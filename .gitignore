@@ -3,6 +3,41 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
+# QAT
+.qat/
+logs/
+calibration_results/
+.coverage
+
+# Docs
+docs/build/
+docs/source/*
+!docs/source/conf.py
+!docs/source/index.rst
+!docs/source/license.rst
+!docs/source/coc.rst
+!docs/source/contribute.rst
+!docs/source/changelog.rst
+!docs/source/qat-logo.png
+
+# Visual studio
+.vs/
+*.csproj.user
+
+# C# / Q#
+bin/
+obj/
+# Disabled as we want the QIR to be commited, for now.
+# qir/ 
+
+# C++
+Debug/
+Release/
+x64/
+
+# Conda
+qat-developer.yml
+
 # Node artifact files
 node_modules/
 dist/
@@ -13,8 +48,12 @@ dist/
 # Compiled Python bytecode
 *.py[cod]
 
+# Swap files
+**/*.sw[nop]
+
 # Log files
 *.log
+logs/
 
 # Package files
 *.jar
@@ -47,4 +86,3 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-

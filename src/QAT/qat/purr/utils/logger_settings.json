@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "filters": {
+        "example_custom_module_filter": {
+            "()": "qat.purr.utils.logger.ModuleFilter",
+            "module_name": "some_module_name"
+        },
+        "example_custom_keyword_filter": {
+            "()": "qat.purr.utils.logger.KeywordFilter",
+            "keyword": "keyword"
+        },
+        "debug_filter": {
+            "()": "qat.purr.utils.logger.LevelFilter",
+            "level": "DEBUG"
+        }
+    },
+    "handlers": {
+        "console_handler": {
+            "class": "qat.purr.utils.logger.ConsoleLoggerHandler",
+            "stream": "ext://sys.stdout",
+            "level": "DEBUG"
+        },
+        "file_handler": {
+            "class": "qat.purr.utils.logger.FileLoggerHandler",
+            "file_path": "purr_log.txt",
+            "level": "DEBUG"
+        },
+        "json_handler": {
+            "class": "qat.purr.utils.logger.JsonLoggerHandler",
+            "file_path": "purr_log.json",
+            "level": "DEBUG"
+        }
+    },
+    "loggers": {
+        "purr": {
+            "handlers": ["console_handler", "file_handler", "json_handler"],
+            "level": "INFO",
+            "active": true,
+            "propagate": true
+        }
+    },
+    "log_folder": {
+        "labber_style": true,
+        "cleanup": false
+    }
+}

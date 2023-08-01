@@ -1,0 +1,345 @@
+// Copyright (c) 2022 Amazon.com Inc. All Rights Reserved.
+// Minor syntax cleanups made by OQC.
+
+// Lark grammar for OpenQASM3.0
+
+?start: program
+
+program: header* (global_statement | statement)*
+
+header: [version] | include
+
+include: "include" /[^ ;]+/ _SEMICOLON
+
+version: "OPENQASM" real_number _SEMICOLON
+
+?global_statement: quantum_declaration_statement | calibration
+
+?statement: quantum_measurement_assignment_statement
+         | bit_declaration_statement
+         | quantum_instruction_statement
+         | timing_statement
+         | timing_box
+         | expression_statement
+         | gate_definition
+         | pragma
+
+gate_definition: "gate" IDENTIFIER (_LPAREN calibration_argument_list? _RPAREN)? calibration_qubit_list? _LBRACE gate_definition_body _RBRACE
+
+gate_definition_body: statement*
+
+?quantum_declaration_statement: quantum_declaration _SEMICOLON
+
+expression_statement: expression _SEMICOLON
+
+// Types and casting
+
+designator: _LBRACKET DECIMAL_INTEGER_LITERAL _RBRACKET
+
+single_designator_type: (INT | FLOAT | ANGLE) designator?
+complex_type: COMPLEX _LBRACKET single_designator_type _RBRACKET
+no_designator_type: "duration"
+
+classical_type: single_designator_type
+              | no_designator_type
+              | BIT_TYPE designator?
+              | complex_type
+
+// Quantum types
+quantum_declaration: "qreg" IDENTIFIER designator?
+                   | "qubit" designator? IDENTIFIER
+
+bit_declaration_statement: ("creg" IDENTIFIER designator? | "bit" designator? IDENTIFIER) _SEMICOLON
+complex_declaration_statement: complex_type IDENTIFIER _SEMICOLON
+
+index_identifier: IDENTIFIER _LBRACKET DECIMAL_INTEGER_LITERAL _RBRACKET
+
+index_identifier_list: (index_identifier | IDENTIFIER) (_COMMA (index_identifier | IDENTIFIER))*
+
+quantum_block: _LBRACE (quantum_instruction_statement | timing_statement)* _RBRACE
+
+timing_statement: timing_instruction _SEMICOLON
+
+timing_instruction: "delay" _LBRACKET timing_literal _RBRACKET index_identifier_list
+
+timing_literal: (DECIMAL_INTEGER_LITERAL | FLOAT_LITERAL) TIME_UNIT
+
+?quantum_instruction_statement: (quantum_measurement | quantum_reset | quantum_barrier | quantum_gate_call) _SEMICOLON
+
+quantum_reset: "reset" index_identifier_list
+
+quantum_measurement: "measure" (index_identifier |IDENTIFIER)
+
+quantum_barrier: "barrier" index_identifier_list
+
+quantum_measurement_assignment_statement: quantum_measurement _ARROW (index_identifier | IDENTIFIER) _SEMICOLON
+                                        | (index_identifier | IDENTIFIER) EQUALS quantum_measurement _SEMICOLON
+
+quantum_gate_call: IDENTIFIER (_LPAREN expression_list _RPAREN)? index_identifier_list
+
+// Classical instructions
+?real_number: PLUS_MINUS? (FLOAT_LITERAL | DECIMAL_INTEGER_LITERAL)
+
+expression: complex_number
+          | timing_literal
+          | division_expression
+          | multiplicative_expression
+          | additive_expression
+          | subtraction_expression
+          | unary_expression
+          | quantum_measurement
+          | quantum_gate_call
+
+additive_expression: expression PLUS expression
+
+subtraction_expression: expression MINUS expression
+
+multiplicative_expression: expression ASTERISK expression
+
+division_expression: expression SLASH expression
+
+unary_expression: UNARY_OPERATOR? expression_terminator
+
+?expression_terminator: CONSTANT
+                      | IDENTIFIER
+                      | complex_number
+                      | real_number
+                      | imag_number
+                      | extern_or_subroutine_call
+                      | frame_attribute
+
+// expression_list: expression | expression _COMMA expression_list
+expression_list: expression (_COMMA expression)*
+
+// Circuit timing
+timing_box: "box" quantum_block
+
+// Pulse related
+
+calibration: calibration_grammar_declaration
+           | calibration_definition
+           | cal_block
+
+calibration_grammar_declaration: DEFCALGRAMMAR STRINGLITERAL _SEMICOLON
+
+frame_attribute: IDENTIFIER "." (FREQUENCY | PHASE)
+
+calibration_qubit_list: IDENTIFIER (_COMMA? IDENTIFIER)*
+
+calibration_definition_body: cal_statement* return_statement?
+
+// For the following:
+// index_identifier_list should only allow identifiers
+// Should check in tree construction
+calibration_definition: DEFCAL IDENTIFIER (_LPAREN calibration_argument_list? _RPAREN)? calibration_qubit_list? return_signature? _LBRACE calibration_definition_body _RBRACE
+
+calibration_argument_list: classical_argument_list
+                         | expression_list
+
+cal_block: CAL _LBRACE cal_statement* _RBRACE
+
+return_statement: "return" (expression | index_identifier) _SEMICOLON
+
+cal_statement: extern_frame
+             | extern_port
+             | pulse_declaration
+             | timing_statement
+             | bit_declaration_statement
+             | complex_declaration_statement
+             | extern_or_subroutine_call _SEMICOLON
+             | frame_attribute_assignment
+             | assignment
+             | quantum_instruction_statement
+
+frame_attribute_assignment: frame_attribute (EQUALS | COMPOUND_ASSIGNMENT_OPERATOR) expression _SEMICOLON
+
+assignment: (IDENTIFIER | index_identifier) (EQUALS | COMPOUND_ASSIGNMENT_OPERATOR) expression _SEMICOLON
+
+extern_frame: "extern" "frame" IDENTIFIER _SEMICOLON
+
+extern_port: "extern" "port" IDENTIFIER _SEMICOLON
+
+extern_or_subroutine_call: IDENTIFIER _LPAREN expression_list _RPAREN
+
+pulse_declaration: frame_definition
+                 | waveform_definition
+                 | port_definition
+
+port_definition: PORT IDENTIFIER _SEMICOLON
+
+frame_definition: FRAME IDENTIFIER EQUALS NEW_FRAME _LPAREN expression_list _RPAREN _SEMICOLON
+
+waveform_definition: WAVEFORM IDENTIFIER EQUALS (IDENTIFIER _LPAREN expression_list _RPAREN | complex_array) _SEMICOLON
+
+// Functions related
+
+// Only defined to support defcal
+classical_argument_list: classical_argument (_COMMA classical_argument)*
+
+classical_argument: (single_designator_type | no_designator_type) IDENTIFIER
+                  | CREG IDENTIFIER designator?
+                  | BIT designator? IDENTIFIER
+                  | COMPLEX _LBRACKET single_designator_type  _RBRACKET IDENTIFIER
+
+return_signature: _ARROW classical_type
+
+// Pragma
+
+?pragma: "#pragma braket" pragma_statement
+
+?pragma_statement: verbatim_pragma
+                 | "result" result_type_pragma
+                 | "basis_rotation" basis_rotation_pragma
+                 | "noise" noise_pragma
+                 | "unitary" unitary_pragma
+
+verbatim_pragma: "verbatim"
+
+?result_type_pragma: BASIS_INVARIANT_RESULT_TYPE
+                   | z_basis_result_type
+                   | rotated_result_type
+
+basis_rotation_pragma: quantum_gate_call
+                     | "braket_unitary_matrix" _LPAREN complex_matrix _RPAREN index_identifier_list
+                     | "auto"
+
+noise_pragma: STANDARD_NOISE_TYPE _LPAREN expression_list _RPAREN index_identifier_list
+            | "kraus" _LPAREN complex_matrix_list _RPAREN index_identifier_list
+
+unitary_pragma: _LPAREN complex_matrix _RPAREN index_identifier_list
+
+// rotated_result_type: ROTATED_RESULT_TYPE (observable_product | index_identifier_list)
+rotated_result_type: ROTATED_RESULT_TYPE observable_product
+                   | ROTATED_RESULT_TYPE (STANDARD_OBSERVABLE | hermitian_observable) "all"
+
+z_basis_result_type: "amplitude" binary_string_list
+                   | "probability" (index_identifier_list | "all")
+
+binary_string_list: BINARY_STRING (_COMMA BINARY_STRING)*
+
+BINARY_STRING: "\"" /[01]+/ "\""
+
+BASIS_INVARIANT_RESULT_TYPE: "state_vector"
+                           | "density_matrix"
+
+ROTATED_RESULT_TYPE: "expectation" | "sample" | "variance"
+
+STANDARD_NOISE_TYPE: "bit_flip"
+                   | "phase_flip"
+                   | "pauli_channel"
+                   | "depolarizing"
+                   | "two_qubit_depolarizing"
+                   | "two_qubit_dephasing"
+                   | "amplitude_damping"
+                   | "generalized_amplitude_damping"
+                   | "phase_damping"
+
+complex_matrix_list: complex_matrix (_COMMA complex_matrix)*
+
+observable_product: observable ("@" observable)*
+
+observable: STANDARD_OBSERVABLE _LPAREN (IDENTIFIER | index_identifier) _RPAREN
+          | hermitian_observable index_identifier_list
+
+STANDARD_OBSERVABLE: "x"
+                   | "y"
+                   | "z"
+                   | "i"
+                   | "h"
+
+hermitian_observable: "hermitian" _LPAREN complex_matrix _RPAREN
+
+complex_matrix: _LBRACKET complex_array (_COMMA complex_array)* _RBRACKET
+
+// complex_array: _LBRACKET complex_number (_COMMA complex_number)* _RBRACKET
+
+complex_array: _LBRACKET expression(_COMMA expression)* _RBRACKET
+
+complex_number: imag_number PLUS_MINUS real_number
+              | real_number PLUS_MINUS imag_number
+
+imag_number: real_number "im"
+
+// Lexer grammars
+
+// %import common.INT -> DECIMAL_INTEGER_LITERAL
+// %import common.FLOAT -> FLOAT
+%import common.ESCAPED_STRING -> STRINGLITERAL
+%import common.LETTER -> LETTER
+%import common.WS
+
+DECIMAL_INTEGER_LITERAL: /([0-9]"_"?)*[0-9]+/
+FLOAT_LITERAL_EXPONENT: ("e" | "E") PLUS_MINUS? DECIMAL_INTEGER_LITERAL
+FLOAT_LITERAL: DECIMAL_INTEGER_LITERAL FLOAT_LITERAL_EXPONENT
+             | "." DECIMAL_INTEGER_LITERAL FLOAT_LITERAL_EXPONENT?
+             | DECIMAL_INTEGER_LITERAL "." DECIMAL_INTEGER_LITERAL? FLOAT_LITERAL_EXPONENT?
+
+INT: "int"
+FLOAT: "float"
+ANGLE: "angle"
+BIT: "bit"
+CREG: "creg"
+BIT_TYPE: "bit" | "creg"
+COMPLEX: "complex"
+
+PLUS_MINUS: PLUS | MINUS
+MINUS: "-"
+PLUS: "+"
+ASTERISK: "*"
+SLASH: "/"
+
+FREQUENCY: "frequency"
+PHASE: "phase"
+NEW_FRAME: "newframe"
+
+_LBRACKET: "["
+_RBRACKET: "]"
+
+_LBRACE: "{"
+_RBRACE: "}"
+
+_LPAREN: "("
+_RPAREN: ")"
+
+_COLON: ":"
+_SEMICOLON: ";"
+
+_COMMA: ","
+
+EQUALS: "="
+_ARROW: "->"
+
+UNARY_OPERATOR: "~" | "!" | "-"
+
+COMPOUND_ASSIGNMENT_OPERATOR:  "+=" | "-=" | "*=" | "/=" | "&=" | "|=" | "~=" | "^=" | "<<=" | ">>=" | "%=" | "**="
+
+CONSTANT: ("pi" | "π" | "tau" | "𝜏" | "euler" | "ℇ" )
+
+TIME_UNIT: "dt" | "ns" | "us" | "µs" | "ms" | "s"
+
+_NEWLINE: /[\r\n]+/
+
+VALID_UNICODE: /[\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}]/
+
+
+IDENTIFIER: /[\$_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}a-zA-Z][\$_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}a-zA-Z0-9]*/
+
+
+// Pulse related
+
+DEFCALGRAMMAR: "defcalgrammar"
+DEF: "def"
+DEFCAL: "defcal"
+CAL: "cal"
+
+WAVEFORM: "waveform"
+PORT: "port"
+FRAME: "frame"
+
+_LINE_COMMENT: /\/\/[^\n]*/
+_BLOCK_COMMENT: "/*" /.*?/ "*/"
+
+%ignore WS
+%ignore _NEWLINE
+%ignore _LINE_COMMENT
+%ignore _BLOCK_COMMENT
