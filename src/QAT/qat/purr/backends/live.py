@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from typing import Dict, List
 
 import numpy as np
@@ -10,11 +11,10 @@ from qat.purr.backends.live_devices import (
     LivePhysicalBaseband,
 )
 from qat.purr.backends.utilities import UPCONVERT_SIGN, get_axis_map
-from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -33,8 +33,9 @@ log = get_default_logger()
 def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target_qubits):
     # Round the drive channel frequencies to the multiple of 1kHz
     for qubit in target_qubits:
-        hw.get_qubit(qubit).get_drive_channel().frequency = \
-            1e9 * round(hw.get_qubit(qubit).get_drive_channel().frequency / 1e9, 6)
+        hw.get_qubit(qubit).get_drive_channel().frequency = 1e9 * round(
+            hw.get_qubit(qubit).get_drive_channel().frequency / 1e9, 6
+        )
 
     for qubit in target_qubits:
         drive_channel = hw.get_qubit(qubit).get_drive_channel()
@@ -49,20 +50,14 @@ def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target
 
 
 class LiveHardwareModel(QuantumHardwareModel):
-    def __init__(
-        self,
-        control_hardware: ControlHardware = None,
-        engine_types: List[QuantumExecutionEngine] = None,
-        builder_types: List[QuantumInstructionBuilder] = None
-    ):
-        super().__init__(
-            acquire_mode=AcquireMode.INTEGRATOR,
-            engine_types=engine_types or [LiveDeviceEngine],
-            builder_types=builder_types or [QuantumInstructionBuilder]
-        )
+    def __init__(self, control_hardware: ControlHardware = None):
+        super().__init__(acquire_mode=AcquireMode.INTEGRATOR)
         self.control_hardware: ControlHardware = control_hardware
         self.instruments: Dict[str, Instrument] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
+
+    def create_engine(self):
+        return LiveDeviceEngine(self)
 
     def add_device(self, device):
         if isinstance(device, Instrument):
@@ -150,13 +145,13 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     )
                 baseband_freqs[pulse_channel.physical_channel_id] = \
                     pulse_channel.frequency - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
-                baseband_freqs_fixed_if[pulse_channel.physical_channel_id
-                                       ] = pulse_channel.fixed_if
+                baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = \
+                    pulse_channel.fixed_if
             else:
                 if pulse_channel.physical_channel_id not in baseband_freqs_fixed_if \
                         or not baseband_freqs_fixed_if[pulse_channel.physical_channel_id]:
-                    baseband_freqs_fixed_if[pulse_channel.physical_channel_id
-                                           ] = pulse_channel.fixed_if
+                    baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = \
+                        pulse_channel.fixed_if
 
         return baseband_freqs
 
@@ -179,7 +174,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                 if len(buffer) > 0:
                     data[ch] = buffer
                     if ch in baseband_freqs:
-                        physical_channel = self.model.get_physical_channel(ch)
+                        physical_channel = self.model.physical_channels.get(ch, None)
                         physical_channel.baseband.set_frequency(int(baseband_freqs[ch]))
 
             self.model.control_hardware.set_data(data)
@@ -282,7 +277,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     # Find target qubit from instruction and check whether it's been
                     # measured already.
                     acquired_qubits = [
-                        self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
+                        resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
                         for chanbit in inst.quantum_targets
                         if isinstance(chanbit, (Qubit, PulseChannel))
                     ]

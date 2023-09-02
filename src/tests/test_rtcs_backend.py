@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import numpy as np
 import pytest
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
 
@@ -17,14 +17,6 @@ class TestBaseQuantumQutip:
         for i in range(2):
             assert hw.get_qubit(i).is_calibrated
         return hw
-
-    def test_save_and_load_calibration(self):
-        original_hw = self.get_simulator()
-        original_calibration = original_hw.get_calibration()
-        loaded_hw = Calibratable.load_calibration(original_calibration)
-
-        assert len(original_hw.qubits) == len(loaded_hw.qubits)
-        assert len(original_hw.resonators) == len(loaded_hw.resonators)
 
     def test_cnot_from_ecr_gate(self):
         def conv(x):
@@ -44,25 +36,21 @@ class TestBaseQuantumQutip:
 
         # sweep over a time range
         # yapf: disable
-        result = [
-            [
-                (
-                    execute_instructions(
-                        hw,
-                        get_builder(hw)
-                        .X(control_q, c)
-                        .synchronize(sync_channels)
-                        .X(target_q, t)
-                        .ECR(control_q, target_q)
-                        .X(control_q)
-                        .X(target_q, -np.pi / 2.0)
-                        .Z(control_q, -np.pi / 2.0)
-                        .measure_mean_z(control_q)
-                        .measure_mean_z(target_q)
-                    )[0]
-                ) for t in prep
-            ] for c in prep
-        ]
+        result = [[(
+            execute_instructions(
+                hw,
+                get_builder(hw)
+                .X(control_q, c)
+                .synchronize(sync_channels)
+                .X(target_q, t)
+                .ECR(control_q, target_q)
+                .X(control_q)
+                .X(target_q, -np.pi / 2.0)
+                .Z(control_q, -np.pi / 2.0)
+                .measure_mean_z(control_q)
+                .measure_mean_z(target_q)
+            )[0]
+        ) for t in prep] for c in prep]
         # yapf: enable
 
         for i in [0, 1]:

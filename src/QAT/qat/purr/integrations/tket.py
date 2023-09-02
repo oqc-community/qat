@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from numbers import Number
 from typing import List
 
 from pytket import Bit, Circuit, Qubit
-from pytket._tket.architecture import Architecture, RingArch
-from pytket._tket.circuit import CustomGateDef
+from pytket._tket.architecture import Architecture
+from pytket._tket.circuit import CustomGateDef, Node
 from pytket._tket.predicates import (
     ConnectivityPredicate,
     DirectednessPredicate,
@@ -324,6 +325,32 @@ def optimize_circuit(circ, architecture, opts):
         return False
 
 
+def get_coupling_subgraphs(couplings):
+    """
+    Given a list of connections which potentially describe a disconnected graph,
+    this returns a list of connected subgraphs
+    """
+    subgraphs = []
+    for coupling in couplings:
+        subgraph_added_to = None
+        for subgraph in subgraphs:
+            # check whether coupling joins to subgraph
+            if set(coupling) & {qubit for connection in subgraph for qubit in connection}:
+                if subgraph_added_to is None:
+                    # add the coupling to the subgraph
+                    subgraph.append(coupling)
+                    subgraph_added_to = subgraph
+                else:
+                    # if coupling joins to 2nd subgraph, the subgraphs combine
+                    subgraph_added_to.extend(subgraph)
+                    subgraphs.remove(subgraph)
+
+        # if coupling doesn't join to any of the current subgraphs, make it a new one
+        if subgraph_added_to is None:
+            subgraphs.append([coupling])
+    return subgraphs
+
+
 def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) -> str:
     """
     Runs tket-based optimizations and modifications. Routing will always happen no
@@ -332,7 +359,6 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
     Will run optimizations in sections if a full suite fails until a minimal subset of
     passing optimizations is found.
     """
-
     try:
         tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm_string)
         circ = tket_builder.circuit
@@ -351,33 +377,42 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         # Without default remapping pass multi-qubit gates don't get moved around, so
         # trying to apply them to a limited subset of qubits provides no value.
         if TketOptimizations.DefaultMappingPass not in opts:
-            architecture = Architecture([val.direction for val in couplings])
+            architecture = Architecture([
+                tuple(Node("q", i) for i in val.direction) for val in couplings
+            ])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
-            chunks = (
-                max([val.quality for val in couplings], default=0)
-                - min([val.quality for val in couplings], default=0)
-            ) / 3
-            steps = 2
-            last_couplings = 0
-            while steps >= 0:
-                quality_level = chunks * steps
+            coupling_qualities = list({val.quality for val in couplings})
+            coupling_qualities.sort(reverse=True)
+            for quality_level in coupling_qualities:
                 filtered_couplings = [
                     val.direction for val in couplings if val.quality >= quality_level
                 ]
-                steps = steps - 1
-                if not any(filtered_couplings) or last_couplings == len(filtered_couplings):
-                    continue
-
-                # Attempt optimization with good quality couplings, then degrade every
-                # failed try until we use everything.
-                last_couplings = len(filtered_couplings)
-                architecture = Architecture(filtered_couplings)
-                optimizations_failed = not optimize_circuit(circ, architecture, opts)
+                coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
+                for subgraph in coupling_subgraphs:
+                    if circ.n_qubits <= len(
+                        set([qubit for coupling in subgraph for qubit in coupling])
+                    ):
+                        architecture = Architecture([
+                            tuple(Node("q", i) for i in val) for val in subgraph
+                        ])
+                        optimizations_failed = not optimize_circuit(
+                            circ, architecture, opts
+                        )
+                        if not optimizations_failed:
+                            break
+                    else:
+                        optimizations_failed = True
                 if not optimizations_failed:
                     break
+
+                log.info("Optimization attempt failed. Running again with more qubits.")
     else:
-        architecture = RingArch(len(hardware.qubits))
+        # Synthetic RingArch object because we need custom quantum node names.
+        num_qubits = len(hardware.qubits)
+        couplings = [(Node("q", i % num_qubits), Node("q", (i + 1) % num_qubits))
+                     for i in range(num_qubits)]
+        architecture = Architecture(couplings)
         optimizations_failed = not optimize_circuit(circ, architecture, opts)
 
     # If our optimizations failed but we want the mapping pass, apply that by itself.
@@ -386,6 +421,7 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             raise ValueError(
                 "Unable to resolve hardware instance for fall-back optimizations."
             )
+        log.info("All tket optimizations failed. Attempting default routing only.")
 
         delay_failed = False
         try:
@@ -415,13 +451,14 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
 
         apply_default_transforms(circ, architecture, opts)
         check_validity(circ, architecture)
+        log.info("Default routing applied successfully.")
 
     try:
         qasm_string = circuit_to_qasm_str(circ)
         log.info(f"Number of gates after tket optimization: {circ.n_gates}")
     except (QASMUnsupportedError, RuntimeError) as e:
         log.warning(
-            f"Error generating QASM from Tket circuit: {_full_stopalize(e)}. "
+            f"Error generating QASM from Tket circuit: {_full_stopalize(e)} "
             "Skipping this optimization pass."
         )
 

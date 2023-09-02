@@ -1,13 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import numpy as np
 import pytest
+from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.utilities import (
     BlackmanFunction,
     GaussianFunction,
     NumericFunction,
     SquareFunction,
+    evaluate_shape,
 )
+from qat.purr.compiler.devices import PulseShapeType
+from qat.purr.compiler.instructions import Pulse
 
 
 @pytest.mark.parametrize("sizes", [1, 2, 5, 7])
@@ -43,7 +48,7 @@ def test_square_function_first_derivative(sizes):
 
 def test_gaussian_function():
     x = np.array([-2, -1, 0, 1, 2])
-    gaussian = GaussianFunction(rise=1, width=1)
+    gaussian = GaussianFunction(std_dev=1, zero_at_edges=0)
     y = gaussian.eval(x)
     assert y.dtype == 'cfloat'
     # Known maxima
@@ -56,7 +61,7 @@ def test_gaussian_function():
 
 def test_gaussian_function_first_derivative():
     x = np.array([-2, -1, 0, 1, 2])
-    gaussian = GaussianFunction(rise=1, width=1)
+    gaussian = GaussianFunction(std_dev=1, zero_at_edges=0)
     y = gaussian.eval(x)
     y_x = gaussian.derivative(x)
     assert y_x.dtype == 'cfloat'
@@ -91,7 +96,6 @@ def test_blackman_function_first_derivative():
     assert np.isclose(y[1], -y[-2], atol=1e-6)
 
 
-@pytest.mark.skip(reason="I don't know what the new results should be.")
 def test_numeric_derivative():
     class SomeFunction(NumericFunction):
         def eval(self, x):
@@ -99,5 +103,27 @@ def test_numeric_derivative():
             return x
 
     f = SomeFunction()
-    d_y = f.derivative(np.arange(start=0, stop=5))
+    x = np.arange(start=0, stop=5)
+    d_y = f.derivative(x, f.eval(x))
     assert np.allclose(d_y, np.ones(5), atol=1e-6)
+
+
+def test_eval_all_shapes():
+    params = {
+        'width': 100e-9,
+        'drag': 1e-9,
+        'rise': 1e-9,
+        'amp_setup': 1.5,
+        'zero_at_edges': 1,
+        'frequency': 1e-6,
+        'std_dev': 10e-9,
+        'square_width': 80e-9
+    }
+    t = np.linspace(
+        -params['width'] / 2, params['width'] / 2, int(params['width'] / 0.5e-9)
+    )
+    hw = get_default_echo_hardware(1)
+    channel = hw.get_qubit(0).get_drive_channel()
+    for shape in PulseShapeType:
+        pulse = Pulse(channel, shape, **params)
+        evaluate_shape(pulse, t)

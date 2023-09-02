@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
 import inspect
@@ -70,7 +71,8 @@ class QuantumResultsFormat:
         Returns a count of each instance of measured qubit registers.
         Switches result format to raw.
         """
-        self.transforms = ResultsFormatting.BinaryCount \
+        self.transforms = \
+            ResultsFormatting.BinaryCount \
             | ResultsFormatting.DynamicStructureReturn
         self.format = InlineResultsProcessing.Raw
         return self
@@ -348,8 +350,10 @@ class Qasm3Optimizations(OptimizationConfig):
     pass
 
 
-class QIROptimizations(OptimizationConfig):
-    pass
+class QIROptimizations(Tket):
+    def __init__(self):
+        super().__init__()
+        self.default()
 
 
 def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:

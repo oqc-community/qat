@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import time
 import uuid
 from typing import List
 
+from qat.core import execute_qasm
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.utils.logger import get_default_logger
-from qat.qat import execute_qasm
 from qiskit import QuantumCircuit, assemble, transpile
 from qiskit.providers.basicaer import BasicAerJob, QasmSimulatorPy
 from qiskit.result import Result

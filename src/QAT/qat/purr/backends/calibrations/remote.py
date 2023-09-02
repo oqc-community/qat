@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from typing import Dict, Union
 
 from qat.purr.compiler.config import CalibrationArguments
@@ -37,7 +38,6 @@ _standard_calibrations: Dict[str, "BuiltinRemoteCalibration"] = dict()
 
 class CustomCalibration(RemoteCalibration):
     """ Bespoke calibration built by external users. """
-    pass
 
 
 class BuiltinRemoteCalibration(RemoteCalibration):

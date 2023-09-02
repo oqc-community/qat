@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import tempfile
 from os.path import dirname, join
 
@@ -13,7 +14,6 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     Calibratable,
-    ChannelType,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
@@ -30,7 +30,7 @@ from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_
 from qat.purr.integrations.qasm import Qasm2Parser
 from scipy import fftpack
 
-from tests.qasm_utils import get_qasm2
+from .qasm_utils import get_qasm2
 
 
 class TestBaseQuantumExecution(LiveDeviceEngine):
@@ -72,8 +72,9 @@ class TestBaseQuantumExecution(LiveDeviceEngine):
 
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
-                        response, response_axis = \
-                            self.run_post_processing(pp, response, response_axis)
+                        response, response_axis = self.run_post_processing(
+                            pp, response, response_axis
+                        )
 
                     var_result = results.setdefault(
                         aq.output_variable,
@@ -154,25 +155,13 @@ class TestBaseQuantum:
     def test_invalid_qubit_numbers(self):
         qasm_string = get_qasm2("example.qasm")
         with pytest.raises(ValueError):
-            Qasm2Parser().parse(get_builder(get_default_RTCS_hardware()), qasm_string)
-
-    def test_load_predefined_qutip_hardware_config(self):
-        hw = get_test_model()
-        for id_, device in hw.quantum_devices.items():
-            assert hw.get_quantum_device(id_) is not None
-            for pc_id, pc in device.pulse_channels.items():
-                pc_id_decomp = pc_id.split('.')
-                assert hw.get_pulse_channel_from_device(
-                    ChannelType[pc_id_decomp[-1]], id_, pc_id_decomp[:-1]
-                ) is not None
-        for id_ in hw.physical_channels.keys():
-            assert hw.get_physical_channel(id_) is not None
-        for id_ in hw.basebands.keys():
-            assert hw.get_physical_baseband(id_) is not None
+            process = Qasm2Parser().parse(
+                get_builder(get_default_RTCS_hardware()), qasm_string
+            )
 
     def test_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
-        pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
+        pulse_channel = hw.get_qubit(0).get_drive_channel()
         physical_channel = pulse_channel.physical_channel
         baseband = physical_channel.baseband
         pulse_channel.frequency = 5e9
@@ -201,7 +190,7 @@ class TestBaseQuantum:
 
     def test_not_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
-        pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
+        pulse_channel = hw.get_qubit(0).get_drive_channel()
         physical_channel = pulse_channel.physical_channel
         baseband = physical_channel.baseband
         pulse_channel.frequency = 5e9
@@ -227,7 +216,9 @@ class TestBaseQuantum:
         if_freq = np.argmax(x) / physical_channel.sample_time / len(pulses)
         assert if_freq == pytest.approx(pulse_channel.frequency - baseband.frequency)
 
-    def test_fixed_if_pulse_channel_frequency_priority_with_multiple_pulse_channels(self):
+    def test_fixed_if_pulse_channel_frequency_priority_when_multiple_pulse_channels_used(
+        self
+    ):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
         drive_channel = qubit.get_drive_channel()

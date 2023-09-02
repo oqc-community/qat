@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from qat.purr.compiler.config import (
     MetricsType,
     OptimizationConfig,
@@ -38,8 +39,7 @@ class DefaultOptimizers(MetricsMixin):
                     qasm_string, optimizations.tket_optimizations, hardware
                 )
 
-            # TODO: [QK] Spend time looking at qiskit optimization and seeing if it's
-            #   worth keeping around.
+            # TODO: Look to see what we're missing in regards to optimizations and what Qiskit can supplement.
             if isinstance(optimizations, Qiskit) and \
                     optimizations.qiskit_optimizations != QiskitOptimizations.Empty:
                 qasm_string = self.run_qiskit_optimization(
@@ -50,10 +50,7 @@ class DefaultOptimizers(MetricsMixin):
             return qasm_string
 
     def run_qiskit_optimization(self, qasm_string, level):
-        """
-        TODO: [QK] Current setup is unlikely to provide much benefit, refine settings
-            before using.
-        """
+        # TODO: Current setup is unlikely to provide much benefit, refine settings.
         if level is not None:
             try:
                 optimized_circuits = transpile(

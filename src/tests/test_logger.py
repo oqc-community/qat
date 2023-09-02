@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import datetime
 import inspect
 import json
@@ -13,8 +14,7 @@ from tempfile import gettempdir
 import qat.purr.utils.logger as logger
 from qat.purr.utils.serializer import json_load
 
-info_msg_pattern = \
-    r"^\[INFO\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \(\w+.\w+:\d+\) - (.+)\n"
+info_msg_pattern = r"^\[INFO\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \(\w+.\w+:\d+\) - (.+)\n"
 
 
 class LoggingCleanup:
@@ -50,21 +50,21 @@ class TestFileLogger:
         return temp_dir, def_logger, file_logger, file_handler
 
     def test_file_is_created_in_log_folder(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, file_logger, file_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, file_logger, file_handler):
             assert os.path.dirname(file_handler.baseFilename), logs_path
 
     def test_file_is_created_delayed(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, file_logger, file_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, file_logger, file_handler):
             assert not os.path.exists(file_handler.baseFilename)
             file_logger.info("Hello world!")
             assert os.path.exists(file_handler.baseFilename)
             file_handler.close()
 
     def test_file_default_info_format_is_used(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, file_logger, file_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, file_logger, file_handler):
             msg = "Hello world!"
             file_logger.info(msg)
             with open(file_handler.baseFilename, "r") as f:
@@ -82,13 +82,14 @@ class TestFileLogger:
             self.flush()
 
     def test_file_initial_text_is_written_if_specified(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, file_logger, file_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, file_logger, file_handler):
             file_logger.removeHandler(file_handler)
             file_handler.close()
             file_handler = self.TestFileLoggerHandler(
                 os.path.join(
-                    logs_path, "initial_test_file_initial_text_is_written_if_specified.txt"
+                    logs_path,
+                    f"initial_test_file_initial_text_is_written_if_specified.txt"
                 )
             )
             file_logger.addHandler(file_handler)
@@ -122,8 +123,8 @@ class TestJsonLogger:
         return temp_folder, def_logger, json_logger, json_handler
 
     def test_json_valid(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, json_logger, json_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, json_logger, json_handler):
             msg = "Test message"
             json_logger.info(msg)
             json_logger.info(msg)
@@ -138,8 +139,8 @@ class TestJsonLogger:
             json_handler.close()
 
     def test_json_info_log(self):
-        with LoggingCleanup(*self.create_logger_instance()
-                           ) as (tempdir, logs_path, json_logger, json_handler):
+        with LoggingCleanup(*self.create_logger_instance()) \
+                as (tempdir, logs_path, json_logger, json_handler):
             msg = "Test message"
             json_logger.info(msg)
             with open(json_handler.baseFilename, "r") as f:

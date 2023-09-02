@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
 from typing import Any, List, Set
@@ -30,11 +31,10 @@ class TimelineSegment:
 
     def __repr__(self):
         sep = ";" if any(self.reliant_instructions) else ""
-        sched_deps = f"[{','.join(self.scheduling_dependencies)}]" if any(
-            self.scheduling_dependencies
-        ) else ""
-        return f"{self.instruction.duration}: {sched_deps} {str(self.instruction)}" \
-            f"{sep}{';'.join(str(inst) for inst in self.reliant_instructions)}"
+        sched_deps = f"[{','.join(self.scheduling_dependencies)}]" \
+            if any(self.scheduling_dependencies) else ""
+        return f"{self.instruction.duration}: {sched_deps} {str(self.instruction)}{sep}" \
+               f"{';'.join(str(inst) for inst in self.reliant_instructions)}"
 
 
 class QatFile:
@@ -66,9 +66,8 @@ class QatFile:
     def get_pp_for_variable(self, target_var):
         results = []
         for instruction in self.instructions:
-            if isinstance(
-                instruction, PostProcessing
-            ) and instruction.acquire.output_variable == target_var:
+            if isinstance(instruction, PostProcessing) \
+                    and instruction.acquire.output_variable == target_var:
                 results.append(instruction)
 
         return results

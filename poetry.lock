@@ -37,9 +37,6 @@ files = [
     {file = "Babel-2.12.1.tar.gz", hash = "sha256:cc2d99999cd01d44420ae725a21c9e3711b3aadc7976d6147f622d8581963455"},
 ]
 
-[package.dependencies]
-pytz = {version = ">=2015.7", markers = "python_version < \"3.9\""}
-
 [[package]]
 name = "bleach"
 version = "6.0.0"
@@ -522,24 +519,6 @@ perf = ["ipython"]
 testing = ["flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pyfakefs", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-perf (>=0.9.2)", "pytest-ruff"]
 
 [[package]]
-name = "importlib-resources"
-version = "6.0.1"
-description = "Read resources from Python packages"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "importlib_resources-6.0.1-py3-none-any.whl", hash = "sha256:134832a506243891221b88b4ae1213327eea96ceb4e407a00d790bb0626f45cf"},
-    {file = "importlib_resources-6.0.1.tar.gz", hash = "sha256:4359457e42708462b9626a04657c6208ad799ceb41e5c58c57ffa0e6a098a5d4"},
-]
-
-[package.dependencies]
-zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
-
-[package.extras]
-docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
-
-[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -646,7 +625,6 @@ files = [
 
 [package.dependencies]
 importlib-metadata = {version = ">=4.11.4", markers = "python_version < \"3.12\""}
-importlib-resources = {version = "*", markers = "python_version < \"3.9\""}
 "jaraco.classes" = "*"
 jeepney = {version = ">=0.4.2", markers = "sys_platform == \"linux\""}
 pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
@@ -772,18 +750,17 @@ files = [
 
 [[package]]
 name = "lark"
-version = "1.1.7"
+version = "0.12.0"
 description = "a modern parsing library"
 optional = false
-python-versions = ">=3.6"
+python-versions = "*"
 files = [
-    {file = "lark-1.1.7-py3-none-any.whl", hash = "sha256:9e5dc5bbf93fa1840083707285262514a0ef8a6613874af7ea1cec60468d6e92"},
-    {file = "lark-1.1.7.tar.gz", hash = "sha256:be7437bf1f37ab08b355f29ff2571d77d777113d0a8c4352b0c513dced6c5a1e"},
+    {file = "lark-0.12.0-py2.py3-none-any.whl", hash = "sha256:ed1d891cbcf5151ead1c1d14663bf542443e579e63a76ae175b01b899bd854ca"},
+    {file = "lark-0.12.0.tar.gz", hash = "sha256:7da76fcfddadabbbbfd949bbae221efd33938451d90b1fefbbc423c3cccf48ef"},
 ]
 
 [package.extras]
 atomic-cache = ["atomicwrites"]
-interegular = ["interegular (>=0.3.1,<0.4.0)"]
 nearley = ["js2py"]
 regex = ["regex"]
 
@@ -1205,13 +1182,13 @@ files = [
 
 [[package]]
 name = "pre-commit"
-version = "3.3.3"
+version = "3.4.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pre_commit-3.3.3-py2.py3-none-any.whl", hash = "sha256:10badb65d6a38caff29703362271d7dca483d01da88f9d7e05d0b97171c136cb"},
-    {file = "pre_commit-3.3.3.tar.gz", hash = "sha256:a2256f489cd913d575c145132ae196fe335da32d91a8294b7afe6622335dd023"},
+    {file = "pre_commit-3.4.0-py2.py3-none-any.whl", hash = "sha256:96d529a951f8b677f730a7212442027e8ba53f9b04d217c4c67dc56c393ad945"},
+    {file = "pre_commit-3.4.0.tar.gz", hash = "sha256:6bbd5129a64cad4c0dfaeeb12cd8f7ea7e15b77028d985341478c8af3c759522"},
 ]
 
 [package.dependencies]
@@ -1308,22 +1285,6 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
-name = "pyqir"
-version = "0.8.2"
-description = "PyQIR parses, generates and evaluates the Quantum Intermediate Representation."
-optional = false
-python-versions = ">= 3.7"
-files = [
-    {file = "pyqir-0.8.2-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:e50136edcd7051bbb7a3096c4b24f0cb5b8a866ead8590de7d3f7692141d8d84"},
-    {file = "pyqir-0.8.2-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:cd993ee01e7120ae0932df6d27c878819664c65120cbffbb03b2c8dd17f79299"},
-    {file = "pyqir-0.8.2-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b66cc0bb1a422e6c9f3821ba6d69e10896c7adf9b6751252934ec1d6de989752"},
-    {file = "pyqir-0.8.2-cp37-abi3-win_amd64.whl", hash = "sha256:c7a0b441a511a30168423016391246a10a318b272afb21005a4c2c69abb7545e"},
-]
-
-[package.extras]
-test = ["pytest (>=7.2.0,<7.3.0)"]
-
-[[package]]
 name = "pyspnego"
 version = "0.9.2"
 description = "Windows Negotiate Authentication Client and Server"
@@ -1355,13 +1316,13 @@ yaml = ["ruamel.yaml"]
 
 [[package]]
 name = "pytest"
-version = "7.4.0"
+version = "7.4.1"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-7.4.0-py3-none-any.whl", hash = "sha256:78bf16451a2eb8c7a2ea98e32dc119fd2aa758f1d5d66dbf0a59d69a3969df32"},
-    {file = "pytest-7.4.0.tar.gz", hash = "sha256:b4bf8c45bd59934ed84001ad51e11b4ee40d40a1229d2c79f9c592b0a3f6bd8a"},
+    {file = "pytest-7.4.1-py3-none-any.whl", hash = "sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f"},
+    {file = "pytest-7.4.1.tar.gz", hash = "sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab"},
 ]
 
 [package.dependencies]
@@ -1423,23 +1384,23 @@ six = ">=1.5"
 
 [[package]]
 name = "pytket"
-version = "1.2.2"
+version = "1.11.1"
 description = "Python module for interfacing with the CQC tket library of quantum software"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytket-1.2.2-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:1b805508a4559788e01199884a246abea4a4e4e4925b63e18e27741d9f831a3e"},
-    {file = "pytket-1.2.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:89e7a79baf7584381ac4b2232e39f6ae72f3ea92b277925155b88dc9ca7f0452"},
-    {file = "pytket-1.2.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d14e57a1367c067abbe5f6fd4a8d77dc7d7cb5e2be742932c6cccf0c75578dc9"},
-    {file = "pytket-1.2.2-cp310-cp310-win_amd64.whl", hash = "sha256:06918bee4f11f2ebdbd50186eb82067ba6463329202f4d8ee189efdf63095d9a"},
-    {file = "pytket-1.2.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:21a702e292627127f9f2da5824a02198db0d784e6907ef01e7eab6ac7722437a"},
-    {file = "pytket-1.2.2-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:8e646e8b74fd1dd88e3fa48804a33ebd9061860668b5583c4ef70fa68b0b6264"},
-    {file = "pytket-1.2.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3f37858c501c965501a980ed564cdb80122d31beb773b6c6f7c32cbace2b443a"},
-    {file = "pytket-1.2.2-cp38-cp38-win_amd64.whl", hash = "sha256:e4971ac1778f12ebfef2e1924f8d4ac03a821bcf45b0b88a225d4282b37ace96"},
-    {file = "pytket-1.2.2-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:306fb3d03beccc9dc1586954dea1b68bab54c827b2395e1ca6857467d6f97a5a"},
-    {file = "pytket-1.2.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:8baaaace2b5761c635339f7852afa20f92022aee4ae48f60126de50498f75056"},
-    {file = "pytket-1.2.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:056d12d370989a9f2c7b78a58665ebe1047edd213c89264a5521f5136d25afe4"},
-    {file = "pytket-1.2.2-cp39-cp39-win_amd64.whl", hash = "sha256:1e9a2a3e9a8ea8707d2d5150424dfc5b024fcc5039bf772d1b852017f1c676f9"},
+    {file = "pytket-1.11.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:739d6653eb049de5f97ed48c221f42780617511f28462d70637e98a8eeed2ca1"},
+    {file = "pytket-1.11.1-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:007acc3a717223f56b32dc95647f058811972d61529b1344766430286b02b1d3"},
+    {file = "pytket-1.11.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9a1d789b9cea873e6105c5b81a2d7815ec405b80509ab22ae056126cc0692376"},
+    {file = "pytket-1.11.1-cp310-cp310-win_amd64.whl", hash = "sha256:61c100c9dcb322f8d123acc735edc4ee648ae800f7413392225f5ac1bd69e867"},
+    {file = "pytket-1.11.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:ec4a802049db6a8075cf8313c3ce9eacb6b222cc720e9ebddc8a2df3963e2fa4"},
+    {file = "pytket-1.11.1-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:7394fb71ff1095bd9bacc6dbf25b18f3e1ec3d98b2ff8b817b8602c61531730c"},
+    {file = "pytket-1.11.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fa79e14f9c9d4bea275234eb67bbddf1869d0bb17fee21c6c8191e837750088e"},
+    {file = "pytket-1.11.1-cp311-cp311-win_amd64.whl", hash = "sha256:7c429a1570cb90670ab2d6d0c0e50fbb530918391fb926af90c2e0d04d5726f7"},
+    {file = "pytket-1.11.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:f94d1906fd7f2b26901c23309c3e6ce5e6479700463bae442d07a321c2ba798a"},
+    {file = "pytket-1.11.1-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:84ff8149283010250e4614566f291a57bb41d435bbd3dbef4cc159bf9e08f4ff"},
+    {file = "pytket-1.11.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6dad35436a09b97b2f0611ec147bcb32708e276eff5dd99d6c3c60b011b581c2"},
+    {file = "pytket-1.11.1-cp39-cp39-win_amd64.whl", hash = "sha256:267202cc3b986968fe779e15e33564d34143314ee8646c5a87ba68e9598e4e8c"},
 ]
 
 [package.dependencies]
@@ -1448,21 +1409,11 @@ jinja2 = ">=3.0,<4.0"
 lark-parser = ">=0.7,<1.0"
 networkx = ">=2.4,<3.0"
 numpy = ">=1.21.4,<2.0"
+qwasm = ">=1.0,<2.0"
 scipy = ">=1.7.2,<2.0"
 sympy = ">=1.6,<2.0"
 types-pkg-resources = "*"
 typing-extensions = ">=4.2,<5.0"
-
-[[package]]
-name = "pytz"
-version = "2023.3"
-description = "World timezone definitions, modern and historical"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytz-2023.3-py2.py3-none-any.whl", hash = "sha256:a151b3abb88eda1d4e34a9814df37de2a80e301e68ba0fd856fb9b46bfbbbffb"},
-    {file = "pytz-2023.3.tar.gz", hash = "sha256:1d8ce29db189191fb55338ee6d0387d82ab59f3d00eac103412d64e0ebd0c588"},
-]
 
 [[package]]
 name = "pywin32-ctypes"
@@ -1737,35 +1688,34 @@ visualization = ["ipywidgets (>=7.3.0)", "matplotlib (>=3.3)", "pillow (>=4.2.1)
 
 [[package]]
 name = "qutip"
-version = "4.6.3"
+version = "4.7.3"
 description = "QuTiP: The Quantum Toolbox in Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "qutip-4.6.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:48b101a3c07973ef02794d07eaa02299a46d043339df08eae68d6d8c4a837f67"},
-    {file = "qutip-4.6.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c4709e3bb2bacc6cbd45e57e687fbc11891115911325a88b4c4a38c5ff2c6b15"},
-    {file = "qutip-4.6.3-cp310-cp310-win_amd64.whl", hash = "sha256:52595f3776c4779468ece414076898e12fbe4e54c8cece8572776db956446ae8"},
-    {file = "qutip-4.6.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:83368597df61dc4495dfb1d35f64d214ffc2656ba240793e0496a789694e7a71"},
-    {file = "qutip-4.6.3-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:3622307c4c40d8930d8eb31154fe00548e7399c9771d4606bef6bb1c65d10425"},
-    {file = "qutip-4.6.3-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6c3af350a186626e3b599ad62833a4796b9477cbada95e57756b0d4fb7acbae7"},
-    {file = "qutip-4.6.3-cp36-cp36m-win32.whl", hash = "sha256:32f8d439027b1ce6d48cf45f0209f2b2f81b542694b7f84c9b574c3909259028"},
-    {file = "qutip-4.6.3-cp36-cp36m-win_amd64.whl", hash = "sha256:8b3f1e98738f277cabe4cc54c0911d556a2de07a653c69e7a3bda0b0d98e996a"},
-    {file = "qutip-4.6.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:d7ad7654feb9ddacceea0fdec7d76d780e9368656db52986274b60669ca24424"},
-    {file = "qutip-4.6.3-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:e7c91f7bc716c49549067b2c0c634787b7140888d32e36b5d9214ef8a64cf218"},
-    {file = "qutip-4.6.3-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f6cd747540c87f4615f8faab7490242c4b180c9e3a4493c81d52aa87c5f8741e"},
-    {file = "qutip-4.6.3-cp37-cp37m-win32.whl", hash = "sha256:559e6398a318867285314c4f414a5a891cbc090bb51bbc446d8ea349b0d9522a"},
-    {file = "qutip-4.6.3-cp37-cp37m-win_amd64.whl", hash = "sha256:185b62899ed6e5463ea5c22fdce10d6f53f98d69208987cf7ce753f706b6a052"},
-    {file = "qutip-4.6.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:babd7d981118ad7a4cfe12cbfad82283928f89dda1ab9aa5342490388c55bf2c"},
-    {file = "qutip-4.6.3-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:85161806aae43874e4227e6b51fb0d08e40c5996722c05980beee4a930e76677"},
-    {file = "qutip-4.6.3-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:826d58b783bfc63fc2375764316c8752cfaff0348b652eebf9f14880fabecfe0"},
-    {file = "qutip-4.6.3-cp38-cp38-win32.whl", hash = "sha256:61d485624477f7176b994def8adb83064ef7dc9f170c3d454ed403d8f2808044"},
-    {file = "qutip-4.6.3-cp38-cp38-win_amd64.whl", hash = "sha256:6cfc113c9a9b0692c44294a224b810877961e217b8652b8489d0f31c90caec18"},
-    {file = "qutip-4.6.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ce4244dbe96cd0fa96c75bbb89f666b568b3ca89985594a872e40c9ddf379ad7"},
-    {file = "qutip-4.6.3-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:de8e5b5e68a1b1c9f1c7a4bc8f88e1194e5d787657d5670e82289d2d8db1fee7"},
-    {file = "qutip-4.6.3-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:5851f15f0336c9cfd8a258e50a665f52e98ee0c7cb7fca01698dc5b323978f9b"},
-    {file = "qutip-4.6.3-cp39-cp39-win32.whl", hash = "sha256:819437efc588319dab0fedad46098e0d20c4fe4b8e15196b7be710f0e89460d8"},
-    {file = "qutip-4.6.3-cp39-cp39-win_amd64.whl", hash = "sha256:2b23217d4daa77fae3804a9258ee44f51c81cb1e073a3a4faa51ab27cbb4df3a"},
-    {file = "qutip-4.6.3.tar.gz", hash = "sha256:caf7c577e01478b488384822f08cb19686a7882969a88115a15f4636585d4fa8"},
+    {file = "qutip-4.7.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ea947c32b5b31446997113271891fe2af91b9e7c58fca92482ce816de66fcbbc"},
+    {file = "qutip-4.7.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d3534b7b7d33c1536c0fe3bc000c4ef6ba33a9bca327234d520a982a06ad07b3"},
+    {file = "qutip-4.7.3-cp310-cp310-win_amd64.whl", hash = "sha256:d1a46ea51ea7c62d69d1acb63cb8e907c44ac75934cf7fa93bd3b4a24462a88e"},
+    {file = "qutip-4.7.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:fecb3d851f938b714c3d45be8baf921129d7ddedbafc948a4bc08cf7b95c27dd"},
+    {file = "qutip-4.7.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:47cbbfed0acb5cc612b19ac9e2a8f3c596ab7511b91e36f69e97cdec27d8508e"},
+    {file = "qutip-4.7.3-cp311-cp311-win_amd64.whl", hash = "sha256:04e751469a6dff44f9ed8d46ff09b1c7e2c5177e91a8083427d163c8271688a8"},
+    {file = "qutip-4.7.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:c078e11e02f0a1d77f8ddff7f245bebf8aa261e19616ef502dba97aef4e4fa9c"},
+    {file = "qutip-4.7.3-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:bb9e71d7891fe9d288573d283cb709b533e9bf9fd8b95ffe616882b38fe6453f"},
+    {file = "qutip-4.7.3-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f76b6d13a8d5816055a9d79de6df15930384d20f8ee1c6a088f6e3925aa6b79c"},
+    {file = "qutip-4.7.3-cp36-cp36m-win32.whl", hash = "sha256:b92523889c0be7a593a652638c2aef2ecbad7436aeb6957ca783e7aa1e47dce3"},
+    {file = "qutip-4.7.3-cp36-cp36m-win_amd64.whl", hash = "sha256:c5febc4ea0cb17af7370d89f8c1bf0735755d6f76b988058164be19ad35de5a7"},
+    {file = "qutip-4.7.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:51fac208a1c04a44cf2e2ada1793288293a9d18755d78d3e1399031169f50227"},
+    {file = "qutip-4.7.3-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:3fd6e4509b748cd3f586cfa41421975e1a290b2b8a4d765265176f798f1dc769"},
+    {file = "qutip-4.7.3-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:15c7ae39ab39feb69bfd6bb0b9ea0258e7504383475b4b1f32c8ca8f70c0210f"},
+    {file = "qutip-4.7.3-cp37-cp37m-win32.whl", hash = "sha256:8d3de71cf768fb20a987a8ca4cfef5bd94a90190ed50b5327bff32ca1869781e"},
+    {file = "qutip-4.7.3-cp37-cp37m-win_amd64.whl", hash = "sha256:3fe273d17f86e25539c16e4f189d639f0ae72402240968b108baed3b990d0a60"},
+    {file = "qutip-4.7.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:23c0c562c51642e3f90c28b09354906909cd21f82103f78566dc9afa5c860536"},
+    {file = "qutip-4.7.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b7696f4c053a2c575a13fec4dbeecb2fbfa26a4c528e7540ef4b0792a89e0c92"},
+    {file = "qutip-4.7.3-cp38-cp38-win_amd64.whl", hash = "sha256:1f4794d68e6b98cc65390cf2af5172cde80a4e870ae2249010c66665cc9a1a89"},
+    {file = "qutip-4.7.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:074cd30890cc1b2d26b391aa778a93b1203e9b531902c2931a16387cdf7f0461"},
+    {file = "qutip-4.7.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cd539c6695d1d11f0118f5083591f600cb9adaeffca274f2d9b2812df629deeb"},
+    {file = "qutip-4.7.3-cp39-cp39-win_amd64.whl", hash = "sha256:d27cf80dc3a80f7db701f04f031dd807b07e66a57db78731ac162b9d2fe6a6d7"},
+    {file = "qutip-4.7.3.tar.gz", hash = "sha256:abaf8281cacdb31b822456b4732d591939781ab94561f42bc081a64e3fda713d"},
 ]
 
 [package.dependencies]
@@ -1774,11 +1724,26 @@ packaging = "*"
 scipy = ">=1.0"
 
 [package.extras]
-full = ["cvxopt", "cvxpy (>=1.0)", "cython (>=0.29.20)", "matplotlib (>=1.2.1)", "pytest (>=5.2)", "pytest-rerunfailures"]
+full = ["cvxopt", "cvxpy (>=1.0)", "cython (>=0.29.20,<3.0.0)", "ipython", "matplotlib (>=1.2.1)", "pytest (>=5.2)", "pytest-rerunfailures"]
 graphics = ["matplotlib (>=1.2.1)"]
-runtime-compilation = ["cython (>=0.29.20)"]
+ipython = ["ipython"]
+runtime-compilation = ["cython (>=0.29.20,<3.0.0)"]
 semidefinite = ["cvxopt", "cvxpy (>=1.0)"]
 tests = ["pytest (>=5.2)", "pytest-rerunfailures"]
+
+[[package]]
+name = "qwasm"
+version = "1.0.1"
+description = "WebAssembly decoder & disassembler"
+optional = false
+python-versions = "*"
+files = [
+    {file = "qwasm-1.0.1-py3-none-any.whl", hash = "sha256:c4c82a3f962d29314634868e06375f0cb4676c3d5266fbe137f6cd67321b0ef1"},
+    {file = "qwasm-1.0.1.tar.gz", hash = "sha256:01f5dfe27159b7fdd9d02cd299833225d528fa383d1278268e5e1526357950fb"},
+]
+
+[package.dependencies]
+setuptools = "*"
 
 [[package]]
 name = "readme-renderer"
@@ -1994,7 +1959,6 @@ files = [
 [package.dependencies]
 markdown-it-py = ">=2.2.0"
 pygments = ">=2.13.0,<3.0.0"
-typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<9)"]
@@ -2150,13 +2114,13 @@ files = [
 
 [[package]]
 name = "sphinx"
-version = "7.1.2"
+version = "7.2.5"
 description = "Python documentation generator"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinx-7.1.2-py3-none-any.whl", hash = "sha256:d170a81825b2fcacb6dfd5a0d7f578a053e45d3f2b153fecc948c37344eb4cbe"},
-    {file = "sphinx-7.1.2.tar.gz", hash = "sha256:780f4d32f1d7d1126576e0e5ecc19dc32ab76cd24e950228dcf7b1f6d3d9e22f"},
+    {file = "sphinx-7.2.5-py3-none-any.whl", hash = "sha256:9269f9ed2821c9ebd30e4204f5c2339f5d4980e377bc89cb2cb6f9b17409c20a"},
+    {file = "sphinx-7.2.5.tar.gz", hash = "sha256:1a9290001b75c497fd087e92b0334f1bbfa1a1ae7fddc084990c4b7bd1130b88"},
 ]
 
 [package.dependencies]
@@ -2168,7 +2132,7 @@ imagesize = ">=1.3"
 importlib-metadata = {version = ">=4.8", markers = "python_version < \"3.10\""}
 Jinja2 = ">=3.0"
 packaging = ">=21.0"
-Pygments = ">=2.13"
+Pygments = ">=2.14"
 requests = ">=2.25.0"
 snowballstemmer = ">=2.0"
 sphinxcontrib-applehelp = "*"
@@ -2176,12 +2140,12 @@ sphinxcontrib-devhelp = "*"
 sphinxcontrib-htmlhelp = ">=2.0.0"
 sphinxcontrib-jsmath = "*"
 sphinxcontrib-qthelp = "*"
-sphinxcontrib-serializinghtml = ">=1.1.5"
+sphinxcontrib-serializinghtml = ">=1.1.9"
 
 [package.extras]
 docs = ["sphinxcontrib-websupport"]
 lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-simplify", "isort", "mypy (>=0.990)", "ruff", "sphinx-lint", "types-requests"]
-test = ["cython", "filelock", "html5lib", "pytest (>=4.6)"]
+test = ["cython (>=3.0)", "filelock", "html5lib", "pytest (>=4.6)", "setuptools (>=67.0)"]
 
 [[package]]
 name = "sphinx-autodoc-typehints"
@@ -2237,14 +2201,17 @@ dev = ["bump2version", "sphinxcontrib-httpdomain", "transifex-client", "wheel"]
 
 [[package]]
 name = "sphinxcontrib-applehelp"
-version = "1.0.4"
+version = "1.0.7"
 description = "sphinxcontrib-applehelp is a Sphinx extension which outputs Apple help books"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib-applehelp-1.0.4.tar.gz", hash = "sha256:828f867945bbe39817c210a1abfd1bc4895c8b73fcaade56d45357a348a07d7e"},
-    {file = "sphinxcontrib_applehelp-1.0.4-py3-none-any.whl", hash = "sha256:29d341f67fb0f6f586b23ad80e072c8e6ad0b48417db2bde114a4c9746feb228"},
+    {file = "sphinxcontrib_applehelp-1.0.7-py3-none-any.whl", hash = "sha256:094c4d56209d1734e7d252f6e0b3ccc090bd52ee56807a5d9315b19c122ab15d"},
+    {file = "sphinxcontrib_applehelp-1.0.7.tar.gz", hash = "sha256:39fdc8d762d33b01a7d8f026a3b7d71563ea3b72787d5f00ad8465bd9d6dfbfa"},
 ]
+
+[package.dependencies]
+Sphinx = ">=5"
 
 [package.extras]
 lint = ["docutils-stubs", "flake8", "mypy"]
@@ -2252,14 +2219,17 @@ test = ["pytest"]
 
 [[package]]
 name = "sphinxcontrib-devhelp"
-version = "1.0.2"
-description = "sphinxcontrib-devhelp is a sphinx extension which outputs Devhelp document."
+version = "1.0.5"
+description = "sphinxcontrib-devhelp is a sphinx extension which outputs Devhelp documents"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib-devhelp-1.0.2.tar.gz", hash = "sha256:ff7f1afa7b9642e7060379360a67e9c41e8f3121f2ce9164266f61b9f4b338e4"},
-    {file = "sphinxcontrib_devhelp-1.0.2-py2.py3-none-any.whl", hash = "sha256:8165223f9a335cc1af7ffe1ed31d2871f325254c0423bc0c4c7cd1c1e4734a2e"},
+    {file = "sphinxcontrib_devhelp-1.0.5-py3-none-any.whl", hash = "sha256:fe8009aed765188f08fcaadbb3ea0d90ce8ae2d76710b7e29ea7d047177dae2f"},
+    {file = "sphinxcontrib_devhelp-1.0.5.tar.gz", hash = "sha256:63b41e0d38207ca40ebbeabcf4d8e51f76c03e78cd61abe118cf4435c73d4212"},
 ]
+
+[package.dependencies]
+Sphinx = ">=5"
 
 [package.extras]
 lint = ["docutils-stubs", "flake8", "mypy"]
@@ -2267,14 +2237,17 @@ test = ["pytest"]
 
 [[package]]
 name = "sphinxcontrib-htmlhelp"
-version = "2.0.1"
+version = "2.0.4"
 description = "sphinxcontrib-htmlhelp is a sphinx extension which renders HTML help files"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib-htmlhelp-2.0.1.tar.gz", hash = "sha256:0cbdd302815330058422b98a113195c9249825d681e18f11e8b1f78a2f11efff"},
-    {file = "sphinxcontrib_htmlhelp-2.0.1-py3-none-any.whl", hash = "sha256:c38cb46dccf316c79de6e5515e1770414b797162b23cd3d06e67020e1d2a6903"},
+    {file = "sphinxcontrib_htmlhelp-2.0.4-py3-none-any.whl", hash = "sha256:8001661c077a73c29beaf4a79968d0726103c5605e27db92b9ebed8bab1359e9"},
+    {file = "sphinxcontrib_htmlhelp-2.0.4.tar.gz", hash = "sha256:6c26a118a05b76000738429b724a0568dbde5b72391a688577da08f11891092a"},
 ]
+
+[package.dependencies]
+Sphinx = ">=5"
 
 [package.extras]
 lint = ["docutils-stubs", "flake8", "mypy"]
@@ -2310,14 +2283,17 @@ test = ["flake8", "mypy", "pytest"]
 
 [[package]]
 name = "sphinxcontrib-qthelp"
-version = "1.0.3"
-description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp document."
+version = "1.0.6"
+description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp documents"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib-qthelp-1.0.3.tar.gz", hash = "sha256:4c33767ee058b70dba89a6fc5c1892c0d57a54be67ddd3e7875a18d14cba5a72"},
-    {file = "sphinxcontrib_qthelp-1.0.3-py2.py3-none-any.whl", hash = "sha256:bd9fc24bcb748a8d51fd4ecaade681350aa63009a347a8c14e637895444dfab6"},
+    {file = "sphinxcontrib_qthelp-1.0.6-py3-none-any.whl", hash = "sha256:bf76886ee7470b934e363da7a954ea2825650013d367728588732c7350f49ea4"},
+    {file = "sphinxcontrib_qthelp-1.0.6.tar.gz", hash = "sha256:62b9d1a186ab7f5ee3356d906f648cacb7a6bdb94d201ee7adf26db55092982d"},
 ]
+
+[package.dependencies]
+Sphinx = ">=5"
 
 [package.extras]
 lint = ["docutils-stubs", "flake8", "mypy"]
@@ -2325,14 +2301,17 @@ test = ["pytest"]
 
 [[package]]
 name = "sphinxcontrib-serializinghtml"
-version = "1.1.5"
-description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)."
+version = "1.1.9"
+description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib-serializinghtml-1.1.5.tar.gz", hash = "sha256:aa5f6de5dfdf809ef505c4895e51ef5c9eac17d0f287933eb49ec495280b6952"},
-    {file = "sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
+    {file = "sphinxcontrib_serializinghtml-1.1.9-py3-none-any.whl", hash = "sha256:9b36e503703ff04f20e9675771df105e58aa029cfcbc23b8ed716019b7416ae1"},
+    {file = "sphinxcontrib_serializinghtml-1.1.9.tar.gz", hash = "sha256:0c64ff898339e1fac29abd2bf5f11078f3ec413cfe9c046d3120d7ca65530b54"},
 ]
+
+[package.dependencies]
+Sphinx = ">=5"
 
 [package.extras]
 lint = ["docutils-stubs", "flake8", "mypy"]
@@ -2623,5 +2602,5 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8.1,<3.11"
-content-hash = "b8a5efcd1e2aafaf5c5b97f785e2c478d0f485f7bc117c9cfbe41e16aecc1807"
+python-versions = ">=3.9,<3.11"
+content-hash = "56e203f885075759d31b15ae76b9e7a146a8e8e8c0a7290af3a67e2c88a6dbd2"

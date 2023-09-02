@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import abc
 import math
 import re
@@ -33,6 +34,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.waveforms import get_waveform_type
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 from qiskit.qasm import Qasm
 from qiskit.qasm.node import Gate
 from qiskit.qasm.qasmparser import QasmParser as QiskitQasmParser
@@ -63,7 +65,7 @@ class ParseResults:
 
 def get_qasm_parser(qasm_str: str):
     """ Gets the appropriate QASM parser for the passed-in QASM string. """
-    parsers = [CloudQasmParser(), Qasm3Parser()]
+    parsers = [DefaultQasm2Parser(), Qasm3Parser()]
     attempts = []
     for parser in parsers:
         parse_attempt = parser.can_parse(qasm_str)
@@ -199,7 +201,8 @@ class AbstractParser:
 
     def _add_cnot(self, control_qbs, target_qbs, builder):
         for cqb, tqb in self._expand_to_match_registers(
-                control_qbs, target_qbs, flatten_results=True):
+            control_qbs, target_qbs, flatten_results=True
+        ):
             builder.cnot(cqb, tqb)
 
     def _add_reset(self, qubits, builder):
@@ -313,11 +316,31 @@ class AbstractParser:
                 ]) for tup in results
             ]
 
-        return [(val[0] if len(val) == 1 else tuple(val)) if tuple_return else list(val)
-                for val in results]
+        return [
+            (val[0] if len(val) == 1 else tuple(val)) if tuple_return else list(val)
+            for val in results
+        ]  # yapf: disable
+
+    def __repr__(self):
+        return self.__class__.__name__
 
 
-class Qasm2Parser(AbstractParser):
+class AbstractQASMParser(AbstractParser):
+    def can_parse(self, qasm_str: str) -> ParseResults:
+        try:
+            with log_duration(
+                f"Checked can parse {self.parser_language().name}, took {{}} seconds."
+            ):
+                self._fetch_or_parse(qasm_str)
+            return ParseResults.success()
+        except Exception as ex:
+            return ParseResults.failure(str(ex))
+
+    def _fetch_or_parse(self, qasm: str):
+        pass
+
+
+class Qasm2Parser(AbstractQASMParser):
     ecr_qasm_str = """
     OPENQASM 2.0;
     include "qelib1.inc";
@@ -326,14 +349,10 @@ class Qasm2Parser(AbstractParser):
 
     ecr_gate = fetch_gate_node(ecr_qasm_str, 'ecr')
 
-    def __init__(self, order_result_vars=False, raw_results=False):
+    def __init__(self, order_result_vars=False):
         super().__init__()
         self.order_result_vars = order_result_vars
-        self.raw_results = raw_results
         self._cached_parses: Dict[int, qasm_ast.Program] = dict()
-
-    def __repr__(self):
-        return self.__class__.__name__
 
     def parser_language(self) -> Languages:
         return Languages.Qasm2
@@ -408,13 +427,15 @@ class Qasm2Parser(AbstractParser):
         self._cached_parses[qasm_id] = program
         return program
 
-    def parse(self, builder, qasm: str):
-        # Parse or pick up the cached version, then remove it as we're about to
-        # interpret it.
-        program = self._fetch_or_parse(qasm)
-        if (qasm_id := hash(qasm)) in self._cached_parses:
-            del self._cached_parses[qasm_id]
-        return self.process_program(builder, program)
+    def parse(self, builder, qasm: str) -> InstructionBuilder:
+        with log_duration(
+            f"{self.parser_language().name} parsing completed, took {{}} seconds."
+        ):
+            # Parse or pick up the cached version, then remove it as we're about to interpret it.
+            program = self._fetch_or_parse(qasm)
+            if (qasm_id := hash(qasm)) in self._cached_parses:
+                del self._cached_parses[qasm_id]
+            return self.process_program(builder, program)
 
     def validate(self, qasm: qasm_ast.Program):
         pass
@@ -432,13 +453,6 @@ class Qasm2Parser(AbstractParser):
             )
         ):
             qasm.children.insert(1, self.ecr_gate)
-
-    def can_parse(self, qasm: str) -> ParseResults:
-        try:
-            self._fetch_or_parse(qasm)
-            return ParseResults.success()
-        except Exception as ex:
-            return ParseResults.failure(str(ex))
 
     def _walk_program(self, builder, qasm: qasm_ast.Program, context):
         self.modify(qasm)
@@ -730,9 +744,9 @@ class RestrictedQasm2Parser(Qasm2Parser):
             raise ValueError("If's are currently unable to be used.")
 
 
-class CloudQasmParser(RestrictedQasm2Parser):
+class DefaultQasm2Parser(RestrictedQasm2Parser):
     """
-    QASM parser used in our QCaaS system.
+    QASM 2 parser that disables conditional statements and orders results, but has no gate limitations.
     """
     def __init__(self):
         super().__init__(allowed_gates=None, disable_if=True, order_result_vars=True)
@@ -753,7 +767,9 @@ class LarkOpenPulseContext(QasmContext):
 
 
 class QasmMethodWrapper(qasm_ast.CustomUnitary):
+    """ Wrapper class for passing around bespoke information through more generic parsers/walkers. """
     def __init__(self, qasm_method, qubit_args, classic_args):
+        # We don't call the constructor on purpose because it expects an AST tree.
         self.qasm_method = qasm_method
         self.qubit_args = qubit_args
         self.classic_args = classic_args
@@ -851,6 +867,7 @@ def get_frame_mappings(model: QuantumHardwareModel):
 
 
 def extern_port_name(physical_channel):
+    """ Generate open pulse port name for this physical channel. """
     match = re.search("[0-9]+", physical_channel.id)
     index = None
     if match is not None:
@@ -879,15 +896,14 @@ def get_port_mappings(model: QuantumHardwareModel):
 class UntargetedPulse:
     """ Pulse that currently has no device to send it down. """
     def __init__(self, pulse_class: type, *args, **kwargs):
-        self._ref_instance: Union[
-            CustomPulse,
-            Pulse] = pulse_class(None, *args, ignore_channel_scale=True, **kwargs)
+        self._ref_instance: Union[CustomPulse, Pulse] \
+            = pulse_class(None, *args, ignore_channel_scale=True, **kwargs)
         self._built = False
 
     @property
     def ref_instance(self):
-        # This defers the deep copy to only if an UntargedPulse is accessed after it has
-        # been already built.
+        # This defers the deep copy to only if an UntargedPulse is accessed after it has been
+        # already built.
         if self._built:
             self._ref_instance = deepcopy(self._ref_instance)
             self._ref_instance.quantum_targets = []
@@ -905,7 +921,7 @@ class UntargetedPulse:
         return f"Partial instance of {type(self._ref_instance).__name__}"
 
 
-class Qasm3Parser(Interpreter, AbstractParser):
+class Qasm3Parser(Interpreter, AbstractQASMParser):
     lark_parser = _create_lark_parser()
 
     def __init__(self):
@@ -941,14 +957,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._cached_parses[qasm_id] = program
         return program
 
-    def can_parse(self, qasm_str: str) -> ParseResults:
-        try:
-            self._fetch_or_parse(qasm_str)
-            return ParseResults.success()
-        except Exception as ex:
-            return ParseResults.failure(str(ex))
-
-    def _reset_and_return(self):
+    def _reset_and_return(self) -> InstructionBuilder:
         builder = self.builder
         self.builder = None
         self._general_context = None
@@ -1240,7 +1249,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 "Must be either type Port or Frame."
             )
 
-        pulse_channel = port.create_pulse_channel(name, frequency)
+        pulse_channel = PulseChannel.build(name, port, frequency, is_temporary=True)
         self.builder.phase_shift(pulse_channel, phase)
 
         self._attempt_declaration(Variable(name, PulseChannel, pulse_channel))
@@ -1281,10 +1290,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 raise ValueError(
                     f"Beta '{str(beta)}' used in {intrinsic_name} is not a float."
                 )
-            if zero_at_edges is not _empty and not isinstance(zero_at_edges, int):
+            if zero_at_edges is not _empty and not isinstance(zero_at_edges, bool):
                 raise ValueError(
                     f"Zero at edges '{str(zero_at_edges)}' used in {intrinsic_name} "
-                    "is not a int."
+                    "is not a bool."
                 )
             if rise is not _empty and not isinstance(rise, float):
                 raise ValueError(
@@ -1317,13 +1326,35 @@ class Qasm3Parser(Interpreter, AbstractParser):
             is_iterable = isinstance(args, (tuple, list))
             arg_length = len(args) if is_iterable else 1
             if (is_iterable and arg_length not in lengths) \
-               or (not is_iterable and 1 not in lengths):
+                    or (not is_iterable and 1 not in lengths):
                 raise ValueError(
                     f"Waveform '{intrinsic_name}' has incorrect number of arguments. "
                     f"Needs {','.join([str(val) for val in lengths])}, "
                     f"has {arg_length}."
                 )
             return args + ([None] * (max(lengths) - arg_length))
+
+        def handle_zero_at_edges(zae):
+            # TODO: should probably be handled in grammar better than this
+            if zae == 'true':
+                return True
+            elif zae is None or zae == 'false':
+                return False
+            else:
+                raise ValueError(
+                    f"Zero at edges is either non-specified, [[true]] or [[false]] Cannot take value [[{zae}]]"
+                )
+
+        def handle_amp(amp):
+            """
+            Extern users have 1 as arbitrary max amp.
+            Internally however, amp > 0.85 gives rise to undefineded non-linear behaviour on the hardware.
+            """
+            if abs(amp) > 1:
+                raise ValueError(
+                    f"Amplitude must be no greater than 1, amp given: [[{amp}]]."
+                )
+            return amp * 0.85
 
         if intrinsic_name is None:
             # This is a flat array of pulse values.
@@ -1333,16 +1364,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # TODO: implement non intrinsic waveforms.
         elif intrinsic_name == 'constant':
             width, amp = _validate_arg_length(tree.children[4], 2)
-            _validate_waveform_args(width=width, amp=amp)
-            waveform = UntargetedPulse(Pulse, PulseShapeType.SQUARE, width, amp=amp)
-
-        elif intrinsic_name == 'legacy_constant':
-            width, amp = _validate_arg_length(tree.children[4], 2)
+            amp = handle_amp(amp)
             _validate_waveform_args(width=width, amp=amp)
             waveform = UntargetedPulse(Pulse, PulseShapeType.SQUARE, width, amp=amp)
 
         elif intrinsic_name == 'rounded_square':
             width, std_dev, rise_time, amp = _validate_arg_length(tree.children[4], 4)
+            amp = handle_amp(amp)
             _validate_waveform_args(width=width, std_dev=std_dev, amp=amp, rise=rise_time)
             waveform = UntargetedPulse(
                 Pulse,
@@ -1352,23 +1380,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 amp=amp,
                 rise=rise_time
             )
-
-        elif intrinsic_name == 'legacy_rounded_square':
-            width, std_dev, rise_time, amp = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(width=width, std_dev=std_dev, amp=amp, rise=rise_time)
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.ROUNDED_SQUARE,
-                width,
-                std_dev=std_dev,
-                amp=amp,
-                rise=rise_time
-            )
-
         elif intrinsic_name == 'drag':
-            amp, width, std_dev, beta, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4, 5)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            amp, width, std_dev, beta, zero_at_edges = _validate_arg_length(
+                tree.children[4], 4, 5
+            )
+            amp = handle_amp(amp)
+            zero_at_edges = handle_zero_at_edges(zero_at_edges)
             _validate_waveform_args(
                 width=width,
                 amp=amp,
@@ -1378,83 +1395,40 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
             waveform = UntargetedPulse(
                 Pulse,
-                PulseShapeType.GAUSSIAN_DRAG,
+                PulseShapeType.GAUSSIAN,
                 width=width,
                 amp=amp,
                 zero_at_edges=zero_at_edges,
-                beta=beta,
-                std_dev=std_dev
-            )
-
-        elif intrinsic_name == 'legacy_drag':
-            amp, width, std_dev, beta, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4, 5)
-            zero_at_edges = 0 if not zero_at_edges else 1
-            _validate_waveform_args(
-                width=width,
-                amp=amp,
-                beta=beta,
-                zero_at_edges=zero_at_edges,
-                std_dev=std_dev
-            )
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_DRAG,
-                width=width,
-                amp=amp,
-                zero_at_edges=zero_at_edges,
-                beta=beta,
+                drag=beta,
                 std_dev=std_dev
             )
 
         elif intrinsic_name == 'gaussian':
-            amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
-            _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
-                width=width,
-                amp=amp,
-                std_dev=std_dev,
+            amp, width, std_dev, zero_at_edges = _validate_arg_length(
+                tree.children[4], 3, 4
             )
-
-        elif intrinsic_name == 'legacy_gaussian':
-            amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
+            amp = handle_amp(amp)
+            zero_at_edges = handle_zero_at_edges(zero_at_edges)
             _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
             waveform = UntargetedPulse(
                 Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
+                PulseShapeType.GAUSSIAN,
                 width=width,
                 amp=amp,
                 std_dev=std_dev,
+                zero_at_edges=zero_at_edges
             )
 
         elif intrinsic_name == 'gaussian_zero_edge':
-            amp, width, std_dev, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            amp, width, std_dev, zero_at_edges = _validate_arg_length(tree.children[4], 4)
+            amp = handle_amp(amp)
+            zero_at_edges = handle_zero_at_edges(zero_at_edges)
             _validate_waveform_args(
                 width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
             )
             waveform = UntargetedPulse(
                 Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
-                width=width,
-                amp=amp,
-                zero_at_edges=zero_at_edges,
-                std_dev=std_dev
-            )
-
-        elif intrinsic_name == 'legacy_gaussian_zero_edge':
-            amp, width, std_dev, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
-            _validate_waveform_args(
-                width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
-            )
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
+                PulseShapeType.GAUSSIAN,
                 width=width,
                 amp=amp,
                 zero_at_edges=zero_at_edges,
@@ -1463,46 +1437,29 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         elif intrinsic_name == 'sech':
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
-            waveform = UntargetedPulse(
-                Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
-            )
-
-        elif intrinsic_name == 'legacy_sech':
-            amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
+            amp = handle_amp(amp)
             waveform = UntargetedPulse(
                 Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
             )
 
         elif intrinsic_name == 'gaussian_square':
-            amp, width, square_width, std_dev = \
-                _validate_arg_length(tree.children[4], 4)
+            amp, width, square_width, std_dev = _validate_arg_length(tree.children[4], 4)
+            amp = handle_amp(amp)
             _validate_waveform_args(
                 width=width, amp=amp, square_width=square_width, std_dev=std_dev
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
-
-        elif intrinsic_name == 'legacy_gaussian_square':
-            amp, width, square_width, std_dev = \
-                _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN_SQUARE,
+                width=width,
+                amp=amp,
+                square_width=square_width,
+                std_dev=std_dev
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
 
         elif intrinsic_name == 'sine':
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(width=width, amp=amp, frequency=frequency, phase=phase)
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.SIN,
-                amp=amp,
-                width=width,
-                frequency=frequency,
-                phase=phase
-            )
-
-        elif intrinsic_name == 'legacy_sine':
-            amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
+            amp = handle_amp(amp)
             _validate_waveform_args(width=width, amp=amp, frequency=frequency, phase=phase)
             waveform = UntargetedPulse(
                 Pulse,
@@ -1516,6 +1473,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # Intrinsic waveform shapes
         elif (internal_waveform := get_waveform_type(intrinsic_name)) is not None:
             width, amp = _validate_arg_length(tree.children[4], 2)
+            amp = handle_amp(amp)
             _validate_waveform_args(width=width, amp=amp)
             waveform = UntargetedPulse(internal_waveform, width, amp)
         else:
@@ -1571,9 +1529,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         is_calibration = name in self._current_context.calibration_methods
         is_qubit_specific = qubit_specific_name in self._current_context.calibration_methods
-        is_list_expr = self.generate_expr_list_defcal_name(
-            name, argument_values
-        ) in self._current_context.calibration_methods
+        is_list_expr = self.generate_expr_list_defcal_name(name, argument_values) \
+            in self._current_context.calibration_methods
 
         return is_calibration or is_qubit_specific or is_list_expr
 
@@ -1615,7 +1572,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         )
 
         # Functionally the methods are processed the same, but the qb-specific override
-        # takes presidence.
+        # takes precedence.
         if qb_specific_cal_def is not None:
             cal_def = qb_specific_cal_def
 
@@ -1958,26 +1915,26 @@ class Qasm3Parser(Interpreter, AbstractParser):
             # is negative we return 1, qubit is in excited state.
             pulse_channel = args[0]
             variable: Variable = Variable.with_random_name(self.builder.existing_names)
+
+            # TODO: Fill in output_variable
             acquire = self._capture_iq_value(
                 pulse_channel, args[1], variable.name, args[2] if len(args) > 2 else None
-            )  # TODO: Fill in output_variable
+            )
             mean_z_map_args = None
             if len(args) > 3:
                 mean_z_map_args = args[3]
             else:
-                resonator = self.builder.model.get_devices_from_physical_channel(
-                    pulse_channel.physical_channel_id
-                )[0]
+                resonator = pulse_channel.related_resonator
                 for qb in self.builder.model.qubits:
                     if qb.measure_device == resonator:
                         mean_z_map_args = qb.mean_z_map_args
                         break
             if mean_z_map_args is None:
-                keys = next(
-                    key for key,
-                    value in self._frame_mappings.items() if value == pulse_channel
+                raise ValueError(
+                    f"Could not find mean_z_map_args for frame "
+                    f"{next(key for key, value in self._frame_mappings.items() if value == pulse_channel)}"
+                    f"."
                 )
-                raise ValueError(f"Could not find mean_z_map_args for frame {keys}.")
             self.builder.post_processing(
                 acquire, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, args=mean_z_map_args
             )
@@ -2092,33 +2049,37 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._current_context = existing_context
 
     def parse(self, builder: InstructionBuilder, qasm_str: str):
-        self.initalize(builder)
-        parsed = self._fetch_or_parse(qasm_str)
+        with log_duration(
+            f"{self.parser_language().name} parsing completed, took {{}} seconds."
+        ):
+            self.initalize(builder)
+            parsed = self._fetch_or_parse(qasm_str)
 
-        if (qasm_id := hash(qasm_str)) in self._cached_parses:
-            del self._cached_parses[qasm_id]
+            if (qasm_id := hash(qasm_str)) in self._cached_parses:
+                del self._cached_parses[qasm_id]
 
-        # If we have a new results format, propagate it.
-        self._q2_patcher.results_format = self.results_format
+            # If we have a new results format, propagate it.
+            self._q2_patcher.results_format = self.results_format
 
-        self.visit(parsed)
-        if not self._has_qasm_version:
-            raise ValueError("Ambiguous QASM version, need OPENQASM header.")
+            self.visit(parsed)
+            if not self._has_qasm_version:
+                raise ValueError("Ambiguous QASM version, need OPENQASM header.")
 
-        if self._has_open_pulse and not self._has_calibration_version:
-            raise ValueError("Uses pulse definitions without defcalgrammar header.")
+            if self._has_open_pulse and not self._has_calibration_version:
+                raise ValueError("Uses pulse definitions without defcalgrammar header.")
 
-        # If we're purely QASM act like the previous version in regards to results.
-        register_keys = self._general_context.registers.classic.keys()
-        if any(register_keys):
-            for key in register_keys:
-                builder.assign(
-                    key, [
-                        val.value
-                        for val in self._general_context.registers.classic[key].bits
-                    ]
-                )
+            # If we're purely QASM act like the previous version in regards to results.
+            register_keys = self._general_context.registers.classic.keys()
+            if any(register_keys):
+                for key in register_keys:
+                    builder.assign(
+                        key,
+                        [
+                            val.value
+                            for val in self._general_context.registers.classic[key].bits
+                        ]
+                    )
 
-            builder.returns([key for key in register_keys])
+                builder.returns([key for key in register_keys])
 
-        return self._reset_and_return()
+            return self._reset_and_return()

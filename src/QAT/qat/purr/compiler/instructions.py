@@ -1,14 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Any, Dict, List, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
+from qat.purr.utils.serializer import json_dumps, json_loads
+
+if TYPE_CHECKING:
+    from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 def _stringify_qubits(qubits):
@@ -35,7 +40,12 @@ class ProcessAxis(Enum):
 
 
 class Instruction:
-    pass
+    @staticmethod
+    def deserialize(blob, model: QuantumHardwareModel):
+        return json_loads(blob, model=model)
+
+    def serialize(self):
+        return json_dumps(self)
 
 
 class QuantumMetadata(Instruction):
@@ -195,6 +205,10 @@ class Assign(Instruction):
 
 
 class Waveform(QuantumInstruction):
+    def __init__(self, quantum_target, ignore_channel_scale: bool = False):
+        super().__init__(quantum_target)
+        self.ignore_channel_scale = ignore_channel_scale
+
     @property
     def channel(self) -> "PulseChannel":
         return self.quantum_targets[0]
@@ -207,10 +221,10 @@ class CustomPulse(Waveform):
     def __init__(
         self,
         quantum_target: "PulseChannel",
-        samples: List[np.complex],
+        samples: List[np.csingle],
         ignore_channel_scale: bool = False
     ):
-        super().__init__(quantum_target)
+        super().__init__(quantum_target, ignore_channel_scale=ignore_channel_scale)
         self.samples: List[np.complex] = samples
         self.ignore_channel_scale: bool = ignore_channel_scale
 
@@ -236,18 +250,17 @@ class Pulse(Waveform):
         amp: float = 1.0,
         phase: float = 0.0,
         drag: float = 0.0,
-        rise=0.0,
+        rise: float = 0.0,
         amp_setup: float = 0.0,
         scale_factor: float = 1.0,
         zero_at_edges: int = 0,
-        beta: float = 0.0,
         frequency: float = 0.0,
         internal_phase: float = 0.0,
         std_dev: float = 0.0,
         square_width: float = 0.0,
         ignore_channel_scale: bool = False,
     ):
-        super().__init__(quantum_target)
+        super().__init__(quantum_target, ignore_channel_scale=ignore_channel_scale)
         self.shape = shape
         self.width = width
         self.amp = amp
@@ -257,12 +270,10 @@ class Pulse(Waveform):
         self.amp_setup = amp_setup
         self.scale_factor = scale_factor
         self.zero_at_edges = bool(zero_at_edges)
-        self.beta = beta
         self.frequency = frequency
         self.internal_phase = internal_phase
         self.std_dev = std_dev
         self.square_width = square_width
-        self.ignore_channel_scale = ignore_channel_scale
 
     @property
     def duration(self):
@@ -303,7 +314,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         mode: AcquireMode = None,
         output_variable=None,
         existing_names: Set[str] = None,
-        delay=180e-9,
+        delay=None,
         filter: Pulse = None
     ):
         super().__init__(channel.full_id())
@@ -339,8 +350,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         return next(iter(self.quantum_targets), None)
 
     def __repr__(self):
-        out_var = f"->{self.output_variable}" \
-            if self.output_variable is not None else ""
+        out_var = f"->{self.output_variable}" if self.output_variable is not None else ""
         mode = f",{self.mode.value}" if self.mode is not None else ""
         return f"acquire {self.channel.full_id()},{self.time}{mode}{out_var}"
 
@@ -454,13 +464,12 @@ class Return(Instruction):
 
 class SweepOperation:
     """ Common parent for all things that need differentiating during a sweep. """
-    pass
 
 
 class SweepValue(SweepOperation):
     def __init__(self, name, value):
-        self.name = name
-        self.value = value
+        self.name: str = name
+        self.value: List[Any] = value
 
 
 class DeviceUpdate(QuantumInstruction):
@@ -584,11 +593,9 @@ def build_generated_name(existing_names=None, prefix=None):
     if any(prefix) and not prefix.endswith("_"):
         prefix = f"{prefix}_"
 
-    variable_name = \
-        f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
+    variable_name = f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
     while variable_name in existing_names:
-        variable_name = \
-            f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
+        variable_name = f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
 
     existing_names.add(variable_name)
     return variable_name

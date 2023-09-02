@@ -7,7 +7,7 @@ cal {
     frame q0_frame = newframe(q0_drive, 5e9, 0.0);
     waveform wf1 = gaussian(1e-6, 0.0001,  0.0001);
     waveform wf2 = sech(1e-6,  0.0001,  0.0001);
-    //waveform wf3 = gaussian_square(1e-6, 0.0001, 0.0001, 0.0001);
+    waveform wf3 = gaussian_square(1e-6, 0.0001, 0.0001, 0.0001);
     waveform wf4 = drag(1e-6, 0.0001, 0.0001, 0.0001);
     waveform wf5 = constant(1e-6, 0.0001);
     waveform wf6 = sine(1e-6, 0.0001, 2525.5, -pi);
@@ -15,7 +15,7 @@ cal {
     waveform wf8 = soft_square(1e-6, 0.0001);
     waveform wf9 = blackman(1e-6, 0.0001);
     waveform wf10 = softer_square(1e-6, 0.0001);
-    waveform wf11 = extra_soft_square(1e-6, 0.0001);
+    //waveform wf11 = extra_soft_square(1e-6, 0.0001);
 
     waveform arb_waveform1 = [1+0, 0+1];
 }

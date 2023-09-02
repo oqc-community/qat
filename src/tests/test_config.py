@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
-from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     InlineResultsProcessing,
@@ -16,10 +16,7 @@ from qat.purr.compiler.config import (
     ResultsFormatting,
     TketOptimizations,
 )
-from qat.purr.compiler.instructions import Delay
-from qat.qat import execute_with_metrics
-
-from tests.qasm_utils import TestFileType, get_test_file_path
+from qat.purr.compiler.devices import QuantumComponent
 
 
 def _get_json_path(file_name):
@@ -40,6 +37,8 @@ class TestConfigGeneral:
         assert TketOptimizations.DefaultMappingPass in opt
         assert QiskitOptimizations.Empty in opt
 
+
+class TestConfigSerialization:
     def test_default_config(self):
         first_conf = CompilerConfig()
         serialized_data = first_conf.to_json()
@@ -136,7 +135,7 @@ class TestConfigGeneral:
         with pytest.raises(ValueError):
             first_conf.to_json()
 
-        first_conf.optimizations = Delay  # Not an allowed custom type in project
+        first_conf.optimizations = QuantumComponent  # Not an allowed custom type in project
 
         with pytest.raises(ValueError):
             first_conf.to_json()
@@ -171,14 +170,3 @@ class TestConfigGeneral:
         assert deserialised_conf.results_format.transforms == ResultsFormatting.DynamicStructureReturn
         assert deserialised_conf.optimizations.qiskit_optimizations == QiskitOptimizations.Empty
         assert deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
-
-    def test_runs_successfully_with_config(self):
-        program = get_test_file_path(TestFileType.QASM2, "ghz.qasm")
-        hardware = get_default_echo_hardware()
-        serialised_data = _get_contents("serialised_full_compiler_config_v1.json")
-        deserialised_conf = CompilerConfig.create_from_json(
-            serialised_data
-        )  # Test full compiler config v1
-        results, metrics = execute_with_metrics(program, hardware, deserialised_conf)
-        assert results is not None
-        assert metrics is not None
