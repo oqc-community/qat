@@ -7,7 +7,7 @@
 |
 
 **QAT** (Quantum Assembly Toolchain) is a low-level quantum compiler and runtime which facilitates executing quantum IRs
-such as `QASM <https://openqasm.com/>`_ , `OpenPulse <https://openqasm.com/language/openpulse.html>`_ and
+such as `QASM <https://openqasm.com/>`_, `OpenPulse <https://openqasm.com/language/openpulse.html>`_ and
 `QIR <https://devblogs.microsoft.com/qsharp/introducing-quantum-intermediate-representation-qir/>`_ against QPU drivers.
 It facilitates the execution of largely-optimised code, converted into abstract pulse- and hardware-level instructions,
 which are then transformed and delivered to an appropriate driver.
