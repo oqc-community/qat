@@ -142,7 +142,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 class TestBaseQuantum:
     def get_qasm2(self, file_name):
-        with open(join(dirname(__file__), "qasm_files", file_name), "r") as qasm_file:
+        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
             return qasm_file.read()
 
     @pytest.mark.skipif(

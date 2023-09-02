@@ -65,7 +65,7 @@ from qiskit_optimization.applications import Maxcut, Tsp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_docplex_mp
 
-from tests.qasm_utils import (
+from .qasm_utils import (
     TestFileType,
     get_qasm2,
     get_qasm3,
@@ -709,7 +709,7 @@ class TestParsing:
     echo = get_default_echo_hardware(6)
 
     def test_compare_tket_parser(self):
-        qasm_folder = join(dirname(__file__), "qasm_files")
+        qasm_folder = join(dirname(__file__), "files", "qasm")
         for file in [f for f in listdir(qasm_folder) if isfile(join(qasm_folder, f))]:
             qasm = get_qasm2(file)
             circ = None

@@ -15,7 +15,7 @@ from tests.qasm_utils import TestFileType, get_test_file_path
 
 
 def _get_qir_path(file_name):
-    return join(abspath(join(dirname(__file__), "qir_files", file_name)))
+    return join(abspath(join(dirname(__file__), "files", "qir", file_name)))
 
 
 def _get_contents(file_path):
