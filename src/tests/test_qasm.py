@@ -47,7 +47,6 @@ from qat.purr.integrations.qasm import (
 )
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
-from qat.qat import execute, execute_qasm, fetch_frontend
 from qiskit import QuantumCircuit
 from qiskit.algorithms import QAOA, VQE, NumPyMinimumEigensolver
 from qiskit.algorithms.optimizers import SPSA
@@ -65,6 +64,7 @@ from qiskit_optimization.applications import Maxcut, Tsp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_docplex_mp
 
+from qat.qat import execute, execute_qasm, fetch_frontend
 from .qasm_utils import (
     TestFileType,
     get_qasm2,
@@ -108,11 +108,6 @@ class TestQASM3:
         hw = get_default_echo_hardware(8)
         results = execute_qasm(get_qasm3("openpulse_tests/zmap.qasm"), hw)
         assert not isinstance(results, dict)
-
-    # def test_expr_list_defcal(self):
-    #     hw = get_default_echo_hardware(8)
-    #     results = execute_qasm(get_qasm3("openpulse_tests/expr_list_caldef.qasm"), hw)
-    #     assert not isinstance(results, dict)
 
     @pytest.mark.parametrize(
         "arg_count",
@@ -666,8 +661,13 @@ class TestExecutionFrontend:
     def test_too_many_qubits(self):
         with pytest.raises(ValueError):
             hw = get_default_echo_hardware()
-            get_builder(hw).X(hw.get_qubit(5)).Y(hw.get_qubit(1)
-                                                ).parse().parse_and_execute()
+            (
+                get_builder(hw)
+                .X(hw.get_qubit(5))
+                .Y(hw.get_qubit(1))
+                .parse()
+                .parse_and_execute()
+            )  # yapf: disable
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -702,7 +702,7 @@ class TestExecutionFrontend:
         frontend = fetch_frontend(contents)
         built = frontend.parse(contents, hardware=hardware)
         results = frontend.execute(instructions=built, hardware=hardware)
-        assert not results is None
+        assert results is not None
 
 
 class TestParsing:
@@ -758,9 +758,8 @@ class TestParsing:
 
     def test_restrict_if(self):
         with pytest.raises(ValueError):
-            RestrictedQasm2Parser(
-                disable_if=True
-            ).parse(get_builder(self.echo), get_qasm2("example_if.qasm"))
+            RestrictedQasm2Parser(disable_if=True)\
+                .parse(get_builder(self.echo), get_qasm2("example_if.qasm"))
 
     def test_invalid_arbitrary_gate(self):
         with pytest.raises(ValueError):

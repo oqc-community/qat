@@ -38,4 +38,3 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
         index = index + 1
 
     return results, seq_lengths
-

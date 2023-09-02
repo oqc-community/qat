@@ -33,9 +33,8 @@ log = get_default_logger()
 def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target_qubits):
     # Round the drive channel frequencies to the multiple of 1kHz
     for qubit in target_qubits:
-        hw.get_qubit(qubit).get_drive_channel().frequency = 1e9 * round(
-            hw.get_qubit(qubit).get_drive_channel().frequency / 1e9, 6
-        )
+        hw.get_qubit(qubit).get_drive_channel().frequency = \
+            1e9 * round(hw.get_qubit(qubit).get_drive_channel().frequency / 1e9, 6)
 
     for qubit in target_qubits:
         drive_channel = hw.get_qubit(qubit).get_drive_channel()
@@ -243,9 +242,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                             and len(pp.axes) <= 1:
                         instructions.remove(pp)
 
-                    if pp.process == PostProcessType.MEAN and ProcessAxis.TIME in pp.axes and len(
-                        pp.axes
-                    ) <= 1:
+                    if pp.process == PostProcessType.MEAN and ProcessAxis.TIME in pp.axes \
+                            and len(pp.axes) <= 1:
                         instructions.remove(pp)
 
             return instructions

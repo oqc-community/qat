@@ -40,7 +40,7 @@ class LanguageFrontend(abc.ABC):
             get_builder(hardware)
             .repeat(compiler_config.repeats, compiler_config.repetition_period)
             .add(quantum_builder)
-        )
+        )  # yapf: disable
         return instructions
 
     def _execute(self, hardware, compiler_config: CompilerConfig, instructions):
@@ -96,7 +96,6 @@ class QIRFrontend(LanguageFrontend):
     def parse(
         self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None
     ):
-
         # Parse from file
         if not os.path.exists(path_or_str):
             with tempfile.NamedTemporaryFile(suffix=".ll", delete=False) as fp:
@@ -187,7 +186,6 @@ class QASMFrontend(LanguageFrontend):
         default qubit simulator if no hardware provided.
         """
         instructions, parse_metrics = self.parse(qasm_string, hardware, compiler_config)
-        result, execution_metrics = \
-            self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
         parse_metrics.merge(execution_metrics)
         return result, parse_metrics

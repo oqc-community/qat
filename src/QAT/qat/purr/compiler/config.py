@@ -33,9 +33,6 @@ class InlineResultsProcessing(Flag):
 
 
 class ResultsFormatting(Flag):
-    """
-
-    """
     # Transforms each shot into binary then counts the instances.
     # Example for two qubits: { '00': 15, '01': 2524, '10': 250, '11': 730 }
     BinaryCount = auto()

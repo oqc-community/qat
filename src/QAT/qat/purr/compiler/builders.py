@@ -509,8 +509,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         phase_resets = [
             val for val in previous_measure_block if isinstance(val, PhaseReset)
         ]
-        full_measure_block = set([val.__class__ for val in previous_measure_block]
-                                ) == set(mblock_types + optional_block_types)
+        full_measure_block = set([val.__class__ for val in previous_measure_block])\
+                             == set(mblock_types + optional_block_types)
         if full_measure_block and len(syncs) >= 2 and len(phase_resets) >= 1:
             # Find the pre-measure sync in the preceeding measure block and merge our
             # values into it.

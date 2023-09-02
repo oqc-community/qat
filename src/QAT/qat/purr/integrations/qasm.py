@@ -509,8 +509,9 @@ class Qasm2Parser(AbstractParser):
 
     def process_unitary(self, node, context, builder, **kwargs):
         """ Unitary in QASM terms is just ``U(...)``. """
-        theta, phi, _lambda = (self._resolve_value(val, context) for val in
-                               node.children[0].children)
+        theta, phi, _lambda = (
+            self._resolve_value(val, context) for val in node.children[0].children
+        )
 
         self._add_unitary(theta, phi, _lambda, self._get_qubits(node, context), builder)
 
@@ -992,7 +993,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             midway_time = waveform.width / 2
 
             t = linspace(-midway_time, midway_time, samples)
-            # return shape_func.get(waveform.shape)(t, waveform)
             return evaluate_shape(waveform, t)
 
     def _perform_signal_processing(self, name, args):
@@ -1366,7 +1366,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'drag':
-
             amp, width, std_dev, beta, zero_at_edges = \
                 _validate_arg_length(tree.children[4], 4, 5)
             zero_at_edges = 0 if not zero_at_edges else 1
@@ -1388,7 +1387,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'legacy_drag':
-
             amp, width, std_dev, beta, zero_at_edges = \
                 _validate_arg_length(tree.children[4], 4, 5)
             zero_at_edges = 0 if not zero_at_edges else 1
@@ -1410,7 +1408,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'gaussian':
-
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
             waveform = UntargetedPulse(
@@ -1422,7 +1419,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'legacy_gaussian':
-
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
             waveform = UntargetedPulse(
@@ -1466,21 +1462,18 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'sech':
-
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             waveform = UntargetedPulse(
                 Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
             )
 
         elif intrinsic_name == 'legacy_sech':
-
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             waveform = UntargetedPulse(
                 Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
             )
 
         elif intrinsic_name == 'gaussian_square':
-
             amp, width, square_width, std_dev = \
                 _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(
@@ -1489,7 +1482,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             raise ValueError("Gaussian square waveform currently not supported.")
 
         elif intrinsic_name == 'legacy_gaussian_square':
-
             amp, width, square_width, std_dev = \
                 _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(
@@ -1498,7 +1490,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             raise ValueError("Gaussian square waveform currently not supported.")
 
         elif intrinsic_name == 'sine':
-
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(width=width, amp=amp, frequency=frequency, phase=phase)
             waveform = UntargetedPulse(
@@ -1511,7 +1502,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == 'legacy_sine':
-
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(width=width, amp=amp, frequency=frequency, phase=phase)
             waveform = UntargetedPulse(
@@ -1865,12 +1855,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
     ):
         # The acquire integrator mode means that for every acquired resonator response
         # signal within a group of shots, we integrate along the time axis to find the
-        # average amplitude of the response. We do this because the FPGA does not have
-        # enough memory to store the entire waveform for every single shot. Before
-        # averaging, the acquired waveform is down converted. Since the down conversion
-        # and mean are performed on the FPGA these post processing operations are
-        # removed for executions on live hardware. The returned value for each shot
-        # after postprocessing is a complex iq value.
+        # average amplitude of the response. Before averaging, the acquired waveform is
+        # down converted. Since the down conversion and mean are performed on the FPGA
+        # these post processing operations are removed for executions on live hardware.
+        #
+        # The returned value for each shot after postprocessing is a complex iq value.
         acquire = Acquire(
             channel=pulse_channel,
             time=time,
@@ -1952,7 +1941,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             # Not sure what this method should return.
             pass
         elif name == 'capture_v1':
-            ## A capture command that returns an iq value
+            # A capture command that returns an iq value
             variable: Variable = Variable.with_random_name(self.builder.existing_names)
             self._capture_iq_value(
                 args[0], args[1], variable.name, args[2] if len(args) > 2 else None
@@ -1961,7 +1950,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             self._attempt_declaration(variable)
             return variable
         elif name == 'capture_v2':
-            ## A capture command that returns a discriminated bit
+            # A capture command that returns a discriminated bit
             # The first part of this capture is the same as capture_v1 but we take the
             # complex iq value and perform a linear complex to real map which is used to
             # adjust the iq values to a form which can be discriminated into a bit. If
@@ -1997,16 +1986,17 @@ class Qasm3Parser(Interpreter, AbstractParser):
             self._attempt_declaration(variable)
             return variable
         elif name == 'capture_v3':
-            ## A capture command that returns a raw waveform data
+            # A capture command that returns a raw waveform data
+            #
             # The acquire scope mode will average the resonator response signal over all
-            # the shots within a group as there is not enough memory on an FPGA to store
-            # the response signal data for every single shot.
+            # the shots within a group.
+            #
             # Unlike the integrator mode, these will not be integrated over time to get
             # an average amplitude but will instead keep the entire waveform, averaging
             # over all the shots. This means you might get unexpected results for
             # greater than 1 shots if you're measuring a qubit in superposition, as the
             # different signal responses from the different measurement results will
-            # average out. During live executions, the mean is performed on the FPGA.
+            # average out.
             variable: Variable = Variable.with_random_name(
                 self.builder.existing_names, CustomPulse
             )

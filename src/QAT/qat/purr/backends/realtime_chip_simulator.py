@@ -131,7 +131,6 @@ class MeasurementStatistics:
         self.sim_t = sim_t
 
         if control_type == ControlType.MEASURE:
-
             empty_state = H0 - H0
             qubit_indices.sort()
             sub_space_size = len(qubit_indices)

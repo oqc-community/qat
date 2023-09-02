@@ -219,7 +219,6 @@ def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 
 
 def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
-
     if isinstance(hardware, QuantumExecutionEngine):
         return QuantumRuntime(hardware)
     elif isinstance(hardware, QuantumHardwareModel):

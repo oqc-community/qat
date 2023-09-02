@@ -138,8 +138,8 @@ class Calibratable:
             return all([self._is_serializable(val_) for val_ in val])
 
         if isinstance(val, dict):
-            return all([self._is_serializable(val_) for val_ in val.keys()]
-                      ) and all([self._is_serializable(val_) for val_ in val.values()])
+            return all([self._is_serializable(val_) for val_ in val.keys()]) \
+                   and all([self._is_serializable(val_) for val_ in val.values()])
 
         if isinstance(val, Enum):
             return self._is_serializable(val.value)
@@ -543,9 +543,8 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def _create_pulse_channel_id(
         self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
     ):
-        if channel_type in self.multi_device_pulse_channel_types and len(
-            auxiliary_devices
-        ) == 0:
+        if channel_type in self.multi_device_pulse_channel_types \
+                and len(auxiliary_devices) == 0:
             raise ValueError(
                 f"Channel type {channel_type.name} requires at least one "
                 "auxillary_device"

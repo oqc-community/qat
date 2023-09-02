@@ -291,9 +291,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         pc = pulse_targets[0].physical_channel
         block_size = pc.block_size
         block_time = pc.block_time
-        block_number = ceil(
-            round(instruction.duration / block_time, 4)
-        )  # round to remove floating point errors
+
+        # round to remove floating point errors
+        block_number = ceil(round(instruction.duration / block_time, 4))
         if return_samples:
             calc_sample = block_number * block_size
         else:
@@ -473,7 +473,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         pulse_channel: PulseChannel,
         frequency: float
     ):
-
         tslip = pulse_channel.phase_offset
         imbalance = pulse_channel.imbalance
         if pulse_channel.fixed_if:
@@ -493,7 +492,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def build_physical_channel_buffers(
         self, pulse_channel_buffers: Dict[PulseChannel, np.ndarray]
     ):
-
         # Add all pulse channel buffers belonging to the same physical channel together
         buffers = {}
         for physical_channel_id in self.model.physical_channels.keys():
@@ -811,8 +809,7 @@ class SweepIterator:
         nested sweeps.
         """
         if self.nested_sweep is not None:
-            return \
-                self.current_iteration * self.nested_sweep.length \
+            return self.current_iteration * self.nested_sweep.length \
                 + self.nested_sweep.accumulated_sweep_iteration
         else:
             return self.current_iteration + 1
@@ -969,7 +966,7 @@ class SweepIterator:
         """ Is this sweep finished. """
         # We're zero-index so take that into account.
         return self.current_iteration == (self.sweep.length-1 if self.sweep is not None else 0) \
-               and (self.nested_sweep is None or self.nested_sweep.is_finished())
+            and (self.nested_sweep is None or self.nested_sweep.is_finished())
 
     def get_results_shape(self, shape: Tuple = None):
         """ Return a default array that mirrors the structure for this set of sweeps."""

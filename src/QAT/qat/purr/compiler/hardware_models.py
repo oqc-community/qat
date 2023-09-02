@@ -280,9 +280,9 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
                 if isinstance(device, Calibratable)
             ])
 
-        return check_devices(self.quantum_devices) and check_devices(
-            self.physical_channels
-        ) and check_devices(self.basebands)
+        return check_devices(self.quantum_devices) \
+            and check_devices(self.physical_channels) \
+            and check_devices(self.basebands)
 
     @is_calibrated.setter
     def is_calibrated(self, val):
