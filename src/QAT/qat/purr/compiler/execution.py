@@ -177,12 +177,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def validate(self, instructions: List[Instruction]):
         """ Validates this graph for execution on the current hardware."""
         self._model_exists()
-        instruction_length = len(instructions)
-        if instruction_length > 200000:
-            raise ValueError(
-                f"Program too large to be run in a single block on current hardware. "
-                f"{instruction_length} instructions."
-            )
 
         for inst in instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
