@@ -94,9 +94,7 @@ class CustomJSONEncoder(JSONEncoder):
         super().__init__(*args, **kwargs)
 
     def default(self, obj):
-
         typ = type(obj)
-
         if issubclass(typ, Enum):
             typ_str = f"<enum '{obj.__module__}.{typ.__name__}'>"
         else:
@@ -110,7 +108,6 @@ class CustomJSONEncoder(JSONEncoder):
                 raise ValueError(f"Invalid type attempted to be serialized: {(type(obj))}.")
 
         try:
-
             if is_dataclass(obj):
                 return {
                     "$type": typ_str,

@@ -19,11 +19,11 @@ class TestFileType(Enum):
 
 def get_test_files_dir(ir_type: TestFileType):
     if ir_type == TestFileType.QASM3:
-        return abspath(join(dirname(__file__), "qasm_files", "qasm3"))
+        return abspath(join(dirname(__file__), "files", "qasm", "qasm3"))
     elif ir_type == TestFileType.QASM2:
-        return abspath(join(dirname(__file__), "qasm_files", "qasm2"))
+        return abspath(join(dirname(__file__), "files", "qasm", "qasm2"))
     elif ir_type == TestFileType.QIR:
-        return abspath(join(dirname(__file__), "qir_files"))
+        return abspath(join(dirname(__file__), "files", "qir"))
     else:
         raise ValueError("Test file directory dosen't exist for this IR type.")
 

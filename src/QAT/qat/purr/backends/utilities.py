@@ -348,7 +348,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
     drag = 0.0
 
     if isinstance(data, Pulse):
-        ### OQC internal
+        # OQC internal
         if data.shape == PulseShapeType.SQUARE:
             num_func = SquareFunction()
         elif data.shape == PulseShapeType.GAUSSIAN:
@@ -365,8 +365,8 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
             num_func = ExtraSoftSquareFunction(data.std_dev, data.rise)
         elif data.shape == PulseShapeType.SOFTER_GAUSSIAN:
             num_func = SofterGaussianFunction(data.width, data.rise)
-        #### external
 
+        # external
         elif data.shape == PulseShapeType.ROUNDED_SQUARE:
             num_func = RoundedSquareFunction(data.width, data.std_dev, data.rise)
         elif data.shape == PulseShapeType.GAUSSIAN_DRAG:
@@ -401,9 +401,8 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
     amplitude_differential = num_func.derivative(t, amplitude)
     buf = scale_factor * amp * np.exp(1.0j * phase_offset) * amplitude
     if not drag == 0.0:
-        buf += drag * 1.0j * amp * scale_factor * np.exp(
-            1.0j * phase_offset
-        ) * amplitude_differential
+        buf += drag * 1.0j * amp * scale_factor \
+               * np.exp(1.0j * phase_offset) * amplitude_differential
 
     return buf
 

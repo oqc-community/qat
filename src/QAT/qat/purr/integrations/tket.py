@@ -97,9 +97,8 @@ class TketBuilder:
 
 class TketQasmParser(Qasm2Parser):
     """
-    QASM parser that turns QASM into Tket structures. Built due to the fact that Tkets
-    parser is very fragile and won't work with QASM v3. When Tkets parser is better,
-    this class can be removed.
+    QASM parser that turns QASM into Tket structures. Switch to Tkets QASM parser when it's
+    more mature.
     """
     def process_qreg(self, node, context: QasmContext, builder: TketBuilder, **kwargs):
         context.registers.quantum[node.name] = QubitRegister([

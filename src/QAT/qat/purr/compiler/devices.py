@@ -138,8 +138,8 @@ class Calibratable:
             return all([self._is_serializable(val_) for val_ in val])
 
         if isinstance(val, dict):
-            return all([self._is_serializable(val_) for val_ in val.keys()]
-                      ) and all([self._is_serializable(val_) for val_ in val.values()])
+            return all([self._is_serializable(val_) for val_ in val.keys()]) \
+                   and all([self._is_serializable(val_) for val_ in val.values()])
 
         if isinstance(val, Enum):
             return self._is_serializable(val.value)
@@ -183,9 +183,6 @@ class Calibratable:
         if use_cwd:
             file_path = os.path.join(os.getcwd(), file_path)
 
-        if not os.path.isabs(file_path):
-            file_path = os.path.join(get_calibration_config_dir(), file_path)
-
         with open(file_path, 'w') as f:
             f.write(self.get_calibration())
 
@@ -195,14 +192,10 @@ class Calibratable:
         Looks for this calibration in the passed-in directory or the default calibration
         save location.
         """
-        # Sometimes QS runs things via the WD and dumps files in there. Check that this
-        # isn't the case before continuing with auto-detection.
+        # Check to see if we're just trying to find a file on the working directory.
         cwd_path = os.path.join(os.getcwd(), file_path)
         if os.path.isfile(cwd_path):
             file_path = cwd_path
-
-        if not os.path.isabs(file_path):
-            file_path = os.path.join(get_calibration_config_dir(), file_path)
 
         with open(file_path, 'r') as f:
             return Calibratable.load_calibration(f.read())
@@ -550,9 +543,8 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def _create_pulse_channel_id(
         self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
     ):
-        if channel_type in self.multi_device_pulse_channel_types and len(
-            auxiliary_devices
-        ) == 0:
+        if channel_type in self.multi_device_pulse_channel_types \
+                and len(auxiliary_devices) == 0:
             raise ValueError(
                 f"Channel type {channel_type.name} requires at least one "
                 "auxillary_device"
@@ -764,21 +756,6 @@ def _strip_aliases(key: str, build_unaliased=False):
         return rhs[0]
 
     return key
-
-
-def get_calibration_config_dir():
-    # On QE machines they just have the folders at the current running directory.
-    relative_calibration_dir = os.path.join(os.getcwd(), "calibrations")
-    if os.path.isdir(relative_calibration_dir):
-        return relative_calibration_dir
-
-    return os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "backends", "calibrations")
-    )
-
-
-def get_calibration_results_dir():
-    return 'calibration_results'
 
 
 MaxPulseLength = 1e-3  # seconds

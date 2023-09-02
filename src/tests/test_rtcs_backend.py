@@ -43,17 +43,27 @@ class TestBaseQuantumQutip:
         prep = np.linspace(0.0, np.pi, 2)
 
         # sweep over a time range
-        result = [[(
-            execute_instructions(
-                hw,
-                get_builder(hw).X(control_q,
-                                  c).synchronize(sync_channels).X(target_q, t).ECR(
-                                      control_q, target_q
-                                  ).X(control_q).X(target_q, -np.pi / 2.0).Z(
-                                      control_q, -np.pi / 2.0
-                                  ).measure_mean_z(control_q).measure_mean_z(target_q)
-            )[0]
-        ) for t in prep] for c in prep]
+        # yapf: disable
+        result = [
+            [
+                (
+                    execute_instructions(
+                        hw,
+                        get_builder(hw)
+                        .X(control_q, c)
+                        .synchronize(sync_channels)
+                        .X(target_q, t)
+                        .ECR(control_q, target_q)
+                        .X(control_q)
+                        .X(target_q, -np.pi / 2.0)
+                        .Z(control_q, -np.pi / 2.0)
+                        .measure_mean_z(control_q)
+                        .measure_mean_z(target_q)
+                    )[0]
+                ) for t in prep
+            ] for c in prep
+        ]
+        # yapf: enable
 
         for i in [0, 1]:
             for j in [0, 1]:

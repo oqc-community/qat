@@ -64,8 +64,11 @@ class TestBaseQuantumExecution(LiveDeviceEngine):
                 for aq in aqs:
                     dt = aq.physical_channel.sample_time
                     start = round(aq.start + aq.delay / dt)
-                    response = self.buffers[increment][aq.physical_channel.full_id()
-                                                      ][start:start + aq.samples]
+                    response = (
+                        self.buffers[increment]
+                        [aq.physical_channel.full_id()]
+                        [start:start + aq.samples]
+                    )  # yapf: disable
 
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
@@ -142,7 +145,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 class TestBaseQuantum:
     def get_qasm2(self, file_name):
-        with open(join(dirname(__file__), "qasm_files", file_name), "r") as qasm_file:
+        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
             return qasm_file.read()
 
     @pytest.mark.skipif(
@@ -181,10 +184,10 @@ class TestBaseQuantum:
         drive_rate = 30e-3
 
         builder = (
-            get_builder(hw).pulse(
-                drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate
-            ).measure_scope_mode(qubit)
-        )
+            get_builder(hw)
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
+            .measure_scope_mode(qubit)
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -210,10 +213,10 @@ class TestBaseQuantum:
         drive_channel = qubit.get_drive_channel()
         drive_rate = 30e-3
         builder = (
-            get_builder(hw).pulse(
-                drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate
-            ).measure_scope_mode(qubit)
-        )
+            get_builder(hw)
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
+            .measure_scope_mode(qubit)
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -246,12 +249,12 @@ class TestBaseQuantum:
         baseband.frequency = drive_channel.frequency - baseband.if_frequency
 
         builder = (
-            get_builder(hw).pulse(
-                drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate
-            ).synchronize([drive_channel, second_state_channel]).pulse(
-                second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate
-            ).measure_scope_mode(qubit)
-        )
+            get_builder(hw)
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
+            .synchronize([drive_channel, second_state_channel])
+            .pulse(second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate)
+            .measure_scope_mode(qubit)
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -389,11 +392,11 @@ class TestBaseQuantum:
         nb_points = 11
         time = np.linspace(0.0, 10 * MaxPulseLength, nb_points)
         builder = (
-            get_builder(hw).sweep(
-                SweepValue("t", time)
-            ).pulse(drive_channel, PulseShapeType.SQUARE,
-                    width=Variable("t")).measure_scope_mode(qubit)
-        )
+            get_builder(hw)
+            .sweep(SweepValue("t", time))
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
+            .measure_scope_mode(qubit)
+        )  # yapf: disable
         engine = get_test_execution_engine(hw)
         try:
             pytest.raises(ValueError, execute_instructions(engine, builder))
@@ -402,9 +405,9 @@ class TestBaseQuantum:
 
         time = np.linspace(0.0, 100e-6, nb_points)
         builder = (
-            get_builder(hw).sweep(
-                SweepValue("t", time)
-            ).pulse(drive_channel, PulseShapeType.SQUARE,
-                    width=Variable("t")).measure_scope_mode(qubit)
-        )
+            get_builder(hw)
+            .sweep(SweepValue("t", time))
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
+            .measure_scope_mode(qubit)
+        )  # yapf: disable
         assert nb_points == execute_instructions(engine, builder)[0].shape[0]
