@@ -1,1 +1,1 @@
-src/tests/files* linguist-vendored
+src/tests/files/** linguist-vendored
