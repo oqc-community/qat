@@ -183,9 +183,6 @@ class Calibratable:
         if use_cwd:
             file_path = os.path.join(os.getcwd(), file_path)
 
-        if not os.path.isabs(file_path):
-            file_path = os.path.join(get_calibration_config_dir(), file_path)
-
         with open(file_path, 'w') as f:
             f.write(self.get_calibration())
 
@@ -195,14 +192,10 @@ class Calibratable:
         Looks for this calibration in the passed-in directory or the default calibration
         save location.
         """
-        # Sometimes QS runs things via the WD and dumps files in there. Check that this
-        # isn't the case before continuing with auto-detection.
+        # Check to see if we're just trying to find a file on the working directory.
         cwd_path = os.path.join(os.getcwd(), file_path)
         if os.path.isfile(cwd_path):
             file_path = cwd_path
-
-        if not os.path.isabs(file_path):
-            file_path = os.path.join(get_calibration_config_dir(), file_path)
 
         with open(file_path, 'r') as f:
             return Calibratable.load_calibration(f.read())
@@ -764,21 +757,6 @@ def _strip_aliases(key: str, build_unaliased=False):
         return rhs[0]
 
     return key
-
-
-def get_calibration_config_dir():
-    # On QE machines they just have the folders at the current running directory.
-    relative_calibration_dir = os.path.join(os.getcwd(), "calibrations")
-    if os.path.isdir(relative_calibration_dir):
-        return relative_calibration_dir
-
-    return os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "backends", "calibrations")
-    )
-
-
-def get_calibration_results_dir():
-    return 'calibration_results'
 
 
 MaxPulseLength = 1e-3  # seconds
