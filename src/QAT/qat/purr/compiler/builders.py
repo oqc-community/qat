@@ -42,8 +42,8 @@ log = get_default_logger()
 
 
 class Axis(Enum):
-    X = auto(),
-    Y = auto(),
+    X = auto()
+    Y = auto()
     Z = auto()
 
 

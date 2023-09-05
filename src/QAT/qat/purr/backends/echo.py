@@ -115,7 +115,7 @@ def generate_connectivity(con_type, qubit_count):
 
 
 class Connectivity(Enum):
-    Ring = auto(),
+    Ring = auto()
 
 
 def get_default_echo_hardware(
