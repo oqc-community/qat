@@ -17,7 +17,7 @@ from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
     software_post_process_mean,
 )
-from qat.purr.compiler.config import InlineResultsProcessing
+from qat.purr.compiler.config import InlineResultsProcessing, MetricsType
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -41,6 +41,7 @@ from qat.purr.compiler.instructions import (
     Variable,
     Waveform,
 )
+from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -69,6 +70,10 @@ class InstructionExecutionEngine(abc.ABC):
 
     @abc.abstractmethod
     def execute(self, instructions: List[Instruction]) -> Dict[str, Any]:
+        pass
+
+    @abc.abstractmethod
+    def execute_with_metrics(self, instructions: List[Instruction]) -> (Dict[str, Any], CompilationMetrics):
         pass
 
     @abc.abstractmethod
@@ -219,15 +224,20 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         )
         return ([batch_limit] * list_expansion_ratio) + [repeats % batch_limit]
 
-    def execute(self, instructions):
+    def execute(self, instructions) -> Dict[str, Any]:
+        results, _ = self.execute_with_metrics(instructions)
+        return results
+
+    def execute_with_metrics(self, instructions):
         """ Executes this qat file against this current hardware. """
         self._model_exists()
 
-        with log_duration("QPU returned results in {} seconds."):
-            # This is where we'd send the instructions off to the compiler for
-            # processing, for now do ad-hoc processing.
-            qat_file = InstructionEmitter().emit(instructions, self.model)
+        # This is where we'd send the instructions off to the compiler for
+        # processing, for now do ad-hoc processing.
+        qat_file = InstructionEmitter().emit(instructions, self.model)
 
+        engine_call_duration = log_duration("QPU returned results in {} seconds.")
+        with engine_call_duration:
             # Rebuild repeat list if the hardware can't support the current setup.
             if qat_file.repeat.repeat_count > self.model.repeat_limit:
                 log.info(
@@ -261,8 +271,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             # right form.
             results = self._process_results(results, qat_file)
             results = self._process_assigns(results, qat_file)
-
-            return results
+        metric = CompilationMetrics()
+        metric.record_metric(MetricsType.EngineCallDuration, engine_call_duration.duration)
+        return results, metric
 
     @abc.abstractmethod
     def _execute_on_hardware(self, sweep_iterator, package: "QatFile"):

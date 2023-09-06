@@ -37,6 +37,11 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
     """
     optimized_circuit: Optional[str]
     optimized_instruction_count: Optional[int]
+    execution_duration: Optional[float]
+    total_duration: Optional[float]
+    optimization_duration: Optional[float]
+    parse_duration: Optional[float]
+    engine_call_duration: Optional[float]
 
     def __init__(self, enabled_metrics=None):
         self.enabled_metrics: Optional[MetricsType] = \

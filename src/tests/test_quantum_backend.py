@@ -308,7 +308,7 @@ class TestBaseQuantum:
             'rise': 100e-9
         }
         qubit.measure_acquire['delay'] = 0.0
-        result, _ = execute_instructions(
+        result, _, _ = execute_instructions(
             get_test_execution_engine(hw), get_builder(hw).measure_scope_mode(qubit)
         )
         result = result[0]
@@ -346,7 +346,7 @@ class TestBaseQuantum:
             'rise': 500e-9
         }
         qubit.measure_acquire = {'delay': 300e-9, 'sync': False, 'width': 1e-6}
-        result, _ = execute_instructions(
+        result, _, _ = execute_instructions(
             get_test_execution_engine(hw), get_builder(hw).measure_scope_mode(qubit)
         )
         result = result[0]

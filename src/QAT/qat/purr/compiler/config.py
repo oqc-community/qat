@@ -168,8 +168,20 @@ class MetricsType(Flag):
     # been performed.
     OptimizedInstructionCount = auto()
 
+    ExecutionDuration = auto()
+    OptimizationDuration = auto()
+    ParseDuration = auto()
+    EngineCallDuration = auto()
+    TotalDuration = auto()
+
     # Set of basic metrics that should be returned at all times.
-    Default = OptimizedCircuit | OptimizedInstructionCount
+    Default = OptimizedCircuit \
+              | OptimizedInstructionCount \
+              | ExecutionDuration \
+              | OptimizationDuration \
+              | ParseDuration \
+              | EngineCallDuration \
+              | TotalDuration
 
     def is_composite(self):
         """

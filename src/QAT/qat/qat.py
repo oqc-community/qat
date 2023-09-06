@@ -7,11 +7,12 @@ from typing import Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
+from qat.purr.compiler.config import CompilerConfig, MetricsType
 from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -74,8 +75,13 @@ def execute_with_metrics(
 ):
     """ Execute file path or code blob. """
 
-    frontend: LanguageFrontend = fetch_frontend(path_or_str)
-    return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
+    total_execution_timer = log_duration("Program execution completed. Total runtime took {} seconds.")
+    with total_execution_timer:
+        frontend: LanguageFrontend = fetch_frontend(path_or_str)
+        results, metrics = _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
+    metrics.record_metric(MetricsType.TotalDuration, total_execution_timer.duration)
+
+    return results, metrics.as_dict()
 
 
 def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None):
@@ -123,4 +129,4 @@ def _execute_with_metrics(
         frontend.execute(instructions, hardware, compiler_config)
     metrics.merge(execution_metrics)
 
-    return results, metrics.as_dict()
+    return results, metrics

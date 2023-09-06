@@ -8,7 +8,7 @@ import regex
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config
+from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config, MetricsType
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import execute_instructions, get_builder, get_model
@@ -84,13 +84,16 @@ class QIRFrontend(LanguageFrontend):
         metrics = CompilationMetrics()
         metrics.enable(compiler_config.metrics)
 
-        parser = QIRParser(hardware)
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(Languages.QIR)
+        parse_timer = log_duration("Parsing completed, took {} seconds.")
+        with parse_timer:
+            parser = QIRParser(hardware)
+            if compiler_config.optimizations is None:
+                compiler_config.optimizations = get_optimizer_config(Languages.QIR)
 
-        if compiler_config.results_format.format is not None:
-            parser.results_format = compiler_config.results_format.format
+            if compiler_config.results_format.format is not None:
+                parser.results_format = compiler_config.results_format.format
 
+        metrics.record_metric(MetricsType.ParseDuration, parse_timer.duration)
         return parser.parse(path_or_str), metrics
 
     def parse(
@@ -116,8 +119,13 @@ class QIRFrontend(LanguageFrontend):
 
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
-        with log_duration("Execution completed, took {} seconds."):
-            return self._execute(hardware, compiler_config, instructions)
+        execution_timer = log_duration("Execution completed, took {} seconds.")
+        with execution_timer:
+             results, engine_call_duration_metrics, metrics = self._execute(hardware, compiler_config, instructions)
+
+        metrics.merge(engine_call_duration_metrics)
+        metrics.record_metric(MetricsType.ExecutionDuration, execution_timer.duration)
+        return results, metrics
 
     def parse_and_execute(
         self, qir_file: str, hardware=None, compiler_config: CompilerConfig = None
@@ -148,7 +156,8 @@ class QASMFrontend(LanguageFrontend):
             compiler_config.optimizations = \
                 get_optimizer_config(parser.parser_language())
 
-        with log_duration("Compilation completed, took {} seconds."):
+        parse_timer = log_duration("Parsing completed, took {} seconds.")
+        with parse_timer:
             log.info(
                 f"Processing QASM with {str(parser)} as parser and {str(hardware)} "
                 "as hardware."
@@ -162,8 +171,10 @@ class QASMFrontend(LanguageFrontend):
                 parser.results_format = compiler_config.results_format.format
 
             quantum_builder = parser.parse(get_builder(hardware), qasm_string)
-            return self._build_instructions(
-                quantum_builder, hardware, compiler_config), metrics
+
+        metrics.record_metric(MetricsType.ParseDuration, parse_timer.duration)
+        return self._build_instructions(
+            quantum_builder, hardware, compiler_config), metrics
 
     def execute(
         self,
@@ -174,9 +185,13 @@ class QASMFrontend(LanguageFrontend):
 
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
-        with log_duration("Execution completed, took {} seconds."):
+        execution_timer = log_duration("Execution completed, took {} seconds.")
+        with execution_timer:
+            results, engine_call_duration_metric, metrics = self._execute(hardware, compiler_config, instructions)
+        metrics.merge(engine_call_duration_metric)
+        metrics.record_metric(MetricsType.ExecutionDuration, execution_timer.duration)
 
-            return self._execute(hardware, compiler_config, instructions)
+        return results, metrics
 
     def parse_and_execute(
         self, qasm_string: str, hardware=None, compiler_config: CompilerConfig = None

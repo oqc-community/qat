@@ -31,7 +31,8 @@ class DefaultOptimizers(MetricsMixin):
         optimizations: OptimizationConfig
     ):
         """ Run all available optimizers on this QASM program. """
-        with log_duration("QASM optimization took {} seconds."):
+        optimization_time = log_duration("QASM optimization took {} seconds.")
+        with optimization_time:
             if isinstance(optimizations, Tket) and \
                     optimizations.tket_optimizations != TketOptimizations.Empty:
                 qasm_string = run_tket_optimizations(
@@ -46,8 +47,9 @@ class DefaultOptimizers(MetricsMixin):
                     qasm_string, optimizations.qiskit_optimizations
                 )
 
-            self.record_metric(MetricsType.OptimizedCircuit, qasm_string)
-            return qasm_string
+        self.record_metric(MetricsType.OptimizedCircuit, qasm_string)
+        self.record_metric(MetricsType.OptimizationDuration, optimization_time.duration)
+        return qasm_string
 
     def run_qiskit_optimization(self, qasm_string, level):
         """
