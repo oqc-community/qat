@@ -5,9 +5,10 @@ from __future__ import annotations
 
 from abc import ABC
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from numpy import array
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -68,6 +69,40 @@ def resolve_qb_pulse_channel(
         return chanbit.related_qubit, chanbit
 
 
+class ReadoutMitigation(Calibratable):
+    """
+    Linear maps each individual qubit to its <0/1> given <0/1> probability.
+    Note that linear assumes no cross-talk effects and considers each qubit independent.
+    linear = {
+        <qubit_number>: {
+            "0|0": 1,
+            "1|0": 1,
+            "0|1": 1,
+            "1|1": 1,
+        }
+    }
+
+    Matrix is the entire 2**n x 2**n process matrix of p(<bitstring_1>|<bitstring_2>).
+
+    M3 is a runtime mitigation strategy that builds up the calibration it needs at runtime,
+    hence a bool of available or not. For more info https://github.com/Qiskit-Partners/mthree.
+    """
+    def __init__(
+        self,
+        linear: [dict[int, dict[str, float]]] = None,
+        matrix: array = None,
+        m3: bool = False
+    ):
+        self.m3_available = m3
+        self.linear: [dict[int, dict[str, float]]] = linear
+        self.matrix: array = matrix
+
+
+class ErrorMitigation(Calibratable):
+    def __init__(self, readout_mitigation: Optional[ReadoutMitigation] = None):
+        self.readout_mitigation = readout_mitigation
+
+
 class QuantumHardwareModel(HardwareModel, Calibratable):
     """
     Object modelling our superconducting hardware. Holds up-to-date information about a
@@ -78,7 +113,8 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         shot_limit=10000,
         acquire_mode=None,
         repeat_count=1000,
-        repetition_period=100e-6
+        repetition_period=100e-6,
+        error_mitigation: Optional[ErrorMitigation] = None
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -90,6 +126,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.physical_channels: Dict[str, PhysicalChannel] = {}
         self.basebands: Dict[str, PhysicalBaseband] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
+        self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
 
         # Construct last due to us overriding calibratables fields with properties.
         super().__init__(shot_limit)

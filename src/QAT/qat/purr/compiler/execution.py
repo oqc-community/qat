@@ -44,6 +44,10 @@ from qat.purr.compiler.instructions import (
     Waveform,
     is_generated_name,
 )
+from qat.purr.error_mitigation.readout_mitigation import (
+    PostProcessingReadoutMitigation,
+    get_readout_mitigation,
+)
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -225,6 +229,32 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return results
 
+    def _apply_error_mitigation(self, results, qfile: "QatFile"):
+        """
+        Process any software-driven results transformation, such as taking a raw waveform result
+        and turning it into a bit, or something else.
+        """
+        readout_instructions = [
+            inst for inst in qfile.meta_instructions
+            if isinstance(inst, PostProcessingReadoutMitigation)
+        ]
+        if not readout_instructions:
+            return results
+
+        if len(results) > 1:
+            # TODO: add support for multiple registers
+            raise ValueError(
+                "Cannot have multiple registers in conjunction with readout error mitigation."
+            )
+
+        output = {"original": results}
+
+        for readout_type in readout_instructions:
+            mitigator = get_readout_mitigation(readout_type)
+            new_result = mitigator.apply_error_mitigation(results, qfile, self.model)
+            output[mitigator.name] = new_result
+        return output
+
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         """ Runs optimization passes specific to this hardware. """
         self._model_exists()
@@ -353,6 +383,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             repeats = qat_file.repeat.repeat_count if qat_file.repeat is not None else self.model.default_repeat_count
             results = self._apply_results_formatting(results, results_format, repeats)
+            results = self._apply_error_mitigation(results, qat_file)
             return results
 
     @abc.abstractmethod

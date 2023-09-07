@@ -123,6 +123,16 @@ class QuantumResultsFormat:
         return self.format == other.format and self.transforms == other.transforms
 
 
+class ErrorMitigationConfig(Flag):
+    Empty = auto()
+    MatrixMitigation = auto()
+    LinearMitigation = auto()
+
+
+class BetaFeatures:
+    error_mitigation = ErrorMitigationConfig.Empty
+
+
 class TketOptimizations(Flag):
     """ Flags for the various Tket optimizations we can apply. """
     Empty = auto()
@@ -205,7 +215,8 @@ class CompilerConfig:
         results_format: QuantumResultsFormat = None,
         metrics=MetricsType.Default,
         active_calibrations=None,
-        optimizations: "OptimizationConfig" = None
+        optimizations: "OptimizationConfig" = None,
+        error_mitigation: ErrorMitigationConfig = None
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
@@ -213,6 +224,7 @@ class CompilerConfig:
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
+        self.error_mitigation: Optional[ErrorMitigationConfig] = error_mitigation
 
     def to_json(self):
         return json_dumps(self, serializable_types=get_serializable_types())
@@ -368,6 +380,10 @@ def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:
     elif lang == Languages.QIR:
         return QIROptimizations()
     return None
+
+
+def get_error_mitigation_config():
+    return ErrorMitigationConfig.Empty
 
 
 def get_config(lang: Languages, **kwargs):

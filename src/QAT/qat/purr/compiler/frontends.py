@@ -9,7 +9,14 @@ from typing import Tuple, Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config
+from qat.purr.compiler.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    Languages,
+    ResultsFormatting,
+    get_error_mitigation_config,
+    get_optimizer_config,
+)
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
@@ -18,6 +25,10 @@ from qat.purr.compiler.runtime import (
     execute_instructions_via_config,
     get_builder,
     get_model,
+)
+from qat.purr.error_mitigation.readout_mitigation import (
+    LinearReadoutMitigation,
+    MatrixReadoutMitigation,
 )
 from qat.purr.integrations.qasm import get_qasm_parser
 from qat.purr.integrations.qir import get_qir_executor
@@ -61,6 +72,40 @@ class LanguageFrontend(abc.ABC):
         self, program_str: str, hardware, compiler_config: CompilerConfig
     ) -> Tuple[InstructionBuilder, CompilationMetrics]:
         ...
+
+    def _modify_builder_with_error_mitigation(
+        self,
+        quantum_builder: InstructionBuilder,
+        compiler_config: CompilerConfig,
+        hardware: QuantumHardwareModel
+    ):
+        """
+        Method for modifying builder to decorate with error mitigation that can be done post-compilation.
+
+        Importantly this is pre-scheduling, so this includes techniques like:
+
+        - randomised compilation
+        - digital dynamical decoupling
+        - readout mitigation
+        """
+        if compiler_config.error_mitigation is None:
+            compiler_config.error_mitigation = get_error_mitigation_config()
+
+        if compiler_config.error_mitigation != ErrorMitigationConfig.Empty:
+            if (hardware.error_mitigation is
+                None) or (not hardware.error_mitigation.readout_mitigation):
+                raise ValueError("Error mitigation not calibrated on this device.")
+            if ResultsFormatting.BinaryCount not in compiler_config.results_format:
+                raise ValueError(
+                    "Binary Count format required for readout error mitigation"
+                )
+
+        if ErrorMitigationConfig.MatrixMitigation in compiler_config.error_mitigation:
+            quantum_builder.add(MatrixReadoutMitigation())
+        if ErrorMitigationConfig.LinearMitigation in compiler_config.error_mitigation:
+            quantum_builder.add(LinearReadoutMitigation())
+
+        return quantum_builder
 
 
 class QIRFrontend(LanguageFrontend):
@@ -148,6 +193,10 @@ class QASMFrontend(LanguageFrontend):
                 parser.results_format = compiler_config.results_format.format
 
             quantum_builder = parser.parse(get_builder(hardware), qasm_string)
+            quantum_builder = self._modify_builder_with_error_mitigation(
+                quantum_builder, compiler_config, hardware
+            )
+            print(quantum_builder)
             return quantum_builder, metrics
 
 
