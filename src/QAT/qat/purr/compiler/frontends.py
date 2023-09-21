@@ -121,9 +121,7 @@ class QIRFrontend(LanguageFrontend):
 
         execution_timer = log_duration("Execution completed, took {} seconds.")
         with execution_timer:
-             results, engine_call_duration_metrics, metrics = self._execute(hardware, compiler_config, instructions)
-
-        metrics.merge(engine_call_duration_metrics)
+             results, metrics = self._execute(hardware, compiler_config, instructions)
         metrics.record_metric(MetricsType.ExecutionDuration, execution_timer.duration)
         return results, metrics
 
@@ -187,8 +185,7 @@ class QASMFrontend(LanguageFrontend):
 
         execution_timer = log_duration("Execution completed, took {} seconds.")
         with execution_timer:
-            results, engine_call_duration_metric, metrics = self._execute(hardware, compiler_config, instructions)
-        metrics.merge(engine_call_duration_metric)
+            results, metrics = self._execute(hardware, compiler_config, instructions)
         metrics.record_metric(MetricsType.ExecutionDuration, execution_timer.duration)
 
         return results, metrics

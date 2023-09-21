@@ -167,12 +167,11 @@ class QuantumRuntime(MetricsMixin):
 
         instructions = self.engine.optimize(instructions)
         self.engine.validate(instructions)
-        self.record_metric(
-            MetricsType.OptimizedInstructionCount, opt_inst_count := len(instructions)
-        )
+        opt_inst_count = len(instructions)
         log.info(f"Optimized instruction count: {opt_inst_count}")
-        results, engine_call_duration_metrics = self.engine.execute_with_metrics(instructions)
-        return self._transform_results(results, results_format, repeats), engine_call_duration_metrics
+        results, metrics = self.engine.execute_with_metrics(instructions)
+        metrics.record_metric(MetricsType.OptimizedInstructionCount, opt_inst_count)
+        return self._transform_results(results, results_format, repeats), metrics
 
 
 def _binary_count(results_list, repeats):
@@ -253,13 +252,5 @@ def execute_instructions(
     repeats: Optional[int] = None
 ):
     active_runtime = get_runtime(hardware)
-
     active_runtime.run_quantum_executable(executable_blocks)
-
-    results, engine_call_duration_metrics = active_runtime.execute(instructions, results_format, repeats)
-
-    return (
-        results,
-        engine_call_duration_metrics,
-        active_runtime.compilation_metrics
-    )
+    return active_runtime.execute(instructions, results_format, repeats)
