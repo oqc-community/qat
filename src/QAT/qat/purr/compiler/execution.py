@@ -61,15 +61,15 @@ class InstructionExecutionEngine(abc.ABC):
         self.model = model
         self.startup()
 
+    def execute(self, instructions) -> Dict[str, Any]:
+        results, _ = self.execute_with_metrics(instructions)
+        return results
+
     def startup(self):
         """ Starts up the underlying hardware or does nothing if already started. """
         pass
 
     def run_calibrations(self, qubits_to_calibrate=None):
-        pass
-
-    @abc.abstractmethod
-    def execute(self, instructions: List[Instruction]) -> Dict[str, Any]:
         pass
 
     @abc.abstractmethod
@@ -223,10 +223,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             (Decimal(repeats) / Decimal(batch_limit)).to_integral(ROUND_DOWN)
         )
         return ([batch_limit] * list_expansion_ratio) + [repeats % batch_limit]
-
-    def execute(self, instructions) -> Dict[str, Any]:
-        results, _ = self.execute_with_metrics(instructions)
-        return results
 
     def execute_with_metrics(self, instructions):
         """ Executes this qat file against this current hardware. """

@@ -75,11 +75,8 @@ def execute_with_metrics(
 ):
     """ Execute file path or code blob. """
 
-    total_execution_timer = log_duration("Program execution completed. Total runtime took {} seconds.")
-    with total_execution_timer:
-        frontend: LanguageFrontend = fetch_frontend(path_or_str)
-        results, metrics = _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
-    metrics.record_metric(MetricsType.TotalDuration, total_execution_timer.duration)
+    frontend: LanguageFrontend = fetch_frontend(path_or_str)
+    results, metrics = _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
     return results, metrics.as_dict()
 
@@ -120,13 +117,18 @@ def _execute_with_metrics(
     if compiler_config is not None:
         metrics.enable(compiler_config.metrics, overwrite=True)
 
-    instructions, build_metrics = _return_or_build(
-        qat_input, frontend.parse, hardware=hardware, compiler_config=compiler_config
-    )
-    metrics.merge(build_metrics)
 
-    results, execution_metrics = \
-        frontend.execute(instructions, hardware, compiler_config)
-    metrics.merge(execution_metrics)
+    total_execution_timer = log_duration("Program execution completed. Total runtime took {} seconds.")
+    with total_execution_timer:
+        instructions, build_metrics = _return_or_build(
+            qat_input, frontend.parse, hardware=hardware, compiler_config=compiler_config
+        )
+        metrics.merge(build_metrics)
+
+        results, execution_metrics = \
+            frontend.execute(instructions, hardware, compiler_config)
+        metrics.merge(execution_metrics)
+
+    metrics.record_metric(MetricsType.TotalDuration, total_execution_timer.duration)
 
     return results, metrics
