@@ -7,14 +7,12 @@ assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Summarize your feature/enhancement**
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+Give a descriptive summary of the feature/enhancement you would like to see. Try and be as precise as possible so the team can gauge whether it's something the team would like to see.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Specific details of what you would like to see**
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+Describe the feature/enhancement in as much detail as you can, including supporting papers or external links that may act as better design references.
+
+The more information the better.

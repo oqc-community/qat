@@ -8,31 +8,17 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what happened.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Describe what you expected to happen**
+A clear and concise description of what you wanted/expected to happen but didn't.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Add supporting information**
+Provide as much information as possible that will allow us to help you. Including but not limited to:
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+1. OS/library version.
+2. Screenshots of an error or stack trace if you have one.
+3. Input file used, or a snippit that causes the issue if you cannot share the full file.
+4. The precise configuration options you used to run QAT.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+It is highly recommended you give _at least_ the above information, as this will help us help you. 
