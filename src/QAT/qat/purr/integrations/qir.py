@@ -137,16 +137,16 @@ class QIRParser:
                     self.reset(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__rx__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[1]
-                    self.rx(radii.value, qubit_id(args[0]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.rx(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__ry__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[1]
-                    self.ry(radii.value, qubit_id(args[0]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.ry(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__rz__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[1]
-                    self.rz(radii.value, qubit_id(args[0]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.rz(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__s__body":
                     throw_on_invalid_args(len(args), 1)
                     self.s(qubit_id(args[0]))

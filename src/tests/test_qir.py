@@ -54,6 +54,14 @@ class TestQIR:
         builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
         assert len(builder.instructions) == 181
 
+    def test_cudaq_input(self):
+        results = execute(
+            get_test_file_path(TestFileType.QIR, "basic_cudaq.ll"),
+            get_default_echo_hardware(6)
+        )
+
+        assert results.get("r00000") == [0]
+
     @pytest.mark.skip("Needs full runtime.")
     def test_bell_measure_bitcode(self):
         config = CompilerConfig()

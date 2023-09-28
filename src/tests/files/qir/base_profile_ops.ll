@@ -18,9 +18,9 @@ entry:
   ;;; call void @__quantum__qis__ccx__body(%Qubit* inttoptr (i64 0 to %Qubit*), %Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 2 to %Qubit*))
   ;;; call void @__quantum__qis__cz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 0 to %Qubit*))
   call void @__quantum__qis__reset__body(%Qubit* inttoptr (i64 2 to %Qubit*))
-  call void @__quantum__qis__rx__body(%Qubit* inttoptr (i64 2 to %Qubit*), double 5.0)
-  call void @__quantum__qis__ry__body(%Qubit* inttoptr (i64 2 to %Qubit*), double 5.0)
-  call void @__quantum__qis__rz__body(%Qubit* inttoptr (i64 2 to %Qubit*), double 5.0)
+  call void @__quantum__qis__rx__body(double 5.0, %Qubit* inttoptr (i64 2 to %Qubit*))
+  call void @__quantum__qis__ry__body(double 5.0, %Qubit* inttoptr (i64 2 to %Qubit*))
+  call void @__quantum__qis__rz__body(double 5.0, %Qubit* inttoptr (i64 2 to %Qubit*))
   call void @__quantum__qis__s__body(%Qubit* inttoptr (i64 0 to %Qubit*))
   call void @__quantum__qis__s_adj(%Qubit* inttoptr (i64 0 to %Qubit*))
   call void @__quantum__qis__t__body(%Qubit* inttoptr (i64 0 to %Qubit*))
@@ -51,11 +51,11 @@ declare void @__quantum__qis__cz__body(%Qubit*, %Qubit*)
 
 declare void @__quantum__qis__reset__body(%Qubit*)
 
-declare void @__quantum__qis__rx__body(%Qubit*, double)
+declare void @__quantum__qis__rx__body(double, %Qubit*)
 
-declare void @__quantum__qis__ry__body(%Qubit*, double)
+declare void @__quantum__qis__ry__body(double, %Qubit*)
 
-declare void @__quantum__qis__rz__body(%Qubit*, double)
+declare void @__quantum__qis__rz__body(double, %Qubit*)
 
 declare void @__quantum__qis__s__body(%Qubit*)
 
