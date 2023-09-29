@@ -3,6 +3,7 @@
 import abc
 import os
 import tempfile
+from enum import Enum
 
 import regex
 from qat.purr.backends.calibrations.remote import find_calibration
@@ -98,8 +99,12 @@ class QIRFrontend(LanguageFrontend):
     ):
         # Parse from file
         if not os.path.exists(path_or_str):
-            with tempfile.NamedTemporaryFile(suffix=".ll", delete=False) as fp:
-                fp.write(path_or_str.encode())
+            suffix = ".bc" if isinstance(path_or_str, bytes) else ".ll"
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
+                if suffix == ".ll":
+                    fp.write(path_or_str.encode())
+                else:
+                    fp.write(path_or_str)
                 fp.close()
                 try:
                     return self._parse_from_file(fp.name, hardware, compiler_config)
