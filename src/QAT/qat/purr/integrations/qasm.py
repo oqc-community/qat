@@ -1229,7 +1229,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         name = self.transform_to_value(tree.children[1])
         args = self.transform_to_value(tree.children[4])
         port = args[0]
-        frequency = args[1]
+        frequency = self._get_frequency(args[1][0]) if isinstance(args[1], list) else args[1]
         phase = 0.0 if len(args) <= 2 else args[2]
 
         if isinstance(port, PulseChannel):

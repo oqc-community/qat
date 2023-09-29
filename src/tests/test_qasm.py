@@ -109,6 +109,10 @@ class TestQASM3:
         results = execute_qasm(get_qasm3("openpulse_tests/zmap.qasm"), hw)
         assert not isinstance(results, dict)
 
+    def test_frequency(self):
+        hw = get_default_echo_hardware(8)
+        execute_qasm(get_qasm3("openpulse_tests/freq.qasm"), hw)
+
     @pytest.mark.parametrize(
         "arg_count",
         [1, 2, 3]  # 2 includes a generic qubit def, should be separate test
