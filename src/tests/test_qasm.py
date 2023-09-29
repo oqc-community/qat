@@ -382,6 +382,16 @@ class TestQASM3:
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
+    def test_internal_pulses(self):
+        qasm_string = get_qasm3(f"waveform_tests/internal_waveform_tests.qasm")
+        hardware = get_default_echo_hardware(8)
+        config = CompilerConfig(
+            repeats=10,
+            results_format=QuantumResultsFormat(),
+            optimizations=Qasm3Optimizations()
+        )
+        assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
+
 
 class TestExecutionFrontend:
     def test_invalid_paths(self):

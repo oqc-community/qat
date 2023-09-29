@@ -24,6 +24,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
+    CustomPulse,
     Delay,
     DeviceUpdate,
     FrequencyShift,
@@ -419,8 +420,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=samples
         )
         pulse = evaluate_shape(position.instruction, t, phase)
-        if not position.instruction.ignore_channel_scale:
-            pulse *= pulse_channel.scale
+
+        scale = pulse_channel.scale
+        if isinstance(
+            position.instruction, (Pulse, CustomPulse)
+        ) and position.instruction.ignore_channel_scale:
+            scale = 1
+        pulse *= scale
         pulse += pulse_channel.bias
 
         if do_upconvert:
