@@ -303,7 +303,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         mode: AcquireMode = None,
         output_variable=None,
         existing_names: Set[str] = None,
-        delay=180e-9,
+        delay=None,
         filter: Pulse = None
     ):
         super().__init__(channel.full_id())

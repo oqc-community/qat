@@ -88,6 +88,10 @@ class InstructionExecutionEngine(abc.ABC):
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
+    def __init__(self, model: QuantumHardwareModel = None, max_instruction_len: int = 200000):
+        super().__init__(model)
+        self.max_instruction_len = max_instruction_len
+
     def _model_exists(self):
         if self.model is None:
             raise ValueError("Requires a loaded hardware model.")
@@ -178,6 +182,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def validate(self, instructions: List[Instruction]):
         """ Validates this graph for execution on the current hardware."""
         self._model_exists()
+
+        instruction_length = len(instructions)
+        if instruction_length > self.max_instruction_len:
+            raise ValueError(
+                f"Program too large to be run in a single block on current hardware. "
+                f"{instruction_length} instructions."
+            )
 
         for inst in instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:

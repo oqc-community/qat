@@ -614,8 +614,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def pulse(self, *args, **kwargs):
         return self.add(Pulse(*args, **kwargs))
 
-    def acquire(self, *args, **kwargs):
-        return self.add(Acquire(*args, **kwargs))
+    def acquire(self, channel: "PulseChannel", time, mode, output_variable, existing_names, filter, delay=None):
+        if delay is None:
+            devices = self.model.get_devices_from_pulse_channel(channel)
+            qubits = [i for i in devices if isinstance(i, Qubit)]
+            if len(qubits) > 1:
+                raise ValueError("Wrong channel type given to acquire, please give a channel with a single qubit!")
+            delay = qubits[0].measure_acquire['delay']
+        return self.add(Acquire(channel, time, mode, output_variable,existing_names,delay,filter))
 
     def delay(self, target: Union[Qubit, PulseChannel], time: float):
         _, channel = self.model._resolve_qb_pulse_channel(target)
