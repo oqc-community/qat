@@ -177,7 +177,29 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         """ Runs optimization passes specific to this hardware. """
         self._model_exists()
-        return instructions
+        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
+        optimized_instructions: List[Instruction] = []
+        for instruction in instructions:
+            if isinstance(instruction, PhaseShift):
+                if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
+                    accum_phaseshift.phase += instruction.phase
+                else:
+                    accum_phaseshifts[instruction.channel] = PhaseShift(instruction.channel, instruction.phase)
+            elif isinstance(instruction, Pulse):
+                quantum_targets = getattr(instruction, 'quantum_targets', [])
+                if not isinstance(quantum_targets, List):
+                    quantum_targets = [quantum_targets]
+                for quantum_target in quantum_targets:
+                    if quantum_target in accum_phaseshifts:
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
+                optimized_instructions.append(instruction)
+            elif isinstance(instruction, PhaseReset):
+                for channel in instruction.quantum_targets:
+                    accum_phaseshifts.pop(channel, None)
+                optimized_instructions.append(instruction)
+            else:
+                optimized_instructions.append(instruction)
+        return optimized_instructions
 
     def validate(self, instructions: List[Instruction]):
         """ Validates this graph for execution on the current hardware."""
