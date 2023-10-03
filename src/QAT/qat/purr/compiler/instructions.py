@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set, TYPE_CHECKING, Union
 
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
+from qat.purr.utils.serializer import json_dumps, json_loads
+
+if TYPE_CHECKING:
+    from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 def _stringify_qubits(qubits):
@@ -35,7 +39,12 @@ class ProcessAxis(Enum):
 
 
 class Instruction:
-    pass
+    @staticmethod
+    def deserialize(blob, model: QuantumHardwareModel):
+        return json_loads(blob, model=model)
+
+    def serialize(self):
+        return json_dumps(self)
 
 
 class QuantumMetadata(Instruction):

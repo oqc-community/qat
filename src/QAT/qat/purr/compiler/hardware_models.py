@@ -243,6 +243,9 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         if (device := self.get_physical_channel(id_)) is not None:
             return device
 
+        if (device := self.get_pulse_channel_from_id(id_)) is not None:
+            return device
+
         return self.get_physical_baseband(id_)
 
     def add_device(self, device):
