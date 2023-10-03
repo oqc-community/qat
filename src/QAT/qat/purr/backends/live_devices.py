@@ -44,10 +44,11 @@ class ControlHardwareChannel(PhysicalChannel):
     Wrapper over a PhysicalChannel, that maps to a live instrument channel. This (and
     derived) object should contain hardware specific information.
     """
-    def __init__(self, id_, hardware_id, dcbiaschannel_pair, *args, **kwargs):
+    def __init__(self, id_, hardware_id, dcbiaschannel_pair, switch_ch=None, *args, **kwargs):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
         self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
+        self.switch_ch = switch_ch
 
 
 class ControlHardware(Instrument):
