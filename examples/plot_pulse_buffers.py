@@ -5,8 +5,9 @@ from matplotlib import pyplot as plt
 from matplotlib import ticker
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine
-from qat.purr.compiler.emitter import InstructionEmitter
-from qat.purr.compiler.runtime import get_builder
+from qat.purr.compiler.emitter import QatFile
+from qat.purr.compiler.execution import SweepIterator
+from qat.purr.compiler.runtime import get_builder, QuantumRuntime
 from qat.purr.integrations.qasm import Qasm3Parser
 
 np.set_printoptions(
@@ -16,6 +17,61 @@ np.set_printoptions(
 import logging
 
 logging.disable()
+
+
+class PhysicalBufferPlotEngine(EchoEngine):
+    def __init__(self, model, target_engine=None, channels=None, upconvert=True,
+                 figsize=None, name=None):
+        super().__init__(model)
+        self.target = target_engine or self
+        self.channels = channels
+        self.upconvert = upconvert
+        self.figsize = figsize
+        self.name = name
+
+    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+        position_map = self.target.create_duration_timeline(package)
+        pulse_buffers = self.target.build_pulse_channel_buffers(position_map, do_upconvert=self.upconvert)
+        buffers = self.target.build_physical_channel_buffers(pulse_buffers)
+        channels = self.channels or buffers.keys()
+
+        if not isinstance(channels, Iterable):
+            channels = [channels]
+
+        figsize = self.figsize
+        if figsize is None:
+            figsize = (8, 3 * len(channels))
+
+        fig, ax = plt.subplots(len(channels), 1, figsize=figsize)
+        for i, channel in enumerate(channels):
+            dt = self.model.physical_channels[channel].sample_time
+            t = np.arange(len(buffers[channel])) * dt
+            ax[i].plot(t, buffers[channel].real, label="Real")
+            ax[i].plot(t, buffers[channel].imag, label="Imag")
+            ax[i].legend()
+            ax[i].set_title(channel)
+            ax[i].set_xlabel("Time")
+            ax[i].xaxis.set_major_formatter(ticker.EngFormatter("s"))
+            ax[i].set_ylabel("Pulse amplitude")
+            ax[i].yaxis.set_major_formatter(ticker.EngFormatter("V"))
+        fig.set_tight_layout(True)
+        if self.name:
+            plt.savefig(self.name)
+
+        res_bufs = []
+        for res in hw.resonators:
+            res_bufs.append(res.physical_channel.id)
+        for key, value in buffers.items():
+            if key in res_bufs:
+                tmp_buf = []
+                for val in value:
+                    tmp_buf.append(val)
+                    tmp_buf.append(val)
+                buffers[key] = tmp_buf
+
+        # As we're processing a QASM file the runtime assumes results are needed, so we
+        # just call the default echo for this. We're immediately throwing them away anyway.
+        return super()._execute_on_hardware(sweep_iterator, package)
 
 
 def plot_physical_buffers(
@@ -34,46 +90,9 @@ def plot_physical_buffers(
     engine: qat execution engine to use to generate buffers. Defaults to Echo hardware engine
     channels: physical channel ids for the channels to be plotted. If None, plots all channels.
     """
-    hw = builder.model
-    engine = engine or EchoEngine(hw)
-
-    qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
-    position_map = engine.create_duration_timeline(qat_file)
-    pulse_buffers = engine.build_pulse_channel_buffers(position_map, do_upconvert=upconvert)
-    buffers = engine.build_physical_channel_buffers(pulse_buffers)
-    channels = channels or buffers.keys()
-
-    if not isinstance(channels, Iterable):
-        channels = [channels]
-    if figsize is None:
-        figsize = (8, 3 * len(channels))
-    fig, ax = plt.subplots(len(channels), 1, figsize=figsize)
-    for i, channel in enumerate(channels):
-        dt = engine.model.physical_channels[channel].sample_time
-        t = np.arange(len(buffers[channel])) * dt
-        ax[i].plot(t, buffers[channel].real, label="Real")
-        ax[i].plot(t, buffers[channel].imag, label="Imag")
-        ax[i].legend()
-        ax[i].set_title(channel)
-        ax[i].set_xlabel("Time")
-        ax[i].xaxis.set_major_formatter(ticker.EngFormatter("s"))
-        ax[i].set_ylabel("Pulse amplitude")
-        ax[i].yaxis.set_major_formatter(ticker.EngFormatter("V"))
-    fig.set_tight_layout(True)
-    if name:
-        plt.savefig(name)
-
-    res_bufs = []
-    for res in hw.resonators:
-        res_bufs.append(res.physical_channel.id)
-    for key, value in buffers.items():
-        if key in res_bufs:
-            tmp_buf = []
-            for val in value:
-                tmp_buf.append(val)
-                tmp_buf.append(val)
-            buffers[key] = tmp_buf
-    return buffers
+    engine = PhysicalBufferPlotEngine(builder.model, engine, channels, upconvert, figsize, name)
+    runtime = QuantumRuntime(engine)
+    runtime.execute(builder)
 
 
 if __name__ == "__main__":
