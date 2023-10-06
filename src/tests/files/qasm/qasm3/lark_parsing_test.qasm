@@ -66,10 +66,10 @@ defcal cz $1, $0 {
     // Using shift_phase command
     shift_phase(q0_rf_frame, 4.366186381749424);
     set_phase(q0_rf_frame, 4.366186381749424);
-    //get_phase(q0_rf_frame);
+    get_phase(q0_rf_frame);
     shift_frequency(q0_rf_frame, 4.366186381749424);
     set_frequency(q0_rf_frame, 4.366186381749424);
-    //get_frequency(q0_rf_frame);
+    get_frequency(q0_rf_frame);
 
     delay[300ns] q0_rf_frame;
     // Using += to shift the phase
