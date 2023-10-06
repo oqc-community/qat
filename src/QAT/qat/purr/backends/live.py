@@ -248,42 +248,46 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
             return instructions
 
-    def validate_hardware(self, instructions: List[Instruction]):
-        consumed_qubits: List[str] = []
-        for inst in instructions:
-            if isinstance(inst, PostProcessing):
-                if inst.acquire.mode == AcquireMode.SCOPE and ProcessAxis.SEQUENCE in inst.axes:
-                    raise ValueError(
-                        "Invalid post-processing! Post-processing over SEQUENCE is not possible after"
-                        "the result is returned from hardware in SCOPE mode!"
-                    )
-                elif inst.acquire.mode == AcquireMode.INTEGRATOR and ProcessAxis.TIME in inst.axes:
-                    raise ValueError(
-                        "Invalid post-processing! Post-processing over TIME is not possible after"
-                        "the result is returned from hardware in INTEGRATOR mode!"
-                    )
-                elif inst.acquire.mode == AcquireMode.RAW:
-                    raise ValueError(
-                        "Invalid acquire mode! The live hardware doesn't support RAW acquire mode!"
-                    )
-            # Check if we've got a measure in the middle of the circuit somewhere.
-            elif isinstance(inst, Acquire):
-                for qbit in self.model.qubits:
-                    if qbit.get_measure_channel() == inst.channel:
-                        consumed_qubits.append(qbit)
-            elif isinstance(inst, Pulse):
-                # Find target qubit from instruction and check whether it's been measured already.
-                acquired_qubits = [
-                    self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
-                    for chanbit in inst.quantum_targets
-                    if isinstance(chanbit, (Qubit, PulseChannel))
-                ]
-                if any(acquired_qubits):
-                    raise ValueError(
-                        "Mid-circuit measurements currently unable to be used."
-                    )
-
     def validate(self, instructions: List[Instruction]):
         with log_duration("Instructions validated in {} seconds."):
             super().validate(instructions)
-            self.validate_hardware(instructions)
+
+            consumed_qubits: List[str] = []
+            for inst in instructions:
+                if isinstance(inst, PostProcessing):
+                    if inst.acquire.mode == AcquireMode.SCOPE and ProcessAxis.SEQUENCE in inst.axes:
+                        raise ValueError(
+                            "Invalid post-processing! Post-processing over SEQUENCE is "
+                            "not possible after the result is returned from hardware "
+                            "in SCOPE mode!"
+                        )
+                    elif inst.acquire.mode == AcquireMode.INTEGRATOR and ProcessAxis.TIME in inst.axes:
+                        raise ValueError(
+                            "Invalid post-processing! Post-processing over TIME is not "
+                            "possible after the result is returned from hardware in "
+                            "INTEGRATOR mode!"
+                        )
+                    elif inst.acquire.mode == AcquireMode.RAW:
+                        raise ValueError(
+                            "Invalid acquire mode! The live hardware doesn't support "
+                            "RAW acquire mode!"
+                        )
+
+                # Check if we've got a measure in the middle of the circuit somewhere.
+                elif isinstance(inst, Acquire):
+                    for qbit in self.model.qubits:
+                        if qbit.get_measure_channel() == inst.channel:
+                            consumed_qubits.append(qbit)
+                elif isinstance(inst, Pulse):
+                    # Find target qubit from instruction and check whether it's been
+                    # measured already.
+                    acquired_qubits = [
+                        self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
+                        for chanbit in inst.quantum_targets
+                        if isinstance(chanbit, (Qubit, PulseChannel))
+                    ]
+
+                    if any(acquired_qubits):
+                        raise ValueError(
+                            "Mid-circuit measurements currently unable to be used."
+                        )
