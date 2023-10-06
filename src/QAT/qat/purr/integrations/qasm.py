@@ -1925,15 +1925,15 @@ class Qasm3Parser(Interpreter, AbstractParser):
             phase = self._get_phase(channel)
             self.builder.add(PhaseShift(channel, phase_arg - phase))
         elif name == 'get_phase':
-            channel, _ = self._validate_phase_args(args[0])
+            channel, _ = self._validate_phase_args(args)
             return self._get_phase(channel)
         elif name == 'set_frequency':
             channel, freq_arg = self._validate_freq_args(args[0], args[1])
             frequency = self._get_frequency(channel)
             self.builder.add(FrequencyShift(channel, freq_arg - frequency))
         elif name == 'get_frequency':
-            channel, _ = self._validate_freq_args(args[0])
-            return self._get_frequency(args[0])
+            channel, _ = self._validate_freq_args(args)
+            return self._get_frequency(channel)
         elif name == 'shift_frequency':
             channel, freq_arg = self._validate_freq_args(args[0], args[1])
             self.builder.add(FrequencyShift(channel, freq_arg))
