@@ -157,12 +157,12 @@ class TestConfigGeneral:
             CompilerConfig.create_from_json(serialized_data)
 
     def test_json_version_compatibility(self):
-        serialised_data = _get_contents("serialised_default_compiler_config_v1.json")
+        serialised_data = _get_contents("serialised_default_compiler_config_v2.json")
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.metrics == MetricsType.Default
         assert deserialised_conf.results_format == QuantumResultsFormat()
 
-        serialised_data = _get_contents("serialised_full_compiler_config_v1.json")
+        serialised_data = _get_contents("serialised_full_compiler_config_v2.json")
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.repeats == 1000
         assert deserialised_conf.repetition_period == 10

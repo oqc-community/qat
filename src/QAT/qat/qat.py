@@ -7,11 +7,12 @@ from typing import Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
+from qat.purr.compiler.config import CompilerConfig, MetricsType
 from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -75,7 +76,9 @@ def execute_with_metrics(
     """ Execute file path or code blob. """
 
     frontend: LanguageFrontend = fetch_frontend(path_or_str)
-    return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
+    results, metrics = _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
+
+    return results, metrics.as_dict()
 
 
 def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None):
@@ -114,13 +117,18 @@ def _execute_with_metrics(
     if compiler_config is not None:
         metrics.enable(compiler_config.metrics, overwrite=True)
 
-    instructions, build_metrics = _return_or_build(
-        qat_input, frontend.parse, hardware=hardware, compiler_config=compiler_config
-    )
-    metrics.merge(build_metrics)
 
-    results, execution_metrics = \
-        frontend.execute(instructions, hardware, compiler_config)
-    metrics.merge(execution_metrics)
+    total_execution_timer = log_duration("Program execution completed. Total runtime took {} seconds.")
+    with total_execution_timer:
+        instructions, build_metrics = _return_or_build(
+            qat_input, frontend.parse, hardware=hardware, compiler_config=compiler_config
+        )
+        metrics.merge(build_metrics)
 
-    return results, metrics.as_dict()
+        results, execution_metrics = \
+            frontend.execute(instructions, hardware, compiler_config)
+        metrics.merge(execution_metrics)
+
+    metrics.record_metric(MetricsType.TotalDuration, total_execution_timer.duration)
+
+    return results, metrics

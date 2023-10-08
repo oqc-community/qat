@@ -26,6 +26,7 @@ class _LogContextManager(MetricsMixin):
         self.metric_type = metric_type
         self.start_time = None
         self.compilation_metrics = metrics_collection
+        self.duration = None
 
     def __enter__(self):
         self.start_time = time.time()
@@ -38,8 +39,10 @@ class _LogContextManager(MetricsMixin):
         if total_time > sys.float_info.epsilon:
             log.log(self.level, self.message.format(total_time), stacklevel=1)
 
+        self.duration = total_time
+
         if self.metric_type is not None:
-            self.record_metric(self.metric_type, total_time)
+            self.record_metric(self.metric_type, self.duration)
 
 
 def log_duration(
