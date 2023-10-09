@@ -1229,7 +1229,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         name = self.transform_to_value(tree.children[1])
         args = self.transform_to_value(tree.children[4])
         port = args[0]
-        frequency = args[1]
+        frequency = self._get_frequency(args[1][0]) if isinstance(args[1], list) else args[1]
         phase = 0.0 if len(args) <= 2 else args[2]
 
         if isinstance(port, PulseChannel):
@@ -1268,10 +1268,15 @@ class Qasm3Parser(Interpreter, AbstractParser):
             frequency=_empty,
             phase=_empty,
             square_width=_empty,
+            drag=_empty,
         ):
             if width is not _empty and not isinstance(width, float):
                 raise ValueError(
                     f"Width '{str(width)}' used in {intrinsic_name} is not a float."
+                )
+            if drag is not _empty and not isinstance(drag, float):
+                raise ValueError(
+                    f"Drag '{str(width)}' used in {intrinsic_name} is not a float."
                 )
             if amp is not _empty and not isinstance(amp, Number):
                 raise ValueError(
@@ -1336,24 +1341,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             _validate_waveform_args(width=width, amp=amp)
             waveform = UntargetedPulse(Pulse, PulseShapeType.SQUARE, width, amp=amp)
 
-        elif intrinsic_name == 'legacy_constant':
-            width, amp = _validate_arg_length(tree.children[4], 2)
-            _validate_waveform_args(width=width, amp=amp)
-            waveform = UntargetedPulse(Pulse, PulseShapeType.SQUARE, width, amp=amp)
-
         elif intrinsic_name == 'rounded_square':
-            width, std_dev, rise_time, amp = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(width=width, std_dev=std_dev, amp=amp, rise=rise_time)
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.ROUNDED_SQUARE,
-                width,
-                std_dev=std_dev,
-                amp=amp,
-                rise=rise_time
-            )
-
-        elif intrinsic_name == 'legacy_rounded_square':
             width, std_dev, rise_time, amp = _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(width=width, std_dev=std_dev, amp=amp, rise=rise_time)
             waveform = UntargetedPulse(
@@ -1386,39 +1374,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 std_dev=std_dev
             )
 
-        elif intrinsic_name == 'legacy_drag':
-            amp, width, std_dev, beta, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4, 5)
-            zero_at_edges = 0 if not zero_at_edges else 1
-            _validate_waveform_args(
-                width=width,
-                amp=amp,
-                beta=beta,
-                zero_at_edges=zero_at_edges,
-                std_dev=std_dev
-            )
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_DRAG,
-                width=width,
-                amp=amp,
-                zero_at_edges=zero_at_edges,
-                beta=beta,
-                std_dev=std_dev
-            )
-
         elif intrinsic_name == 'gaussian':
-            amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
-            _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
-                width=width,
-                amp=amp,
-                std_dev=std_dev,
-            )
-
-        elif intrinsic_name == 'legacy_gaussian':
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
             waveform = UntargetedPulse(
@@ -1445,43 +1401,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 std_dev=std_dev
             )
 
-        elif intrinsic_name == 'legacy_gaussian_zero_edge':
-            amp, width, std_dev, zero_at_edges = \
-                _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
-            _validate_waveform_args(
-                width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
-            )
-            waveform = UntargetedPulse(
-                Pulse,
-                PulseShapeType.GAUSSIAN_ZERO_EDGE,
-                width=width,
-                amp=amp,
-                zero_at_edges=zero_at_edges,
-                std_dev=std_dev
-            )
-
         elif intrinsic_name == 'sech':
             amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
             waveform = UntargetedPulse(
                 Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
             )
 
-        elif intrinsic_name == 'legacy_sech':
-            amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
-            waveform = UntargetedPulse(
-                Pulse, PulseShapeType.SECH, width=width, amp=amp, std_dev=std_dev
-            )
-
         elif intrinsic_name == 'gaussian_square':
-            amp, width, square_width, std_dev = \
-                _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
-            )
-            raise ValueError("Gaussian square waveform currently not supported.")
-
-        elif intrinsic_name == 'legacy_gaussian_square':
             amp, width, square_width, std_dev = \
                 _validate_arg_length(tree.children[4], 4)
             _validate_waveform_args(
@@ -1501,17 +1427,33 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 phase=phase
             )
 
-        elif intrinsic_name == 'legacy_sine':
-            amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(width=width, amp=amp, frequency=frequency, phase=phase)
+        elif intrinsic_name == 'gaussian_rise':
+            amp, width, rise, drag, phase = _validate_arg_length(tree.children[4], 5)
+            _validate_waveform_args(width=width, rise=rise, amp=amp, drag=drag, phase=phase)
             waveform = UntargetedPulse(
                 Pulse,
-                PulseShapeType.SIN,
+                PulseShapeType.GAUSSIAN,
                 amp=amp,
                 width=width,
-                frequency=frequency,
+                rise=rise,
+                drag=drag,
                 phase=phase
             )
+
+        elif intrinsic_name == 'soft_square_rise':
+            amp, width, rise, drag, phase = _validate_arg_length(tree.children[4], 5)
+            _validate_waveform_args(width=width, rise=rise, amp=amp, drag=drag, phase=phase)
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.SOFT_SQUARE,
+                amp=amp,
+                width=width,
+                rise=rise,
+                drag=drag,
+                phase=phase
+            )
+
+
 
         # Intrinsic waveform shapes
         elif (internal_waveform := get_waveform_type(intrinsic_name)) is not None:

@@ -8,6 +8,7 @@ import numpy
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import ChannelType, PulseChannel, Qubit, Resonator
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -33,6 +34,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.serializer import json_dumps, json_loads
 
 log = get_default_logger()
 
@@ -56,6 +58,20 @@ class InstructionBuilder:
     @property
     def instructions(self):
         return list(self._instructions)
+
+    @staticmethod
+    def deserialize(blob, model) -> "QuantumInstructionBuilder":
+        # TODO: At this point everything is a Quantum builder variation, base class losing meaning.
+        builder = QuantumInstructionBuilder(model)
+        builder._instructions = json_loads(blob, model=model)
+        return builder
+
+    def serialize(self):
+        """
+        Currently only serializes the instructions, not the supporting objects of the builder itself.
+        This could be supported pretty easily, but not required right now.
+        """
+        return json_dumps(self._instructions)
 
     def splice(self):
         """ Clears the builder and returns its current instructions. """
@@ -614,8 +630,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def pulse(self, *args, **kwargs):
         return self.add(Pulse(*args, **kwargs))
 
-    def acquire(self, *args, **kwargs):
-        return self.add(Acquire(*args, **kwargs))
+    def acquire(self, channel: "PulseChannel", *args, delay=None, **kwargs):
+        if delay is None:
+            devices = self.model.get_devices_from_pulse_channel(channel)
+            qubits = [i for i in devices if isinstance(i, Qubit)]
+            if len(qubits) > 1:
+                raise ValueError("Wrong channel type given to acquire, please give a channel with a single qubit!")
+            delay = qubits[0].measure_acquire['delay']
+        return self.add(Acquire(channel, *args, delay, **kwargs))
 
     def delay(self, target: Union[Qubit, PulseChannel], time: float):
         _, channel = self.model._resolve_qb_pulse_channel(target)

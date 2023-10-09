@@ -16,11 +16,11 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 # Credible input are str (contents or file path) or pre-build instruction builder
-QATInput = Union[str, InstructionBuilder]
+QATInput = Union[str, bytes, InstructionBuilder]
 
 
 def _return_or_build(ingest: QATInput, build_func: typing.Callable, **kwargs):
-    is_source = isinstance(ingest, str)
+    is_source = isinstance(ingest, (str, bytes))
     is_instructions = isinstance(ingest, InstructionBuilder)
     if (not is_instructions) and (not is_source):
         raise ValueError(f"No compiler support for inputs of type {str(type(ingest))}")
@@ -44,7 +44,10 @@ contents_match_pattern = regex.compile(
 path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
 
 
-def fetch_frontend(path_or_str: str) -> LanguageFrontend:
+def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
+    if isinstance(path_or_str, bytes) and path_or_str.startswith(b"BC"):
+        return QIRFrontend()
+
     if path_regex.match(path_or_str) is not None:
         if not os.path.exists(path_or_str):
             raise ValueError(f"Path {path_or_str} does not exist.")
@@ -54,8 +57,8 @@ def fetch_frontend(path_or_str: str) -> LanguageFrontend:
             return QASMFrontend()
         elif path.suffix in (".bc", ".ll"):
             return QIRFrontend()
-        else:
-            raise ValueError(f"File with extension {path.suffix} unrecognized.")
+
+        raise ValueError(f"File with extension {path.suffix} unrecognized.")
 
     results = regex.search(contents_match_pattern, path_or_str)
     if results is not None:
@@ -78,13 +81,13 @@ def execute_with_metrics(
     return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
 
-def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None):
+def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig=None):
     results, _ = execute_qir_with_metrics(qat_input, hardware, compiler_config)
     return results
 
 
 def execute_qir_with_metrics(
-    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
+    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig=None
 ):
     frontend = QIRFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)

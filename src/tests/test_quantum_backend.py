@@ -25,7 +25,7 @@ from qat.purr.compiler.devices import (
 )
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import SweepValue, Variable
+from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from scipy import fftpack
@@ -411,3 +411,62 @@ class TestBaseQuantum:
             .measure_scope_mode(qubit)
         )  # yapf: disable
         assert nb_points == execute_instructions(engine, builder)[0].shape[0]
+
+    def test_phase_shift_optimisation_squashes_down_adjacent_phase_shifts(self):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_1)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0).measure_mean_z(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        optimized_instructions = engine.optimize(builder.instructions)
+        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        assert len(phase_shift_list) == 1
+        assert phase_shift_list[0].phase == phase_shift_1 + phase_shift_2
+
+    def test_phase_shift_optimisation_does_not_squash_down_non_adjacent_phase_shifts(self):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        optimized_instructions = engine.optimize(builder.instructions)
+        print(optimized_instructions)
+        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        assert len(phase_shift_list) == 2
+        assert phase_shift_list[0].phase == phase_shift_1
+        assert phase_shift_list[1].phase == phase_shift_2
+
+    def test_phase_shift_optimisation_skips_sweep_variables(self):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+        phase_shift_fixed = 0.2
+        phase_shift_sweep = np.linspace(0.0, 1.0, 5)
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("p", phase_shift_sweep))
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, Variable("p"))
+            .phase_shift(qubit, phase_shift_fixed)
+            .X(qubit, np.pi / 2.0).measure_mean_z(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        optimized_instructions = engine.optimize(builder.instructions)
+        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        assert len(phase_shift_list) == 2
+        assert phase_shift_list[1].phase == phase_shift_fixed
+        assert isinstance(phase_shift_list[0].phase, Variable)

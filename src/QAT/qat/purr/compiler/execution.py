@@ -24,6 +24,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
+    CustomPulse,
     Delay,
     DeviceUpdate,
     FrequencyShift,
@@ -87,6 +88,10 @@ class InstructionExecutionEngine(abc.ABC):
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
+    def __init__(self, model: QuantumHardwareModel = None, max_instruction_len: int = 200000):
+        super().__init__(model)
+        self.max_instruction_len = max_instruction_len
+
     def _model_exists(self):
         if self.model is None:
             raise ValueError("Requires a loaded hardware model.")
@@ -172,11 +177,40 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         """ Runs optimization passes specific to this hardware. """
         self._model_exists()
-        return instructions
+        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
+        optimized_instructions: List[Instruction] = []
+        for instruction in instructions:
+            if isinstance(instruction, PhaseShift) and isinstance(instruction.phase, Number):
+                if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
+                    accum_phaseshift.phase += instruction.phase
+                else:
+                    accum_phaseshifts[instruction.channel] = PhaseShift(instruction.channel, instruction.phase)
+            elif isinstance(instruction, Pulse):
+                quantum_targets = getattr(instruction, 'quantum_targets', [])
+                if not isinstance(quantum_targets, List):
+                    quantum_targets = [quantum_targets]
+                for quantum_target in quantum_targets:
+                    if quantum_target in accum_phaseshifts:
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
+                optimized_instructions.append(instruction)
+            elif isinstance(instruction, PhaseReset):
+                for channel in instruction.quantum_targets:
+                    accum_phaseshifts.pop(channel, None)
+                optimized_instructions.append(instruction)
+            else:
+                optimized_instructions.append(instruction)
+        return optimized_instructions
 
     def validate(self, instructions: List[Instruction]):
         """ Validates this graph for execution on the current hardware."""
         self._model_exists()
+
+        instruction_length = len(instructions)
+        if instruction_length > self.max_instruction_len:
+            raise ValueError(
+                f"Program too large to be run in a single block on current hardware. "
+                f"{instruction_length} instructions."
+            )
 
         for inst in instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
@@ -419,8 +453,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=samples
         )
         pulse = evaluate_shape(position.instruction, t, phase)
-        if not position.instruction.ignore_channel_scale:
-            pulse *= pulse_channel.scale
+
+        scale = pulse_channel.scale
+        if isinstance(
+            position.instruction, (Pulse, CustomPulse)
+        ) and position.instruction.ignore_channel_scale:
+            scale = 1
+        pulse *= scale
         pulse += pulse_channel.bias
 
         if do_upconvert:

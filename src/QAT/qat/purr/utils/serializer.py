@@ -7,39 +7,56 @@ from dataclasses import asdict, is_dataclass
 from enum import Enum
 from importlib import import_module
 from json import JSONDecoder, JSONEncoder
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scc.compiler.hardware_models import QuantumHardwareModel
 
 
 # Set of common methods so we don't have to add/remove the custom serializer.
 def json_dumps(*args, serializable_types=None, **kwargs):
     kwargs.setdefault('cls', CustomJSONEncoder)
-    return json.dumps(*args, **kwargs, serializable_types=serializable_types)
+    return json.dumps(*args, serializable_types=serializable_types, **kwargs)
 
 
-def json_loads(*args, serializable_types=None, **kwargs):
+def json_loads(*args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs):
     kwargs.setdefault('cls', CustomJsonDecoder)
-    return json.loads(*args, **kwargs, serializable_types=serializable_types)
+    return json.loads(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 def json_dump(*args, serializable_types=None, **kwargs):
     kwargs.setdefault('cls', CustomJSONEncoder)
-    return json.dump(*args, **kwargs, serializable_types=serializable_types)
+    return json.dump(*args, serializable_types=serializable_types, **kwargs)
 
 
-def json_load(*args, serializable_types=None, **kwargs):
+def json_load(*args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs):
     kwargs.setdefault('cls', CustomJsonDecoder)
-    return json.load(*args, **kwargs, serializable_types=serializable_types)
+    return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 class CustomJsonDecoder(JSONDecoder):
-    def __init__(self, *args, serializable_types=None, **kwargs):
+    def __init__(self, *args, serializable_types=None, model=None, **kwargs):
         self.serializable_types = serializable_types
+        self.model: "QuantumHardwareModel" = model
         super().__init__(object_hook=self.default, *args, **kwargs)
 
     def default(self, obj):
-        if not isinstance(obj, dict) or "$type" not in obj:
+        if not isinstance(obj, dict):
             return obj
 
-        obj_type = obj["$type"]
+        # Components are objects directly related to hardware and you never want to serialize them, so we re-link
+        # upon deserialization.
+        component_id = obj.get("$component_id")
+        if component_id is not None:
+            if self.model is None:
+                raise ValueError("Attempted to deserialize object that requires re-linking to a "
+                                 "hardware model and we have no hardware model.")
+
+            return self.model.get_device(component_id)
+
+        obj_type = obj.get("$type")
+        if obj_type is None:
+            return obj
 
         if obj_type == '<class \'tuple\'>':
             return tuple(obj["$data"])
@@ -108,7 +125,14 @@ class CustomJSONEncoder(JSONEncoder):
                 raise ValueError(f"Invalid type attempted to be serialized: {(type(obj))}.")
 
         try:
-            if is_dataclass(obj):
+            from qat.purr.compiler.instructions import Acquire
+            from qat.purr.compiler.devices import QuantumComponent
+
+            # TODO: Acquire is a special wrapper component, not an actual component. Have a few too many special-cases
+            #   for it now, think about reverting its special status.
+            if isinstance(obj, QuantumComponent) and not isinstance(obj, Acquire):
+                return {"$component_id": obj.full_id()}
+            elif is_dataclass(obj):
                 return {
                     "$type": typ_str,
                     "$dataclass": True,
