@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import pytest
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.compiler.config import CompilerConfig, MetricsType
+from qat_config.config import CompilerConfig, MetricsType
 from qat.qat import execute_with_metrics
 
 from tests.qasm_utils import TestFileType, get_test_file_path

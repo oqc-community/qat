@@ -14,7 +14,7 @@ from lark.visitors import Interpreter
 from numpy import append, array, exp, linspace
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing, Languages
+from qat_config.config import InlineResultsProcessing, Languages
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, Qubit
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (

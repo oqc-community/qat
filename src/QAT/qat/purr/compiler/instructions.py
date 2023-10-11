@@ -7,9 +7,9 @@ from enum import Enum
 from typing import Any, Dict, List, Set, TYPE_CHECKING, Union
 
 import numpy as np
-from qat.purr.compiler.config import InlineResultsProcessing
+from qat_config.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
-from qat.purr.utils.serializer import json_dumps, json_loads
+from qat_config.serializer import json_dumps, json_loads
 
 if TYPE_CHECKING:
     from qat.purr.compiler.hardware_models import QuantumHardwareModel

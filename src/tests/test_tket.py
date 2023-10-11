@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 from pytket.architecture import Architecture, RingArch
-from qat.purr.compiler.config import Qasm2Optimizations, TketOptimizations
+from qat_config.config import Qasm2Optimizations, TketOptimizations
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser, optimize_circuit
 
 from tests.qasm_utils import get_qasm2

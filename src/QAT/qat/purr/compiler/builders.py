@@ -6,9 +6,8 @@ from typing import List, Set, Union
 
 import numpy
 import numpy as np
-from qat.purr.compiler.config import InlineResultsProcessing
+from qat_config.config import InlineResultsProcessing
 from qat.purr.compiler.devices import ChannelType, PulseChannel, Qubit, Resonator
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -34,7 +33,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.serializer import json_dumps, json_loads
+from qat_config.serializer import json_dumps, json_loads
 
 log = get_default_logger()
 

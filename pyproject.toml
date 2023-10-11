@@ -15,7 +15,8 @@ authors = [
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
 ]
 packages = [
-    { include = "qat", from = "src/QAT/" }
+    { include = "qat", from = "src/QAT/" },
+    { include = "qat_config", from = "src/CONFIG/" },
 ]
 license = "BSD-3-Clause"
 

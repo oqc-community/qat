@@ -8,7 +8,7 @@ import sys
 from enum import Enum, Flag, IntEnum, auto
 from typing import List, Optional
 
-from qat.purr.utils.serializer import json_dumps, json_loads
+from qat_config.serializer import json_dumps, json_loads
 
 
 class InlineResultsProcessing(Flag):

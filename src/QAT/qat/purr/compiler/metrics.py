@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from typing import List, Optional
 
-from qat.purr.compiler.config import MetricsType
+from qat_config.config import MetricsType
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()

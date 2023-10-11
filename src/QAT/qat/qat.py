@@ -7,7 +7,7 @@ from typing import Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
+from qat_config.config import CompilerConfig
 from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics

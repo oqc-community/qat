@@ -17,7 +17,7 @@ from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
     software_post_process_mean,
 )
-from qat.purr.compiler.config import InlineResultsProcessing
+from qat_config.config import InlineResultsProcessing
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

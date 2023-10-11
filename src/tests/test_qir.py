@@ -8,7 +8,7 @@ import pytest
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
+from qat_config.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
 

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import IO, List, Union
 
 from numpy import savetxt
-from qat.purr.utils.serializer import json_dump, json_load
+from qat_config.serializer import json_dump, json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
 default_logger_format = "[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"

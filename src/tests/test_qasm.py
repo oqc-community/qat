@@ -14,7 +14,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.compiler.config import (
+from qat_config.config import (
     CompilerConfig,
     MetricsType,
     Qasm2Optimizations,

@@ -5,7 +5,7 @@ from sys import __loader__
 
 import pytest
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.compiler.config import (
+from qat_config.config import (
     CompilerConfig,
     InlineResultsProcessing,
     MetricsType,

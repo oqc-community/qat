@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from dataclasses import asdict, dataclass, is_dataclass
 
-from qat.purr.utils import serializer
-from qat.purr.utils.serializer import json_dumps, json_loads
+from qat_config import serializer
+from qat_config.serializer import json_dumps, json_loads
 
 
 @dataclass

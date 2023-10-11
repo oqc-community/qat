@@ -6,7 +6,7 @@ from typing import List, Optional, TypeVar, Union
 
 import numpy
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
-from qat.purr.compiler.config import CalibrationArguments, MetricsType, ResultsFormatting
+from qat_config.config import CalibrationArguments, MetricsType, ResultsFormatting
 from qat.purr.compiler.execution import (
     InstructionExecutionEngine,
     QuantumExecutionEngine,

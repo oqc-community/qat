@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from qat.purr.compiler.config import (
+from qat_config.config import (
     MetricsType,
     OptimizationConfig,
     Qiskit,
