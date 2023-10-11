@@ -3,6 +3,7 @@
 import json
 import re
 import sys
+import warnings
 from dataclasses import asdict, is_dataclass
 from enum import Enum
 from importlib import import_module
@@ -62,9 +63,21 @@ class CustomJsonDecoder(JSONDecoder):
             return tuple(obj["$data"])
 
         if self.serializable_types is not None:
+            old_paths = {"scc.compiler.config": "v0.2",
+                "qat.purr.compiler.config": "qat-compiler v.1.0.0 internal",}
+            deprecated_version = None
+            for old_path in old_paths.keys():
+                if old_path in obj_type:
+                    obj_type = obj_type.replace(old_path, "qat_config.config")
+                    deprecated_version = old_paths[old_path]
+                    break
+
             typ = self.serializable_types.get(obj_type)
             if typ is None:
                 raise ValueError(f"Invalid type attempted to be serialized: {obj_type}.")
+            elif deprecated_version is not None:
+                warnings.warn(f"Deprecated {typ.__name__} version {deprecated_version} "
+                              "found, update package version.", DeprecationWarning)
         else:
             typ = _get_type(obj_type)
 
