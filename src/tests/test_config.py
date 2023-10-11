@@ -22,6 +22,8 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.devices import QuantumComponent
 from .qasm_utils import get_test_file_path, TestFileType, get_qasm2
 
+SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
+
 
 def _get_json_path(file_name):
     return join(
@@ -219,13 +221,14 @@ class TestConfigSerialization:
         with pytest.raises(ValueError):
             CompilerConfig.create_from_json(serialized_data)
 
-    def test_json_version_compatibility(self):
-        serialised_data = _get_contents("serialised_default_compiler_config_v1.json")
+    @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
+    def test_json_version_compatibility(self, version):
+        serialised_data = _get_contents(f"serialised_default_compiler_config_{version}.json")
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.metrics == MetricsType.Default
         assert deserialised_conf.results_format == QuantumResultsFormat()
 
-        serialised_data = _get_contents("serialised_full_compiler_config_v1.json")
+        serialised_data = _get_contents(f"serialised_full_compiler_config_{version}.json")
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.repeats == 1000
         assert deserialised_conf.repetition_period == 10
@@ -242,3 +245,15 @@ class TestConfigSerialization:
         assert (
             deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
         )
+
+    @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
+    def test_runs_successfully_with_config(self, version):
+        program = get_test_file_path(TestFileType.QASM2, "ghz.qasm")
+        hardware = get_default_echo_hardware()
+        serialised_data = _get_contents(f"serialised_full_compiler_config_{version}.json")
+        deserialised_conf = CompilerConfig.create_from_json(
+            serialised_data
+        )  # Test full compiler config v1
+        results, metrics = execute_with_metrics(program, hardware, deserialised_conf)
+        assert results is not None
+        assert metrics is not None
