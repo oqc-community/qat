@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "qat-config"
+version = "1.0.0"
+description = ""
+authors = [
+    "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>",
+    "Harry Waring <hwaring@oxfordquantumcircuits.com>",
+    "Jamie Friel <jfriel@oxfordquantumcircuits.com>",
+    "John Dumbell <jdumbell@oxfordquantumcircuits.com>",
+    "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>",
+    "Norbert Deak <ndeak@oxfordquantumcircuits.com>",
+    "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
+]
+#readme = "README.md"
+packages = [{include = "qat_config"}]
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
