@@ -10,8 +10,9 @@ from qat.purr.backends.live_devices import (
     LivePhysicalBaseband,
 )
 from qat.purr.backends.utilities import UPCONVERT_SIGN, get_axis_map
-from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling
+from qat.purr.compiler.builders import QuantumInstructionBuilder, InstructionBuilder
+from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling, ChannelType, Resonator, PhysicalChannel, \
+    PhysicalBaseband, PulseShapeType
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -28,6 +29,73 @@ from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
+
+def apply_setup_to_hardware(hw: QuantumHardwareModel, qubit_count: int = 8) -> QuantumHardwareModel:
+    """ Apply lucy to the passed-in hardware. """
+    qubit_devices = []
+    resonator_devices = []
+    channel_index = 1
+
+    for primary_index in range(qubit_count):
+        bb1 = PhysicalBaseband(f"LO{channel_index}", 5.5e9)
+        bb2 = PhysicalBaseband(f"LO{channel_index + 1}", 8.5e9)
+        hw.add_physical_baseband(bb1, bb2)
+
+        ch1 = PhysicalChannel(f"CH{channel_index}", 1.0e-9, bb1, 1)
+        ch2 = PhysicalChannel(
+            f"CH{channel_index + 1}", 1.0e-9, bb2, 1, acquire_allowed=True
+        )
+        hw.add_physical_channel(ch1, ch2)
+
+        resonator = Resonator(f"R{primary_index}", ch2)
+        resonator.create_pulse_channel(ChannelType.measure, frequency=8.5e9)
+        resonator.create_pulse_channel(ChannelType.acquire, frequency=8.5e9)
+
+        # As our main system is a ring architecture we just attach every qubit in the
+        # ring to the one on either side.
+        # 2 has a connection to 1 and 3. This number wraps around, so we also have
+        # 10-0-1 linkages.
+        qubit = Qubit(primary_index, resonator, ch1)
+        qubit.create_pulse_channel(ChannelType.drive, frequency=5.5e9)
+
+        qubit.pulse_hw_x_pi_2.update({'width': 25e-9})
+        qubit.pulse_hw_zx_pi_4.update({'width': 3.18e-07})
+        qubit.pulse_measure.update({"width": 2.41e-06})
+
+        qubit_devices.append(qubit)
+        resonator_devices.append(resonator)
+        channel_index = channel_index + 2
+
+    # TODO: For backwards compatability cross resonance pulse channels are fully
+    #   connected but coupled qubits are only in a ring architecture. I think it would be
+    #   more appropriate for cross resonace channels to also be a ring architecture but
+    #   that can be done in a later PR.
+    for i, qubit in enumerate(qubit_devices):
+        for other_qubit in qubit_devices:
+            if qubit != other_qubit:
+                qubit.create_pulse_channel(
+                    auxiliary_devices=[other_qubit],
+                    channel_type=ChannelType.cross_resonance,
+                    frequency=5.5e9,
+                    scale=50
+                )
+                qubit.create_pulse_channel(
+                    auxiliary_devices=[other_qubit],
+                    channel_type=ChannelType.cross_resonance_cancellation,
+                    frequency=5.5e9,
+                    scale=0.0
+                )
+            qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
+            qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
+
+    hw.add_quantum_device(*qubit_devices, *resonator_devices)
+    hw.is_calibrated = True
+    return hw
+
+def get_default_lucy_hardware(qubit_count: int=8) -> QuantumHardwareModel:
+    model = QuantumHardwareModel()
+    return apply_setup_to_hardware(model, qubit_count)
+
 
 
 def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target_qubits):

@@ -15,6 +15,7 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import Acquire, Instruction, PostProcessType, Pulse, Sweep, SweepValue
 from qat.purr.compiler.runtime import get_builder
+from qat.purr.compiler.runtime import execute_instructions
 
 
 class TestInstruction:

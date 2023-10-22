@@ -17,6 +17,7 @@ from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
     software_post_process_mean,
 )
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
@@ -85,6 +86,8 @@ class InstructionExecutionEngine(abc.ABC):
         Shuts down the underlying hardware when this instance is no longer in use.
         """
         pass
+
+
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
@@ -405,6 +408,19 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 del results[key]
 
         return results
+
+    def instruction_duration(self, builder: InstructionBuilder) -> int:
+        qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
+        instruction_timeline = self.create_duration_timeline(qat_file)
+        instruction_durations = [[inst.end for inst in val] for val in instruction_timeline.values()]
+
+        def get_max_value(lst):
+            return max(get_max_value(n) if isinstance(n, list) else n for n in lst)
+
+        total_instruction_duration = get_max_value(instruction_durations)
+
+        log.info(f"The duration of this circuit is {total_instruction_duration/1000} microseconds")
+        return total_instruction_duration
 
     def build_pulse_channel_buffers(
         self,
