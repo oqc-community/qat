@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "QAT-compiler"
+name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
 version = "1.0.0"
