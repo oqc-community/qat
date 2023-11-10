@@ -13,9 +13,12 @@ class QatCache:
     Folder control object for the various caches of the toolchain. Consolidates
     creation/deletion and validation.
     """
+
     def __init__(self, root_folder=None):
         if root_folder is None:
-            root_folder = os.path.realpath(os.path.join(__file__, "..", "..", "..", ".."))
+            root_folder = os.path.realpath(
+                os.path.join(__file__, "..", "..", "..", "..")
+            )
 
         self.qat_root = os.path.join(root_folder, ".qat")
         self.ll_cache = os.path.realpath(os.path.join(self.qat_root, "ll"))
@@ -23,7 +26,7 @@ class QatCache:
         self.qat_cache = os.path.realpath(os.path.join(self.qat_root, "qat"))
 
     def create_cache_folders(self):
-        """ Creates folders if they don't exist. """
+        """Creates folders if they don't exist."""
         Path(self.ll_cache).mkdir(parents=True, exist_ok=True)
         Path(self.qs_cache).mkdir(parents=True, exist_ok=True)
         Path(self.qat_cache).mkdir(parents=True, exist_ok=True)

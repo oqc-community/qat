@@ -18,7 +18,8 @@ log = get_default_logger()
 
 
 class FeatureMetadata:
-    """ Exposed metadata for various languages, integrations and features."""
+    """Exposed metadata for various languages, integrations and features."""
+
     def to_json_dict(self):
         """
         Turn object into a JSON-amenable dictionary to return from a web service. All
@@ -31,6 +32,7 @@ class Scale(Enum):
     """
     SI units of frequency
     """
+
     NANO = "ns"
     MICRO = "us"
     MILLI = "ms"
@@ -45,6 +47,7 @@ class Unit(Enum):
     """
     Physical SI units.
     """
+
     TIME = "s"
     FREQUENCY = "Hz"
 
@@ -102,14 +105,14 @@ class OpenPulseFeatures(FeatureMetadata):
         for port_name, port in get_port_mappings(hardware).items():
             qb = port.related_qubit
             self.ports[port_name] = dict(
-                direction='two-way' if port.acquire_allowed else 'one-way',
+                direction="two-way" if port.acquire_allowed else "one-way",
                 type="port_type_1",
-                associated_qubits=[qb] if qb is not None else []
+                associated_qubits=[qb] if qb is not None else [],
             )
 
         self.waveforms = {
-            key: vars(value.waveform_definition) for key,
-            value in AbstractWaveform.actual_waveforms.items()
+            key: vars(value.waveform_definition)
+            for key, value in AbstractWaveform.actual_waveforms.items()
         }
 
         self.constraints = Constraints()
@@ -121,6 +124,6 @@ class OpenPulseFeatures(FeatureMetadata):
                 "ports": self.ports,
                 "frames": self.frames,
                 "waveforms": self.waveforms,
-                "constraints": self.constraints.__dict__
+                "constraints": self.constraints.__dict__,
             }
         }

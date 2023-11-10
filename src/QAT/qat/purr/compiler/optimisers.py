@@ -29,19 +29,23 @@ class DefaultOptimizers(MetricsMixin):
         self,
         qasm_string,
         hardware: QuantumHardwareModel,
-        optimizations: OptimizationConfig
+        optimizations: OptimizationConfig,
     ):
-        """ Run all available optimizers on this QASM program. """
+        """Run all available optimizers on this QASM program."""
         with log_duration("QASM optimization took {} seconds."):
-            if isinstance(optimizations, Tket) and \
-                    optimizations.tket_optimizations != TketOptimizations.Empty:
+            if (
+                isinstance(optimizations, Tket)
+                and optimizations.tket_optimizations != TketOptimizations.Empty
+            ):
                 qasm_string = run_tket_optimizations(
                     qasm_string, optimizations.tket_optimizations, hardware
                 )
 
             # TODO: Look to see what we're missing in regards to optimizations and what Qiskit can supplement.
-            if isinstance(optimizations, Qiskit) and \
-                    optimizations.qiskit_optimizations != QiskitOptimizations.Empty:
+            if (
+                isinstance(optimizations, Qiskit)
+                and optimizations.qiskit_optimizations != QiskitOptimizations.Empty
+            ):
                 qasm_string = self.run_qiskit_optimization(
                     qasm_string, optimizations.qiskit_optimizations
                 )
@@ -55,8 +59,8 @@ class DefaultOptimizers(MetricsMixin):
             try:
                 optimized_circuits = transpile(
                     QuantumCircuit.from_qasm_str(qasm_string),
-                    basis_gates=['u1', 'u2', 'u3', 'cx'],
-                    optimization_level=level
+                    basis_gates=["u1", "u2", "u3", "cx"],
+                    optimization_level=level,
                 )
                 qasm_string = optimized_circuits.qasm()
             except TranspilerError as ex:

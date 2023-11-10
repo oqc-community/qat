@@ -37,7 +37,12 @@ from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
 from qat.purr.compiler.config import TketOptimizations
 from qat.purr.compiler.execution import QuantumHardwareModel
-from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
+from qat.purr.integrations.qasm import (
+    BitRegister,
+    Qasm2Parser,
+    QasmContext,
+    QubitRegister,
+)
 from qat.purr.utils.logger import get_default_logger
 from qiskit.qasm.node import Cnot, UniversalUnitary
 from sympy import pi, sympify
@@ -50,6 +55,7 @@ class TketBuilder:
     Builds a Tket circuit using a builder API. No direct relation to our other builders
     as the API is a little too different.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.circuit = Circuit()
@@ -88,7 +94,9 @@ class TketBuilder:
         params = [params] if not isinstance(params, List) else params
         self.circuit.add_gate(target_gate, params, qubits, **conditions)
 
-    def custom_gate(self, gate_def: CustomGateDef, qubits, params=None, conditions=None):
+    def custom_gate(
+        self, gate_def: CustomGateDef, qubits, params=None, conditions=None
+    ):
         conditions = conditions or {}
         params = params or []
         qubits = [qubits] if not isinstance(qubits, List) else qubits
@@ -101,16 +109,17 @@ class TketQasmParser(Qasm2Parser):
     QASM parser that turns QASM into Tket structures. Switch to Tkets QASM parser when it's
     more mature.
     """
+
     def process_qreg(self, node, context: QasmContext, builder: TketBuilder, **kwargs):
-        context.registers.quantum[node.name] = QubitRegister([
-            Qubit(node.name, val) for val in range(node.id.index)
-        ])
+        context.registers.quantum[node.name] = QubitRegister(
+            [Qubit(node.name, val) for val in range(node.id.index)]
+        )
         builder.qreg(node.name, node.id.index)
 
     def process_creg(self, node, context, builder: TketBuilder, **kwargs):
-        context.registers.classic[node.name] = BitRegister([
-            Bit(node.name, val) for val in range(node.index)
-        ])
+        context.registers.classic[node.name] = BitRegister(
+            [Bit(node.name, val) for val in range(node.index)]
+        )
         builder.creg(node.name, node.index)
 
     def process_gate_definition(self, node, context, _, **kwargs):
@@ -129,13 +138,18 @@ class TketQasmParser(Qasm2Parser):
             [
                 transform_to_halfturn(param) if isinstance(param, Number) else param
                 for param in self._get_parameters(node, context)
-            ]
+            ],
         )
 
         return res
 
     def process_gate(
-        self, method, context: QasmContext, builder: TketBuilder, conditions=None, **kwargs
+        self,
+        method,
+        context: QasmContext,
+        builder: TketBuilder,
+        conditions=None,
+        **kwargs,
     ):
         # For ease-of-use we just process CX and U as a normal gate, but the QASM nodes
         # don't have names. Infer them in this case.
@@ -174,7 +188,12 @@ class TketQasmParser(Qasm2Parser):
             builder.gate("reset", qubits, conditions)
 
     def process_measure(
-        self, node, context: QasmContext, builder: TketBuilder, conditions=None, **kwargs
+        self,
+        node,
+        context: QasmContext,
+        builder: TketBuilder,
+        conditions=None,
+        **kwargs,
     ):
         for qubits, bits in self._get_staggered_qubit_params(node, context):
             builder.measure(qubits, bits, conditions)
@@ -212,7 +231,7 @@ def fetch_default_passes(architecture, opts, pass_list: List = None, add_delay=T
 
 def _full_stopalize(e):
     exception = str(e)
-    return exception if exception.endswith('.') else f"{exception}."
+    return exception if exception.endswith(".") else f"{exception}."
 
 
 def apply_default_transforms(circuit, architecture, opts):
@@ -229,9 +248,12 @@ def check_validity(circuit, architecture):
     predicates = [
         (
             "Failed to apply circuit to hardware topology.",
-            ConnectivityPredicate(architecture)
+            ConnectivityPredicate(architecture),
         ),
-        ("Failed to satisfy 2QB gate constraints.", DirectednessPredicate(architecture)),
+        (
+            "Failed to satisfy 2QB gate constraints.",
+            DirectednessPredicate(architecture),
+        ),
         ("No mid-circuit measurements allowed.", NoMidMeasurePredicate()),
     ]
 
@@ -335,7 +357,9 @@ def get_coupling_subgraphs(couplings):
         subgraph_added_to = None
         for subgraph in subgraphs:
             # check whether coupling joins to subgraph
-            if set(coupling) & {qubit for connection in subgraph for qubit in connection}:
+            if set(coupling) & {
+                qubit for connection in subgraph for qubit in connection
+            }:
                 if subgraph_added_to is None:
                     # add the coupling to the subgraph
                     subgraph.append(coupling)
@@ -377,9 +401,9 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         # Without default remapping pass multi-qubit gates don't get moved around, so
         # trying to apply them to a limited subset of qubits provides no value.
         if TketOptimizations.DefaultMappingPass not in opts:
-            architecture = Architecture([
-                tuple(Node("q", i) for i in val.direction) for val in couplings
-            ])
+            architecture = Architecture(
+                [tuple(Node("q", i) for i in val.direction) for val in couplings]
+            )
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
             coupling_qualities = list({val.quality for val in couplings})
@@ -393,9 +417,9 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
                     if circ.n_qubits <= len(
                         set([qubit for coupling in subgraph for qubit in coupling])
                     ):
-                        architecture = Architecture([
-                            tuple(Node("q", i) for i in val) for val in subgraph
-                        ])
+                        architecture = Architecture(
+                            [tuple(Node("q", i) for i in val) for val in subgraph]
+                        )
                         optimizations_failed = not optimize_circuit(
                             circ, architecture, opts
                         )
@@ -410,8 +434,10 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
     else:
         # Synthetic RingArch object because we need custom quantum node names.
         num_qubits = len(hardware.qubits)
-        couplings = [(Node("q", i % num_qubits), Node("q", (i + 1) % num_qubits))
-                     for i in range(num_qubits)]
+        couplings = [
+            (Node("q", i % num_qubits), Node("q", (i + 1) % num_qubits))
+            for i in range(num_qubits)
+        ]
         architecture = Architecture(couplings)
         optimizations_failed = not optimize_circuit(circ, architecture, opts)
 
@@ -436,7 +462,9 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             try:
                 # Tket just throws an exception if the list is none, so skip if that's
                 # the case.
-                default_passes = fetch_default_passes(architecture, opts, add_delay=False)
+                default_passes = fetch_default_passes(
+                    architecture, opts, add_delay=False
+                )
                 if len(default_passes) > 0:
                     SequencePass(default_passes).apply(circ)
             except RuntimeError as e:

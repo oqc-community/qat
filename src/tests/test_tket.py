@@ -10,12 +10,14 @@ from .qasm_utils import get_qasm2
 
 class TestTketOptimization:
     def _run_random(self, tket_opt):
-        """ Helper class for testing various optimization configs against a varied QASM file. """
+        """Helper class for testing various optimization configs against a varied QASM file."""
         qasm_string = get_qasm2("random_n5_d5.qasm")
         opt_config = Qasm2Optimizations()
         opt_config.tket_optimizations |= tket_opt
         hardware = get_default_echo_hardware(8)
-        return run_tket_optimizations(qasm_string, opt_config.tket_optimizations, hardware)
+        return run_tket_optimizations(
+            qasm_string, opt_config.tket_optimizations, hardware
+        )
 
     def test_globalise_phased_x(self):
         assert self._run_random(TketOptimizations.GlobalisePhasedX)

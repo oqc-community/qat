@@ -16,12 +16,13 @@ from qat.purr.compiler.instructions import (
 
 
 class TimelineSegment:
-    """ Segment of the execution timeline. """
+    """Segment of the execution timeline."""
+
     def __init__(
         self,
         instruction: QuantumInstruction,
         dependencies: Set[str] = None,
-        reliant: List[Any] = None
+        reliant: List[Any] = None,
     ):
         self.instruction = instruction
         self.scheduling_dependencies = dependencies or {
@@ -31,14 +32,20 @@ class TimelineSegment:
 
     def __repr__(self):
         sep = ";" if any(self.reliant_instructions) else ""
-        sched_deps = f"[{','.join(self.scheduling_dependencies)}]" \
-            if any(self.scheduling_dependencies) else ""
-        return f"{self.instruction.duration}: {sched_deps} {str(self.instruction)}{sep}" \
-               f"{';'.join(str(inst) for inst in self.reliant_instructions)}"
+        sched_deps = (
+            f"[{','.join(self.scheduling_dependencies)}]"
+            if any(self.scheduling_dependencies)
+            else ""
+        )
+        return (
+            f"{self.instruction.duration}: {sched_deps} {str(self.instruction)}{sep}"
+            f"{';'.join(str(inst) for inst in self.reliant_instructions)}"
+        )
 
 
 class QatFile:
-    """ In-memory representation of our instruction file. """
+    """In-memory representation of our instruction file."""
+
     def __init__(self):
         self.timeline: List[TimelineSegment] = []
         self.meta_instructions = []
@@ -49,8 +56,10 @@ class QatFile:
     def add_meta(self, instruction):
         if isinstance(instruction, Return):
             existing_return = next(
-                iter(meta for meta in self.meta_instructions if isinstance(meta, Return)),
-                None
+                iter(
+                    meta for meta in self.meta_instructions if isinstance(meta, Return)
+                ),
+                None,
             )
             if existing_return is not None:
                 existing_return.variables.extend(instruction.variables)
@@ -66,8 +75,10 @@ class QatFile:
     def get_pp_for_variable(self, target_var):
         results = []
         for instruction in self.instructions:
-            if isinstance(instruction, PostProcessing) \
-                    and instruction.acquire.output_variable == target_var:
+            if (
+                isinstance(instruction, PostProcessing)
+                and instruction.acquire.output_variable == target_var
+            ):
                 results.append(instruction)
 
         return results
@@ -95,6 +106,7 @@ class InstructionEmitter:
     simulate what it might do in the future and ust output a Python object that
     simulates what our instruction set might look like.
     """
+
     def emit(self, instructions, hardware):
         qatf = QatFile()
 
@@ -111,7 +123,8 @@ class InstructionEmitter:
             # Only gather each variable once for the return.
             unique_variables = []
             for var in [
-                acq.output_variable for acq in qatf.instructions
+                acq.output_variable
+                for acq in qatf.instructions
                 if isinstance(acq, Acquire)
             ]:
                 if var not in unique_variables:
@@ -124,7 +137,9 @@ class InstructionEmitter:
         )
         if repeat_inst is None:
             qatf.add_meta(
-                Repeat(hardware.default_repeat_count, hardware.default_repetition_period)
+                Repeat(
+                    hardware.default_repeat_count, hardware.default_repetition_period
+                )
             )
         else:
             if repeat_inst.repeat_count is None:

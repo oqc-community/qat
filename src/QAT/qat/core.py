@@ -20,16 +20,16 @@ log = get_default_logger()
 
 
 def _default_arguments(hardware: QuantumHardwareModel, config: CompilerConfig):
-    """ Centralized place for config/hardware defaulting for various generalized execution pathways. """
+    """Centralized place for config/hardware defaulting for various generalized execution pathways."""
     return hardware or get_default_echo_hardware(), config or CompilerConfig()
 
 
 def execute(
     qat_input: Union[str, InstructionBuilder],
     hardware: QuantumHardwareModel = None,
-    compiler_config: CompilerConfig = None
+    compiler_config: CompilerConfig = None,
 ):
-    """ Execute file path or code blob. """
+    """Execute file path or code blob."""
     results, _ = execute_with_metrics(qat_input, hardware, compiler_config)
     return results
 
@@ -37,7 +37,7 @@ def execute(
 def execute_with_metrics(
     incoming: Union[str, InstructionBuilder],
     hardware: QuantumHardwareModel = None,
-    config: CompilerConfig = None
+    config: CompilerConfig = None,
 ):
     hardware, config = _default_arguments(hardware, config)
     """ Execute file path or code blob. """
@@ -45,7 +45,9 @@ def execute_with_metrics(
         frontend: LanguageFrontend = fetch_frontend(incoming)
         return _parse_and_execute(frontend, incoming, hardware, config)
     elif isinstance(incoming, InstructionBuilder):
-        results, metrics = execute_instructions_via_config(hardware, incoming.instructions, config)
+        results, metrics = execute_instructions_via_config(
+            hardware, incoming.instructions, config
+        )
         return results, metrics.as_dict()
 
     raise ValueError(f"No compiler support for inputs of type {str(type(incoming))}")
@@ -74,7 +76,10 @@ def execute_qasm_with_metrics(
 
 
 def _parse_and_execute(
-    frontend: LanguageFrontend, str_or_path: str, hardware, config: CompilerConfig = None
+    frontend: LanguageFrontend,
+    str_or_path: str,
+    hardware,
+    config: CompilerConfig = None,
 ):
     hardware, config = _default_arguments(hardware, config)
     results, metrics = frontend.parse_and_execute(str_or_path, hardware, config)

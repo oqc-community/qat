@@ -12,7 +12,10 @@ from qat.purr.backends.echo import (
 from qat.purr.compiler.builders import Axis, InstructionBuilder
 from qat.purr.compiler.config import ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
-from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
+from qat.purr.compiler.hardware_models import (
+    QuantumHardwareModel,
+    resolve_qb_pulse_channel,
+)
 from qat.purr.compiler.runtime import QuantumRuntime
 from qiskit import Aer, QiskitError, QuantumCircuit, transpile
 
@@ -26,7 +29,8 @@ def get_default_qasm_hardware(qubit_count=20):
 
 
 class QasmBuilder(InstructionBuilder):
-    """ Builder around QASM circuits. """
+    """Builder around QASM circuits."""
+
     def __init__(self, qubit_count: int, hardware_model: QuantumHardwareModel):
         super().__init__(hardware_model)
         self.qubit_count = qubit_count
@@ -67,7 +71,7 @@ class QasmBuilder(InstructionBuilder):
         axis: Axis,
         controllers: Union[Qubit, List[Qubit]],
         target: Qubit,
-        theta: float
+        theta: float,
     ):
         if len(controllers) > 1:
             raise ValueError(
@@ -139,7 +143,7 @@ class QasmRuntime(QuantumRuntime):
         if not isinstance(builder, QasmBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
 
-        qasm_sim = Aer.get_backend('qasm_simulator')
+        qasm_sim = Aer.get_backend("qasm_simulator")
         circuit = builder.circuit
 
         # TODO: Needs a more nuanced try/catch. Some exceptions we should catch, others we should re-throw.

@@ -17,6 +17,7 @@ class InlineResultsProcessing(Flag):
     Results transforms applied directly to the read-out value on the QPU. In most
     situations applied post-execution, but can also be interwoven.
     """
+
     # Raw readout from the QPU. Normally Z-axis values for each shot.
     Raw = auto()
 
@@ -55,8 +56,9 @@ class ResultsFormatting(Flag):
 class QuantumResultsFormat:
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
-        self.transforms: Optional[ResultsFormatting] \
-            = ResultsFormatting.DynamicStructureReturn
+        self.transforms: Optional[
+            ResultsFormatting
+        ] = ResultsFormatting.DynamicStructureReturn
 
     def raw(self) -> QuantumResultsFormat:
         self.format = InlineResultsProcessing.Raw
@@ -71,9 +73,9 @@ class QuantumResultsFormat:
         Returns a count of each instance of measured qubit registers.
         Switches result format to raw.
         """
-        self.transforms = \
-            ResultsFormatting.BinaryCount \
-            | ResultsFormatting.DynamicStructureReturn
+        self.transforms = (
+            ResultsFormatting.BinaryCount | ResultsFormatting.DynamicStructureReturn
+        )
         self.format = InlineResultsProcessing.Raw
         return self
 
@@ -82,9 +84,10 @@ class QuantumResultsFormat:
         Squashes binary result list into a singular bit string. Switches results to
         binary.
         """
-        self.transforms = \
-            ResultsFormatting.SquashBinaryResultArrays \
+        self.transforms = (
+            ResultsFormatting.SquashBinaryResultArrays
             | ResultsFormatting.DynamicStructureReturn
+        )
         self.format = InlineResultsProcessing.Binary
         return self
 
@@ -124,7 +127,8 @@ class QuantumResultsFormat:
 
 
 class TketOptimizations(Flag):
-    """ Flags for the various Tket optimizations we can apply. """
+    """Flags for the various Tket optimizations we can apply."""
+
     Empty = auto()
     DefaultMappingPass = auto()
     FullPeepholeOptimise = auto()
@@ -151,12 +155,14 @@ class TketOptimizations(Flag):
 
 
 class QiskitOptimizations(Flag):
-    """ Flags for the various Qiskit optimizations we can apply. """
+    """Flags for the various Qiskit optimizations we can apply."""
+
     Empty = auto()
 
 
 class QatOptimizations(Flag):
-    """ Flags for the various Qat optimizations we can apply. """
+    """Flags for the various Qat optimizations we can apply."""
+
     Empty = auto()
 
 
@@ -187,8 +193,8 @@ class MetricsType(Flag):
         metric.
         """
         name = self.name
-        name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+        name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+        return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
 class CompilerConfig:
@@ -198,6 +204,7 @@ class CompilerConfig:
     If no explicit optimizations are passed then the default set of optimization for the
     language you're attempting to compile will be applied.
     """
+
     def __init__(
         self,
         repeats=None,
@@ -205,11 +212,13 @@ class CompilerConfig:
         results_format: QuantumResultsFormat = None,
         metrics=MetricsType.Default,
         active_calibrations=None,
-        optimizations: "OptimizationConfig" = None
+        optimizations: "OptimizationConfig" = None,
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
-        self.results_format: QuantumResultsFormat = results_format or QuantumResultsFormat()
+        self.results_format: QuantumResultsFormat = (
+            results_format or QuantumResultsFormat()
+        )
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
@@ -229,7 +238,8 @@ class CompilerConfig:
 
 
 class CalibrationArguments:
-    """ Base class for individual calibration arguments."""
+    """Base class for individual calibration arguments."""
+
     def to_json(self):
         return json_dumps(self)
 
@@ -276,15 +286,16 @@ class OptimizationConfig:
     so we can mix and match optimization objects across multiple setups and languages
     without duplication.
     """
+
     def __init__(self):
         super().__init__()
 
     def default(self):
-        """ Apply default set of optimizations to the current set. """
+        """Apply default set of optimizations to the current set."""
         return self
 
     def disable(self):
-        """ Disable all optimizations. """
+        """Disable all optimizations."""
         return self
 
     def minimum(self):
@@ -393,7 +404,9 @@ def get_serializable_types():
 
     def update_dict(type):
         if issubclass(type, Enum):
-            serializable_types.update({f"<enum '{type.__module__}.{type.__name__}'>": type})
+            serializable_types.update(
+                {f"<enum '{type.__module__}.{type.__name__}'>": type}
+            )
         else:
             serializable_types.update({str(type): type})
 
