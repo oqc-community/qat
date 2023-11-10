@@ -52,4 +52,4 @@ html_theme_options = {
     'navigation_depth': 6,
     'includehidden': True,
     'titles_only': False
-}   # yapf: disable
+}

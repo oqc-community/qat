@@ -16,7 +16,7 @@ def test_square_function(sizes):
     y1 = func(np.empty(shape=[sizes]))
     y2 = func.eval(np.empty(shape=[sizes]))
     assert np.array_equal(y1, y2)
-    assert np.array_equal(y1, np.ones(shape=[sizes], dtype='cfloat'))
+    assert np.array_equal(y1, np.ones(shape=[sizes], dtype="cfloat"))
 
 
 def test_size_limits():
@@ -34,10 +34,10 @@ def test_size_limits():
 def test_square_function_first_derivative(sizes):
     x = np.empty(shape=[sizes])
     assert np.array_equal(
-        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype='cfloat')
+        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype="cfloat")
     )
     assert np.array_equal(
-        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype='cfloat')
+        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype="cfloat")
     )
 
 
@@ -45,7 +45,7 @@ def test_gaussian_function():
     x = np.array([-2, -1, 0, 1, 2])
     gaussian = GaussianFunction(rise=1, width=1)
     y = gaussian.eval(x)
-    assert y.dtype == 'cfloat'
+    assert y.dtype == "cfloat"
     # Known maxima
     assert y[2] == 1 + 0j
     # Test based on even function symmetry
@@ -59,7 +59,7 @@ def test_gaussian_function_first_derivative():
     gaussian = GaussianFunction(rise=1, width=1)
     y = gaussian.eval(x)
     y_x = gaussian.derivative(x)
-    assert y_x.dtype == 'cfloat'
+    assert y_x.dtype == "cfloat"
     assert np.argmax(y) == 2
     # Known maxima
     assert y_x[2] == 0 + 0j

@@ -17,7 +17,9 @@ def find_calibration(args: "CalibrationArguments"):
             break
 
     if calibration is None:
-        raise ValueError(f"Calibration with an argument of {str(args)} couldn't be found.")
+        raise ValueError(
+            f"Calibration with an argument of {str(args)} couldn't be found."
+        )
 
     return calibration
 
@@ -36,7 +38,8 @@ _standard_calibrations: Dict[str, "BuiltinRemoteCalibration"] = dict()
 
 
 class CustomCalibration(RemoteCalibration):
-    """ Bespoke calibration built by external users. """
+    """Bespoke calibration built by external users."""
+
     pass
 
 
@@ -45,5 +48,6 @@ class BuiltinRemoteCalibration(RemoteCalibration):
     Identifier for any built-in calibrations. Enables automatic running of calibrations
     remotely for any class that inherits this.
     """
+
     def __init_subclass__(cls, **kwargs):
         _standard_calibrations[cls.__name__] = cls()

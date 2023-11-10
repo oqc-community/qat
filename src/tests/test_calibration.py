@@ -78,15 +78,16 @@ class CalibrationSavingAndLoadingTests(unittest.TestCase):
             self.assertEqual(
                 id(value.physical_channel),
                 id(original_channel),
-                "Copied references are different objects."
+                "Copied references are different objects.",
             )
 
         assert len(echo.basebands) == len(copied_echo.basebands)
         assert len(echo.physical_channels) == len(copied_echo.physical_channels)
         assert len(echo.pulse_channels) == len(copied_echo.pulse_channels)
         assert len(echo.quantum_devices) == len(copied_echo.quantum_devices)
-        assert len(echo.qubit_direction_couplings
-                  ) == len(copied_echo.qubit_direction_couplings)
+        assert len(echo.qubit_direction_couplings) == len(
+            copied_echo.qubit_direction_couplings
+        )
 
     def test_save_calibration(self):
         saved_path = save_object_to_log_folder(

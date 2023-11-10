@@ -13,10 +13,12 @@ class _FlagFieldValidation(type):
     Validate that the CompilationsMetrics class has type hints for all the metrics,
     which'll be dynamically assigned later.
     """
+
     def __new__(mcs, name, inheritance, attributes):
         hint_names = set(attributes.get("__annotations__", {}).keys())
         snake_cased_flags = [
-            val.snake_case_name() for val in list(dict(MetricsType.__members__).values())
+            val.snake_case_name()
+            for val in list(dict(MetricsType.__members__).values())
             if not val.is_composite()
         ]
         missing_fields = [val for val in snake_cased_flags if val not in hint_names]
@@ -35,19 +37,22 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
     fields are generated from the MetricsType flag after the names are snake-cased and
     hold the value associated with that particular flag.
     """
+
     optimized_circuit: Optional[str]
     optimized_instruction_count: Optional[int]
 
     def __init__(self, enabled_metrics=None):
-        self.enabled_metrics: Optional[MetricsType] = \
+        self.enabled_metrics: Optional[MetricsType] = (
             enabled_metrics or MetricsType.Default
+        )
         for key in [val.snake_case_name() for val in self._target_metrics()]:
             setattr(self, key, None)
 
     def _target_metrics(self) -> List[MetricsType]:
-        """ Get a list of the enum types that we should function on. """
+        """Get a list of the enum types that we should function on."""
         return [
-            val for val in list(dict(MetricsType.__members__).values())
+            val
+            for val in list(dict(MetricsType.__members__).values())
             if not val.is_composite()
         ]
 
@@ -62,8 +67,7 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
         if overwrite:
             self.enabled_metrics = enabled_metrics
         else:
-            self.enabled_metrics = \
-                self.enabled_metrics | enabled_metrics
+            self.enabled_metrics = self.enabled_metrics | enabled_metrics
 
     def are_enabled(self, metric: MetricsType):
         return self.enabled_metrics is not None and metric in self.enabled_metrics
@@ -78,9 +82,10 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
         return getattr(self, metric.snake_case_name())
 
     def as_dict(self):
-        """ Generates a dictionary of the valid metrics. """
+        """Generates a dictionary of the valid metrics."""
         return {
-            met.snake_case_name(): self.get_metric(met) for met in self._target_metrics()
+            met.snake_case_name(): self.get_metric(met)
+            for met in self._target_metrics()
         }
 
     def merge(self, other: "CompilationMetrics"):

@@ -14,8 +14,9 @@ class TestTketOptimization:
         circ = tket_builder.circuit
 
         if directional_arch:
-            architecture = Architecture([(0, 1), (1, 2), (2, 3), (4, 3), (4, 5), (6, 5),
-                                         (7, 6), (0, 7)])
+            architecture = Architecture(
+                [(0, 1), (1, 2), (2, 3), (4, 3), (4, 5), (6, 5), (7, 6), (0, 7)]
+            )
         else:
             architecture = RingArch(8)
 

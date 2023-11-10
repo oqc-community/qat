@@ -22,12 +22,12 @@ log = get_default_logger()
 
 
 def _get_file_contents(file_path):
-    """ Get Program contents from a file. """
+    """Get Program contents from a file."""
     with open(file_path) as ifile:
         return ifile.read()
 
 
-path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
+path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 
 class LanguageFrontend(abc.ABC):
@@ -35,17 +35,16 @@ class LanguageFrontend(abc.ABC):
         self,
         quantum_builder: InstructionBuilder,
         hardware,
-        compiler_config: CompilerConfig
+        compiler_config: CompilerConfig,
     ):
         instructions = (
             get_builder(hardware)
             .repeat(compiler_config.repeats, compiler_config.repetition_period)
             .add(quantum_builder)
-        )  # yapf: disable
+        )
         return instructions
 
     def _execute(self, hardware, compiler_config: CompilerConfig, instructions):
-
         calibrations = [
             find_calibration(arg) for arg in compiler_config.active_calibrations
         ]
@@ -55,7 +54,7 @@ class LanguageFrontend(abc.ABC):
             instructions,
             compiler_config.results_format,
             calibrations,
-            compiler_config.repeats
+            compiler_config.repeats,
         )
 
     def _default_common_args(self, hardware=None, compiler_config=None):
@@ -71,7 +70,10 @@ class LanguageFrontend(abc.ABC):
 
     @abc.abstractmethod
     def execute(
-        self, instructions: InstructionBuilder, hardware, compiler_config: CompilerConfig
+        self,
+        instructions: InstructionBuilder,
+        hardware,
+        compiler_config: CompilerConfig,
     ):
         ...
 
@@ -116,9 +118,8 @@ class QIRFrontend(LanguageFrontend):
         self,
         instructions: InstructionBuilder,
         hardware=None,
-        compiler_config: CompilerConfig = None
+        compiler_config: CompilerConfig = None,
     ):
-
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
         with log_duration("Execution completed, took {} seconds."):
@@ -128,8 +129,9 @@ class QIRFrontend(LanguageFrontend):
         self, qir_file: str, hardware=None, compiler_config: CompilerConfig = None
     ):
         instructions, parse_metrics = self.parse(qir_file, hardware, compiler_config)
-        result, execution_metrics = \
-            self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(
+            instructions, hardware, compiler_config
+        )
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 
@@ -150,8 +152,9 @@ class QASMFrontend(LanguageFrontend):
 
         parser = get_qasm_parser(qasm_string)
         if compiler_config.optimizations is None:
-            compiler_config.optimizations = \
-                get_optimizer_config(parser.parser_language())
+            compiler_config.optimizations = get_optimizer_config(
+                parser.parser_language()
+            )
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(
@@ -167,20 +170,20 @@ class QASMFrontend(LanguageFrontend):
                 parser.results_format = compiler_config.results_format.format
 
             quantum_builder = parser.parse(get_builder(hardware), qasm_string)
-            return self._build_instructions(
-                quantum_builder, hardware, compiler_config), metrics
+            return (
+                self._build_instructions(quantum_builder, hardware, compiler_config),
+                metrics,
+            )
 
     def execute(
         self,
         instructions: InstructionBuilder,
         hardware=None,
-        compiler_config: CompilerConfig = None
+        compiler_config: CompilerConfig = None,
     ):
-
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
         with log_duration("Execution completed, took {} seconds."):
-
             return self._execute(hardware, compiler_config, instructions)
 
     def parse_and_execute(
@@ -191,6 +194,8 @@ class QASMFrontend(LanguageFrontend):
         default qubit simulator if no hardware provided.
         """
         instructions, parse_metrics = self.parse(qasm_string, hardware, compiler_config)
-        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(
+            instructions, hardware, compiler_config
+        )
         parse_metrics.merge(execution_metrics)
         return result, parse_metrics

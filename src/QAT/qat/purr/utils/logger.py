@@ -15,10 +15,14 @@ from numpy import savetxt
 from qat.purr.utils.serializer import json_dump, json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
-default_logger_format = "[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"
-json_format = "{\"level\": \"%(levelname)s\", \"time\": \"%(asctime)s\"," \
-              "\"module name\": \"%(module)s\", \"function name\": \"%(funcName)s\", \"line number\": %(lineno)d," \
-              "\"message\": \"%(message)s\"},"
+default_logger_format = (
+    "[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"
+)
+json_format = (
+    '{"level": "%(levelname)s", "time": "%(asctime)s",'
+    '"module name": "%(module)s", "function name": "%(funcName)s", "line number": %(lineno)d,'
+    '"message": "%(message)s"},'
+)
 
 
 class LoggerLevel(Enum):
@@ -44,6 +48,7 @@ class BasicLogger(logging.Logger):
     separately, only call ``logging.getLogger("qat.purr.some_name")``, and this will return
     an instance of :class:`BasicLogger`.
     """
+
     def __init__(self, name: str, _log_folder: "LogFolder" = None):
         logging.Logger.__init__(self, name)
         self.setLevel(logging.INFO)
@@ -60,7 +65,7 @@ class BasicLogger(logging.Logger):
         cell_type: str = None,
         fit_type: str = None,
         msg: str = "",
-        section_level=1
+        section_level=1,
     ):
         """
         Displays the result of some experiment or computation. This logging function is
@@ -93,11 +98,11 @@ class BasicLogger(logging.Logger):
             msg=data,
             *args,
             extra={
-                'cell_type': cell_type,
-                'fit_type': fit_type,
-                'note': msg,
-                'section_level': section_level
-            }
+                "cell_type": cell_type,
+                "fit_type": fit_type,
+                "note": msg,
+                "section_level": section_level,
+            },
         )
 
     def code(self, source: List[str]):
@@ -107,7 +112,7 @@ class BasicLogger(logging.Logger):
 
         :param source: The list of code lines as strings
         """
-        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg='\n'.join(source))
+        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(source))
 
     def save_object(self, obj, name: str, numpy_arr: bool = False):
         """
@@ -122,13 +127,13 @@ class BasicLogger(logging.Logger):
             code = [
                 "# load the measured data from the file",
                 "from numpy import loadtxt",
-                f"{name} = loadtxt(r'{name}.txt')"
+                f"{name} = loadtxt(r'{name}.txt')",
             ]
-            logging.Logger.log(self, level=LoggerLevel.CODE.value, msg='\n'.join(code))
+            logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(code))
             return
-        file_name = f'{name}.json'
+        file_name = f"{name}.json"
         file_path = os.path.join(self.logs_path, file_name)
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json_dump(obj, f, indent=4, ensure_ascii=False)
 
         # After serializing the object above, a code snippet will be added to the
@@ -137,12 +142,12 @@ class BasicLogger(logging.Logger):
         # the Jupyter script.
         code = [
             "from qat.purr.logger import *",
-            f"{name} = load_data('{os.path.relpath(file_path, self.logs_path)}')"
+            f"{name} = load_data('{os.path.relpath(file_path, self.logs_path)}')",
         ]
-        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg='\n'.join(code))
+        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(code))
 
     def close(self):
-        """ Closes this logger, cleans up the file handles and appropriate folder. """
+        """Closes this logger, cleans up the file handles and appropriate folder."""
         for handler in self.handlers:
             try:
                 handler.close()
@@ -156,7 +161,7 @@ class BasicLogger(logging.Logger):
                 print(f"Log folder failed to close cleanly. Message: {e}")
 
     _dummy_log = logging.makeLogRecord({})
-    record_override_key = '$_enable_record_override'
+    record_override_key = "$_enable_record_override"
 
     def makeRecord(
         self,
@@ -169,7 +174,7 @@ class BasicLogger(logging.Logger):
         exc_info,
         func=None,
         extra: dict = None,
-        sinfo=None
+        sinfo=None,
     ):
         """
         Override that allows us to override record values via the extras dictionary.
@@ -183,21 +188,22 @@ class BasicLogger(logging.Logger):
             # Strip off values that would conflict with the makeRecord validation then
             # just apply them afterwards.
             overwriting_values = {
-                key: value for key,
-                value in extra.items() if key in self._dummy_log.__dict__
+                key: value
+                for key, value in extra.items()
+                if key in self._dummy_log.__dict__
             }
             for key in overwriting_values:
                 del extra[key]
 
             # If we have overrides for the function values, just apply them.
-            if 'fn' in extra:
-                fn = extra.pop('fn')
+            if "fn" in extra:
+                fn = extra.pop("fn")
 
-            if 'lno' in extra:
-                lno = extra.pop('lno')
+            if "lno" in extra:
+                lno = extra.pop("lno")
 
-            if 'func' in extra:
-                func = extra.pop('func')
+            if "func" in extra:
+                func = extra.pop("func")
         else:
             overwriting_values = {}
 
@@ -223,12 +229,13 @@ class ConsoleLoggerHandler(logging.StreamHandler):
     """
     Basic console handler for the logger. It defaults to stdout.
     """
+
     def __init__(self, stream: IO = sys.stdout):
         super().__init__(stream)
         self.setFormatter(logging.Formatter(default_logger_format))
 
     def __repr__(self):
-        return 'Console logger handler'
+        return "Console logger handler"
 
 
 class FileLoggerHandler(logging.FileHandler):
@@ -237,8 +244,9 @@ class FileLoggerHandler(logging.FileHandler):
     created with a delay, so the stream is None until the first emit. This also allows
     to write some initial stuff to the log file when creating it.
     """
+
     def __init__(self, file_path: str):
-        super().__init__(os.path.abspath(file_path), mode='w', delay=True)
+        super().__init__(os.path.abspath(file_path), mode="w", delay=True)
         self.setFormatter(logging.Formatter(default_logger_format))
 
     def emit(self, record):
@@ -256,7 +264,7 @@ class FileLoggerHandler(logging.FileHandler):
         pass
 
     def __repr__(self):
-        return 'File logger handler (path: %s)' % self.baseFilename
+        return "File logger handler (path: %s)" % self.baseFilename
 
 
 class JsonHandler(FileLoggerHandler):
@@ -266,6 +274,7 @@ class JsonHandler(FileLoggerHandler):
     emit function is called. By overriding the method, the JSON format can be ensured at
     each writing.
     """
+
     def __init__(self, file_path):
         super().__init__(file_path)
         self.file_terminator = "{}]}" + self.terminator
@@ -280,7 +289,9 @@ class JsonHandler(FileLoggerHandler):
             self.stream = self._open()
             self.create_initial_file()
         self.stream.seek(0, os.SEEK_END)
-        self.stream.seek(self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET)
+        self.stream.seek(
+            self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET
+        )
         FileLoggerHandler.emit(self, record)
         self.stream.write(self.file_terminator)
         self.flush()
@@ -291,21 +302,22 @@ class JsonLoggerHandler(JsonHandler):
     The basic JSON file handler logger. It is intended to generate the same output as
     :class:`FileLoggerHandler`, but in JSON format.
     """
+
     def __init__(self, file_path):
         extension = Path(file_path).suffix
-        if not extension == '.json':
+        if not extension == ".json":
             raise ValueError("Only JSON file paths are accepted!")
         super().__init__(file_path)
         self.setFormatter(logging.Formatter(json_format))
 
     def create_initial_file(self):
         self.stream.write(
-            "{" + f"{os.linesep}\"entries\": [{os.linesep}" + "{}]}" + self.terminator
+            "{" + f'{os.linesep}"entries": [{os.linesep}' + "{}]}" + self.terminator
         )
         self.flush()
 
     def __repr__(self):
-        return 'JSON console logger handler (path: %s)' % self.baseFilename
+        return "JSON console logger handler (path: %s)" % self.baseFilename
 
 
 class CompositeLogger(BasicLogger):
@@ -316,8 +328,11 @@ class CompositeLogger(BasicLogger):
     function needs to be called when logging, and it is ensured, that all the enabled
     loggers will log the message.
     """
+
     def __init__(
-        self, loggers_or_names: List[Union[str, logging.Logger]] = None, _log_folder=None
+        self,
+        loggers_or_names: List[Union[str, logging.Logger]] = None,
+        _log_folder=None,
     ):
         """Creates the list of loggers on which the logging functions will iterate
 
@@ -337,7 +352,13 @@ class CompositeLogger(BasicLogger):
 
         # Set the root to the lowest non-custom log level activated.
         root.setLevel(
-            min([val.level for val in self.loggers if (float(val.level / 10)).is_integer()])
+            min(
+                [
+                    val.level
+                    for val in self.loggers
+                    if (float(val.level / 10)).is_integer()
+                ]
+            )
         )
 
     def add_loggers(self, loggers_or_names: List[Union[str, logging.Logger]] = ()):
@@ -444,6 +465,7 @@ class LogFolder:
     :paramref:`prefix` and :paramref:`suffix` can be specified to append the created log
     folder (if :paramref:`labber_style` is not True).
     """
+
     def __init__(
         self,
         base_folder_path: str = None,
@@ -451,7 +473,7 @@ class LogFolder:
         cleanup: bool = None,
         folder_name: str = None,
         prefix: str = None,
-        suffix: str = None
+        suffix: str = None,
     ):
         """
         The constructor for the LogFolder. It can be configured by the parameters. If
@@ -482,7 +504,7 @@ class LogFolder:
 
         os.makedirs(os.path.abspath(base_folder_path), exist_ok=True)
 
-        folder_name = folder_name or ''
+        folder_name = folder_name or ""
         if prefix is not None:
             folder_name = f"{prefix}_{folder_name}"
         if suffix is not None:
@@ -497,7 +519,7 @@ class LogFolder:
 
         self.folder_path = os.path.abspath(self.folder_path)
 
-    def get_log_file_path(self, file_name: str = 'log', over_write=True):
+    def get_log_file_path(self, file_name: str = "log", over_write=True):
         file_path = os.path.join(self.folder_path, file_name)
         if not over_write:
             if os.path.exists(file_path):
@@ -505,10 +527,10 @@ class LogFolder:
         return file_path
 
     def create_sub_folder_labber_style(self, base_folder, folder_name: str = None):
-        if folder_name is None or folder_name == '':
-            folder_name = ''
+        if folder_name is None or folder_name == "":
+            folder_name = ""
         else:
-            folder_name = folder_name + '.'
+            folder_name = folder_name + "."
         now = datetime.now()
         folder_name = folder_name + f"{now.hour:02d}.{now.minute:02d}.{now.second:02d}"
         main_folder_path = self.get_main_folder_path_labber_style(base_folder)
@@ -526,7 +548,7 @@ class LogFolder:
         now = datetime.now()
         year, month, day = now.year, now.month, now.day
         main_folder_path = os.path.join(
-            base_folder, f"{year:04d}", f"{month:02d}", f'Data_{month:02d}{day:02d}'
+            base_folder, f"{year:04d}", f"{month:02d}", f"Data_{month:02d}{day:02d}"
         )
         return main_folder_path
 
@@ -553,7 +575,8 @@ class KeywordFilter(logging.Filter):
     all the log messages, and if the message content contains the keyword, the log will
     not be printed.
     """
-    def __init__(self, keyword=''):
+
+    def __init__(self, keyword=""):
         super().__init__(keyword)
         self.keyword = keyword
 
@@ -569,7 +592,8 @@ class ModuleFilter(logging.Filter):
     all the log messages, and if the log was produced by a module with the specified
     module name, the log will not pass.
     """
-    def __init__(self, module_name=''):
+
+    def __init__(self, module_name=""):
         super().__init__(module_name)
         self.module_name = module_name
 
@@ -585,6 +609,7 @@ class LevelFilter(logging.Filter):
     specialized logging functions, like code or output have smaller level than the
     DEBUG logging level (so that other than Jupyter handlers don't process them).
     """
+
     def __init__(self, level):
         super().__init__()
         self.level = logging.getLevelName(level)
@@ -600,8 +625,8 @@ logging.setLoggerClass(BasicLogger)
 These specialized logging levels are registered with the logging system, so they can be
 retrieved by using for example logging.getLevelName('CODE').
 """
-logging.addLevelName(LoggerLevel.OUTPUT.value, 'OUTPUT')
-logging.addLevelName(LoggerLevel.CODE.value, 'CODE')
+logging.addLevelName(LoggerLevel.OUTPUT.value, "OUTPUT")
+logging.addLevelName(LoggerLevel.CODE.value, "CODE")
 
 
 def import_logger_configuration(logger_config: dict, log_folder: LogFolder = None):
@@ -731,10 +756,10 @@ def load_object_from_log_folder(file_path: str):
     :return: The loaded object after deserialization
     """
     extension = Path(file_path).suffix
-    if not extension == '.json':
+    if not extension == ".json":
         raise ValueError("Only JSON file paths are accepted!")
     with open(
-        os.path.join(get_default_logger().log_folder.folder_path, file_path), 'r'
+        os.path.join(get_default_logger().log_folder.folder_path, file_path), "r"
     ) as f:
         obj = json_load(f)
     get_default_logger().debug(f"Object loaded: {str(obj)}")
@@ -746,7 +771,7 @@ def save_object_to_log_folder(obj, sub_folder_path: str):
     Serializes the specified object.
     """
     extension = Path(sub_folder_path).suffix
-    if not extension == '.json':
+    if not extension == ".json":
         raise ValueError("Only JSON file paths are accepted!")
     sub_folder_path = os.path.join(
         get_default_logger().log_folder.folder_path, sub_folder_path
@@ -755,7 +780,7 @@ def save_object_to_log_folder(obj, sub_folder_path: str):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    with open(sub_folder_path, 'w') as f:
+    with open(sub_folder_path, "w") as f:
         json_dump(obj, f, indent=4, ensure_ascii=False)
 
     return sub_folder_path
@@ -776,9 +801,11 @@ def get_default_logger():
         # clean-up if we are.
         try:
             import traceback
+
             stack = traceback.extract_stack()
             is_test_env = any(
-                val.filename is not None and val.filename.endswith(f"unittest\\loader.py")
+                val.filename is not None
+                and val.filename.endswith(f"unittest\\loader.py")
                 for val in stack
             )
             if is_test_env:

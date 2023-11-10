@@ -20,7 +20,7 @@ def _get_qir_path(file_name):
 
 
 def _get_contents(file_path):
-    """ Get QASM from a file. """
+    """Get QASM from a file."""
     with open(_get_qir_path(file_path)) as ifile:
         return ifile.read()
 
@@ -39,7 +39,7 @@ class TestQIR:
     def test_valid_ll_path(self):
         execute(
             get_test_file_path(TestFileType.QIR, "generator-bell.ll"),
-            get_default_echo_hardware(2)
+            get_default_echo_hardware(2),
         )
 
     def test_qir_bell(self):
@@ -48,7 +48,7 @@ class TestQIR:
         results = execute_qir(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
         )
-        assert results == '00'
+        assert results == "00"
 
     def test_base_profile_ops(self):
         parser = QIRParser(get_default_echo_hardware(7))
@@ -58,7 +58,7 @@ class TestQIR:
     def test_cudaq_input(self):
         results = execute(
             get_test_file_path(TestFileType.QIR, "basic_cudaq.ll"),
-            get_default_echo_hardware(6)
+            get_default_echo_hardware(6),
         )
 
         assert results.get("r00000") == [0]
@@ -75,7 +75,9 @@ class TestQIR:
     def test_complicated(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
-        execute_qir(_get_qir_path("complicated.ll"), get_default_echo_hardware(4), config)
+        execute_qir(
+            _get_qir_path("complicated.ll"), get_default_echo_hardware(4), config
+        )
 
     @pytest.mark.skip("Needs full runtime.")
     def test_hello_bitcode(self):
@@ -90,13 +92,15 @@ class TestQIR:
         results = execute_qir(
             _get_qir_path("select.bc"), get_default_echo_hardware(4), config
         )
-        assert results == '00'
+        assert results == "00"
 
     @pytest.mark.skip("Needs full runtime.")
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
-        execute_qir(_get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config)
+        execute_qir(
+            _get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config
+        )
 
     def test_qir_instruction_builder(self):
         parser = QIRParser(get_default_echo_hardware(4))
@@ -109,7 +113,7 @@ class TestQIR:
         results = execute(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
         )
-        assert results == {'00': 1000}
+        assert results == {"00": 1000}
 
     def test_common_entrypoint_string(self):
         config = CompilerConfig()
@@ -117,17 +121,15 @@ class TestQIR:
         results = execute(
             _get_contents("generator-bell.ll"), get_default_echo_hardware(4), config
         )
-        assert results == {'00': 1000}
+        assert results == {"00": 1000}
 
     def test_common_entrypoint_bitcode(self):
         config = CompilerConfig()
         config.results_format.binary_count()
         program = _get_contents("base64_bitcode_ghz")
         program = base64.b64decode(program)
-        results = execute(
-            program, get_default_echo_hardware(4), config
-        )
-        assert results == {'0': 1000}
+        results = execute(program, get_default_echo_hardware(4), config)
+        assert results == {"0": 1000}
 
     def test_invalid_QIR(self):
         config = CompilerConfig()
@@ -150,7 +152,7 @@ class TestQIR:
 
         expected_calls = [
             mock.call.measure_single_shot_z(q1, output_variable="1"),
-            mock.call.measure_single_shot_z(q0, output_variable="0")
+            mock.call.measure_single_shot_z(q0, output_variable="0"),
         ]
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
@@ -170,7 +172,7 @@ class TestQIR:
 
         expected_calls = [
             mock.call.measure_single_shot_z(q1, output_variable="1"),
-            mock.call.measure_single_shot_z(q0, output_variable="0")
+            mock.call.measure_single_shot_z(q0, output_variable="0"),
         ]
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
@@ -190,7 +192,7 @@ class TestQIR:
 
         expected_calls = [
             mock.call.measure_single_shot_z(q1, output_variable="1"),
-            mock.call.measure_single_shot_z(q0, output_variable="0")
+            mock.call.measure_single_shot_z(q0, output_variable="0"),
         ]
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
@@ -210,7 +212,7 @@ class TestQIR:
             mock.call.X(q1),
             mock.call.X(q0),
             mock.call.measure_single_shot_z(q1, output_variable="1"),
-            mock.call.measure_single_shot_z(q0, output_variable="0")
+            mock.call.measure_single_shot_z(q0, output_variable="0"),
         ]
 
         mock_builder.assert_has_calls(expected_calls, any_order=True)
@@ -221,12 +223,14 @@ class TestQIR:
     def test_qir_bell_binary_count(self):
         config = CompilerConfig()
         config.results_format.binary_count()
-        results = execute_qir(_get_qir_path("generator-bell.ll"), compiler_config=config)
+        results = execute_qir(
+            _get_qir_path("generator-bell.ll"), compiler_config=config
+        )
         assert len(results) == 4
-        assert results['00'] > 1
-        assert results['01'] > 1
-        assert results['10'] > 1
-        assert results['11'] > 1
+        assert results["00"] > 1
+        assert results["01"] > 1
+        assert results["10"] > 1
+        assert results["11"] > 1
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"

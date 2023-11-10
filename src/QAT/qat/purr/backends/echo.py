@@ -16,7 +16,7 @@ from qat.purr.compiler.instructions import AcquireMode, PostProcessing
 
 
 def apply_setup_to_hardware(hw, qubit_count: int = 4):
-    """ Apply the default echo hardware setup to the passed-in hardware. """
+    """Apply the default echo hardware setup to the passed-in hardware."""
     qubit_devices = []
     resonator_devices = []
     channel_index = 1
@@ -57,13 +57,13 @@ def apply_setup_to_hardware(hw, qubit_count: int = 4):
                     auxiliary_devices=[other_qubit],
                     channel_type=ChannelType.cross_resonance,
                     frequency=5.5e9,
-                    scale=50
+                    scale=50,
                 )
                 qubit.create_pulse_channel(
                     auxiliary_devices=[other_qubit],
                     channel_type=ChannelType.cross_resonance_cancellation,
                     frequency=5.5e9,
-                    scale=0.0
+                    scale=0.0,
                 )
             qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
             qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
@@ -83,6 +83,7 @@ class EchoEngine(QuantumExecutionEngine):
     A backend that just returns default values. Primarily used for testing and
     no-backend situations.
     """
+
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
@@ -110,8 +111,9 @@ class EchoEngine(QuantumExecutionEngine):
             for channel_id, aqs in aq_map.items():
                 for aq in aqs:
                     # just echo the output pulse back for now
-                    response = buffers[aq.physical_channel.full_id()][aq.start:aq.start
-                                                                      + aq.samples]
+                    response = buffers[aq.physical_channel.full_id()][
+                        aq.start : aq.start + aq.samples
+                    ]
                     if aq.mode != AcquireMode.SCOPE:
                         if repeats > 0:
                             response = np.tile(response, repeats).reshape((repeats, -1))
@@ -119,14 +121,15 @@ class EchoEngine(QuantumExecutionEngine):
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(
-                            pp, response, response_axis)
+                            pp, response, response_axis
+                        )
 
                     var_result = results.setdefault(
                         aq.output_variable,
                         np.empty(
                             sweep_iterator.get_results_shape(response.shape),
-                            response.dtype
-                        )
+                            response.dtype,
+                        ),
                     )
                     sweep_iterator.insert_result_at_sweep_position(var_result, response)
 

@@ -17,6 +17,7 @@ class Instrument(Calibratable):
     calibration files, the actual drivers should be a property of this object, so the
     calibration will skip it.
     """
+
     def __init__(self, address, id_=None):
         super().__init__()
         self.id = id_ if id_ else address
@@ -32,7 +33,7 @@ class Instrument(Calibratable):
 
     def __getstate__(self) -> Dict:
         results = super(Instrument, self).__getstate__()
-        results['driver'] = None
+        results["driver"] = None
         return results
 
     def __str__(self):
@@ -44,7 +45,10 @@ class ControlHardwareChannel(PhysicalChannel):
     Wrapper over a PhysicalChannel, that maps to a live instrument channel. This (and
     derived) object should contain hardware specific information.
     """
-    def __init__(self, id_, hardware_id, dcbiaschannel_pair, switch_ch=None, *args, **kwargs):
+
+    def __init__(
+        self, id_, hardware_id, dcbiaschannel_pair, switch_ch=None, *args, **kwargs
+    ):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
         self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
@@ -57,6 +61,7 @@ class ControlHardware(Instrument):
     contains all the physical channels, since in most of the cases, you interact with
     the control unit rather than with the individual channels.
     """
+
     def __init__(self, id_=None):
         super().__init__(address=None, id_=id_)
         self.channels: Dict[str, ControlHardwareChannel] = {}
@@ -79,8 +84,14 @@ class LivePhysicalBaseband(PhysicalBaseband):
     """
     A wrapper over the PhysicalBaseband, that connects to a live instrument.
     """
+
     def __init__(
-        self, id_, frequency, if_frequency, instrument: Instrument = None, channel_idx=None
+        self,
+        id_,
+        frequency,
+        if_frequency,
+        instrument: Instrument = None,
+        channel_idx=None,
     ):
         self.instrument = instrument
         self.instrument_id = instrument.id if instrument is not None else None
@@ -118,11 +129,12 @@ class DCBiasChannel(Calibratable):
     This is generic DC Bias Channel class, It would ONLY accept DC bias card as
     instrument which needs to have get_voltage and set_voltage function.
     """
+
     def __init__(
         self,
         channel_idx=None,
         bias_value: Union[float, int] = 0,
-        instrument: Instrument = None
+        instrument: Instrument = None,
     ):
         super().__init__()
         self.channel_idx = channel_idx

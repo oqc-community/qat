@@ -81,14 +81,17 @@ class TestQASM3:
     In particular these tests currently only operate on a subset of OQ3
     and focus on the OpenPulse side of the language definition.
     """
+
     def test_named_defcal_arg(self):
         hw = get_default_echo_hardware(8)
         comp = CompilerConfig()
         comp.results_format.binary_count()
-        results = execute_qasm(get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp)
+        results = execute_qasm(
+            get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp
+        )
         results = next(iter(results.values()), dict())
         assert len(results) == 1
-        assert results['00'] == 1000
+        assert results["00"] == 1000
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -98,11 +101,11 @@ class TestQASM3:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qasm(get_qasm3("basic.qasm"), hw, compiler_config=config)
-        assert len(results['c']) == 4
+        assert len(results["c"]) == 4
 
         # Assert the distribution is mostly correct. Don't care about absolute accuracy,
         # just that it's spread equally.
-        assert not any([val for val in results['c'].values() if (val / 1000) < 0.15])
+        assert not any([val for val in results["c"].values() if (val / 1000) < 0.15])
 
     def test_zmap(self):
         hw = get_default_echo_hardware(8)
@@ -115,14 +118,14 @@ class TestQASM3:
 
     @pytest.mark.parametrize(
         "arg_count",
-        [1, 2, 3]  # 2 includes a generic qubit def, should be separate test
+        [1, 2, 3],  # 2 includes a generic qubit def, should be separate test
     )
     def test_expr_list_defcal(self, arg_count):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw),
-            get_qasm3(f"openpulse_tests/expr_list_caldef_{arg_count}.qasm")
+            get_qasm3(f"openpulse_tests/expr_list_caldef_{arg_count}.qasm"),
         )
         instructions = result.instructions
         # There is a sync instruction from the implicit defcal barrier first
@@ -134,7 +137,7 @@ class TestQASM3:
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw),
-            get_qasm3("openpulse_tests/expr_list_defcal_different_arg.qasm")
+            get_qasm3("openpulse_tests/expr_list_defcal_different_arg.qasm"),
         )
         instructions = result.instructions
         assert len(instructions) > 2
@@ -150,8 +153,7 @@ class TestQASM3:
         v3_instructions = get_qasm_parser(v3_qasm).parse(get_builder(hw), v3_qasm)
         v2_instructions = get_qasm_parser(v2_qasm).parse(get_builder(hw), v2_qasm)
 
-        assert len(v3_instructions.instructions) == \
-               len(v2_instructions.instructions)
+        assert len(v3_instructions.instructions) == len(v2_instructions.instructions)
 
     @pytest.mark.skip(reason="Need to be able to parse 'dt' correctly.")
     def test_complex_gates(self):
@@ -203,17 +205,26 @@ class TestQASM3:
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
-        assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
+        assert any(
+            isinstance(inst, CrossResonancePulse) for inst in result.instructions
+        )
 
     def test_cx_override(self):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("cx_override_test.qasm"))
         # assert that there are 2 extra_soft_square pulses, coming from custom def
-        assert len([
-            inst for inst in result.instructions
-            if hasattr(inst, 'shape') and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
-        ]) == 2
+        assert (
+            len(
+                [
+                    inst
+                    for inst in result.instructions
+                    if hasattr(inst, "shape")
+                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+                ]
+            )
+            == 2
+        )
 
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
@@ -336,10 +347,13 @@ class TestQASM3:
         assert isinstance(instruction[0], Delay)
         assert np.isclose(instruction[0].time, 42e-9)
 
-    @pytest.mark.parametrize("file_name,test_value", (
-        ("sum", 5.0),
-        ("mix", 6.0),
-    ))
+    @pytest.mark.parametrize(
+        "file_name,test_value",
+        (
+            ("sum", 5.0),
+            ("mix", 6.0),
+        ),
+    )
     def test_waveform_processing(self, file_name, test_value):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
@@ -352,9 +366,11 @@ class TestQASM3:
 
     @pytest.mark.parametrize(
         "file_name,attribute,test_value",
-        (("scale", "scale_factor", 42), ("phase_shift", "phase", 4 + 2j))
+        (("scale", "scale_factor", 42), ("phase_shift", "phase", 4 + 2j)),
     )
-    def test_waveform_processing_single_waveform(self, file_name, attribute, test_value):
+    def test_waveform_processing_single_waveform(
+        self, file_name, attribute, test_value
+    ):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
@@ -373,8 +389,8 @@ class TestQASM3:
             "detune_gate",
             "set_frequency",
             "shift_phase",
-            "waveform_numerical_types"
-        ]
+            "waveform_numerical_types",
+        ],
     )
     def test_op(self, qasm_name):
         qasm_string = get_qasm3(f"openpulse_tests/{qasm_name}.qasm")
@@ -382,7 +398,7 @@ class TestQASM3:
         config = CompilerConfig(
             repeats=10,
             results_format=QuantumResultsFormat(),
-            optimizations=Qasm3Optimizations()
+            optimizations=Qasm3Optimizations(),
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
@@ -392,7 +408,7 @@ class TestQASM3:
         config = CompilerConfig(
             repeats=10,
             results_format=QuantumResultsFormat(),
-            optimizations=Qasm3Optimizations()
+            optimizations=Qasm3Optimizations(),
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
@@ -409,11 +425,16 @@ class TestExecutionFrontend:
     def test_quality_couplings(self):
         qasm_string = get_qasm2("basic.qasm")
         hardware = get_default_echo_hardware(8)
-        hardware.qubit_direction_couplings = \
-            [QubitCoupling((0, 1)), QubitCoupling((1, 2), quality=10),
-             QubitCoupling((2, 3), quality=10), QubitCoupling((4, 3), quality=10),
-             QubitCoupling((4, 5), quality=10), QubitCoupling((6, 5), quality=10),
-             QubitCoupling((7, 6), quality=7), QubitCoupling((0, 7))]
+        hardware.qubit_direction_couplings = [
+            QubitCoupling((0, 1)),
+            QubitCoupling((1, 2), quality=10),
+            QubitCoupling((2, 3), quality=10),
+            QubitCoupling((4, 3), quality=10),
+            QubitCoupling((4, 5), quality=10),
+            QubitCoupling((6, 5), quality=10),
+            QubitCoupling((7, 6), quality=7),
+            QubitCoupling((0, 7)),
+        ]
 
         results = execute_qasm(qasm_string, hardware=hardware)
 
@@ -424,11 +445,16 @@ class TestExecutionFrontend:
     def test_quality_couplings_all_off(self):
         qasm_string = get_qasm2("basic.qasm")
         hardware = get_default_echo_hardware(8)
-        hardware.qubit_direction_couplings = \
-            [QubitCoupling((0, 1)), QubitCoupling((1, 2), quality=10),
-             QubitCoupling((2, 3), quality=10), QubitCoupling((4, 3), quality=10),
-             QubitCoupling((4, 5), quality=10), QubitCoupling((6, 5), quality=10),
-             QubitCoupling((7, 6), quality=7), QubitCoupling((0, 7))]
+        hardware.qubit_direction_couplings = [
+            QubitCoupling((0, 1)),
+            QubitCoupling((1, 2), quality=10),
+            QubitCoupling((2, 3), quality=10),
+            QubitCoupling((4, 3), quality=10),
+            QubitCoupling((4, 5), quality=10),
+            QubitCoupling((6, 5), quality=10),
+            QubitCoupling((7, 6), quality=7),
+            QubitCoupling((0, 7)),
+        ]
 
         config = CompilerConfig()
         config.optimizations = Qasm2Optimizations().disable()
@@ -445,15 +471,21 @@ class TestExecutionFrontend:
     def test_quality_couplings_some_off(self):
         qasm_string = get_qasm2("basic.qasm")
         hardware = get_default_echo_hardware(8)
-        hardware.qubit_direction_couplings = \
-            [QubitCoupling((0, 1)), QubitCoupling((1, 2), quality=10),
-             QubitCoupling((2, 3), quality=10), QubitCoupling((4, 3), quality=10),
-             QubitCoupling((4, 5), quality=10), QubitCoupling((6, 5), quality=10),
-             QubitCoupling((7, 6), quality=7), QubitCoupling((0, 7))]
+        hardware.qubit_direction_couplings = [
+            QubitCoupling((0, 1)),
+            QubitCoupling((1, 2), quality=10),
+            QubitCoupling((2, 3), quality=10),
+            QubitCoupling((4, 3), quality=10),
+            QubitCoupling((4, 5), quality=10),
+            QubitCoupling((6, 5), quality=10),
+            QubitCoupling((7, 6), quality=7),
+            QubitCoupling((0, 7)),
+        ]
 
         config = CompilerConfig()
-        config.tket_optimizations = \
-                config.tket_optimizations & ~TketOptimizations.DefaultMappingPass
+        config.tket_optimizations = (
+            config.tket_optimizations & ~TketOptimizations.DefaultMappingPass
+        )
         results = execute_qasm(qasm_string, hardware, config)
 
         assert results is not None
@@ -468,8 +500,8 @@ class TestExecutionFrontend:
         results = execute_qasm(qasm_string)
 
         assert len(results) == 1
-        assert 'c' in results
-        assert results['c'] == [1, 1]
+        assert "c" in results
+        assert results["c"] == [1, 1]
 
     def test_engine_as_model(self):
         qasm_string = get_qasm2("ghz.qasm")
@@ -477,27 +509,27 @@ class TestExecutionFrontend:
         results = execute_qasm(qasm_string, engine)
 
         assert len(results) == 1
-        assert 'b' in results
-        assert results['b'] == [0, 0, 0, 0]
+        assert "b" in results
+        assert results["b"] == [0, 0, 0, 0]
 
     def test_ghz(self):
         qasm_string = get_qasm2("ghz.qasm")
         hardware = get_default_echo_hardware(5)
         results = execute_qasm(qasm_string, hardware)
         assert len(results) == 1
-        assert 'b' in results
-        assert results['b'] == [0, 0, 0, 0]
+        assert "b" in results
+        assert results["b"] == [0, 0, 0, 0]
 
     def test_basic_binary(self):
         qasm_string = get_qasm2("basic_results_formats.qasm")
         hardware = get_default_echo_hardware(8)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 2
-        assert 'ab' in results
-        assert 'c' in results
-        assert results['ab'] == [0, 0]
-        assert results['c'][1] == 0
-        assert results['c'][0] in (1, 0)
+        assert "ab" in results
+        assert "c" in results
+        assert results["ab"] == [0, 0]
+        assert results["c"][1] == 0
+        assert results["c"][0] in (1, 0)
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -507,23 +539,23 @@ class TestExecutionFrontend:
         config = CompilerConfig()
         config.results_format = QuantumResultsFormat().binary_count()
         results = execute_qasm(qasm_string, compiler_config=config)
-        assert 'ab' in results
-        assert 'c' in results
+        assert "ab" in results
+        assert "c" in results
 
         # ab is unmeasured, will always be empty.
-        assert len(results['ab']) == 1
-        assert results['ab']['00'] == 1000
+        assert len(results["ab"]) == 1
+        assert results["ab"]["00"] == 1000
 
         # c[1] is unmeasured, so one bit will always be static.
-        assert len(results['c']) == 2
-        assert (results['c']['10'] + results['c']['00']) == 1000
+        assert len(results["c"]) == 2
+        assert (results["c"]["10"] + results["c"]["00"]) == 1000
 
     def test_ecr(self):
         qasm_string = get_qasm2("ecr.qasm")
         hardware = get_default_echo_hardware(3)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['meas'] == [0, 0]
+        assert results["meas"] == [0, 0]
 
     def test_device_revert(self):
         hw = get_default_echo_hardware(4)
@@ -531,9 +563,11 @@ class TestExecutionFrontend:
         original_drive_value = drive.frequency
 
         freq_array = np.linspace(4e9, 6e9, 10)
-        builder = get_builder(hw)\
-            .sweep(SweepValue("drive_freq", freq_array))\
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("drive_freq", freq_array))
             .device_assign(drive, "frequency", Variable("drive_freq"))
+        )
         builder.measure_mean_signal(hw.get_qubit(0))
         execute_instructions(hw, builder)
 
@@ -544,15 +578,15 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(2)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['meas'] == [0, 0]
+        assert results["meas"] == [0, 0]
 
     def test_example(self):
         qasm_string = get_qasm2("example.qasm")
         hardware = get_default_echo_hardware(9)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 2
-        assert results['c'] == [0, 0, 0]
-        assert results['d'] == [0, 0, 0]
+        assert results["c"] == [0, 0, 0]
+        assert results["d"] == [0, 0, 0]
 
     def test_example_if(self):
         qasm_string = get_qasm2("example_if.qasm")
@@ -565,14 +599,14 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(5)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c'] == [0, 0, 0]
+        assert results["c"] == [0, 0, 0]
 
     def test_invalid_mid_circuit_measure(self):
         qasm_string = get_qasm2("invalid_mid_circuit_measure.qasm")
         hardware = get_default_echo_hardware(2)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c'] == [0, 0]
+        assert results["c"] == [0, 0]
 
     def test_mid_circuit_measure(self):
         qasm_string = get_qasm2("mid_circuit_measure.qasm")
@@ -585,37 +619,37 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(6)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c'] == [0, 0]
+        assert results["c"] == [0, 0]
 
     def test_move_measurements(self):
         qasm_string = get_qasm2("move_measurements.qasm")
         hardware = get_default_echo_hardware(12)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c'] == [0, 0, 0]
+        assert results["c"] == [0, 0, 0]
 
     def test_order_cregs(self):
         qasm_string = get_qasm2("ordered_cregs.qasm")
         hardware = get_default_echo_hardware(4)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 3
-        assert results['a'] == [0, 0]
-        assert results['b'] == [0, 0]
-        assert results['c'] == [0, 0]
+        assert results["a"] == [0, 0]
+        assert results["b"] == [0, 0]
+        assert results["c"] == [0, 0]
 
     def test_parallel_test(self):
         qasm_string = get_qasm2("parallel_test.qasm")
         hardware = get_default_echo_hardware(10)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c0'] == [0, 0]
+        assert results["c0"] == [0, 0]
 
     def test_random_n5_d5(self):
         qasm_string = get_qasm2("random_n5_d5.qasm")
         hardware = get_default_echo_hardware(5)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results['c'] == [0, 0, 0, 0, 0]
+        assert results["c"] == [0, 0, 0, 0, 0]
 
     def test_metrics_filtered(self):
         metrics = CompilationMetrics(MetricsType.Empty)
@@ -637,7 +671,7 @@ class TestExecutionFrontend:
             repeats=300,
             repetition_period=1e-4,
             optimizations=opts,
-            results_format=QuantumResultsFormat().binary_count()
+            results_format=QuantumResultsFormat().binary_count(),
         )
         results = execute_qasm(
             qasm_string, hardware=get_default_echo_hardware(8), compiler_config=config
@@ -660,9 +694,9 @@ class TestExecutionFrontend:
     def test_binary_count_return(self):
         config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
         results = execute_qasm(get_qasm2("basic.qasm"), compiler_config=config)
-        assert 'c' in results
-        assert len(results['c']) == 4
-        assert {'11', '01', '00', '10'} == set(results['c'].keys())
+        assert "c" in results
+        assert len(results["c"]) == 4
+        assert {"11", "01", "00", "10"} == set(results["c"].keys())
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -681,7 +715,7 @@ class TestExecutionFrontend:
                 .Y(hw.get_qubit(1))
                 .parse()
                 .parse_and_execute()
-            )  # yapf: disable
+            )
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -738,8 +772,9 @@ class TestParsing:
 
     def test_invalid_gates(self):
         with pytest.raises(ValueError):
-            RestrictedQasm2Parser({"cx"})\
-                .parse(get_builder(self.echo), get_qasm2("example.qasm"))
+            RestrictedQasm2Parser({"cx"}).parse(
+                get_builder(self.echo), get_qasm2("example.qasm")
+            )
 
     def test_example(self):
         builder = parse_and_apply_optimiziations("example.qasm")
@@ -755,7 +790,9 @@ class TestParsing:
 
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
-        builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
+        builder = parse_and_apply_optimiziations(
+            "move_measurements.qasm", qubit_count=12
+        )
         assert 93378 == len(builder.instructions)
 
     def test_random_n5_d5(self):
@@ -772,8 +809,9 @@ class TestParsing:
 
     def test_restrict_if(self):
         with pytest.raises(ValueError):
-            RestrictedQasm2Parser(disable_if=True)\
-                .parse(get_builder(self.echo), get_qasm2("example_if.qasm"))
+            RestrictedQasm2Parser(disable_if=True).parse(
+                get_builder(self.echo), get_qasm2("example_if.qasm")
+            )
 
     def test_invalid_arbitrary_gate(self):
         with pytest.raises(ValueError):
@@ -786,7 +824,9 @@ class TestParsing:
 
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
-        assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
+        assert any(
+            isinstance(inst, CrossResonancePulse) for inst in builder.instructions
+        )
         assert 118 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
@@ -800,16 +840,24 @@ class TestQatOptimization:
         timeline = EchoEngine(builder.model).create_duration_timeline(qat_file)
 
         def get_start_end(key, instruction, channel_type):
-            pulse_channel = builder.model.get_pulse_channel_from_device(channel_type, key)
-            return (0, 0) if (
-                r1_m := next(
-                    iter(
-                        val for val in timeline[pulse_channel]
-                        if isinstance(val.instruction, instruction)
-                    ),
-                    None
+            pulse_channel = builder.model.get_pulse_channel_from_device(
+                channel_type, key
+            )
+            return (
+                (0, 0)
+                if (
+                    r1_m := next(
+                        iter(
+                            val
+                            for val in timeline[pulse_channel]
+                            if isinstance(val.instruction, instruction)
+                        ),
+                        None,
+                    )
                 )
-            ) is None else (r1_m.start, r1_m.end)
+                is None
+                else (r1_m.start, r1_m.end)
+            )
 
         # We check that every measurement fires at the same time.
         for key, start_end in zip(keys, expected):
@@ -819,15 +867,24 @@ class TestQatOptimization:
     def test_measure_merge_example(self):
         self._measure_merge_timings(
             "example.qasm",
-            6, ('R0', 'R1', 'R2', 'R3', 'R4', 'R5'),
-            ((1750, 2750), (1750, 2750), (750, 1750), (1750, 2750), (750, 1750),
-             (1750, 2750))
+            6,
+            ("R0", "R1", "R2", "R3", "R4", "R5"),
+            (
+                (1750, 2750),
+                (1750, 2750),
+                (750, 1750),
+                (1750, 2750),
+                (750, 1750),
+                (1750, 2750),
+            ),
         )
 
     def test_measure_merge_move_measurements(self):
         self._measure_merge_timings(
             "move_measurements.qasm",
-            12, ("R2", "R3", "R10"), ((565700, 566700), (564700, 565700), (575900, 576900))
+            12,
+            ("R2", "R3", "R10"),
+            ((565700, 566700), (564700, 565700), (575900, 576900)),
         )
 
 
@@ -837,11 +894,11 @@ class TestQiskitOptimization:
         # TODO: Re-check comparisons and validity:
         #   https://qiskit.org/documentation/optimization/tutorials/03_minimum_eigen_optimizer.html
         qubo = QuadraticProgram()
-        qubo.binary_var('x')
-        qubo.binary_var('y')
-        qubo.binary_var('z')
+        qubo.binary_var("x")
+        qubo.binary_var("y")
+        qubo.binary_var("z")
         qubo.minimize(
-            linear=[1, -2, 3], quadratic={('x', 'y'): 1, ('x', 'z'): -1, ('y', 'z'): 2}
+            linear=[1, -2, 3], quadratic={("x", "y"): 1, ("x", "z"): -1, ("y", "z"): 2}
         )
 
         op, offset = qubo.to_ising()
@@ -852,9 +909,9 @@ class TestQiskitOptimization:
         quantum_instance = QuantumInstance(
             QatBackend(),
             seed_simulator=algorithm_globals.random_seed,
-            seed_transpiler=algorithm_globals.random_seed
+            seed_transpiler=algorithm_globals.random_seed,
         )
-        qaoa_mes = QAOA(quantum_instance=quantum_instance, initial_point=[0., 0.])
+        qaoa_mes = QAOA(quantum_instance=quantum_instance, initial_point=[0.0, 0.0])
         exact_mes = NumPyMinimumEigensolver()
 
         qaoa = MinimumEigenOptimizer(qaoa_mes)  # using QAOA
@@ -873,13 +930,15 @@ class TestQiskitOptimization:
         #   https://qiskit.org/documentation/optimization/tutorials/04_grover_optimizer.html
         backend = QatBackend()
         model = Model()
-        x0 = model.binary_var(name='x0')
-        x1 = model.binary_var(name='x1')
-        x2 = model.binary_var(name='x2')
+        x0 = model.binary_var(name="x0")
+        x1 = model.binary_var(name="x1")
+        x2 = model.binary_var(name="x2")
         model.minimize(-x0 + 2 * x1 - 3 * x2 - 2 * x0 * x2 - 1 * x1 * x2)
         qp = from_docplex_mp(model)
 
-        grover_optimizer = GroverOptimizer(6, num_iterations=10, quantum_instance=backend)
+        grover_optimizer = GroverOptimizer(
+            6, num_iterations=10, quantum_instance=backend
+        )
         results = grover_optimizer.solve(qp)
 
         exact_solver = MinimumEigenOptimizer(NumPyMinimumEigensolver())
@@ -893,14 +952,14 @@ class TestQiskitOptimization:
     def test_ADMM(self):
         # TODO: Re-check comparisons and validity:
         #   https://qiskit.org/documentation/optimization/tutorials/05_admm_optimizer.html
-        mdl = Model('ex6')
+        mdl = Model("ex6")
 
-        v = mdl.binary_var(name='v')
-        w = mdl.binary_var(name='w')
-        t = mdl.binary_var(name='t')
-        u = mdl.continuous_var(name='u')
+        v = mdl.binary_var(name="v")
+        w = mdl.binary_var(name="w")
+        t = mdl.binary_var(name="t")
+        u = mdl.continuous_var(name="u")
 
-        mdl.minimize(v + w + t + 5 * (u - 2)**2)
+        mdl.minimize(v + w + t + 5 * (u - 2) ** 2)
         mdl.add_constraint(v + 2 * w + t + u <= 3, "cons1")
         mdl.add_constraint(v + w + t >= 1, "cons2")
         mdl.add_constraint(v + w == 1, "cons3")
@@ -914,7 +973,7 @@ class TestQiskitOptimization:
             factor_c=900,
             maxiter=100,
             three_block=True,
-            tol=1.e-6
+            tol=1.0e-6,
         )
 
         # define COBYLA optimizer to handle convex continuous problems.
@@ -958,7 +1017,7 @@ class TestQiskitOptimization:
             for j in range(n):
                 temp = G.get_edge_data(i, j, default=0)
                 if temp != 0:
-                    w[i, j] = temp['weight']
+                    w[i, j] = temp["weight"]
 
         best_cost_brute = 0
         for b in range(2**n):
@@ -971,7 +1030,7 @@ class TestQiskitOptimization:
                 best_cost_brute = cost
                 xbest_brute = x
 
-        colors = ['r' if xbest_brute[i] == 0 else 'c' for i in range(n)]
+        colors = ["r" if xbest_brute[i] == 0 else "c" for i in range(n)]
 
         max_cut = Maxcut(w)
         qp = max_cut.to_quadratic_program()
@@ -994,7 +1053,7 @@ class TestQiskitOptimization:
 
         # construct VQE
         spsa = SPSA(maxiter=300)
-        ry = TwoLocal(qubitOp.num_qubits, 'ry', 'cz', reps=5, entanglement='linear')
+        ry = TwoLocal(qubitOp.num_qubits, "ry", "cz", reps=5, entanglement="linear")
         vqe = VQE(ry, optimizer=spsa, quantum_instance=quantum_instance)
 
         # run VQE
@@ -1020,8 +1079,8 @@ class TestQiskitOptimization:
         tsp = Tsp.create_random_instance(n, seed=123)
         adj_matrix = nx.to_numpy_matrix(tsp.graph)
 
-        colors = ['r' for node in tsp.graph.nodes]
-        pos = [tsp.graph.nodes[node]['pos'] for node in tsp.graph.nodes]
+        colors = ["r" for node in tsp.graph.nodes]
+        pos = [tsp.graph.nodes[node]["pos"] for node in tsp.graph.nodes]
 
         def brute_force_tsp(w, N):
             a = list(permutations(range(1, N)))
@@ -1033,7 +1092,7 @@ class TestQiskitOptimization:
                     distance = distance + w[j, pre_j]
                     pre_j = j
                 distance = distance + w[pre_j, 0]
-                order = (0, ) + i
+                order = (0,) + i
                 if distance < last_best_distance:
                     best_order = order
                     last_best_distance = distance
@@ -1063,7 +1122,7 @@ class TestQiskitOptimization:
             backend, seed_simulator=seed, seed_transpiler=seed
         )
         spsa = SPSA(maxiter=300)
-        ry = TwoLocal(qubitOp.num_qubits, 'ry', 'cz', reps=5, entanglement='linear')
+        ry = TwoLocal(qubitOp.num_qubits, "ry", "cz", reps=5, entanglement="linear")
         vqe = VQE(ry, optimizer=spsa, quantum_instance=quantum_instance)
 
         result = vqe.compute_minimum_eigenvalue(qubitOp)
@@ -1089,4 +1148,4 @@ class TestQiskitBackend:
         circuit.measure_all()
         result = backend.run(circuit, shots=1000).result()
         counts = result.get_counts()
-        assert counts['1'] > 900
+        assert counts["1"] > 900
