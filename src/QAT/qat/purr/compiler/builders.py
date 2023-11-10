@@ -44,10 +44,11 @@ class InstructionBuilder:
     Base instruction builder class that leaves unimplemented the methods that vary on a
     hardware-by-hardware basis.
     """
+
     def __init__(
         self,
         hardware_model,
-        instructions: List[Union["InstructionBuilder", Instruction]] = None
+        instructions: List[Union["InstructionBuilder", Instruction]] = None,
     ):
         super().__init__()
         self._instructions = []
@@ -74,13 +75,13 @@ class InstructionBuilder:
         return json_dumps(self._instructions)
 
     def splice(self):
-        """ Clears the builder and returns its current instructions. """
+        """Clears the builder and returns its current instructions."""
         final_instructions = self.instructions
         self.clear()
         return final_instructions
 
     def clear(self):
-        """ Resets builder internal state for building a new set of instructions."""
+        """Resets builder internal state for building a new set of instructions."""
         self._instructions = []
         self.existing_names = set()
 
@@ -102,8 +103,9 @@ class InstructionBuilder:
 
             new_name = regenerated_names.setdefault(inst.name, None)
             if new_name is None:
-                regenerated_names[inst.name
-                                 ] = new_name = Label.generate_name(existing_names)
+                regenerated_names[inst.name] = new_name = Label.generate_name(
+                    existing_names
+                )
 
             inst.name = new_name
 
@@ -125,9 +127,11 @@ class InstructionBuilder:
 
     def add(
         self,
-        components: Union["InstructionBuilder",
-                          Instruction,
-                          List[Union["InstructionBuilder", Instruction]]]
+        components: Union[
+            "InstructionBuilder",
+            Instruction,
+            List[Union["InstructionBuilder", Instruction]],
+        ],
     ):
         """
         Adds an instruction to this builder. All methods should use this instead of
@@ -276,7 +280,7 @@ class InstructionBuilder:
         return self.add(Assign(name, value))
 
     def returns(self, variables=None):
-        """ Add return statement. """
+        """Add return statement."""
         return self.add(Return(variables))
 
     def reset(self, qubits):
@@ -325,13 +329,15 @@ class FluidBuilderWrapper(tuple):
                 .builder_method()
 
     """
+
     def __new__(cls, *args, **kwargs):
         if len(args) == 0:
             raise ValueError("Need at least one value to wrap.")
 
         instance = super().__new__(cls, args)
         both_contain = [
-            val for val in set(dir(instance[0])) & set(dir(instance))
+            val
+            for val in set(dir(instance[0])) & set(dir(instance))
             if not val.startswith("__")
         ]
         if any(both_contain):
@@ -373,15 +379,21 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
-        return self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
+        return self.post_processing(
+            acquire, PostProcessType.MEAN, ProcessAxis.TIME, target
+        )
 
-    def measure_mean_z(self, target: Qubit, axis: str = None, output_variable: str = None):
+    def measure_mean_z(
+        self, target: Qubit, axis: str = None, output_variable: str = None
+    ):
         _, acquire = self.measure(target, axis, output_variable)
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
         self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
-        self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target)
+        self.post_processing(
+            acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target
+        )
         return self.post_processing(
             acquire, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, qubit=target
         )
@@ -412,7 +424,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self,
         target: Qubit,
         axis: Union[str, List[str]] = None,
-        output_variable: str = None
+        output_variable: str = None,
     ):
         _, acquire = self.measure(
             target, axis if axis is not None else ProcessAxis.SEQUENCE, output_variable
@@ -511,12 +523,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         acquire_channel = qubit.get_acquire_channel()
         acquire_instruction = Acquire(
             acquire_channel,
-            qubit.pulse_measure['width']
-            if qubit.measure_acquire['sync'] else qubit.measure_acquire['width'],
+            qubit.pulse_measure["width"]
+            if qubit.measure_acquire["sync"]
+            else qubit.measure_acquire["width"],
             mode,
             output_variable,
             self.existing_names,
-            qubit.measure_acquire['delay']
+            qubit.measure_acquire["delay"],
         )
 
         # If we detect a full measure block before us, merge it together if we're
@@ -525,8 +538,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
         phase_resets = [
             val for val in previous_measure_block if isinstance(val, PhaseReset)
         ]
-        full_measure_block = set([val.__class__ for val in previous_measure_block])\
-                             == set(mblock_types + optional_block_types)
+        full_measure_block = set(
+            [val.__class__ for val in previous_measure_block]
+        ) == set(mblock_types + optional_block_types)
         if full_measure_block and len(syncs) >= 2 and len(phase_resets) >= 1:
             # Find the pre-measure sync in the preceeding measure block and merge our
             # values into it.
@@ -540,29 +554,34 @@ class QuantumInstructionBuilder(InstructionBuilder):
             self._instructions.remove(phase_resets[0])
 
             # Add in our current changes.
-            self.add([
-                MeasurePulse(measure_channel, **qubit.pulse_measure),
-                acquire_instruction,
-                final_syncronize,
-                final_phase_reset
-            ])
+            self.add(
+                [
+                    MeasurePulse(measure_channel, **qubit.pulse_measure),
+                    acquire_instruction,
+                    final_syncronize,
+                    final_phase_reset,
+                ]
+            )
 
             # Move all post-processing until after our newly-shifted syncronize block.
             # Order matters here.
             for pp in [
-                val for val in reversed(previous_measure_block)
+                val
+                for val in reversed(previous_measure_block)
                 if isinstance(val, PostProcessing)
             ]:
                 self._instructions.remove(pp)
                 self.add(pp)
         else:
-            self.add([
-                Synchronize(entangled_qubits),
-                MeasurePulse(measure_channel, **qubit.pulse_measure),
-                acquire_instruction,
-                Synchronize(qubit),
-                PhaseReset(entangled_qubits)
-            ])
+            self.add(
+                [
+                    Synchronize(entangled_qubits),
+                    MeasurePulse(measure_channel, **qubit.pulse_measure),
+                    acquire_instruction,
+                    Synchronize(qubit),
+                    PhaseReset(entangled_qubits),
+                ]
+            )
 
         return FluidBuilderWrapper(self, acquire_instruction)
 
@@ -612,7 +631,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             elif process == PostProcessType.DOWN_CONVERT:
                 phys = acq.channel.physical_channel
                 resonator = next(
-                    dev for dev in self.model.get_devices_from_physical_channel(phys.id)
+                    dev
+                    for dev in self.model.get_devices_from_physical_channel(phys.id)
                     if isinstance(dev, Resonator)
                 )
                 pulse = resonator.get_measure_channel()
@@ -635,8 +655,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             devices = self.model.get_devices_from_pulse_channel(channel)
             qubits = [i for i in devices if isinstance(i, Qubit)]
             if len(qubits) > 1:
-                raise ValueError("Wrong channel type given to acquire, please give a channel with a single qubit!")
-            delay = qubits[0].measure_acquire['delay']
+                raise ValueError(
+                    "Wrong channel type given to acquire, please give a channel with a single qubit!"
+                )
+            delay = qubits[0].measure_acquire["delay"]
         return self.add(Acquire(channel, *args, delay, **kwargs))
 
     def delay(self, target: Union[Qubit, PulseChannel], time: float):
@@ -683,8 +705,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_channels = [
             control.get_pulse_channel(ChannelType.drive),
             control.get_pulse_channel(ChannelType.cross_resonance, [target]),
-            control.get_pulse_channel(ChannelType.cross_resonance_cancellation, [target]),
-            target.get_pulse_channel(ChannelType.drive)
+            control.get_pulse_channel(
+                ChannelType.cross_resonance_cancellation, [target]
+            ),
+            target.get_pulse_channel(ChannelType.drive),
         ]
 
         sync_instr = Synchronize(pulse_channels)

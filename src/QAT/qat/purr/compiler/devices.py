@@ -23,11 +23,11 @@ def build_resonator(
     *args,
     measure_fixed_if=False,
     acquire_fixed_if=False,
-    **kwargs
+    **kwargs,
 ):
-    """ Helper method to build a resonator with default channels. """
+    """Helper method to build a resonator with default channels."""
     reson = Resonator(resonator_id, resonator_channel)
-    kwargs.pop('fixed_if', None)
+    kwargs.pop("fixed_if", None)
     reson.create_pulse_channel(
         ChannelType.measure, *args, fixed_if=measure_fixed_if, **kwargs
     )
@@ -45,18 +45,20 @@ def build_qubit(
     second_state_freq=None,
     measure_amp: float = 1.0,
     fixed_drive_if=False,
-    qubit_id=None
+    qubit_id=None,
 ):
     """
     Helper method tp build a qubit with assumed default values on the channels. Modelled
     after the live hardware.
     """
-    qubit = Qubit(index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id)
+    qubit = Qubit(
+        index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id
+    )
     qubit.create_pulse_channel(
         ChannelType.drive,
         frequency=drive_freq,
         scale=(1.0e-8 + 0.0j),
-        fixed_if=fixed_drive_if
+        fixed_if=fixed_drive_if,
     )
 
     qubit.create_pulse_channel(
@@ -67,9 +69,10 @@ def build_qubit(
 
 
 def add_cross_resonance(qubit_one: Qubit, qubit_two: Qubit):
-    """ Adds cross-resonance couplings and channels between these two qubits. """
+    """Adds cross-resonance couplings and channels between these two qubits."""
+
     def couple_qubits(qone, qtwo):
-        """ Builds the channels on qone that will all coupling to qtwo. """
+        """Builds the channels on qone that will all coupling to qtwo."""
         qone.add_coupled_qubit(qtwo)
 
         twobit_drive = qtwo.get_drive_channel()
@@ -77,14 +80,14 @@ def add_cross_resonance(qubit_one: Qubit, qubit_two: Qubit):
             ChannelType.cross_resonance,
             frequency=twobit_drive.frequency,
             scale=(1.0e-7 + 0.0j),
-            auxiliary_devices=[qtwo]
+            auxiliary_devices=[qtwo],
         )
 
         qtwo.create_pulse_channel(
             ChannelType.cross_resonance_cancellation,
             frequency=twobit_drive.frequency,
             scale=(0.0 + 0.0j),
-            auxiliary_devices=[qone]
+            auxiliary_devices=[qone],
         )
 
     couple_qubits(qubit_one, qubit_two)
@@ -108,6 +111,7 @@ class QuantumComponent:
     Base class for any logical object which can act as a target of a quantum action - a
     Qubit or various channels for a simple example.
     """
+
     def __init__(self, id_, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if id_ is None:
@@ -125,6 +129,7 @@ class Calibratable:
     """
     Allows this object to be loaded as a calibrated object when we get pickled.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_calibrated = False
@@ -138,8 +143,9 @@ class Calibratable:
             return all([self._is_serializable(val_) for val_ in val])
 
         if isinstance(val, dict):
-            return all([self._is_serializable(val_) for val_ in val.keys()]) \
-                   and all([self._is_serializable(val_) for val_ in val.values()])
+            return all([self._is_serializable(val_) for val_ in val.keys()]) and all(
+                [self._is_serializable(val_) for val_ in val.values()]
+            )
 
         if isinstance(val, Enum):
             return self._is_serializable(val.value)
@@ -167,9 +173,13 @@ class Calibratable:
 
     @staticmethod
     def load_calibration(calibration_string):
-        reconstituted = jsonpickle.decode(calibration_string, context=CyclicRefUnpickler())
+        reconstituted = jsonpickle.decode(
+            calibration_string, context=CyclicRefUnpickler()
+        )
         if isinstance(reconstituted, str):
-            raise ValueError("Loading from calibration string failed. Please regenerate.")
+            raise ValueError(
+                "Loading from calibration string failed. Please regenerate."
+            )
 
         return reconstituted
 
@@ -183,7 +193,7 @@ class Calibratable:
         if use_cwd:
             file_path = os.path.join(os.getcwd(), file_path)
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             f.write(self.get_calibration())
 
     @staticmethod
@@ -197,7 +207,7 @@ class Calibratable:
         if os.path.isfile(cwd_path):
             file_path = cwd_path
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             return Calibratable.load_calibration(f.read())
 
 
@@ -240,8 +250,9 @@ class FakeList(dict):
     This simply exposes the methods and functionality jsonpickle relies upon in the
     list, while also allowing us to use very large ints as lookup targets.
     """
+
     def append(self, val):
-        """ Appends a value on to the dictionary with key=length. """
+        """Appends a value on to the dictionary with key=length."""
         self[len(self)] = val
 
     def __getitem__(self, item):
@@ -261,6 +272,7 @@ class CyclicRefUnpickler(Unpickler):
     with CyclicRefPickler otherwise the tags required for this more precise detection
     won't exist.
     """
+
     _objs: FakeList
 
     def reset(self):
@@ -300,7 +312,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         imbalance: float = 1.0,
         acquire_allowed: bool = False,
         pulse_channel_min_frequency: float = 0.0,
-        pulse_channel_max_frequency: float = np.inf
+        pulse_channel_max_frequency: float = np.inf,
     ):
         super().__init__(id_)
         self.sample_time: float = sample_time
@@ -319,7 +331,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         frequency=0.0,
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
-        fixed_if: bool = False
+        fixed_if: bool = False,
     ):
         pulse_channel = PulseChannel(id_, self, frequency, bias, scale, fixed_if)
 
@@ -346,7 +358,8 @@ class PhysicalBaseband(QuantumComponent, Calibratable):
 
 
 class PulseChannel(QuantumComponent, Calibratable):
-    """ Models a pulse channel on a particular device. """
+    """Models a pulse channel on a particular device."""
+
     def __init__(
         self,
         id_: str,
@@ -355,7 +368,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(id_, **kwargs)
         self.physical_channel: PhysicalChannel = physical_channel
@@ -421,7 +434,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.id
 
     def full_id(self):
-        return self.physical_channel_id + '.' + self.partial_id()
+        return self.physical_channel_id + "." + self.partial_id()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
@@ -461,7 +474,7 @@ class PulseChannelView(PulseChannel):
         self,
         pulse_channel: PulseChannel,
         channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None
+        auxiliary_devices: List[QuantumDevice] = None,
     ):
         """
         pulse_channel: The PulseChannel this device is viewing.
@@ -478,9 +491,11 @@ class PulseChannelView(PulseChannel):
         self.channel_type: ChannelType = channel_type
         self.auxiliary_devices: List[QuantumDevice] = auxiliary_devices
         if not any(self._pulse_channel_attributes):
-            self._pulse_channel_attributes = \
-                {val for val in dir(pulse_channel)
-                 if not val.startswith("__") and not val.endswith("__")}
+            self._pulse_channel_attributes = {
+                val
+                for val in dir(pulse_channel)
+                if not val.startswith("__") and not val.endswith("__")
+            }
 
             if any(set(vars(self)).intersection(self._pulse_channel_attributes)):
                 raise ValueError(
@@ -501,17 +516,18 @@ class PulseChannelView(PulseChannel):
 
 
 class QuantumDevice(QuantumComponent, Calibratable):
-    """ A physical device whose main form of operation involves pulse channels. """
+    """A physical device whose main form of operation involves pulse channels."""
 
     multi_device_pulse_channel_types = (
-        ChannelType.cross_resonance, ChannelType.cross_resonance_cancellation
+        ChannelType.cross_resonance,
+        ChannelType.cross_resonance_cancellation,
     )
 
     def __init__(
         self,
         id_: str,
         physical_channel: PhysicalChannel,
-        measure_device: QuantumDevice = None
+        measure_device: QuantumDevice = None,
     ):
         super().__init__(id_)
         self.measure_device: QuantumDevice = measure_device
@@ -527,12 +543,14 @@ class QuantumDevice(QuantumComponent, Calibratable):
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
         auxiliary_devices: List[QuantumDevice] = None,
-        id_: str = None
+        id_: str = None,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
         if id_ is None:
-            id_ = self._create_pulse_channel_id(channel_type, [self] + auxiliary_devices)
+            id_ = self._create_pulse_channel_id(
+                channel_type, [self] + auxiliary_devices
+            )
         pulse_channel = self.physical_channel.create_pulse_channel(
             id_, frequency, bias, scale, fixed_if
         )
@@ -543,20 +561,23 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def _create_pulse_channel_id(
         self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
     ):
-        if channel_type in self.multi_device_pulse_channel_types \
-                and len(auxiliary_devices) == 0:
+        if (
+            channel_type in self.multi_device_pulse_channel_types
+            and len(auxiliary_devices) == 0
+        ):
             raise ValueError(
                 f"Channel type {channel_type.name} requires at least one "
                 "auxillary_device"
             )
-        return '.'.join([str(x.full_id())
-                         for x in (auxiliary_devices)] + [channel_type.name])
+        return ".".join(
+            [str(x.full_id()) for x in (auxiliary_devices)] + [channel_type.name]
+        )
 
     def add_pulse_channel(
         self,
         pulse_channel: PulseChannel,
         channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None
+        auxiliary_devices: List[QuantumDevice] = None,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
@@ -582,7 +603,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
-        auxiliary_devices: List[QuantumDevice] = None
+        auxiliary_devices: List[QuantumDevice] = None,
     ) -> PTType:
         if channel_type is None:
             channel_type = self.default_pulse_channel_type
@@ -609,7 +630,8 @@ class QuantumDevice(QuantumComponent, Calibratable):
 
 
 class Resonator(QuantumDevice):
-    """ Models a resonator on a chip. Can be connected to multiple qubits. """
+    """Models a resonator on a chip. Can be connected to multiple qubits."""
+
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.measure)
 
@@ -622,6 +644,7 @@ class Qubit(QuantumDevice):
     Class modelling our superconducting qubit and holds all information relating to
     them.
     """
+
     measure_device: Resonator
 
     def __init__(
@@ -631,7 +654,7 @@ class Qubit(QuantumDevice):
         physical_channel: PhysicalChannel,
         coupled_qubits: List[Qubit] = None,
         drive_amp: float = 1.0,
-        id_=None
+        id_=None,
     ):
         super().__init__(id_ or f"Q{index}", physical_channel, resonator)
         self.index = index
@@ -645,23 +668,23 @@ class Qubit(QuantumDevice):
             self.add_coupled_qubit(qubit)
 
         self.pulse_hw_x_pi_2 = {
-            'shape': PulseShapeType.GAUSSIAN,
-            'width': 100e-9,
-            'rise': 1. / 3.,
-            'amp': 0.25 / (100e-9 * 1. / 3. * np.pi**0.5),
-            'drag': 0.0,
-            'phase': 0.0
+            "shape": PulseShapeType.GAUSSIAN,
+            "width": 100e-9,
+            "rise": 1.0 / 3.0,
+            "amp": 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5),
+            "drag": 0.0,
+            "phase": 0.0,
         }
 
         self.pulse_measure = {
-            'shape': PulseShapeType.SQUARE,
-            'width': 1.0e-6,
-            'amp': drive_amp,
-            'amp_setup': 0.0,
-            'rise': 0.0,
+            "shape": PulseShapeType.SQUARE,
+            "width": 1.0e-6,
+            "amp": drive_amp,
+            "amp_setup": 0.0,
+            "rise": 0.0,
         }
 
-        self.measure_acquire = {'delay': 180e-9, 'sync': True, 'width': 1e-6}
+        self.measure_acquire = {"delay": 180e-9, "sync": True, "width": 1e-6}
 
     def add_coupled_qubit(self, qubit: Qubit):
         if qubit is None:
@@ -677,7 +700,7 @@ class Qubit(QuantumDevice):
                 "rise": 10e-9,
                 "amp": 1e6,
                 "drag": 0.0,
-                "phase": 0.0
+                "phase": 0.0,
             }
 
     def get_drive_channel(self):
@@ -710,7 +733,7 @@ class Qubit(QuantumDevice):
         return [
             *self.pulse_channels.values(),
             self.get_measure_channel(),
-            self.get_acquire_channel()
+            self.get_acquire_channel(),
         ]
 
 
@@ -736,15 +759,15 @@ class PulseShapeType(Enum):
 
 
 def _strip_aliases(key: str, build_unaliased=False):
-    if '<' in key:
-        lhs = key.split('<')
+    if "<" in key:
+        lhs = key.split("<")
         if len(lhs) > 2:
             raise ValueError(
                 f"Alias {key} has more than 1 angle bracket. "
                 "Nested or multiple alias' are unsupported."
             )
 
-        rhs = lhs[1].split('>')
+        rhs = lhs[1].split(">")
         if len(rhs) != 2:
             raise ValueError(
                 f"Multiple (or no) closing angle brackets detected in for alias {key}."

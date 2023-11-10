@@ -30,18 +30,18 @@ def _return_or_build(ingest: QATInput, build_func: typing.Callable, **kwargs):
 def execute(
     qat_input: QATInput,
     hardware: QuantumHardwareModel = None,
-    compiler_config: CompilerConfig = None
+    compiler_config: CompilerConfig = None,
 ):
-    """ Execute file path or code blob. """
+    """Execute file path or code blob."""
     results, _ = execute_with_metrics(qat_input, hardware, compiler_config)
     return results
 
 
 contents_match_pattern = regex.compile(
-    "(OPENQASM [0-9]*(.0)?;|defcalgrammar \"[a-zA-Z ]+\";)|(@__quantum__qis)"
+    '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
 )
 
-path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
+path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 
 def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
@@ -73,21 +73,23 @@ def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
 def execute_with_metrics(
     path_or_str: str,
     hardware: QuantumHardwareModel = None,
-    compiler_config: CompilerConfig = None
+    compiler_config: CompilerConfig = None,
 ):
-    """ Execute file path or code blob. """
+    """Execute file path or code blob."""
 
     frontend: LanguageFrontend = fetch_frontend(path_or_str)
     return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
 
-def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig=None):
+def execute_qir(
+    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
+):
     results, _ = execute_qir_with_metrics(qat_input, hardware, compiler_config)
     return results
 
 
 def execute_qir_with_metrics(
-    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig=None
+    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
 ):
     frontend = QIRFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)
@@ -111,7 +113,7 @@ def _execute_with_metrics(
     frontend: LanguageFrontend,
     qat_input: QATInput,
     hardware=None,
-    compiler_config: CompilerConfig = None
+    compiler_config: CompilerConfig = None,
 ):
     metrics = CompilationMetrics()
     if compiler_config is not None:
@@ -122,8 +124,9 @@ def _execute_with_metrics(
     )
     metrics.merge(build_metrics)
 
-    results, execution_metrics = \
-        frontend.execute(instructions, hardware, compiler_config)
+    results, execution_metrics = frontend.execute(
+        instructions, hardware, compiler_config
+    )
     metrics.merge(execution_metrics)
 
     return results, metrics.as_dict()

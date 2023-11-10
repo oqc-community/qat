@@ -8,7 +8,12 @@ from typing import Any, Dict, List, Set, TYPE_CHECKING, Union
 
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
+from qat.purr.compiler.devices import (
+    PulseChannel,
+    PulseShapeType,
+    QuantumComponent,
+    Qubit,
+)
 from qat.purr.utils.serializer import json_dumps, json_loads
 
 if TYPE_CHECKING:
@@ -16,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def _stringify_qubits(qubits):
-    return ','.join([str(qb) for qb in qubits])
+    return ",".join([str(qb) for qb in qubits])
 
 
 class PostProcessType(Enum):
@@ -57,6 +62,7 @@ class QuantumInstruction(Instruction):
     must have some sort of target on the quantum computer, such as a qubit, channel, or
     another form of component.
     """
+
     def __init__(
         self, quantum_targets: Union[QuantumComponent, List[QuantumComponent]] = None
     ):
@@ -69,7 +75,7 @@ class QuantumInstruction(Instruction):
             val for val in quantum_targets if not isinstance(val, QuantumComponent)
         ]
         if any(invalid_targets):
-            invalid_targets_str = ','.join([str(val) for val in invalid_targets])
+            invalid_targets_str = ",".join([str(val) for val in invalid_targets])
             raise ValueError(f"Invalid targets for component: {invalid_targets_str}")
 
         # Quick way to make sure the targets are unique.
@@ -88,6 +94,7 @@ class Repeat(Instruction):
     Global meta-instruction that applies to the entire list of instructions. Repeat
     value of the current operations, also known as shots.
     """
+
     def __init__(self, repeat_count, repetition_period=None):
         super().__init__()
         self.repeat_count = repeat_count
@@ -124,7 +131,8 @@ class FrequencyShift(QuantumInstruction):
 
 
 class Id(QuantumInstruction):
-    """ Simply a no-op, called an Identity gate. """
+    """Simply a no-op, called an Identity gate."""
+
     def __repr__(self):
         return "id"
 
@@ -156,8 +164,10 @@ class Synchronize(QuantumInstruction):
     Tells the QPU to wait for all the related channels to be free before continuing
     execution on any of them.
     """
+
     def __init__(
-        self, sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+        self,
+        sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
     ):
         super().__init__()
         self.add_channels(sync_channels)
@@ -167,7 +177,8 @@ class Synchronize(QuantumInstruction):
             sync_channels = [sync_channels]
 
         for target in [
-            chan for val in sync_channels
+            chan
+            for val in sync_channels
             for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
         ]:
             if not isinstance(target, PulseChannel):
@@ -195,6 +206,7 @@ class Assign(Instruction):
     Assigns the variable 'x' the value 'y'. This can be performed as a part of running
     on the QPU or by a post-processing pass.
     """
+
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -213,11 +225,12 @@ class CustomPulse(Waveform):
     """
     Send a pulse down this particular channel.
     """
+
     def __init__(
         self,
         quantum_target: "PulseChannel",
         samples: List[np.complex],
-        ignore_channel_scale: bool = False
+        ignore_channel_scale: bool = False,
     ):
         super().__init__(quantum_target)
         self.samples: List[np.complex] = samples
@@ -237,6 +250,7 @@ class Pulse(Waveform):
     """
     Send a pulse down this particular channel.
     """
+
     def __init__(
         self,
         quantum_target: "PulseChannel",
@@ -278,8 +292,10 @@ class Pulse(Waveform):
         return self.width
 
     def __repr__(self):
-        return f"pulse {self.channel.full_id()},{self.shape.value},{self.amp}," \
+        return (
+            f"pulse {self.channel.full_id()},{self.shape.value},{self.amp},"
             f"{self.phase},{self.width},{self.drag},{self.rise}"
+        )
 
 
 class MeasurePulse(Pulse):
@@ -313,7 +329,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         output_variable=None,
         existing_names: Set[str] = None,
         delay=None,
-        filter: Pulse = None
+        filter: Pulse = None,
     ):
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
@@ -348,8 +364,9 @@ class Acquire(QuantumComponent, QuantumInstruction):
         return next(iter(self.quantum_targets), None)
 
     def __repr__(self):
-        out_var = f"->{self.output_variable}" \
-            if self.output_variable is not None else ""
+        out_var = (
+            f"->{self.output_variable}" if self.output_variable is not None else ""
+        )
         mode = f",{self.mode.value}" if self.mode is not None else ""
         return f"acquire {self.channel.full_id()},{self.time}{mode}{out_var}"
 
@@ -359,6 +376,7 @@ class PostProcessing(QuantumInstruction):
     States what post-processing should happen after data has been acquired. This can
     happen in the FPGA's or a software post-process.
     """
+
     def __init__(self, acquire: Acquire, process, axes=None, args=None):
         super().__init__(acquire)
         if axes is not None and not isinstance(axes, List):
@@ -375,14 +393,19 @@ class PostProcessing(QuantumInstruction):
         return self.quantum_targets[0]
 
     def __repr__(self):
-        axis = ','.join([axi.value for axi in self.axes])
-        args = f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
-        output_var = f"->{self.output_variable}" if self.output_variable is not None else ""
+        axis = ",".join([axi.value for axi in self.axes])
+        args = (
+            f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
+        )
+        output_var = (
+            f"->{self.output_variable}" if self.output_variable is not None else ""
+        )
         return f"{self.process.value} {self.acquire.output_variable}{args}{axis}{output_var}"
 
 
 class Reset(QuantumInstruction):
-    """ Resets this qubit to its starting state. """
+    """Resets this qubit to its starting state."""
+
     def __init__(self, qubit: Union[List[Qubit], Qubit]):
         if not isinstance(qubit, List):
             qubit = [qubit]
@@ -396,9 +419,12 @@ class Reset(QuantumInstruction):
                 f"{', '.join(invalid_reset_targets)}."
             )
 
-        super().__init__([
-            val.get_drive_channel() if isinstance(val, Qubit) else val for val in qubit
-        ])
+        super().__init__(
+            [
+                val.get_drive_channel() if isinstance(val, Qubit) else val
+                for val in qubit
+            ]
+        )
 
     def __repr__(self):
         return f"reset {','.join([str(qb) for qb in self.quantum_targets])}"
@@ -408,22 +434,26 @@ class PhaseReset(QuantumInstruction):
     """
     Reset the phase shift of all the channels
     """
+
     quantum_targets: List[PulseChannel]
 
     def __init__(
-        self, reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+        self,
+        reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
     ):
         super().__init__()
         self.add_channels(reset_channels)
 
     def add_channels(
-        self, reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+        self,
+        reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
     ):
         if not isinstance(reset_channels, List):
             reset_channels = [reset_channels]
 
         for target in [
-            chan for val in reset_channels
+            chan
+            for val in reset_channels
             for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
         ]:
             if not isinstance(target, PulseChannel):
@@ -447,7 +477,8 @@ class PhaseReset(QuantumInstruction):
 
 
 class Return(Instruction):
-    """ A statement defining what to return from a quantum execution. """
+    """A statement defining what to return from a quantum execution."""
+
     def __init__(self, variables: List[str] = None):
         if variables is None:
             variables = []
@@ -462,7 +493,8 @@ class Return(Instruction):
 
 
 class SweepOperation:
-    """ Common parent for all things that need differentiating during a sweep. """
+    """Common parent for all things that need differentiating during a sweep."""
+
     pass
 
 
@@ -480,6 +512,7 @@ class DeviceUpdate(QuantumInstruction):
     .. note:: It's still unknown how this will be represented in the instructions themselves, but that'll come later.
     For now we perform programatic modification and a before/after state.
     """
+
     def __init__(self, target: QuantumComponent, attribute: str, value):
         super().__init__()
         self.target = target
@@ -499,6 +532,7 @@ class Sweep(Instruction):
     Nested sweeps are run in the order they're added and are performed after repeats. So
     a 1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.
     """
+
     def __init__(self, operations: Union[SweepValue, List[SweepValue]] = None):
         super().__init__()
 
@@ -520,7 +554,7 @@ class Sweep(Instruction):
         return next(iter([len(value) for value in self.variables.values()]), 0)
 
     def __repr__(self):
-        args = ','.join(key + "=" + str(value) for key, value in self.variables.items())
+        args = ",".join(key + "=" + str(value) for key, value in self.variables.items())
         return f"sweep {args}"
 
 
@@ -528,6 +562,7 @@ class Jump(Instruction):
     """
     Classic jump instruction, should be linked to label with an optional condition.
     """
+
     def __init__(self, label: Union[str, Label], condition=None):
         self.condition = condition
         if isinstance(label, Label):
@@ -543,7 +578,8 @@ class Jump(Instruction):
 
 
 class BinaryOperator:
-    """ Binary operator, such as ``x == y``, ``x != y`` etc."""
+    """Binary operator, such as ``x == y``, ``x != y`` etc."""
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -593,11 +629,13 @@ def build_generated_name(existing_names=None, prefix=None):
     if any(prefix) and not prefix.endswith("_"):
         prefix = f"{prefix}_"
 
-    variable_name = \
+    variable_name = (
         f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
+    )
     while variable_name in existing_names:
-        variable_name = \
+        variable_name = (
             f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
+        )
 
     existing_names.add(variable_name)
     return variable_name
@@ -607,6 +645,7 @@ class Variable:
     """
     States that this value is actually a variable that should be fetched instead.
     """
+
     def __init__(self, name, var_type=None, value=None):
         self.name = name
         self.var_type = var_type
@@ -628,8 +667,9 @@ class Label(Instruction):
     """
     Label to apply to a line of code. Used as anchors for other instructions like jumps.
     """
+
     def __init__(self, name):
-        """ If you need a name, use generate_name and pass in existing values. """
+        """If you need a name, use generate_name and pass in existing values."""
         self.name = name
 
     @staticmethod
@@ -645,7 +685,8 @@ class Label(Instruction):
 
 
 class IndexAccessor(Variable):
-    """ Used to access an array index on a particular variable. """
+    """Used to access an array index on a particular variable."""
+
     def __init__(self, name, index):
         super().__init__(name)
         self.index = index

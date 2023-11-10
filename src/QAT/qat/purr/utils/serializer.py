@@ -15,23 +15,31 @@ if TYPE_CHECKING:
 
 # Set of common methods so we don't have to add/remove the custom serializer.
 def json_dumps(*args, serializable_types=None, **kwargs):
-    kwargs.setdefault('cls', CustomJSONEncoder)
+    kwargs.setdefault("cls", CustomJSONEncoder)
     return json.dumps(*args, serializable_types=serializable_types, **kwargs)
 
 
-def json_loads(*args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs):
-    kwargs.setdefault('cls', CustomJsonDecoder)
-    return json.loads(*args, serializable_types=serializable_types, model=model, **kwargs)
+def json_loads(
+    *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
+):
+    kwargs.setdefault("cls", CustomJsonDecoder)
+    return json.loads(
+        *args, serializable_types=serializable_types, model=model, **kwargs
+    )
 
 
 def json_dump(*args, serializable_types=None, **kwargs):
-    kwargs.setdefault('cls', CustomJSONEncoder)
+    kwargs.setdefault("cls", CustomJSONEncoder)
     return json.dump(*args, serializable_types=serializable_types, **kwargs)
 
 
-def json_load(*args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs):
-    kwargs.setdefault('cls', CustomJsonDecoder)
-    return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
+def json_load(
+    *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
+):
+    kwargs.setdefault("cls", CustomJsonDecoder)
+    return json.load(
+        *args, serializable_types=serializable_types, model=model, **kwargs
+    )
 
 
 class CustomJsonDecoder(JSONDecoder):
@@ -49,8 +57,10 @@ class CustomJsonDecoder(JSONDecoder):
         component_id = obj.get("$component_id")
         if component_id is not None:
             if self.model is None:
-                raise ValueError("Attempted to deserialize object that requires re-linking to a "
-                                 "hardware model and we have no hardware model.")
+                raise ValueError(
+                    "Attempted to deserialize object that requires re-linking to a "
+                    "hardware model and we have no hardware model."
+                )
 
             return self.model.get_device(component_id)
 
@@ -58,7 +68,7 @@ class CustomJsonDecoder(JSONDecoder):
         if obj_type is None:
             return obj
 
-        if obj_type == '<class \'tuple\'>':
+        if obj_type == "<class 'tuple'>":
             return tuple(obj["$data"])
 
         if self.serializable_types is not None:
@@ -70,12 +80,14 @@ class CustomJsonDecoder(JSONDecoder):
 
             typ = self.serializable_types.get(obj_type)
             if typ is None:
-                raise ValueError(f"Invalid type attempted to be serialized: {obj_type}.")
+                raise ValueError(
+                    f"Invalid type attempted to be serialized: {obj_type}."
+                )
         else:
             typ = _get_type(obj_type)
 
         if issubclass(typ, Enum):
-            return typ(obj['$value'])
+            return typ(obj["$value"])
 
         if "$data" in obj:
             data = obj["$data"]
@@ -84,7 +96,9 @@ class CustomJsonDecoder(JSONDecoder):
                 return typ(**fields)
             elif isinstance(data, dict):
                 new_obj = object.__new__(typ)
-                new_obj.__dict__ = {key: self.default(value) for key, value in data.items()}
+                new_obj.__dict__ = {
+                    key: self.default(value) for key, value in data.items()
+                }
                 return new_obj
             elif isinstance(data, str):
                 return typ(data)
@@ -112,6 +126,7 @@ class CustomJSONEncoder(JSONEncoder):
       available in case of complex numbers), then the type name is saved, and the data
       is the string representation of the object.
     """
+
     def __init__(self, *args, serializable_types=None, **kwargs):
         self.serializable_types = serializable_types
         super().__init__(*args, **kwargs)
@@ -124,11 +139,13 @@ class CustomJSONEncoder(JSONEncoder):
             typ_str = str(typ)
 
         if self.serializable_types is not None:
-
-            if typ_str not in self.serializable_types and type(
-                obj
-            ).__module__ != "builtins":
-                raise ValueError(f"Invalid type attempted to be serialized: {(type(obj))}.")
+            if (
+                typ_str not in self.serializable_types
+                and type(obj).__module__ != "builtins"
+            ):
+                raise ValueError(
+                    f"Invalid type attempted to be serialized: {(type(obj))}."
+                )
 
         try:
             from qat.purr.compiler.instructions import Acquire
@@ -142,20 +159,24 @@ class CustomJSONEncoder(JSONEncoder):
                 return {
                     "$type": typ_str,
                     "$dataclass": True,
-                    "$data": self.default(asdict(obj))
+                    "$data": self.default(asdict(obj)),
                 }
             elif isinstance(obj, Enum):
                 return {"$type": typ_str, "$value": obj.value}
             elif isinstance(obj, complex):
                 return {"$type": typ_str, "$data": str(obj)}
             elif isinstance(obj, tuple):
-                return {"$type": typ_str, "$data": tuple(self.default(val) for val in obj)}
+                return {
+                    "$type": typ_str,
+                    "$data": tuple(self.default(val) for val in obj),
+                }
 
             if hasattr(obj, "__dict__"):
                 return {
                     "$type": typ_str,
-                    "$data":
-                    {key: self.default(value) for key, value in obj.__dict__.items()}
+                    "$data": {
+                        key: self.default(value) for key, value in obj.__dict__.items()
+                    },
                 }
         except (TypeError, AttributeError):
             pass
@@ -170,8 +191,8 @@ def _get_type(s: str):
     match = re.match(_type_name_matcher, s)
     if match:
         namespace = match.group(1)
-        if namespace != '':
-            expanded_namespace = namespace[:-1].split('.')
+        if namespace != "":
+            expanded_namespace = namespace[:-1].split(".")
             module_name = expanded_namespace.pop(0)
             imported_module = import_module(module_name)
             for item in expanded_namespace:
@@ -182,7 +203,7 @@ def _get_type(s: str):
                     import_module(module_name)
                     imported_module = getattr(imported_module, item)
         else:
-            imported_module = sys.modules['builtins']
+            imported_module = sys.modules["builtins"]
         try:
             return getattr(imported_module, match.group(2))
         except AttributeError:

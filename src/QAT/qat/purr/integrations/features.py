@@ -17,7 +17,8 @@ log = get_default_logger()
 
 
 class FeatureMetadata:
-    """ Exposed metadata for various languages, integrations and features."""
+    """Exposed metadata for various languages, integrations and features."""
+
     def to_json_dict(self):
         """
         Turn object into a JSON-amenable dictionary to return from a web service. All
@@ -31,6 +32,7 @@ class Scale(Enum):
     """
     SI units of frequency
     """
+
     NANO = "ns"
     MICRO = "us"
     MILLI = "ms"
@@ -45,6 +47,7 @@ class Unit(Enum):
     """
     Physical SI units.
     """
+
     TIME = "s"
     FREQUENCY = "Hz"
 
@@ -93,12 +96,17 @@ class OpenPulseFeatures(FeatureMetadata):
 
         for frame_name, channel_view in get_frame_mappings(hardware).items():
             frame = channel_view.pulse_channel
-            qubit = _find_qubit(hardware.get_devices_from_pulse_channel(frame.full_id())[0])
+            qubit = _find_qubit(
+                hardware.get_devices_from_pulse_channel(frame.full_id())[0]
+            )
             qubits = [qubit.id]
-            qubits.extend([
-                qubit.id for qubit in channel_view.auxiliary_devices
-                if isinstance(qubit, Qubit)
-            ])
+            qubits.extend(
+                [
+                    qubit.id
+                    for qubit in channel_view.auxiliary_devices
+                    if isinstance(qubit, Qubit)
+                ]
+            )
             self.frames[frame_name] = dict(
                 qubits=qubits,
                 port_id=extern_port_name(frame.physical_channel),
@@ -109,17 +117,18 @@ class OpenPulseFeatures(FeatureMetadata):
 
         for port_name, port in get_port_mappings(hardware).items():
             self.ports[port_name] = dict(
-                direction='two-way' if port.acquire_allowed else 'one-way',
+                direction="two-way" if port.acquire_allowed else "one-way",
                 type="port_type_1",
                 associated_qubits=[
-                    _find_qubit(qb).index for qb in hardware.quantum_devices.values()
+                    _find_qubit(qb).index
+                    for qb in hardware.quantum_devices.values()
                     if qb.physical_channel == port
-                ]
+                ],
             )
 
         self.waveforms = {
-            key: vars(value.waveform_definition) for key,
-            value in AbstractWaveform.actual_waveforms.items()
+            key: vars(value.waveform_definition)
+            for key, value in AbstractWaveform.actual_waveforms.items()
         }
 
         self.constraints = Constraints()
@@ -131,6 +140,6 @@ class OpenPulseFeatures(FeatureMetadata):
                 "ports": self.ports,
                 "frames": self.frames,
                 "waveforms": self.waveforms,
-                "constraints": self.constraints
+                "constraints": self.constraints,
             }
         }

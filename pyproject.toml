@@ -44,8 +44,7 @@ coverage = "^6.3.2"
 pytest-cov = "~=2.10.1"
 autoflake = "^2.2.0"
 isort = "^5.10.1"
-pre-commit = "^3.2.0"
-yapf = "^0.32.0"
+black = "^23.11.0"
 docplex = "^2.21.207"
 
 [tool.poetry.group.licenses]
@@ -73,13 +72,6 @@ sphinx-multiversion = "^0.2.4"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.yapfignore]
-ignore_patterns  = [
-    "external/",
-    "*/target/",
-    "*.ipynb"
-]
 
 [tool.autoflake]
 remove-all-unused-imports = true

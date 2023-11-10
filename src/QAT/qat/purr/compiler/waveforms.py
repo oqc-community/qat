@@ -15,17 +15,17 @@ class WaveformDef:
 
 
 class AbstractWaveform(Pulse):
-    actual_waveforms: Dict[str, 'AbstractWaveform'] = dict()
+    actual_waveforms: Dict[str, "AbstractWaveform"] = dict()
     waveform_definition: WaveformDef = None
 
-    def __init_subclass__(cls: 'AbstractWaveform'):
+    def __init_subclass__(cls: "AbstractWaveform"):
         if cls.waveform_definition is None:
             raise ValueError(
                 f"Subclass of {AbstractWaveform.__name__} doesn't have a "
                 "waveform_definition."
             )
 
-        normalized_name = cls.waveform_definition.name.lower().replace(' ', '_')
+        normalized_name = cls.waveform_definition.name.lower().replace(" ", "_")
         AbstractWaveform.actual_waveforms[normalized_name] = cls
 
 
@@ -33,14 +33,18 @@ class SquareWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Square")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale)
+        super().__init__(
+            channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale
+        )
 
 
 class GaussianWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Gaussian")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale)
+        super().__init__(
+            channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale
+        )
 
 
 class SoftSquareWaveform(AbstractWaveform):
@@ -56,7 +60,9 @@ class BlackmanWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Blackman")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale)
+        super().__init__(
+            channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale
+        )
 
 
 class SetupHoldWaveform(AbstractWaveform):

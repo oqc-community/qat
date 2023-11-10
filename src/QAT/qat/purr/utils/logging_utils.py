@@ -15,10 +15,10 @@ class _LogContextManager(MetricsMixin):
         message: str,
         metric_type=None,
         metrics_collection=None,
-        level=LoggerLevel.INFO
+        level=LoggerLevel.INFO,
     ):
         super().__init__()
-        if '{' not in message:
+        if "{" not in message:
             raise ValueError("Need one matching {} to inject duration time into.")
 
         self.message = message

@@ -6,7 +6,11 @@ from typing import List, Optional, TypeVar, Union
 
 import numpy
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
-from qat.purr.compiler.config import CalibrationArguments, MetricsType, ResultsFormatting
+from qat.purr.compiler.config import (
+    CalibrationArguments,
+    MetricsType,
+    ResultsFormatting,
+)
 from qat.purr.compiler.execution import (
     InstructionExecutionEngine,
     QuantumExecutionEngine,
@@ -26,28 +30,33 @@ class RemoteCalibration:
     blocks than purely a string of instructions and include nested executions and rely
     on classic Python code.
     """
+
     def run(
         self,
         model: QuantumHardwareModel,
         runtime: "QuantumRuntime",
-        args: CalibrationArguments
+        args: CalibrationArguments,
     ):
         raise ValueError("Calibration cannot be run at this time.")
 
     def arguments_type(self) -> type:
-        """ Returns the type of this calibrations arguments. """
+        """Returns the type of this calibrations arguments."""
         return CalibrationArguments
 
 
 class QuantumExecutableBlock:
-    """ Generic executable block that can be run on a quantum runtime. """
+    """Generic executable block that can be run on a quantum runtime."""
+
     def run(self, runtime: "QuantumRuntime"):
         pass
 
 
 class CalibrationWithArgs(QuantumExecutableBlock):
-    """ Wrapper for a calibration and argument combination. """
-    def __init__(self, calibration: RemoteCalibration, args: CalibrationArguments = None):
+    """Wrapper for a calibration and argument combination."""
+
+    def __init__(
+        self, calibration: RemoteCalibration, args: CalibrationArguments = None
+    ):
         self.calibration = calibration
         self.args = args or CalibrationArguments()
 
@@ -58,7 +67,7 @@ class CalibrationWithArgs(QuantumExecutableBlock):
         self.calibration.run(runtime.model, runtime, self.args)
 
 
-AnyEngine = TypeVar('AnyEngine', bound=InstructionExecutionEngine, covariant=True)
+AnyEngine = TypeVar("AnyEngine", bound=InstructionExecutionEngine, covariant=True)
 
 
 class QuantumRuntime(MetricsMixin):
@@ -120,7 +129,7 @@ class QuantumRuntime(MetricsMixin):
             if isinstance(value, int):
                 return str(value)
             elif all(isinstance(val, int) for val in value):
-                return ''.join([str(val) for val in value])
+                return "".join([str(val) for val in value])
 
         if ResultsFormatting.SquashBinaryResultArrays in format_flags:
             results = {key: squash_binary(val) for key, val in results.items()}
@@ -135,7 +144,7 @@ class QuantumRuntime(MetricsMixin):
     def run_calibration(
         self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
     ):
-        """ Make 'calibration' distinct from 'quantum executable' for usabilities sake. """
+        """Make 'calibration' distinct from 'quantum executable' for usabilities sake."""
         self.run_quantum_executable(calibrations)
 
     def run_quantum_executable(
@@ -181,13 +190,14 @@ def _binary_count(results_list, repeats):
     Returns a dictionary of binary number: count. So for a two qubit register it'll return the various counts for
     ``00``, ``01``, ``10`` and ``11``.
     """
+
     def flatten(res):
         """
         Combine binary result from the QPU into composite key result.
         Aka '0110' or '0001'
         """
         if isinstance(res, Iterable):
-            return ''.join([flatten(val) for val in res])
+            return "".join([flatten(val) for val in res])
         else:
             return str(res)
 
@@ -199,8 +209,10 @@ def _binary_count(results_list, repeats):
     binary_results = _binary(results_list)
 
     # If our results are a single qubit then pretend to be a register of one.
-    if isinstance(next(iter(binary_results), None),
-                  Number) and len(binary_results) == repeats:
+    if (
+        isinstance(next(iter(binary_results), None), Number)
+        and len(binary_results) == repeats
+    ):
         binary_results = [binary_results]
 
     result_count = dict()
@@ -241,7 +253,9 @@ def get_builder(
         model = model.model
     default_builder = model.get_builder()
     if default_builder is None:
-        raise ValueError(f"{str(model)} is not mapped to a recognized instruction builder.")
+        raise ValueError(
+            f"{str(model)} is not mapped to a recognized instruction builder."
+        )
 
     return default_builder(model)
 
@@ -251,12 +265,12 @@ def execute_instructions(
     instructions: Union[List[Instruction], QuantumInstructionBuilder],
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
-    repeats: Optional[int] = None
+    repeats: Optional[int] = None,
 ):
     active_runtime = get_runtime(hardware)
 
     active_runtime.run_quantum_executable(executable_blocks)
     return (
         active_runtime.execute(instructions, results_format, repeats),
-        active_runtime.compilation_metrics
+        active_runtime.compilation_metrics,
     )
