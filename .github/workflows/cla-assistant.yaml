@@ -1,0 +1,26 @@
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened,closed,synchronize]
+
+name: "CLA bot"
+
+jobs:
+  cla-acknowledgement:
+    runs-on: ubuntu-latest
+    name: "Check that the CLA has been acknowledged"
+    steps:
+      - name: "CLA Assistant"
+        if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the Contributor License Agreement and I hereby accept the Terms.') || github.event_name == 'pull_request_target'
+        uses: cla-assistant/github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN : ${{ secrets.REPO_BOT_ACCESS_TOKEN }}
+        with:
+          branch: 'bot/data'
+          path-to-signatures: 'cla.json'
+          custom-allsigned-prcomment: 'All Contributors have signed the CLA.'
+          custom-pr-sign-comment: 'I have read the Contributor License Agreement and I hereby accept the Terms.'
+          allowlist: bot*
+          path-to-document: 'https://github.com/oqc-community/qat/blob/main/contributor_license_agreement.md'
