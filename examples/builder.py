@@ -13,16 +13,21 @@ sync_channels = [
 ]
 prep = np.linspace(0.0, np.pi, 2)
 
+# yapf: disable
 # sweep over a time range
 builder = (
-    get_builder(hw).X(control_q,
-                      np.pi).synchronize(sync_channels).X(target_q,
-                                                          np.pi).ECR(control_q,
-                                                                     target_q).X(control_q).
-    X(target_q,
-      -np.pi / 2.0).Z(control_q,
-                      -np.pi / 2.0).measure_mean_z(control_q).measure_mean_z(target_q)
+    get_builder(hw)
+    .X(control_q, np.pi)
+    .synchronize(sync_channels)
+    .X(target_q, np.pi)
+    .ECR(control_q, target_q)
+    .X(control_q)
+    .X(target_q, -np.pi / 2.0)
+    .Z(control_q, -np.pi / 2.0)
+    .measure_mean_z(control_q)
+    .measure_mean_z(target_q)
 )
+# yapf: enable
 
 for instruction in builder.instructions:
     print(instruction)
