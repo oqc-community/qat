@@ -1,9 +1,0 @@
-OPENQASM 2.0;
-include "qelib1.inc";
-qreg q[2];
-rx(pi/3) q[0];
-rx(pi/2) q[1];
-cx q[0],q[1];
-rx(pi/3) q[0];
-creg c[2];
-measure q->c;
