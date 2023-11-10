@@ -5,6 +5,7 @@ name = "qat-compiler"
 version = "1.0.0"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
+documentation = "https://oqc-community.github.io/qat"
 authors = [
     "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>",
     "Harry Waring <hwaring@oxfordquantumcircuits.com>",

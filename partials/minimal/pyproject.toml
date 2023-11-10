@@ -3,6 +3,7 @@ name = "qat-compiler-minimal"
 version = "1.0.0"
 description = "A minimal version of the `qat-compiler` package."
 readme = "README.rst"
+documentation = "https://oqc-community.github.io/qat"
 authors = [
     "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>",
     "Harry Waring <hwaring@oxfordquantumcircuits.com>",

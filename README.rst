@@ -12,6 +12,8 @@ such as `QASM <https://openqasm.com/>`_, `OpenPulse <https://openqasm.com/langua
 It facilitates the execution of largely-optimised code, converted into abstract pulse-level and hardware-level instructions,
 which are then transformed and delivered to an appropriate driver.
 
+For the official QAT documentation, please see `QAT <https://oqc-community.github.io/qat>`_.
+
 |
 
 ----------------------
