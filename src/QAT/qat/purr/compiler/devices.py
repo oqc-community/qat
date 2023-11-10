@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set, TypeVar
+from typing import Dict, List, Optional, Set, TypeVar, Union
 
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
@@ -658,7 +658,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
-        auxiliary_devices: List[QuantumDevice] = None
+        auxiliary_devices: Union[QuantumDevice, List[QuantumDevice]] = None
     ) -> PTType:
         if channel_type is None:
             channel_type = self.default_pulse_channel_type
@@ -773,7 +773,7 @@ class Qubit(QuantumDevice):
     def get_second_state_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.second_state)
 
-    def get_cross_resonance_channel(self, linked_qubits: List[Qubit]) -> PulseChannel:
+    def get_cross_resonance_channel(self, linked_qubits: Union[List[Qubit], Qubit]) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.cross_resonance, linked_qubits)
 
     def get_cross_resonance_cancellation_channel(
