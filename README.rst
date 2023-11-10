@@ -1,4 +1,4 @@
-.. image:: qat-logo.png
+.. image:: https://github.com/oqc-community/qat/blob/main/qat-logo.png
   :width: 400
   :alt: QAT
 
@@ -11,6 +11,8 @@ such as `QASM <https://openqasm.com/>`_, `OpenPulse <https://openqasm.com/langua
 `QIR <https://devblogs.microsoft.com/qsharp/introducing-quantum-intermediate-representation-qir/>`_ against QPU drivers.
 It facilitates the execution of largely-optimised code, converted into abstract pulse-level and hardware-level instructions,
 which are then transformed and delivered to an appropriate driver.
+
+For the official QAT documentation, please see `QAT <https://oqc-community.github.io/qat>`_.
 
 |
 
