@@ -30,8 +30,8 @@ def run_qasm_circuit(circuit):
         binary = {bin(int(key, 16))[2:]: val for key, val in results_dictionary.items()}
         fill_value = max([len(val) for val in binary.keys()])
         return {
-            key.zfill(fill_value): val for key,
-            val in sorted(binary.items(), key=lambda kvp: int(kvp[0]))
+            key.zfill(fill_value): val
+            for key, val in sorted(binary.items(), key=lambda kvp: int(kvp[0]))
         }
 
     # If we're a single value, just return, otherwise return list of results (or None).
@@ -44,12 +44,12 @@ def run_qasm_circuit(circuit):
 
 
 def run_qasm_from_file(qasm_file: str):
-    """ Runs the passed-in QASM file against the QASM state simulator. """
+    """Runs the passed-in QASM file against the QASM state simulator."""
     return run_qasm_circuit(QuantumCircuit.from_qasm_file(qasm_file))
 
 
 def run_qasm(qasm_str: str):
-    """ Runs the passed-in QASM string against the QASM state simulator. """
+    """Runs the passed-in QASM string against the QASM state simulator."""
     return run_qasm_circuit(QuantumCircuit.from_qasm_str(qasm_str))
 
 
@@ -60,6 +60,7 @@ class QatBackend(QasmSimulatorPy):
     TODO: Expand this to become a proper back-end, as I don't believe we need to inherit
         off the QASM simulator as it stands.
     """
+
     def __init__(self, hardware=None, comp_config=None, **fields):
         super().__init__(**fields)
         self.hardware = hardware
@@ -89,11 +90,14 @@ class QatBackend(QasmSimulatorPy):
 
         # Merge the Qiskit header/config info together with the experiment as
         # represented as a QASM string
-        experiment_info = [(
-            val.qasm(),
-            assembled_data.experiments[i].config,
-            assembled_data.experiments[i].header,
-        ) for i, val in enumerate(qobj)]  # yapf: disable
+        experiment_info = [
+            (
+                val.qasm(),
+                assembled_data.experiments[i].config,
+                assembled_data.experiments[i].header,
+            )
+            for i, val in enumerate(qobj)
+        ]  # yapf: disable
 
         results = []
         full_start = time.time()
@@ -114,8 +118,10 @@ class QatBackend(QasmSimulatorPy):
                 if len(header.creg_sizes) == 1:
                     creg_label, _ = header.creg_sizes[0]
                     counts_qat = results_data[creg_label]
-                    counts_qiskit = dict((hex(int(key[::-1], 2)), value)
-                                         for (key, value) in counts_qat.items())
+                    counts_qiskit = dict(
+                        (hex(int(key[::-1], 2)), value)
+                        for (key, value) in counts_qat.items()
+                    )
                     results.append(
                         ExperimentResult(
                             self.comp_config.repeats,
@@ -124,7 +130,7 @@ class QatBackend(QasmSimulatorPy):
                             status="DONE",
                             header=header,
                             name=header.name,
-                            time_taken=end - start
+                            time_taken=end - start,
                         )
                     )
                 else:
@@ -136,7 +142,7 @@ class QatBackend(QasmSimulatorPy):
                             status="DONE",
                             header=header,
                             name=header.name,
-                            time_taken=end - start
+                            time_taken=end - start,
                         )
                     )
         except Exception as ex:
@@ -158,6 +164,6 @@ class QatBackend(QasmSimulatorPy):
                 status=status,
                 success=any(results) and all(val.success for val in results),
                 time_taken=full_end - full_start,
-                header=assembled_data.header
-            )
+                header=assembled_data.header,
+            ),
         )

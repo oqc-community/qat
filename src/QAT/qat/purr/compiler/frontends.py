@@ -28,15 +28,15 @@ log = get_default_logger()
 
 
 def _get_file_contents(file_path):
-    """ Get Program contents from a file. """
+    """Get Program contents from a file."""
     with open(file_path) as ifile:
         return ifile.read()
 
 
-path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
+path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 contents_match_pattern = regex.compile(
-    "(OPENQASM [0-9]*(.0)?;|defcalgrammar \"[a-zA-Z ]+\";)|(@__quantum__qis)"
+    '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
 )
 
 
@@ -70,7 +70,9 @@ class QIRFrontend(LanguageFrontend):
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
     ):
-        raise NotImplementedError("QIR needs to be executed via a graph, not via this API.")
+        raise NotImplementedError(
+            "QIR needs to be executed via a graph, not via this API."
+        )
 
     def parse_and_execute(
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
@@ -78,7 +80,9 @@ class QIRFrontend(LanguageFrontend):
         # Parsing and execution are done at the same time with early versions of QIR.
         return self.parse(file_or_str, hardware, compiler_config)
 
-    def _parse_from_file(self, qir_file: str, hardware, compiler_config: CompilerConfig):
+    def _parse_from_file(
+        self, qir_file: str, hardware, compiler_config: CompilerConfig
+    ):
         metrics = CompilationMetrics()
         metrics.initialize(compiler_config.metrics)
 
@@ -118,7 +122,9 @@ class QASMFrontend(LanguageFrontend):
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
     ):
         instructions, parse_metrics = self.parse(file_or_str, hardware, compiler_config)
-        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(
+            instructions, hardware, compiler_config
+        )
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 
@@ -133,7 +139,9 @@ class QASMFrontend(LanguageFrontend):
 
         parser = get_qasm_parser(qasm_string)
         if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(parser.parser_language())
+            compiler_config.optimizations = get_optimizer_config(
+                parser.parser_language()
+            )
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(

@@ -42,14 +42,16 @@ def remove_axes(original_dims, removed_axis_indices, axis_locations):
     }
     new_dims = original_dims - len(removed_axis_indices)
     new_axis_locations = {
-        k: (v - new_dims) if axis_negative[k] else v for k, v in new_axis_locations.items()
+        k: (v - new_dims) if axis_negative[k] else v
+        for k, v in new_axis_locations.items()
     }
     return new_axis_locations
 
 
 class ComplexFunction:
     """Function object used to represent Complex 1D functions"""
-    _dtype = 'cfloat'
+
+    _dtype = "cfloat"
     dt = 0.5e-9
 
     def eval(self, x: np.ndarray) -> np.ndarray:
@@ -88,6 +90,7 @@ class NumericFunction(ComplexFunction):
     """
     Base class for functions applying an numerical first derivative
     """
+
     @validate_input_array
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
@@ -102,7 +105,7 @@ class NumericFunction(ComplexFunction):
             # so we approximate what the last point should look like
             return np.append(
                 amplitude_differential,
-                2 * amplitude_differential[-1] - amplitude_differential[-2]
+                2 * amplitude_differential[-1] - amplitude_differential[-2],
             )
 
 
@@ -110,6 +113,7 @@ class SquareFunction(ComplexFunction):
     """
     Square function of fixed amplitude
     """
+
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
         return np.ones(shape=x.shape, dtype=self._dtype)
@@ -123,12 +127,13 @@ class GaussianFunction(ComplexFunction):
     """
     Gaussian function
     """
+
     def __init__(self, std_dev, zero_at_edges):
         self.std_dev = std_dev
         self.zero_at_edges = zero_at_edges
 
     def _eval(self, x: np.ndarray) -> np.ndarray:
-        return np.exp(-0.5 * (x / self.std_dev)**2, dtype=self._dtype)
+        return np.exp(-0.5 * (x / self.std_dev) ** 2, dtype=self._dtype)
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
@@ -136,7 +141,7 @@ class GaussianFunction(ComplexFunction):
         if self.zero_at_edges and len(x) > 2:
             edge = max(amp[0], amp[-1])
             amp -= edge
-            amp /= (1 - edge)
+            amp /= 1 - edge
         return amp
 
     @validate_input_array
@@ -145,7 +150,7 @@ class GaussianFunction(ComplexFunction):
         derivative = -x / self.std_dev**2 * amp
         if self.zero_at_edges:
             edge = max(amp[0], amp[-1])
-            derivative /= (1 - edge)
+            derivative /= 1 - edge
         return derivative
 
 
@@ -159,8 +164,8 @@ class GaussianSquareFunction(NumericFunction):
         y = np.ones(shape=x.shape, dtype=self._dtype)
         x_rise = x[x < -self.square_width / 2] + self.square_width / 2
         x_fall = x[x > self.square_width / 2] - self.square_width / 2
-        y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev)**2)
-        y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev)**2)
+        y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev) ** 2)
+        y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev) ** 2)
         return y
 
 
@@ -181,8 +186,11 @@ class SinFunction(ComplexFunction):
         return sin(2 * pi * x * self.frequency + self.internal_phase)
 
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return 2 * pi * self.frequency * cos(
-            2 * pi * x * self.frequency + self.internal_phase
+        return (
+            2
+            * pi
+            * self.frequency
+            * cos(2 * pi * x * self.frequency + self.internal_phase)
         )
 
 
@@ -193,6 +201,7 @@ class RoundedSquareFunction(NumericFunction):
          /    \
      ___|      |___
     """
+
     def __init__(self, width, rise):
         self.width = width
         self.rise_time = rise
@@ -204,17 +213,19 @@ class RoundedSquareFunction(NumericFunction):
     def eval(self, x: np.ndarray) -> np.ndarray:
         x1 = -self.width / 2
         x2 = self.width / 2
-        rescaling = (self.step(-x1 / self.rise_time) + self.step(x2 / self.rise_time) - 1)
+        rescaling = self.step(-x1 / self.rise_time) + self.step(x2 / self.rise_time) - 1
         return rescaling * (
-            self.step((x - x1) / self.rise_time) + self.step(-(x - x2) / self.rise_time) - 1
+            self.step((x - x1) / self.rise_time)
+            + self.step(-(x - x2) / self.rise_time)
+            - 1
         )
 
 
 class BlackmanFunction(ComplexFunction):
     def __init__(self, width):
-        self._a0 = 7938. / 18608.
-        self._a1 = 9240. / 18608.
-        self._a2 = 1430. / 18608.
+        self._a0 = 7938.0 / 18608.0
+        self._a1 = 9240.0 / 18608.0
+        self._a2 = 1430.0 / 18608.0
         self._width = width
 
     @validate_input_array
@@ -237,11 +248,9 @@ class SoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        amp = (
-            0.5 * (
-                np.tanh((x + self._width / 2.0) / self._rise, dtype=self._dtype)
-                - np.tanh((x - self._width / 2.0) / self._rise, dtype=self._dtype)
-            )
+        amp = 0.5 * (
+            np.tanh((x + self._width / 2.0) / self._rise, dtype=self._dtype)
+            - np.tanh((x - self._width / 2.0) / self._rise, dtype=self._dtype)
         )
         if self.zero_at_edges and len(x) > 2:
             edge = max(amp[0], amp[-1])
@@ -271,21 +280,31 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0, half_sample=False):
         if data.shape == PulseShapeType.SQUARE:
             num_func = SquareFunction()
         elif data.shape == PulseShapeType.GAUSSIAN:
-            std_dev = data.std_dev \
-                if not data.std_dev == 0.0 \
+            std_dev = (
+                data.std_dev
+                if not data.std_dev == 0.0
                 else data.width * data.rise / np.sqrt(2)
+            )
             num_func = GaussianFunction(std_dev, data.zero_at_edges)
         elif data.shape == PulseShapeType.GAUSSIAN_SQUARE:
             num_func = GaussianSquareFunction(data.square_width, data.std_dev)
         elif data.shape == PulseShapeType.SOFT_SQUARE:
-            square_width = data.square_width if not data.square_width == 0.0 else data.width - data.rise
+            square_width = (
+                data.square_width
+                if not data.square_width == 0.0
+                else data.width - data.rise
+            )
             num_func = SoftSquareFunction(square_width, data.rise, data.zero_at_edges)
         elif data.shape == PulseShapeType.BLACKMAN:
             num_func = BlackmanFunction(data.width)
         elif data.shape == PulseShapeType.SETUP_HOLD:
             num_func = SetupHoldFunction(data.rise, data.amp_setup, data.amp)
         elif data.shape == PulseShapeType.SOFTER_SQUARE:
-            square_width = data.square_width if not data.square_width == 0.0 else data.width - 2.0 * data.rise
+            square_width = (
+                data.square_width
+                if not data.square_width == 0.0
+                else data.width - 2.0 * data.rise
+            )
             num_func = SoftSquareFunction(square_width, data.rise, 1.0)
 
         # Externally defined functions. Standard pulse shapes, just ones we haven't used.
@@ -319,13 +338,21 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0, half_sample=False):
         if half_sample:
             amplitude = [point for i, point in enumerate(amplitude) if i % 2 == 0]
     else:
-        raise ValueError(f"'{str(data)}' is an unknown pulse type. Can't evaluate shape.")
+        raise ValueError(
+            f"'{str(data)}' is an unknown pulse type. Can't evaluate shape."
+        )
 
     buf = scale_factor * amp * np.exp(1.0j * phase_offset) * amplitude
     if not drag == 0.0:
         amplitude_differential = num_func.derivative(t, amplitude)
-        buf += drag * 1.0j * amp * scale_factor \
-            * np.exp(1.0j * phase_offset) * amplitude_differential
+        buf += (
+            drag
+            * 1.0j
+            * amp
+            * scale_factor
+            * np.exp(1.0j * phase_offset)
+            * amplitude_differential
+        )
 
     return buf
 

@@ -10,7 +10,10 @@ from qat.purr.compiler.config import (
     MetricsType,
     ResultsFormatting,
 )
-from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine
+from qat.purr.compiler.execution import (
+    InstructionExecutionEngine,
+    QuantumExecutionEngine,
+)
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Repeat
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
@@ -26,28 +29,33 @@ class RemoteCalibration:
     blocks than purely a string of instructions and include nested executions and rely
     on classic Python code.
     """
+
     def run(
         self,
         model: QuantumHardwareModel,
         runtime: "QuantumRuntime",
-        args: CalibrationArguments
+        args: CalibrationArguments,
     ):
         raise ValueError("Calibration cannot be run at this time.")
 
     def arguments_type(self) -> type:
-        """ Returns the type of this calibrations arguments. """
+        """Returns the type of this calibrations arguments."""
         return CalibrationArguments
 
 
 class QuantumExecutableBlock:
-    """ Generic executable block that can be run on a quantum runtime. """
+    """Generic executable block that can be run on a quantum runtime."""
+
     def run(self, runtime: "QuantumRuntime"):
         pass
 
 
 class CalibrationWithArgs(QuantumExecutableBlock):
-    """ Wrapper for a calibration and argument combination. """
-    def __init__(self, calibration: RemoteCalibration, args: CalibrationArguments = None):
+    """Wrapper for a calibration and argument combination."""
+
+    def __init__(
+        self, calibration: RemoteCalibration, args: CalibrationArguments = None
+    ):
         self.calibration = calibration
         self.args = args or CalibrationArguments()
 
@@ -58,7 +66,7 @@ class CalibrationWithArgs(QuantumExecutableBlock):
         self.calibration.run(runtime.model, runtime, self.args)
 
 
-AnyEngine = TypeVar('AnyEngine', bound=InstructionExecutionEngine, covariant=True)
+AnyEngine = TypeVar("AnyEngine", bound=InstructionExecutionEngine, covariant=True)
 
 
 class QuantumRuntime(MetricsMixin):
@@ -74,7 +82,7 @@ class QuantumRuntime(MetricsMixin):
     def run_calibration(
         self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
     ):
-        """ Make 'calibration' distinct from 'quantum executable' for usabilities sake. """
+        """Make 'calibration' distinct from 'quantum executable' for usabilities sake."""
         self.run_quantum_executable(calibrations)
 
     def run_quantum_executable(
@@ -155,6 +163,7 @@ def execute_instructions_via_config(
     # TODO: Look up later how much of a runtime hit this is, I'd hope
     #  hoisted to global and don't have to re-import every time.
     from qat.purr.backends.calibrations.remote import find_calibration
+
     calibrations = [find_calibration(arg) for arg in config.active_calibrations]
 
     return execute_instructions(
@@ -167,10 +176,13 @@ def execute_instructions(
     instructions: InstructionBuilder,
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
-    metrics: MetricsType = None
+    metrics: MetricsType = None,
 ):
     with log_duration("Execution completed, took {} seconds."):
         active_runtime = get_runtime(hardware)
         active_runtime.initialize_metrics(metrics)
         active_runtime.run_quantum_executable(executable_blocks)
-        return active_runtime.execute(instructions, results_format), active_runtime.compilation_metrics
+        return (
+            active_runtime.execute(instructions, results_format),
+            active_runtime.compilation_metrics,
+        )

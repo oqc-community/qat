@@ -21,7 +21,7 @@ class QPUVersion:
 
     @staticmethod
     def with_version(version: str = None):
-        """ Creates a QPU version with an empty QPU make. Only used in very special circumstances. """
+        """Creates a QPU version with an empty QPU make. Only used in very special circumstances."""
         return QPUVersion("", version)
 
 

@@ -21,12 +21,14 @@ from qat.purr.compiler.devices import QuantumComponent
 
 def _get_json_path(file_name):
     return join(
-        abspath(join(dirname(__file__), "serialised_compiler_config_templates", file_name))
+        abspath(
+            join(dirname(__file__), "serialised_compiler_config_templates", file_name)
+        )
     )
 
 
 def _get_contents(file_path):
-    """ Get Json from a file. """
+    """Get Json from a file."""
     with open(_get_json_path(file_path)) as ifile:
         return ifile.read()
 
@@ -45,12 +47,15 @@ class TestConfigSerialization:
         second_conf = CompilerConfig.create_from_json(serialized_data)
 
         assert first_conf.results_format.format == second_conf.results_format.format
-        assert first_conf.results_format.transforms == second_conf.results_format.transforms
+        assert (
+            first_conf.results_format.transforms
+            == second_conf.results_format.transforms
+        )
 
         conf1_dict = dict(vars(first_conf))
-        del conf1_dict['results_format']
+        del conf1_dict["results_format"]
         conf2_dict = dict(vars(second_conf))
-        del conf2_dict['results_format']
+        del conf2_dict["results_format"]
 
         assert conf1_dict == conf2_dict
 
@@ -59,10 +64,14 @@ class TestConfigSerialization:
         first_conf.optimizations = Qasm2Optimizations()
         serialized_data = first_conf.to_json()
         second_conf = CompilerConfig.create_from_json(serialized_data)
-        assert first_conf.optimizations.tket_optimizations == \
-               second_conf.optimizations.tket_optimizations
-        assert first_conf.optimizations.qiskit_optimizations == \
-               second_conf.optimizations.qiskit_optimizations
+        assert (
+            first_conf.optimizations.tket_optimizations
+            == second_conf.optimizations.tket_optimizations
+        )
+        assert (
+            first_conf.optimizations.qiskit_optimizations
+            == second_conf.optimizations.qiskit_optimizations
+        )
 
     def test_all_config_optimizations(self):
         def get_subclasses(object):
@@ -95,10 +104,8 @@ class TestConfigSerialization:
         serialized_data = first_conf.to_json()
         second_conf = CompilerConfig.create_from_json(serialized_data)
 
-        assert first_conf.repeats == \
-               second_conf.repeats
-        assert first_conf.repetition_period == \
-               second_conf.repetition_period
+        assert first_conf.repeats == second_conf.repeats
+        assert first_conf.repetition_period == second_conf.repetition_period
 
     def test_config_metrics(self):
         first_conf = CompilerConfig()
@@ -108,8 +115,7 @@ class TestConfigSerialization:
             serialized_data = first_conf.to_json()
             second_conf = CompilerConfig.create_from_json(serialized_data)
 
-            assert first_conf.metrics == \
-                   second_conf.metrics
+            assert first_conf.metrics == second_conf.metrics
 
     def test_config_quantum_results_format(self):
         first_conf = CompilerConfig()
@@ -122,8 +128,7 @@ class TestConfigSerialization:
                 serialized_data = first_conf.to_json()
                 second_conf = CompilerConfig.create_from_json(serialized_data)
 
-                assert first_conf.results_format == \
-                       second_conf.results_format
+                assert first_conf.results_format == second_conf.results_format
 
     def test_config_serialisation_raises_error(self):
         class A:
@@ -135,7 +140,9 @@ class TestConfigSerialization:
         with pytest.raises(ValueError):
             first_conf.to_json()
 
-        first_conf.optimizations = QuantumComponent  # Not an allowed custom type in project
+        first_conf.optimizations = (
+            QuantumComponent  # Not an allowed custom type in project
+        )
 
         with pytest.raises(ValueError):
             first_conf.to_json()
@@ -146,12 +153,12 @@ class TestConfigSerialization:
             first_conf.to_json()
 
     def test_config_deserialization_raises_error(self):
-        serialized_data = str({
-            "$type": "<class 'scc.compiler.config.FakeClass'>",
-            "$data": {
-                "repeats": 1000, "repetition_period": 1000
+        serialized_data = str(
+            {
+                "$type": "<class 'scc.compiler.config.FakeClass'>",
+                "$data": {"repeats": 1000, "repetition_period": 1000},
             }
-        })
+        )
         with pytest.raises(ValueError):
             CompilerConfig.create_from_json(serialized_data)
 
@@ -167,6 +174,14 @@ class TestConfigSerialization:
         assert deserialised_conf.repetition_period == 10
         assert deserialised_conf.metrics == MetricsType.OptimizedInstructionCount
         assert deserialised_conf.results_format.format == InlineResultsProcessing.Binary
-        assert deserialised_conf.results_format.transforms == ResultsFormatting.DynamicStructureReturn
-        assert deserialised_conf.optimizations.qiskit_optimizations == QiskitOptimizations.Empty
-        assert deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
+        assert (
+            deserialised_conf.results_format.transforms
+            == ResultsFormatting.DynamicStructureReturn
+        )
+        assert (
+            deserialised_conf.optimizations.qiskit_optimizations
+            == QiskitOptimizations.Empty
+        )
+        assert (
+            deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
+        )

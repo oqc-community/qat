@@ -38,8 +38,8 @@ class TestInstruction:
             Sweep(SweepValue("dave", [1, 2, 3, 4, 5])),
             SweepIterator(
                 Sweep(SweepValue("dave", [1, 2, 3])),
-                SweepIterator(Sweep(SweepValue("dave", [1, 2, 3, 4, 5, 6, 7, 8])))
-            )
+                SweepIterator(Sweep(SweepValue("dave", [1, 2, 3, 4, 5, 6, 7, 8]))),
+            ),
         )
         incrementor = 0
         while not sweep_iter.is_finished():
@@ -68,20 +68,28 @@ class TestInstruction:
     def test_instruction_limit(self):
         qie = EchoEngine()
         with pytest.raises(ValueError):
-            qie.validate([
-                Pulse(
-                    PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
-                    PulseShapeType.SQUARE,
-                    0
-                ) for _ in range(201000)
-            ])
+            qie.validate(
+                [
+                    Pulse(
+                        PulseChannel(
+                            "", PhysicalChannel("", 1, PhysicalBaseband("", 1))
+                        ),
+                        PulseShapeType.SQUARE,
+                        0,
+                    )
+                    for _ in range(201000)
+                ]
+            )
 
 
 class TestInstructionSerialisation:
     def test_basic_gate(self):
         hw = get_default_echo_hardware(4)
-        builder = get_builder(hw).X(hw.get_qubit(0).get_drive_channel(),
-                                    np.pi / 2.0).measure_mean_z(hw.get_qubit(0))
+        builder = (
+            get_builder(hw)
+            .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)
+            .measure_mean_z(hw.get_qubit(0))
+        )
 
         seri = builder.serialize()
         deseri = InstructionBuilder.deserialize(seri, hw)

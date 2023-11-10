@@ -14,7 +14,10 @@ from qat.purr.backends.utilities import UPCONVERT_SIGN, get_axis_map
 from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
-from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
+from qat.purr.compiler.hardware_models import (
+    QuantumHardwareModel,
+    resolve_qb_pulse_channel,
+)
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -30,7 +33,9 @@ from qat.purr.utils.logging_utils import log_duration
 log = get_default_logger()
 
 
-def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target_qubits):
+def sync_baseband_frequencies_to_value(
+    hw: QuantumHardwareModel, lo_freq, target_qubits
+):
     # Round the drive channel frequencies to the multiple of 1kHz
     for qubit in target_qubits:
         hw.get_qubit(qubit).get_drive_channel().frequency = 1e9 * round(
@@ -41,11 +46,15 @@ def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target
         drive_channel = hw.get_qubit(qubit).get_drive_channel()
         physical_channel = drive_channel.physical_channel
         baseband = physical_channel.baseband
-        log.info(f"Old baseband IF frequency of qubit '{qubit}': {baseband.if_frequency}")
+        log.info(
+            f"Old baseband IF frequency of qubit '{qubit}': {baseband.if_frequency}"
+        )
         log.info(f"Old baseband frequency of qubit '{qubit}': {baseband.frequency}")
         baseband.if_frequency = float(round(drive_channel.frequency - lo_freq))
         baseband.frequency = lo_freq
-        log.info(f"Baseband IF frequency of qubit '{qubit}' set to {baseband.if_frequency}")
+        log.info(
+            f"Baseband IF frequency of qubit '{qubit}' set to {baseband.if_frequency}"
+        )
         log.info(f"Baseband frequency of qubit '{qubit}' set to {baseband.frequency}")
 
 
@@ -96,6 +105,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
     Backend that hooks up to our QPU's, currently hardcoded to particular fridges.
     This will only work when run on a machine physically connected to a QPU.
     """
+
     model: LiveHardwareModel
 
     def __init__(self, model: LiveHardwareModel):
@@ -131,27 +141,38 @@ class LiveDeviceEngine(QuantumExecutionEngine):
     def build_baseband_frequencies(
         self, pulse_channel_buffers: Dict[PulseChannel, np.ndarray]
     ):
-        """ Find fixed intermediate frequencies for physical channels if they exist. """
+        """Find fixed intermediate frequencies for physical channels if they exist."""
         baseband_freqs = {}
         baseband_freqs_fixed_if = {}
         for pulse_channel in pulse_channel_buffers.keys():
             if pulse_channel.fixed_if:
-                if baseband_freqs_fixed_if.get(pulse_channel.physical_channel_id, False) and \
-                    baseband_freqs[pulse_channel.physical_channel_id] != \
-                        pulse_channel.frequency - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency:
+                if (
+                    baseband_freqs_fixed_if.get(
+                        pulse_channel.physical_channel_id, False
+                    )
+                    and baseband_freqs[pulse_channel.physical_channel_id]
+                    != pulse_channel.frequency
+                    - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
+                ):
                     raise ValueError(
                         "Cannot fix the frequency for two pulse channels of different "
                         "frequencies on the same physical channel!"
                     )
-                baseband_freqs[pulse_channel.physical_channel_id] = \
-                    pulse_channel.frequency - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
-                baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = \
-                    pulse_channel.fixed_if
+                baseband_freqs[pulse_channel.physical_channel_id] = (
+                    pulse_channel.frequency
+                    - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
+                )
+                baseband_freqs_fixed_if[
+                    pulse_channel.physical_channel_id
+                ] = pulse_channel.fixed_if
             else:
-                if pulse_channel.physical_channel_id not in baseband_freqs_fixed_if \
-                        or not baseband_freqs_fixed_if[pulse_channel.physical_channel_id]:
-                    baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = \
-                        pulse_channel.fixed_if
+                if (
+                    pulse_channel.physical_channel_id not in baseband_freqs_fixed_if
+                    or not baseband_freqs_fixed_if[pulse_channel.physical_channel_id]
+                ):
+                    baseband_freqs_fixed_if[
+                        pulse_channel.physical_channel_id
+                    ] = pulse_channel.fixed_if
 
         return baseband_freqs
 
@@ -193,7 +214,9 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     dt = physical_channel.sample_time
                     physical_channel.readout_start = aq.start * dt + aq.delay
                     physical_channel.readout_length = aq.samples * dt
-                    physical_channel.acquire_mode_integrator = aq.mode == AcquireMode.INTEGRATOR
+                    physical_channel.acquire_mode_integrator = (
+                        aq.mode == AcquireMode.INTEGRATOR
+                    )
 
             playback_results = self.model.control_hardware.start_playback(
                 repetitions=repetitions, repetition_time=repetition_time
@@ -210,13 +233,14 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(
-                            pp, response, response_axis)
+                            pp, response, response_axis
+                        )
                     var_result = results.setdefault(
                         aq.output_variable,
                         np.empty(
                             sweep_iterator.get_results_shape(response.shape),
-                            response.dtype
-                        )
+                            response.dtype,
+                        ),
                     )
                     sweep_iterator.insert_result_at_sweep_position(var_result, response)
         return results
@@ -226,19 +250,26 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             instructions = super().optimize(instructions)
             for pp in [val for val in instructions if isinstance(val, PostProcessing)]:
                 if pp.acquire.mode == AcquireMode.SCOPE:
-                    if pp.process == PostProcessType.MEAN \
-                            and ProcessAxis.SEQUENCE in pp.axes \
-                            and len(pp.axes) <= 1:
+                    if (
+                        pp.process == PostProcessType.MEAN
+                        and ProcessAxis.SEQUENCE in pp.axes
+                        and len(pp.axes) <= 1
+                    ):
                         instructions.remove(pp)
 
                 elif pp.acquire.mode == AcquireMode.INTEGRATOR:
-                    if pp.process == PostProcessType.DOWN_CONVERT \
-                            and ProcessAxis.TIME in pp.axes \
-                            and len(pp.axes) <= 1:
+                    if (
+                        pp.process == PostProcessType.DOWN_CONVERT
+                        and ProcessAxis.TIME in pp.axes
+                        and len(pp.axes) <= 1
+                    ):
                         instructions.remove(pp)
 
-                    if pp.process == PostProcessType.MEAN and ProcessAxis.TIME in pp.axes \
-                            and len(pp.axes) <= 1:
+                    if (
+                        pp.process == PostProcessType.MEAN
+                        and ProcessAxis.TIME in pp.axes
+                        and len(pp.axes) <= 1
+                    ):
                         instructions.remove(pp)
 
             return instructions
@@ -250,13 +281,19 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             consumed_qubits: List[str] = []
             for inst in instructions:
                 if isinstance(inst, PostProcessing):
-                    if inst.acquire.mode == AcquireMode.SCOPE and ProcessAxis.SEQUENCE in inst.axes:
+                    if (
+                        inst.acquire.mode == AcquireMode.SCOPE
+                        and ProcessAxis.SEQUENCE in inst.axes
+                    ):
                         raise ValueError(
                             "Invalid post-processing! Post-processing over SEQUENCE is "
                             "not possible after the result is returned from hardware "
                             "in SCOPE mode!"
                         )
-                    elif inst.acquire.mode == AcquireMode.INTEGRATOR and ProcessAxis.TIME in inst.axes:
+                    elif (
+                        inst.acquire.mode == AcquireMode.INTEGRATOR
+                        and ProcessAxis.TIME in inst.axes
+                    ):
                         raise ValueError(
                             "Invalid post-processing! Post-processing over TIME is not "
                             "possible after the result is returned from hardware in "

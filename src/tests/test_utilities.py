@@ -21,7 +21,7 @@ def test_square_function(sizes):
     y1 = func(np.empty(shape=[sizes]))
     y2 = func.eval(np.empty(shape=[sizes]))
     assert np.array_equal(y1, y2)
-    assert np.array_equal(y1, np.ones(shape=[sizes], dtype='cfloat'))
+    assert np.array_equal(y1, np.ones(shape=[sizes], dtype="cfloat"))
 
 
 def test_size_limits():
@@ -39,10 +39,10 @@ def test_size_limits():
 def test_square_function_first_derivative(sizes):
     x = np.empty(shape=[sizes])
     assert np.array_equal(
-        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype='cfloat')
+        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype="cfloat")
     )
     assert np.array_equal(
-        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype='cfloat')
+        SquareFunction().derivative(x), np.zeros(shape=[sizes], dtype="cfloat")
     )
 
 
@@ -50,7 +50,7 @@ def test_gaussian_function():
     x = np.array([-2, -1, 0, 1, 2])
     gaussian = GaussianFunction(std_dev=1, zero_at_edges=0)
     y = gaussian.eval(x)
-    assert y.dtype == 'cfloat'
+    assert y.dtype == "cfloat"
     # Known maxima
     assert y[2] == 1 + 0j
     # Test based on even function symmetry
@@ -64,7 +64,7 @@ def test_gaussian_function_first_derivative():
     gaussian = GaussianFunction(std_dev=1, zero_at_edges=0)
     y = gaussian.eval(x)
     y_x = gaussian.derivative(x)
-    assert y_x.dtype == 'cfloat'
+    assert y_x.dtype == "cfloat"
     assert np.argmax(y) == 2
     # Known maxima
     assert y_x[2] == 0 + 0j
@@ -110,17 +110,17 @@ def test_numeric_derivative():
 
 def test_eval_all_shapes():
     params = {
-        'width': 100e-9,
-        'drag': 1e-9,
-        'rise': 1e-9,
-        'amp_setup': 1.5,
-        'zero_at_edges': 1,
-        'frequency': 1e-6,
-        'std_dev': 10e-9,
-        'square_width': 80e-9
+        "width": 100e-9,
+        "drag": 1e-9,
+        "rise": 1e-9,
+        "amp_setup": 1.5,
+        "zero_at_edges": 1,
+        "frequency": 1e-6,
+        "std_dev": 10e-9,
+        "square_width": 80e-9,
     }
     t = np.linspace(
-        -params['width'] / 2, params['width'] / 2, int(params['width'] / 0.5e-9)
+        -params["width"] / 2, params["width"] / 2, int(params["width"] / 0.5e-9)
     )
     hw = get_default_echo_hardware(1)
     channel = hw.get_qubit(0).get_drive_channel()

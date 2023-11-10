@@ -32,12 +32,6 @@ We use `poetry <https://python-poetry.org/>`_ for dependency management and run 
 Once both of these are installed run this in the root folder to install all the dependencies that you need:
 :code:`poetry install`
 
-.. note::
-   If you are contributing to the project we recommend that you also run
-
-   :code:`poetry run pre-commit install`
-   to enable pre-commit checks.
-
 |
 
 ----------------------

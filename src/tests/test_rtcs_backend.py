@@ -10,7 +10,9 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
 
-@pytest.mark.skipif(not qutip_available, reason="Qutip is not available on this platform")
+@pytest.mark.skipif(
+    not qutip_available, reason="Qutip is not available on this platform"
+)
 class TestBaseQuantumQutip:
     def get_simulator(self):
         hw = get_default_RTCS_hardware()
@@ -30,7 +32,9 @@ class TestBaseQuantumQutip:
         target_q = hw.get_qubit(1)
         cr_channel = control_q.get_cross_resonance_channel(target_q)
         sync_channels = [
-            cr_channel, control_q.get_drive_channel(), target_q.get_drive_channel()
+            cr_channel,
+            control_q.get_drive_channel(),
+            target_q.get_drive_channel(),
         ]
         prep = np.linspace(0.0, np.pi, 2)
 

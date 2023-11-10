@@ -166,7 +166,9 @@ class TestDeserialize:
     def test_deserialize_dataclass(self):
         test_obj = TestDataClass(23, "Hello World!", {"key1": "data1", "key2": "data2"})
         formatted_json = {
-            "$type": str(type(test_obj)), "$dataclass": True, "$data": asdict(test_obj)
+            "$type": str(type(test_obj)),
+            "$dataclass": True,
+            "$data": asdict(test_obj),
         }
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)
@@ -196,10 +198,13 @@ class TestDeserialize:
         formatted_json_data = asdict(test_obj)
         formatted_json_data.pop("field3")
         formatted_json_data["field3"] = {
-            "$type": str(type(custom_field)), "$data": custom_field.__dict__
+            "$type": str(type(custom_field)),
+            "$data": custom_field.__dict__,
         }
         formatted_json = {
-            "$type": str(type(test_obj)), "$dataclass": True, "$data": formatted_json_data
+            "$type": str(type(test_obj)),
+            "$dataclass": True,
+            "$data": formatted_json_data,
         }
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)

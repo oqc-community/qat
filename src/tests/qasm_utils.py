@@ -13,8 +13,8 @@ from qat.purr.integrations.qasm import Qasm2Parser, qasm_from_file
 
 
 class TestFileType(Enum):
-    QASM2 = auto(),
-    QASM3 = auto(),
+    QASM2 = (auto(),)
+    QASM3 = (auto(),)
     QIR = auto()
 
 
