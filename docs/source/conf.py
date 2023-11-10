@@ -20,11 +20,12 @@ author = (
 release = version = '1.0.0'
 add_module_names = False
 autoclass_content = 'both'
+smv_remote_whitelist = None
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx_autodoc_typehints', 'sphinx_paramlinks']
+extensions = ['sphinx_multiversion', 'sphinx_rtd_theme', 'sphinx.ext.autodoc', 'sphinx_autodoc_typehints', 'sphinx_paramlinks']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -35,6 +36,9 @@ exclude_patterns = []
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_logo = 'qat-logo.png'
+html_sidebars = {
+'**': ["versioning.html"]
+}
 
 html_theme_options = {
     'logo_only': True,
