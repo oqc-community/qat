@@ -78,9 +78,3 @@ jobs:
         git add --force .
         git commit -a -m "temporarily commiting api docs"
         poetry run sphinx-multiversion docs/source/ docs/build/
-
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: docs/build
-        clean: false
