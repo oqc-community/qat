@@ -376,14 +376,13 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             architecture = Architecture([val.direction for val in couplings])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
-            chunks = (
-                max([val.quality for val in couplings], default=0)
-                - min([val.quality for val in couplings], default=0)
-            ) / 3
+            min_quality = min([val.quality for val in couplings], default=0)
+            max_quality = max([val.quality for val in couplings], default=0)
+            chunks = (max_quality - min_quality) / 3
             steps = 2
             last_couplings = 0
             while steps >= 0:
-                quality_level = chunks * steps
+                quality_level = min_quality + chunks * steps
                 filtered_couplings = [
                     val.direction for val in couplings if val.quality >= quality_level
                 ]
