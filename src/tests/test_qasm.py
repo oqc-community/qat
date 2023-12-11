@@ -442,7 +442,7 @@ class TestExecutionFrontend:
 
         assert results is not None
         assert len(results) == 1
-        assert len(results["c"]) == 2
+        assert results["c"]["00"] == 1000
 
     def test_quality_couplings_all_off(self):
         qasm_string = get_qasm2("basic.qasm")
@@ -464,7 +464,7 @@ class TestExecutionFrontend:
 
         assert results is not None
         assert len(results) == 1
-        assert len(results["c"]) == 2
+        assert results["c"]["00"] == 1000
 
     @pytest.mark.skip(
         "Tket incorrectly fails verification with remapping off. Assert this is wrong, "
@@ -512,7 +512,7 @@ class TestExecutionFrontend:
 
         assert len(results) == 1
         assert "c" in results
-        assert results["c"] == [1, 1]
+        assert results["c"]["11"] > 700
 
     def test_engine_as_model(self):
         qasm_string = get_qasm2("ghz.qasm")
@@ -521,7 +521,7 @@ class TestExecutionFrontend:
 
         assert len(results) == 1
         assert "b" in results
-        assert results["b"] == [0, 0, 0, 0]
+        assert results["b"]["0000"] == 1000
 
     def test_ghz(self):
         qasm_string = get_qasm2("ghz.qasm")
@@ -529,7 +529,7 @@ class TestExecutionFrontend:
         results = execute_qasm(qasm_string, hardware)
         assert len(results) == 1
         assert "b" in results
-        assert results["b"] == [0, 0, 0, 0]
+        assert results["b"]["0000"] == 1000
 
     def test_basic_binary(self):
         qasm_string = get_qasm2("basic_results_formats.qasm")
@@ -538,9 +538,8 @@ class TestExecutionFrontend:
         assert len(results) == 2
         assert "ab" in results
         assert "c" in results
-        assert results["ab"] == [0, 0]
-        assert results["c"][1] == 0
-        assert results["c"][0] in (1, 0)
+        assert results["ab"]["00"] == 1000
+        assert results["c"]["00"] == 1000
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -567,7 +566,7 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(3)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["meas"] == [0, 0]
+        assert results["meas"]["00"] == 1000
 
     def test_device_revert(self):
         hw = get_default_echo_hardware(4)
@@ -590,15 +589,15 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(2)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["meas"] == [0, 0]
+        assert results["meas"]["00"] == 1000
 
     def test_example(self):
         qasm_string = get_qasm2("example.qasm")
         hardware = get_default_echo_hardware(9)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 2
-        assert results["c"] == [0, 0, 0]
-        assert results["d"] == [0, 0, 0]
+        assert results["c"]["000"] == 1000
+        assert results["d"]["000"] == 1000
 
     def test_example_if(self):
         qasm_string = get_qasm2("example_if.qasm")
@@ -611,7 +610,7 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(2)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["c"] == [0, 0]
+        assert results["c"]["00"] == 1000
 
     def test_mid_circuit_measure(self):
         qasm_string = get_qasm2("invalid_mid_circuit_measure.qasm")
@@ -624,37 +623,37 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(6)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["c"] == [0, 0]
+        assert results["c"]["00"] == 1000
 
     def test_move_measurements(self):
         qasm_string = get_qasm2("move_measurements.qasm")
         hardware = get_default_echo_hardware(12)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["c"] == [0, 0, 0]
+        assert results["c"]["000"] == 1000
 
     def test_order_cregs(self):
         qasm_string = get_qasm2("ordered_cregs.qasm")
         hardware = get_default_echo_hardware(4)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 3
-        assert results["a"] == [0, 0]
-        assert results["b"] == [0, 0]
-        assert results["c"] == [0, 0]
+        assert results["a"]["00"] == 1000
+        assert results["b"]["00"] == 1000
+        assert results["c"]["00"] == 1000
 
     def test_parallel_test(self):
         qasm_string = get_qasm2("parallel_test.qasm")
         hardware = get_default_echo_hardware(10)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["c0"] == [0, 0]
+        assert results["c0"]["00"] == 1000
 
     def test_random_n5_d5(self):
         qasm_string = get_qasm2("random_n5_d5.qasm")
         hardware = get_default_echo_hardware(5)
         results = execute_qasm(qasm_string, hardware=hardware)
         assert len(results) == 1
-        assert results["c"] == [0, 0, 0, 0, 0]
+        assert results["c"]["00000"] == 1000
 
     def test_metrics_filtered(self):
         metrics = CompilationMetrics(MetricsType.Empty)
@@ -691,7 +690,7 @@ class TestExecutionFrontend:
         results = execute_qasm(qasm_string)
         assert results is not None
         assert len(results) == 1
-        assert len(results["c"]) == 2
+        assert results["c"]["00"] == 1000
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
@@ -732,7 +731,7 @@ class TestExecutionFrontend:
 
         # We're testing that individual assignments to a classical register get
         # correctly assigned, aka that measuring c[0] then c[1] results in c = [c0, c1].
-        assert len(results["c"]) == 2
+        assert results["c"]["00"] == 1000
 
     def test_frontend_peek(self):
         with pytest.raises(ValueError):
