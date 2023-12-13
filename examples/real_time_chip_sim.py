@@ -1,4 +1,5 @@
 import numpy as np
+
 from qat.purr.backends.realtime_chip_simulator import (
     RealtimeChipSimEngine,
     get_default_RTCS_hardware,

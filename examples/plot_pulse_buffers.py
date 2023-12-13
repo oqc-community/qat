@@ -3,6 +3,7 @@ from typing import Iterable
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import ticker
+
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine
 from qat.purr.compiler.emitter import QatFile
