@@ -101,6 +101,7 @@ class ChannelType(Enum):
     cross_resonance = auto()
     cross_resonance_cancellation = auto()
     acquire = auto()
+    freq_shift = auto()
 
     def __repr__(self):
         return self.name
@@ -444,6 +445,24 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     def __hash__(self):
         return hash(self.full_id())
+
+
+class FreqShiftPulseChannel(PulseChannel):
+    def __init__(
+        self,
+        id_: str,
+        physical_channel: PhysicalChannel,
+        frequency=0.0,
+        bias=0.0 + 0.0j,
+        scale=1.0 + 0.0j,
+        amp=0.0,
+        active: bool = True,
+        fixed_if: bool = False,
+        **kwargs
+    ):
+        super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
+        self.amp: float = amp
+        self.active: bool = active
 
 
 class QubitCoupling(Calibratable):
