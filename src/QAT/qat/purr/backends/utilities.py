@@ -378,9 +378,9 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
                 data.std_dev, data.rise, data.amp_setup, data.amp
             )
         elif data.shape == PulseShapeType.SOFTER_SQUARE:
-            num_func = SofterSquareFunction(data.std_dev, data.rise)
+            num_func = SofterSquareFunction(data.width, data.rise)
         elif data.shape == PulseShapeType.EXTRA_SOFT_SQUARE:
-            num_func = ExtraSoftSquareFunction(data.std_dev, data.rise)
+            num_func = ExtraSoftSquareFunction(data.width, data.rise)
         elif data.shape == PulseShapeType.SOFTER_GAUSSIAN:
             num_func = SofterGaussianFunction(data.width, data.rise)
 
@@ -388,19 +388,19 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
         elif data.shape == PulseShapeType.ROUNDED_SQUARE:
             num_func = RoundedSquareFunction(data.width, data.std_dev, data.rise)
         elif data.shape == PulseShapeType.GAUSSIAN_DRAG:
-            num_func = DragGaussianFunction(data.std_dev, data.beta, data.zero_at_edges)
+            num_func = DragGaussianFunction(data.width, data.beta, data.zero_at_edges)
         elif data.shape == PulseShapeType.GAUSSIAN_ZERO_EDGE:
             num_func = GaussianZeroEdgeFunction(
                 data.std_dev, data.width, data.zero_at_edges
             )
         elif data.shape == PulseShapeType.SECH:
-            num_func = Sech(data.std_dev)
+            num_func = Sech(data.width)
         elif data.shape == PulseShapeType.SIN:
             num_func = Sin(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.COS:
             num_func = Cos(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.GAUSSIAN_SQUARE:
-            num_func = GaussianSquare(data.std_dev, data.square_width)
+            num_func = GaussianSquare(data.width, data.square_width)
         else:
             raise ValueError(f"'{str(data.shape)}' is an unknown pulse shape.")
 
