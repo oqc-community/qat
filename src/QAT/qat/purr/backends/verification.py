@@ -1,14 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-
+import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.backends.live import LiveHardwareModel, get_default_lucy_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.emitter import QatFile
+from qat.purr.compiler.emitter import QatFile, InstructionEmitter
 from qat.purr.compiler.execution import QuantumExecutionEngine
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Instruction
+from qat.purr.utils.logger import get_default_logger
+from numpy import max as np_max
+
+logger = get_default_logger()
 
 
 class QPUVersion:
@@ -49,7 +54,7 @@ class VerificationModel(LiveHardwareModel):
         self.version = qpu_version
 
 
-def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
+def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion, max_circuit_duration: int = 90000):
     """
     Runs instruction verification for the instructions in this builder.
 
@@ -65,10 +70,9 @@ def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
         )
 
     engine: VerificationEngine = model.get_engine()
-    engine.verify_instructions(builder.instructions)
+    engine.verify_instructions(builder.instructions, max_circuit_duration)
 
-
-def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
+def get_verification_model(qpu_type: QPUVersion) -> Union[VerificationModel, QuantumHardwareModel]:
     """
     Get verification model for a particular QPU make and model. Each make has its own class,
     which has a field that is each individual version available for verification.
@@ -89,25 +93,38 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
         )
 
     if qpu_type.make == Lucy.__name__:
-        # TODO: Should have an apply_setup_to_hardware in live which people can use to build our own architecture.
-        model = VerificationModel(qpu_type, LucyVerificationEngine)
-        raise NotImplementedError("No lucy-specific model created yet.")
+        model = get_default_lucy_hardware()
+    else:
+        raise NotImplementedError(f"No specific model created yet for {qpu_type}.")
 
-    return None
+    return model
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
+
+    def __init__(self, model):
+        super().__init__(model)
+
     def _execute_on_hardware(self, sweep_iterator, package: QatFile):
         veri_list = list(package.meta_instructions)
         veri_list.extend(package.instructions)
         self.verify_instructions(veri_list)
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction]):
+    def verify_instructions(self, instructions: List[Instruction], max_circuit_duration: int = 90000):
         ...
 
-
 class LucyVerificationEngine(VerificationEngine):
-    def verify_instructions(self, instructions: List[Instruction]):
-        # TODO: Add actual verification
-        raise NotImplementedError("No lucy-specific verification yet.")
+
+    def verify_instructions(self, instructions: Union[List[Instruction], InstructionBuilder], max_circuit_duration: int = 90000) -> bool:
+        valid_instructions = True
+
+        duration = self.instruction_duration(instructions)
+        if not valid_circuit_length(duration, max_circuit_duration):
+            valid_instructions = False
+
+        return valid_instructions
+
+
+def valid_circuit_length(duration: int, max_circuit_duration: int= 90000) -> bool:
+    return duration < max_circuit_duration

@@ -1,11 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import logging
 import os.path
 import typing
 from pathlib import Path
 from typing import Union
 
 import regex
+
+from qat.purr.backends.live import LiveDeviceEngine
+from qat.purr.backends.verification import LucyVerificationEngine, get_verification_model, Lucy, verify_instructions, \
+    QPUVersion, valid_circuit_length
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
@@ -80,6 +85,34 @@ def execute_with_metrics(
     frontend: LanguageFrontend = fetch_frontend(path_or_str)
     return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
+def validate_circuit_length(
+        program: Union[str, InstructionBuilder],
+        compiler_config: CompilerConfig = None,
+        qpu: QPUVersion = QPUVersion(make="Lucy", version="latest"),
+        max_circuit_duration: int = 90000,
+) -> bool:
+
+    if isinstance(program, InstructionBuilder):
+        hardware = program.model.get_engine()
+        duration = hardware.instruction_duration(program)
+        return valid_circuit_length(duration=duration, max_circuit_duration=max_circuit_duration)
+
+    elif isinstance(program, str):
+        model = get_verification_model(qpu)
+
+        frontend: LanguageFrontend = fetch_frontend(program)
+        builder, _ = _return_or_build(
+            program, frontend.parse, hardware=model, compiler_config=compiler_config
+        )
+
+        if qpu.make == "Lucy":
+            return LucyVerificationEngine(model=model).verify_instructions(instructions= builder, max_circuit_duration=max_circuit_duration)
+        else:
+            return verify_instructions(builder=builder, qpu_type=qpu, max_circuit_duration=max_circuit_duration)
+
+    else:
+        raise ValueError("A valid program type has not been provided.")
+
 
 def execute_qir(
     qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
@@ -128,5 +161,6 @@ def _execute_with_metrics(
         instructions, hardware, compiler_config
     )
     metrics.merge(execution_metrics)
+
 
     return results, metrics.as_dict()

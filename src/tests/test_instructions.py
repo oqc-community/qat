@@ -22,6 +22,7 @@ from qat.purr.compiler.instructions import (
     SweepValue,
 )
 from qat.purr.compiler.runtime import get_builder
+from qat.purr.compiler.runtime import execute_instructions
 
 
 class TestInstruction:

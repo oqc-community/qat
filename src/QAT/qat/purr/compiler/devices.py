@@ -661,7 +661,7 @@ class Qubit(QuantumDevice):
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
         self.discriminator = [0.0]
-        self.pulse_hw_zx_pi_4 = dict()
+        self.pulse_hw_zx_pi_4 = dict() #
         self.default_pulse_channel_type = ChannelType.drive
 
         for qubit in coupled_qubits or []:

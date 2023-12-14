@@ -4,4 +4,5 @@ qreg q[2];
 creg ab[2];
 creg c[2];
 h q;
+
 measure q[0]->c[0];
