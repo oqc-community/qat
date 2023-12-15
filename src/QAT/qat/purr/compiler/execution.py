@@ -4,7 +4,7 @@ import abc
 from decimal import ROUND_DOWN, Decimal
 from math import ceil
 from numbers import Number
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from qat.purr.backends.utilities import (

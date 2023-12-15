@@ -4,11 +4,16 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.backends.live import LiveHardwareModel, apply_setup_to_hardware
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
-from qat.purr.compiler.instructions import Instruction
+from qat.qat import execute
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
+
 
 
 class QPUVersion:
@@ -91,23 +96,46 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
     if qpu_type.make == Lucy.__name__:
         # TODO: Should have an apply_setup_to_hardware in live which people can use to build our own architecture.
         model = VerificationModel(qpu_type, LucyVerificationEngine)
-        raise NotImplementedError("No lucy-specific model created yet.")
-
+        return apply_setup_to_hardware(model,
+                                       qubit_count = 8,
+                                       pulse_hw_x_pi_2_width = 25e-9,
+                                       pulse_hw_zx_pi_4_width = 3.18e-07,
+                                       pulse_measure_width =  2.41e-06)  # type hinted incorrectly - needs to return Union[VerificationModel, QuantumHardwareModel]
     return None
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile):
-        veri_list = list(package.meta_instructions)
-        veri_list.extend(package.instructions)
-        self.verify_instructions(veri_list)
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction]):
-        ...
+    def _verify_timeline(self, package: QatFile):
+        pass
 
 
 class LucyVerificationEngine(VerificationEngine):
-    def verify_instructions(self, instructions: List[Instruction]):
-        # TODO: Add actual verification
-        raise NotImplementedError("No lucy-specific verification yet.")
+"""
+1) Integrate verification as part of the execution, in which case called right after Sweep iteration changes
+    This means any call to execute() will also call verify()
+    implementation is empty by default, but can be overriden in an specific Engine.
+2) Define verification separately in an engine.
+    a) intergate the verification in execution
+        This means overriding execute(), execute_on_hw(), process_results(), process_assigns()
+    b) leave it separete from execution
+        Call verify directly to test ...
+"""
+    max_circuit_duration = 90e-9 # 90000
+    def _verify_timeline(self, package):
+        position_map = self.create_duration_timeline(package)
+        pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
+        durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
+
+        if any([duration > self.max_circuit_duration for duration in durations.values()]):
+            raise ValueError("Exceeds the limit ...")
+
+
+def verify_program(program:str, compiler_config: CompilerConfig, qpu_version: QPUVersion):
+    model = get_verification_model(qpu_version)
+    engine = LucyVerificationEngine(model=model)
+    # prepare pacakage from program
+    package = None
+    engine._verify_timeline(package)
+    # return execute(program, model, compiler_config)
