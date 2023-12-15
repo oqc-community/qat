@@ -15,6 +15,7 @@ class TestFileType(Enum):
     QASM2 = (auto(),)
     QASM3 = (auto(),)
     QIR = auto()
+    OPENPULSE = auto()
 
 
 def get_test_files_dir(ir_type: TestFileType):
@@ -24,6 +25,8 @@ def get_test_files_dir(ir_type: TestFileType):
         return abspath(join(dirname(__file__), "files", "qasm", "qasm2"))
     elif ir_type == TestFileType.QIR:
         return abspath(join(dirname(__file__), "files", "qir"))
+    elif ir_type == TestFileType.OPENPULSE:
+        return abspath(join(dirname(__file__), "files", "qasm", "qasm3", "openpulse_tests"))
     else:
         raise ValueError("Test file directory dosen't exist for this IR type.")
 

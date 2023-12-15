@@ -40,7 +40,7 @@ from qat.purr.compiler.instructions import (
     Sweep,
     Synchronize,
     Variable,
-    Waveform,
+    Waveform, QuantumInstruction,
 )
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
@@ -358,7 +358,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return calc_sample
 
-    def create_duration_timeline(self, package: QatFile):
+    def create_duration_timeline(self, instructions: List[QuantumInstruction]):
         """
         Builds a dictionary mapping channels to a list of instructions and at what
         precise sample time they should be associated with. It's important that the
@@ -378,7 +378,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         results: Dict[PulseChannel, List[PositionData]] = {}
         total_durations: Dict[PulseChannel, int] = dict()
 
-        for instruction in package.instructions:
+        for instruction in instructions:
             for qtarget in instruction.quantum_targets:
                 # TODO: Acquire is a special quantum target for post processing.
                 #  This should probably be changed.
