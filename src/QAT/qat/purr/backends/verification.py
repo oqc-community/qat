@@ -160,16 +160,7 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
 
 
 class LucyVerificationEngine(VerificationEngine):
-    """
-    1) Integrate verification as part of the execution, in which case called right after Sweep iteration changes
-        This means any call to execute() will also call verify()
-        implementation is empty by default, but can be overriden in an specific Engine.
-    2) Define verification separately in an engine.
-        a) intergate the verification in execution
-            This means overriding execute(), execute_on_hw(), process_results(), process_assigns()
-        b) leave it separete from execution
-            Call verify directly to test ...
-    """
+
 
     max_circuit_duration = 90000e-9
 
@@ -178,14 +169,6 @@ class LucyVerificationEngine(VerificationEngine):
             return False
 
         return True
-
-    # def _get_circuit_duration(self, package:QatFile):
-    #     position_map = self.create_duration_timeline(package)
-    #     pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
-    #     durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
-    #
-    #     if any([duration > self.max_circuit_duration for duration in durations.values()]):
-    #         lo(f"Exceeds the circuit duration limit of {self.max_circuit_duration} microseconds.")
 
     def _get_circuit_duration(self, package: QatFile):
         position_map = self.create_duration_timeline(package)
