@@ -11,32 +11,27 @@ import pytest
 
 class TestFirmwareVerificationEngines:
     def test_latest_lucy(self):
-        model = get_verification_model(Lucy.Latest)
-        exec = execute(get_qasm2("basic.qasm"), model, compiler_config=CompilerConfig())
-        assert exec
-
+        with pytest.raises(NotImplementedError):
+            model = get_verification_model(Lucy.Latest)
+            execute(get_qasm2("basic.qasm"), model)
 
     def test_unknown_make(self):
         model = get_verification_model(QPUVersion("something", "123"))
         assert model is None
 
-    # @pytest.mark.parametrize(("input_string", "file_type", "expected_result"),
-    #                          [("primitives.qasm", TestFileType.QASM2, True),
-    #                           ("ghz.qasm", TestFileType.QASM3, True),
-    #                           ("ghz.qasm", TestFileType.QASM3, True),
-    #                           ("bell_psi_plus.ll", TestFileType.QIR, True),
-    #                           ("cross_ressonance.qasm", TestFileType.QASM3, True),
-    #                           ("long_qasm.qasm", TestFileType.QASM2, False)])
-    # def test_circuit_length_validation(input_string, file_type, expected_result):
-    #     program = get_test_file_path(file_type, input_string)
-    #
-    #     optim = Tket()
-    #     optim.disable()
-    #     config = CompilerConfig(optimizations=optim)
-    #
-    #     # Test with program
-    #
-    #     assert verify_program(program=program, compiler_config=config, qpu_version= QPUVersion(make="Lucy", version= "latest" )) == expected_result
+    @pytest.mark.parametrize(("input_string", "file_type", "expected_result"),
+                              [("primitives.qasm", TestFileType.QASM2, True),
+                               ("ghz.qasm", TestFileType.QASM3, True),
+                               ("ghz.qasm", TestFileType.QASM3, True),
+                               ("bell_psi_plus.ll", TestFileType.QIR, True),
+                               ("cross_ressonance.qasm", TestFileType.OPENPULSE, True),
+                               ("long_qasm.qasm", TestFileType.QASM2, False)])
+    def test_circuit_length_validation(self, input_string, file_type, expected_result):
+        program = get_test_file_path(file_type, input_string)
 
-    # qpu version to get get_verification_
-    # execute in qat porgram, compiler config, verification mdoel)
+        optim = Tket()
+        optim.disable()
+        config = CompilerConfig(optimizations=optim)
+
+        assert verify_program(program=program, compiler_config=config, qpu_version= QPUVersion(make="Lucy", version= "latest" )) == expected_result
+
