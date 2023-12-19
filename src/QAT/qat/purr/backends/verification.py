@@ -160,7 +160,7 @@ def verify_program(
 
     # An exception will always be generated, type of exception depends on
     # circuit validity.
-    except (Exception, NotImplementedError) as e:
+    except Exception as e:
         if isinstance(e, VerificationError):
             log.info("The circuit is not valid.")
             return False
