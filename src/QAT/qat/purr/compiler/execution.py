@@ -98,9 +98,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         if self.model is None:
             raise ValueError("Requires a loaded hardware model.")
 
-    def _validate_instructions(self, qfile: QatFile):
-        pass
-
     def _process_assigns(self, results, qfile: "QatFile"):
         """
         As assigns are classical instructions they are not processed as a part of the
@@ -305,7 +302,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             for batch_count in batches:
                 qat_file.repeat.repeat_count = batch_count
                 dinjectors.inject()
-                self._validate_instructions(qat_file)
                 batch_results = self._execute_on_hardware(switerator, qat_file)
                 switerator.revert(qat_file.instructions)
                 dinjectors.revert()

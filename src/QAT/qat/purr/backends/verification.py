@@ -6,13 +6,12 @@ from typing import List, Optional
 
 from qat.purr.backends.live import LiveHardwareModel, apply_setup_to_hardware
 from qat.purr.backends.live_devices import ControlHardware
-from qat.purr.backends.utilities import get_axis_map, UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
-from qat.purr.compiler.instructions import AcquireMode
+from qat.purr.compiler.execution import QuantumExecutionEngine
+from qat.purr.compiler.instructions import Instruction
+
 from qat.qat import execute
 from qat.purr.utils.logger import get_default_logger
 
@@ -115,25 +114,44 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
-    @abstractmethod
-    def _validate_instructions(self, package: QatFile):
-        pass
 
     def _execute_on_hardware(self, sweep_iterator, package: QatFile):
-        raise NotImplementedError("Verification engine execution has not been implemented by design.")
+
+
+        while not sweep_iterator.is_finished():
+            sweep_iterator.do_sweep(package.instructions)
+            position_map = self.create_duration_timeline(package)
+
+        veri_list = list(package.meta_instructions)
+        veri_list.extend(package.instructions)
+
+        if self.verify_instructions(veri_list):
+            # raise NotImplementedError
+            return True
+
+    def _process_results(self, results, qat_file):
+        pass
+
+    def _process_assigns(self, results, qat_file):
+        pass
+
+
+    @abstractmethod
+    def verify_instructions(self, instructions: List[Instruction]):
+        ...
 
 
 class LucyVerificationEngine(VerificationEngine):
 
     max_circuit_duration = 90000e-9
 
-    def _validate_instructions(self, package: QatFile):
+    def verify_instructions(self, package: QatFile):
         valid_circuit = True
+
         if self._get_circuit_duration(package) > self.max_circuit_duration:
             valid_circuit= False
 
-        if not valid_circuit:
-            raise VerificationError("The circuit is not valid.")
+        return valid_circuit
 
 
     def _get_circuit_duration(self, package: QatFile):
