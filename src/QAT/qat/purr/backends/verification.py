@@ -101,33 +101,28 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
         )
 
     if qpu_type.make == Lucy.__name__:
-        # TODO: Should have an apply_setup_to_hardware in live which people can use to build our own architecture.
-        model = VerificationModel(qpu_type, LucyVerificationEngine)
         return apply_setup_to_hardware(
-            model,
+            hw= VerificationModel(qpu_type, LucyVerificationEngine),
             qubit_count=8,
             pulse_hw_x_pi_2_width=25e-9,
             pulse_hw_zx_pi_4_width=3.18e-07,
             pulse_measure_width=2.41e-06,
-        )  # type hinted incorrectly - needs to return Union[VerificationModel, QuantumHardwareModel]
+        )
+
     return None
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
 
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile):
-
+    def _execute_on_hardware(self, sweep_iterator, package: QatFile) -> bool:
 
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
             position_map = self.create_duration_timeline(package)
 
-        veri_list = list(package.meta_instructions)
-        veri_list.extend(package.instructions)
 
-        if self.verify_instructions(veri_list):
-            # raise NotImplementedError
-            return True
+        return self.verify_instructions(position_map)
+
 
     def _process_results(self, results, qat_file):
         pass
@@ -145,17 +140,22 @@ class LucyVerificationEngine(VerificationEngine):
 
     max_circuit_duration = 90000e-9
 
-    def verify_instructions(self, package: QatFile):
+    def verify_instructions(self, instructions: Dict) -> bool:
         valid_circuit = True
 
-        if self._get_circuit_duration(package) > self.max_circuit_duration:
+        if self._get_circuit_duration(instructions) > self.max_circuit_duration:
             valid_circuit= False
 
         return valid_circuit
 
+    def _process_results(self, results, qat_file):
+        return results
 
-    def _get_circuit_duration(self, package: QatFile):
-        position_map = self.create_duration_timeline(package)
+    def _process_assigns(self, results, qat_file):
+        return results
+
+
+    def _get_circuit_duration(self, position_map: Dict):
         pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
         durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
 
@@ -173,21 +173,7 @@ def verify_program(
 ):
     model = get_verification_model(qpu_version)
 
-    try:
-        execute(program, model, compiler_config)
-
-    # An exception will always be generated, type of exception depends on
-    # circuit validity.
-    except Exception as e:
-        if isinstance(e, VerificationError):
-            log.info("The circuit is not valid.")
-            return False
-        elif isinstance(e, NotImplementedError):
-            log.info("The circuit is valid.")
-            return True
-        else:
-            log.info("Unexpected exception has occurred.")
-            raise e
+    return execute(program, model, compiler_config)
 
 
 class VerificationError(Exception):

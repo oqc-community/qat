@@ -33,5 +33,5 @@ class TestFirmwareVerificationEngines:
         optim.disable()
         config = CompilerConfig(optimizations=optim)
 
-        assert verify_program(program=program, compiler_config=config, qpu_version= QPUVersion(make="Lucy", version= "latest" )) == expected_result
+        assert verify_program(program, config, QPUVersion(make="Lucy", version="latest")) == expected_result
 

@@ -5,6 +5,7 @@ from numbers import Number
 from typing import List, Optional, TypeVar, Union
 
 import numpy
+
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import CalibrationArguments, MetricsType, ResultsFormatting
 from qat.purr.compiler.execution import (
@@ -78,6 +79,10 @@ class QuantumRuntime(MetricsMixin):
         Transform the raw results into the format that we've been asked to provide. Look
         at individual transformation documentation for descriptions on what they do.
         """
+        from qat.purr.backends.verification import VerificationEngine
+        if isinstance(self.engine, VerificationEngine):
+            return results
+
         if len(results) == 0:
             return []
 
