@@ -120,15 +120,13 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
             sweep_iterator.do_sweep(package.instructions)
             position_map = self.create_duration_timeline(package)
 
-
         return self.verify_instructions(position_map)
 
-
     def _process_results(self, results, qat_file):
-        pass
+        return results
 
     def _process_assigns(self, results, qat_file):
-        pass
+        return results
 
 
     @abstractmethod
@@ -140,7 +138,7 @@ class LucyVerificationEngine(VerificationEngine):
 
     max_circuit_duration = 90000e-9
 
-    def verify_instructions(self, instructions: Dict) -> bool:
+    def verify_instructions(self, instructions: dict) -> bool:
         valid_circuit = True
 
         if self._get_circuit_duration(instructions) > self.max_circuit_duration:
@@ -154,8 +152,7 @@ class LucyVerificationEngine(VerificationEngine):
     def _process_assigns(self, results, qat_file):
         return results
 
-
-    def _get_circuit_duration(self, position_map: Dict):
+    def _get_circuit_duration(self, position_map: dict) -> float:
         pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
         durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
 

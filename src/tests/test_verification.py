@@ -11,9 +11,9 @@ import pytest
 
 class TestFirmwareVerificationEngines:
     def test_latest_lucy(self):
-        with pytest.raises(NotImplementedError):
-            model = get_verification_model(Lucy.Latest)
-            execute(get_qasm2("basic.qasm"), model)
+
+        model = get_verification_model(Lucy.Latest)
+        assert execute(get_qasm2("basic.qasm"), model)
 
     def test_unknown_make(self):
         model = get_verification_model(QPUVersion("something", "123"))
