@@ -116,6 +116,7 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
 
     def _execute_on_hardware(self, sweep_iterator, package: QatFile) -> bool:
 
+        #TODO: Need a discussion around this step. Where are instructions 'finalised'?
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
             position_map = self.create_duration_timeline(package)
@@ -127,7 +128,6 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
 
     def _process_assigns(self, results, qat_file):
         return results
-
 
     @abstractmethod
     def verify_instructions(self, instructions: List[Instruction]):

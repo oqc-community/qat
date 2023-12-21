@@ -3,6 +3,7 @@
 from collections import Iterable
 from numbers import Number
 from typing import List, Optional, TypeVar, Union
+from functools import cache
 
 import numpy
 
@@ -19,7 +20,6 @@ from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
-
 
 class RemoteCalibration:
     """
@@ -79,8 +79,10 @@ class QuantumRuntime(MetricsMixin):
         Transform the raw results into the format that we've been asked to provide. Look
         at individual transformation documentation for descriptions on what they do.
         """
-        from qat.purr.backends.verification import VerificationEngine
-        if isinstance(self.engine, VerificationEngine):
+
+        verification_engine = import_verification_engine()
+
+        if isinstance(self.engine, verification_engine):
             return results
 
         if len(results) == 0:
@@ -265,3 +267,9 @@ def execute_instructions(
         active_runtime.execute(instructions, results_format, repeats),
         active_runtime.compilation_metrics
     )
+
+
+@cache
+def import_verification_engine():
+    from qat.purr.backends.verification import VerificationEngine
+    return VerificationEngine
