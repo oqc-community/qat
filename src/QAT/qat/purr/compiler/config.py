@@ -381,13 +381,35 @@ def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:
     return None
 
 
-def get_config(lang: Languages, **kwargs):
+_default_results_format = QuantumResultsFormat()
+
+
+def default_language_options(lang: Languages, config: CompilerConfig):
+    """ Applies default language-specific options to an existing configuration. """
+    if lang == Languages.Qasm2:
+        if config.optimizations is None:
+            config.optimizations = Qasm2Optimizations()
+        if config.results_format == _default_results_format:
+            config.results_format.binary_count()
+
+    elif lang == Languages.Qasm3:
+        if config.optimizations is None:
+            config.optimizations = Qasm3Optimizations()
+
+    elif lang == Languages.QIR:
+        if config.optimizations is None:
+            config.optimizations = QIROptimizations()
+        if config.results_format == _default_results_format:
+            config.results_format.binary_count()
+
+
+def get_default_config(lang: Languages, **kwargs):
     """
     Helper method to build a compiler config for a particular language. Forwards
     keywords to the CompilerConfig constructor.
     """
     config = CompilerConfig(**kwargs)
-    config.optimizations = get_optimizer_config(lang)
+    default_language_options(lang, config)
     return config
 
 

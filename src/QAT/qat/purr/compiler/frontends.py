@@ -9,7 +9,7 @@ from typing import Tuple, Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config
+from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config, default_language_options
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
@@ -86,8 +86,7 @@ class QIRFrontend(LanguageFrontend):
         metrics = CompilationMetrics()
         metrics.initialize(compiler_config.metrics)
 
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(Languages.QIR)
+        default_language_options(Languages.QIR, compiler_config)
 
         model = get_model(hardware)
 
@@ -138,10 +137,7 @@ class QASMFrontend(LanguageFrontend):
         metrics.initialize(compiler_config.metrics)
 
         parser = get_qasm_parser(qasm_string)
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(
-                parser.parser_language()
-            )
+        default_language_options(parser.parser_language(), compiler_config)
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(
