@@ -126,7 +126,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
     def startup(self):
         for instrument in self.model.instruments.values():
             instrument.connect()
-        self.model.control_hardware.connect()
+        if self.model.control_hardware is not None:
+            self.model.control_hardware.connect()
         for baseband in self.model.basebands.values():
             if isinstance(baseband, LivePhysicalBaseband):
                 baseband.connect_to_instrument()
@@ -134,7 +135,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
     def shutdown(self):
         for instrument in self.model.instruments.values():
             instrument.close()
-        self.model.control_hardware.close()
+        if self.model.control_hardware is not None:
+            self.model.control_hardware.close()
 
     def process_reset(self, position):
         raise NotImplementedError(
