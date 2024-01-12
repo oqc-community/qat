@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'QAT'
-copyright = '2023, Oxford Quantum Circuits Ltd'
+copyright = '2024, Oxford Quantum Circuits Ltd'
 author = (
     "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>, "
     "Harry Waring <hwaring@oxfordquantumcircuits.com>, "
