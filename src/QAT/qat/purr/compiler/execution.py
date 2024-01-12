@@ -376,6 +376,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             ]}
         """
         results: Dict[PulseChannel, List[PositionData]] = {}
+        total_durations: Dict[PulseChannel, int] = dict()
 
         for instruction in package.instructions:
             for qtarget in instruction.quantum_targets:
@@ -390,38 +391,36 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 if not any(device_instructions):
                     sample_start = 0
                 else:
-                    sample_start = max([inst.end for inst in device_instructions])
+                    sample_start = device_instructions[-1].end
 
                 # For syncs we want to look at the currently-processed instructions on
                 # the channels we target, get the max end time then align all of our
                 # channels to that point in time.
+                position_data = None
                 if isinstance(instruction, Synchronize):
-                    current_durations = {
-                        qt.full_id(): sum(
-                            [pos.instruction.duration for pos in results.get(qt, [])],
-                            0.0,
-                        )
-                        for qt in instruction.quantum_targets
-                    }
+                    current_durations = {qt: total_durations.setdefault(qt, 0) for qt in instruction.quantum_targets}
                     longest_length = max(current_durations.values(), default=0.0)
-                    delay_time = longest_length - current_durations[qtarget.full_id()]
+                    delay_time = longest_length - total_durations[qtarget]
                     if delay_time > 0:
                         instr = Delay(qtarget, delay_time)
-                        device_instructions.append(
-                            PositionData(
-                                sample_start,
-                                sample_start + self.calculate_duration(instr),
-                                instr,
-                            )
+                        position_data = PositionData(
+                            sample_start,
+                            sample_start + self.calculate_duration(instr),
+                            instr,
                         )
                 else:
-                    device_instructions.append(
-                        PositionData(
+                    position_data = PositionData(
                             sample_start,
                             sample_start + self.calculate_duration(instruction),
                             instruction,
                         )
-                    )
+
+                if position_data is not None:
+                    device_instructions.append(position_data)
+
+                    # Calculate running durations for sync/delay evaluation
+                    current_duration = total_durations.setdefault(qtarget, 0)
+                    total_durations[qtarget] = current_duration + position_data.instruction.duration
 
         # Strip timelines that only hold delays, since that just means nothing is
         # happening on this channel.

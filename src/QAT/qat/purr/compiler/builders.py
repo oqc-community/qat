@@ -2,17 +2,23 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import itertools
 import math
+from collections import defaultdict
 from typing import List, Set, Union
 
-import numpy
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import ChannelType, PulseChannel, Qubit, Resonator
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.devices import (
+    ChannelType,
+    PulseChannel,
+    PulseChannelView,
+    Qubit,
+    Resonator,
+)
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
     Assign,
+    CrossResonancePulse,
     Delay,
     DeviceUpdate,
     Instruction,
@@ -53,6 +59,7 @@ class InstructionBuilder:
         super().__init__()
         self._instructions = []
         self.existing_names = set()
+        self._entanglement_map = {qubit:{qubit} for qubit in hardware_model.qubits}
         self.model = hardware_model
         self.add(instructions)
 
@@ -84,9 +91,14 @@ class InstructionBuilder:
         """Resets builder internal state for building a new set of instructions."""
         self._instructions = []
         self.existing_names = set()
+        self._entanglement_map = defaultdict(set)
 
-    def get_child_builder(self):
-        return InstructionBuilder(self.model)
+    def get_child_builder(self, inherit=False):
+        builder = InstructionBuilder(self.model)
+        builder._entanglement_map = self._entanglement_map
+        if inherit:
+            builder.existing_names = set(self.existing_names)
+        return builder
 
     def _fix_clashing_label_names(
         self, invalid_label_names: Set[str], existing_names: Set[str]
@@ -151,8 +163,39 @@ class InstructionBuilder:
             else:
                 inst_list.append(component)
 
-        self._instructions.extend(inst_list)
+        for inst in inst_list:
+            # Naive entanglement checker for syncronization.
+            if isinstance(inst, CrossResonancePulse):
+                ent_qubits = self._get_entangled_qubits(inst)
+                for qubit in ent_qubits:
+                    self._entanglement_map[qubit].update(ent_qubits)
+                for qubit in self.model.qubits:
+                    # entanglement is transitive, if A<>B and B<>C then C<>A
+                    tmp = set()
+                    for entangled in self._entanglement_map[qubit]:
+                        tmp.update(self._entanglement_map[entangled])
+                    self._entanglement_map[qubit].update(tmp)
+            self._instructions.append(inst)
         return self
+
+    def _get_entangled_qubits(self, inst):
+        """
+        Gets qubit ID's in relation to quantum entanglement for the current instruction.
+        Important to note that it will route up or out to a qubit from things like resonators and pulse channels.
+        """
+        if not isinstance(inst, CrossResonancePulse):
+            # Crossress pulses are the only mechanism by which entanglement is generated.
+            return set()
+        results = set()
+        pulse_channel_view: PulseChannelView
+        for pulse_channel_view in inst.quantum_targets:
+            for target_qubit in pulse_channel_view.auxilary_devices:
+                results.update(target_qubit)
+            physical_channel = pulse_channel_view.pulse_channel.physical_channel
+            for control_qubit in self.model.qubits:
+                if control_qubit.physical_channel == physical_channel:
+                    results.update(control_qubit)
+        return results
 
     def results_processing(self, variable: str, res_format: InlineResultsProcessing):
         return self.add(ResultsProcessing(variable, res_format))
@@ -223,22 +266,22 @@ class InstructionBuilder:
         raise NotImplementedError("Not available on this hardware model.")
 
     def SX(self, target):
-        return self.X(target, numpy.pi / 2)
+        return self.X(target, np.pi / 2)
 
     def SXdg(self, target):
-        return self.X(target, -(numpy.pi / 2))
+        return self.X(target, -(np.pi / 2))
 
     def S(self, target):
-        return self.Z(target, numpy.pi / 2)
+        return self.Z(target, np.pi / 2)
 
     def Sdg(self, target):
-        return self.Z(target, -(numpy.pi / 2))
+        return self.Z(target, -(np.pi / 2))
 
     def T(self, target):
-        return self.Z(target, numpy.pi / 4)
+        return self.Z(target, np.pi / 4)
 
     def Tdg(self, target):
-        return self.Z(target, -(numpy.pi / 4))
+        return self.Z(target, -(np.pi / 4))
 
     def controlled(
         self, controllers: Union[Qubit, List[Qubit]], builder: "InstructionBuilder"
@@ -357,8 +400,12 @@ class FluidBuilderWrapper(tuple):
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
-    def get_child_builder(self):
-        return QuantumInstructionBuilder(self.model)
+    def get_child_builder(self, inherit=False):
+        builder = QuantumInstructionBuilder(self.model)
+        builder._entanglement_map = self._entanglement_map
+        if inherit:
+            builder.existing_names = set(self.existing_names)
+        return builder
 
     def measure_single_shot_z(
         self, target: Qubit, axis: str = None, output_variable: str = None
@@ -486,14 +533,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         # Naive entanglement checker to assure all entangled qubits are sync before a
         # measurement is done on any of them.
-        entangled_qubits = set()
-        for inst in self._instructions:
-            if isinstance(inst, QuantumInstruction):
-                qubits = self._get_entangled_qubits(inst)
-                if qubit in qubits:
-                    entangled_qubits.update(qubits)
-
-        entangled_qubits = list(entangled_qubits)
+        entangled_qubits = list(self._entanglement_map.get(qubit, []))
 
         # List of node types that a measurement can be made up of.
         mblock_types = [Acquire, MeasurePulse]

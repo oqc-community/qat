@@ -81,6 +81,42 @@ class TestInstruction:
                 ]
             )
 
+    def test_no_entanglement(self):
+        hw = get_default_echo_hardware(2)
+        builder = get_builder(hw)
+        qubit0 = hw.get_qubit(0)
+        qubit1 = hw.get_qubit(1)
+        builder.X(qubit0)
+        builder.X(qubit1)
+        assert builder._entanglement_map == {qubit0: {qubit0}, qubit1: {qubit1}}
+
+    def test_01_entanglement(self):
+        hw = get_default_echo_hardware(3)
+        builder = get_builder(hw)
+        qubit0 = hw.get_qubit(0)
+        qubit1 = hw.get_qubit(1)
+        qubit2 = hw.get_qubit(2)
+        builder.ECR(qubit0, qubit1)
+        assert builder._entanglement_map == {
+            qubit0: {qubit0, qubit1},
+            qubit1: {qubit1, qubit0},
+            qubit2: {qubit2}
+        }
+
+    def test_012_entanglement(self):
+        hw = get_default_echo_hardware(3)
+        builder = get_builder(hw)
+        qubit0 = hw.get_qubit(0)
+        qubit1 = hw.get_qubit(1)
+        qubit2 = hw.get_qubit(2)
+        builder.ECR(qubit0, qubit1)
+        builder.ECR(qubit1, qubit2)
+        assert builder._entanglement_map == {
+            qubit0: {qubit0, qubit1, qubit2},
+            qubit1: {qubit1, qubit0, qubit2},
+            qubit2: {qubit0, qubit1, qubit2}
+        }
+
 
 class TestInstructionSerialisation:
     def test_basic_gate(self):
