@@ -1,0 +1,85 @@
+name: publish sphinx pages
+on:
+  push:
+      tags:
+        - "*"
+      branches:
+        - main
+  
+  workflow_dispatch:
+
+permissions:
+    contents: write
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: "applications - github"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.5.2
+
+    - name: Setup Python
+      uses: actions/setup-python@v4.6.0
+
+    - name: cache poetry install
+      uses: actions/cache@v2
+      with:
+        key: poetry-1.4.1-0
+        path: ~/.local
+  
+    - name: Install Poetry Action
+      uses: snok/install-poetry@v1.3.3
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: cache deps
+      id: cache-deps
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: pydeps-${{ hashFiles('**/poetry.lock') }}
+    
+    - run: poetry install --no-interaction --no-root --with docs
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+    
+    - run: poetry install --no-interaction
+
+    - name: Build docs
+      if: github.ref_type == 'branch'
+      run: |
+        git config --global user.email "GithubActions@oqc-community.com"
+        git config --global user.name "Github Actions"
+        git fetch --all
+        git checkout ${{ steps.extract_branch.outputs.branch }}
+        rm -rf .gitignore
+        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
+        git add .
+        git commit -m "temporarily commiting api docs"
+        poetry run sphinx-multiversion docs/source/ docs/build/
+    
+    - name: Extract tag name
+      if: github.ref_type == 'tag'
+      run: echo "tag=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/tags/}}" >> $GITHUB_OUTPUT
+      id: extract_tag
+
+    - name: Build docs - tag
+      if: github.ref_type == 'tag'
+      run: |
+        git config --global user.email "GithubActions@oqc-community.com"
+        git config --global user.name "Github Actions"
+        git fetch --all
+        git checkout ${{ steps.extract_branch.outputs.branch }} -b ${{ steps.extract_tag.outputs.tag }} 
+        rm -rf .gitignore
+        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
+        git add --force .
+        git commit -a -m "temporarily commiting api docs"
+        poetry run sphinx-multiversion docs/source/ docs/build/
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: docs/build
+        clean: false
