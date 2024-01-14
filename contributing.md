@@ -13,12 +13,12 @@ The areas you could contribute to QAT include:
 - Helping to answer questions which are asked in the discussion forum
 
 All contributions to QAT are governed by our
-[code of conduct](https://github.com/oqc-community/qat/blob/main/CODE_OF_CONDUCT.rst).
+[code of conduct](https://github.com/oqc-community/qat/blob/main/code_of_conduct.md).
 
 ## Installation
 
 To get started, see the Building from Source section of the
-[README](https://github.com/oqc-community/qat/blob/main/README.rst).
+[README](https://github.com/oqc-community/qat/blob/main/README.md).
 
 ## Pull Requests
 
@@ -82,7 +82,7 @@ This is to save disappointment as some features we will refuse because purely it
 Once a new feature has approval of the team as a whole you can start work on it and we'll support you where possible. If you do not want to work on it personally it'll go on the backlog and we'll get to it when possible.
 
 For ideas about where the project is heading, checkout the [issues](https://github.com/oqc-community/qat/issues) list
-or the Roadmap in the [README](https://github.com/oqc-community/qat/blob/main/README.rst).
+or the Roadmap in the [README](https://github.com/oqc-community/qat/blob/main/README.md).
 
 ## Additional Information
 

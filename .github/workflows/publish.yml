@@ -1,11 +1,9 @@
 name: publish sphinx pages
 on:
   push:
-      tags:
-        - "*"
-      branches:
-        - main
-  
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 permissions:
@@ -54,32 +52,11 @@ jobs:
         git config --global user.name "Github Actions"
         git fetch --all
         git checkout ${{ steps.extract_branch.outputs.branch }}
-        rm -rf .gitignore
-        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
-        git add .
-        git commit -m "temporarily commiting api docs"
-        poetry run sphinx-multiversion docs/source/ docs/build/
-    
-    - name: Extract tag name
-      if: github.ref_type == 'tag'
-      run: echo "tag=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/tags/}}" >> $GITHUB_OUTPUT
-      id: extract_tag
-
-    - name: Build docs - tag
-      if: github.ref_type == 'tag'
-      run: |
-        git config --global user.email "GithubActions@oqc-community.com"
-        git config --global user.name "Github Actions"
-        git fetch --all
-        git checkout ${{ steps.extract_branch.outputs.branch }} -b ${{ steps.extract_tag.outputs.tag }} 
-        rm -rf .gitignore
-        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
-        git add --force .
-        git commit -a -m "temporarily commiting api docs"
-        poetry run sphinx-multiversion docs/source/ docs/build/
+        poetry run build-docs
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        folder: docs/build
+        target-folder: ${{ steps.extract_branch.outputs.branch }}
+        folder: docs/sphinx/build
         clean: false

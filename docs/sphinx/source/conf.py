@@ -6,6 +6,16 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+"""
+sphinx-build loads from a temporary environment and needs a reference to our code to properly build, so we just
+add it in crude fashion here.
+
+It isn't needed everywhere, so if your own scenario works fine without it still don't remove.
+"""
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..\\..\\..\\src\\QAT")))
+
 project = 'QAT'
 copyright = '2023, Oxford Quantum Circuits Ltd'
 author = (
@@ -25,7 +35,7 @@ smv_remote_whitelist = None
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx_multiversion', 'sphinx_rtd_theme', 'sphinx.ext.autodoc', 'sphinx_autodoc_typehints', 'sphinx_paramlinks']
+extensions = ['sphinx_rtd_theme', 'sphinx.ext.autodoc', 'sphinx_autodoc_typehints', 'sphinx_paramlinks']
 
 templates_path = ['_templates']
 exclude_patterns = []
