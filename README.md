@@ -1,4 +1,4 @@
-![QAT Logo](qat-logo.png)
+![QAT Logo](https://raw.githubusercontent.com/oqc-community/qat/main/qat-logo.png)
 
 **QAT** (Quantum Assembly Toolkit/Toolchain) is a low-level quantum compiler and runtime which facilitates executing quantum IRs
 such as [QASM](https://openqasm.com/), [OpenPulse](https://openqasm.com/language/openpulse.html) and
