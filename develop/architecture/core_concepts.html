@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Concepts &mdash; QAT 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Documentation" href="../api/folder.html" />
+    <link rel="prev" title="Architecture" href="folder.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="folder.html">Architecture</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core Concepts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/folder.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/modules.html">QAT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/generated/qat.html">qat package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/generated/qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../api/generated/qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.qasm_sim.html">qat.purr.backends.qasm_sim module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../api/generated/qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../api/generated/qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../api/generated/qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../api/generated/qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../api/generated/qat.core.html">qat.core module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="folder.html">Architecture</a></li>
+      <li class="breadcrumb-item active">Core Concepts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/architecture/core_concepts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="core-concepts">
+<h1>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading"></a></h1>
+<p>QAT is driven by a few core concepts:</p>
+<ol class="arabic simple">
+<li><p>A virtual hardware model. This holds all information about a piece of hardware you’re wanting to compile and/or run against.</p></li>
+<li><p>An instruction builder. An abstract builder which hides the implementation of various gates and hardware instructions. Builds up abstract hardware instructions.</p></li>
+<li><p>A runtime. The outer shell of execution, deals with auxiliary and generic runtime requirements such as results/argument processing, request batching, things like that.</p></li>
+<li><p>An engine. Consumes hardware instructions to actually execute against a driver, hardware, remote target or simulator. It’s the piece that actually executes your request and returns the results.</p></li>
+</ol>
+<p>Each of these can be extended to allow nearly full customization of how you want QAT to optimize, build and run the instructions it generates.</p>
+<p>We’ll cover each of them in turn, but the hardware model is the most critical so we’ll start there.</p>
+<section id="hardware-models">
+<h2>Hardware Models<a class="headerlink" href="#hardware-models" title="Link to this heading"></a></h2>
+<p>A hardware model is a virtual model of a piece of hardware. It can model down to the smallest nuance physical hardware that exists, doesn’t exist, or you want to exist. This can also include simulators and more exotic hardware - we won’t judge.</p>
+<p>But more than that it also supplies the builders, runtimes and engines that are associated with a piece of hardware and which QAT will use to power almost the entirety of its functionality. It does this because there is no agreed common (low-level) way a quantum computer operates right now. So how each of them perform gates, what classical operations they have available and how they then run it all differ drastically.</p>
+<p>Depending upon what you want to override you can change almost every step of compilation and execution purely from providing a custom model.</p>
+</section>
+<section id="instruction-builders">
+<h2>Instruction Builders<a class="headerlink" href="#instruction-builders" title="Link to this heading"></a></h2>
+<p>The instruction builders are the objects called when QAT parses any IR’s. It provides methods for gate-level, pulse-level and classical control. By default it will attempt to call the model for definitions around the various pulses require to represent rotations/unitaries. But if you need more fine-grained control than this or your engine requires an entirely custom set of instructions you can overwrite this entirely.</p>
+<p>The builder acts as wrapper and instruction collection. The instructions don’t (shouldn’t) get pulled out of them, so you can represent your instructions and operations however you want within it.</p>
+</section>
+<section id="runtime">
+<h2>Runtime<a class="headerlink" href="#runtime" title="Link to this heading"></a></h2>
+<p>The runtime is the most general section of the stack and will only need overriding if your backend uses increadibly custom instructions, execution and results formats. Or if you just don’t like ours and want to replace it.</p>
+<p>It deals with every aspect between getting given a builder to execute and it being refined enough to be sent to the engine, then also dealing with iterations, exceptions, results, pretty much everything that isn’t running the instructions directly against a driver.</p>
+</section>
+<section id="engine">
+<h2>Engine<a class="headerlink" href="#engine" title="Link to this heading"></a></h2>
+<p>The engine deals with taking the instructions and metadata passed to it and then just executing it. In our systems it takes the role of transforming QATs proto-instructions into the actual hardware instructions and then running them against a driver.</p>
+</section>
+<section id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Link to this heading"></a></h2>
+<p>If you use the existing models and engines in QAT as a template, you should be able to hook up most systems. There aren’t as many overrides for runtimes and builders as they aren’t required for most setups, but they have pretty clear API’s and if you focus on the model and engine first, the other two will be much easier to build as you’ll be more familiar with the code at that point.</p>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="folder.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/folder.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

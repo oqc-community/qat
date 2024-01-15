@@ -1,0 +1,7 @@
+qat.purr.backends.qasm\_sim module
+==================================
+
+.. automodule:: qat.purr.backends.qasm_sim
+   :members:
+   :undoc-members:
+   :show-inheritance:

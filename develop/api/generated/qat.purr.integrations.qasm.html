@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.purr.integrations.qasm module &mdash; QAT 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="qat.purr.integrations.qir module" href="qat.purr.integrations.qir.html" />
+    <link rel="prev" title="qat.purr.integrations.features module" href="qat.purr.integrations.features.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick-start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/folder.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture/core_concepts.html">Core Concepts</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../folder.html">API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="modules.html">QAT</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qasm_sim.html">qat.purr.backends.qasm_sim module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l5 current"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul class="current">
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../folder.html">API Documentation</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">QAT</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.integrations.html">qat.purr.integrations package</a></li>
+      <li class="breadcrumb-item active">qat.purr.integrations.qasm module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/generated/qat.purr.integrations.qasm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.purr.integrations.qasm">
+<span id="qat-purr-integrations-qasm-module"></span><h1>qat.purr.integrations.qasm module<a class="headerlink" href="#module-qat.purr.integrations.qasm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractParser</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractParser.can_parse">
+<span class="sig-name descname"><span class="pre">can_parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractParser.can_parse" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.integrations.qasm.ParseResults" title="qat.purr.integrations.qasm.ParseResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseResults</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractParser.parser_language">
+<span class="sig-name descname"><span class="pre">parser_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractParser.parser_language" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages" title="qat.purr.compiler.config.Languages"><code class="xref py py-class docutils literal notranslate"><span class="pre">Languages</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractParser.walk_node">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">walk_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractParser.walk_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractQASMParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractQASMParser</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractQASMParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.AbstractParser" title="qat.purr.integrations.qasm.AbstractParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractParser</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.AbstractQASMParser.can_parse">
+<span class="sig-name descname"><span class="pre">can_parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.AbstractQASMParser.can_parse" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.integrations.qasm.ParseResults" title="qat.purr.integrations.qasm.ParseResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseResults</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.BitRegister">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BitRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.BitRegister" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.CregIndexValue">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CregIndexValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">register_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.CregIndexValue" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Used to reference when we’re looking at a particular index in a creg variable.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.CregIndexValue.variable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variable</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.CregIndexValue.variable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.DefaultQasm2Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultQasm2Parser</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.DefaultQasm2Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.RestrictedQasm2Parser" title="qat.purr.integrations.qasm.RestrictedQasm2Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">RestrictedQasm2Parser</span></code></a></p>
+<p>QASM 2 parser that disables conditional statements and orders results, but has no gate limitations.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkOpenPulseContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LarkOpenPulseContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cali_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkOpenPulseContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.QasmContext" title="qat.purr.integrations.qasm.QasmContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">QasmContext</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LarkPatchingParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_result_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.Qasm2Parser" title="qat.purr.integrations.qasm.Qasm2Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm2Parser</span></code></a></p>
+<p>Parser built to route the lark limited QASM 3 requests into and through.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_cnot">
+<span class="sig-name descname"><span class="pre">add_cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control_qbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_qbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_cnot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_creg">
+<span class="sig-name descname"><span class="pre">add_creg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reg_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_creg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_delay">
+<span class="sig-name descname"><span class="pre">add_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_delay" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_ecr">
+<span class="sig-name descname"><span class="pre">add_ecr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_ecr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_if">
+<span class="sig-name descname"><span class="pre">add_if</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_if" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_measure">
+<span class="sig-name descname"><span class="pre">add_measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_measure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_qreg">
+<span class="sig-name descname"><span class="pre">add_qreg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reg_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_qreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_reset">
+<span class="sig-name descname"><span class="pre">add_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_reset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.add_unitary">
+<span class="sig-name descname"><span class="pre">add_unitary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_lambda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_or_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.add_unitary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.base_include_str">
+<span class="sig-name descname"><span class="pre">base_include_str</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">OPENQASM</span> <span class="pre">2.0;\n</span>&#160;&#160;&#160; <span class="pre">include</span> <span class="pre">&quot;qelib1.inc&quot;;\n</span>&#160;&#160;&#160; <span class="pre">'</span></em><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.base_include_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.LarkPatchingParser.load_default_gates">
+<span class="sig-name descname"><span class="pre">load_default_gates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.LarkPatchingParser.load_default_gates" title="Link to this definition"></a></dt>
+<dd><p>Loads the default QASM 2 gates for further processing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.ParseResults">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParseResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.ParseResults" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Results object for attempted parse. When coerced to a boolean matches
+against if parse was successful.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.ParseResults.failure">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">failure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.ParseResults.failure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.ParseResults.success">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">success</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.ParseResults.success" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Qasm2Parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_result_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.AbstractQASMParser" title="qat.purr.integrations.qasm.AbstractQASMParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractQASMParser</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.ecr_gate">
+<span class="sig-name descname"><span class="pre">ecr_gate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;qiskit.qasm.node.gate.Gate</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.ecr_gate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.ecr_qasm_str">
+<span class="sig-name descname"><span class="pre">ecr_qasm_str</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">OPENQASM</span> <span class="pre">2.0;\n</span>&#160;&#160;&#160; <span class="pre">include</span> <span class="pre">&quot;qelib1.inc&quot;;\n</span>&#160;&#160;&#160; <span class="pre">gate</span> <span class="pre">ecr</span> <span class="pre">q0,</span> <span class="pre">q1</span> <span class="pre">{</span> <span class="pre">}\n</span>&#160;&#160;&#160; <span class="pre">'</span></em><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.ecr_qasm_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.modify">
+<span class="sig-name descname"><span class="pre">modify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.modify" title="Link to this definition"></a></dt>
+<dd><p>Allows children to transform the program before validation/transforming into our
+AST occurs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.parse" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.parser_language">
+<span class="sig-name descname"><span class="pre">parser_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.parser_language" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages" title="qat.purr.compiler.config.Languages"><code class="xref py py-class docutils literal notranslate"><span class="pre">Languages</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_barrier">
+<span class="sig-name descname"><span class="pre">process_barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_barrier" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_cnot">
+<span class="sig-name descname"><span class="pre">process_cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_cnot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_creg">
+<span class="sig-name descname"><span class="pre">process_creg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_creg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_gate">
+<span class="sig-name descname"><span class="pre">process_gate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_gate" title="Link to this definition"></a></dt>
+<dd><p>Process a gate call.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_gate_definition">
+<span class="sig-name descname"><span class="pre">process_gate_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_gate_definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_if">
+<span class="sig-name descname"><span class="pre">process_if</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_if" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_intrinsic">
+<span class="sig-name descname"><span class="pre">process_intrinsic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_intrinsic" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_measure">
+<span class="sig-name descname"><span class="pre">process_measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_measure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_program">
+<span class="sig-name descname"><span class="pre">process_program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_program" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_qreg">
+<span class="sig-name descname"><span class="pre">process_qreg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_qreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_reset">
+<span class="sig-name descname"><span class="pre">process_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_reset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.process_unitary">
+<span class="sig-name descname"><span class="pre">process_unitary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.process_unitary" title="Link to this definition"></a></dt>
+<dd><p>Unitary in QASM terms is just <code class="docutils literal notranslate"><span class="pre">U(...)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm2Parser.walk_node">
+<span class="sig-name descname"><span class="pre">walk_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm2Parser.walk_node" title="Link to this definition"></a></dt>
+<dd><p>Process each individual QASM node, builds context or forwards processing to
+relevant <code class="docutils literal notranslate"><span class="pre">process_x</span></code> method associated with each node type.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Qasm3Parser</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code>, <a class="reference internal" href="#qat.purr.integrations.qasm.AbstractQASMParser" title="qat.purr.integrations.qasm.AbstractQASMParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractQASMParser</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.assignment">
+<span class="sig-name descname"><span class="pre">assignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.assignment" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">
+<span class="sig-name descname"><span class="pre">bit_declaration_statement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.cal_block">
+<span class="sig-name descname"><span class="pre">cal_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.cal_block" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.calibration_definition">
+<span class="sig-name descname"><span class="pre">calibration_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.calibration_definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.calibration_grammar_declaration">
+<span class="sig-name descname"><span class="pre">calibration_grammar_declaration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.calibration_grammar_declaration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.complex_declaration_statement">
+<span class="sig-name descname"><span class="pre">complex_declaration_statement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.complex_declaration_statement" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.extern_frame">
+<span class="sig-name descname"><span class="pre">extern_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.extern_frame" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.extern_or_subroutine_call">
+<span class="sig-name descname"><span class="pre">extern_or_subroutine_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.extern_or_subroutine_call" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.extern_port">
+<span class="sig-name descname"><span class="pre">extern_port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.extern_port" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.frame_attribute_assignment">
+<span class="sig-name descname"><span class="pre">frame_attribute_assignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.frame_attribute_assignment" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.frame_definition">
+<span class="sig-name descname"><span class="pre">frame_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.frame_definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.gate_definition">
+<span class="sig-name descname"><span class="pre">gate_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.gate_definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.generate_expr_list_defcal_name">
+<span class="sig-name descname"><span class="pre">generate_expr_list_defcal_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.generate_expr_list_defcal_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.get_waveform_samples">
+<span class="sig-name descname"><span class="pre">get_waveform_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.get_waveform_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.initalize">
+<span class="sig-name descname"><span class="pre">initalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.initalize" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.lark_parser">
+<span class="sig-name descname"><span class="pre">lark_parser</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Lark(open('&lt;string&gt;'),</span> <span class="pre">parser='earley',</span> <span class="pre">lexer='dynamic',</span> <span class="pre">...)</span></em><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.lark_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qasm_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.parse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.parser_language">
+<span class="sig-name descname"><span class="pre">parser_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.parser_language" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages" title="qat.purr.compiler.config.Languages"><code class="xref py py-class docutils literal notranslate"><span class="pre">Languages</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_barrier">
+<span class="sig-name descname"><span class="pre">quantum_barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_barrier" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_declaration">
+<span class="sig-name descname"><span class="pre">quantum_declaration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_declaration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_gate_call">
+<span class="sig-name descname"><span class="pre">quantum_gate_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_gate_call" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement">
+<span class="sig-name descname"><span class="pre">quantum_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement" title="Link to this definition"></a></dt>
+<dd><p>Throwaway measurement that doesn’t store results into any variable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement_assignment_statement">
+<span class="sig-name descname"><span class="pre">quantum_measurement_assignment_statement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement_assignment_statement" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.quantum_reset">
+<span class="sig-name descname"><span class="pre">quantum_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.quantum_reset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.return_statement">
+<span class="sig-name descname"><span class="pre">return_statement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.return_statement" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.timing_box">
+<span class="sig-name descname"><span class="pre">timing_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.timing_box" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.timing_instruction">
+<span class="sig-name descname"><span class="pre">timing_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.timing_instruction" title="Link to this definition"></a></dt>
+<dd><p>This is actually a delay instruction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.transform_to_value">
+<span class="sig-name descname"><span class="pre">transform_to_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walk_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.transform_to_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.version">
+<span class="sig-name descname"><span class="pre">version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.walk_node">
+<span class="sig-name descname"><span class="pre">walk_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.walk_node" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Qasm3Parser.waveform_definition">
+<span class="sig-name descname"><span class="pre">waveform_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.Qasm3Parser.waveform_definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.QasmContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QasmContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.QasmContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container object for all data relating to the scope/pass of QASM currently under
+analysis.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.QasmMethodWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QasmMethodWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classic_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.QasmMethodWrapper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomUnitary</span></code></p>
+<p>Wrapper class for passing around bespoke information through more generic parsers/walkers.</p>
+<p>Create the custom gate node.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.QubitRegister">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QubitRegister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.QubitRegister" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.Registers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Registers</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.Registers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.RestrictedQasm2Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RestrictedQasm2Parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_gates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_if</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.RestrictedQasm2Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.integrations.qasm.Qasm2Parser" title="qat.purr.integrations.qasm.Qasm2Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm2Parser</span></code></a></p>
+<p>Parser which only allows certain gates to be passed.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.RestrictedQasm2Parser.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.RestrictedQasm2Parser.validate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.UntargetedPulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UntargetedPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_class</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.UntargetedPulse" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pulse that currently has no device to send it down.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.UntargetedPulse.build_with_target">
+<span class="sig-name descname"><span class="pre">build_with_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.UntargetedPulse.build_with_target" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.UntargetedPulse.ref_instance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_instance</span></span><a class="headerlink" href="#qat.purr.integrations.qasm.UntargetedPulse.ref_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.extern_port_name">
+<span class="sig-name descname"><span class="pre">extern_port_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.extern_port_name" title="Link to this definition"></a></dt>
+<dd><p>Generate open pulse port name for this physical channel.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.fetch_gate_node">
+<span class="sig-name descname"><span class="pre">fetch_gate_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gate_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.fetch_gate_node" title="Link to this definition"></a></dt>
+<dd><p>Used to fetch particular nodes out of a minimalistic QASM program. Not used for
+execution, more for retrieving particular things for insertion into Qiskit’s QASM
+parser later on.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.get_frame_mappings">
+<span class="sig-name descname"><span class="pre">get_frame_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.get_frame_mappings" title="Link to this definition"></a></dt>
+<dd><p>Generate the names for frames we allow in open pulse ‘extern’ statements.
+Returns a dictionary mapping name-&gt;pulse channel.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.get_port_mappings">
+<span class="sig-name descname"><span class="pre">get_port_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.get_port_mappings" title="Link to this definition"></a></dt>
+<dd><p>Generate the names for ports we allow in open pulse ‘extern’ statements.
+Returns a dictionary mapping name-&gt;physical channel.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.get_qasm_parser">
+<span class="sig-name descname"><span class="pre">get_qasm_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.get_qasm_parser" title="Link to this definition"></a></dt>
+<dd><p>Gets the appropriate QASM parser for the passed-in QASM string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.qasm.qasm_from_file">
+<span class="sig-name descname"><span class="pre">qasm_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qasm.qasm_from_file" title="Link to this definition"></a></dt>
+<dd><p>Get QASM from a file.</p>
+</dd></dl>
+
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.purr.integrations.features.html" class="btn btn-neutral float-left" title="qat.purr.integrations.features module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.integrations.qir.html" class="btn btn-neutral float-right" title="qat.purr.integrations.qir module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
