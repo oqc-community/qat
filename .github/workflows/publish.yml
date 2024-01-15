@@ -1,0 +1,62 @@
+name: publish sphinx pages
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+    contents: write
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: "applications - github"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.5.2
+
+    - name: Setup Python
+      uses: actions/setup-python@v4.6.0
+
+    - name: cache poetry install
+      uses: actions/cache@v2
+      with:
+        key: poetry-1.4.1-0
+        path: ~/.local
+  
+    - name: Install Poetry Action
+      uses: snok/install-poetry@v1.3.3
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: cache deps
+      id: cache-deps
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: pydeps-${{ hashFiles('**/poetry.lock') }}
+    
+    - run: poetry install --no-interaction --no-root --with docs
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+    
+    - run: poetry install --no-interaction
+
+    - name: Build docs
+      if: github.ref_type == 'branch'
+      run: |
+        git config --global user.email "GithubActions@oqc-community.com"
+        git config --global user.name "Github Actions"
+        git fetch --all
+        git checkout ${{ steps.extract_branch.outputs.branch }}
+        poetry run build-docs
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        target-folder: ${{ steps.extract_branch.outputs.branch }}
+        folder: docs/sphinx/build
+        clean: false

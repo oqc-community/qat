@@ -4,7 +4,8 @@
 name = "QAT-compiler"
 version = "1.0.0"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
-readme = "README.rst"
+readme = "README.md"
+documentation = "https://oqc-community.github.io/qat"
 authors = [
     "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>",
     "Harry Waring <hwaring@oxfordquantumcircuits.com>",
@@ -80,6 +81,9 @@ ignore-pass-after-docstring = true
 py_version = 38
 profile = "wemake"
 line_length = 92
+
+[tool.poetry.scripts]
+build-docs = "poetry_scripts:build_docs"
 
 [[tool.poetry.source]]
 name = "PyPI"

@@ -1,15 +1,10 @@
-Code of Conduct
-=====================
+# Code of Conduct
 
 We, the community of contributors and maintainers, are dedicated to nurturing an atmosphere of inclusivity and respect within this project.
 Our objective is to establish a space which welcomes individuals of all backgrounds and identities, and is safe and respectful for everyone regardless of ethnicity,
 gender identity and expression, level of experience, age, disability, nationality, personal appearance, race, religion, or sexual orientation.
 
-|
-
---------------------
-Our Commitment
---------------------
+## Our Commitment
 
 With the aim of nurturing an open and inviting space, we commit to:
 
@@ -19,11 +14,7 @@ With the aim of nurturing an open and inviting space, we commit to:
 - Patience: Demonstrating understanding and empathy towards varying levels of experience and viewpoints.
 - Constructive Interaction: Engaging in conversations that offer positive and productive outcomes.
 
-|
-
------------------------
-Unacceptable Behaviour
------------------------
+## Unacceptable Behaviour
 
 Actions that will not be tolerated include, but are not limited to:
 
@@ -34,35 +25,23 @@ Actions that will not be tolerated include, but are not limited to:
 - Discrimination in Any Form: Discriminating behaviour or conduct relating to, but not limited to, any of the
   aforementioned characteristics.
 
-|
-
------------------------
-Our Responsibilities
------------------------
+## Our Responsibilities
 
 The project maintainers are entrusted with upholding this code of conduct.
 Enforcing this code is crucial for maintaining a positive, welcoming and productive environment.
 Instances of inappropriate behaviour can be reported to the project team using this
-`form <https://docs.google.com/forms/d/e/1FAIpQLSeyEX_txP3JDF3RQrI3R7ilPHV9JcZIyHPwLLlF6Pz7iGnocw/viewform?usp=sf_link>`_
+[form](https://docs.google.com/forms/d/e/1FAIpQLSeyEX_txP3JDF3RQrI3R7ilPHV9JcZIyHPwLLlF6Pz7iGnocw/viewform?usp=sf_link).
 All grievances will be reviewed confidentially, punctually and impartially.
 The moderators have the authority to edit, remove, or decline comments, commits, code, issues, and other contributions
 that conflict with this code of conduct.
 Contributors who disregard this code may face temporary or permanent consequences, as determined by the project team.
 
-|
-
------------------------
-Applicability
------------------------
+## Applicability
 
 This code of conduct is applicable within project spaces, encompassing project repositories, issue trackers,
 communication channels, mailing lists, social media platforms and public events.
 
-|
-
------------------------
-Enforcement guidelines
------------------------
+## Enforcement guidelines
 
 The project team will use the following steps to enforce the standards of conduct.
 
@@ -79,9 +58,4 @@ appropriate consequences for the offending party and that the listed steps are o
 be applied in the presented order (e.g. a permanent ban can be issued without preceding warnings if the offence warrants
 it).
 If the project team bans a contributor and you consider this to be unjustified, please communicate this to the project
-moderators in private by emailing `qat_moderators@oqc.tech <qat_moderators@oqc.tech>`_.
-
-
-
-
-.
+moderators in private by emailing qat_moderators.
