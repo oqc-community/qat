@@ -18,7 +18,7 @@ from qat.purr.backends.utilities import (
     software_post_process_mean,
 )
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import ChannelType, MaxPulseLength, PulseChannel, PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -432,7 +432,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             end_point = max(final_positions)
 
             for qubit in self.model.qubits:
-                if freq_channel := qubit.pulse_channels.get("freq_shift", None):
+                if freq_channel := qubit.pulse_channels.get(ChannelType.freq_shift.name, None):
                     if freq_channel.active:
                         pulse = Pulse(
                             freq_channel,
