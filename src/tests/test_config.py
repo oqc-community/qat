@@ -5,6 +5,9 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
+
+from qat import execute_with_metrics
+from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     InlineResultsProcessing,
@@ -17,6 +20,7 @@ from qat.purr.compiler.config import (
     TketOptimizations,
 )
 from qat.purr.compiler.devices import QuantumComponent
+from .qasm_utils import get_qasm2
 
 
 def _get_json_path(file_name):
@@ -96,6 +100,29 @@ class TestConfigSerialization:
             second_conf = CompilerConfig.create_from_json(serialized_data)
 
             assert vars(first_conf.optimizations) == vars(second_conf.optimizations)
+
+    def test_optimized_instructions_metric(self):
+        conf = CompilerConfig()
+        conf.metrics = conf.metrics | conf.metrics.OptimizedInstructions
+        results, metrics = execute_with_metrics(get_qasm2("logic_example.qasm"), get_default_echo_hardware(), conf)
+
+        key_name = MetricsType.OptimizedInstructions.snake_case_name()
+        assert key_name in metrics
+        assert len(metrics[key_name]) > 2000  # Just check we have a non-trivial result.
+
+    def test_default_metrics(self):
+        conf = CompilerConfig()
+        results, metrics = execute_with_metrics(get_qasm2("logic_example.qasm"), get_default_echo_hardware(), conf)
+
+        default_metrics = {
+            MetricsType.OptimizedInstructionCount.snake_case_name(),
+            MetricsType.OptimizedCircuit.snake_case_name()
+        }
+        for key, value in metrics.items():
+            if key in default_metrics:
+                assert value is not None
+            else:
+                assert value is None
 
     def test_config_repeats(self):
         first_conf = CompilerConfig()

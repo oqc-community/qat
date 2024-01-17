@@ -176,6 +176,9 @@ class MetricsType(Flag):
     # been performed.
     OptimizedInstructionCount = auto()
 
+    # Returns raw instructions sent to the QPU.
+    OptimizedInstructions = auto()
+
     # Set of basic metrics that should be returned at all times.
     Default = OptimizedCircuit | OptimizedInstructionCount
 
