@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Set
+from typing import Any, List, Set, Dict
 
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -49,6 +49,7 @@ class QatFile:
     def __init__(self):
         self.timeline: List[TimelineSegment] = []
         self.meta_instructions = []
+        self._pp_instructions: Dict[str, List[PostProcessing]] = {}
 
     def add(self, *args, **kwargs):
         self.timeline.append(TimelineSegment(*args, **kwargs))
@@ -73,15 +74,13 @@ class QatFile:
         return [seg.instruction for seg in self.timeline]
 
     def get_pp_for_variable(self, target_var):
-        results = []
-        for instruction in self.instructions:
-            if (
-                isinstance(instruction, PostProcessing)
-                and instruction.acquire.output_variable == target_var
-            ):
-                results.append(instruction)
+        if target_var not in self._pp_instructions:
+            raise ValueError(f"Could not find PostProcessing instruction for variable {target_var}")
 
-        return results
+        return self._pp_instructions[target_var]
+
+    def add_pp_for_variable(self, pp, target_var):
+        self._pp_instructions.setdefault(target_var, []).append(pp)
 
     @property
     def sweeps(self):
@@ -113,6 +112,7 @@ class InstructionEmitter:
         for inst in instructions:
             if isinstance(inst, PostProcessing):
                 qatf.add(inst, [inst.acquire.channel.full_id()])
+                qatf.add_pp_for_variable(inst, inst.acquire.output_variable)
             elif isinstance(inst, QuantumInstruction):
                 qatf.add(inst)
             else:
