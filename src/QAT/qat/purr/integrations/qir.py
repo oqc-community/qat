@@ -43,7 +43,7 @@ class QIRParser:
         self.result_variables = []
 
     def _get_qubit(self, id_: int):
-        return self.hardware.get_qubit(id_)
+        return self.hardware.qubits[id_]
 
     def ccx(self, control1, control2, target):
         self.builder.ccnot(
