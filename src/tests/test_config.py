@@ -5,6 +5,9 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
+
+from qat import execute_with_metrics, execute
+from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     InlineResultsProcessing,
@@ -17,6 +20,7 @@ from qat.purr.compiler.config import (
     TketOptimizations,
 )
 from qat.purr.compiler.devices import QuantumComponent
+from .qasm_utils import get_test_file_path, TestFileType, get_qasm2
 
 
 def _get_json_path(file_name):
@@ -41,6 +45,59 @@ class TestConfigGeneral:
 
 
 class TestConfigSerialization:
+    def test_binary(self):
+        conf = CompilerConfig()
+        conf.results_format.most_probable_bitstring()
+        results = execute(get_qasm2("example.qasm"), get_default_echo_hardware(6), conf)
+
+        assert len(results) == 2
+        assert results['c'] == '000'
+        assert results['d'] == '000'
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type", "instruction_length"),
+        [
+            ("ghz.qasm", TestFileType.QASM2, 196),
+        ],
+    )
+    def test_all_metrics_are_returned(self, input_string, file_type, instruction_length):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is not None
+        assert metrics["optimized_instruction_count"] == instruction_length
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+        ],
+    )
+    def test_only_optim_circuitmetrics_are_returned(self, input_string, file_type):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        config.metrics = MetricsType.OptimizedCircuit
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is not None
+        assert metrics["optimized_instruction_count"] is None
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+        ],
+    )
+    def test_only_inst_len_circuitmetrics_are_returned(self, input_string, file_type):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        config.metrics = MetricsType.OptimizedInstructionCount
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is None
+        assert metrics["optimized_instruction_count"] is not None
+
     def test_default_config(self):
         first_conf = CompilerConfig()
         serialized_data = first_conf.to_json()
