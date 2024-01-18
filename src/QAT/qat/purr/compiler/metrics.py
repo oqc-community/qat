@@ -41,6 +41,7 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
 
     optimized_circuit: Optional[str]
     optimized_instruction_count: Optional[int]
+    optimized_instructions: Optional[str]
 
     def __init__(self, enabled_metrics=None):
         self.enabled_metrics: Optional[MetricsType] = (

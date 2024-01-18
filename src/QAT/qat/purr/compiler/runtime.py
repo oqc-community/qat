@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-
+import os
 from typing import List, TypeVar, Union
 
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
@@ -119,6 +119,10 @@ class QuantumRuntime(MetricsMixin):
         self.record_metric(
             MetricsType.OptimizedInstructionCount, opt_inst_count := len(instructions)
         )
+
+        if self.are_metrics_enabled(MetricsType.OptimizedInstructions):
+            self.record_metric(MetricsType.OptimizedInstructions, os.linesep.join([str(inst) for inst in instructions]))
+
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
         return self.engine.execute(instructions, results_format)
