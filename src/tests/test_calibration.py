@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import os
-import unittest
+import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Calibratable
@@ -55,14 +55,14 @@ class TestCalibrations:
         assert twobit.is_calibrated
 
 
-class CalibrationSavingAndLoadingTests(unittest.TestCase):
-    def setUp(self) -> None:
+class TestCalibrationSavingAndLoading:
+    def setup_method(self, method) -> None:
         self.calibration_filename = (
-            f"{self._testMethodName}_"
+            f"{method.__name__}_"
             f"{get_default_echo_hardware().__class__.__name__}.calibration.json"
         )
 
-    def tearDown(self) -> None:
+    def teardown_method(self, method) -> None:
         if os.path.exists(self.calibration_filename):
             os.remove(self.calibration_filename)
 
@@ -75,10 +75,9 @@ class CalibrationSavingAndLoadingTests(unittest.TestCase):
         for key, value in copied_echo.pulse_channels.items():
             channel_key = key[:3]
             original_channel = copied_echo.physical_channels[channel_key]
-            self.assertEqual(
-                id(value.physical_channel),
-                id(original_channel),
-                "Copied references are different objects.",
+            assert (
+                id(value.physical_channel) == id(original_channel),
+                "Copied references are different objects."
             )
 
         assert len(echo.basebands) == len(copied_echo.basebands)
@@ -106,8 +105,9 @@ class CalibrationSavingAndLoadingTests(unittest.TestCase):
         assert os.path.exists(saved_path)
         assert original_calibration == echo.get_calibration()
 
-    def test_load_hardware_definition(self):
-        echo = get_default_echo_hardware()
+    @pytest.mark.parametrize("qubit_count", [4, 8, 35])
+    def test_load_hardware_definition(self, qubit_count):
+        echo = get_default_echo_hardware(qubit_count)
         original_calibration = echo.get_calibration()
         empty_hw = Calibratable.load_calibration(original_calibration)
 
