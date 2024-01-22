@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from enum import Enum, auto
 from typing import Dict, List, Optional, Set, TypeVar, Union
 
@@ -12,6 +13,10 @@ import numpy as np
 from jsonpickle import Pickler, Unpickler
 from jsonpickle.util import is_picklable
 from qat.purr.utils.logger import get_default_logger
+
+# TODO: Remove the setting of the recursion limit as soon as the pickling of hardware is
+# not blocked by the default limit.
+sys.setrecursionlimit(2000)
 
 log = get_default_logger()
 jsonpickle_numpy.register_handlers()
