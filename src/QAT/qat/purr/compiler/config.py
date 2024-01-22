@@ -53,6 +53,30 @@ class ResultsFormatting(Flag):
 
 
 class QuantumResultsFormat:
+    """
+    There are numerous types of results people want from a quantum computer, from low-level experimentation
+    to circuit and quantum program execution. Usually these all start at the raw readout and then progressively get
+    simplified and condensed into whatever format you want.
+
+    We mirror this approach and all of our transformations are layered upon one another allowing quite a bit of
+    flexibility in the results you get back. This does also mean that some transformations are meant to work together,
+    or after one another, or have various conditions that are more subtle.
+
+    To that end we've provided combinations of flags that allow for the most current results formats to be targeted
+    in this object.
+
+    Note: binary_count() is a results distribution, and for most circuit runs you'll want to use that.
+
+    Here's an example for results distribution:
+    ::
+        config = CompilerConfig()
+        config.results_format.binary_count()
+
+    And here's for the raw results:
+    ::
+        config = CompilerConfig()
+        config.results_format.raw()
+    """
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
         self.transforms: Optional[
@@ -171,6 +195,13 @@ class QatOptimizations(Flag):
 
 
 class MetricsType(Flag):
+    """
+    A variety of metrics can be returned about compilation and execution. The default metrics are a selection of
+    information that people generally want to know such as what the post-optimization circuit/IR looks like before we
+    start executing.
+
+    Default metrics will only have a minute impact on runtime, so are fine to leave enabled.
+    """
     Empty = auto()
 
     # Returns circuit after optimizations have been run.
@@ -203,10 +234,24 @@ class MetricsType(Flag):
 
 class CompilerConfig:
     """
-    Full settings for the compiler. All values are defaulted on initialization.
+    Main configuration for many compiler passes and features. All defaults are chosen based upon target
+    machine and IR used (QASM, QIR, etc) if not explicitly passed in.
 
-    If no explicit optimizations are passed then the default set of optimization for the
-    language you're attempting to compile will be applied.
+    Look at the documentation on each object for more detailed uses.
+
+    Usage Example:
+    ::
+        conf = CompilerConfig()
+        conf.results_format.binary_count()
+        conf.optimizations = QIR2Optimizations()
+        results = execute(..., ..., conf)
+
+    You can also use `get_default_config` to build a default configuration for a particular language, which
+    is usually the easier option.
+    ::
+        conf = get_default_config(Languages.Qasm2, repeats=5000)
+
+    Note: 'repeats' are more commonly known as shots.
     """
 
     def __init__(
@@ -286,9 +331,28 @@ class Languages(IntEnum):
 
 class OptimizationConfig:
     """
-    Base class for instantiated optimizations as well as mix-in classes. Built this way
-    so we can mix and match optimization objects across multiple setups and languages
-    without duplication.
+    We have a variety of third-party libraries that can be run before your program reaches our
+    main compilation and runtime pipeline. Each of these will have an associated set of flags (like `TketOptimizations`)
+    where you can tell us which passes you want run.
+
+    Each flag is associated with a particular run/feature in the various libraries. We try and keep a thin wrapper
+    around them to keep maintenance/usage easy. Please look for a flags name in the associated library for specific
+    information about that pass. For example, for `TketOptimizations.ThreeQubitSquash` just look up ThreeQubitSquash
+    in Tkets documentation.
+
+    There are helper composites for various languages such as `Qasm2Optimizations` and `QIROptimizations`. These
+    allow you to set multiple optimizers settings in one object and filter to only the ones that work for that language.
+
+    It's recommended you use these over the raw optimization flags, but you can also use those as well.
+
+    Example:
+    ::
+        conf = CompilerConfig(optimizations = Qasm2Optimizations())
+        conf.optimizations = conf.optimizations
+            | TketOptimizations.ThreeQubitSquash
+            | TketOptimizations.RemoveDiscarded
+
+    You can also use `get_optimizer_config` to return an optimization config for a particular language.
     """
 
     def __init__(self):
