@@ -383,7 +383,8 @@ without duplication.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.config.QuantumResultsFormat.binary">
 <span class="sig-name descname"><span class="pre">binary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.QuantumResultsFormat.binary" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns a definitive 0/1 for each qubit instead of raw measurement results * shots.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.compiler.config.QuantumResultsFormat" title="qat.purr.compiler.config.QuantumResultsFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumResultsFormat</span></code></a></span></p>
 </dd>
@@ -393,25 +394,26 @@ without duplication.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.config.QuantumResultsFormat.binary_count">
 <span class="sig-name descname"><span class="pre">binary_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.QuantumResultsFormat.binary_count" title="Link to this definition"></a></dt>
-<dd><p>Returns a count of each instance of measured qubit registers.
-Switches result format to raw.</p>
+<dd><p>Returns the count of each time a particular bitstring was seen in a result.
+{‘00’: 40, ‘01’: 150, …}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.config.QuantumResultsFormat.most_probable_bitstring">
+<span class="sig-name descname"><span class="pre">most_probable_bitstring</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.QuantumResultsFormat.most_probable_bitstring" title="Link to this definition"></a></dt>
+<dd><p>Returns the most probable bitstring from your execution. Clusters the results then
+picks the one with the highest incident.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.config.QuantumResultsFormat.raw">
 <span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.QuantumResultsFormat.raw" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Raw QPU output.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.compiler.config.QuantumResultsFormat" title="qat.purr.compiler.config.QuantumResultsFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumResultsFormat</span></code></a></span></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.compiler.config.QuantumResultsFormat.squash_binary_result_arrays">
-<span class="sig-name descname"><span class="pre">squash_binary_result_arrays</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.QuantumResultsFormat.squash_binary_result_arrays" title="Link to this definition"></a></dt>
-<dd><p>Squashes binary result list into a singular bit string. Switches results to
-binary.</p>
 </dd></dl>
 
 </dd></dl>
@@ -432,8 +434,8 @@ binary.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.compiler.config.ResultsFormatting.SquashBinaryResultArrays">
-<span class="sig-name descname"><span class="pre">SquashBinaryResultArrays</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.purr.compiler.config.ResultsFormatting.SquashBinaryResultArrays" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.purr.compiler.config.ResultsFormatting.ReturnMostProbable">
+<span class="sig-name descname"><span class="pre">ReturnMostProbable</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.purr.compiler.config.ResultsFormatting.ReturnMostProbable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
