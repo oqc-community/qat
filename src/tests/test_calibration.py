@@ -105,8 +105,9 @@ class TestCalibrationSavingAndLoading:
         assert os.path.exists(saved_path)
         assert original_calibration == echo.get_calibration()
 
-    def test_load_hardware_definition(self):
-        echo = get_default_echo_hardware()
+    @pytest.mark.parametrize("qubit_count", [4, 8, 35])
+    def test_load_hardware_definition(self, qubit_count):
+        echo = get_default_echo_hardware(qubit_count)
         original_calibration = echo.get_calibration()
         empty_hw = Calibratable.load_calibration(original_calibration)
 
