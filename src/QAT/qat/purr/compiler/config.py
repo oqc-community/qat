@@ -44,10 +44,9 @@ class ResultsFormatting(Flag):
     # should have a way to disable it for certain uses.
     DynamicStructureReturn = auto()
 
-    # If your qubit results are lists of binary, squash to one string representation.
-    # Changes 1: [1, 0, 0, 1] to 1: '1001'.
-    # Only works when Binary format is returned.
-    SquashBinaryResultArrays = auto()
+    # Returns the most probably binary string from your result. Meant to work in conjunction
+    # with BinaryCount
+    ReturnMostProbable = auto()
 
     def __repr__(self):
         return self.name
@@ -61,17 +60,21 @@ class QuantumResultsFormat:
         ] = ResultsFormatting.DynamicStructureReturn
 
     def raw(self) -> QuantumResultsFormat:
+        """ Raw QPU output. """
         self.format = InlineResultsProcessing.Raw
         return self
 
     def binary(self) -> QuantumResultsFormat:
+        """
+        Returns a definitive 0/1 for each qubit instead of raw measurement results * shots.
+        """
         self.format = InlineResultsProcessing.Binary
         return self
 
     def binary_count(self):
         """
-        Returns a count of each instance of measured qubit registers.
-        Switches result format to raw.
+        Returns the count of each time a particular bitstring was seen in a result.
+        {'00': 40, '01': 150, ...}
         """
         self.transforms = (
             ResultsFormatting.BinaryCount | ResultsFormatting.DynamicStructureReturn
@@ -79,16 +82,17 @@ class QuantumResultsFormat:
         self.format = InlineResultsProcessing.Raw
         return self
 
-    def squash_binary_result_arrays(self):
+    def most_probable_bitstring(self):
         """
-        Squashes binary result list into a singular bit string. Switches results to
-        binary.
+        Returns the most probable bitstring from your execution. Clusters the results then
+        picks the one with the highest incident.
         """
         self.transforms = (
-            ResultsFormatting.SquashBinaryResultArrays
+            ResultsFormatting.BinaryCount
+            | ResultsFormatting.ReturnMostProbable
             | ResultsFormatting.DynamicStructureReturn
         )
-        self.format = InlineResultsProcessing.Binary
+        self.format = InlineResultsProcessing.Raw
         return self
 
     def __contains__(self, other):

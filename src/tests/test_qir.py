@@ -47,7 +47,7 @@ class TestQIR:
 
     def test_qir_bell(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         results = execute_qir(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
         )
@@ -64,7 +64,7 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_bell_measure_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(
             _get_qir_path("bell_qir_measure.bc"), get_default_echo_hardware(4), config
         )
@@ -72,7 +72,7 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_complicated(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(
             _get_qir_path("complicated.ll"), get_default_echo_hardware(4), config
         )
@@ -80,13 +80,13 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_hello_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(_get_qir_path("hello.bc"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
     def test_select_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         results = execute_qir(
             _get_qir_path("select.bc"), get_default_echo_hardware(4), config
         )
@@ -95,7 +95,7 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(
             _get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config
         )

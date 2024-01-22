@@ -222,14 +222,18 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         if ResultsFormatting.BinaryCount in format_flags:
             results = {key: _binary_count(val, repeats) for key, val in results.items()}
 
-        def squash_binary(value):
-            if isinstance(value, int):
-                return str(value)
-            elif all(isinstance(val, int) for val in value):
-                return "".join([str(val) for val in value])
+        def find_most_probable(results_dict):
+            highest = 0
+            result = None
+            for key, value in results_dict.items():
+                if value > highest:
+                    result = key
+                    highest = value
 
-        if ResultsFormatting.SquashBinaryResultArrays in format_flags:
-            results = {key: squash_binary(val) for key, val in results.items()}
+            return result
+
+        if ResultsFormatting.ReturnMostProbable in format_flags:
+            results = {key: find_most_probable(val) for key, val in results.items()}
 
         # Dynamic structure return is an ease-of-use flag to strip things that you know your
         # use-case won't use, such as variable names and nested lists.
