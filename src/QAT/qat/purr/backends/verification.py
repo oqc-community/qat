@@ -4,13 +4,13 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from qat.purr.backends.live import LiveHardwareModel, apply_setup_to_hardware
+from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
-from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.instructions import Instruction, QuantumInstruction
 
 from qat.qat import execute
 from qat.purr.utils.logger import get_default_logger
@@ -77,7 +77,7 @@ def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
         )
 
     engine: VerificationEngine = model.get_engine()
-    engine._verify_timeline(builder.instructions)
+    engine.verify_instructions(builder.instructions)
 
 
 def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
@@ -101,36 +101,27 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
         )
 
     if qpu_type.make == Lucy.__name__:
-        return apply_setup_to_hardware(
-            hw= VerificationModel(qpu_type, LucyVerificationEngine),
-            qubit_count=8,
-            pulse_hw_x_pi_2_width=25e-9,
-            pulse_hw_zx_pi_4_width=3.18e-07,
-            pulse_measure_width=2.41e-06,
-        )
+        return build_lucy_hardware(VerificationModel(qpu_type, LucyVerificationEngine))
 
     return None
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
-
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile) -> bool:
-
-        #TODO: Need a discussion around this step. Where are instructions 'finalised'?
+    def _execute_on_hardware(self, sweep_iterator, package: QatFile):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
-            position_map = self.create_duration_timeline(package)
+            self.verify_instructions(package.instructions, package.meta_instructions)
 
-        return self.verify_instructions(position_map)
+        return dict()
 
-    def _process_results(self, results, qat_file):
+    def _process_results(self, results, qfile: "QatFile"):
         return results
 
-    def _process_assigns(self, results, qat_file):
+    def _process_assigns(self, results, qfile: "QatFile"):
         return results
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction]):
+    def verify_instructions(self, instructions: List[Instruction], metadata):
         ...
 
 
@@ -138,40 +129,31 @@ class LucyVerificationEngine(VerificationEngine):
 
     max_circuit_duration = 90000e-9
 
-    def verify_instructions(self, instructions: dict) -> bool:
-        valid_circuit = True
+    def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
+        timeline = self.create_duration_timeline(instructions)
 
-        if self._get_circuit_duration(instructions) > self.max_circuit_duration:
-            valid_circuit= False
-
-        return valid_circuit
-
-    def _process_results(self, results, qat_file):
-        return results
-
-    def _process_assigns(self, results, qat_file):
-        return results
-
-    def _get_circuit_duration(self, position_map: dict) -> float:
-        pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
+        pc2samples = {pc: positions[-1].end for pc, positions in timeline.items()}
         durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
 
         circuit_duration = max([duration for duration in durations.values()])
 
-        log.info(
+        log.debug(
             f"The circuit duration is {circuit_duration/1e-6} microseconds."
         )
 
-        return circuit_duration
+        if circuit_duration > self.max_circuit_duration:
+            raise VerificationError(f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}.")
 
 
 def verify_program(
     program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion
 ):
     model = get_verification_model(qpu_version)
+    if model is None:
+        raise ValueError("Unable to find model to verify against.")
 
     return execute(program, model, compiler_config)
 
 
-class VerificationError(Exception):
+class VerificationError(ValueError):
     ...

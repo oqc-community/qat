@@ -31,6 +31,10 @@ from qat.purr.utils.logging_utils import log_duration
 log = get_default_logger()
 
 
+def build_lucy_hardware(hw: QuantumHardwareModel):
+    return apply_setup_to_hardware(hw, 8, 25e-9, 3.18e-07, 2.41e-06)
+
+
 def apply_setup_to_hardware(hw: QuantumHardwareModel,
                             qubit_count: int,
                             pulse_hw_x_pi_2_width: float,
@@ -260,7 +264,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
 
-            position_map = self.create_duration_timeline(package)
+            position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
             buffers = self.build_physical_channel_buffers(pulse_channel_buffers)
             baseband_freqs = self.build_baseband_frequencies(pulse_channel_buffers)

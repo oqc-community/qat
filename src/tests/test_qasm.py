@@ -916,7 +916,7 @@ class TestQatOptimization:
     def _measure_merge_timings(self, file, qubit_count, keys, expected):
         builder = parse_and_apply_optimiziations(file, qubit_count=qubit_count)
         qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
-        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file)
+        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file.instructions)
 
         def get_start_end(key, instruction, channel_type):
             pulse_channel = builder.model.get_pulse_channel_from_device(
