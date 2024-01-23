@@ -301,10 +301,12 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             results = {}
             for batch_count in batches:
                 qat_file.repeat.repeat_count = batch_count
-                dinjectors.inject()
-                batch_results = self._execute_on_hardware(switerator, qat_file)
-                switerator.revert(qat_file.instructions)
-                dinjectors.revert()
+                try:
+                    dinjectors.inject()
+                    batch_results = self._execute_on_hardware(switerator, qat_file)
+                finally:
+                    switerator.revert(qat_file.instructions)
+                    dinjectors.revert()
 
                 if not any(results):
                     results = batch_results
