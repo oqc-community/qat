@@ -283,35 +283,50 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             qat_file = InstructionEmitter().emit(instructions, self.model)
 
             # Rebuild repeat list if the hardware can't support the current setup.
-            if qat_file.repeat.repeat_count > self.model.repeat_limit:
+            repeat_count = qat_file.repeat.repeat_count
+            if repeat_count > self.model.repeat_limit:
                 log.info(
-                    f"Running {qat_file.repeat.repeat_count} shots at once is "
+                    f"Running {repeat_count} shots at once is "
                     f"unsupported on the current hardware. Batching execution."
                 )
-                batches = self._generate_repeat_batches(
-                    sum(qat_file.repeat.repeat_count)
-                )
+                batches = self._generate_repeat_batches(repeat_count)
             else:
-                batches = [qat_file.repeat.repeat_count]
+                batches = [repeat_count]
 
             # Set up the sweep and device injectors, passing all appropriate data to
             # the specific execute methods and deal with clean-up afterwards.
-            switerator = SweepIterator.from_qfile(qat_file)
-            dinjectors = DeviceInjectors(qat_file.instructions)
             results = {}
             for batch_count in batches:
+                if batch_count <= 0:
+                    continue
+
+                # Reset iterators/injectors per cycle.
+                switerator = SweepIterator.from_qfile(qat_file)
+                dinjectors = DeviceInjectors(qat_file.instructions)
+
+                # Assign shortened repeat for this execution then reset it.
                 qat_file.repeat.repeat_count = batch_count
-                dinjectors.inject()
-                batch_results = self._execute_on_hardware(switerator, qat_file)
-                switerator.revert(qat_file.instructions)
-                dinjectors.revert()
+                try:
+                    dinjectors.inject()
+                    batch_results = self._execute_on_hardware(switerator, qat_file)
+                finally:
+                    switerator.revert(qat_file.instructions)
+                    dinjectors.revert()
+                    qat_file.repeat.repeat_count = repeat_count
 
                 if not any(results):
                     results = batch_results
                 else:
                     # As it's the same execution we can assume it has the same keys.
                     for key in results:
-                        results[key].append(batch_results[key])
+                        existing = results[key]
+                        appending = batch_results[key]
+
+                        # If one is a numpy array, both are. Otherwise traditional list.
+                        if isinstance(existing, np.ndarray):
+                            results[key] = np.append(existing, appending)
+                        else:
+                            existing.append(appending)
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.

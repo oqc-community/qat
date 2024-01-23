@@ -5,6 +5,8 @@ from os.path import dirname, join
 
 import numpy as np
 import pytest
+
+from qat.qat import execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine, sync_baseband_frequencies_to_value
 from qat.purr.backends.realtime_chip_simulator import (
@@ -12,6 +14,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     qutip_available,
 )
 from qat.purr.backends.utilities import get_axis_map
+from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -152,6 +155,19 @@ class TestBaseQuantum:
             join(dirname(__file__), "files", "qasm", file_name), "r"
         ) as qasm_file:
             return qasm_file.read()
+
+    def test_batched_execution(self):
+        hw = get_default_echo_hardware()
+        hw.shot_limit = 10
+
+        config = CompilerConfig()
+        config.repeats = 50
+        config.results_format.binary_count()
+
+        results = execute(get_qasm2("basic.qasm"), hw, config)
+
+        # Assert we have a full 50 results at 00.
+        assert results["c"]["00"] == 50
 
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
