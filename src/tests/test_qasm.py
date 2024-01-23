@@ -156,7 +156,6 @@ class TestQASM3:
 
         assert len(v3_instructions.instructions) == len(v2_instructions.instructions)
 
-    @pytest.mark.skip(reason="Need to be able to parse 'dt' correctly.")
     def test_complex_gates(self):
         hw = get_default_echo_hardware(8)
         execute_qasm(get_qasm3("complex_gates_test.qasm"), hw)

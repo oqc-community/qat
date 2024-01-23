@@ -25,8 +25,8 @@ defcal sx $1 {
 }
 
 defcal cx $1, $0 {
-   waveform CR90p = gaussian_square(1e-6, 560dt, 240dt, 40dt);
-   waveform CR90m = gaussian_square(1e-6, 560dt, 240dt, 40dt);
+   waveform CR90p = square(1e-6, 560dt);
+   waveform CR90m = gaussian(1e-6, 560dt, 240dt);
 
    rz(pi/2) $0; rz(-pi/2) $1;
    sx $0; sx $1;
