@@ -4,11 +4,18 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
+from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
-from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.instructions import Instruction, QuantumInstruction
+
+from qat.qat import execute
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 class QPUVersion:
@@ -44,8 +51,13 @@ class Lucy:
 
 
 class VerificationModel(LiveHardwareModel):
-    def __init__(self, qpu_version, verification_engine_type: type):
-        super().__init__(None, [verification_engine_type], None)
+    def __init__(
+        self,
+        qpu_version,
+        verification_engine_type: type,
+        control_hardware: ControlHardware = ControlHardware(),
+    ):
+        super().__init__(control_hardware, [verification_engine_type], None)
         self.version = qpu_version
 
 
@@ -89,25 +101,59 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
         )
 
     if qpu_type.make == Lucy.__name__:
-        # TODO: Should have an apply_setup_to_hardware in live which people can use to build our own architecture.
-        model = VerificationModel(qpu_type, LucyVerificationEngine)
-        raise NotImplementedError("No lucy-specific model created yet.")
+        return build_lucy_hardware(VerificationModel(qpu_type, LucyVerificationEngine))
 
     return None
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
     def _execute_on_hardware(self, sweep_iterator, package: QatFile):
-        veri_list = list(package.meta_instructions)
-        veri_list.extend(package.instructions)
-        self.verify_instructions(veri_list)
+        while not sweep_iterator.is_finished():
+            sweep_iterator.do_sweep(package.instructions)
+            self.verify_instructions(package.instructions, package.meta_instructions)
+
+        return dict()
+
+    def _process_results(self, results, qfile: "QatFile"):
+        return results
+
+    def _process_assigns(self, results, qfile: "QatFile"):
+        return results
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction]):
+    def verify_instructions(self, instructions: List[Instruction], metadata):
         ...
 
 
 class LucyVerificationEngine(VerificationEngine):
-    def verify_instructions(self, instructions: List[Instruction]):
-        # TODO: Add actual verification
-        raise NotImplementedError("No lucy-specific verification yet.")
+
+    max_circuit_duration = 90000e-9
+
+    def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
+        timeline = self.create_duration_timeline(instructions)
+
+        pc2samples = {pc: positions[-1].end for pc, positions in timeline.items()}
+        durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
+
+        circuit_duration = max([duration for duration in durations.values()])
+
+        log.debug(
+            f"The circuit duration is {circuit_duration/1e-6} microseconds."
+        )
+
+        if circuit_duration > self.max_circuit_duration:
+            raise VerificationError(f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}.")
+
+
+def verify_program(
+    program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion
+):
+    model = get_verification_model(qpu_version)
+    if model is None:
+        raise ValueError("Unable to find model to verify against.")
+
+    return execute(program, model, compiler_config)
+
+
+class VerificationError(ValueError):
+    ...
