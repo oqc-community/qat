@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
