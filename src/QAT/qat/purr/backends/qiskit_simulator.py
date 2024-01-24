@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from typing import List, Union
+from typing import List, Union, Dict, Any
 
 import numpy as np
 from qat.purr.backends.echo import (
@@ -12,23 +12,31 @@ from qat.purr.compiler.config import ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.runtime import QuantumRuntime
-from qiskit import Aer, QiskitError, QuantumCircuit, transpile
+from qat.purr.utils.logger import get_default_logger
+from qiskit import QiskitError, QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
 
+log = get_default_logger()
 
-def get_default_qasm_hardware(qubit_count=20):
-    model = QasmHardwareModel(qubit_count)
+def get_default_qiskit_hardware(qubit_count=20, noise_model=None) -> "QiskitHardwareModel":
+    model = QiskitHardwareModel(qubit_count, noise_model)
 
     # Copy the echo model builders way of doing things.
     return apply_setup_to_hardware(model, qubit_count)
 
 
-class QasmBuilder(InstructionBuilder):
+class QiskitBuilder(InstructionBuilder):
     """Builder around QASM circuits."""
 
-    def __init__(self, qubit_count: int, hardware_model: QuantumHardwareModel):
-        super().__init__(hardware_model)
-        self.qubit_count = qubit_count
+    def __init__(
+        self,
+        hardware_model: QuantumHardwareModel,
+        qubit_count: int,
+        instructions: InstructionBuilder = None
+    ):
+        super().__init__(hardware_model=hardware_model, instructions=instructions)
         self.circuit = QuantumCircuit(qubit_count, qubit_count)
         self.shot_count = 1024
         self.bit_count = 0
@@ -124,12 +132,14 @@ class QasmBuilder(InstructionBuilder):
 
         return self
 
-    def repeat(self, repeat_value: int, repetition_period=None):
-        self.shot_count = repeat_value
+    def repeat(self, repeat_value: int = None, repetition_period=None):
+        # Compiler config may attempt to pass None
+        if repeat_value is not None:
+            self.shot_count = repeat_value
         return self
 
     def clear(self):
-        self.circuit = QuantumCircuit(self.qubit_count, self.qubit_count)
+        self.circuit.clear()
         self.bit_count = 0
 
     def merge_builder(self, other_builder: InstructionBuilder):
@@ -143,37 +153,42 @@ class QasmBuilder(InstructionBuilder):
         return super().merge_builder(other_builder)
 
 
-class QasmHardwareModel(QuantumHardwareModel):
-    def __init__(self, qubit_count):
+class QiskitHardwareModel(QuantumHardwareModel):
+    def __init__(self, qubit_count, noise_model=None):
         self.qubit_count = qubit_count
+        self.noise_model = noise_model
         super().__init__()
 
     def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
         # We aren't going to use the engine anyway.
-        return QasmRuntime(existing_engine or self.create_engine())
+        return QiskitRuntime(existing_engine or self.create_engine())
 
     def create_builder(self) -> InstructionBuilder:
-        return QasmBuilder(self.qubit_count, self)
+        return QiskitBuilder(hardware_model=self, qubit_count=self.qubit_count)
+
+    def create_engine(self) -> InstructionExecutionEngine:
+        return QiskitEngine(hardware_model=self)
 
 
-class QasmRuntime(QuantumRuntime):
-    model: QasmHardwareModel
+class QiskitEngine(InstructionExecutionEngine):
+    def __init__(self, hardware_model: QiskitHardwareModel = None):
+        super().__init__(hardware_model)
 
-    def execute(
-        self,
-        builder: QasmBuilder,
-        results_format: ResultsFormatting = None,
-        repeats: int = None,
-    ):
-        if not isinstance(builder, QasmBuilder):
-            raise ValueError("Wrong builder type passed to QASM runtime.")
+    def run_calibrations(self, qubits_to_calibrate=None):
+        pass
 
-        qasm_sim = Aer.get_backend("qasm_simulator")
+    def execute(self, builder: QiskitBuilder) -> Dict[str, Any]:
+        if not isinstance(builder, QiskitBuilder):
+            raise ValueError(
+                "Contravariance is not possible with QiskitEngine. "
+                "execute input must be a QiskitBuilder"
+            )
+
+        qasm_sim = AerSimulator(noise_model=builder.model.noise_model)
         circuit = builder.circuit
-
         # TODO: Needs a more nuanced try/catch. Some exceptions we should catch, others we should re-throw.
         try:
-            job = qasm_sim.run(transpile(circuit, qasm_sim), builder.shot_count)
+            job = qasm_sim.run(transpile(circuit, qasm_sim), shots=builder.shot_count)
             results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
@@ -184,3 +199,25 @@ class QasmRuntime(QuantumRuntime):
         # Because qiskit needs all values up-front we just provide a maximal classical register then strim off
         # the values we aren't going to use.
         return {key[removals:]: value for key, value in distribution.items()}
+
+    def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
+        log.info("No optimize implemented for QiskitEngine")
+        return instructions
+
+    def validate(self, instructions: List[Instruction]):
+        pass
+
+
+class QiskitRuntime(QuantumRuntime):
+    model: QiskitHardwareModel
+
+    def execute(
+        self,
+        builder: QiskitBuilder,
+        results_format: ResultsFormatting = None,
+        repeats: int = None,
+    ):
+        if not isinstance(builder, QiskitBuilder):
+            raise ValueError("Wrong builder type passed to QASM runtime.")
+
+        return self.engine.execute(builder)

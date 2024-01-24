@@ -14,7 +14,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.backends.qasm_sim import get_default_qasm_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -808,7 +808,7 @@ class TestExecutionFrontend:
         assert results is not None
 
     def test_qasm_sim(self):
-        model = get_default_qasm_hardware(20)
+        model = get_default_qiskit_hardware(20)
         qasm = get_qasm2("basic.qasm")
         results = execute(qasm, model, CompilerConfig())
         assert len(results) == 4
