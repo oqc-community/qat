@@ -850,7 +850,7 @@ class TestQatOptimization:
     def _measure_merge_timings(self, file, qubit_count, keys, expected):
         builder = parse_and_apply_optimiziations(file, qubit_count=qubit_count)
         qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
-        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file)
+        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file.instructions)
         model: QuantumHardwareModel = builder.model
 
         def assert_times_match(res_key, start_end):

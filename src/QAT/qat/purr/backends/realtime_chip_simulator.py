@@ -726,7 +726,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}"
             )
 
-            position_map = self.create_duration_timeline(package)
+            position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
             resets = self.build_simulator_resets(position_map)
             buffers = self.build_physical_channel_buffers(pulse_channel_buffers)

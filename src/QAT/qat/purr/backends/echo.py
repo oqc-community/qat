@@ -155,7 +155,7 @@ class EchoEngine(QuantumExecutionEngine):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
 
-            position_map = self.create_duration_timeline(package)
+            position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
             buffers = self.build_physical_channel_buffers(pulse_channel_buffers)
             aq_map = self.build_acquire_list(position_map)
