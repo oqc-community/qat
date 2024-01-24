@@ -231,15 +231,11 @@ def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 
 
 def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
+    # We shouldn't really have an orphaned execution engine, but no harm in it.
     if isinstance(hardware, QuantumExecutionEngine):
-        return QuantumRuntime(hardware)
+        return hardware.model.create_runtime(hardware)
     elif isinstance(hardware, QuantumHardwareModel):
-        default_hw = hardware.get_engine()
-        if default_hw is None:
-            raise ValueError(
-                f"{str(hardware)} is not mapped to a recognized execution engine."
-            )
-        return QuantumRuntime(default_hw(hardware))
+        return hardware.create_runtime()
 
     raise ValueError(
         f"{str(hardware)} is not a recognized hardware model or execution engine."
@@ -251,13 +247,7 @@ def get_builder(
 ) -> QuantumInstructionBuilder:
     if isinstance(model, QuantumExecutionEngine):
         model = model.model
-    default_builder = model.get_builder()
-    if default_builder is None:
-        raise ValueError(
-            f"{str(model)} is not mapped to a recognized instruction builder."
-        )
-
-    return default_builder(model)
+    return model.create_builder()
 
 
 def execute_instructions(

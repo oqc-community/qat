@@ -644,20 +644,10 @@ def get_default_RTCS_hardware(repeats=1000, rotating_frame=True):
 
 
 class RealtimeSimHardwareModel(QuantumHardwareModel):
-    def __init__(
-        self,
-        *args,
-        engine_types: List[QuantumExecutionEngine] = None,
-        builder_types: List[QuantumInstructionBuilder] = None,
-        **kwargs,
-    ):
-        super().__init__(
-            *args,
-            engine_types=engine_types or [RealtimeChipSimEngine],
-            builder_types=builder_types or [QuantumInstructionBuilder],
-            **kwargs,
-        )
-        self.couplings: List[RTCSCoupling] = []
+    couplings: List[RTCSCoupling] = []
+
+    def create_engine(self):
+        return RealtimeChipSimEngine(self)
 
     def add_couplings(self, *args):
         self.couplings.extend(list(args))
