@@ -107,6 +107,18 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return QuantumInstructionBuilder(self)
 
+    def resolve_qb_pulse_channel(
+        self, chanbit: Union[Qubit, PulseChannel]
+    ) -> Tuple[Qubit, PulseChannel]:
+        if isinstance(chanbit, Qubit):
+            return chanbit, chanbit.get_default_pulse_channel()
+        else:
+            for qubit in self.qubits:
+                for channel in qubit.pulse_channels.values():
+                    if chanbit == channel:
+                        return qubit, chanbit
+        raise ValueError(f"Cannot resolve {chanbit}")
+
     @property
     def qubits(self):
         """Returns list of the qubits on this hardware sorted by index."""
