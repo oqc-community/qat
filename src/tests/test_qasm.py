@@ -14,6 +14,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
+from qat.purr.backends.qasm_sim import get_default_qasm_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -805,6 +806,16 @@ class TestExecutionFrontend:
         built = frontend.parse(contents, hardware=hardware)
         results = frontend.execute(instructions=built, hardware=hardware)
         assert results is not None
+
+    def test_qasm_sim(self):
+        model = get_default_qasm_hardware(20)
+        qasm = get_qasm2("basic.qasm")
+        results = execute(qasm, model, CompilerConfig())
+        assert len(results) == 4
+        assert results["11"] > 200
+        assert results["01"] > 200
+        assert results["10"] > 200
+        assert results["00"] > 200
 
 
 class TestParsing:
