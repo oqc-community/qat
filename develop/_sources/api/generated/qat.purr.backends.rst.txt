@@ -23,7 +23,7 @@ Submodules
    qat.purr.backends.echo
    qat.purr.backends.live
    qat.purr.backends.live_devices
-   qat.purr.backends.qasm_sim
+   qat.purr.backends.qiskit_simulator
    qat.purr.backends.realtime_chip_simulator
    qat.purr.backends.utilities
    qat.purr.backends.verification
