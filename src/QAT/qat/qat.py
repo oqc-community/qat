@@ -19,12 +19,14 @@ log = get_default_logger()
 QATInput = Union[str, bytes, InstructionBuilder]
 
 
-def _return_or_build(ingest: QATInput, build_func: typing.Callable, **kwargs):
-    is_source = isinstance(ingest, (str, bytes))
-    is_instructions = isinstance(ingest, InstructionBuilder)
-    if (not is_instructions) and (not is_source):
-        raise ValueError(f"No compiler support for inputs of type {str(type(ingest))}")
-    return build_func(ingest, **kwargs) if is_source else ingest
+def _return_or_build(qat_input: QATInput, build_func: typing.Callable, **kwargs):
+    if isinstance(qat_input, (str, bytes)):
+        return build_func(qat_input, **kwargs)
+
+    if isinstance(qat_input, InstructionBuilder):
+        return qat_input, CompilationMetrics()
+
+    raise TypeError(f"No compiler support for inputs of type {str(type(qat_input))}")
 
 
 def execute(
