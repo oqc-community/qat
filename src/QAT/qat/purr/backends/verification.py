@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
@@ -54,11 +54,15 @@ class VerificationModel(LiveHardwareModel):
     def __init__(
         self,
         qpu_version,
-        verification_engine_type: type,
+        verification_engine: "VerificationEngine",
         control_hardware: ControlHardware = ControlHardware(),
     ):
-        super().__init__(control_hardware, [verification_engine_type], None)
+        super().__init__(control_hardware)
         self.version = qpu_version
+        self.verification_engine = verification_engine
+
+    def create_engine(self) -> "VerificationEngine":
+        return self.verification_engine(self)
 
 
 def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):

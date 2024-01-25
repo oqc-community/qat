@@ -134,17 +134,16 @@ class LiveHardwareModel(QuantumHardwareModel):
     def __init__(
         self,
         control_hardware: ControlHardware = None,
-        engine_types: List[QuantumExecutionEngine] = None,
-        builder_types: List[QuantumInstructionBuilder] = None,
     ):
         super().__init__(
             acquire_mode=AcquireMode.INTEGRATOR,
-            engine_types=engine_types or [LiveDeviceEngine],
-            builder_types=builder_types or [QuantumInstructionBuilder],
         )
         self.control_hardware: ControlHardware = control_hardware
         self.instruments: Dict[str, Instrument] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
+
+    def create_engine(self):
+        return LiveDeviceEngine(self)
 
     def add_device(self, device):
         if isinstance(device, Instrument):

@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Any, Dict, List, TypeVar, Union
+from typing import Any, Dict, List, Tuple, TypeVar, TYPE_CHECKING, Union
 
 import numpy as np
 from qat.purr.compiler.devices import (
@@ -24,6 +26,10 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 
+if TYPE_CHECKING:
+    from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
+    from qat.purr.compiler.execution import InstructionExecutionEngine
+
 AnyEngine = TypeVar("AnyEngine")
 AnyBuilder = TypeVar("AnyBuilder")
 
@@ -34,33 +40,23 @@ class HardwareModel:
     should be used to build circuits/pulses for its particular back-end.
     """
 
-    engine_types: List[AnyEngine]
-    builder_types: List[AnyBuilder]
-
-    def __init__(
-        self,
-        shot_limit=-1,
-        engine_types: List[AnyEngine] = None,
-        builder_types: List[AnyBuilder] = None,
-    ):
+    def __init__(self, shot_limit=-1):
         super().__init__()
         self.repeat_limit = shot_limit
-        if engine_types is None:
-            from qat.purr.backends.echo import EchoEngine
 
-            engine_types = [EchoEngine]
-        self.engine_types = engine_types
-        if builder_types is None:
-            from qat.purr.compiler.builders import QuantumInstructionBuilder
+    def create_engine(self) -> InstructionExecutionEngine:
+        ...
 
-            builder_types = [QuantumInstructionBuilder]
-        self.builder_types = builder_types
+    def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
+        if existing_engine is None:
+            existing_engine = self.create_engine()
 
-    def get_engine(self):
-        return self.engine_types[0] if len(self.engine_types) > 0 else None
+        from qat.purr.compiler.runtime import QuantumRuntime
 
-    def get_builder(self):
-        return self.builder_types[0] if len(self.engine_types) > 0 else None
+        return QuantumRuntime(existing_engine)
+
+    def create_builder(self) -> InstructionBuilder:
+        ...
 
 
 class QuantumHardwareModel(HardwareModel, Calibratable):
@@ -75,8 +71,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         acquire_mode=None,
         repeat_count=1000,
         repetition_period=100e-6,
-        engine_types: List[AnyEngine] = None,
-        builder_types: List[AnyBuilder] = None,
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -92,9 +86,29 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         # Construct last due to us overriding calibratables fields with properties.
         super().__init__(
             shot_limit=shot_limit,
-            engine_types=engine_types,
-            builder_types=builder_types,
         )
+
+    def create_engine(self) -> InstructionExecutionEngine:
+        from qat.purr.backends.echo import EchoEngine
+
+        return EchoEngine(self)
+
+    def create_builder(self) -> "QuantumInstructionBuilder":
+        from qat.purr.compiler.builders import QuantumInstructionBuilder
+
+        return QuantumInstructionBuilder(self)
+
+    def resolve_qb_pulse_channel(
+        self, chanbit: Union[Qubit, PulseChannel]
+    ) -> Tuple[Qubit, PulseChannel]:
+        if isinstance(chanbit, Qubit):
+            return chanbit, chanbit.get_default_pulse_channel()
+        else:
+            for qubit in self.qubits:
+                for channel in qubit.pulse_channels.values():
+                    if chanbit == channel:
+                        return qubit, chanbit
+        raise ValueError(f"Cannot resolve {chanbit}")
 
     @property
     def qubits(self):

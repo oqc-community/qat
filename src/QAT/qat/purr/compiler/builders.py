@@ -3,6 +3,7 @@
 import itertools
 import math
 from collections import defaultdict
+from enum import Enum, auto
 from typing import List, Set, Union
 
 import numpy as np
@@ -43,6 +44,12 @@ from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.serializer import json_dumps, json_loads
 
 log = get_default_logger()
+
+
+class Axis(Enum):
+    X = auto()
+    Y = auto()
+    Z = auto()
 
 
 class InstructionBuilder:
