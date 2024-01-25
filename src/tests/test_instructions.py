@@ -138,6 +138,31 @@ class TestSweep:
         assert(hw.get_qubit(0).get_drive_channel().scale == 5.0)
 
 
+class TestInstructionExecution:
+    @pytest.mark.skip("Needs fixing post processing and down-conversion issues.")
+    def test_measure_instructions(hw):
+        hw = get_default_echo_hardware(3)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit) # triggers a KeyError
+            .measure_mean_signal(qubit)
+            .measure_single_shot_z(qubit)
+            .measure_scope_mode(qubit)
+            .measure_single_shot_binned(qubit)
+            .measure_single_shot_signal(qubit)
+        )
+        engine = EchoEngine(hw)
+        results = engine.execute(builder.instructions)
+        assert results is not None
+
+
 class TestInstructionSerialisation:
     def test_basic_gate(self):
         hw = get_default_echo_hardware(4)
