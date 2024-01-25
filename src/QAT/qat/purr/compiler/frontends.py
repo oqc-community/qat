@@ -4,6 +4,7 @@ import abc
 import os
 import tempfile
 from enum import Enum
+from typing import Tuple
 
 import regex
 from qat.purr.backends.calibrations.remote import find_calibration
@@ -65,7 +66,7 @@ class LanguageFrontend(abc.ABC):
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> InstructionBuilder:
+    ) -> Tuple[InstructionBuilder, CompilationMetrics]:
         ...
 
     @abc.abstractmethod

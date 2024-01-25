@@ -29,7 +29,15 @@ class Instrument(Calibratable):
         self.is_connected = True
 
     def close(self):
-        pass
+        if self.driver is not None:
+            try:
+                self.driver.close()
+                self.driver = None
+                self.is_connected = False
+            except BaseException as e:
+                log.warning(
+                    f'Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}'
+                )
 
     def __getstate__(self) -> Dict:
         results = super(Instrument, self).__getstate__()
