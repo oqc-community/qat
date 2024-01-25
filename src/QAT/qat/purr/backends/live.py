@@ -205,6 +205,10 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         for baseband in self.model.basebands.values():
             if isinstance(baseband, LivePhysicalBaseband):
                 baseband.connect_to_instrument()
+        for physical_channel in self.model.physical_channels:
+            if isinstance(physical_channel, ControlHardwareChannel):
+                for dc_bias_ch in physical_channel.dcbiaschannel_pair.values():
+                    dc_bias_ch.connect_to_instrument()
 
     def shutdown(self):
         for instrument in self.model.instruments.values():
