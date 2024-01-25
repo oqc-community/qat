@@ -36,7 +36,6 @@ qiskit-ignis = "~=0.7"
 qiskit-aer = "^0.13.0"
 scipy = "^1.8.0"
 pyqir = { version = "^0.8.0a1", allow-prereleases = true }
-jinja2 = "3.0.3"
 lark = "^1.1.2"
 regex = "^2022.6.2"
 jsonpickle = "^2.2.0"
