@@ -22,19 +22,46 @@ class Instrument(Calibratable):
         super().__init__()
         self.id = id_ if id_ else address
         self.address = address
-        self.driver = None
+        self._driver = None
         self.is_connected = False
 
     def connect(self):
         self.is_connected = True
 
     def close(self):
-        pass
+        self.disconnect()
+
+    def disconnect(self):
+        if self.driver is not None:
+            try:
+                self.driver.close()
+                self.driver = None
+                self.is_connected = False
+            except BaseException as e:
+                log.warning(
+                    f'Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}'
+                )
+
+    @property
+    def driver(self):
+        return self._driver
+
+    @driver.setter
+    def driver(self, obj):
+        # Checks if there is a driver already before allociating the new driver
+        if self._driver is not None:
+            self.disconnect()
+        self._driver = obj
 
     def __getstate__(self) -> Dict:
         results = super(Instrument, self).__getstate__()
-        results["driver"] = None
+        results["_driver"] = None
         return results
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._driver = None
+        self.is_connected = False
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, address={self.address})"
