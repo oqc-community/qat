@@ -25,6 +25,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
+    CustomPulse,
     Delay,
     DeviceUpdate,
     FrequencyShift,
@@ -42,7 +43,8 @@ from qat.purr.compiler.instructions import (
     Synchronize,
     Variable,
     Waveform,
-    is_generated_name, QuantumInstruction,
+    is_generated_name,
+    QuantumInstruction,
 )
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
@@ -565,8 +567,14 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         )
         half_sample = isinstance(pulse_channel, MeasureChannel)
         pulse = evaluate_shape(position.instruction, t, phase, half_sample)
-        if not position.instruction.ignore_channel_scale:
-            pulse *= pulse_channel.scale
+
+        scale = pulse_channel.scale
+        if (
+            isinstance(position.instruction, (Pulse, CustomPulse))
+            and position.instruction.ignore_channel_scale
+        ):
+            scale = 1
+        pulse *= scale
         pulse += pulse_channel.bias
 
         if do_upconvert:

@@ -1344,44 +1344,49 @@ class Qasm3Parser(Interpreter, AbstractQASMParser):
             frequency=_empty,
             phase=_empty,
             square_width=_empty,
+            drag=_empty,
         ):
             if width is not _empty and not isinstance(width, float):
-                raise ValueError(
+                raise TypeError(
                     f"Width '{str(width)}' used in {intrinsic_name} is not a float."
                 )
+            if drag is not _empty and not isinstance(drag, float):
+                raise TypeError(
+                    f"Drag '{str(drag)}' used in {intrinsic_name} is not a float."
+                )
             if amp is not _empty and not isinstance(amp, Number):
-                raise ValueError(
+                raise TypeError(
                     f"Amp '{str(amp)}' used in {intrinsic_name} is not a float."
                 )
             if beta is not _empty and not isinstance(beta, float):
-                raise ValueError(
+                raise TypeError(
                     f"Beta '{str(beta)}' used in {intrinsic_name} is not a float."
                 )
             if zero_at_edges is not _empty and not isinstance(zero_at_edges, bool):
-                raise ValueError(
+                raise TypeError(
                     f"Zero at edges '{str(zero_at_edges)}' used in {intrinsic_name} "
                     "is not a bool."
                 )
             if rise is not _empty and not isinstance(rise, float):
-                raise ValueError(
+                raise TypeError(
                     f"Rise '{str(rise)}' used in {intrinsic_name} is not a float."
                 )
             if std_dev is not _empty and not isinstance(std_dev, (float, int)):
-                raise ValueError(
+                raise TypeError(
                     f"Standard deviation '{str(std_dev)}' used in {intrinsic_name} "
                     "is not a float."
                 )
             if frequency is not _empty and not isinstance(frequency, float):
-                raise ValueError(
+                raise TypeError(
                     f"Frequency '{str(frequency)}' used in {intrinsic_name} "
                     "is not a float."
                 )
             if phase is not _empty and not isinstance(phase, float):
-                raise ValueError(
+                raise TypeError(
                     f"Phase '{str(phase)}' used in {intrinsic_name} is not a float."
                 )
             if square_width is not _empty and not isinstance(square_width, float):
-                raise ValueError(
+                raise TypeError(
                     f"Square width '{str(square_width)}' used in {intrinsic_name} "
                     "is not a float."
                 )
@@ -1544,6 +1549,32 @@ class Qasm3Parser(Interpreter, AbstractQASMParser):
                 width=width,
                 frequency=frequency,
                 phase=phase,
+            )
+
+        elif intrinsic_name == 'gaussian_rise':
+            amp, width, rise, drag, phase = _validate_arg_length(tree.children[4], 5)
+            _validate_waveform_args(width=width, rise=rise, amp=amp, drag=drag, phase=phase)
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN,
+                amp=amp,
+                width=width,
+                rise=rise,
+                drag=drag,
+                phase=phase
+            )
+
+        elif intrinsic_name == 'soft_square_rise':
+            amp, width, rise, drag, phase = _validate_arg_length(tree.children[4], 5)
+            _validate_waveform_args(width=width, rise=rise, amp=amp, drag=drag, phase=phase)
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.SOFT_SQUARE,
+                amp=amp,
+                width=width,
+                rise=rise,
+                drag=drag,
+                phase=phase
             )
 
         # Intrinsic waveform shapes
