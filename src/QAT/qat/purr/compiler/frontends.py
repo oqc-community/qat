@@ -75,7 +75,7 @@ class QIRFrontend(LanguageFrontend):
 
     def parse_and_execute(
         self,
-        path_or_str: str,
+        path_or_str: Union[str, bytes],
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
     ):

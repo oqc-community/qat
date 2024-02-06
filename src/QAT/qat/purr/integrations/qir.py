@@ -10,22 +10,18 @@ from qat.purr.compiler.instructions import Variable
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logging_utils import log_duration
 
-qir_available = True
-try:
-    from pyqir import (
-        Call,
-        Constant,
-        Context,
-        FloatConstant,
-        IntConstant,
-        Module,
-        extract_byte_string,
-        is_entry_point,
-        qubit_id,
-        result_id,
-    )
-except ImportError:
-    qir_available = False
+from pyqir import (
+    Call,
+    Constant,
+    Context,
+    FloatConstant,
+    IntConstant,
+    Module,
+    extract_byte_string,
+    is_entry_point,
+    qubit_id,
+    result_id,
+)
 
 
 class QIRParser:
@@ -184,9 +180,6 @@ class QIRParser:
                     self.result_variables.append((Variable(str(res)), label))
 
     def parse(self, qir_file: str):
-        if not qir_available:
-            raise RuntimeError('QIR parser unavailable.')
-
         with log_duration("QIR parsing completed, took {} seconds."):
             if qir_file.endswith(".bc"):
                 with open(qir_file, "rb") as f:
