@@ -178,9 +178,9 @@ class QIRParser:
                     throw_on_invalid_args(len(args), 2)
                     res = result_id(args[0])
                     label_ptr = args[1]
-                    label = "" if label_ptr.is_null else extract_byte_string(
-                        label_ptr
-                    ).decode("utf-8").rstrip("\x00")
+                    label = ""
+                    if (not label_ptr.is_null) and (byte_string := extract_byte_string(label_ptr)):
+                        label = byte_string.decode("utf-8").rstrip("\x00")
                     self.result_variables.append((Variable(str(res)), label))
 
     def parse(self, qir_file: str):

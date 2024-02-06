@@ -112,8 +112,12 @@ class QIRFrontend(LanguageFrontend):
         if os.path.exists(path_or_str):
             return self._parse_from_file(path_or_str, hardware, compiler_config)
 
-        with tempfile.NamedTemporaryFile(suffix=".ll", delete=False) as fp:
-            fp.write(path_or_str.encode())
+        suffix = ".bc" if isinstance(path_or_str, bytes) else ".ll"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
+            if suffix == ".ll":
+                fp.write(path_or_str.encode())
+            else:
+                fp.write(path_or_str)
             fp.close()
             try:
                 return self._parse_from_file(fp.name, hardware, compiler_config)
@@ -168,7 +172,10 @@ class QASMFrontend(LanguageFrontend):
             return quantum_builder, metrics
 
 
-def fetch_frontend(path_or_str: str) -> LanguageFrontend:
+def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
+    if isinstance(path_or_str, bytes) and path_or_str.startswith(b"BC"):
+        return QIRFrontend()
+
     if path_regex.match(path_or_str) is not None:
         if not os.path.exists(path_or_str):
             raise ValueError(f"Path {path_or_str} does not exist.")
@@ -187,5 +194,5 @@ def fetch_frontend(path_or_str: str) -> LanguageFrontend:
             return QASMFrontend()
         if results.captures(3):
             return QIRFrontend()
-    else:
-        raise ValueError("Cannot establish a LanguageFrontend based on contents")
+
+    raise ValueError("Cannot establish a LanguageFrontend based on contents")

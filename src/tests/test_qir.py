@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
+import base64
 from os.path import abspath, dirname, join
 from unittest import mock
 
@@ -116,6 +117,16 @@ class TestQIR:
             _get_contents("generator-bell.ll"), get_default_echo_hardware(4), config
         )
         assert results == {"00": 1000}
+
+    def test_common_entrypoint_bitcode(self):
+        config = CompilerConfig()
+        config.results_format.binary_count()
+        program = _get_contents("base64_bitcode_ghz")
+        program = base64.b64decode(program)
+        results = execute(
+            program, get_default_echo_hardware(4), config
+        )
+        assert results == {'0': 1000}
 
     def test_invalid_QIR(self):
         config = CompilerConfig()

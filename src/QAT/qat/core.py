@@ -18,6 +18,9 @@ from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
+# Credible input are str (contents or file path) or pre-build instruction builder
+QATInput = Union[str, bytes, InstructionBuilder]
+
 
 def _default_arguments(hardware: QuantumHardwareModel, config: CompilerConfig):
     """Centralized place for config/hardware defaulting for various generalized execution pathways."""
@@ -25,7 +28,7 @@ def _default_arguments(hardware: QuantumHardwareModel, config: CompilerConfig):
 
 
 def execute(
-    qat_input: Union[str, InstructionBuilder],
+    qat_input: QATInput,
     hardware: QuantumHardwareModel = None,
     compiler_config: CompilerConfig = None,
 ):
@@ -35,13 +38,13 @@ def execute(
 
 
 def execute_with_metrics(
-    incoming: Union[str, InstructionBuilder],
+    incoming: QATInput,
     hardware: QuantumHardwareModel = None,
     config: CompilerConfig = None,
 ):
     hardware, config = _default_arguments(hardware, config)
     """ Execute file path or code blob. """
-    if isinstance(incoming, str):
+    if isinstance(incoming, (str, bytes)):
         frontend: LanguageFrontend = fetch_frontend(incoming)
         return _parse_and_execute(frontend, incoming, hardware, config)
     elif isinstance(incoming, InstructionBuilder):
@@ -53,13 +56,13 @@ def execute_with_metrics(
     raise ValueError(f"No compiler support for inputs of type {str(type(incoming))}")
 
 
-def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig = None):
+def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig=None):
     results, _ = execute_qir_with_metrics(qir_file, hardware, compiler_config)
     return results
 
 
 def execute_qir_with_metrics(
-    qir_file: str, hardware=None, compiler_config: CompilerConfig = None
+    qir_file: str, hardware=None, compiler_config: CompilerConfig=None
 ):
     return _parse_and_execute(QIRFrontend(), qir_file, hardware, compiler_config)
 
