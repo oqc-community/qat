@@ -7,15 +7,16 @@ from unittest import mock
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.backends.realtime_chip_simulator import qutip_available
+from qat.purr.backends.realtime_chip_simulator import (
+    get_default_RTCS_hardware,
+    qutip_available,
+)
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
+from qat.purr.integrations.qir import QIRParser
 from qat import execute, execute_qir
 
 from .qasm_utils import TestFileType, get_test_file_path
-
-
-pytestmark = pytest.mark.skip("Hybrid runtime currently unavailable.")
 
 
 def _get_qir_path(file_name):
@@ -59,7 +60,7 @@ class TestQIR:
             get_default_echo_hardware(6),
         )
 
-        assert results.get("r00000") == [0]
+        assert results.get("r00000")["0"] == 1000
 
     @pytest.mark.skip("Needs full runtime.")
     def test_bell_measure_bitcode(self):
@@ -209,7 +210,7 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("generator-bell.ll"), compiler_config=config
+            _get_qir_path("generator-bell.ll"), get_default_RTCS_hardware(), compiler_config=config
         )
         assert len(results) == 4
         assert results["00"] > 1
@@ -224,6 +225,6 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("out_of_order_measure.ll"), compiler_config=config
+            _get_qir_path("out_of_order_measure.ll"), get_default_RTCS_hardware(), compiler_config=config
         )
         assert len(results) == 4
