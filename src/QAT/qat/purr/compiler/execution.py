@@ -250,7 +250,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: List[Instruction] = []
         for instruction in instructions:
-            if isinstance(instruction, PhaseShift):
+            if isinstance(instruction, PhaseShift) and isinstance(instruction.phase, Number):
                 if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
                     accum_phaseshift.phase += instruction.phase
                 else:
