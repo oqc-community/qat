@@ -480,6 +480,23 @@ class TestQASM3:
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
 
+    def test_execute_different_qat_input_types(self):
+        hw = get_default_echo_hardware(5)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+
+        with pytest.raises(TypeError):
+            execute_qasm(qat_input=builder.instructions, hardware=hw)
+
 
 class TestExecutionFrontend:
     def test_invalid_paths(self):
@@ -852,6 +869,23 @@ class TestExecutionFrontend:
         parser = Qasm2Parser()
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
+
+    def test_execute_different_qat_input_types(self):
+        hw = get_default_echo_hardware(5)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+
+        with pytest.raises(TypeError):
+            execute_qasm(qat_input=builder.instructions, hardware=hw)
 
 
 class TestParsing:
