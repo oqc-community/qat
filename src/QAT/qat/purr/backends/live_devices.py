@@ -74,10 +74,11 @@ class ControlHardwareChannel(PhysicalChannel):
     derived) object should contain hardware specific information.
     """
 
-    def __init__(self, id_, hardware_id, dcbiaschannel_pair, *args, **kwargs):
+    def __init__(self, id_, hardware_id, dcbiaschannel_pair, *args, switch_ch=None, **kwargs):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
         self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
+        self.switch_ch: str = switch_ch
 
 
 class ControlHardware(Instrument):
