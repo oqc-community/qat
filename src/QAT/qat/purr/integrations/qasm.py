@@ -234,26 +234,25 @@ class AbstractParser:
         builder.ECR(qubits[0], qubits[1])
 
     def _get_qreg_index_range(self, reg_length, context, builder):
-        next_free = (
-            max(
-                [-1]
-                + [
-                    qubit.index
-                    for qubit_reg in context.registers.quantum.values()
-                    for qubit in qubit_reg.qubits
-                ]
-            )
-            + 1
+        next_free = 0
+        available_indices = [qubit.index for qubit in builder.model.qubits]
+
+        max_used = (
+                max(
+                    [-1]
+                    + [
+                        qubit.index
+                        for qubit_reg in context.registers.quantum.values()
+                        for qubit in qubit_reg.qubits
+                    ]
+                )
         )
-        index_range = [next_free + val for val in range(reg_length)]
-        invalid_qubits = [
-            ind for ind in index_range if not builder.model.has_qubit(ind)
-        ]
-        if any(invalid_qubits):
+        if max_used > -1:
+           next_free = available_indices.index(max_used) + 1
+        index_range = available_indices[next_free:next_free + reg_length]
+        if len(index_range) < reg_length:
             raise ValueError(
-                "Attempted to allocate qubits at index(es) "
-                f"{', '.join(str(index) for index in invalid_qubits)} "
-                "which aren't available."
+                "Attempted to allocate more qubits than available."
             )
 
         return index_range
@@ -1170,10 +1169,9 @@ class Qasm3Parser(Interpreter, AbstractQASMParser):
 
                 if isinstance(registers, QubitRegister):
                     reg_index = self.transform_to_value(node.children[1])
-                    return next(
-                        (val for val in registers.qubits if val.index == reg_index),
-                        None,
-                    )
+                    if len(qubits:= registers.qubits) > reg_index:
+                        return qubits[reg_index]
+                    return None
 
             if data == "additive_expression":
                 return self.transform_to_value(
