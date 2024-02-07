@@ -18,9 +18,11 @@ from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
+    ChannelType,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
+    FreqShiftPulseChannel,
     PulseShapeType,
     QubitCoupling,
     add_cross_resonance,
@@ -433,3 +435,55 @@ class TestBaseQuantum:
             .measure_scope_mode(qubit)
         )  # yapf: disable
         assert nb_points == execute_instructions(engine, builder)[0].shape[0]
+
+    def setup_frequency_shift(self, hardware, freq_shift_qubits=[]):
+        builder = get_builder(hardware)
+
+        for qid in freq_shift_qubits:
+            qubit = hardware.get_qubit(qid)
+            freq_channel = qubit.create_pulse_channel(channel_type=ChannelType.freq_shift,
+                                       frequency=8.5e9,
+                                       scale=1.0,
+                                       amp=1.0,
+                                       id_='freq_shift',
+                                      )
+            hardware.add_pulse_channel(freq_channel,)
+
+        for qubit in hardware.qubits:
+            builder.pulse(
+                qubit.get_drive_channel(), PulseShapeType.SQUARE, width=1e-6, amp=1, ignore_channel_scale=True
+            )
+
+        return builder
+
+    def get_qubit_buffers(self, hw, engine, ids):
+        if not isinstance(ids, list):
+            ids = [ids]
+        return [engine.buffers[0][hw.get_qubit(_id).physical_channel.id] for _id in ids]
+
+    def test_no_freq_shift(self):
+        hardware = get_default_echo_hardware(2)
+        engine = get_test_execution_engine(hardware)
+
+        builder = self.setup_frequency_shift(hardware)
+
+        execute_instructions(engine, builder)
+        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
+        assert len(qubit1_buffer) > 0
+        assert len(qubit2_buffer) > 0
+        assert np.isclose(qubit1_buffer, 1+0j).all()
+        assert np.isclose(qubit2_buffer, 1+0j).all()
+
+    def test_freq_shift(self):
+        hardware = get_default_echo_hardware(2)
+        engine = get_test_execution_engine(hardware)
+
+        builder = self.setup_frequency_shift(hardware, freq_shift_qubits=[0])
+
+        execute_instructions(engine, builder)
+        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
+
+        assert len(qubit1_buffer) > 0
+        assert len(qubit2_buffer) > 0
+        assert np.isclose([abs(val) for val in qubit1_buffer], 2).all()
+        assert np.isclose([abs(val) for val in qubit2_buffer], 1).all()

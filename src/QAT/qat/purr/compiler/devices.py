@@ -102,6 +102,7 @@ class ChannelType(Enum):
     cross_resonance = auto()
     cross_resonance_cancellation = auto()
     acquire = auto()
+    freq_shift = auto()
 
     def __repr__(self):
         return self.name
@@ -461,6 +462,8 @@ class PulseChannel(QuantumComponent, Calibratable):
             creation_class = CrossResonanceDriveChannel
         elif channel_type == ChannelType.cross_resonance_cancellation:
             creation_class = CrossResonanceCancellationDriveChannel
+        elif channel_type == ChannelType.freq_shift:
+            creation_class = FreqShiftPulseChannel
         else:
             creation_class = PulseChannel
 
@@ -595,6 +598,24 @@ class SecondStateDriveChannel(DriveChannel):
     """
 
 
+class FreqShiftPulseChannel(PulseChannel):
+    def __init__(
+        self,
+        id_: str,
+        physical_channel: PhysicalChannel,
+        frequency=0.0,
+        bias=0.0 + 0.0j,
+        scale=1.0 + 0.0j,
+        amp=0.0,
+        active: bool = True,
+        fixed_if: bool = False,
+        **kwargs
+    ):
+        super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
+        self.amp: float = amp
+        self.active: bool = active
+
+
 class QubitCoupling(Calibratable):
     def __init__(self, direction, quality=1):
         """
@@ -636,6 +657,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
         fixed_if: bool = False,
         auxiliary_devices: List[QuantumDevice] = None,
         id_: str = None,
+        **kwargs,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
@@ -643,15 +665,17 @@ class QuantumDevice(QuantumComponent, Calibratable):
         if id_ is None:
             id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
 
+
         pulse_channel = PulseChannel.build(
             id_,
             self.physical_channel,
-            frequency,
-            bias,
-            scale,
-            fixed_if,
+            frequency=frequency,
+            bias=bias,
+            scale=scale,
+            fixed_if=fixed_if,
             channel_type=channel_type,
             related_devices=[self] + auxiliary_devices,
+            **kwargs,
         )
 
         if id_ in self.pulse_channels:
