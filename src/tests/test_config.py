@@ -22,7 +22,7 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.devices import QuantumComponent
 from .qasm_utils import get_test_file_path, TestFileType, get_qasm2
 
-SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
+SUPPORTED_CONFIG_VERSIONS = ["legacy", "v1"]
 
 
 def _get_json_path(file_name):
