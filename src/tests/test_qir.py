@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import base64
+import numpy as np
 from os.path import abspath, dirname, join
 from unittest import mock
 
@@ -261,3 +262,20 @@ class TestQIR:
         parser = QIRParser(hw)
         builder = parser.parse(_get_qir_path(qir_file))
         assert len(builder.instructions) > 0
+
+    def test_execute_different_qat_input_types(self):
+        hw = get_default_echo_hardware(5)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            hw.create_builder()
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+
+        with pytest.raises(TypeError):
+            execute_qir(qat_input=builder.instructions)

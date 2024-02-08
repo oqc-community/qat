@@ -53,7 +53,7 @@ def execute_with_metrics(
         )
         return results, metrics.as_dict()
 
-    raise ValueError(f"No compiler support for inputs of type {str(type(incoming))}")
+    raise TypeError(f"No compiler support for inputs of type {str(type(incoming))}")
 
 
 def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig=None):

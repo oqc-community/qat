@@ -148,7 +148,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         if id_ not in self.quantum_devices:
             raise ValueError(
-                f"Tried to retrieve a qubit ({str(id_)}) that dosen't exist."
+                f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist."
             )
 
         found_qubit = self.quantum_devices.get(id_)

@@ -20,8 +20,9 @@ from qat.purr.compiler.instructions import (
     Pulse,
     Sweep,
     SweepValue,
+    Variable,
 )
-from qat.purr.compiler.runtime import get_builder
+from qat.purr.compiler.runtime import execute_instructions, get_builder
 
 
 class TestInstruction:
@@ -105,6 +106,24 @@ class TestInstructionExecution:
         engine = EchoEngine(hw)
         results = engine.execute(builder.instructions)
         assert results is not None
+
+
+class TestSweep:
+    def test_sweep_runs(self):
+        hw = get_default_echo_hardware(2)
+        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
+                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable')))
+        execute_instructions(EchoEngine(hw), builder)
+
+    def test_sweep_reverts(self):
+        hw = get_default_echo_hardware(2)
+        hw.get_qubit(0).get_drive_channel().scale = 5.0
+        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
+                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable'))
+                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'sclae', Variable('variable')))
+        with pytest.raises(Exception):
+            execute_instructions(EchoEngine(hw), builder)
+        assert(hw.get_qubit(0).get_drive_channel().scale == 5.0)
 
 
 class TestInstructionSerialisation:

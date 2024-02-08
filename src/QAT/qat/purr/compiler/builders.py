@@ -6,7 +6,6 @@ import math
 from enum import Enum, auto
 from typing import List, Set, Union
 
-import numpy
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit
@@ -279,22 +278,22 @@ class InstructionBuilder:
         raise ValueError("Not available on this hardware model.")
 
     def SX(self, target):
-        return self.X(target, numpy.pi / 2)
+        return self.X(target, np.pi / 2)
 
     def SXdg(self, target):
-        return self.X(target, -(numpy.pi / 2))
+        return self.X(target, -(np.pi / 2))
 
     def S(self, target):
-        return self.Z(target, numpy.pi / 2)
+        return self.Z(target, np.pi / 2)
 
     def Sdg(self, target):
-        return self.Z(target, -(numpy.pi / 2))
+        return self.Z(target, -(np.pi / 2))
 
     def T(self, target):
-        return self.Z(target, numpy.pi / 4)
+        return self.Z(target, np.pi / 4)
 
     def Tdg(self, target):
-        return self.Z(target, -(numpy.pi / 4))
+        return self.Z(target, -(np.pi / 4))
 
     def cR(
         self,

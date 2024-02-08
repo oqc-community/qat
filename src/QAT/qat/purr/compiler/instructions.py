@@ -90,6 +90,31 @@ class QuantumInstruction(Instruction):
         return 0.0
 
 
+def _add_channels(
+    instruction: QuantumInstruction,
+    channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+):
+    """Returns the union of `channels` and `instruction`'s quantum targets"""
+    if channels is None:
+        return instruction.quantum_targets
+
+    if not isinstance(channels, List):
+        channels = [channels]
+
+    unique_targets = set(instruction.quantum_targets)
+    for target in (
+        chan for val in channels
+        for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
+    ):
+        if not isinstance(target, PulseChannel):
+            raise ValueError(
+                f"Attempted to try and add non PulseChannel ({target}) to a sync."
+            )
+        unique_targets.add(target)
+
+    return list(unique_targets)
+
+
 class Repeat(Instruction):
     """
     Global meta-instruction that applies to the entire list of instructions. Repeat
@@ -165,6 +190,7 @@ class Synchronize(QuantumInstruction):
     Tells the QPU to wait for all the related channels to be free before continuing
     execution on any of them.
     """
+    quantum_targets: List[PulseChannel]
 
     def __init__(
         self,
@@ -173,29 +199,16 @@ class Synchronize(QuantumInstruction):
         super().__init__()
         self.add_channels(sync_channels)
 
-    def add_channels(self, sync_channels):
-        if not isinstance(sync_channels, List):
-            sync_channels = [sync_channels]
-
-        for target in [
-            chan
-            for val in sync_channels
-            for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
-        ]:
-            if not isinstance(target, PulseChannel):
-                raise ValueError(
-                    f"Attempted to try and add non PulseChannel ({target}) to a sync."
-                )
-
-            if target not in self.quantum_targets:
-                self.quantum_targets.append(target)
+    def add_channels(
+        self,
+        sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+    ):
+        self.quantum_targets = _add_channels(self, sync_channels)
 
     def __add__(self, other):
-        if isinstance(other, Synchronize):
-            return Synchronize(self.quantum_targets + other.quantum_targets)
-
+        other_targets = other.quantum_targets if isinstance(other, Synchronize) else other
         new_sync = Synchronize(self.quantum_targets)
-        new_sync.add_channels(other)
+        new_sync.add_channels(other_targets)
         return new_sync
 
     def __repr__(self):
@@ -450,28 +463,12 @@ class PhaseReset(QuantumInstruction):
         self,
         reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
     ):
-        if not isinstance(reset_channels, List):
-            reset_channels = [reset_channels]
-
-        for target in [
-            chan
-            for val in reset_channels
-            for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
-        ]:
-            if not isinstance(target, PulseChannel):
-                raise ValueError(
-                    f"Attempted to try and add non PulseChannel ({target}) to a sync."
-                )
-
-            if target not in self.quantum_targets:
-                self.quantum_targets.append(target)
+        self.quantum_targets = _add_channels(self, reset_channels)
 
     def __add__(self, other):
-        if isinstance(other, PhaseReset):
-            return PhaseReset(self.quantum_targets + other.quantum_targets)
-
+        other_targets = other.quantum_targets if isinstance(other, PhaseReset) else other
         new_reset = PhaseReset(self.quantum_targets)
-        new_reset.add_channels(other)
+        new_reset.add_channels(other_targets)
         return new_reset
 
     def __repr__(self):

@@ -113,6 +113,10 @@ class TestQASM3:
         results = execute_qasm(get_qasm3("openpulse_tests/zmap.qasm"), hw)
         assert not isinstance(results, dict)
 
+    def test_frequency(self):
+        hw = get_default_echo_hardware(8)
+        execute_qasm(get_qasm3("openpulse_tests/freq.qasm"), hw)
+
     @pytest.mark.parametrize(
         "arg_count",
         [1, 2, 3],  # 2 includes a generic qubit def, should be separate test
@@ -161,7 +165,6 @@ class TestQASM3:
 
         assert len(v3_instructions.instructions) == len(v2_instructions.instructions)
 
-    @pytest.mark.skip(reason="Need to be able to parse 'dt' correctly.")
     def test_complex_gates(self):
         hw = get_default_echo_hardware(8)
         execute_qasm(get_qasm3("complex_gates_test.qasm"), hw)
@@ -476,6 +479,23 @@ class TestQASM3:
         qasm_string = update_qubit_indices(qasm_string, [q.index for q in hw.qubits])
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
+
+    def test_execute_different_qat_input_types(self):
+        hw = get_default_echo_hardware(5)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+
+        with pytest.raises(TypeError):
+            execute_qasm(qat_input=builder.instructions, hardware=hw)
 
 
 class TestExecutionFrontend:
@@ -849,6 +869,23 @@ class TestExecutionFrontend:
         parser = Qasm2Parser()
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
+
+    def test_execute_different_qat_input_types(self):
+        hw = get_default_echo_hardware(5)
+        qubit = hw.get_qubit(0)
+        phase_shift_1 = 0.2
+        phase_shift_2 = 0.1
+        builder = (
+            get_builder(hw)
+            .phase_shift(qubit, phase_shift_1)
+            .X(qubit, np.pi / 2.0)
+            .phase_shift(qubit, phase_shift_2)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
+        )
+
+        with pytest.raises(TypeError):
+            execute_qasm(qat_input=builder.instructions, hardware=hw)
 
 
 class TestParsing:
