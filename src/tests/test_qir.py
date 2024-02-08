@@ -17,7 +17,8 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
 from qat import execute, execute_qir
 
-from .qasm_utils import TestFileType, get_test_file_path
+from tests.qasm_utils import TestFileType, get_test_file_path
+from tests.utils import get_jagged_echo_hardware
 
 
 def _get_qir_path(file_name):
@@ -239,3 +240,24 @@ class TestQIR:
             _get_qir_path("out_of_order_measure.ll"), get_default_RTCS_hardware(), compiler_config=config
         )
         assert len(results) == 4
+
+    @pytest.mark.parametrize(
+        "qir_file",
+        [
+            "base_profile_ops.ll",
+            "basic_cudaq.ll",
+            "bell_psi_minus.ll",
+            "bell_psi_plus.ll",
+            "bell_theta_minus.ll",
+            "bell_theta_plus.ll",
+            "generator-bell.ll",
+            "hello.bc",
+            "out_of_order_measure.ll",
+            "select.bc",
+        ],
+    )
+    def test_on_jagged_hardware(self, qir_file):
+        hw = get_jagged_echo_hardware(8)
+        parser = QIRParser(hw)
+        builder = parser.parse(_get_qir_path(qir_file))
+        assert len(builder.instructions) > 0

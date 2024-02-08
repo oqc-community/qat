@@ -60,6 +60,7 @@ from .qasm_utils import (
     get_test_file_path,
     parse_and_apply_optimiziations,
 )
+from .utils import get_jagged_echo_hardware, update_qubit_indices
 
 
 class TestQASM3:
@@ -424,6 +425,58 @@ class TestQASM3:
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
+    @pytest.mark.parametrize(
+        "qasm_file",
+        [
+            "basic.qasm",
+            "ghz.qasm",
+        ],
+    )
+    def test_on_jagged_hardware(self, qasm_file):
+        hw = get_jagged_echo_hardware(8)
+        qasm_string = get_qasm3(qasm_file)
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), qasm_string)
+        assert len(result.instructions) > 0
+
+    @pytest.mark.parametrize(
+        "qasm_file",
+        [
+            "named_defcal_arg.qasm",
+            "delay.qasm",
+            "redefine_defcal.qasm",
+            "lark_parsing_test.qasm",
+            "arb_waveform.qasm",
+            "cx_override_test.qasm",
+            "ecr_test.qasm",
+            "openpulse_tests/acquire.qasm",
+            "openpulse_tests/expr_list_defcal_different_arg.qasm",
+            "openpulse_tests/set_frequency.qasm",
+            "openpulse_tests/constant_wf.qasm",
+            "openpulse_tests/detune_gate.qasm",
+            "openpulse_tests/zmap.qasm",
+            "openpulse_tests/expr_list_caldef_1.qasm",
+            "openpulse_tests/expr_list_caldef_2.qasm",
+            "openpulse_tests/expr_list_caldef_3.qasm",
+            "openpulse_tests/waveform_numerical_types.qasm",
+            "openpulse_tests/cross_ressonance.qasm",
+            "openpulse_tests/shift_phase.qasm",
+            "waveform_tests/waveform_test_scale.qasm",
+            "waveform_tests/internal_waveform_tests.qasm",
+            "waveform_tests/waveform_test_phase_shift.qasm",
+            "waveform_tests/waveform_test_sum.qasm",
+        ],
+    )
+    def test_dollar_on_jagged_hardware(self, qasm_file):
+        hw = get_jagged_echo_hardware(8)
+        parser = Qasm3Parser()
+        qasm_string = get_qasm3(qasm_file)
+        with pytest.raises(ValueError):
+            parser.parse(get_builder(hw), qasm_string)
+        qasm_string = update_qubit_indices(qasm_string, [q.index for q in hw.qubits])
+        result = parser.parse(get_builder(hw), qasm_string)
+        assert len(result.instructions) > 0
+
 
 class TestExecutionFrontend:
     def test_invalid_paths(self):
@@ -773,6 +826,29 @@ class TestExecutionFrontend:
         assert results["01"] > 200
         assert results["10"] > 200
         assert results["00"] > 200
+
+    @pytest.mark.parametrize(
+        "qasm_file",
+        [
+            "basic.qasm",
+            "basic_results_formats.qasm",
+            "basic_single_measures.qasm",
+            "ecr_exists.qasm",
+            "ecr.qasm",
+            "invalid_mid_circuit_measure.qasm",
+            "logic_example.qasm",
+            "more_basic.qasm",
+            "parallel_test.qasm",
+            "primitives.qasm",
+            "valid_custom_gate.qasm",
+        ],
+    )
+    def test_on_jagged_hardware(self, qasm_file):
+        hw = get_jagged_echo_hardware(8)
+        qasm_string = get_qasm2(qasm_file)
+        parser = Qasm2Parser()
+        result = parser.parse(get_builder(hw), qasm_string)
+        assert len(result.instructions) > 0
 
 
 class TestParsing:
