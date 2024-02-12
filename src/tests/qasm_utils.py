@@ -44,13 +44,13 @@ def get_qasm2(file_name):
 
 
 def parse_and_apply_optimiziations(
-    qasm_file_name, qubit_count=6, parser=None, opt_config=None
+    qasm_file_name, hardware=None, qubit_count=6, parser=None, opt_config=None
 ) -> InstructionBuilder:
     """
     Helper that builds a basic hardware, applies general optimizations, parses the QASM
     then returns the resultant builder.
     """
-    hardware = get_default_echo_hardware(qubit_count)
+    hardware = hardware or get_default_echo_hardware(qubit_count)
     qasm = get_qasm2(qasm_file_name)
 
     if opt_config is None:

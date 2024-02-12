@@ -35,7 +35,7 @@ from qat.purr.compiler.instructions import (
     ResultsProcessing,
     Return,
     Sweep,
-    Synchronize,
+    Synchronize, FrequencyShift,
 )
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.serializer import json_dumps, json_loads
@@ -275,6 +275,9 @@ class InstructionBuilder:
         raise ValueError("Not available on this hardware model.")
 
     def phase_shift(self, target: PulseChannel, phase):
+        raise ValueError("Not available on this hardware model.")
+
+    def frequency_shift(self, target: PulseChannel, frequency):
         raise ValueError("Not available on this hardware model.")
 
     def SX(self, target):
@@ -706,6 +709,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         _, channel = resolve_qb_pulse_channel(target)
         return self.add(PhaseShift(channel, phase))
+
+    def frequency_shift(self, target: PulseChannel, frequency):
+        if frequency == 0:
+            return self
+
+        _, channel = resolve_qb_pulse_channel(target)
+        return self.add(FrequencyShift(channel, frequency))
 
     def cnot(self, controlled_qubit: Qubit, target_qubit: Qubit):
         if isinstance(controlled_qubit, List):

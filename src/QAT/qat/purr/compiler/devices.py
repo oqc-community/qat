@@ -49,6 +49,7 @@ def build_qubit(
     physical_channel,
     drive_freq,
     second_state_freq=None,
+    channel_scale=(1.0e-8 + 0.0j),
     measure_amp: float = 1.0,
     fixed_drive_if=False,
     qubit_id=None,
@@ -63,12 +64,12 @@ def build_qubit(
     qubit.create_pulse_channel(
         ChannelType.drive,
         frequency=drive_freq,
-        scale=(1.0e-8 + 0.0j),
+        scale=channel_scale,
         fixed_if=fixed_drive_if,
     )
 
     qubit.create_pulse_channel(
-        ChannelType.second_state, frequency=second_state_freq, scale=(1.0e-8 + 0.0j)
+        ChannelType.second_state, frequency=second_state_freq, scale=channel_scale
     )
 
     return qubit
@@ -108,6 +109,7 @@ class ChannelType(Enum):
     cross_resonance_cancellation = auto()
     acquire = auto()
     freq_shift = auto()
+    macq = auto()
 
     def __repr__(self):
         return self.name
@@ -316,7 +318,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         id_: str,
         sample_time: float,
         baseband: PhysicalBaseband,
-        block_size: Optional[int] = None,
+        block_size: Optional[int] = 1,
         phase_offset: float = 0.0,
         imbalance: float = 1.0,
         acquire_allowed: bool = False,
@@ -330,7 +332,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         self.baseband: PhysicalBaseband = baseband
         self.baseband.related_devices.append(self)
 
-        self.block_size: int = block_size or 1
+        self.block_size: int = block_size
         self.phase_offset: float = phase_offset
         self.imbalance: float = imbalance
 
@@ -870,6 +872,9 @@ class PulseShapeType(Enum):
     COS = "cos"
 
     def __repr__(self):
+        return self.value
+
+    def __str__(self):
         return self.value
 
 
