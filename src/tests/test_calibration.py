@@ -5,8 +5,11 @@ import os
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.backends.qblox import QbloxControlHardware
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from src.tests.test_qblox_backend import setup_qblox_hardware_model
 
 
 class TestCalibrations:
@@ -34,17 +37,16 @@ class TestCalibrations:
             drive.frequency = drive.frequency + 100
             qubit.is_calibrated = True
 
-    def test_custom_calibration(self):
-        echo: QuantumHardwareModel = get_default_echo_hardware()
-        echo.is_calibrated = False
-        before = Calibratable.load_calibration(echo.get_calibration())
-        self.custom_calibration_process(echo)
-        after = Calibratable.load_calibration(echo.get_calibration())
-        self.custom_calibration_process(echo)
-        after_again = echo
+    def run_calibration_tests(self, hardware_model):
+        hardware_model.is_calibrated = False
+        before = Calibratable.load_calibration(hardware_model.get_calibration())
+        self.custom_calibration_process(hardware_model)
+        after = Calibratable.load_calibration(hardware_model.get_calibration())
+        self.custom_calibration_process(hardware_model)
+        after_again = hardware_model
 
-        qubit = echo.get_qubit(0)
-        twobit = echo.get_qubit(1)
+        qubit = hardware_model.get_qubit(0)
+        twobit = hardware_model.get_qubit(1)
 
         before_frequency = self._get_qb_freq(before, 1)
         after_frequency = self._get_qb_freq(after, 1)
@@ -53,6 +55,16 @@ class TestCalibrations:
         assert self._get_qb_freq(after) == self._get_qb_freq(after_again)
         assert not qubit.is_calibrated
         assert twobit.is_calibrated
+
+    def test_echo_calibration(self):
+        echo_model: QuantumHardwareModel = get_default_echo_hardware()
+        self.run_calibration_tests(echo_model)
+
+    def test_qblox_calibration(self):
+        instrument = QbloxControlHardware(name="live_cluster_mm")
+        qblox_model = LiveHardwareModel()
+        setup_qblox_hardware_model(qblox_model, instrument)
+        self.run_calibration_tests(qblox_model)
 
 
 class TestCalibrationSavingAndLoading:

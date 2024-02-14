@@ -5,6 +5,8 @@ from enum import Enum, auto
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
+
+from qat.purr.backends.qblox import SequenceEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     ChannelType,
@@ -186,4 +188,67 @@ class EchoEngine(QuantumExecutionEngine):
                     )
                     sweep_iterator.insert_result_at_sweep_position(var_result, response)
 
+        return results
+
+
+class QbloxEchoHardwareModel(QuantumHardwareModel):
+    def __init__(
+        self,
+        shot_limit=10000,
+        acquire_mode=None,
+        repeat_count=1000,
+        repetition_period=100e-6,
+        control_hardware=None,
+    ):
+        super().__init__(
+            shot_limit=shot_limit,
+            acquire_mode=acquire_mode,
+            repeat_count=repeat_count,
+            repetition_period=repetition_period,
+        )
+        self.control_hardware = control_hardware
+
+
+class QbloxEchoEngine(EchoEngine):
+    def __init__(self, model: QbloxEchoHardwareModel):
+        super().__init__(model)
+        self.model = model
+
+    def startup(self):
+        if self.model.control_hardware is None:
+            raise ValueError(f"Please add a control hardware first!")
+        self.model.control_hardware.connect()
+
+    def shutdown(self):
+        if self.model.control_hardware is None:
+            raise ValueError(f"Please add a control hardware first!")
+        self.model.control_hardware.close()
+
+    def optimize(self, instructions):
+        instructions = super().optimize(instructions)
+        return instructions
+
+    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+        if self.model.control_hardware is None:
+            raise ValueError("Please add a control hardware first!")
+
+        results = {}
+        while not sweep_iterator.is_finished():
+            sweep_iterator.do_sweep(package.instructions)
+            seq_files = SequenceEmitter().emit(package)
+            self.model.control_hardware.set_data(seq_files)
+
+            repetitions = package.repeat.repeat_count
+            repetition_time = package.repeat.repetition_period
+            playback_results = self.model.control_hardware.start_playback(
+                repetitions=repetitions, repetition_time=repetition_time
+            )
+            results.update(playback_results)
+
+        return results
+
+    def _process_assigns(self, results, qfile: "QatFile"):
+        return results
+
+    def _process_results(self, results, qfile: "QatFile"):
         return results

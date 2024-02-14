@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum
+from math import ceil
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
@@ -19,6 +20,11 @@ from qat.purr.utils.serializer import json_dumps, json_loads
 
 if TYPE_CHECKING:
     from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 def _stringify_qubits(qubits):
@@ -699,3 +705,38 @@ class ResultsProcessing(Instruction):
 
     def __repr__(self):
         return f"{self.variable}: {str(self.results_processing.name)}"
+
+
+def calculate_duration(instruction, return_samples: bool = True):
+    """
+    Calculates the duration of the instruction for this particular piece of
+    hardware.
+    """
+    pulse_targets = [
+        pulse
+        for pulse in instruction.quantum_targets
+        if isinstance(pulse, PulseChannel)
+    ]
+    if not any(pulse_targets):
+        return 0
+
+    # TODO: Allow for multiple pulse channel targets.
+    if len(pulse_targets) > 1 and not isinstance(instruction, PhaseReset):
+        log.warning(
+            f"Attempted to calculate duration of {str(instruction)} that has "
+            "multiple target channels. We're arbitrarily using the duration of the "
+            "first channel to calculate instruction duration."
+        )
+
+    pc = pulse_targets[0].physical_channel
+    block_size = pc.block_size
+    block_time = pc.block_time
+
+    # round to remove floating point errors
+    block_number = ceil(round(instruction.duration / block_time, 4))
+    if return_samples:
+        calc_sample = block_number * block_size
+    else:
+        calc_sample = block_number * block_time
+
+    return calc_sample
