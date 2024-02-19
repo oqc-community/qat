@@ -10,9 +10,7 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
 
-@pytest.mark.skipif(
-    not qutip_available, reason="Qutip is not available on this platform"
-)
+@pytest.mark.skipif(not qutip_available, reason="Qutip is not available on this platform")
 class TestBaseQuantumQutip:
     def get_simulator(self):
         hw = get_default_RTCS_hardware()

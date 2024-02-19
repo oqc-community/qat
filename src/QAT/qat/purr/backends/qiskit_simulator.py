@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from typing import List, Union, Dict, Any
+from typing import Any, Dict, List, Union
 
 import numpy as np
 from qat.purr.backends.echo import (
@@ -21,6 +21,7 @@ from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
 log = get_default_logger()
+
 
 def get_default_qiskit_hardware(qubit_count=20, noise_model=None) -> "QiskitHardwareModel":
     model = QiskitHardwareModel(qubit_count, noise_model)

@@ -10,12 +10,12 @@ import toml
 
 parser = argparse.ArgumentParser(
     "Partial Package builder",
-    description="Easily package parts of the source code into a separate distribution."
+    description="Easily package parts of the source code into a separate distribution.",
 )
 parser.add_argument(
     "--toml-file",
     required=True,
-    help="The pyproject.toml file to use for the patial package."
+    help="The pyproject.toml file to use for the patial package.",
 )
 
 
@@ -37,11 +37,9 @@ class PartialPackageBuilder:
                 README = f"README{Path(readme).suffix}"
                 copy2(Path(self.file_dir, readme), Path(tempdir, README))
                 self.toml["tool"]["poetry"]["readme"] = README
-            self.toml["tool"]["poetry"]["version"] = run_cmd([
-                "poetry", "version", "--short"
-            ],
-                                                             capture_output=True,
-                                                             text=True).stdout.rstrip("\n")
+            self.toml["tool"]["poetry"]["version"] = run_cmd(
+                ["poetry", "version", "--short"], capture_output=True, text=True
+            ).stdout.rstrip("\n")
             with open(Path(tempdir, "pyproject.toml"), "w+") as pyproject_file:
                 toml.dump(self.toml, pyproject_file)
             run_cmd(["poetry", "build"], cwd=tempdir)

@@ -37,12 +37,7 @@ from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
 from qat.purr.compiler.config import TketOptimizations
 from qat.purr.compiler.execution import QuantumHardwareModel
-from qat.purr.integrations.qasm import (
-    BitRegister,
-    Qasm2Parser,
-    QasmContext,
-    QubitRegister,
-)
+from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
 from qat.purr.utils.logger import get_default_logger
 from qiskit.qasm.node import Cnot, UniversalUnitary
 from sympy import pi, sympify
@@ -94,9 +89,7 @@ class TketBuilder:
         params = [params] if not isinstance(params, List) else params
         self.circuit.add_gate(target_gate, params, qubits, **conditions)
 
-    def custom_gate(
-        self, gate_def: CustomGateDef, qubits, params=None, conditions=None
-    ):
+    def custom_gate(self, gate_def: CustomGateDef, qubits, params=None, conditions=None):
         conditions = conditions or {}
         params = params or []
         qubits = [qubits] if not isinstance(qubits, List) else qubits
@@ -357,9 +350,7 @@ def get_coupling_subgraphs(couplings):
         subgraph_added_to = None
         for subgraph in subgraphs:
             # check whether coupling joins to subgraph
-            if set(coupling) & {
-                qubit for connection in subgraph for qubit in connection
-            }:
+            if set(coupling) & {qubit for connection in subgraph for qubit in connection}:
                 if subgraph_added_to is None:
                     # add the coupling to the subgraph
                     subgraph.append(coupling)
@@ -462,9 +453,7 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             try:
                 # Tket just throws an exception if the list is none, so skip if that's
                 # the case.
-                default_passes = fetch_default_passes(
-                    architecture, opts, add_delay=False
-                )
+                default_passes = fetch_default_passes(architecture, opts, add_delay=False)
                 if len(default_passes) > 0:
                     SequencePass(default_passes).apply(circ)
             except RuntimeError as e:

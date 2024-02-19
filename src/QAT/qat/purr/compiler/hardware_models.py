@@ -147,9 +147,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             id_ = f"Q{id_}"
 
         if id_ not in self.quantum_devices:
-            raise ValueError(
-                f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist."
-            )
+            raise ValueError(f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist.")
 
         found_qubit = self.quantum_devices.get(id_)
         if not isinstance(found_qubit, Qubit):
@@ -206,9 +204,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_physical_channel(self, *physical_channels: PhysicalChannel):
         for physical_channel in physical_channels:
-            existing_channel = self.physical_channels.get(
-                physical_channel.full_id(), None
-            )
+            existing_channel = self.physical_channels.get(physical_channel.full_id(), None)
             if existing_channel is not None:
                 # If we're the same instance just don't throw.
                 if existing_channel is physical_channel:
@@ -231,9 +227,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
                 if existing_baseband is baseband:
                     continue
 
-                raise KeyError(
-                    f"Baseband with id '{baseband.full_id()}' already exists."
-                )
+                raise KeyError(f"Baseband with id '{baseband.full_id()}' already exists.")
 
             self.basebands[baseband.full_id()] = baseband
 

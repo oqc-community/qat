@@ -18,9 +18,7 @@ def find_calibration(args: "CalibrationArguments"):
             break
 
     if calibration is None:
-        raise ValueError(
-            f"Calibration with an argument of {str(args)} couldn't be found."
-        )
+        raise ValueError(f"Calibration with an argument of {str(args)} couldn't be found.")
 
     return calibration
 

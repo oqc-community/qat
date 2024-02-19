@@ -10,10 +10,7 @@ from qat.purr.compiler.config import (
     MetricsType,
     ResultsFormatting,
 )
-from qat.purr.compiler.execution import (
-    InstructionExecutionEngine,
-    QuantumExecutionEngine,
-)
+from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Repeat
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
@@ -53,9 +50,7 @@ class QuantumExecutableBlock:
 class CalibrationWithArgs(QuantumExecutableBlock):
     """Wrapper for a calibration and argument combination."""
 
-    def __init__(
-        self, calibration: RemoteCalibration, args: CalibrationArguments = None
-    ):
+    def __init__(self, calibration: RemoteCalibration, args: CalibrationArguments = None):
         self.calibration = calibration
         self.args = args or CalibrationArguments()
 

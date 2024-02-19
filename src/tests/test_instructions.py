@@ -72,9 +72,7 @@ class TestInstruction:
             qie.validate(
                 [
                     Pulse(
-                        PulseChannel(
-                            "", PhysicalChannel("", 1, PhysicalBaseband("", 1))
-                        ),
+                        PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
                         PulseShapeType.SQUARE,
                         0,
                     )
@@ -96,7 +94,7 @@ class TestInstructionExecution:
             .X(qubit, np.pi / 2.0)
             .phase_shift(qubit, phase_shift_2)
             .X(qubit, np.pi / 2.0)
-            .measure_mean_z(qubit) # triggers a KeyError
+            .measure_mean_z(qubit)  # triggers a KeyError
             .measure_mean_signal(qubit)
             .measure_single_shot_z(qubit)
             .measure_scope_mode(qubit)
@@ -111,19 +109,31 @@ class TestInstructionExecution:
 class TestSweep:
     def test_sweep_runs(self):
         hw = get_default_echo_hardware(2)
-        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable')))
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("variable", [0.0, 1.0, 2.0]))
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "scale", Variable("variable")
+            )
+        )
         execute_instructions(EchoEngine(hw), builder)
 
     def test_sweep_reverts(self):
         hw = get_default_echo_hardware(2)
         hw.get_qubit(0).get_drive_channel().scale = 5.0
-        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable'))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'sclae', Variable('variable')))
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("variable", [0.0, 1.0, 2.0]))
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "scale", Variable("variable")
+            )
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "sclae", Variable("variable")
+            )
+        )
         with pytest.raises(Exception):
             execute_instructions(EchoEngine(hw), builder)
-        assert(hw.get_qubit(0).get_drive_channel().scale == 5.0)
+        assert hw.get_qubit(0).get_drive_channel().scale == 5.0
 
 
 class TestInstructionSerialisation:

@@ -9,11 +9,11 @@ import pytest
 from pytket.qasm import circuit_from_qasm_str
 from qat.core import execute, execute_qasm
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -25,10 +25,7 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.devices import PulseShapeType, QubitCoupling, Resonator
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend, fetch_frontend
-from qat.purr.compiler.hardware_models import (
-    QuantumHardwareModel,
-    resolve_qb_pulse_channel,
-)
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,
     CrossResonancePulse,
@@ -87,9 +84,7 @@ class TestQASM3:
         hw = get_default_echo_hardware(8)
         comp = CompilerConfig()
         comp.results_format.binary_count()
-        results = execute_qasm(
-            get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp
-        )
+        results = execute_qasm(get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp)
         results = next(iter(results.values()), dict())
         assert len(results) == 1
         assert results["00"] == 1000
@@ -214,9 +209,7 @@ class TestQASM3:
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
-        assert any(
-            isinstance(inst, CrossResonancePulse) for inst in result.instructions
-        )
+        assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
 
     def test_cx_override(self):
         hw = get_default_echo_hardware()
@@ -384,9 +377,7 @@ class TestQASM3:
         "file_name,attribute,test_value",
         (("scale", "scale_factor", 0.42), ("phase_shift", "phase", 0.4 + 0.2j)),
     )
-    def test_waveform_processing_single_waveform(
-        self, file_name, attribute, test_value
-    ):
+    def test_waveform_processing_single_waveform(self, file_name, attribute, test_value):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
@@ -424,7 +415,7 @@ class TestQASM3:
         config = CompilerConfig(
             repeats=10,
             results_format=QuantumResultsFormat(),
-            optimizations=Qasm3Optimizations()
+            optimizations=Qasm3Optimizations(),
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
@@ -925,9 +916,7 @@ class TestParsing:
 
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
-        builder = parse_and_apply_optimiziations(
-            "move_measurements.qasm", qubit_count=12
-        )
+        builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
         assert len(builder.instructions) == 97469
 
     def test_random_n5_d5(self):
@@ -960,9 +949,7 @@ class TestParsing:
 
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
-        assert any(
-            isinstance(inst, CrossResonancePulse) for inst in builder.instructions
-        )
+        assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
         assert len(builder.instructions) == 182
 
     def test_ecr_already_exists(self):

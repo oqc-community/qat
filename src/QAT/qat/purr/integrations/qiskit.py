@@ -80,7 +80,7 @@ class QatBackend(QasmSimulatorPy):
         assembled_data = assemble(
             qobj,
             self,
-            **{key: val for key, val in backend_options.items() if key in options_keys}
+            **{key: val for key, val in backend_options.items() if key in options_keys},
         )
 
         if self.comp_config is None:

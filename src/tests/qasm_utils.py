@@ -18,6 +18,7 @@ class TestFileType(Enum):
     QIR = auto()
     OPENPULSE = auto()
 
+
 def get_test_files_dir(ir_type: TestFileType):
     if ir_type == TestFileType.QASM3:
         return abspath(join(dirname(__file__), "files", "qasm", "qasm3"))

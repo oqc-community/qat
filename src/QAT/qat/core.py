@@ -56,13 +56,13 @@ def execute_with_metrics(
     raise TypeError(f"No compiler support for inputs of type {str(type(incoming))}")
 
 
-def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig=None):
+def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig = None):
     results, _ = execute_qir_with_metrics(qir_file, hardware, compiler_config)
     return results
 
 
 def execute_qir_with_metrics(
-    qir_file: str, hardware=None, compiler_config: CompilerConfig=None
+    qir_file: str, hardware=None, compiler_config: CompilerConfig = None
 ):
     return _parse_and_execute(QIRFrontend(), qir_file, hardware, compiler_config)
 

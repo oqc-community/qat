@@ -77,6 +77,7 @@ class QuantumResultsFormat:
         config = CompilerConfig()
         config.results_format.raw()
     """
+
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
         self.transforms: Optional[
@@ -84,7 +85,7 @@ class QuantumResultsFormat:
         ] = ResultsFormatting.DynamicStructureReturn
 
     def raw(self) -> QuantumResultsFormat:
-        """ Raw QPU output. """
+        """Raw QPU output."""
         self.format = InlineResultsProcessing.Raw
         return self
 
@@ -202,6 +203,7 @@ class MetricsType(Flag):
 
     Default metrics will only have a minute impact on runtime, so are fine to leave enabled.
     """
+
     Empty = auto()
 
     # Returns circuit after optimizations have been run.
@@ -265,9 +267,7 @@ class CompilerConfig:
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
-        self.results_format: QuantumResultsFormat = (
-            results_format or QuantumResultsFormat()
-        )
+        self.results_format: QuantumResultsFormat = results_format or QuantumResultsFormat()
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
@@ -453,7 +453,7 @@ _default_results_format = QuantumResultsFormat()
 
 
 def default_language_options(lang: Languages, config: CompilerConfig):
-    """ Applies default language-specific options to an existing configuration. """
+    """Applies default language-specific options to an existing configuration."""
     if lang == Languages.Qasm2:
         if config.optimizations is None:
             config.optimizations = Qasm2Optimizations()
@@ -494,9 +494,7 @@ def get_serializable_types():
 
     def update_dict(type):
         if issubclass(type, Enum):
-            serializable_types.update(
-                {f"<enum '{type.__module__}.{type.__name__}'>": type}
-            )
+            serializable_types.update({f"<enum '{type.__module__}.{type.__name__}'>": type})
         else:
             serializable_types.update({str(type): type})
 

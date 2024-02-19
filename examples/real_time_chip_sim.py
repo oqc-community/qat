@@ -15,7 +15,11 @@ hw = get_default_RTCS_hardware()
 control_q = hw.get_qubit(0)
 target_q = hw.get_qubit(1)
 cr_channel = control_q.get_cross_resonance_channel(target_q)
-sync_channels = [cr_channel, control_q.get_drive_channel(), target_q.get_drive_channel()]
+sync_channels = [
+    cr_channel,
+    control_q.get_drive_channel(),
+    target_q.get_drive_channel(),
+]
 prep = np.linspace(0.0, np.pi, 2)
 
 runtime = get_runtime(hw)

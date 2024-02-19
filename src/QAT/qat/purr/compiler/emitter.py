@@ -56,9 +56,7 @@ class QatFile:
     def add_meta(self, instruction):
         if isinstance(instruction, Return):
             existing_return = next(
-                iter(
-                    meta for meta in self.meta_instructions if isinstance(meta, Return)
-                ),
+                iter(meta for meta in self.meta_instructions if isinstance(meta, Return)),
                 None,
             )
             if existing_return is not None:
@@ -123,9 +121,7 @@ class InstructionEmitter:
             # Only gather each variable once for the return.
             unique_variables = []
             for var in [
-                acq.output_variable
-                for acq in qatf.instructions
-                if isinstance(acq, Acquire)
+                acq.output_variable for acq in qatf.instructions if isinstance(acq, Acquire)
             ]:
                 if var not in unique_variables:
                     unique_variables.append(var)
@@ -137,9 +133,7 @@ class InstructionEmitter:
         )
         if repeat_inst is None:
             qatf.add_meta(
-                Repeat(
-                    hardware.default_repeat_count, hardware.default_repetition_period
-                )
+                Repeat(hardware.default_repeat_count, hardware.default_repetition_period)
             )
         else:
             if repeat_inst.repeat_count is None:

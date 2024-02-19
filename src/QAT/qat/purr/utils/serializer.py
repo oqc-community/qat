@@ -24,9 +24,7 @@ def json_loads(
     *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
 ):
     kwargs.setdefault("cls", CustomJsonDecoder)
-    return json.loads(
-        *args, serializable_types=serializable_types, model=model, **kwargs
-    )
+    return json.loads(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 def json_dump(*args, serializable_types=None, **kwargs):
@@ -38,9 +36,7 @@ def json_load(
     *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
 ):
     kwargs.setdefault("cls", CustomJsonDecoder)
-    return json.load(
-        *args, serializable_types=serializable_types, model=model, **kwargs
-    )
+    return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 class CustomJsonDecoder(JSONDecoder):
@@ -81,9 +77,7 @@ class CustomJsonDecoder(JSONDecoder):
 
             typ = self.serializable_types.get(obj_type)
             if typ is None:
-                raise ValueError(
-                    f"Invalid type attempted to be serialized: {obj_type}."
-                )
+                raise ValueError(f"Invalid type attempted to be serialized: {obj_type}.")
         else:
             typ = _get_type(obj_type)
 
@@ -97,9 +91,7 @@ class CustomJsonDecoder(JSONDecoder):
                 return typ(**fields)
             elif isinstance(data, dict):
                 new_obj = object.__new__(typ)
-                new_obj.__dict__ = {
-                    key: self.default(value) for key, value in data.items()
-                }
+                new_obj.__dict__ = {key: self.default(value) for key, value in data.items()}
                 return new_obj
             elif isinstance(data, str):
                 return typ(data)
@@ -144,9 +136,7 @@ class CustomJSONEncoder(JSONEncoder):
                 typ_str not in self.serializable_types
                 and type(obj).__module__ != "builtins"
             ):
-                raise ValueError(
-                    f"Invalid type attempted to be serialized: {(type(obj))}."
-                )
+                raise ValueError(f"Invalid type attempted to be serialized: {(type(obj))}.")
 
         try:
             from qat.purr.compiler.devices import QuantumComponent

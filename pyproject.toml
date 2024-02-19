@@ -81,8 +81,12 @@ ignore-pass-after-docstring = true
 
 [tool.isort]
 py_version = 38
-profile = "wemake"
+profile = "black"
 line_length = 92
+
+[tool.black]
+line-length = 92
+target-version = ['py38']
 
 [tool.poetry.scripts]
 build-docs = "poetry_scripts:build_docs"
