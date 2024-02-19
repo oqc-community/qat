@@ -101,10 +101,10 @@ class TestReadoutMitigation:
         )
         for config in config_options:
             if random_cal:
-                assert result["original"] != result[config]
+                assert result["b"] != result[config]
                 assert all([i > 0 for i in result[config].values()])
             else:
-                original = result["original"]["b"]
+                original = result["b"]
                 assert original["0" * qubit_count] == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
