@@ -31,7 +31,7 @@ class ApplyReadoutMitigation:
                 creg, qubit = var.split("_", 1)
                 qubit = int(qubit)
                 qubits.append(qubit)
-                creg_index = re.search('[a-zA-Z0-9]\[(.*)\]', creg).group(1)
+                creg_index = re.search("[a-zA-Z0-9]\[(.*)\]", creg).group(1)
                 mapping[creg_index] = qubit
         return mapping, len(qubits)
 
@@ -74,6 +74,7 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
         }
     }
     """
+
     def generate_mitigated_probabilites(
         self,
         bitstring_value,
@@ -83,19 +84,20 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
         mapping,
         linear_mitigation_mappings,
         result_probability,
-        mitigated_results
+        mitigated_results,
     ):
         other_value = "1" if bitstring_value == "0" else "0"
-        new_sting = "".join([
-            i if index_ != creg_index else other_value for index_,
-            i in enumerate(bitstring)
-        ])
+        new_sting = "".join(
+            [
+                i if index_ != creg_index else other_value
+                for index_, i in enumerate(bitstring)
+            ]
+        )
 
         qubit_number = mapping[str(creg_index)]
-        change_factor = linear_mitigation_mappings[qubit_number][
-            f"{other_value}|{bitstring_value}"] / qubit_count
-        unchange_factor = linear_mitigation_mappings[qubit_number][
-            f"{bitstring_value}|{bitstring_value}"] / qubit_count
+        lin_mit = linear_mitigation_mappings[qubit_number]
+        change_factor = lin_mit[f"{other_value}|{bitstring_value}"] / qubit_count
+        unchange_factor = lin_mit[f"{bitstring_value}|{bitstring_value}"] / qubit_count
 
         mitigated_results[new_sting] += change_factor * result_probability
         mitigated_results[bitstring] += unchange_factor * result_probability
@@ -118,12 +120,12 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
                     mapping,
                     linear_mitigation_mappings,
                     result_probability,
-                    mitigated_results
+                    mitigated_results,
                 )
         return mitigated_results
 
     def __repr__(self):
-        return "[Linear readout mitigation]"
+        return "Linear readout mitigation"
 
 
 class ApplyMatrixReadoutMitigation(ApplyPostProcReadoutMitigation):
@@ -135,13 +137,14 @@ class ApplyMatrixReadoutMitigation(ApplyPostProcReadoutMitigation):
             tmp_bit_string = ["0" for _ in range(output_length)]
             for i, bit in enumerate(bitstring):
                 tmp_bit_string[mapping[str(i)]] = bit
-            output[''.join(tmp_bit_string)] = result
+            output["".join(tmp_bit_string)] = result
         return output
 
     def create_array_from_dict(self, algo_dict, n):
         tmp_array = {
-            bin(i)[2:].zfill(n):
-            algo_dict[bin(i)[2:].zfill(n)] if algo_dict.get(bin(i)[2:].zfill(n)) else 0
+            bin(i)[2:].zfill(n): algo_dict[bin(i)[2:].zfill(n)]
+            if algo_dict.get(bin(i)[2:].zfill(n))
+            else 0
             for i in range(2**n)
         }
         keys = sorted(tmp_array.keys(), key=lambda x: int(x, 2))
@@ -160,7 +163,8 @@ class ApplyMatrixReadoutMitigation(ApplyPostProcReadoutMitigation):
         algo_data_array = self.create_array_from_dict(algo_data, n)
 
         data = np.matmul(
-            model.error_mitigation.readout_mitigation.matrix, np.transpose(algo_data_array)
+            model.error_mitigation.readout_mitigation.matrix,
+            np.transpose(algo_data_array),
         )
         mitigated_data = {bin(i)[2:].zfill(n): data[i] for i in range(2**n)}
         inverted_map = {str(value): int(key) for key, value in mapping.items()}
@@ -168,7 +172,7 @@ class ApplyMatrixReadoutMitigation(ApplyPostProcReadoutMitigation):
         return self.remap_result(mitigated_data, inverted_map, n)
 
     def __repr__(self):
-        return "[Maitrx readout mitigation]"
+        return "Matrix readout mitigation"
 
 
 class ReadoutMitigation(Instruction):

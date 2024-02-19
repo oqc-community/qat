@@ -238,7 +238,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             inst for inst in qfile.meta_instructions
             if isinstance(inst, PostProcessingReadoutMitigation)
         ]
-        if not readout_instructions:
+        if not any(readout_instructions):
             return results
 
         if len(results) > 1:
