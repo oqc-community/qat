@@ -151,9 +151,11 @@ class MeasurementStatistics:
                 probability = (operator * final_state).tr()
                 self.measurement_statistics.append(
                     MeasurementStatistics(
-                        state=operator * final_state * operator.dag() / probability
-                        if probability.real > 0
-                        else empty_state,
+                        state=(
+                            operator * final_state * operator.dag() / probability
+                            if probability.real > 0
+                            else empty_state
+                        ),
                         level=self.level + 1,
                         probability=probability if probability.real > 0 else 0,
                         qubits_measured=qubit_indices,
@@ -200,9 +202,11 @@ class MeasurementStatistics:
                 result_list = result_dict.setdefault(qubit, [])
                 result_list.insert(
                     0,
-                    self.result
-                    if self.result == ControlType.RESET
-                    else int(self.result[i]),
+                    (
+                        self.result
+                        if self.result == ControlType.RESET
+                        else int(self.result[i])
+                    ),
                 )
 
             return result_dict
@@ -819,17 +823,17 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 # state.
                 for i, segment in enumerate(buffer_segment):
                     if segment[0] == ControlType.MEASURE:
-                        lorentzian_responses[buffer_idx][
-                            i
-                        ] = get_resonator_response_signal_segment(
-                            resonator_input=resonator_buffers[buffer_idx][
-                                segment[1] : segment[2]
-                            ],
-                            resonator_dt=phys_channel.sample_time,
-                            width=resonator.width,
-                            res_freq=resonator.frequency,
-                            shift=res_qubit_coupling.frequency,
-                            lo_freq=lo,
+                        lorentzian_responses[buffer_idx][i] = (
+                            get_resonator_response_signal_segment(
+                                resonator_input=resonator_buffers[buffer_idx][
+                                    segment[1] : segment[2]
+                                ],
+                                resonator_dt=phys_channel.sample_time,
+                                width=resonator.width,
+                                res_freq=resonator.frequency,
+                                shift=res_qubit_coupling.frequency,
+                                lo_freq=lo,
+                            )
                         )
 
             # Generate projection operators for each possible system state

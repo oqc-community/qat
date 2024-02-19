@@ -246,17 +246,17 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     pulse_channel.frequency
                     - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
                 )
-                baseband_freqs_fixed_if[
-                    pulse_channel.physical_channel_id
-                ] = pulse_channel.fixed_if
+                baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = (
+                    pulse_channel.fixed_if
+                )
             else:
                 if (
                     pulse_channel.physical_channel_id not in baseband_freqs_fixed_if
                     or not baseband_freqs_fixed_if[pulse_channel.physical_channel_id]
                 ):
-                    baseband_freqs_fixed_if[
-                        pulse_channel.physical_channel_id
-                    ] = pulse_channel.fixed_if
+                    baseband_freqs_fixed_if[pulse_channel.physical_channel_id] = (
+                        pulse_channel.fixed_if
+                    )
 
         return baseband_freqs
 

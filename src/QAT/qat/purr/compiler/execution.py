@@ -920,9 +920,11 @@ class IteratorInjector(ValueReplacement):
             return type_to_check(expanded)
         elif isinstance(self.iteration, Dict):
             return {
-                key: replacements[value.name][index]
-                if isinstance(value, Variable) and key in replacements
-                else value
+                key: (
+                    replacements[value.name][index]
+                    if isinstance(value, Variable) and key in replacements
+                    else value
+                )
                 for key, value in self.iteration.items()
             }
         else:

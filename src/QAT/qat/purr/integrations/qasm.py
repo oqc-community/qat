@@ -310,9 +310,11 @@ class AbstractParser:
         # Flatten registers out, so they are individual lists holding their bit/qubits
         # for easy zipping.
         args = [
-            _flatten_registers(val)
-            if self._is_register_target(val)
-            else [_flatten_registers(val)]
+            (
+                _flatten_registers(val)
+                if self._is_register_target(val)
+                else [_flatten_registers(val)]
+            )
             for val in args
         ]
         max_length = max([len(val) for val in args])

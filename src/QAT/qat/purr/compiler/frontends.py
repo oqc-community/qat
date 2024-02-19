@@ -52,20 +52,17 @@ class LanguageFrontend(abc.ABC):
         instructions: InstructionBuilder,
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
-    ):
-        ...
+    ): ...
 
     @abc.abstractmethod
     def parse_and_execute(
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
-    ):
-        ...
+    ): ...
 
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> Tuple[InstructionBuilder, CompilationMetrics]:
-        ...
+    ) -> Tuple[InstructionBuilder, CompilationMetrics]: ...
 
 
 class QIRFrontend(LanguageFrontend):

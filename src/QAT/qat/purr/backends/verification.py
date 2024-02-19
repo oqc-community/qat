@@ -124,8 +124,7 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
         return results
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction], metadata):
-        ...
+    def verify_instructions(self, instructions: List[Instruction], metadata): ...
 
 
 class LucyVerificationEngine(VerificationEngine):
@@ -155,5 +154,4 @@ def verify_program(program: str, compiler_config: CompilerConfig, qpu_version: Q
     return execute(program, model, compiler_config)
 
 
-class VerificationError(ValueError):
-    ...
+class VerificationError(ValueError): ...

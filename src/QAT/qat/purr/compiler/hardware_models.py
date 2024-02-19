@@ -43,8 +43,7 @@ class HardwareModel(ABC):
         super().__init__()
         self.shot_limit = shot_limit
 
-    def create_engine(self) -> InstructionExecutionEngine:
-        ...
+    def create_engine(self) -> InstructionExecutionEngine: ...
 
     def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
         if existing_engine is None:
@@ -54,8 +53,7 @@ class HardwareModel(ABC):
 
         return QuantumRuntime(existing_engine)
 
-    def create_builder(self) -> InstructionBuilder:
-        ...
+    def create_builder(self) -> InstructionBuilder: ...
 
     def __repr__(self):
         return self.__class__.__name__

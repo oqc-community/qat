@@ -80,9 +80,9 @@ class QuantumResultsFormat:
 
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
-        self.transforms: Optional[
-            ResultsFormatting
-        ] = ResultsFormatting.DynamicStructureReturn
+        self.transforms: Optional[ResultsFormatting] = (
+            ResultsFormatting.DynamicStructureReturn
+        )
 
     def raw(self) -> QuantumResultsFormat:
         """Raw QPU output."""

@@ -541,9 +541,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         acquire_channel = qubit.get_acquire_channel()
         acquire_instruction = Acquire(
             acquire_channel,
-            qubit.pulse_measure["width"]
-            if qubit.measure_acquire["sync"]
-            else qubit.measure_acquire["width"],
+            (
+                qubit.pulse_measure["width"]
+                if qubit.measure_acquire["sync"]
+                else qubit.measure_acquire["width"]
+            ),
             mode,
             output_variable,
             self.existing_names,
