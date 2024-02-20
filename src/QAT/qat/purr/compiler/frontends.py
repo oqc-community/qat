@@ -14,7 +14,6 @@ from qat.purr.compiler.config import (
     ErrorMitigationConfig,
     Languages,
     ResultsFormatting,
-    get_error_mitigation_config,
     get_optimizer_config,
 )
 from qat.purr.compiler.execution import QuantumExecutionEngine
@@ -39,15 +38,15 @@ log = get_default_logger()
 
 
 def _get_file_contents(file_path):
-    """ Get Program contents from a file. """
+    """Get Program contents from a file."""
     with open(file_path) as ifile:
         return ifile.read()
 
 
-path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
+path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 contents_match_pattern = regex.compile(
-    "(OPENQASM [0-9]*(.0)?;|defcalgrammar \"[a-zA-Z ]+\";)|(@__quantum__qis)"
+    '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
 )
 
 
@@ -77,7 +76,7 @@ class LanguageFrontend(abc.ABC):
         self,
         quantum_builder: InstructionBuilder,
         compiler_config: CompilerConfig,
-        hardware: QuantumHardwareModel
+        hardware: QuantumHardwareModel,
     ):
         """
         Method for modifying builder to decorate with error mitigation that can be done post-compilation.
@@ -88,22 +87,28 @@ class LanguageFrontend(abc.ABC):
         - digital dynamical decoupling
         - readout mitigation
         """
-        if compiler_config.error_mitigation is None:
-            compiler_config.error_mitigation = get_error_mitigation_config()
-
-        if compiler_config.error_mitigation != ErrorMitigationConfig.Empty:
-            if (hardware.error_mitigation is
-                None) or (not hardware.error_mitigation.readout_mitigation):
+        if (
+            compiler_config.error_mitigation is not None
+            and compiler_config.error_mitigation != ErrorMitigationConfig.Empty
+        ):
+            if (hardware.error_mitigation is None) or (
+                not hardware.error_mitigation.readout_mitigation
+            ):
                 raise ValueError("Error mitigation not calibrated on this device.")
             if ResultsFormatting.BinaryCount not in compiler_config.results_format:
                 raise ValueError(
                     "Binary Count format required for readout error mitigation"
                 )
-
-        if ErrorMitigationConfig.MatrixMitigation in compiler_config.error_mitigation:
-            quantum_builder.add(MatrixReadoutMitigation())
-        if ErrorMitigationConfig.LinearMitigation in compiler_config.error_mitigation:
-            quantum_builder.add(LinearReadoutMitigation())
+            if (
+                ErrorMitigationConfig.MatrixMitigation
+                in compiler_config.error_mitigation
+            ):
+                quantum_builder.add(MatrixReadoutMitigation())
+            if (
+                ErrorMitigationConfig.LinearMitigation
+                in compiler_config.error_mitigation
+            ):
+                quantum_builder.add(LinearReadoutMitigation())
 
         return quantum_builder
 
@@ -115,7 +120,9 @@ class QIRFrontend(LanguageFrontend):
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
     ):
-        raise NotImplementedError("QIR needs to be executed via a graph, not via this API.")
+        raise NotImplementedError(
+            "QIR needs to be executed via a graph, not via this API."
+        )
 
     def parse_and_execute(
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
@@ -123,7 +130,9 @@ class QIRFrontend(LanguageFrontend):
         # Parsing and execution are done at the same time with early versions of QIR.
         return self.parse(file_or_str, hardware, compiler_config)
 
-    def _parse_from_file(self, qir_file: str, hardware, compiler_config: CompilerConfig):
+    def _parse_from_file(
+        self, qir_file: str, hardware, compiler_config: CompilerConfig
+    ):
         metrics = CompilationMetrics()
         metrics.initialize(compiler_config.metrics)
 
@@ -163,7 +172,9 @@ class QASMFrontend(LanguageFrontend):
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
     ):
         instructions, parse_metrics = self.parse(file_or_str, hardware, compiler_config)
-        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(
+            instructions, hardware, compiler_config
+        )
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 
@@ -178,7 +189,9 @@ class QASMFrontend(LanguageFrontend):
 
         parser = get_qasm_parser(qasm_string)
         if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(parser.parser_language())
+            compiler_config.optimizations = get_optimizer_config(
+                parser.parser_language()
+            )
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(
@@ -196,7 +209,6 @@ class QASMFrontend(LanguageFrontend):
             quantum_builder = self._modify_builder_with_error_mitigation(
                 quantum_builder, compiler_config, hardware
             )
-            print(quantum_builder)
             return quantum_builder, metrics
 
 

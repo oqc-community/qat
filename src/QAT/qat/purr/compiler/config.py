@@ -382,10 +382,6 @@ def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:
     return None
 
 
-def get_error_mitigation_config():
-    return ErrorMitigationConfig.Empty
-
-
 def get_config(lang: Languages, **kwargs):
     """
     Helper method to build a compiler config for a particular language. Forwards

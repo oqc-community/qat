@@ -238,7 +238,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             inst for inst in qfile.meta_instructions
             if isinstance(inst, PostProcessingReadoutMitigation)
         ]
-        if not readout_instructions:
+        if not any(readout_instructions):
             return results
 
         if len(results) > 1:
@@ -247,13 +247,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 "Cannot have multiple registers in conjunction with readout error mitigation."
             )
 
-        output = {"original": results}
-
         for readout_type in readout_instructions:
             mitigator = get_readout_mitigation(readout_type)
             new_result = mitigator.apply_error_mitigation(results, qfile, self.model)
-            output[mitigator.name] = new_result
-        return output
+            results[mitigator.name] = new_result
+        return results
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         """ Runs optimization passes specific to this hardware. """
@@ -1145,3 +1143,5 @@ class SweepIterator:
             )
         else:
             results_array[self.current_iteration] = value
+
+

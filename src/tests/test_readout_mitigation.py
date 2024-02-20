@@ -19,10 +19,13 @@ from qat.purr.integrations.qasm import Qasm2Parser
 
 @pytest.mark.parametrize(
     "config_options",
-    [[
-        "matrix_readout_mitigation",
-    ], ["linear_readout_mitigation"],
-     ["matrix_readout_mitigation", "linear_readout_mitigation"]]
+    [
+        [
+            "matrix_readout_mitigation",
+        ],
+        ["linear_readout_mitigation"],
+        ["matrix_readout_mitigation", "linear_readout_mitigation"],
+    ],
 )
 class TestReadoutMitigation:
     def get_qasm(self, qubit_count):
@@ -51,14 +54,17 @@ class TestReadoutMitigation:
             random_0 = random() if random_data else 1
             random_1 = random() if random_data else 1
             output[qubit] = {
-                "0|0": random_0, "1|0": 1 - random_0, "1|1": random_1, "0|1": 1 - random_1
+                "0|0": random_0,
+                "1|0": 1 - random_0,
+                "1|1": random_1,
+                "0|1": 1 - random_1,
             }
         return output
 
     def build_config(self, configs):
         config_map = {
             "matrix_readout_mitigation": ErrorMitigationConfig.MatrixMitigation,
-            "linear_readout_mitigation": ErrorMitigationConfig.LinearMitigation
+            "linear_readout_mitigation": ErrorMitigationConfig.LinearMitigation,
         }
         mitigation_config = ErrorMitigationConfig.Empty
 
@@ -66,7 +72,7 @@ class TestReadoutMitigation:
             mitigation_config |= config_map[config]
         compiler_config = CompilerConfig(
             results_format=QuantumResultsFormat().binary_count(),
-            error_mitigation=mitigation_config
+            error_mitigation=mitigation_config,
         )
         return compiler_config
 
@@ -95,10 +101,10 @@ class TestReadoutMitigation:
         )
         for config in config_options:
             if random_cal:
-                assert result['original'] != result[config]
+                assert result["b"] != result[config]
                 assert all([i > 0 for i in result[config].values()])
             else:
-                original = result['original']['b']
+                original = result["b"]
                 assert original["0" * qubit_count] == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
@@ -147,9 +153,8 @@ qasm1 = (
         creg b[2];
         measure q[0] -> b[1];
         measure q[1] -> b[0];
-        """, {
-        "0": 1, "1": 0
-    }
+        """,
+    {"0": 1, "1": 0},
 )
 qasm2 = (
     """
@@ -160,9 +165,8 @@ qasm2 = (
     measure q[0] -> b[2];
     measure q[1] -> b[1];
     measure q[2] -> b[0];
-    """, {
-        "0": 2, "1": 1, "2": 0
-    }
+    """,
+    {"0": 2, "1": 1, "2": 0},
 )
 qasm3 = (
     """
@@ -171,9 +175,8 @@ qasm3 = (
     qreg q[3];
     creg b[3];
     measure q -> b;
-    """, {
-        "0": 0, "1": 1, "2": 2
-    }
+    """,
+    {"0": 0, "1": 1, "2": 2},
 )
 
 
