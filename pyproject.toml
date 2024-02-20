@@ -40,9 +40,9 @@ qiskit-aer = "^0.13.0"
 lark = "~=0.12"
 regex = "^2022.6.2"
 jsonpickle = "^2.2.0"
-black = "24.2.0"
 
 [tool.poetry.group.dev.dependencies]
+black = "24.2.0"
 coverage = "^6.3.2"
 pytest-cov = "~=2.10.1"
 autoflake = "^2.2.0"
@@ -90,6 +90,7 @@ target-version = ['py38']
 
 [tool.poetry.scripts]
 build-docs = "poetry_scripts:build_docs"
+format-code = "poetry_scripts:format_code"
 
 [[tool.poetry.source]]
 name = "PyPI"
