@@ -8,6 +8,8 @@ which are then transformed and delivered to an appropriate driver.
 
 For our full documentation check [here](https://oqc-community.github.io/qat/main/index.html).
 
+[Rasqal](https://github.com/oqc-community/rasqal) is our low-level hybrid runtime and optimizer, which powers our more advanced QIR features.
+
 ### Installation
 
 QAT can be installed from [PyPI](https://pypi.org/project/qat-compiler/>) via:

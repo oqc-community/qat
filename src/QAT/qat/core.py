@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-
-from typing import Union
+from typing import Any, List, Optional, Union
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
@@ -31,9 +30,10 @@ def execute(
     qat_input: QATInput,
     hardware: QuantumHardwareModel = None,
     compiler_config: CompilerConfig = None,
+    args: List[Any] = None,
 ):
     """Execute file path or code blob."""
-    results, _ = execute_with_metrics(qat_input, hardware, compiler_config)
+    results, _ = execute_with_metrics(qat_input, hardware, compiler_config, args)
     return results
 
 
@@ -41,12 +41,13 @@ def execute_with_metrics(
     incoming: QATInput,
     hardware: QuantumHardwareModel = None,
     config: CompilerConfig = None,
+    args: List[Any] = None,
 ):
     hardware, config = _default_arguments(hardware, config)
     """ Execute file path or code blob. """
     if isinstance(incoming, (str, bytes)):
         frontend: LanguageFrontend = fetch_frontend(incoming)
-        return _parse_and_execute(frontend, incoming, hardware, config)
+        return _parse_and_execute(frontend, incoming, hardware, config, args)
     elif isinstance(incoming, InstructionBuilder):
         results, metrics = execute_instructions_via_config(
             hardware, incoming.instructions, config
@@ -56,26 +57,42 @@ def execute_with_metrics(
     raise TypeError(f"No compiler support for inputs of type {str(type(incoming))}")
 
 
-def execute_qir(qir_file: str, hardware=None, compiler_config: CompilerConfig = None):
-    results, _ = execute_qir_with_metrics(qir_file, hardware, compiler_config)
+def execute_qir(
+    qir_file: str,
+    hardware=None,
+    compiler_config: CompilerConfig = None,
+    args: List[Any] = None,
+):
+    results, _ = execute_qir_with_metrics(qir_file, hardware, compiler_config, args)
     return results
 
 
 def execute_qir_with_metrics(
-    qir_file: str, hardware=None, compiler_config: CompilerConfig = None
+    qir_file: str,
+    hardware=None,
+    compiler_config: CompilerConfig = None,
+    args: List[Any] = None,
 ):
-    return _parse_and_execute(QIRFrontend(), qir_file, hardware, compiler_config)
+    return _parse_and_execute(QIRFrontend(), qir_file, hardware, compiler_config, args)
 
 
-def execute_qasm(qat_input: str, hardware=None, compiler_config: CompilerConfig = None):
-    results, _ = execute_qasm_with_metrics(qat_input, hardware, compiler_config)
+def execute_qasm(
+    qat_input: str,
+    hardware=None,
+    compiler_config: CompilerConfig = None,
+    args: List[Any] = None,
+):
+    results, _ = execute_qasm_with_metrics(qat_input, hardware, compiler_config, args)
     return results
 
 
 def execute_qasm_with_metrics(
-    qat_input: str, hardware=None, compiler_config: CompilerConfig = None
+    qat_input: str,
+    hardware=None,
+    compiler_config: CompilerConfig = None,
+    args: List[Any] = None,
 ):
-    return _parse_and_execute(QASMFrontend(), qat_input, hardware, compiler_config)
+    return _parse_and_execute(QASMFrontend(), qat_input, hardware, compiler_config, args)
 
 
 def _parse_and_execute(
@@ -83,7 +100,8 @@ def _parse_and_execute(
     str_or_path: str,
     hardware,
     config: CompilerConfig = None,
+    args: Optional[List[Any]] = None,
 ):
     hardware, config = _default_arguments(hardware, config)
-    results, metrics = frontend.parse_and_execute(str_or_path, hardware, config)
+    results, metrics = frontend.parse_and_execute(str_or_path, hardware, config, args)
     return results, metrics.as_dict()
