@@ -1,17 +1,19 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import os.path
 import typing
 from pathlib import Path
-from typing import Union
+from enum import Enum, auto
 
 import regex
-from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
-from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.metrics import CompilationMetrics
-from qat.purr.utils.logger import get_default_logger
+
+from scc.compiler.config import CompilerConfig
+import scc.compiler.frontends as core_frontends
+import scc.compiler.experimental.frontends as experimental_frontends
+from scc.compiler.frontends import LanguageFrontend
+from scc.compiler.hardware_models import QuantumHardwareModel
+from scc.compiler.metrics import CompilationMetrics
+from scc.utils.logger import get_default_logger
+from scc.compiler.builders import InstructionBuilder
+from typing import Union
 
 log = get_default_logger()
 
@@ -26,29 +28,34 @@ def _return_or_build(qat_input: QATInput, build_func: typing.Callable, **kwargs)
     if isinstance(qat_input, InstructionBuilder):
         return qat_input, CompilationMetrics()
 
-    raise TypeError(f"No compiler support for inputs of type {str(type(qat_input))}")
+    raise ValueError(f"No compiler support for inputs of type {str(type(qat_input))}")
 
 
 def execute(
     qat_input: QATInput,
     hardware: QuantumHardwareModel = None,
-    compiler_config: CompilerConfig = None,
+    compiler_config: CompilerConfig = None
 ):
-    """Execute file path or code blob."""
+    """ Execute file path or code blob. """
     results, _ = execute_with_metrics(qat_input, hardware, compiler_config)
     return results
 
 
 contents_match_pattern = regex.compile(
-    '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
+    "(OPENQASM [0-9]*(.0)?;|defcalgrammar \"[a-zA-Z ]+\";)|(@__quantum__qis)"
 )
 
-path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
+path_regex = regex.compile('^.+\.(qasm|ll|bc)$')
 
 
-def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
+def fetch_frontend(
+    path_or_str: Union[str, bytes], use_experimental=False
+) -> LanguageFrontend:
+    frontend_mod = core_frontends
+    if use_experimental:
+        frontend_mod = experimental_frontends
     if isinstance(path_or_str, bytes) and path_or_str.startswith(b"BC"):
-        return QIRFrontend()
+        return frontend_mod.QIRFrontend()
 
     if path_regex.match(path_or_str) is not None:
         if not os.path.exists(path_or_str):
@@ -56,36 +63,34 @@ def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
 
         path = Path(path_or_str)
         if path.suffix == ".qasm":
-            return QASMFrontend()
+            return frontend_mod.QASMFrontend()
         elif path.suffix in (".bc", ".ll"):
-            return QIRFrontend()
-
-        raise ValueError(f"File with extension {path.suffix} unrecognized.")
+            return frontend_mod.QIRFrontend()
+        else:
+            raise ValueError(f"File with extension {path.suffix} unrecognized.")
 
     results = regex.search(contents_match_pattern, path_or_str)
     if results is not None:
         if results.captures(1):
-            return QASMFrontend()
+            return frontend_mod.QASMFrontend()
         if results.captures(3):
-            return QIRFrontend()
-    else:
-        raise ValueError("Cannot establish a LanguageFrontend based on contents")
+            return frontend_mod.QIRFrontend()
+
+    raise ValueError("Cannot establish a LanguageFrontend based on contents")
 
 
 def execute_with_metrics(
     path_or_str: str,
     hardware: QuantumHardwareModel = None,
-    compiler_config: CompilerConfig = None,
+    compiler_config: CompilerConfig = None
 ):
-    """Execute file path or code blob."""
+    """ Execute file path or code blob. """
 
-    frontend: LanguageFrontend = fetch_frontend(path_or_str)
+    frontend = fetch_frontend(path_or_str)
     return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
 
-def execute_qir(
-    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
-):
+def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None):
     results, _ = execute_qir_with_metrics(qat_input, hardware, compiler_config)
     return results
 
@@ -93,7 +98,7 @@ def execute_qir(
 def execute_qir_with_metrics(
     qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
 ):
-    frontend = QIRFrontend()
+    frontend = core_frontends.QIRFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)
 
 
@@ -107,7 +112,7 @@ def execute_qasm(
 def execute_qasm_with_metrics(
     qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
 ):
-    frontend = QASMFrontend()
+    frontend = core_frontends.QASMFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)
 
 
@@ -115,7 +120,7 @@ def _execute_with_metrics(
     frontend: LanguageFrontend,
     qat_input: QATInput,
     hardware=None,
-    compiler_config: CompilerConfig = None,
+    compiler_config: CompilerConfig = None
 ):
     metrics = CompilationMetrics()
     if compiler_config is not None:
@@ -126,9 +131,7 @@ def _execute_with_metrics(
     )
     metrics.merge(build_metrics)
 
-    results, execution_metrics = frontend.execute(
-        instructions, hardware, compiler_config
-    )
+    results, execution_metrics = frontend.execute(instructions, hardware, compiler_config)
     metrics.merge(execution_metrics)
 
     return results, metrics.as_dict()

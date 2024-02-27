@@ -1,25 +1,17 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from collections import Iterable
 from numbers import Number
-from typing import List, Optional, TypeVar, Union
+from typing import List, Union, TypeVar, Optional
 
 import numpy
-from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
-from qat.purr.compiler.config import (
-    CalibrationArguments,
-    MetricsType,
-    ResultsFormatting,
-)
-from qat.purr.compiler.execution import (
-    InstructionExecutionEngine,
-    QuantumExecutionEngine,
-    _binary,
-)
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Instruction, is_generated_name
-from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
-from qat.purr.utils.logger import get_default_logger
+
+from scc.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
+from scc.compiler.config import ResultsFormatting, MetricsType, CalibrationArguments
+from scc.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine, _binary
+from scc.compiler.hardware_models import QuantumHardwareModel
+from scc.compiler.instructions import Instruction, is_generated_name
+from scc.compiler.metrics import MetricsMixin, CompilationMetrics
+from scc.utils.logger import get_default_logger
+from scc.compiler.interrupt import Interrupt, NullInterrupt
 
 log = get_default_logger()
 
@@ -27,36 +19,30 @@ log = get_default_logger()
 class RemoteCalibration:
     """
     Base class for any remote calibration executions. These are far more complicated
-    blocks than purely a string of instructions and include nested executions and rely
-    on classic Python code.
-    """
-
+    blocks than purely a string of instructions and include nested executions and rely on classic
+    Python code."""
     def run(
         self,
         model: QuantumHardwareModel,
         runtime: "QuantumRuntime",
-        args: CalibrationArguments,
+        args: CalibrationArguments
     ):
         raise ValueError("Calibration cannot be run at this time.")
 
     def arguments_type(self) -> type:
-        """Returns the type of this calibrations arguments."""
+        """ Returns the type of this calibrations arguments. """
         return CalibrationArguments
 
 
 class QuantumExecutableBlock:
-    """Generic executable block that can be run on a quantum runtime."""
-
+    """ Generic executable block that can be run on a quantum runtime. """
     def run(self, runtime: "QuantumRuntime"):
         pass
 
 
 class CalibrationWithArgs(QuantumExecutableBlock):
-    """Wrapper for a calibration and argument combination."""
-
-    def __init__(
-        self, calibration: RemoteCalibration, args: CalibrationArguments = None
-    ):
+    """ Wrapper for a calibration and argument combination. """
+    def __init__(self, calibration: RemoteCalibration, args: CalibrationArguments = None):
         self.calibration = calibration
         self.args = args or CalibrationArguments()
 
@@ -67,7 +53,7 @@ class CalibrationWithArgs(QuantumExecutableBlock):
         self.calibration.run(runtime.model, runtime, self.args)
 
 
-AnyEngine = TypeVar("AnyEngine", bound=InstructionExecutionEngine, covariant=True)
+AnyEngine = TypeVar('AnyEngine', bound=InstructionExecutionEngine, covariant=True)
 
 
 class QuantumRuntime(MetricsMixin):
@@ -84,8 +70,8 @@ class QuantumRuntime(MetricsMixin):
         self, results, format_flags: ResultsFormatting, repeats: Optional[int] = None
     ):
         """
-        Transform the raw results into the format that we've been asked to provide. Look
-        at individual transformation documentation for descriptions on what they do.
+        Transform the raw results into the format that we've been asked to provide. Look at individual transformation
+        documentation for descriptions on what they do.
         """
         if len(results) == 0:
             return []
@@ -99,17 +85,15 @@ class QuantumRuntime(MetricsMixin):
 
         def simplify_results(simplify_target):
             """
-            To facilitate backwards compatability and being able to run low-level
-            experiments alongside quantum programs we make some assumptions based upon
-            form of the results.
+            To facilitate backwards compatability and being able to run low-level experiments alongside quantum
+            programs we make some assumptions based upon form of the results.
 
-            If all results have default variable names then the user didn't care about
-            value assignment or this was a low-level experiment - in both cases, it
-            means we can throw away the names and simply return the results in the order
-            they were defined in the instructions.
+            If all results have default variable names then the user didn't care about value assignment or this was a
+            low-level experiment - in both cases, it means we can throw away the names and simply return the results in
+            the order they were defined in the instructions.
 
-            If we only have one result after this, just return that list directly
-            instead, as it's probably just a single experiment.
+            If we only have one result after this, just return that list directly instead, as it's probably just a single
+            experiment.
             """
             if all([is_generated_name(k) for k in simplify_target.keys()]):
                 if len(simplify_target) == 1:
@@ -129,13 +113,13 @@ class QuantumRuntime(MetricsMixin):
             if isinstance(value, int):
                 return str(value)
             elif all(isinstance(val, int) for val in value):
-                return "".join([str(val) for val in value])
+                return ''.join([str(val) for val in value])
 
         if ResultsFormatting.SquashBinaryResultArrays in format_flags:
             results = {key: squash_binary(val) for key, val in results.items()}
 
-        # Dynamic structure return is an ease-of-use flag to strip things that you know
-        # your use-case won't use, such as variable names and nested lists.
+        # Dynamic structure return is an ease-of-use flag to strip things that you know your
+        # use-case won't use, such as variable names and nested lists.
         if ResultsFormatting.DynamicStructureReturn in format_flags:
             results = simplify_results(results)
 
@@ -144,7 +128,7 @@ class QuantumRuntime(MetricsMixin):
     def run_calibration(
         self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
     ):
-        """Make 'calibration' distinct from 'quantum executable' for usabilities sake."""
+        """ Make 'calibration' distinct from 'quantum executable' for usabilities sake. """
         self.run_quantum_executable(calibrations)
 
     def run_quantum_executable(
@@ -159,7 +143,9 @@ class QuantumRuntime(MetricsMixin):
         for exe in executables:
             exe.run(self)
 
-    def execute(self, instructions, results_format=None, repeats=None):
+    def _common_execute(
+        self, fexecute: callable, instructions, results_format=None, repeats=None
+    ):
         """
         Executes these instructions against the current engine and returns the results.
         """
@@ -181,23 +167,43 @@ class QuantumRuntime(MetricsMixin):
         )
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
-        results = self.engine.execute(instructions)
+        results = fexecute(instructions)
         return self._transform_results(results, results_format, repeats)
+
+    def execute_with_interrupt(
+        self,
+        instructions,
+        results_format=None,
+        repeats=None,
+        interrupt: Interrupt = NullInterrupt()
+    ):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+        def fexecute(instrs):
+            return self.engine.execute_with_interrupt(instrs, interrupt)
+
+        return self._common_execute(fexecute, instructions, results_format, repeats)
+
+    def execute(self, instructions, results_format=None, repeats=None):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+        def fexecute(instrs):
+            return self.engine.execute(instrs)
+
+        return self._common_execute(fexecute, instructions, results_format, repeats)
 
 
 def _binary_count(results_list, repeats):
     """
     Returns a dictionary of binary number: count. So for a two qubit register it'll return the various counts for
-    ``00``, ``01``, ``10`` and ``11``.
+    00, 01, 10 and 11.
     """
-
     def flatten(res):
-        """
-        Combine binary result from the QPU into composite key result.
-        Aka '0110' or '0001'
-        """
+        """ Combine binary result from the QPU into composite key result. Aka '0110' or '0001' """
         if isinstance(res, Iterable):
-            return "".join([flatten(val) for val in res])
+            return ''.join([flatten(val) for val in res])
         else:
             return str(res)
 
@@ -209,10 +215,8 @@ def _binary_count(results_list, repeats):
     binary_results = _binary(results_list)
 
     # If our results are a single qubit then pretend to be a register of one.
-    if (
-        isinstance(next(iter(binary_results), None), Number)
-        and len(binary_results) == repeats
-    ):
+    if isinstance(next(iter(binary_results), None),
+                  Number) and len(binary_results) == repeats:
         binary_results = [binary_results]
 
     result_count = dict()
@@ -231,11 +235,26 @@ def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 
 
 def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
-    # We shouldn't really have an orphaned execution engine, but no harm in it.
+    from scc.backends.echo import EchoEngine
+    from scc.backends.live import LiveHardwareModel, LiveDeviceEngine
+    from scc.backends.live_arb_seq import LiveArbSeqDeviceEngine
+    from scc.backends.live_devices import ControlHardwareArbSeq
+    from scc.backends.realtime_chip_simulator import RealtimeSimHarwareModel, \
+        RealtimeChipSimEngine
+    from scc.backends.qasm_sim import QasmHardwareModel
+
     if isinstance(hardware, QuantumExecutionEngine):
-        return hardware.model.create_runtime(hardware)
-    elif isinstance(hardware, QuantumHardwareModel):
+        return QuantumRuntime(hardware)
+    elif isinstance(hardware, LiveHardwareModel):
+        if isinstance(hardware.control_hardware, ControlHardwareArbSeq):
+            return QuantumRuntime(LiveArbSeqDeviceEngine(hardware))
+        return QuantumRuntime(LiveDeviceEngine(hardware))
+    elif isinstance(hardware, RealtimeSimHarwareModel):
+        return QuantumRuntime(RealtimeChipSimEngine(hardware))
+    elif isinstance(hardware, QasmHardwareModel):
         return hardware.create_runtime()
+    elif isinstance(hardware, QuantumHardwareModel):
+        return QuantumRuntime(EchoEngine(hardware))
 
     raise ValueError(
         f"{str(hardware)} is not a recognized hardware model or execution engine."
@@ -245,9 +264,12 @@ def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 def get_builder(
     model: Union[QuantumHardwareModel, QuantumExecutionEngine]
 ) -> QuantumInstructionBuilder:
+    from scc.backends.qasm_sim import QasmHardwareModel
+    if isinstance(model, QasmHardwareModel):
+        return model.create_builder()
     if isinstance(model, QuantumExecutionEngine):
         model = model.model
-    return model.create_builder()
+    return QuantumInstructionBuilder(model)
 
 
 def execute_instructions(
@@ -255,12 +277,23 @@ def execute_instructions(
     instructions: Union[List[Instruction], QuantumInstructionBuilder],
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
-    repeats: Optional[int] = None,
+    repeats: Optional[int] = None
 ):
     active_runtime = get_runtime(hardware)
 
     active_runtime.run_quantum_executable(executable_blocks)
-    return (
-        active_runtime.execute(instructions, results_format, repeats),
-        active_runtime.compilation_metrics,
-    )
+    return active_runtime.execute(instructions, results_format, repeats), active_runtime.compilation_metrics
+
+
+def execute_instructions_with_interrupt(
+    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+    instructions: Union[List[Instruction], QuantumInstructionBuilder],
+    results_format=None,
+    executable_blocks: List[QuantumExecutableBlock] = None,
+    repeats: Optional[int] = None,
+    interrupt: Interrupt = NullInterrupt()
+):
+    active_runtime = get_runtime(hardware)
+
+    active_runtime.run_quantum_executable(executable_blocks)
+    return active_runtime.execute_with_interrupt(instructions, results_format, repeats, interrupt), active_runtime.compilation_metrics
