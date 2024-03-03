@@ -13,6 +13,7 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Repeat
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
@@ -92,9 +93,7 @@ class QuantumRuntime(MetricsMixin):
         for exe in executables:
             exe.run(self)
 
-    def execute(
-        self, builder: InstructionBuilder, results_format: ResultsFormatting = None
-    ):
+    def _common_execute(self, fexecute: callable, builder: InstructionBuilder):
         """
         Executes these instructions against the current engine and returns the results.
         """
@@ -116,7 +115,34 @@ class QuantumRuntime(MetricsMixin):
         )
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
-        return self.engine.execute(instructions, results_format)
+        return fexecute(instructions)
+
+    def execute(
+        self, builder: InstructionBuilder, results_format: ResultsFormatting = None
+    ):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+
+        def fexecute(instrs):
+            return self.engine.execute(instrs, results_format)
+
+        return self._common_execute(fexecute, builder)
+
+    def execute_with_interrupt(
+        self,
+        builder: InstructionBuilder,
+        results_format: ResultsFormatting = None,
+        interrupt: Interrupt = NullInterrupt(),
+    ):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+
+        def fexecute(instrs):
+            return self.engine.execute_with_interrupt(instrs, results_format, interrupt)
+
+        return self._common_execute(fexecute, builder)
 
 
 def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
@@ -179,5 +205,49 @@ def execute_instructions(
         active_runtime.run_quantum_executable(executable_blocks)
         return (
             active_runtime.execute(instructions, results_format),
+            active_runtime.compilation_metrics,
+        )
+
+
+def execute_instructions_with_interrupt_via_config(
+    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+    instructions: InstructionBuilder,
+    config: CompilerConfig,
+    interrupt: Interrupt = NullInterrupt(),
+):
+    # If we don't have a repeat, default it.
+    if not any(val for val in instructions.instructions if isinstance(val, Repeat)):
+        instructions.repeat(config.repeats, config.repetition_period)
+
+    # TODO: Look up later how much of a runtime hit this is, I'd hope
+    #  hoisted to global and don't have to re-import every time.
+    from qat.purr.backends.calibrations.remote import find_calibration
+
+    calibrations = [find_calibration(arg) for arg in config.active_calibrations]
+
+    return execute_instructions_with_interrupt(
+        hardware,
+        instructions,
+        config.results_format,
+        calibrations,
+        config.metrics,
+        interrupt,
+    )
+
+
+def execute_instructions_with_interrupt(
+    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+    instructions: InstructionBuilder,
+    results_format=None,
+    executable_blocks: List[QuantumExecutableBlock] = None,
+    metrics: MetricsType = None,
+    interrupt: Interrupt = NullInterrupt(),
+):
+    with log_duration("Execution completed, took {} seconds."):
+        active_runtime = get_runtime(hardware)
+        active_runtime.initialize_metrics(metrics)
+        active_runtime.run_quantum_executable(executable_blocks)
+        return (
+            active_runtime.execute_with_interrupt(instructions, results_format, interrupt),
             active_runtime.compilation_metrics,
         )

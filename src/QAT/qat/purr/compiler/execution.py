@@ -53,6 +53,7 @@ from qat.purr.compiler.instructions import (
     Waveform,
     is_generated_name,
 )
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -334,9 +335,27 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         list_expansion_ratio = int(
             (Decimal(repeats) / Decimal(batch_limit)).to_integral(ROUND_DOWN)
         )
-        return ([batch_limit] * list_expansion_ratio) + [repeats % batch_limit]
+        remainder = repeats % batch_limit
+        batches = [batch_limit] * list_expansion_ratio
+        if remainder > 0:
+            batches.append(remainder)
+
+        return batches
 
     def execute(self, instructions, results_format=None):
+        """Executes this qat file against this current hardware."""
+        return self._common_execute(instructions, results_format)
+
+    def execute_with_interrupt(
+        self, instructions, results_format=None, interrupt=NullInterrupt()
+    ):
+        """
+        Executes this qat file against this current hardware.
+        Execution allows for interrupts triggered by events
+        """
+        return self._common_execute(instructions, results_format, interrupt)
+
+    def _common_execute(self, instructions, results_format=None, interrupt=NullInterrupt()):
         """Executes this qat file against this current hardware."""
         self._model_exists()
 
@@ -352,14 +371,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     f"Running {repeat_count} shots at once is "
                     f"unsupported on the current hardware. Batching execution."
                 )
-                batches = self._generate_repeat_batches(repeat_count)
-            else:
-                batches = [repeat_count]
+            batches = self._generate_repeat_batches(repeat_count)
 
             # Set up the sweep and device injectors, passing all appropriate data to
             # the specific execute methods and deal with clean-up afterwards.
             results = {}
-            for batch_count in batches:
+            for i, batch_count in enumerate(batches):
+                interrupt.if_triggered(iteration=i, throw=True)
                 if batch_count <= 0:
                     continue
 

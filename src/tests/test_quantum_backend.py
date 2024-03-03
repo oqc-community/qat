@@ -551,3 +551,15 @@ class TestBaseQuantum:
         assert len(phase_shift_list) == 2
         assert phase_shift_list[1].phase == phase_shift_fixed
         assert isinstance(phase_shift_list[0].phase, Variable)
+
+    @pytest.mark.parametrize("repeat_count, repeat_limit, expected_batches", [
+        (123, 5, [5] * 24 + [3]),
+        (124, 5, [5] * 24 + [4]),
+        (125, 5, [5] * 25)
+    ])
+    def test_execution_batching(self, repeat_count, repeat_limit, expected_batches):
+        hw = get_test_model()
+        hw.shot_limit = repeat_limit
+        engine = get_test_execution_engine(hw)
+        generated_batches = engine._generate_repeat_batches(repeat_count)
+        assert generated_batches == expected_batches
