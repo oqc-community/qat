@@ -23,7 +23,7 @@ class Interrupt(abc.ABC):
         ...
 
 
-class NullInterrupt(abc.ABC):
+class NullInterrupt(Interrupt):
     def if_triggered(self, metadata={}, throw=False):
         ...
 

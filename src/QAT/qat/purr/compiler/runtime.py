@@ -8,19 +8,22 @@ import numpy
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CalibrationArguments,
+    CompilerConfig,
     MetricsType,
     ResultsFormatting,
 )
+from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import (
     InstructionExecutionEngine,
     QuantumExecutionEngine,
     _binary,
 )
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Instruction, is_generated_name
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
+from qat.purr.compiler.instructions import Instruction, Repeat, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -142,6 +145,23 @@ class QuantumRuntime(MetricsMixin):
 
         return results
 
+    def _apply_error_mitigation(self, results, instructions, error_mitigation):
+        if error_mitigation is None:
+            return results
+
+        # TODO: add support for multiple registers
+        # TODO: reconsider results length
+        if len(results) > 1:
+            raise ValueError(
+                "Cannot have multiple registers in conjunction with readout error mitigation."
+            )
+
+        mapping = get_cl2qu_index_mapping(instructions, self.model)
+        for mitigator in get_readout_mitigation(error_mitigation):
+            new_result = mitigator.apply_error_mitigation(results, mapping, self.model)
+            results[mitigator.name] = new_result
+        return results  # TODO: new results object
+
     def run_calibration(
         self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
     ):
@@ -161,7 +181,7 @@ class QuantumRuntime(MetricsMixin):
             exe.run(self)
 
     def _common_execute(
-        self, fexecute: callable, instructions, results_format=None, repeats=None
+        self, fexecute: callable, instructions, results_format=None, repeats=None, error_mitigation=None
     ):
         """
         Executes these instructions against the current engine and returns the results.
@@ -185,14 +205,16 @@ class QuantumRuntime(MetricsMixin):
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
         results = fexecute(instructions)
-        return self._transform_results(results, results_format, repeats)
+        results = self._transform_results(results, results_format, repeats)
+        return self._apply_error_mitigation(results, instructions, error_mitigation)
 
     def _execute_with_interrupt(
         self,
         instructions,
         results_format=None,
         repeats=None,
-        interrupt: Interrupt = NullInterrupt()
+        interrupt: Interrupt = NullInterrupt(),
+        error_mitigation=None,
     ):
         """
         Executes these instructions against the current engine and returns the results.
@@ -200,16 +222,16 @@ class QuantumRuntime(MetricsMixin):
         def fexecute(instrs):
             return self.engine._execute_with_interrupt(instrs, interrupt)
 
-        return self._common_execute(fexecute, instructions, results_format, repeats)
+        return self._common_execute(fexecute, instructions, results_format, repeats, error_mitigation)
 
-    def execute(self, instructions, results_format=None, repeats=None):
+    def execute(self, instructions, results_format=None, repeats=None, error_mitigation=None):
         """
         Executes these instructions against the current engine and returns the results.
         """
         def fexecute(instrs):
             return self.engine.execute(instrs)
 
-        return self._common_execute(fexecute, instructions, results_format, repeats)
+        return self._common_execute(fexecute, instructions, results_format, repeats, error_mitigation)
 
 
 def _binary_count(results_list, repeats):
@@ -280,35 +302,50 @@ def get_builder(
 def execute_instructions(
     hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
     instructions: Union[List[Instruction], QuantumInstructionBuilder],
-    results_format=None,
+    config: CompilerConfig = None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     repeats: Optional[int] = None,
+    metrics: MetricsType = None,
     *args,
     **kwargs,
 ):
+    if config is None:
+        config = CompilerConfig()
+    config.validate(hardware)
+
     active_runtime = get_runtime(hardware)
 
     active_runtime.run_quantum_executable(executable_blocks)
-    return (
-        active_runtime.execute(instructions, results_format, repeats),
-        active_runtime.compilation_metrics,
+    results = active_runtime.execute(
+        instructions,
+        config.results_format,
+        config.repeats,
+        config.error_mitigation,
     )
+    return results, active_runtime.compilation_metrics
 
 
 def _execute_instructions_with_interrupt(
     hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
     instructions: Union[List[Instruction], QuantumInstructionBuilder],
-    results_format=None,
+    config: CompilerConfig = None,
     executable_blocks: List[QuantumExecutableBlock] = None,
-    repeats: Optional[int] = None,
     interrupt: Interrupt = NullInterrupt(),
     *args,
     **kwargs,
 ):
+    if config is None:
+        config = CompilerConfig()
+    config.validate(hardware)
+
     active_runtime = get_runtime(hardware)
     active_runtime.run_quantum_executable(executable_blocks)
 
-    return (
-        active_runtime._execute_with_interrupt(instructions, results_format, repeats, interrupt),
-        active_runtime.compilation_metrics
+    results = active_runtime._execute_with_interrupt(
+        instructions,
+        config.results_format,
+        config.repeats,
+        interrupt,
+        config.error_mitigation,
     )
+    return results, active_runtime.compilation_metrics
