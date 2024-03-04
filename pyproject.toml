@@ -46,7 +46,7 @@ black = "24.2.0"
 coverage = "^6.3.2"
 pytest-cov = "~=2.10.1"
 autoflake = "^2.2.0"
-isort = "^5.10.1"
+isort = "^5.13.2"
 docplex = "^2.21.207"
 
 [tool.poetry.group.licenses]
@@ -86,7 +86,7 @@ line_length = 92
 
 [tool.black]
 line-length = 92
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.poetry.scripts]
 build-docs = "poetry_scripts:build_docs"
