@@ -16,6 +16,7 @@ jobs:
   formatting-tests:
     name: Consistency and formatting
     runs-on: [ubuntu-latest]
+
     steps:
       - uses: actions/checkout@v3
 
@@ -29,10 +30,18 @@ jobs:
 
       - name: Formatting tests
         run: |
-          poetry install
+          poetry install --with dev
           poetry run black --check .
-          poetry run isort --check-only .
           poetry run autoflake --check .
+  isort-test:
+    # Isort test separate using the official isort runner to ensure correct settings picked up
+    name: Run isort
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: isort/isort-action@v1
+        with:
+            requirements-files: "pyproject.toml"
+
 
   unit-tests:
     name: Unit Tests

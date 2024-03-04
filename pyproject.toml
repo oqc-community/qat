@@ -80,7 +80,7 @@ ignore-init-module-imports = true
 ignore-pass-after-docstring = true
 
 [tool.isort]
-py_version = 38
+py_version = 39
 profile = "black"
 line_length = 92
 
