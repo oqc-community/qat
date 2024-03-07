@@ -24,6 +24,8 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
+from .utils import ListReturningEngine
+
 
 class TestInstruction:
     def test_name_assignment(self):
@@ -104,6 +106,80 @@ class TestInstructionExecution:
         engine = EchoEngine(hw)
         results = engine.execute(builder.instructions)
         assert results is not None
+
+    def check_size(self, results, expected_shape):
+        if isinstance(results, np.ndarray):
+            assert results.shape == expected_shape
+        else:
+            dims = set()
+            def _check_size(list_, dim):
+                dims.add(dim)
+                assert len(list_) == expected_shape[dim]
+                if len(list_) > 0 and not isinstance(list_[0], list):
+                    return
+                for l in list_:
+                    _check_size(l, dim + 1)
+            _check_size(results, 0)
+            assert max(dims) == len(expected_shape) - 1
+
+    @pytest.mark.parametrize(
+        "engine, form",
+        [(EchoEngine, np.ndarray), (ListReturningEngine, list)]
+    )
+    @pytest.mark.parametrize(
+        "sweeps",
+        [{}, {
+            "amp": [i * 1e6 for i in range(5)]
+        }, {
+            "amp": [i * 1e6 for i in range(5)], "width": [i * 100e-9 for i in range(1, 4)]
+        }], ids=lambda val: f"{len(val)} sweep variables"
+    )
+    def test_batched_instruction_execution(self, sweeps, engine, form):
+        hw = get_default_echo_hardware()
+        hw.default_repeat_count = int(hw.shot_limit * 1.5)
+        eng = engine(hw)
+
+        vars_ = {"amp": 1e6, "width": 100e-9}
+        shape = []
+
+        qubit = hw.get_qubit(0)
+        builder = get_builder(hw)
+        for n, v in sweeps.items():
+            builder.sweep(SweepValue(n, v))
+            vars_[n] = Variable(n)
+            shape.append(len(v))
+        if len(shape) < 1:
+            shape.append(1)
+        shape = (*shape, hw.default_repeat_count)
+        builder.pulse(
+            qubit.get_drive_channel(),
+            width=vars_["width"],
+            shape=PulseShapeType.SQUARE,
+            amp=vars_["amp"]
+        )
+        builder.measure_single_shot_z(qubit)
+        results, metrics = execute_instructions(eng, builder)
+        assert isinstance(results, form)
+        self.check_size(results, shape)
+
+    @pytest.mark.skip("Needs fixing for combining bathes of mean results.")
+    def test_batched_instruction_execution_with_mean(self):
+        hw = get_default_echo_hardware()
+        hw.default_repeat_count = int(hw.shot_limit * 1.5)
+        eng = EchoEngine(hw)
+
+        qubit = hw.get_qubit(0)
+        amps = [i * 1e6 for i in range(5)]
+        builder = get_builder(hw).sweep(SweepValue("amp", amps))
+        builder.pulse(
+            qubit.get_drive_channel(),
+            width=100e-9,
+            shape=PulseShapeType.SQUARE,
+            amp=Variable('amp')
+        )
+        builder.measure_mean_z(qubit)
+        results = execute_instructions(eng, builder)[0]
+        assert results.shape == (5, )
 
 
 class TestSweep:
