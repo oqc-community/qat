@@ -195,10 +195,9 @@ instrument which needs to have get_voltage and set_voltage function.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.live_devices.Instrument">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.live_devices.Instrument" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable" title="qat.purr.compiler.devices.Calibratable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibratable</span></code></a></p>
-<p>An interface for any live instrument. It requires a unique address (IP address, USB
-VISA address, etc.). It is derived from Calibratable so the instruments will be
-saved in the calibration files. To avoid saving driver specific data in the
-calibration files, the actual drivers should be a property of this object, so the
+<p>An interface for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
+It is derived from Calibratable so the instruments will be saved in the calibration files. To avoid saving
+driver specific data in the calibration files, the actual drivers should be a property of this object, so the
 calibration will skip it.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.live_devices.Instrument.close">
