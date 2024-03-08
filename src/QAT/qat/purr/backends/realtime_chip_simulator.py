@@ -708,7 +708,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
             return instructions
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile
+    ) -> Dict[str, np.ndarray]:
         """
         Derivation of the mathematics behind this simulation can be found in the docs
         folder, "Realtime chip simulator mathematical derivation.pdf". Emulate the

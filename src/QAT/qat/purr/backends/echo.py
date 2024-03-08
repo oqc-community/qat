@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from typing import Dict
+
 import numpy as np
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
@@ -97,7 +99,9 @@ class EchoEngine(QuantumExecutionEngine):
 
         return instructions
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile
+    ) -> Dict[str, np.ndarray]:
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
