@@ -222,9 +222,7 @@ class LogFolderTests(unittest.TestCase):
             log_folder = logger.LogFolder(
                 base_folder_path=tempdir, folder_name=name, prefix=prefix, suffix=suffix
             )
-            assert f"{prefix}_{name}_{suffix}" == os.path.basename(
-                log_folder.folder_path
-            )
+            assert f"{prefix}_{name}_{suffix}" == os.path.basename(log_folder.folder_path)
             assert os.path.exists(log_folder.folder_path)
 
     def test_temp_folder_with_cleanup(self):

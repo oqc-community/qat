@@ -42,8 +42,7 @@ def remove_axes(original_dims, removed_axis_indices, axis_locations):
     }
     new_dims = original_dims - len(removed_axis_indices)
     new_axis_locations = {
-        k: (v - new_dims) if axis_negative[k] else v
-        for k, v in new_axis_locations.items()
+        k: (v - new_dims) if axis_negative[k] else v for k, v in new_axis_locations.items()
     }
     return new_axis_locations
 
@@ -187,10 +186,7 @@ class SinFunction(ComplexFunction):
 
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         return (
-            2
-            * pi
-            * self.frequency
-            * cos(2 * pi * x * self.frequency + self.internal_phase)
+            2 * pi * self.frequency * cos(2 * pi * x * self.frequency + self.internal_phase)
         )
 
 
@@ -215,9 +211,7 @@ class RoundedSquareFunction(NumericFunction):
         x2 = self.width / 2
         rescaling = self.step(-x1 / self.rise_time) + self.step(x2 / self.rise_time) - 1
         return rescaling * (
-            self.step((x - x1) / self.rise_time)
-            + self.step(-(x - x2) / self.rise_time)
-            - 1
+            self.step((x - x1) / self.rise_time) + self.step(-(x - x2) / self.rise_time) - 1
         )
 
 
@@ -338,9 +332,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0, half_sample=False):
         if half_sample:
             amplitude = [point for i, point in enumerate(amplitude) if i % 2 == 0]
     else:
-        raise ValueError(
-            f"'{str(data)}' is an unknown pulse type. Can't evaluate shape."
-        )
+        raise ValueError(f"'{str(data)}' is an unknown pulse type. Can't evaluate shape.")
 
     buf = scale_factor * amp * np.exp(1.0j * phase_offset) * amplitude
     if not drag == 0.0:

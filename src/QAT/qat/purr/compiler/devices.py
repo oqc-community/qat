@@ -57,9 +57,7 @@ def build_qubit(
     Helper method tp build a qubit with assumed default values on the channels. Modelled
     after the live hardware.
     """
-    qubit = Qubit(
-        index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id
-    )
+    qubit = Qubit(index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id)
     qubit.create_pulse_channel(
         ChannelType.drive,
         frequency=drive_freq,
@@ -181,13 +179,9 @@ class Calibratable:
 
     @staticmethod
     def load_calibration(calibration_string):
-        reconstituted = jsonpickle.decode(
-            calibration_string, context=CyclicRefUnpickler()
-        )
+        reconstituted = jsonpickle.decode(calibration_string, context=CyclicRefUnpickler())
         if isinstance(reconstituted, str):
-            raise ValueError(
-                "Loading from calibration string failed. Please regenerate."
-            )
+            raise ValueError("Loading from calibration string failed. Please regenerate.")
 
         return reconstituted
 
@@ -351,11 +345,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
             return primary_resonator
 
         proxy_resonator = next(
-            (
-                qb.related_resonator
-                for qb in self.related_devices
-                if isinstance(qb, Qubit)
-            ),
+            (qb.related_resonator for qb in self.related_devices if isinstance(qb, Qubit)),
             None,
         )
         if proxy_resonator is not None:
@@ -614,7 +604,7 @@ class FreqShiftPulseChannel(PulseChannel):
         amp=0.0,
         active: bool = True,
         fixed_if: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
         self.amp: float = amp
@@ -669,7 +659,6 @@ class QuantumDevice(QuantumComponent, Calibratable):
 
         if id_ is None:
             id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
-
 
         pulse_channel = PulseChannel.build(
             id_,
@@ -767,9 +756,7 @@ class Qubit(QuantumDevice):
         *args,
         **kwargs,
     ):
-        super().__init__(
-            id_ or f"Q{index}", physical_channel, resonator, *args, **kwargs
-        )
+        super().__init__(id_ or f"Q{index}", physical_channel, resonator, *args, **kwargs)
         self.index = index
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]

@@ -2,12 +2,12 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import base64
-import numpy as np
 from os.path import abspath, dirname, join
 from unittest import mock
 
+import numpy as np
 import pytest
-
+from qat import execute, execute_qir
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
@@ -16,7 +16,6 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
-from qat import execute, execute_qir
 
 from tests.qasm_utils import TestFileType, get_test_file_path
 from tests.utils import get_jagged_echo_hardware
@@ -77,9 +76,7 @@ class TestQIR:
     def test_complicated(self):
         config = CompilerConfig()
         config.results_format.most_probable_bitstring()
-        execute_qir(
-            _get_qir_path("complicated.ll"), get_default_echo_hardware(4), config
-        )
+        execute_qir(_get_qir_path("complicated.ll"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
     def test_hello_bitcode(self):
@@ -100,9 +97,7 @@ class TestQIR:
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
         config.results_format.most_probable_bitstring()
-        execute_qir(
-            _get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config
-        )
+        execute_qir(_get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config)
 
     def test_common_entrypoint_file(self):
         config = CompilerConfig()
@@ -125,10 +120,8 @@ class TestQIR:
         config.results_format.binary_count()
         program = _get_contents("base64_bitcode_ghz")
         program = base64.b64decode(program)
-        results = execute(
-            program, get_default_echo_hardware(4), config
-        )
-        assert results == {'0': 1000}
+        results = execute(program, get_default_echo_hardware(4), config)
+        assert results == {"0": 1000}
 
     def test_invalid_QIR(self):
         config = CompilerConfig()
@@ -223,7 +216,9 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("generator-bell.ll"), get_default_RTCS_hardware(), compiler_config=config
+            _get_qir_path("generator-bell.ll"),
+            get_default_RTCS_hardware(),
+            compiler_config=config,
         )
         assert len(results) == 4
         assert results["00"] > 1
@@ -238,7 +233,9 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("out_of_order_measure.ll"), get_default_RTCS_hardware(), compiler_config=config
+            _get_qir_path("out_of_order_measure.ll"),
+            get_default_RTCS_hardware(),
+            compiler_config=config,
         )
         assert len(results) == 4
 

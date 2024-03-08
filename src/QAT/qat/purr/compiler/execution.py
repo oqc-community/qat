@@ -19,7 +19,13 @@ from qat.purr.backends.utilities import (
     software_post_process_mean,
 )
 from qat.purr.compiler.config import InlineResultsProcessing, ResultsFormatting
-from qat.purr.compiler.devices import ChannelType, MaxPulseLength, MeasureChannel, PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import (
+    ChannelType,
+    MaxPulseLength,
+    MeasureChannel,
+    PulseChannel,
+    PulseShapeType,
+)
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -36,6 +42,7 @@ from qat.purr.compiler.instructions import (
     PostProcessing,
     PostProcessType,
     Pulse,
+    QuantumInstruction,
     Repeat,
     Reset,
     ResultsProcessing,
@@ -44,7 +51,6 @@ from qat.purr.compiler.instructions import (
     Variable,
     Waveform,
     is_generated_name,
-    QuantumInstruction,
 )
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
@@ -89,9 +95,7 @@ class InstructionExecutionEngine(abc.ABC):
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
-    def __init__(
-        self, model: QuantumHardwareModel = None, instruction_limit: int = 200000
-    ):
+    def __init__(self, model: QuantumHardwareModel = None, instruction_limit: int = 200000):
         super().__init__(model)
         self.instruction_limit = instruction_limit
 
@@ -146,8 +150,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         missing_results = {
             val.output_variable
             for val in qfile.instructions
-            if isinstance(val, Acquire)
-            and val.output_variable not in results_processing
+            if isinstance(val, Acquire) and val.output_variable not in results_processing
         }
 
         # For any acquires that are raw, assume they're experiment results.
@@ -159,9 +162,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         for inst in results_processing.values():
             target_values = results.get(inst.variable, None)
             if target_values is None:
-                raise ValueError(
-                    f"Variable {inst.variable} not found in results output."
-                )
+                raise ValueError(f"Variable {inst.variable} not found in results output.")
 
             if (
                 InlineResultsProcessing.Raw in inst.results_processing
@@ -184,9 +185,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return results
 
-    def _apply_results_formatting(
-        self, results, format_flags: ResultsFormatting, repeats
-    ):
+    def _apply_results_formatting(self, results, format_flags: ResultsFormatting, repeats):
         """
         Transform the raw results into the format that we've been asked to provide. Look at individual transformation
         documentation for descriptions on what they do.
@@ -250,7 +249,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: List[Instruction] = []
         for instruction in instructions:
-            if isinstance(instruction, PhaseShift) and isinstance(instruction.phase, Number):
+            if isinstance(instruction, PhaseShift) and isinstance(
+                instruction.phase, Number
+            ):
                 if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
                     accum_phaseshift.phase += instruction.phase
                 else:
@@ -260,9 +261,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             elif isinstance(instruction, Pulse):
                 for quantum_target in instruction.quantum_targets:
                     if quantum_target in accum_phaseshifts:
-                        optimized_instructions.append(
-                            accum_phaseshifts.pop(quantum_target)
-                        )
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
@@ -469,9 +468,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 if isinstance(qtarget, Acquire):
                     qtarget = qtarget.channel
 
-                device_instructions: List[PositionData] = results.setdefault(
-                    qtarget, []
-                )
+                device_instructions: List[PositionData] = results.setdefault(qtarget, [])
                 if not any(device_instructions):
                     sample_start = 0
                 else:
@@ -517,19 +514,25 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             if all(isinstance(pos_data.instruction, Delay) for pos_data in timeline):
                 del results[key]
 
-        if final_positions := [final_position[-1].end for final_position in list(results.values())]:
+        if final_positions := [
+            final_position[-1].end for final_position in list(results.values())
+        ]:
             end_point = max(final_positions)
 
             for qubit in self.model.qubits:
-                if freq_channel := qubit.pulse_channels.get(ChannelType.freq_shift.name, None):
+                if freq_channel := qubit.pulse_channels.get(
+                    ChannelType.freq_shift.name, None
+                ):
                     if freq_channel.active:
                         pulse = Pulse(
                             freq_channel,
                             shape=PulseShapeType.SQUARE,
                             amp=freq_channel.amp,
-                            width=end_point*qubit.physical_channel.sample_time
+                            width=end_point * qubit.physical_channel.sample_time,
                         )
-                        results[freq_channel] = [PositionData(0, end_point, pulse), ]
+                        results[freq_channel] = [
+                            PositionData(0, end_point, pulse),
+                        ]
         return results
 
     def build_pulse_channel_buffers(
@@ -557,9 +560,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 elif isinstance(pos.instruction, Reset):
                     self.process_reset(pos)
                 elif isinstance(pos.instruction, FrequencyShift):
-                    frequency = self.process_frequencyshift(
-                        pos, frequency, pulse_channel
-                    )
+                    frequency = self.process_frequencyshift(pos, frequency, pulse_channel)
 
         return buffers
 
@@ -745,9 +746,7 @@ def _binary_count(results_list, repeats):
             return str(res)
 
     def get_tuple(res, index):
-        return [
-            val[index] if isinstance(val, (List, np.ndarray)) else val for val in res
-        ]
+        return [val[index] if isinstance(val, (List, np.ndarray)) else val for val in res]
 
     binary_results = _binary(results_list)
 
@@ -921,9 +920,11 @@ class IteratorInjector(ValueReplacement):
             return type_to_check(expanded)
         elif isinstance(self.iteration, Dict):
             return {
-                key: replacements[value.name][index]
-                if isinstance(value, Variable) and key in replacements
-                else value
+                key: (
+                    replacements[value.name][index]
+                    if isinstance(value, Variable) and key in replacements
+                    else value
+                )
                 for key, value in self.iteration.items()
             }
         else:
@@ -1119,9 +1120,7 @@ class SweepIterator:
                         val, replacers, index, revert, recursion_guard
                     )
             else:
-                self._inject_sweep_values(
-                    value, replacers, index, revert, recursion_guard
-                )
+                self._inject_sweep_values(value, replacers, index, revert, recursion_guard)
 
     def reset_iteration(self):
         """
@@ -1153,9 +1152,7 @@ class SweepIterator:
             return
 
         for inst in instructions:
-            self._inject_sweep_values(
-                inst, self.sweep.variables, self.current_iteration
-            )
+            self._inject_sweep_values(inst, self.sweep.variables, self.current_iteration)
 
         if self.nested_sweep is not None:
             self.nested_sweep.do_sweep(instructions)

@@ -13,6 +13,36 @@ permissions:
 run-name: Build from ${{ github.ref }}
 
 jobs:
+  formatting-tests:
+    name: Consistency and formatting
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Formatting tests
+        run: |
+          poetry install --with dev
+          poetry run black --check .
+          poetry run autoflake --check .
+  isort-test:
+    # Isort test separate using the official isort runner to ensure correct settings picked up
+    name: Run isort
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: isort/isort-action@v1
+        with:
+            requirements-files: "pyproject.toml"
+
+
   unit-tests:
     name: Unit Tests
     runs-on: [ubuntu-latest]

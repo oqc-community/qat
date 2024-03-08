@@ -120,9 +120,7 @@ class Connectivity(Enum):
 
 def get_default_echo_hardware(
     qubit_count=4,
-    connectivity: Optional[
-        Union[Connectivity, List[Tuple[int, int]]]
-    ] = Connectivity.Ring,
+    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = Connectivity.Ring,
 ) -> "QuantumHardwareModel":
     """
     Generate a default echo backend optionally providing the type of connectivity. Either you pass a pre-defined connectivity as

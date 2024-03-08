@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import os
-import pytest
 
+import pytest
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

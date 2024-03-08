@@ -9,7 +9,12 @@ from typing import Tuple, Union
 
 import regex
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config, default_language_options
+from qat.purr.compiler.config import (
+    CompilerConfig,
+    Languages,
+    default_language_options,
+    get_optimizer_config,
+)
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
@@ -47,20 +52,17 @@ class LanguageFrontend(abc.ABC):
         instructions: InstructionBuilder,
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
-    ):
-        ...
+    ): ...
 
     @abc.abstractmethod
     def parse_and_execute(
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
-    ):
-        ...
+    ): ...
 
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> Tuple[InstructionBuilder, CompilationMetrics]:
-        ...
+    ) -> Tuple[InstructionBuilder, CompilationMetrics]: ...
 
 
 class QIRFrontend(LanguageFrontend):
@@ -70,7 +72,6 @@ class QIRFrontend(LanguageFrontend):
         hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
         compiler_config: CompilerConfig,
     ):
-
         return execute_instructions_via_config(hardware, instructions, compiler_config)
 
     def parse_and_execute(
@@ -80,8 +81,7 @@ class QIRFrontend(LanguageFrontend):
         compiler_config: CompilerConfig,
     ):
         instructions, parse_metrics = self.parse(path_or_str, hardware, compiler_config)
-        result, execution_metrics = \
-            self.execute(instructions, hardware, compiler_config)
+        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 
@@ -138,9 +138,7 @@ class QASMFrontend(LanguageFrontend):
         self, file_or_str: str, hardware, compiler_config: CompilerConfig
     ):
         instructions, parse_metrics = self.parse(file_or_str, hardware, compiler_config)
-        result, execution_metrics = self.execute(
-            instructions, hardware, compiler_config
-        )
+        result, execution_metrics = self.execute(instructions, hardware, compiler_config)
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 

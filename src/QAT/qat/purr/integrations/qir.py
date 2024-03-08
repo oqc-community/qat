@@ -2,14 +2,6 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from typing import List, Union
 
-from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.execution import InstructionExecutionEngine
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Variable
-from qat.purr.compiler.runtime import get_builder
-from qat.purr.utils.logging_utils import log_duration
-
 from pyqir import (
     Call,
     Constant,
@@ -22,13 +14,20 @@ from pyqir import (
     qubit_id,
     result_id,
 )
+from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.config import InlineResultsProcessing
+from qat.purr.compiler.execution import InstructionExecutionEngine
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.instructions import Variable
+from qat.purr.compiler.runtime import get_builder
+from qat.purr.utils.logging_utils import log_duration
 
 
 class QIRParser:
     def __init__(
         self,
         hardware: Union[QuantumHardwareModel, InstructionExecutionEngine],
-        builder=None
+        builder=None,
     ):
         if isinstance(hardware, InstructionExecutionEngine):
             hardware = hardware.model
@@ -110,12 +109,14 @@ class QIRParser:
                 args: List[Constant] = inst.args
                 intrinsic_name = inst.callee.name
                 if intrinsic_name in (
-                    "__quantum__qis__ccx__body", "__quantum__qis__ccnot__body"
+                    "__quantum__qis__ccx__body",
+                    "__quantum__qis__ccnot__body",
                 ):
                     throw_on_invalid_args(len(args), 3)
                     self.ccx(qubit_id(args[0]), qubit_id(args[1]), qubit_id(args[2]))
                 elif intrinsic_name in (
-                    "__quantum__qis__cnot__body", "__quantum__qis__cx__body"
+                    "__quantum__qis__cnot__body",
+                    "__quantum__qis__cx__body",
                 ):
                     throw_on_invalid_args(len(args), 2)
                     self.cx(qubit_id(args[0]), qubit_id(args[1]))
@@ -175,7 +176,9 @@ class QIRParser:
                     res = result_id(args[0])
                     label_ptr = args[1]
                     label = ""
-                    if (not label_ptr.is_null) and (byte_string := extract_byte_string(label_ptr)):
+                    if (not label_ptr.is_null) and (
+                        byte_string := extract_byte_string(label_ptr)
+                    ):
                         label = byte_string.decode("utf-8").rstrip("\x00")
                     self.result_variables.append((Variable(str(res)), label))
 
@@ -194,9 +197,9 @@ class QIRParser:
             if entry_point is None:
                 raise ValueError("Entry point unable to be found in QIR file.")
 
-            self.process_instructions([
-                inst for bb in entry_point.basic_blocks for inst in bb.instructions
-            ])
+            self.process_instructions(
+                [inst for bb in entry_point.basic_blocks for inst in bb.instructions]
+            )
 
             if any(self.result_variables):
                 potential_names = [
@@ -205,7 +208,7 @@ class QIRParser:
                 if not any(potential_names):
                     result_name = Variable.generate_name()
                 else:
-                    result_name = '_'.join(potential_names)
+                    result_name = "_".join(potential_names)
 
                 self.builder.assign(result_name, [val[0] for val in self.result_variables])
                 self.builder.returns(result_name)

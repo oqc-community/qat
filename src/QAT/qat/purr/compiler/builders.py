@@ -9,10 +9,7 @@ from typing import List, Set, Union
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit
-from qat.purr.compiler.hardware_models import (
-    QuantumHardwareModel,
-    resolve_qb_pulse_channel,
-)
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -442,21 +439,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
-        return self.post_processing(
-            acquire, PostProcessType.MEAN, ProcessAxis.TIME, target
-        )
+        return self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
 
-    def measure_mean_z(
-        self, target: Qubit, axis: str = None, output_variable: str = None
-    ):
+    def measure_mean_z(self, target: Qubit, axis: str = None, output_variable: str = None):
         _, acquire = self.measure(target, axis, output_variable)
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
         self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
-        self.post_processing(
-            acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target
-        )
+        self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target)
         return self.post_processing(
             acquire, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, qubit=target
         )
@@ -550,9 +541,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         acquire_channel = qubit.get_acquire_channel()
         acquire_instruction = Acquire(
             acquire_channel,
-            qubit.pulse_measure["width"]
-            if qubit.measure_acquire["sync"]
-            else qubit.measure_acquire["width"],
+            (
+                qubit.pulse_measure["width"]
+                if qubit.measure_acquire["sync"]
+                else qubit.measure_acquire["width"]
+            ),
             mode,
             output_variable,
             self.existing_names,
@@ -566,9 +559,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             val for val in previous_measure_block if isinstance(val, PhaseReset)
         ]
 
-        full_measure_block = set(
-            [val.__class__ for val in previous_measure_block]
-        ) == set(mblock_types + optional_block_types)
+        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
+            mblock_types + optional_block_types
+        )
 
         if full_measure_block and len(syncs) >= 2 and len(phase_resets) >= 1:
             # Find the pre-measure sync in the preceeding measure block and merge our
@@ -725,9 +718,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_channels = [
             control.get_pulse_channel(ChannelType.drive),
             control.get_pulse_channel(ChannelType.cross_resonance, [target]),
-            control.get_pulse_channel(
-                ChannelType.cross_resonance_cancellation, [target]
-            ),
+            control.get_pulse_channel(ChannelType.cross_resonance_cancellation, [target]),
             target.get_pulse_channel(ChannelType.drive),
         ]
 

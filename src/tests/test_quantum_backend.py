@@ -6,7 +6,6 @@ from os.path import dirname, join
 
 import numpy as np
 import pytest
-
 from qat import execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine, sync_baseband_frequencies_to_value
@@ -19,10 +18,10 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
+    FreqShiftPulseChannel,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
-    FreqShiftPulseChannel,
     PulseShapeType,
     QubitCoupling,
     add_cross_resonance,
@@ -152,9 +151,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 class TestBaseQuantum:
     def get_qasm2(self, file_name):
-        with open(
-            join(dirname(__file__), "files", "qasm", file_name), "r"
-        ) as qasm_file:
+        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
             return qasm_file.read()
 
     def test_batched_execution(self):
@@ -265,9 +262,7 @@ class TestBaseQuantum:
             get_builder(hw)
             .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
             .synchronize([drive_channel, second_state_channel])
-            .pulse(
-                second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate
-            )
+            .pulse(second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate)
             .measure_scope_mode(qubit)
         )  # yapf: disable
 
@@ -308,14 +303,10 @@ class TestBaseQuantum:
         sync_baseband_frequencies_to_value(hw, common_lo_frequency, [0, 1])
         assert drive_channel_1.frequency == 5.0e9
         assert drive_channel_2.frequency == 5.5e9
-        assert (
-            baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
-        )
+        assert baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
         assert baseband_1.frequency == common_lo_frequency
         assert baseband_2.frequency == common_lo_frequency
-        assert (
-            baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
-        )
+        assert baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
 
     def test_setup_hold_measure_pulse(self):
         hw = get_test_model()
@@ -333,9 +324,7 @@ class TestBaseQuantum:
         )
         result = result[0]
         setup_length = (
-            int(
-                qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time
-            )
+            int(qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time)
             + 1
         )
         full_length = int(
@@ -387,8 +376,7 @@ class TestBaseQuantum:
             result[: setup_length - delay_length].real,
         )
         assert np.array_equal(
-            qubit.pulse_measure["amp"]
-            * np.ones(full_length - setup_length + delay_length),
+            qubit.pulse_measure["amp"] * np.ones(full_length - setup_length + delay_length),
             result[setup_length - delay_length : full_length].real,
         )
 
@@ -441,17 +429,24 @@ class TestBaseQuantum:
 
         for qid in freq_shift_qubits:
             qubit = hardware.get_qubit(qid)
-            freq_channel = qubit.create_pulse_channel(channel_type=ChannelType.freq_shift,
-                                       frequency=8.5e9,
-                                       scale=1.0,
-                                       amp=1.0,
-                                       id_='freq_shift',
-                                      )
-            hardware.add_pulse_channel(freq_channel,)
+            freq_channel = qubit.create_pulse_channel(
+                channel_type=ChannelType.freq_shift,
+                frequency=8.5e9,
+                scale=1.0,
+                amp=1.0,
+                id_="freq_shift",
+            )
+            hardware.add_pulse_channel(
+                freq_channel,
+            )
 
         for qubit in hardware.qubits:
             builder.pulse(
-                qubit.get_drive_channel(), PulseShapeType.SQUARE, width=1e-6, amp=1, ignore_channel_scale=True
+                qubit.get_drive_channel(),
+                PulseShapeType.SQUARE,
+                width=1e-6,
+                amp=1,
+                ignore_channel_scale=True,
             )
 
         return builder
@@ -471,8 +466,8 @@ class TestBaseQuantum:
         qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
         assert len(qubit1_buffer) > 0
         assert len(qubit2_buffer) > 0
-        assert np.isclose(qubit1_buffer, 1+0j).all()
-        assert np.isclose(qubit2_buffer, 1+0j).all()
+        assert np.isclose(qubit1_buffer, 1 + 0j).all()
+        assert np.isclose(qubit2_buffer, 1 + 0j).all()
 
     def test_freq_shift(self):
         hardware = get_default_echo_hardware(2)
@@ -498,15 +493,20 @@ class TestBaseQuantum:
             .X(qubit, np.pi / 2.0)
             .phase_shift(qubit, phase_shift_1)
             .phase_shift(qubit, phase_shift_2)
-            .X(qubit, np.pi / 2.0).measure_mean_z(qubit)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
         )
         engine = get_test_execution_engine(hw)
         optimized_instructions = engine.optimize(builder.instructions)
-        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        phase_shift_list = [
+            instr for instr in optimized_instructions if isinstance(instr, PhaseShift)
+        ]
         assert len(phase_shift_list) == 1
         assert phase_shift_list[0].phase == phase_shift_1 + phase_shift_2
 
-    def test_phase_shift_optimisation_does_not_squash_down_non_adjacent_phase_shifts(self):
+    def test_phase_shift_optimisation_does_not_squash_down_non_adjacent_phase_shifts(
+        self,
+    ):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
         phase_shift_1 = 0.2
@@ -521,7 +521,9 @@ class TestBaseQuantum:
         )
         engine = get_test_execution_engine(hw)
         optimized_instructions = engine.optimize(builder.instructions)
-        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        phase_shift_list = [
+            instr for instr in optimized_instructions if isinstance(instr, PhaseShift)
+        ]
         assert len(phase_shift_list) == 2
         assert phase_shift_list[0].phase == phase_shift_1
         assert phase_shift_list[1].phase == phase_shift_2
@@ -537,11 +539,14 @@ class TestBaseQuantum:
             .X(qubit, np.pi / 2.0)
             .phase_shift(qubit, Variable("p"))
             .phase_shift(qubit, phase_shift_fixed)
-            .X(qubit, np.pi / 2.0).measure_mean_z(qubit)
+            .X(qubit, np.pi / 2.0)
+            .measure_mean_z(qubit)
         )
         engine = get_test_execution_engine(hw)
         optimized_instructions = engine.optimize(builder.instructions)
-        phase_shift_list = [instr for instr in optimized_instructions if isinstance(instr, PhaseShift)]
+        phase_shift_list = [
+            instr for instr in optimized_instructions if isinstance(instr, PhaseShift)
+        ]
         assert len(phase_shift_list) == 2
         assert phase_shift_list[1].phase == phase_shift_fixed
         assert isinstance(phase_shift_list[0].phase, Variable)

@@ -7,7 +7,7 @@ from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
-from qat.purr.compiler.runtime import get_builder, QuantumRuntime
+from qat.purr.compiler.runtime import QuantumRuntime, get_builder
 from qat.purr.integrations.qasm import Qasm3Parser
 
 np.set_printoptions(
@@ -20,8 +20,15 @@ logging.disable()
 
 
 class PhysicalBufferPlotEngine(EchoEngine):
-    def __init__(self, model, target_engine=None, channels=None, upconvert=True,
-                 figsize=None, name=None):
+    def __init__(
+        self,
+        model,
+        target_engine=None,
+        channels=None,
+        upconvert=True,
+        figsize=None,
+        name=None,
+    ):
         super().__init__(model)
         self.target = target_engine or self
         self.channels = channels
@@ -31,7 +38,9 @@ class PhysicalBufferPlotEngine(EchoEngine):
 
     def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
         position_map = self.target.create_duration_timeline(package)
-        pulse_buffers = self.target.build_pulse_channel_buffers(position_map, do_upconvert=self.upconvert)
+        pulse_buffers = self.target.build_pulse_channel_buffers(
+            position_map, do_upconvert=self.upconvert
+        )
         buffers = self.target.build_physical_channel_buffers(pulse_buffers)
         channels = self.channels or buffers.keys()
 
@@ -90,7 +99,9 @@ def plot_physical_buffers(
     engine: qat execution engine to use to generate buffers. Defaults to Echo hardware engine
     channels: physical channel ids for the channels to be plotted. If None, plots all channels.
     """
-    engine = PhysicalBufferPlotEngine(builder.model, engine, channels, upconvert, figsize, name)
+    engine = PhysicalBufferPlotEngine(
+        builder.model, engine, channels, upconvert, figsize, name
+    )
     runtime = QuantumRuntime(engine)
     runtime.execute(builder)
 

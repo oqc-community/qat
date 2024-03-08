@@ -40,7 +40,7 @@ class Instrument(Calibratable):
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
-                    f'Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}'
+                    f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
                 )
 
     @property
@@ -74,7 +74,9 @@ class ControlHardwareChannel(PhysicalChannel):
     derived) object should contain hardware specific information.
     """
 
-    def __init__(self, id_, hardware_id, dcbiaschannel_pair, *args, switch_ch=None, **kwargs):
+    def __init__(
+        self, id_, hardware_id, dcbiaschannel_pair, *args, switch_ch=None, **kwargs
+    ):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
         self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
