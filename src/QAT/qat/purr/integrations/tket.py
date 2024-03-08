@@ -35,12 +35,13 @@ from pytket.passes import (
 )
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
+from qiskit.qasm.node import Cnot, UniversalUnitary
+from sympy import pi, sympify
+
 from qat.purr.compiler.config import TketOptimizations
 from qat.purr.compiler.execution import QuantumHardwareModel
 from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
 from qat.purr.utils.logger import get_default_logger
-from qiskit.qasm.node import Cnot, UniversalUnitary
-from sympy import pi, sympify
 
 log = get_default_logger()
 

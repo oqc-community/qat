@@ -7,6 +7,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
+
 from qat import execute, execute_qir
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import (
@@ -16,7 +17,6 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
-
 from tests.qasm_utils import TestFileType, get_test_file_path
 from tests.utils import get_jagged_echo_hardware
 

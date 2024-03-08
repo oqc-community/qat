@@ -8,6 +8,7 @@ from numbers import Number
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
+
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -390,12 +391,14 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                                 (existing, appending), axis=existing.ndim - 1
                             )
                         else:
+
                             def combine_lists(exi, new):
                                 if len(new) > 0 and not isinstance(new[0], list):
                                     exi += new
                                     return
                                 for i, item in enumerate(new):
                                     combine_lists(exi[i], item)
+
                             combine_lists(existing, appending)
 
             # Process metadata assign/return values to make sure the data is in the

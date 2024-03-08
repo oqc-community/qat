@@ -5,6 +5,7 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
+
 from qat import execute, execute_with_metrics
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import (
@@ -255,22 +256,21 @@ class TestConfigExecution:
         assert metrics["optimized_circuit"] is None
         assert metrics["optimized_instruction_count"] is not None
 
+    @pytest.mark.parametrize("engine", [EchoEngine, ListReturningEngine])
     @pytest.mark.parametrize(
-        "engine",
-        [EchoEngine, ListReturningEngine]
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+            ("basic.qasm", TestFileType.QASM3),
+            ("generator-bell.ll", TestFileType.QIR),
+        ],
     )
-    @pytest.mark.parametrize(("input_string", "file_type"),
-                             [
-                                 ("ghz.qasm", TestFileType.QASM2),
-                                 ("basic.qasm", TestFileType.QASM3),
-                                 ("generator-bell.ll", TestFileType.QIR),
-                             ])
     def test_batched_execution(self, input_string, file_type, engine):
         hardware = get_default_echo_hardware()
         program = get_test_file_path(file_type, input_string)
         config = CompilerConfig(
             repeats=int(hardware.shot_limit * 1.5),
-            results_format=QuantumResultsFormat().raw()
+            results_format=QuantumResultsFormat().raw(),
         )
 
         result, _ = execute_with_metrics(program, engine(hardware), config)

@@ -8,6 +8,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
+
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
 from qat.purr.utils.serializer import json_dumps, json_loads

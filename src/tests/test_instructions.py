@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
@@ -112,6 +113,7 @@ class TestInstructionExecution:
             assert results.shape == expected_shape
         else:
             dims = set()
+
             def _check_size(list_, dim):
                 dims.add(dim)
                 assert len(list_) == expected_shape[dim]
@@ -119,20 +121,24 @@ class TestInstructionExecution:
                     return
                 for l in list_:
                     _check_size(l, dim + 1)
+
             _check_size(results, 0)
             assert max(dims) == len(expected_shape) - 1
 
     @pytest.mark.parametrize(
-        "engine, form",
-        [(EchoEngine, np.ndarray), (ListReturningEngine, list)]
+        "engine, form", [(EchoEngine, np.ndarray), (ListReturningEngine, list)]
     )
     @pytest.mark.parametrize(
         "sweeps",
-        [{}, {
-            "amp": [i * 1e6 for i in range(5)]
-        }, {
-            "amp": [i * 1e6 for i in range(5)], "width": [i * 100e-9 for i in range(1, 4)]
-        }], ids=lambda val: f"{len(val)} sweep variables"
+        [
+            {},
+            {"amp": [i * 1e6 for i in range(5)]},
+            {
+                "amp": [i * 1e6 for i in range(5)],
+                "width": [i * 100e-9 for i in range(1, 4)],
+            },
+        ],
+        ids=lambda val: f"{len(val)} sweep variables",
     )
     def test_batched_instruction_execution(self, sweeps, engine, form):
         hw = get_default_echo_hardware()
@@ -155,7 +161,7 @@ class TestInstructionExecution:
             qubit.get_drive_channel(),
             width=vars_["width"],
             shape=PulseShapeType.SQUARE,
-            amp=vars_["amp"]
+            amp=vars_["amp"],
         )
         builder.measure_single_shot_z(qubit)
         results, metrics = execute_instructions(eng, builder)
@@ -175,11 +181,11 @@ class TestInstructionExecution:
             qubit.get_drive_channel(),
             width=100e-9,
             shape=PulseShapeType.SQUARE,
-            amp=Variable('amp')
+            amp=Variable("amp"),
         )
         builder.measure_mean_z(qubit)
         results = execute_instructions(eng, builder)[0]
-        assert results.shape == (5, )
+        assert results.shape == (5,)
 
 
 class TestSweep:
