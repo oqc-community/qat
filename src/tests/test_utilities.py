@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.utilities import (
     BlackmanFunction,

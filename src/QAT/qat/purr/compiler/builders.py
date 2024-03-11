@@ -7,6 +7,7 @@ from enum import Enum, auto
 from typing import List, Set, Union
 
 import numpy as np
+
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit
 from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel

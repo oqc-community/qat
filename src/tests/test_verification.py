@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import pytest
+
 from qat import execute
 from qat.purr.backends.verification import (
     Lucy,

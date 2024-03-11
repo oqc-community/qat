@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import qiskit.ignis.verification.randomized_benchmarking as rb
+
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.purr.utils.logger import get_default_logger

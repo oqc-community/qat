@@ -4,6 +4,9 @@
 from typing import Any, Dict, List, Union
 
 import numpy as np
+from qiskit import QiskitError, QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+
 from qat.purr.backends.echo import (
     Connectivity,
     apply_setup_to_hardware,
@@ -17,8 +20,6 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
-from qiskit import QiskitError, QuantumCircuit, transpile
-from qiskit_aer import AerSimulator
 
 log = get_default_logger()
 

@@ -8,6 +8,8 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import cos, pi, sin
+from scipy.special import erf
+
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -18,7 +20,6 @@ from qat.purr.compiler.instructions import (
     QuantumInstruction,
     Waveform,
 )
-from scipy.special import erf
 
 UPCONVERT_SIGN = 1.0
 

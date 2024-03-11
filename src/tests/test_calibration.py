@@ -4,6 +4,7 @@
 import os
 
 import pytest
+
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

@@ -5,6 +5,8 @@ import re
 from typing import List
 
 import numpy as np
+
+from qat.purr.backends.echo import EchoEngine
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     ChannelType,
@@ -150,3 +152,14 @@ def update_qubit_indices(program: str, qubit_indices: List[int]) -> str:
 
     new_program += program[old_end:]
     return new_program
+
+
+class ListReturningEngine(EchoEngine):
+    """EchoEngine which is forced to return results in list format."""
+
+    def _execute_on_hardware(self, *args, **kwargs):
+        results = super()._execute_on_hardware(*args, **kwargs)
+        for k, v in results.items():
+            if isinstance(v, np.ndarray):
+                results[k] = v.tolist()
+        return results

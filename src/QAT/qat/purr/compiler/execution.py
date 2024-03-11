@@ -8,6 +8,7 @@ from numbers import Number
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
+
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -386,9 +387,19 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
                         # If one is a numpy array, both are. Otherwise traditional list.
                         if isinstance(existing, np.ndarray):
-                            results[key] = np.append(existing, appending)
+                            results[key] = np.concatenate(
+                                (existing, appending), axis=existing.ndim - 1
+                            )
                         else:
-                            existing.append(appending)
+
+                            def combine_lists(exi, new):
+                                if len(new) > 0 and not isinstance(new[0], list):
+                                    exi += new
+                                    return
+                                for i, item in enumerate(new):
+                                    combine_lists(exi[i], item)
+
+                            combine_lists(existing, appending)
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.
@@ -810,7 +821,10 @@ def _numpy_array_to_list(array):
             return numpy_list[0]
         return numpy_list
     elif isinstance(array, List):
-        return [_numpy_array_to_list(val) for val in array]
+        list_list = [_numpy_array_to_list(val) for val in array]
+        if len(list_list) == 1:
+            return list_list[0]
+        return list_list
     else:
         return array
 

@@ -14,6 +14,7 @@ from pyqir import (
     qubit_id,
     result_id,
 )
+
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.execution import InstructionExecutionEngine
