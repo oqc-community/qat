@@ -395,29 +395,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     dinjectors.revert()
                     qat_file.repeat.repeat_count = repeat_count
 
-                if not any(results):
-                    results = batch_results
-                else:
-                    # As it's the same execution we can assume it has the same keys.
-                    for key in results:
-                        existing = results[key]
-                        appending = batch_results[key]
-
-                        # If one is a numpy array, both are. Otherwise traditional list.
-                        if isinstance(existing, np.ndarray):
-                            results[key] = np.concatenate(
-                                (existing, appending), axis=existing.ndim - 1
-                            )
-                        else:
-
-                            def combine_lists(exi, new):
-                                if len(new) > 0 and not isinstance(new[0], list):
-                                    exi += new
-                                    return
-                                for i, item in enumerate(new):
-                                    combine_lists(exi[i], item)
-
-                            combine_lists(existing, appending)
+                results = self._accumulate_results(results, batch_results)
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.
@@ -431,6 +409,49 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             )
             results = self._apply_results_formatting(results, results_format, repeats)
             return results
+
+    @staticmethod
+    def _accumulate_results(results: Dict, batch_results: Dict):
+        if not any(batch_results):
+            return results
+
+        if any(results):
+            if results.keys() != batch_results.keys():
+                raise ValueError(
+                    f"Dictionaries' keys mismatch, {results.keys()} != {batch_results.keys()}"
+                )
+
+            for key in results:
+                existing = results[key]
+                appending = batch_results[key]
+
+                if type(existing) is not type(appending):
+                    raise ValueError(
+                        f"Expected objects with the same type, got {type(existing)} and {type(appending)} instead"
+                    )
+
+                if isinstance(existing, np.ndarray):
+                    results[key] = np.concatenate(
+                        (existing, appending), axis=existing.ndim - 1
+                    )
+                elif isinstance(existing, List):
+
+                    def combine_lists(exi, new):
+                        if len(new) > 0 and not isinstance(new[0], list):
+                            exi += new
+                            return
+                        for i, item in enumerate(new):
+                            combine_lists(exi[i], item)
+
+                    combine_lists(existing, appending)
+                else:
+                    raise ValueError(
+                        f"Cannot combine objects of unsupported type {type(existing)}"
+                    )
+        else:
+            results = batch_results
+
+        return results
 
     @abc.abstractmethod
     def _execute_on_hardware(self, sweep_iterator, package: "QatFile"):
