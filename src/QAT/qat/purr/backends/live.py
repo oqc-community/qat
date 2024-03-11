@@ -259,7 +259,9 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
         return baseband_freqs
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile
+    ) -> Dict[str, np.ndarray]:
         if self.model.control_hardware is None:
             raise ValueError("Please add a control hardware first!")
 

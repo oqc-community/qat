@@ -95,7 +95,8 @@ class QIRFrontend(LanguageFrontend):
         if compiler_config.results_format.format is not None:
             parser.results_format = compiler_config.results_format.format
 
-        return parser.parse(path_or_str), metrics
+        quantum_builder = parser.parse(path_or_str)
+        return self._build_instructions(quantum_builder, hardware, compiler_config), metrics
 
     def parse(
         self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None
