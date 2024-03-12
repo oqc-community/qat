@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from qat import execute
 from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.compiler.builders import InstructionBuilder
@@ -12,8 +13,6 @@ from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction
 from qat.purr.utils.logger import get_default_logger
-
-from qat import execute
 
 log = get_default_logger()
 

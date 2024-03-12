@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
+from qiskit import QuantumCircuit, transpile
+from qiskit.transpiler import TranspilerError
+
 from qat.purr.compiler.config import (
     MetricsType,
     OptimizationConfig,
@@ -14,8 +17,6 @@ from qat.purr.compiler.metrics import MetricsMixin
 from qat.purr.integrations.tket import run_tket_optimizations
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
-from qiskit import QuantumCircuit, transpile
-from qiskit.transpiler import TranspilerError
 
 log = get_default_logger()
 

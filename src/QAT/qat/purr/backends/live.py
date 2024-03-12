@@ -4,6 +4,7 @@
 from typing import Dict, List
 
 import numpy as np
+
 from qat.purr.backends.live_devices import (
     ControlHardware,
     ControlHardwareChannel,

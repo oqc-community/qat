@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Tuple, Union
 
 import regex
+
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,

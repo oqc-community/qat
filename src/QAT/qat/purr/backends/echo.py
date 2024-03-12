@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
+
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     ChannelType,

@@ -8,6 +8,7 @@ from numbers import Number
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
+
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,

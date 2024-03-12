@@ -9,6 +9,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
