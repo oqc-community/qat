@@ -15,6 +15,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     qutip_available,
 )
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
+from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -850,6 +851,24 @@ class TestExecutionFrontend:
 
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
+
+    def test_serialized_references_persist(self):
+        qasm_string = get_qasm2("serialize_orphan.qasm")
+        hardware = get_default_echo_hardware(8)
+        config = CompilerConfig()
+
+        frontend = QASMFrontend()
+        builder, metrics = frontend.parse(qasm_string, hardware, config)
+
+        serialized_builder = builder.serialize()
+        builder = QuantumInstructionBuilder.deserialize(serialized_builder)
+
+        results_orig_hw, _ = frontend.execute(builder, hardware, config)
+        results_rehy_hw, _ = frontend.execute(builder, builder.model, config)
+
+        assert len(results_orig_hw) != 0
+        assert len(results_rehy_hw) != 0
+        assert results_orig_hw == results_rehy_hw
 
 
 class TestParsing:
