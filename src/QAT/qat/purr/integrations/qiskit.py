@@ -5,15 +5,14 @@ import time
 import uuid
 from typing import List
 
-from qiskit import QuantumCircuit, assemble, transpile
-from qiskit.providers.basicaer import BasicAerJob, QasmSimulatorPy
-from qiskit.result import Result
-from qiskit.result.models import ExperimentResult, ExperimentResultData
-
 from qat.core import execute_qasm
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.utils.logger import get_default_logger
+from qiskit import QuantumCircuit, assemble, transpile
+from qiskit.providers.basicaer import BasicAerJob, QasmSimulatorPy
+from qiskit.result import Result
+from qiskit.result.models import ExperimentResult, ExperimentResultData
 
 logger = get_default_logger()
 

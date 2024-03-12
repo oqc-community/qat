@@ -8,8 +8,6 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import CubicSpline
-
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -28,6 +26,7 @@ from qat.purr.compiler.instructions import (
     Reset,
 )
 from qat.purr.utils.logger import get_default_logger
+from scipy.interpolate import CubicSpline
 
 from ..compiler.execution import QuantumExecutionEngine, SweepIterator
 from ..compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel

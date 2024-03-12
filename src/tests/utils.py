@@ -5,7 +5,6 @@ import re
 from typing import List
 
 import numpy as np
-
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (

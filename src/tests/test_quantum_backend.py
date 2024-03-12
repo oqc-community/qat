@@ -6,9 +6,6 @@ from os.path import dirname, join
 
 import numpy as np
 import pytest
-from scipy import fftpack
-
-from qat import execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine, sync_baseband_frequencies_to_value
 from qat.purr.backends.realtime_chip_simulator import (
@@ -35,6 +32,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
+from scipy import fftpack
+
+from qat import execute
 
 from .qasm_utils import get_qasm2
 from .test_readout_mitigation import apply_error_mitigation_setup

@@ -8,10 +8,15 @@ from typing import List, Set, Union
 
 import jsonpickle
 import numpy as np
-
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit, CyclicRefPickler, \
-    CyclicRefUnpickler
+from qat.purr.compiler.devices import (
+    ChannelType,
+    CyclicRefPickler,
+    CyclicRefUnpickler,
+    PulseChannel,
+    QuantumComponent,
+    Qubit,
+)
 from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,

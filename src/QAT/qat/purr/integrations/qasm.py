@@ -13,10 +13,6 @@ import qiskit.qasm.node as qasm_ast
 from lark import Lark, Token, Tree, UnexpectedCharacters
 from lark.visitors import Interpreter
 from numpy import append, array, exp, linspace
-from qiskit.qasm import Qasm
-from qiskit.qasm.node import Gate
-from qiskit.qasm.qasmparser import QasmParser as QiskitQasmParser
-
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing, Languages
@@ -39,6 +35,9 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.waveforms import get_waveform_type
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
+from qiskit.qasm import Qasm
+from qiskit.qasm.node import Gate
+from qiskit.qasm.qasmparser import QasmParser as QiskitQasmParser
 
 log = get_default_logger()
 

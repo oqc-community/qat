@@ -3,7 +3,6 @@
 
 import numpy as np
 import pytest
-
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,

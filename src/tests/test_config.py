@@ -5,8 +5,6 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
-
-from qat import execute, execute_with_metrics
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
@@ -20,6 +18,8 @@ from qat.purr.compiler.config import (
     TketOptimizations,
 )
 from qat.purr.compiler.devices import QuantumComponent
+
+from qat import execute, execute_with_metrics
 
 from .qasm_utils import TestFileType, get_qasm2, get_test_file_path
 from .utils import ListReturningEngine
