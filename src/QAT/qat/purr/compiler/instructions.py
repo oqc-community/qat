@@ -123,7 +123,7 @@ class Repeat(Instruction):
     def __init__(self, repeat_count, repetition_period=None):
         super().__init__()
         self.repeat_count = repeat_count
-        self.repetition_period = repetition_period or 100e-6
+        self.repetition_period = repetition_period
 
     def __repr__(self):
         return f"repeat {self.repeat_count},{self.repetition_period}"
