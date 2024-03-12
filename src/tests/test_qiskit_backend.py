@@ -16,6 +16,27 @@ from tests.qasm_utils import get_qasm2
 
 
 class TestQiskitBackend:
+
+    @pytest.mark.parametrize("strict_placement", [True, False])
+    @pytest.mark.parametrize("qi0, qi1, valid", [(0, 1, True), (0, 2, False)])
+    def test_coupling_enforcement_on_qasm_hardware(self, strict_placement, qi0, qi1, valid):
+        coupling_map = [(0, 1), (1, 2)]
+        hardware = get_default_qiskit_hardware(
+            qubit_count=3, strict_placement=strict_placement, connectivity=coupling_map
+        )
+        builder = hardware.create_builder()
+        builder.had(hardware.get_qubit(qi0))
+        builder.cnot(hardware.get_qubit(qi0), hardware.get_qubit(qi1))
+        builder.measure(hardware.get_qubit(qi0))
+        builder.measure(hardware.get_qubit(qi1))
+        runtime = hardware.create_runtime()
+        if not valid and strict_placement:
+            with pytest.raises(RuntimeError):
+                runtime.execute(builder)
+        else:
+            results = runtime.execute(builder)
+            assert len(results) > 0
+
     def test_bitflip_noise_model(self):
         # Example error probabilities
         p_reset = 0.03

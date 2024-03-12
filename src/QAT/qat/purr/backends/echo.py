@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-
+import random
 from enum import Enum, auto
 from typing import List, Optional, Tuple, Union
 
@@ -12,6 +12,7 @@ from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
+    QubitCoupling,
     Resonator,
 )
 from qat.purr.compiler.emitter import QatFile
@@ -113,6 +114,14 @@ def generate_connectivity(con_type, qubit_count):
             return [(0, 1)]
         return [(i, (i + 1) % qubit_count) for i in range(qubit_count)]
     return None
+
+
+def add_direction_couplings_to_hardware(model, connectivity):
+    for edge in connectivity:
+        model.qubit_direction_couplings.append(
+            QubitCoupling(edge, quality=random.randrange(1, 20))
+        )
+    return model
 
 
 class Connectivity(Enum):
