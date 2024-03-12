@@ -74,11 +74,11 @@ class InstructionBuilder:
 
     @staticmethod
     def deserialize(blob) -> "QuantumInstructionBuilder":
-        reconstituted = jsonpickle.decode(blob, context=CyclicRefUnpickler())
-        if isinstance(reconstituted, str):
-            raise ValueError("Loading from calibration string failed. Please regenerate.")
+        builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
+        if isinstance(builder, str):
+            raise ValueError("Attempt to deserialize has failed.")
 
-        return reconstituted
+        return builder
 
     def serialize(self):
         """
