@@ -6,10 +6,12 @@ import math
 from enum import Enum, auto
 from typing import List, Set, Union
 
+import jsonpickle
 import numpy as np
 
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit
+from qat.purr.compiler.devices import ChannelType, PulseChannel, QuantumComponent, Qubit, CyclicRefPickler, \
+    CyclicRefUnpickler
 from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -65,18 +67,19 @@ class InstructionBuilder:
         return list(self._instructions)
 
     @staticmethod
-    def deserialize(blob, model) -> "QuantumInstructionBuilder":
-        # TODO: At this point everything is a Quantum builder variation, base class losing meaning.
-        builder = QuantumInstructionBuilder(model)
-        builder._instructions = json_loads(blob, model=model)
-        return builder
+    def deserialize(blob) -> "QuantumInstructionBuilder":
+        reconstituted = jsonpickle.decode(blob, context=CyclicRefUnpickler())
+        if isinstance(reconstituted, str):
+            raise ValueError("Loading from calibration string failed. Please regenerate.")
+
+        return reconstituted
 
     def serialize(self):
         """
         Currently only serializes the instructions, not the supporting objects of the builder itself.
         This could be supported pretty easily, but not required right now.
         """
-        return json_dumps(self._instructions)
+        return jsonpickle.encode(self, indent=4, context=CyclicRefPickler())
 
     def splice(self):
         """Clears the builder and returns its current instructions."""
@@ -642,7 +645,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         "Pass in either args or a qubit."
                     )
 
-                args = qubit.mean_z_map_args
+                args = qubit.mean_z_map_args.copy()
             if process == PostProcessType.DISCRIMINATE:
                 if not isinstance(qubit, Qubit):
                     raise ValueError(
@@ -650,7 +653,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         "Pass in either args or a qubit."
                     )
 
-                args = [qubit.discriminator]
+                args = [qubit.discriminator.copy()]
             elif process == PostProcessType.DOWN_CONVERT:
                 phys = acq.channel.physical_channel
                 resonator = phys.related_resonator

@@ -17,7 +17,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -611,6 +611,21 @@ class TestExecutionFrontend:
         assert len(results) == 1
         assert "b" in results
         assert results["b"]["0000"] == 1000
+
+    def test_serialized_references_persist(self):
+        qasm_string = get_qasm2("serialize_orphan.qasm")
+        hardware = get_default_echo_hardware(8)
+        config = CompilerConfig()
+
+        frontend = QASMFrontend()
+        builder, metrics = frontend.parse(qasm_string, hardware, config)
+
+        serialized_builder = builder.serialize()
+        builder = QuantumInstructionBuilder.deserialize(serialized_builder)
+
+        results = frontend.execute(builder, hardware, config)
+
+        assert len(results) != 0
 
     def test_basic_binary(self):
         qasm_string = get_qasm2("basic_results_formats.qasm")

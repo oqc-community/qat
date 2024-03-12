@@ -41,12 +41,7 @@ class ProcessAxis(Enum):
 
 
 class Instruction:
-    @staticmethod
-    def deserialize(blob, model: QuantumHardwareModel):
-        return json_loads(blob, model=model)
-
-    def serialize(self):
-        return json_dumps(self)
+    ...
 
 
 class QuantumMetadata(Instruction):
