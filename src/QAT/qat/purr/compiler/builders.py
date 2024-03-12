@@ -651,7 +651,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         "Pass in either args or a qubit."
                     )
 
-                args = qubit.mean_z_map_args.copy()
+                args = qubit.mean_z_map_args
             if process == PostProcessType.DISCRIMINATE:
                 if not isinstance(qubit, Qubit):
                     raise ValueError(
@@ -659,7 +659,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         "Pass in either args or a qubit."
                     )
 
-                args = [qubit.discriminator.copy()]
+                args = [qubit.discriminator]
             elif process == PostProcessType.DOWN_CONVERT:
                 phys = acq.channel.physical_channel
                 resonator = phys.related_resonator

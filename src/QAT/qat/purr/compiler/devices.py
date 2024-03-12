@@ -267,7 +267,7 @@ class FakeList(dict):
         try:
             return super().__getitem__(item)
         except KeyError:
-            raise IndexError()
+            raise IndexError(f"Error with: {item}")
 
 
 class CyclicRefUnpickler(Unpickler):
