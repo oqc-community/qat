@@ -3,6 +3,7 @@
 
 from os import listdir
 from os.path import dirname, isfile, join
+from typing import List
 
 import numpy as np
 import pytest
@@ -16,6 +17,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -826,6 +828,7 @@ class TestExecutionFrontend:
         contents = get_qasm2("basic.qasm")
         frontend = fetch_frontend(contents)
         built, _ = frontend.parse(contents, hardware, config)
+        assert isinstance(built, (InstructionBuilder, List))
         results = frontend.execute(built, hardware, config)
         assert results is not None
 
