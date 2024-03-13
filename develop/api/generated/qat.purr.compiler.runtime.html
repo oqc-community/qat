@@ -79,6 +79,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l6 current"><a class="current reference internal" href="#">qat.purr.compiler.runtime module</a></li>
@@ -179,6 +180,12 @@
 <dd><p>Executes these instructions against the current engine and returns the results.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumRuntime.execute_with_interrupt">
+<span class="sig-name descname"><span class="pre">execute_with_interrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interrupt=&lt;qat.purr.compiler.interrupt.NullInterrupt</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime.execute_with_interrupt" title="Link to this definition"></a></dt>
+<dd><p>Executes these instructions against the current engine and returns the results.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.QuantumRuntime.model">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#qat.purr.compiler.runtime.QuantumRuntime.model" title="Link to this definition"></a></dt>
@@ -230,6 +237,16 @@ on classic Python code.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.execute_instructions_via_config">
 <span class="sig-name descname"><span class="pre">execute_instructions_via_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.execute_instructions_via_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.compiler.runtime.execute_instructions_with_interrupt">
+<span class="sig-name descname"><span class="pre">execute_instructions_with_interrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">executable_blocks=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interrupt=&lt;qat.purr.compiler.interrupt.NullInterrupt</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.execute_instructions_with_interrupt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.compiler.runtime.execute_instructions_with_interrupt_via_config">
+<span class="sig-name descname"><span class="pre">execute_instructions_with_interrupt_via_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interrupt=&lt;qat.purr.compiler.interrupt.NullInterrupt</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.execute_instructions_with_interrupt_via_config" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

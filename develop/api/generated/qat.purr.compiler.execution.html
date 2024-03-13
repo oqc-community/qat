@@ -79,6 +79,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
@@ -340,6 +341,13 @@ times are absolute here, not relative.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.QuantumExecutionEngine.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.QuantumExecutionEngine.execute" title="Link to this definition"></a></dt>
 <dd><p>Executes this qat file against this current hardware.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.execution.QuantumExecutionEngine.execute_with_interrupt">
+<span class="sig-name descname"><span class="pre">execute_with_interrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interrupt=&lt;qat.purr.compiler.interrupt.NullInterrupt</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.QuantumExecutionEngine.execute_with_interrupt" title="Link to this definition"></a></dt>
+<dd><p>Executes this qat file against this current hardware.
+Execution allows for interrupts triggered by events</p>
 </dd></dl>
 
 <dl class="py method">

@@ -21,6 +21,7 @@ Submodules
    qat.purr.compiler.frontends
    qat.purr.compiler.hardware_models
    qat.purr.compiler.instructions
+   qat.purr.compiler.interrupt
    qat.purr.compiler.metrics
    qat.purr.compiler.optimisers
    qat.purr.compiler.runtime
