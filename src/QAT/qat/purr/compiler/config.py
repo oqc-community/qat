@@ -234,6 +234,16 @@ class MetricsType(Flag):
         return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
+class ErrorMitigationConfig(Flag):
+    Empty = auto()
+    MatrixMitigation = auto()
+    LinearMitigation = auto()
+
+
+class ExperimentalFeatures:
+    error_mitigation = ErrorMitigationConfig.Empty
+
+
 class CompilerConfig:
     """
     Main configuration for many compiler passes and features. All defaults are chosen based upon target
@@ -264,6 +274,7 @@ class CompilerConfig:
         metrics=MetricsType.Default,
         active_calibrations=None,
         optimizations: "OptimizationConfig" = None,
+        error_mitigation: ErrorMitigationConfig = None,
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
@@ -271,6 +282,7 @@ class CompilerConfig:
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
+        self.error_mitigation: Optional[ErrorMitigationConfig] = error_mitigation
 
     def to_json(self):
         return json_dumps(self, serializable_types=get_serializable_types())
@@ -284,6 +296,23 @@ class CompilerConfig:
     @classmethod
     def create_from_json(cls, json: str):
         return CompilerConfig().from_json(json)
+
+    def validate(self, hardware):
+        from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+        if (
+            self.error_mitigation is not None
+            and self.error_mitigation != ErrorMitigationConfig.Empty
+        ):
+            if isinstance(hardware, QuantumHardwareModel) and (
+                hardware.error_mitigation is None
+                or not hardware.error_mitigation.readout_mitigation
+            ):
+                raise ValueError("Error mitigation not calibrated on this device.")
+            if ResultsFormatting.BinaryCount not in self.results_format:
+                raise ValueError(
+                    "Binary Count format required for readout error mitigation"
+                )
 
 
 class CalibrationArguments:

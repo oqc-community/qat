@@ -10,8 +10,9 @@ from qat.purr.compiler.config import (
     MetricsType,
     ResultsFormatting,
 )
+from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
 from qat.purr.compiler.instructions import Repeat
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
@@ -75,6 +76,23 @@ class QuantumRuntime(MetricsMixin):
     def model(self):
         return self.engine.model if self.engine is not None else None
 
+    def _apply_error_mitigation(self, results, instructions, error_mitigation):
+        if error_mitigation is None:
+            return results
+
+        # TODO: add support for multiple registers
+        # TODO: reconsider results length
+        if len(results) > 1:
+            raise ValueError(
+                "Cannot have multiple registers in conjunction with readout error mitigation."
+            )
+
+        mapping = get_cl2qu_index_mapping(instructions)
+        for mitigator in get_readout_mitigation(error_mitigation):
+            new_result = mitigator.apply_error_mitigation(results, mapping, self.model)
+            results[mitigator.name] = new_result
+        return results  # TODO: new results object
+
     def run_calibration(
         self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
     ):
@@ -93,7 +111,9 @@ class QuantumRuntime(MetricsMixin):
         for exe in executables:
             exe.run(self)
 
-    def _common_execute(self, fexecute: callable, builder: InstructionBuilder):
+    def _common_execute(
+        self, fexecute: callable, builder: InstructionBuilder, error_mitigation=None
+    ):
         """
         Executes these instructions against the current engine and returns the results.
         """
@@ -115,10 +135,14 @@ class QuantumRuntime(MetricsMixin):
         )
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
-        return fexecute(instructions)
+        results = fexecute(instructions)
+        return self._apply_error_mitigation(results, instructions, error_mitigation)
 
     def execute(
-        self, builder: InstructionBuilder, results_format: ResultsFormatting = None
+        self,
+        builder: InstructionBuilder,
+        results_format: ResultsFormatting = None,
+        error_mitigation=None,
     ):
         """
         Executes these instructions against the current engine and returns the results.
@@ -127,13 +151,14 @@ class QuantumRuntime(MetricsMixin):
         def fexecute(instrs):
             return self.engine.execute(instrs, results_format)
 
-        return self._common_execute(fexecute, builder)
+        return self._common_execute(fexecute, builder, error_mitigation)
 
     def execute_with_interrupt(
         self,
         builder: InstructionBuilder,
         results_format: ResultsFormatting = None,
         interrupt: Interrupt = NullInterrupt(),
+        error_mitigation=None,
     ):
         """
         Executes these instructions against the current engine and returns the results.
@@ -142,7 +167,7 @@ class QuantumRuntime(MetricsMixin):
         def fexecute(instrs):
             return self.engine.execute_with_interrupt(instrs, results_format, interrupt)
 
-        return self._common_execute(fexecute, builder)
+        return self._common_execute(fexecute, builder, error_mitigation)
 
 
 def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
@@ -187,8 +212,15 @@ def execute_instructions_via_config(
 
     calibrations = [find_calibration(arg) for arg in config.active_calibrations]
 
+    config.validate(hardware)
+
     return execute_instructions(
-        hardware, instructions, config.results_format, calibrations, config.metrics
+        hardware,
+        instructions,
+        config.results_format,
+        calibrations,
+        config.metrics,
+        config.error_mitigation,
     )
 
 
@@ -198,13 +230,14 @@ def execute_instructions(
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     metrics: MetricsType = None,
+    error_mitigation=None,
 ):
     with log_duration("Execution completed, took {} seconds."):
         active_runtime = get_runtime(hardware)
         active_runtime.initialize_metrics(metrics)
         active_runtime.run_quantum_executable(executable_blocks)
         return (
-            active_runtime.execute(instructions, results_format),
+            active_runtime.execute(instructions, results_format, error_mitigation),
             active_runtime.compilation_metrics,
         )
 

@@ -13,7 +13,7 @@ from qat.purr.backends.echo import (
     generate_connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
-from qat.purr.compiler.config import ResultsFormatting
+from qat.purr.compiler.config import ResultsFormatting, ErrorMitigationConfig
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -205,8 +205,10 @@ class QiskitRuntime(QuantumRuntime):
         builder: QiskitBuilder,
         results_format: ResultsFormatting = None,
         repeats: int = None,
+        error_mitigation: ErrorMitigationConfig = None,
     ):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
 
+        # TODO - add error_mitigation for Qasm sim
         return self.engine.execute(builder)

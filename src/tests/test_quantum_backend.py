@@ -37,6 +37,7 @@ from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_
 from qat.purr.integrations.qasm import Qasm2Parser
 
 from .qasm_utils import get_qasm2
+from .test_readout_mitigation import apply_error_mitigation_setup
 
 
 class TestBaseQuantumExecution(LiveDeviceEngine):
@@ -397,6 +398,27 @@ class TestBaseQuantum:
             assert 1 == len(empty_hw.qubit_direction_couplings)
             assert coupling_direction == empty_hw.qubit_direction_couplings[0].direction
             assert coupling_quality == empty_hw.qubit_direction_couplings[0].quality
+
+    def test_error_mitigation_calibration(self):
+        original_hw = get_test_model()
+        assert original_hw.error_mitigation is None
+
+        apply_error_mitigation_setup(
+            original_hw,
+            q0_ro_fidelity_0=0.8,
+            q0_ro_fidelity_1=0.7,
+            q1_ro_fidelity_0=0.9,
+            q1_ro_fidelity_1=0.6,
+        )
+        assert original_hw.error_mitigation is not None
+
+        original_hw_cal_string = original_hw.get_calibration()
+        loaded_hw = Calibratable.load_calibration(original_hw_cal_string)
+        assert loaded_hw.error_mitigation is not None
+
+        original_linear_rm = original_hw.error_mitigation.readout_mitigation.linear
+        loaded_linear_rm = loaded_hw.error_mitigation.readout_mitigation.linear
+        assert loaded_linear_rm == original_linear_rm
 
     def test_sweep_pulse_length_exceeds_max_throws_error(self):
         hw = get_test_model()

@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from abc import ABC
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, Optional
 
+import re
 import numpy as np
 
 from qat.purr.compiler.devices import (
@@ -27,6 +28,8 @@ from qat.purr.compiler.instructions import (
     DrivePulse,
     PhaseShift,
     Synchronize,
+    Instruction,
+    Acquire,
 )
 
 if TYPE_CHECKING:
@@ -61,12 +64,88 @@ class HardwareModel(ABC):
 
 
 def resolve_qb_pulse_channel(
-    chanbit: Union[Qubit, PulseChannel]
+    chanbit: Union[Qubit, PulseChannel], channel_type=None
 ) -> Tuple[Qubit, PulseChannel]:
     if isinstance(chanbit, Qubit):
-        return chanbit, chanbit.get_default_pulse_channel()
+        qubit = chanbit
+        if channel_type == ChannelType.acquire:
+            channel = qubit.get_acquire_channel()
+        else:
+            channel = qubit.get_default_pulse_channel()
+        return qubit, channel
     else:
         return chanbit.related_qubit, chanbit
+
+
+def get_cl2qu_index_mapping(instructions: List[Instruction]):
+    """
+    Returns a Dict[str, str] mapping creg to qreg indices.
+    Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
+    """
+    mapping = {}
+    pattern = re.compile("(.*)\[([0-9]+)\]")
+
+    for instruction in instructions:
+        if not isinstance(instruction, Acquire):
+            continue
+
+        result = pattern.match(instruction.output_variable)
+        if result is None:
+            raise ValueError(
+                f"Could not extract cl register index from {instruction.output_variable}"
+            )
+
+        qubit, _ = resolve_qb_pulse_channel(instruction.channel, ChannelType.acquire)
+        clbit_index = result.group(2)
+        mapping[clbit_index] = qubit.index
+
+    return mapping
+
+
+class ReadoutMitigation(Calibratable):
+    """
+    Linear maps each individual qubit to its <0/1> given <0/1> probability.
+    Note that linear assumes no cross-talk effects and considers each qubit independent.
+    linear = {
+        <qubit_number>: {
+            "0|0": 1,
+            "1|0": 1,
+            "0|1": 1,
+            "1|1": 1,
+        }
+    }
+    Matrix is the entire 2**n x 2**n process matrix of p(<bitstring_1>|<bitstring_2>).
+    M3 is a runtime mitigation strategy that builds up the calibration it needs at runtime,
+    hence a bool of available or not. For more info https://github.com/Qiskit-Partners/mthree.
+    """
+
+    def __init__(
+        self,
+        linear: [Dict[str, Dict[str, float]]] = None,
+        matrix: np.array = None,
+        m3: bool = False,
+    ):
+        super().__init__()
+        self.m3_available = m3
+        self.linear: [Dict[str, Dict[str, float]]] = linear
+        self.matrix: np.array = matrix
+
+
+class ErrorMitigation(Calibratable):
+    def __init__(self, readout_mitigation: Optional[ReadoutMitigation] = None):
+        super().__init__()
+        self.readout_mitigation = readout_mitigation
+
+    def __setstate__(self, state):
+        readout_mitigation = state.pop("readout_mitigation", None)
+        if readout_mitigation is None or isinstance(readout_mitigation, ReadoutMitigation):
+            self.readout_mitigation = readout_mitigation
+        else:
+            raise ValueError(
+                f"Expected {ReadoutMitigation.__class__} but got {type(readout_mitigation)}"
+            )
+
+        self.__dict__.update(state)
 
 
 class QuantumHardwareModel(HardwareModel, Calibratable):
@@ -81,6 +160,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         acquire_mode=None,
         repeat_count=1000,
         repetition_period=100e-6,
+        error_mitigation: Optional[ErrorMitigation] = None,
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -92,6 +172,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.physical_channels: Dict[str, PhysicalChannel] = {}
         self.basebands: Dict[str, PhysicalBaseband] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
+        self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
 
         # Construct last due to us overriding calibratables fields with properties.
         super().__init__(shot_limit)
@@ -405,3 +486,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             ]
         else:
             raise ValueError("Generic ZX gate not implemented yet!")
+
+    def __setstate__(self, state):
+        error_mitigation = state.pop("error_mitigation", None)
+        if error_mitigation is None or isinstance(error_mitigation, ErrorMitigation):
+            self.error_mitigation = error_mitigation
+        else:
+            raise ValueError(
+                f"Expected {ErrorMitigation.__class__} but got {type(error_mitigation)}"
+            )
+
+        self.__dict__.update(state)
