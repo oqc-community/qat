@@ -70,6 +70,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
@@ -299,7 +300,7 @@ As well as the rest of the base merging operations.</p>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime" title="qat.purr.compiler.runtime.QuantumRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qiskit_simulator.QiskitRuntime.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qiskit_simulator.QiskitRuntime.execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_mitigation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qiskit_simulator.QiskitRuntime.execute" title="Link to this definition"></a></dt>
 <dd><p>Executes these instructions against the current engine and returns the results.</p>
 </dd></dl>
 

@@ -6,6 +6,14 @@ qat.purr.compiler package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 12
+
+   qat.purr.compiler.error_mitigation
+
 Submodules
 ----------
 
