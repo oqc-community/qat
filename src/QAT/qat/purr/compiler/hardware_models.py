@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
+import re
 from abc import ABC
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-import re
 import numpy as np
 
 from qat.purr.compiler.devices import (
@@ -22,14 +22,14 @@ from qat.purr.compiler.devices import (
     Resonator,
 )
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     CrossResonanceCancelPulse,
     CrossResonancePulse,
     DrivePulse,
+    Instruction,
     PhaseShift,
     Synchronize,
-    Instruction,
-    Acquire,
 )
 
 if TYPE_CHECKING:

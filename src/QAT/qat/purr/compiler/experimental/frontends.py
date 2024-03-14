@@ -1,9 +1,8 @@
+import qat.purr.compiler.frontends as core_frontends
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
-
-from qat.purr.compiler.runtime import execute_instructions_with_interrupt_via_config
-import qat.purr.compiler.frontends as core_frontends
 from qat.purr.compiler.interrupt import NullInterrupt
+from qat.purr.compiler.runtime import execute_instructions_with_interrupt_via_config
 
 
 class InterruptableExecutingMixin:

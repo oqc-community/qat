@@ -1,6 +1,6 @@
 import abc
-from threading import Event
 from queue import Queue
+from threading import Event
 
 
 class InterruptError(RuntimeError): ...
