@@ -6,10 +6,13 @@ from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
 
+import jsonpickle
 import numpy as np
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     ChannelType,
+    CyclicRefPickler,
+    CyclicRefUnpickler,
     PulseChannel,
     PulseChannelView,
     Qubit,
@@ -75,10 +78,11 @@ class InstructionBuilder:
         return list(self._instructions)
 
     @staticmethod
-    def deserialize(blob, model) -> "QuantumInstructionBuilder":
-        # TODO: At this point everything is a Quantum builder variation, base class losing meaning.
-        builder = QuantumInstructionBuilder(model)
-        builder._instructions = json_loads(blob, model=model)
+    def deserialize(blob) -> "QuantumInstructionBuilder":
+        builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
+        if not isinstance(builder, QuantumInstructionBuilder):
+            raise ValueError("Attempt to deserialize has failed.")
+
         return builder
 
     def serialize(self):
@@ -86,7 +90,7 @@ class InstructionBuilder:
         Currently only serializes the instructions, not the supporting objects of the builder itself.
         This could be supported pretty easily, but not required right now.
         """
-        return json_dumps(self._instructions)
+        return jsonpickle.encode(self, indent=4, context=CyclicRefPickler())
 
     def splice(self):
         """Clears the builder and returns its current instructions."""

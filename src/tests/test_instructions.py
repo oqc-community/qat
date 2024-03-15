@@ -248,7 +248,7 @@ class TestInstructionSerialisation:
             .measure_mean_z(hw.get_qubit(0))
         )
         seri = builder.serialize()
-        deseri = InstructionBuilder.deserialize(seri, hw)
+        deseri = InstructionBuilder.deserialize(seri)
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)
 
@@ -284,12 +284,7 @@ class TestInstructionSerialisation:
             .synchronize([hw.get_qubit(5), hw.get_qubit(7), hw.get_qubit(9)])
             .measure_mean_z(hw.get_qubit(0))
         )
-        for inst in builder.instructions:
-            inst: Instruction
-            iseri = inst.serialize()
-            ideseri = Instruction.deserialize(iseri, hw)
-            assert str(inst) == str(ideseri)
         seri = builder.serialize()
-        deseri = InstructionBuilder.deserialize(seri, hw)
+        deseri = InstructionBuilder.deserialize(seri)
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)

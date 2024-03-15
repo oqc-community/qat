@@ -234,7 +234,7 @@ class CyclicRefPickler(Pickler):
         is_new = super()._log_ref(obj)
         # We don't want complex' or enums to be referenced. Just create a new one on
         # each instance.
-        if isinstance(obj, (complex, Enum)):
+        if isinstance(obj, (complex, Enum, np.number)):
             return True
 
         if is_new:
