@@ -78,6 +78,8 @@ build-backend = "poetry.core.masonry.api"
 remove-all-unused-imports = true
 ignore-init-module-imports = true
 ignore-pass-after-docstring = true
+in-place = true
+recursive = true
 
 [tool.isort]
 py_version = 39

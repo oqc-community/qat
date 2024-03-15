@@ -1,4 +1,4 @@
-from os.path import abspath, dirname, exists, join
+from os.path import abspath, dirname, join
 from queue import Queue
 from threading import Event, Thread
 from typing import List

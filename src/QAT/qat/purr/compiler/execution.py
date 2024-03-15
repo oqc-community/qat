@@ -53,7 +53,7 @@ from qat.purr.compiler.instructions import (
     Waveform,
     is_generated_name,
 )
-from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
+from qat.purr.compiler.interrupt import NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 

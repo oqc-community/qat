@@ -7,7 +7,6 @@ from typing import List
 import numpy as np
 
 from qat.purr.backends.echo import EchoEngine
-from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalBaseband,
@@ -15,10 +14,7 @@ from qat.purr.compiler.devices import (
     Qubit,
     Resonator,
 )
-from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import AcquireMode, PostProcessing
 
 
 def apply_setup_to_hardware(hw, qubit_indices: list):
@@ -71,7 +67,7 @@ def apply_setup_to_hardware(hw, qubit_indices: list):
                 frequency=5.5e9,
                 scale=0.0,
             )
-        except KeyError as e:
+        except KeyError:
             pass
 
     def _couple_qubits(q1, q2):

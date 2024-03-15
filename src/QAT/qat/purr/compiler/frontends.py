@@ -9,13 +9,8 @@ from typing import Tuple, Union
 
 import regex
 
-from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
-from qat.purr.compiler.config import (
-    CompilerConfig,
-    Languages,
-    default_language_options,
-    get_optimizer_config,
-)
+from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.config import CompilerConfig, Languages, default_language_options
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
