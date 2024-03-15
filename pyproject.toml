@@ -78,15 +78,18 @@ build-backend = "poetry.core.masonry.api"
 remove-all-unused-imports = true
 ignore-init-module-imports = true
 ignore-pass-after-docstring = true
+in-place = true
+recursive = true
 
 [tool.isort]
 py_version = 39
 profile = "black"
 line_length = 92
+known_first_party = ["qat"]
 
 [tool.black]
 line-length = 92
-target-version = ['py39']
+target-version = ["py38", "py39", "py310"]
 
 [tool.poetry.scripts]
 build-docs = "poetry_scripts:build_docs"

@@ -44,7 +44,6 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.serializer import json_dumps, json_loads
 
 log = get_default_logger()
 

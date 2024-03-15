@@ -32,15 +32,8 @@ jobs:
         run: |
           poetry install --with dev
           poetry run black --check .
+          poetry run isort --check .
           poetry run autoflake --check .
-  isort-test:
-    # Isort test separate using the official isort runner to ensure correct settings picked up
-    name: Run isort
-    runs-on: [ubuntu-latest]
-    steps:
-      - uses: isort/isort-action@v1
-        with:
-            requirements-files: "pyproject.toml"
 
 
   unit-tests:

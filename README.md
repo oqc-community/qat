@@ -13,6 +13,10 @@ For our full documentation check [here](https://oqc-community.github.io/qat/main
 QAT can be installed from [PyPI](https://pypi.org/project/qat-compiler/>) via:
 `pip install qat-compiler`
 
+> If you are contributing to the project we recommend that you also run  
+> `poetry run pre-commit install`  
+> to enable pre-commit checks.
+
 ### Building from Source
 
 We use [poetry](https://python-poetry.org/) for dependency management and run on

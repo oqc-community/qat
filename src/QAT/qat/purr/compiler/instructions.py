@@ -6,16 +6,12 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set, Union
 
 import numpy as np
 
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
-from qat.purr.utils.serializer import json_dumps, json_loads
-
-if TYPE_CHECKING:
-    from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 def _stringify_qubits(qubits):

@@ -20,7 +20,6 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
-    FreqShiftPulseChannel,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
