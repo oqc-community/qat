@@ -9,7 +9,7 @@ from typing import Tuple, Union
 
 import regex
 
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     Languages,

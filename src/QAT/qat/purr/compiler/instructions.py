@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
@@ -40,13 +41,7 @@ class ProcessAxis(Enum):
         return self.name
 
 
-class Instruction:
-    @staticmethod
-    def deserialize(blob, model: QuantumHardwareModel):
-        return json_loads(blob, model=model)
-
-    def serialize(self):
-        return json_dumps(self)
+class Instruction: ...
 
 
 class QuantumMetadata(Instruction):
@@ -394,7 +389,10 @@ class PostProcessing(QuantumInstruction):
             axes = [axes]
 
         self.process: PostProcessType = process
-        self.args: List = args or []
+
+        # TODO: Should find out why ags can't reference model objects in builder serialization.
+        #   But deep copying them, as the values shouldn't vary, should be fine.
+        self.args: List = deepcopy(args) or []
         self.axes: List[ProcessAxis] = axes or []
         self.output_variable = acquire.output_variable
         self.result_needed = False
