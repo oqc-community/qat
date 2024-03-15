@@ -31,8 +31,8 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend, fetch_frontend
 from qat.purr.compiler.hardware_models import (
     QuantumHardwareModel,
-    resolve_qb_pulse_channel,
     get_cl2qu_index_mapping,
+    resolve_qb_pulse_channel,
 )
 from qat.purr.compiler.instructions import (
     Acquire,

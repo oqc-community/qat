@@ -6,6 +6,7 @@ from numpy import identity, isclose
 from numpy.random import rand
 from qiskit import QuantumCircuit
 
+from qat.core import execute_qasm
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     RealtimeChipSimEngine,
@@ -19,7 +20,6 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
-from qat.core import execute_qasm
 
 
 def apply_error_mitigation_setup(

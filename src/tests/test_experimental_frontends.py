@@ -1,15 +1,17 @@
+from os.path import abspath, dirname, exists, join
+from queue import Queue
+from threading import Event, Thread
 from typing import List
 from unittest.mock import create_autospec
+
+import pytest
+
+from qat import _parse_and_execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
-from qat import _parse_and_execute
-from os.path import join, dirname, abspath, exists
-from qat.purr.compiler.experimental.frontends import QIRFrontend, QASMFrontend
+from qat.purr.compiler.experimental.frontends import QASMFrontend, QIRFrontend
 from qat.purr.compiler.interrupt import BasicInterrupt
-from queue import Queue
-from threading import Thread, Event
-import pytest
 
 
 def _get_qir_path(file_name):

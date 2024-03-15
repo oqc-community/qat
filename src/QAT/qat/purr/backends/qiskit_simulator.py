@@ -16,7 +16,7 @@ from qat.purr.backends.echo import (
     generate_connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
-from qat.purr.compiler.config import ResultsFormatting, ErrorMitigationConfig
+from qat.purr.compiler.config import ErrorMitigationConfig, ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
