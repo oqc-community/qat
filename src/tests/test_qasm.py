@@ -623,9 +623,12 @@ class TestExecutionFrontend:
         serialized_builder = builder.serialize()
         builder = QuantumInstructionBuilder.deserialize(serialized_builder)
 
-        results = frontend.execute(builder, hardware, config)
+        results_orig_hw, _ = frontend.execute(builder, hardware, config)
+        results_rehy_hw, _ = frontend.execute(builder, builder.model, config)
 
-        assert len(results) != 0
+        assert len(results_orig_hw) != 0
+        assert len(results_rehy_hw) != 0
+        assert results_orig_hw == results_rehy_hw
 
     def test_basic_binary(self):
         qasm_string = get_qasm2("basic_results_formats.qasm")
