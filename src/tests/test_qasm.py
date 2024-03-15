@@ -8,6 +8,8 @@ from typing import List
 import numpy as np
 import pytest
 from pytket.qasm import circuit_from_qasm_str
+from qiskit.qasm import QasmError
+
 from qat.core import execute, execute_qasm
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -54,7 +56,6 @@ from qat.purr.integrations.qasm import (
     get_qasm_parser,
 )
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
-from qiskit.qasm import QasmError
 
 from .qasm_utils import (
     TestFileType,
