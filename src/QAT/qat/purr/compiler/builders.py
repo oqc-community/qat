@@ -3,12 +3,11 @@
 
 import itertools
 import math
+import jsonpickle
 from enum import Enum, auto
 from typing import List, Set, Union
 
-import jsonpickle
 import numpy as np
-
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     ChannelType,
