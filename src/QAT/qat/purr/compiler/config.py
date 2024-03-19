@@ -235,13 +235,34 @@ class MetricsType(Flag):
 
 
 class ErrorMitigationConfig(Flag):
+    """
+    Configuration for management of error mitigation passes to be switched on or off.
+
+    Currently, we have two different options for readout mitigation, namely matrix mitigation and linear mitigation.
+
+    Note: MatrixMitigation has an exponential calibration and runtime overhead and is only potentially available for
+    Lucy generation of QPU.
+
+    For a deep dive into the theory of matrix mitigation the qiskit textbook includes a notebook going through this
+    https://github.com/Qiskit/textbook/blob/main/notebooks/quantum-hardware/measurement-error-mitigation.ipynb
+
+    Matrix mitigation starts by noting, the output vector of results C_output can be modeled by a purely classical
+    process which starts with the perfect results C_perfect and is transformed by a noisy channel to the actual output
+    vector observed. That is C_output = M*C_perfect, where M is the transfer matrix that takes us away from the
+    theoretical perfect results to C_output. Multiplying both sides by the inverse of M, M^{-1}, gets us,
+    M^{-1}*C_output = C_perfect. We can compute the elements of M_{i,j} = p(i|j), where i is the measured bit string
+    from the input bitstring, j.
+
+    LinearMitigation is a simplification of the above that is constant time in calibration. We measure the "all zero"
+    state and "all one" state. From this, for each qubit we are able to extract p(0/1|0/1). We can then, for each
+    measured bitstring, for each qubit we are able to invert the measured bitstring up to a first order correction.
+    This is a much simplified version of the full MatrixMitigation and will only correct for uncorrelated readout
+    errors.
+    """
+
     Empty = auto()
     MatrixMitigation = auto()
     LinearMitigation = auto()
-
-
-class ExperimentalFeatures:
-    error_mitigation = ErrorMitigationConfig.Empty
 
 
 class CompilerConfig:
