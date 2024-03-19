@@ -21,6 +21,8 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 
+np.random.seed(42)
+
 
 def apply_error_mitigation_setup(
     hw, q0_ro_fidelity_0, q0_ro_fidelity_1, q1_ro_fidelity_0, q1_ro_fidelity_1
