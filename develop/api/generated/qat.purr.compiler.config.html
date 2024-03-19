@@ -217,7 +217,23 @@ is usually the easier option.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.config.ErrorMitigationConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ErrorMitigationConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.config.ErrorMitigationConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></p>
-<p>An enumeration.</p>
+<p>Configuration for management of error mitigation passes to be switched on or off.</p>
+<p>Currently, we have two different options for readout mitigation, namely matrix mitigation and linear mitigation.</p>
+<p>Note: MatrixMitigation has an exponential calibration and runtime overhead and is only potentially available for
+Lucy generation of QPU.</p>
+<p>For a deep dive into the theory of matrix mitigation the qiskit textbook includes a notebook going through this
+<a class="reference external" href="https://github.com/Qiskit/textbook/blob/main/notebooks/quantum-hardware/measurement-error-mitigation.ipynb">https://github.com/Qiskit/textbook/blob/main/notebooks/quantum-hardware/measurement-error-mitigation.ipynb</a></p>
+<p>Matrix mitigation starts by noting, the output vector of results C_output can be modeled by a purely classical
+process which starts with the perfect results C_perfect and is transformed by a noisy channel to the actual output
+vector observed. That is C_output = M*C_perfect, where M is the transfer matrix that takes us away from the
+theoretical perfect results to C_output. Multiplying both sides by the inverse of M, M^{-1}, gets us,
+M^{-1}*C_output = C_perfect. We can compute the elements of M_{i,j} = p(i|j), where i is the measured bit string
+from the input bitstring, j.</p>
+<p>LinearMitigation is a simplification of the above that is constant time in calibration. We measure the “all zero”
+state and “all one” state. From this, for each qubit we are able to extract p(0/1|0/1). We can then, for each
+measured bitstring, for each qubit we are able to invert the measured bitstring up to a first order correction.
+This is a much simplified version of the full MatrixMitigation and will only correct for uncorrelated readout
+errors.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.config.ErrorMitigationConfig.Empty">
 <span class="sig-name descname"><span class="pre">Empty</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.compiler.config.ErrorMitigationConfig.Empty" title="Link to this definition"></a></dt>
@@ -231,17 +247,6 @@ is usually the easier option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.config.ErrorMitigationConfig.MatrixMitigation">
 <span class="sig-name descname"><span class="pre">MatrixMitigation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.purr.compiler.config.ErrorMitigationConfig.MatrixMitigation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.compiler.config.ExperimentalFeatures">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExperimentalFeatures</span></span><a class="headerlink" href="#qat.purr.compiler.config.ExperimentalFeatures" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.compiler.config.ExperimentalFeatures.error_mitigation">
-<span class="sig-name descname"><span class="pre">error_mitigation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.compiler.config.ExperimentalFeatures.error_mitigation" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
