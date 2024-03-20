@@ -820,6 +820,9 @@ class Qubit(QuantumDevice):
     def get_second_state_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.second_state)
 
+    def get_freq_shift_channel(self) -> PulseChannel:
+        return self.get_pulse_channel(ChannelType.freq_shift)
+
     def get_cross_resonance_channel(
         self, linked_qubits: Union[List[Qubit], Qubit]
     ) -> PulseChannel:
