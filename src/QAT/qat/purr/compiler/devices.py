@@ -343,6 +343,20 @@ class PhysicalChannel(QuantumComponent, Calibratable):
 
         return pulse_channel
 
+    def create_freq_shift_pulse_channel(
+        self,
+        id_: str,
+        frequency=0.0,
+        bias=0.0 + 0.0j,
+        scale=1.0 + 0.0j,
+        amp=0.0,
+        active: bool = True,
+        fixed_if: bool = False
+    ):
+        pulse_channel = FreqShiftPulseChannel(id_, self, frequency, bias, scale, amp, active, fixed_if)
+
+        return pulse_channel
+
     @property
     def block_time(self):
         return self.block_size * self.sample_time
@@ -565,6 +579,8 @@ class QuantumDevice(QuantumComponent, Calibratable):
         frequency=0.0,
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
+        amp=0.0,
+        active: bool = True,
         fixed_if: bool = False,
         auxiliary_devices: List[QuantumDevice] = None,
         id_: str = None,
@@ -575,9 +591,13 @@ class QuantumDevice(QuantumComponent, Calibratable):
             id_ = self._create_pulse_channel_id(
                 channel_type, [self] + auxiliary_devices
             )
-        pulse_channel = self.physical_channel.create_pulse_channel(
-            id_, frequency, bias, scale, fixed_if
-        )
+        if channel_type == ChannelType.freq_shift:
+            pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(id_, frequency, bias, scale, amp,
+                                                                                  active, fixed_if)
+        else:
+            pulse_channel = self.physical_channel.create_pulse_channel(
+                id_, frequency, bias, scale, fixed_if
+            )
         self.add_pulse_channel(pulse_channel, channel_type, auxiliary_devices)
 
         return pulse_channel
@@ -738,6 +758,9 @@ class Qubit(QuantumDevice):
 
     def get_second_state_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.second_state)
+
+    def get_freq_shift_channel(self) -> PulseChannel:
+        return self.get_pulse_channel(ChannelType.freq_shift)
 
     def get_cross_resonance_channel(self, linked_qubits: List[Qubit]) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.cross_resonance, linked_qubits)

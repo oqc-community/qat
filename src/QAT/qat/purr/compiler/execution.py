@@ -458,7 +458,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             end_point = max(final_positions)
 
             for qubit in self.model.qubits:
-                if freq_channel := qubit.pulse_channels.get(ChannelType.freq_shift.name, None):
+                freq_channel = next(
+                    (channel for channel in qubit.get_all_channels() if channel.channel_type == ChannelType.freq_shift),
+                    None)
+
+                if freq_channel is not None:
                     if freq_channel.active:
                         pulse = Pulse(
                             freq_channel,
