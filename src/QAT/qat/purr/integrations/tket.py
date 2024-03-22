@@ -5,15 +5,8 @@ from numbers import Number
 from typing import List
 
 from pytket import Bit, Circuit, Qubit
-from pytket._tket.architecture import Architecture
-from pytket._tket.circuit import CustomGateDef, Node
-from pytket._tket.predicates import (
-    ConnectivityPredicate,
-    DirectednessPredicate,
-    MaxNQubitsPredicate,
-    NoMidMeasurePredicate,
-)
-from pytket._tket.transform import Transform
+from pytket.architecture import Architecture
+from pytket.circuit import CustomGateDef, Node
 from pytket.passes import (
     CliffordSimp,
     ContextSimp,
@@ -33,8 +26,15 @@ from pytket.passes import (
     SynthesiseTket,
     ThreeQubitSquash,
 )
+from pytket.predicates import (
+    ConnectivityPredicate,
+    DirectednessPredicate,
+    MaxNQubitsPredicate,
+    NoMidMeasurePredicate,
+)
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
+from pytket.transform import Transform
 from qiskit.qasm.node import Cnot, UniversalUnitary
 from sympy import pi, sympify
 
@@ -367,6 +367,33 @@ def get_coupling_subgraphs(couplings):
     return subgraphs
 
 
+def build_routing_architectures(hardware: QuantumHardwareModel):
+    """Builds a suite of architectures to attempt routing on, starting with the best quality."""
+    couplings = hardware.qubit_direction_couplings
+    if not any(couplings):
+        return []
+
+    results = []
+    coupling_qualities = list({val.quality for val in couplings})
+    min_quality = min(coupling_qualities)
+    difference = max(coupling_qualities) - min_quality
+    steps = difference / 3
+
+    # Build 3 architectures with high quality, medium quality and all couplings. (top third, top 2-thirds, everything)
+    for quality_level in [min_quality + (steps * 2), min_quality + steps, min_quality]:
+        filtered_couplings = [
+            val.direction for val in couplings if val.quality >= quality_level
+        ]
+        coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
+        for subgraph in coupling_subgraphs:
+            architecture = Architecture(
+                [tuple(Node("q", i) for i in val) for val in subgraph]
+            )
+            results.append(architecture)
+
+    return results
+
+
 def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) -> str:
     """
     Runs tket-based optimizations and modifications. Routing will always happen no
@@ -398,27 +425,11 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             )
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
-            coupling_qualities = list({val.quality for val in couplings})
-            coupling_qualities.sort(reverse=True)
-            for quality_level in coupling_qualities:
-                filtered_couplings = [
-                    val.direction for val in couplings if val.quality >= quality_level
-                ]
-                coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
-                for subgraph in coupling_subgraphs:
-                    if circ.n_qubits <= len(
-                        set([qubit for coupling in subgraph for qubit in coupling])
-                    ):
-                        architecture = Architecture(
-                            [tuple(Node("q", i) for i in val) for val in subgraph]
-                        )
-                        optimizations_failed = not optimize_circuit(
-                            circ, architecture, opts
-                        )
-                        if not optimizations_failed:
-                            break
-                    else:
-                        optimizations_failed = True
+            optimizations_failed = True
+            for subarchitecture in build_routing_architectures(hardware):
+                if circ.n_qubits <= len(subarchitecture.nodes):
+                    optimizations_failed = not optimize_circuit(circ, subarchitecture, opts)
+
                 if not optimizations_failed:
                     break
 

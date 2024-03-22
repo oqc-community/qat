@@ -7,3 +7,4 @@ from .core import (
     execute_qir_with_metrics,
     execute_with_metrics,
 )
+from .features import Features, enable_feature
