@@ -1,0 +1,7 @@
+qat.features module
+===================
+
+.. automodule:: qat.features
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -92,6 +92,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html">qat.purr.integrations.rasqal module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
 </ul>
 </li>
@@ -105,6 +106,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.features.html">qat.features module</a></li>
 </ul>
 </li>
 </ul>
@@ -153,7 +155,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.LanguageFrontend.execute">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.LanguageFrontend.execute" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.LanguageFrontend.execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -168,7 +170,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.LanguageFrontend.parse_and_execute">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.LanguageFrontend.parse_and_execute" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.LanguageFrontend.parse_and_execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -179,7 +181,7 @@
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.frontends.LanguageFrontend" title="qat.purr.compiler.frontends.LanguageFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">LanguageFrontend</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.QASMFrontend.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QASMFrontend.execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QASMFrontend.execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -189,7 +191,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.QASMFrontend.parse_and_execute">
-<span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QASMFrontend.parse_and_execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QASMFrontend.parse_and_execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -200,17 +202,17 @@
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.frontends.LanguageFrontend" title="qat.purr.compiler.frontends.LanguageFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">LanguageFrontend</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.QIRFrontend.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_contents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.QIRFrontend.parse">
-<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.parse" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_contents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.parse" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.frontends.QIRFrontend.parse_and_execute">
-<span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.parse_and_execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">parse_and_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.QIRFrontend.parse_and_execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -224,6 +226,11 @@
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.compiler.frontends.is_path">
+<span class="sig-name descname"><span class="pre">is_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.frontends.is_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.compiler.optimisers module &mdash; QAT 1.0.0 documentation</title>
+  <title>qat.features module &mdash; QAT 1.0.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/sphinx_paramlinks.css" type="text/css" />
@@ -20,8 +20,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="qat.purr.compiler.runtime module" href="qat.purr.compiler.runtime.html" />
-    <link rel="prev" title="qat.purr.compiler.metrics module" href="qat.purr.compiler.metrics.html" /> 
+    <link rel="next" title="FAQ" href="../../faq.html" />
+    <link rel="prev" title="qat.core module" href="qat.core.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,7 +57,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../folder.html">API Documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="modules.html">QAT</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
@@ -69,7 +69,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
 </ul>
 </li>
-<li class="toctree-l5 current"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
@@ -82,7 +82,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
-<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
@@ -106,7 +106,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.features.html">qat.features module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qat.features module</a></li>
 </ul>
 </li>
 </ul>
@@ -133,11 +133,9 @@
           <li class="breadcrumb-item"><a href="../folder.html">API Documentation</a></li>
           <li class="breadcrumb-item"><a href="modules.html">QAT</a></li>
           <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.compiler.html">qat.purr.compiler package</a></li>
-      <li class="breadcrumb-item active">qat.purr.compiler.optimisers module</li>
+      <li class="breadcrumb-item active">qat.features module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/api/generated/qat.purr.compiler.optimisers.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/api/generated/qat.features.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -147,24 +145,49 @@
              
 
 
-  <section id="module-qat.purr.compiler.optimisers">
-<span id="qat-purr-compiler-optimisers-module"></span><h1>qat.purr.compiler.optimisers module<a class="headerlink" href="#module-qat.purr.compiler.optimisers" title="Link to this heading"></a></h1>
+  <section id="module-qat.features">
+<span id="qat-features-module"></span><h1>qat.features module<a class="headerlink" href="#module-qat.features" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.compiler.optimisers.DefaultOptimizers">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultOptimizers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.optimisers.DefaultOptimizers" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin" title="qat.purr.compiler.metrics.MetricsMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsMixin</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.compiler.optimisers.DefaultOptimizers.optimize_qasm">
-<span class="sig-name descname"><span class="pre">optimize_qasm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.optimisers.DefaultOptimizers.optimize_qasm" title="Link to this definition"></a></dt>
-<dd><p>Run all available optimizers on this QASM program.</p>
+<dt class="sig sig-object py" id="qat.features.Features">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.features.Features" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></p>
+<p>Flags for enabling niche, optional or experimental features that
+by default most people may not want enabled.</p>
+<p>These features can fundamentally change the underlying mechanisms of the project
+so only enable if you’re comfortable with what they do.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.features.Features.Empty">
+<span class="sig-name descname"><span class="pre">Empty</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.features.Features.Empty" title="Link to this definition"></a></dt>
+<dd><p>Replaces basic QIR support with our hybrid runtime, Rasqal. See QAT documentation for full 
+details, but this enables the full QIR spec to be passed, and run, in a hybrid manner.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.compiler.optimisers.DefaultOptimizers.run_qiskit_optimization">
-<span class="sig-name descname"><span class="pre">run_qiskit_optimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.optimisers.DefaultOptimizers.run_qiskit_optimization" title="Link to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.features.Features.Rasqal">
+<span class="sig-name descname"><span class="pre">Rasqal</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.features.Features.Rasqal" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.features.disable_all_features">
+<span class="sig-name descname"><span class="pre">disable_all_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.features.disable_all_features" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.features.disable_feature">
+<span class="sig-name descname"><span class="pre">disable_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.features.disable_feature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.features.enable_feature">
+<span class="sig-name descname"><span class="pre">enable_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.features.enable_feature" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.features.is_rasqal_enabled">
+<span class="sig-name descname"><span class="pre">is_rasqal_enabled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.features.is_rasqal_enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 
@@ -173,8 +196,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.purr.compiler.metrics.html" class="btn btn-neutral float-left" title="qat.purr.compiler.metrics module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.purr.compiler.runtime.html" class="btn btn-neutral float-right" title="qat.purr.compiler.runtime module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.core.html" class="btn btn-neutral float-left" title="qat.core module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

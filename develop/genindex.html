@@ -89,6 +89,7 @@
 <li class="toctree-l6"><a class="reference internal" href="api/generated/qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="api/generated/qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="api/generated/qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/generated/qat.purr.integrations.rasqal.html">qat.purr.integrations.rasqal module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="api/generated/qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
 </ul>
 </li>
@@ -102,6 +103,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/qat.core.html">qat.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/qat.features.html">qat.features module</a></li>
 </ul>
 </li>
 </ul>
@@ -409,6 +411,8 @@
 </li>
       <li><a href="api/generated/qat.purr.compiler.devices.html#qat.purr.compiler.devices.build_resonator">build_resonator() (in module qat.purr.compiler.devices)</a>
 </li>
+      <li><a href="api/generated/qat.purr.integrations.tket.html#qat.purr.integrations.tket.build_routing_architectures">build_routing_architectures() (in module qat.purr.integrations.tket)</a>
+</li>
       <li><a href="api/generated/qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.build_simulator_resets">build_simulator_resets() (RealtimeChipSimEngine method)</a>
 </li>
       <li><a href="api/generated/qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.build_tree">build_tree() (MeasurementStatistics method)</a>
@@ -478,6 +482,8 @@
       <ul>
         <li><a href="api/generated/qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.clear">(QiskitBuilder method)</a>
 </li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.clear">(RasqalBuilder method)</a>
+</li>
       </ul></li>
       <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.CliffordSimp">CliffordSimp (TketOptimizations attribute)</a>
 </li>
@@ -539,12 +545,12 @@
 </li>
       <li><a href="api/generated/qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType">ControlType (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.COS">COS (PulseShapeType attribute)</a>
 </li>
       <li><a href="api/generated/qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.CouplingType">CouplingType (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cR">cR() (InstructionBuilder method)</a>
 
       <ul>
@@ -559,6 +565,8 @@
         <li><a href="api/generated/qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitHardwareModel.create_builder">(QiskitHardwareModel method)</a>
 </li>
         <li><a href="api/generated/qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.create_builder">(QuantumHardwareModel method)</a>
+</li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.create_builder">(RasqalRuntime method)</a>
 </li>
       </ul></li>
       <li><a href="api/generated/qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache.create_cache_folders">create_cache_folders() (QatCache method)</a>
@@ -598,6 +606,8 @@
       <li><a href="api/generated/qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_runtime">create_runtime() (HardwareModel method)</a>
 
       <ul>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.create_runtime">(in module qat.purr.integrations.rasqal)</a>
+</li>
         <li><a href="api/generated/qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitHardwareModel.create_runtime">(QiskitHardwareModel method)</a>
 </li>
       </ul></li>
@@ -642,8 +652,14 @@
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cX">cX() (InstructionBuilder method)</a>
 </li>
       <li><a href="api/generated/qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.cx">cx() (QIRParser method)</a>
+
+      <ul>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cx">(RasqalBuilder method)</a>
 </li>
+      </ul></li>
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cY">cY() (InstructionBuilder method)</a>
+</li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cy">cy() (RasqalBuilder method)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.devices.html#qat.purr.compiler.devices.CyclicRefPickler">CyclicRefPickler (class in qat.purr.compiler.devices)</a>
 </li>
@@ -652,7 +668,11 @@
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cZ">cZ() (InstructionBuilder method)</a>
 </li>
       <li><a href="api/generated/qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.cz">cz() (QIRParser method)</a>
+
+      <ul>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cz">(RasqalBuilder method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -741,6 +761,10 @@
         <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.Tket.disable">(Tket method)</a>
 </li>
       </ul></li>
+      <li><a href="api/generated/qat.features.html#qat.features.disable_all_features">disable_all_features() (in module qat.features)</a>
+</li>
+      <li><a href="api/generated/qat.features.html#qat.features.disable_feature">disable_feature() (in module qat.features)</a>
+</li>
       <li><a href="api/generated/qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.disconnect">disconnect() (Instrument method)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE">DISCRIMINATE (PostProcessType attribute)</a>
@@ -808,6 +832,8 @@
       <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.ErrorMitigationConfig.Empty">Empty (ErrorMitigationConfig attribute)</a>
 
       <ul>
+        <li><a href="api/generated/qat.features.html#qat.features.Features.Empty">(Features attribute)</a>
+</li>
         <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.Languages.Empty">(Languages attribute)</a>
 </li>
         <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.Empty">(MetricsType attribute)</a>
@@ -820,6 +846,8 @@
 </li>
       </ul></li>
       <li><a href="api/generated/qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.enable">enable() (CompilationMetrics method)</a>
+</li>
+      <li><a href="api/generated/qat.features.html#qat.features.enable_feature">enable_feature() (in module qat.features)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.enable_metrics">enable_metrics() (MetricsMixin method)</a>
 </li>
@@ -888,6 +916,10 @@
 </li>
         <li><a href="api/generated/qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.execute">(QuantumRuntime method)</a>
 </li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRouter.execute">(RasqalRouter method)</a>
+</li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.execute">(RasqalRuntime method)</a>
+</li>
       </ul></li>
       <li><a href="api/generated/qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.execute_instructions">execute_instructions() (in module qat.purr.compiler.runtime)</a>
 </li>
@@ -938,6 +970,8 @@
       <li><a href="api/generated/qat.purr.compiler.devices.html#qat.purr.compiler.devices.FakeList">FakeList (class in qat.purr.compiler.devices)</a>
 </li>
       <li><a href="api/generated/qat.purr.integrations.features.html#qat.purr.integrations.features.FeatureMetadata">FeatureMetadata (class in qat.purr.integrations.features)</a>
+</li>
+      <li><a href="api/generated/qat.features.html#qat.features.Features">Features (class in qat.features)</a>
 </li>
       <li><a href="api/generated/qat.purr.integrations.tket.html#qat.purr.integrations.tket.fetch_default_passes">fetch_default_passes() (in module qat.purr.integrations.tket)</a>
 </li>
@@ -1201,6 +1235,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel">HardwareModel (class in qat.purr.compiler.hardware_models)</a>
 </li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.has_features">has_features() (RasqalRuntime method)</a>
+</li>
       <li><a href="api/generated/qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.has_qubit">has_qubit() (QuantumHardwareModel method)</a>
 </li>
   </ul></td>
@@ -1251,10 +1287,10 @@
 </li>
       <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing">InlineResultsProcessing (class in qat.purr.compiler.config)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.insert_result_at_sweep_position">insert_result_at_sweep_position() (SweepIterator method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction">Instruction (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="api/generated/qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData.instruction">instruction (PositionData attribute)</a>
@@ -1294,6 +1330,10 @@
       <li><a href="api/generated/qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.is_finished">is_finished() (SweepIterator method)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.is_generated_name">is_generated_name() (in module qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="api/generated/qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.is_path">is_path() (in module qat.purr.compiler.frontends)</a>
+</li>
+      <li><a href="api/generated/qat.features.html#qat.features.is_rasqal_enabled">is_rasqal_enabled() (in module qat.features)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.execution.html#qat.purr.compiler.execution.IteratorInjector">IteratorInjector (class in qat.purr.compiler.execution)</a>
 </li>
@@ -1446,6 +1486,8 @@
 </li>
         <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure">(QuantumInstructionBuilder method)</a>
 </li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.measure">(RasqalBuilder method)</a>
+</li>
         <li><a href="api/generated/qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.measure">(TketBuilder method)</a>
 </li>
       </ul></li>
@@ -1527,8 +1569,6 @@
       </ul></li>
       <li><a href="api/generated/qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.modify">modify() (Qasm2Parser method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
@@ -1536,6 +1576,8 @@
         <li><a href="api/generated/qat.html#module-qat">qat</a>
 </li>
         <li><a href="api/generated/qat.core.html#module-qat.core">qat.core</a>
+</li>
+        <li><a href="api/generated/qat.features.html#module-qat.features">qat.features</a>
 </li>
         <li><a href="api/generated/qat.purr.html#module-qat.purr">qat.purr</a>
 </li>
@@ -1603,6 +1645,8 @@
 </li>
         <li><a href="api/generated/qat.purr.integrations.qiskit.html#module-qat.purr.integrations.qiskit">qat.purr.integrations.qiskit</a>
 </li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#module-qat.purr.integrations.rasqal">qat.purr.integrations.rasqal</a>
+</li>
         <li><a href="api/generated/qat.purr.integrations.tket.html#module-qat.purr.integrations.tket">qat.purr.integrations.tket</a>
 </li>
         <li><a href="api/generated/qat.purr.utils.html#module-qat.purr.utils">qat.purr.utils</a>
@@ -1616,6 +1660,8 @@
         <li><a href="api/generated/qat.purr.utils.serializer.html#module-qat.purr.utils.serializer">qat.purr.utils.serializer</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/qat.purr.utils.logger.html#qat.purr.utils.logger.ModuleFilter">ModuleFilter (class in qat.purr.utils.logger)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat.most_probable_bitstring">most_probable_bitstring() (QuantumResultsFormat method)</a>
@@ -1945,6 +1991,13 @@
 </li>
       </ul></li>
       <li>
+    qat.features
+
+      <ul>
+        <li><a href="api/generated/qat.features.html#module-qat.features">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr
 
       <ul>
@@ -2178,6 +2231,13 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.integrations.rasqal
+
+      <ul>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#module-qat.purr.integrations.rasqal">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.integrations.tket
 
       <ul>
@@ -2323,6 +2383,14 @@
 </li>
       <li><a href="api/generated/qat.purr.utils.benchmarking.html#qat.purr.utils.benchmarking.randomized_benchmarking">randomized_benchmarking() (in module qat.purr.utils.benchmarking)</a>
 </li>
+      <li><a href="api/generated/qat.features.html#qat.features.Features.Rasqal">Rasqal (Features attribute)</a>
+</li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder">RasqalBuilder (class in qat.purr.integrations.rasqal)</a>
+</li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRouter">RasqalRouter (class in qat.purr.integrations.rasqal)</a>
+</li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime">RasqalRuntime (class in qat.purr.integrations.rasqal)</a>
+</li>
       <li><a href="api/generated/qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.RAW">RAW (AcquireMode attribute)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.Raw">Raw (InlineResultsProcessing attribute)</a>
@@ -2412,11 +2480,13 @@
 </li>
         <li><a href="api/generated/qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.reset">(QiskitBuilder method)</a>
 </li>
-      </ul></li>
-      <li><a href="api/generated/qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.reset_iteration">reset_iteration() (SweepIterator method)</a>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.reset">(RasqalBuilder method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.reset_iteration">reset_iteration() (SweepIterator method)</a>
+</li>
       <li><a href="api/generated/qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.resolve_qb_pulse_channel">resolve_qb_pulse_channel() (in module qat.purr.compiler.hardware_models)</a>
 
       <ul>
@@ -2641,6 +2711,8 @@
 
       <ul>
         <li><a href="api/generated/qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.swap">(QiskitBuilder method)</a>
+</li>
+        <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.swap">(RasqalBuilder method)</a>
 </li>
       </ul></li>
       <li><a href="api/generated/qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Sweep">Sweep (class in qat.purr.compiler.instructions)</a>
@@ -2887,6 +2959,8 @@
 </li>
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.X">X() (QuantumInstructionBuilder method)</a>
 </li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.x">x() (RasqalBuilder method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -2903,6 +2977,8 @@
 </li>
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.Y">Y() (QuantumInstructionBuilder method)</a>
 </li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.y">y() (RasqalBuilder method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -2918,6 +2994,8 @@
       <li><a href="api/generated/qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.z">z() (QIRParser method)</a>
 </li>
       <li><a href="api/generated/qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.Z">Z() (QuantumInstructionBuilder method)</a>
+</li>
+      <li><a href="api/generated/qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.z">z() (RasqalBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>

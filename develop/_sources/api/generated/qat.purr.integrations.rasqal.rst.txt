@@ -1,0 +1,7 @@
+qat.purr.integrations.rasqal module
+===================================
+
+.. automodule:: qat.purr.integrations.rasqal
+   :members:
+   :undoc-members:
+   :show-inheritance:

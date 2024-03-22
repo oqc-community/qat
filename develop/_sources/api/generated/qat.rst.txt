@@ -21,3 +21,4 @@ Submodules
    :maxdepth: 12
 
    qat.core
+   qat.features

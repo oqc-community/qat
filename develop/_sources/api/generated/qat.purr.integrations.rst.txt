@@ -16,4 +16,5 @@ Submodules
    qat.purr.integrations.qasm
    qat.purr.integrations.qir
    qat.purr.integrations.qiskit
+   qat.purr.integrations.rasqal
    qat.purr.integrations.tket

@@ -92,6 +92,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html">qat.purr.integrations.rasqal module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
 </ul>
 </li>
@@ -105,6 +106,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.features.html">qat.features module</a></li>
 </ul>
 </li>
 </ul>
@@ -948,6 +950,7 @@
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.fetch_frontend"><code class="docutils literal notranslate"><span class="pre">fetch_frontend()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.is_path"><code class="docutils literal notranslate"><span class="pre">is_path()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a><ul>
@@ -1427,6 +1430,33 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.run_qasm_from_file"><code class="docutils literal notranslate"><span class="pre">run_qasm_from_file()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.rasqal.html">qat.purr.integrations.rasqal module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.clear"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.clear()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cx"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.cx()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cy"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.cy()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.cz"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.cz()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.measure"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.measure()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.reset"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.reset()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.swap"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.swap()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.x"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.x()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.y"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.y()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalBuilder.z"><code class="docutils literal notranslate"><span class="pre">RasqalBuilder.z()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRouter"><code class="docutils literal notranslate"><span class="pre">RasqalRouter</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRouter.execute"><code class="docutils literal notranslate"><span class="pre">RasqalRouter.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime"><code class="docutils literal notranslate"><span class="pre">RasqalRuntime</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.create_builder"><code class="docutils literal notranslate"><span class="pre">RasqalRuntime.create_builder()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.execute"><code class="docutils literal notranslate"><span class="pre">RasqalRuntime.execute()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.RasqalRuntime.has_features"><code class="docutils literal notranslate"><span class="pre">RasqalRuntime.has_features()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.rasqal.html#qat.purr.integrations.rasqal.create_runtime"><code class="docutils literal notranslate"><span class="pre">create_runtime()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder"><code class="docutils literal notranslate"><span class="pre">TketBuilder</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.barrier"><code class="docutils literal notranslate"><span class="pre">TketBuilder.barrier()</span></code></a></li>
@@ -1453,6 +1483,7 @@
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.apply_default_transforms"><code class="docutils literal notranslate"><span class="pre">apply_default_transforms()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.build_routing_architectures"><code class="docutils literal notranslate"><span class="pre">build_routing_architectures()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.check_validity"><code class="docutils literal notranslate"><span class="pre">check_validity()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.fetch_default_passes"><code class="docutils literal notranslate"><span class="pre">fetch_default_passes()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.get_coupling_subgraphs"><code class="docutils literal notranslate"><span class="pre">get_coupling_subgraphs()</span></code></a></li>
@@ -1580,6 +1611,18 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.core.html#qat.core.execute_qir"><code class="docutils literal notranslate"><span class="pre">execute_qir()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.core.html#qat.core.execute_qir_with_metrics"><code class="docutils literal notranslate"><span class="pre">execute_qir_with_metrics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.core.html#qat.core.execute_with_metrics"><code class="docutils literal notranslate"><span class="pre">execute_with_metrics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.features.html">qat.features module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.features.html#qat.features.Features"><code class="docutils literal notranslate"><span class="pre">Features</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.features.html#qat.features.Features.Empty"><code class="docutils literal notranslate"><span class="pre">Features.Empty</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.features.html#qat.features.Features.Rasqal"><code class="docutils literal notranslate"><span class="pre">Features.Rasqal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.features.html#qat.features.disable_all_features"><code class="docutils literal notranslate"><span class="pre">disable_all_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.features.html#qat.features.disable_feature"><code class="docutils literal notranslate"><span class="pre">disable_feature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.features.html#qat.features.enable_feature"><code class="docutils literal notranslate"><span class="pre">enable_feature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.features.html#qat.features.is_rasqal_enabled"><code class="docutils literal notranslate"><span class="pre">is_rasqal_enabled()</span></code></a></li>
 </ul>
 </li>
 </ul>
