@@ -140,8 +140,18 @@ class TestSweep:
 
 
 class TestInstructionExecution:
-    @pytest.mark.skip("Needs fixing post processing and down-conversion issues.")
-    def test_measure_instructions(hw):
+    @pytest.mark.parametrize(
+        "measure_instruction",
+        [
+            "measure_mean_z",
+            "measure_mean_signal",
+            "measure_single_shot_z",
+            "measure_scope_mode",
+            "measure_single_shot_binned",
+            "measure_single_shot_signal",
+        ],
+    )
+    def test_measure_instructions(self, measure_instruction):
         hw = get_default_echo_hardware(3)
         qubit = hw.get_qubit(0)
         phase_shift_1 = 0.2
@@ -152,15 +162,9 @@ class TestInstructionExecution:
             .X(qubit, np.pi / 2.0)
             .phase_shift(qubit, phase_shift_2)
             .X(qubit, np.pi / 2.0)
-            .measure_mean_z(qubit) # triggers a KeyError
-            .measure_mean_signal(qubit)
-            .measure_single_shot_z(qubit)
-            .measure_scope_mode(qubit)
-            .measure_single_shot_binned(qubit)
-            .measure_single_shot_signal(qubit)
         )
-        engine = EchoEngine(hw)
-        results = engine.execute(builder.instructions)
+        getattr(builder, measure_instruction)(qubit)
+        results = execute_instructions(hw, builder)
         assert results is not None
 
     def check_size(self, results, expected_shape):
