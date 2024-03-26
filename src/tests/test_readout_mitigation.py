@@ -181,7 +181,9 @@ class TestOnNoisySimulator:
             self.fidelity_r0 = {qubit.index: 1.0 for qubit in self.model.qubits}
             self.fidelity_r1 = {qubit.index: 1.0 for qubit in self.model.qubits}
 
-        def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+        def _execute_on_hardware(
+            self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None
+        ):
             result = super()._execute_on_hardware(sweep_iterator, package)
             for key in result.keys():
                 q = int(key.split("_", 1)[1])

@@ -19,6 +19,7 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import AcquireMode, PostProcessing
+from qat.purr.compiler.interrupt import NullInterrupt
 
 
 def apply_setup_to_hardware(
@@ -158,10 +159,15 @@ class EchoEngine(QuantumExecutionEngine):
 
         return instructions
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile, interrupt=NullInterrupt()
+    ):
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
+
+            metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
+            interrupt.if_triggered(metadata, throw=True)
 
             position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)

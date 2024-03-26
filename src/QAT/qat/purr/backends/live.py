@@ -32,6 +32,7 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
     Pulse,
 )
+from qat.purr.compiler.interrupt import NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -261,13 +262,16 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
         return baseband_freqs
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile, interrupt=NullInterrupt()
+    ):
         if self.model.control_hardware is None:
             raise ValueError("Please add a control hardware first!")
 
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
+            metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
 
             position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
@@ -302,6 +306,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     physical_channel.acquire_mode_integrator = (
                         aq.mode == AcquireMode.INTEGRATOR
                     )
+
+            interrupt.if_triggered(metadata, throw=True)
 
             playback_results = self.model.control_hardware.start_playback(
                 repetitions=repetitions, repetition_time=repetition_time

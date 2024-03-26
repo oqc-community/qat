@@ -31,6 +31,7 @@ from qat.purr.utils.logger import get_default_logger
 
 from ..compiler.execution import QuantumExecutionEngine, SweepIterator
 from ..compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
+from ..compiler.interrupt import NullInterrupt
 from ..utils.logging_utils import log_duration
 from .utilities import UPCONVERT_SIGN, PositionData, get_axis_map
 
@@ -704,7 +705,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
             return instructions
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile, interrupt=NullInterrupt()
+    ):
         """
         Emulate the effects of the firmware and quantum hardware for a given input. Before instructions
         are passed to execute they are optimised for this specific function so that all measurements
@@ -720,6 +723,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
             logger.debug(f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}")
+
+            metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
+            interrupt.if_triggered(metadata, throw=True)
 
             position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
