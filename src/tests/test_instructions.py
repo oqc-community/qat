@@ -143,13 +143,14 @@ class TestInstructionExecution:
     @pytest.mark.parametrize(
         "measure_instruction",
         [
-            "measure_mean_z",
-            "measure_mean_signal",
-            "measure_single_shot_z",
-            "measure_scope_mode",
-            "measure_single_shot_binned",
-            "measure_single_shot_signal",
+            lambda b: b.measure_mean_z,
+            lambda b: b.measure_mean_signal,
+            lambda b: b.measure_single_shot_z,
+            lambda b: b.measure_scope_mode,
+            lambda b: b.measure_single_shot_binned,
+            lambda b: b.measure_single_shot_signal,
         ],
+        ids=lambda v: v.__code__.co_names[0],
     )
     def test_measure_instructions(self, measure_instruction):
         hw = get_default_echo_hardware(3)
@@ -163,7 +164,7 @@ class TestInstructionExecution:
             .phase_shift(qubit, phase_shift_2)
             .X(qubit, np.pi / 2.0)
         )
-        getattr(builder, measure_instruction)(qubit)
+        measure_instruction(builder)(qubit)
         results = execute_instructions(hw, builder)
         assert results is not None
 
