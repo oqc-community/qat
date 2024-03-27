@@ -8,7 +8,7 @@ class InterruptError(RuntimeError): ...
 
 class Interrupt(abc.ABC):
     @abc.abstractmethod
-    def if_triggered(self, iteration: int, metadata={}, throw=False):
+    def if_triggered(self, metadata={}, throw=False):
         """
         Capture context if triggered
         """
@@ -23,7 +23,7 @@ class Interrupt(abc.ABC):
 
 
 class NullInterrupt(Interrupt):
-    def if_triggered(self, iteration: int, metadata={}, throw=False): ...
+    def if_triggered(self, metadata={}, throw=False): ...
 
     def trigger(self): ...
 
@@ -36,15 +36,16 @@ class BasicInterrupt(Interrupt):
     def __init__(self, event=Event(), queue=Queue()):
         self._event = event
         self._queue = queue
+        self._metadata = {}
 
-    def if_triggered(self, iteration: int, metadata={}, throw=False):
+    def if_triggered(self, metadata={}, throw=False):
+        self._metadata.update(metadata)
         if self._event.is_set():
-            response = {"interrupted": True, "iteration": iteration}
-            response.update(metadata)
+            response = {"interrupted": True, "metadata": self._metadata}
             self._queue.put(response)
 
             if throw:
-                raise InterruptError(f"Interrupt triggered in batch {iteration}")
+                raise InterruptError(f"Interrupt triggered, {self._metadata}")
 
     def trigger(self):
         self._event.set()
