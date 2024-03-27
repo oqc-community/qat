@@ -36,7 +36,7 @@ class Instrument(Calibratable):
         if self.driver is not None:
             try:
                 self.driver.close()
-                self.driver = None
+                self._driver = None
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
