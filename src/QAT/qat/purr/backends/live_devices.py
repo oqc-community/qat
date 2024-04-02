@@ -36,7 +36,9 @@ class Instrument(Calibratable):
         if self.driver is not None:
             try:
                 self.driver.close()
-                self.driver = None
+                # The current version of the drivers required the link to be removed for
+                # proper operation. Adjust this when it is no longer needed.
+                self._driver = None
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
