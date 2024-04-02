@@ -8,7 +8,7 @@ cal {
     extern port channel_2;
     frame q1_frame = newframe(q1_drive, 5e9, 0.0);
     frame q2_frame = newframe(q2_drive, 5.1e9, 0.0);
-    waveform wf1 = extra_soft_square(1e-6, 1.0);
+    waveform wf1 = rounded_square(1e-6, 1.0, 50e-9, 8ns);
 }
 
 defcal cx $1,$2 {

@@ -1,38 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from pytket.architecture import Architecture, RingArch
+from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.config import Qasm2Optimizations, TketOptimizations
-from qat.purr.integrations.tket import TketBuilder, TketQasmParser, optimize_circuit
+from qat.purr.integrations.tket import run_tket_optimizations
 
-from tests.qasm_utils import get_qasm2
+from .qasm_utils import get_qasm2
 
 
 class TestTketOptimization:
-    def _build_tket_objects(self, qasm_string, directional_arch=True):
-        tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm_string)
-        circ = tket_builder.circuit
-
-        if directional_arch:
-            architecture = Architecture(
-                [(0, 1), (1, 2), (2, 3), (4, 3), (4, 5), (6, 5), (7, 6), (0, 7)]
-            )
-        else:
-            architecture = RingArch(8)
-
-        return circ, architecture
-
     def _run_random(self, tket_opt):
-        """
-        Helper class for testing various optimization configs against a varied QASM
-        file.
-        """
+        """Helper class for testing various optimization configs against a varied QASM file."""
         qasm_string = get_qasm2("random_n5_d5.qasm")
         opt_config = Qasm2Optimizations()
         opt_config.tket_optimizations |= tket_opt
-
-        circ, architecture = self._build_tket_objects(qasm_string)
-        return optimize_circuit(circ, architecture, opt_config.tket_optimizations)
+        hardware = get_default_echo_hardware(8)
+        return run_tket_optimizations(qasm_string, opt_config.tket_optimizations, hardware)
 
     def test_globalise_phased_x(self):
         assert self._run_random(TketOptimizations.GlobalisePhasedX)

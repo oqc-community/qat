@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
+import re
+from abc import ABC
 from copy import deepcopy
-from typing import Any, Dict, List, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -18,10 +22,12 @@ from qat.purr.compiler.devices import (
     Resonator,
 )
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     CrossResonanceCancelPulse,
     CrossResonancePulse,
     DrivePulse,
+    Instruction,
     PhaseShift,
     Synchronize,
 )
@@ -30,22 +36,18 @@ if TYPE_CHECKING:
     from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
     from qat.purr.compiler.execution import InstructionExecutionEngine
 
-AnyEngine = TypeVar("AnyEngine")
-AnyBuilder = TypeVar("AnyBuilder")
 
-
-class HardwareModel:
+class HardwareModel(ABC):
     """
-    Base class for all hardware models. Every model should return the builder class that
-    should be used to build circuits/pulses for its particular back-end.
+    Base class for all hardware models. Every model should return the builder class that should be
+    used to build circuits/pulses for its particular back-end.
     """
 
     def __init__(self, shot_limit=-1):
         super().__init__()
-        self.repeat_limit = shot_limit
+        self.shot_limit = shot_limit
 
-    def create_engine(self) -> InstructionExecutionEngine:
-        ...
+    def create_engine(self) -> InstructionExecutionEngine: ...
 
     def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
         if existing_engine is None:
@@ -55,8 +57,95 @@ class HardwareModel:
 
         return QuantumRuntime(existing_engine)
 
-    def create_builder(self) -> InstructionBuilder:
-        ...
+    def create_builder(self) -> InstructionBuilder: ...
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+def resolve_qb_pulse_channel(
+    chanbit: Union[Qubit, PulseChannel], channel_type=None
+) -> Tuple[Qubit, PulseChannel]:
+    if isinstance(chanbit, Qubit):
+        qubit = chanbit
+        if channel_type == ChannelType.acquire:
+            channel = qubit.get_acquire_channel()
+        else:
+            channel = qubit.get_default_pulse_channel()
+        return qubit, channel
+    else:
+        return chanbit.related_qubit, chanbit
+
+
+def get_cl2qu_index_mapping(instructions: List[Instruction]):
+    """
+    Returns a Dict[str, str] mapping creg to qreg indices.
+    Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
+    """
+    mapping = {}
+    pattern = re.compile("(.*)\[([0-9]+)\]")
+
+    for instruction in instructions:
+        if not isinstance(instruction, Acquire):
+            continue
+
+        result = pattern.match(instruction.output_variable)
+        if result is None:
+            raise ValueError(
+                f"Could not extract cl register index from {instruction.output_variable}"
+            )
+
+        qubit, _ = resolve_qb_pulse_channel(instruction.channel, ChannelType.acquire)
+        clbit_index = result.group(2)
+        mapping[clbit_index] = qubit.index
+
+    return mapping
+
+
+class ReadoutMitigation(Calibratable):
+    """
+    Linear maps each individual qubit to its <0/1> given <0/1> probability.
+    Note that linear assumes no cross-talk effects and considers each qubit independent.
+    linear = {
+        <qubit_number>: {
+            "0|0": 1,
+            "1|0": 1,
+            "0|1": 1,
+            "1|1": 1,
+        }
+    }
+    Matrix is the entire 2**n x 2**n process matrix of p(<bitstring_1>|<bitstring_2>).
+    M3 is a runtime mitigation strategy that builds up the calibration it needs at runtime,
+    hence a bool of available or not. For more info https://github.com/Qiskit-Partners/mthree.
+    """
+
+    def __init__(
+        self,
+        linear: [Dict[str, Dict[str, float]]] = None,
+        matrix: np.array = None,
+        m3: bool = False,
+    ):
+        super().__init__()
+        self.m3_available = m3
+        self.linear: [Dict[str, Dict[str, float]]] = linear
+        self.matrix: np.array = matrix
+
+
+class ErrorMitigation(Calibratable):
+    def __init__(self, readout_mitigation: Optional[ReadoutMitigation] = None):
+        super().__init__()
+        self.readout_mitigation = readout_mitigation
+
+    def __setstate__(self, state):
+        readout_mitigation = state.pop("readout_mitigation", None)
+        if readout_mitigation is None or isinstance(readout_mitigation, ReadoutMitigation):
+            self.readout_mitigation = readout_mitigation
+        else:
+            raise ValueError(
+                f"Expected {ReadoutMitigation.__class__} but got {type(readout_mitigation)}"
+            )
+
+        self.__dict__.update(state)
 
 
 class QuantumHardwareModel(HardwareModel, Calibratable):
@@ -71,6 +160,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         acquire_mode=None,
         repeat_count=1000,
         repetition_period=100e-6,
+        error_mitigation: Optional[ErrorMitigation] = None,
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -82,11 +172,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.physical_channels: Dict[str, PhysicalChannel] = {}
         self.basebands: Dict[str, PhysicalBaseband] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
+        self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
 
         # Construct last due to us overriding calibratables fields with properties.
-        super().__init__(
-            shot_limit=shot_limit,
-        )
+        super().__init__(shot_limit)
 
     def create_engine(self) -> InstructionExecutionEngine:
         from qat.purr.backends.echo import EchoEngine
@@ -138,9 +227,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             id_ = f"Q{id_}"
 
         if id_ not in self.quantum_devices:
-            raise ValueError(
-                f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist."
-            )
+            raise ValueError(f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist.")
 
         found_qubit = self.quantum_devices.get(id_)
         if not isinstance(found_qubit, Qubit):
@@ -183,38 +270,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return pulse_channels
 
-    def get_pulse_channel_from_device(
-        self,
-        ch_type: ChannelType,
-        host_device_id: str,
-        aux_device_ids: List[str] = None,
-    ):
-        if aux_device_ids is None:
-            aux_device_ids = []
-        return self.get_quantum_device(host_device_id).get_pulse_channel(
-            ch_type, [self.get_quantum_device(device) for device in aux_device_ids]
-        )
-
-    def get_pulse_channels_from_physical_channel(self, physical_channel_id: str):
-        # WARNING: this will not get pulse channels created during execution, only ones
-        # predefined on the hardware.
-        pulse_channels = []
-        for pulse_channel in self.pulse_channels.values():
-            if pulse_channel.physical_channel_id == physical_channel_id:
-                pulse_channels.append(pulse_channel)
-
-        return pulse_channels
-
-    def get_devices_from_pulse_channel(self, id_: str):
-        pulse_channel = self.get_pulse_channel_from_id(id_)
-        devices = [
-            device
-            for device in self.quantum_devices.values()
-            if pulse_channel in device.pulse_channels.values()
-        ]
-        return devices
-
-    def get_pulse_channel_from_id(self, id_: str):
+    def get_pulse_channel(self, id_: str):
         return self.pulse_channels.get(id_)
 
     def get_devices_from_physical_channel(self, id_: str):
@@ -228,9 +284,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_physical_channel(self, *physical_channels: PhysicalChannel):
         for physical_channel in physical_channels:
-            existing_channel = self.physical_channels.get(
-                physical_channel.full_id(), None
-            )
+            existing_channel = self.physical_channels.get(physical_channel.full_id(), None)
             if existing_channel is not None:
                 # If we're the same instance just don't throw.
                 if existing_channel is physical_channel:
@@ -253,9 +307,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
                 if existing_baseband is baseband:
                     continue
 
-                raise KeyError(
-                    f"Baseband with id '{baseband.full_id()}' already exists."
-                )
+                raise KeyError(f"Baseband with id '{baseband.full_id()}' already exists.")
 
             self.basebands[baseband.full_id()] = baseband
 
@@ -269,7 +321,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         if (device := self.get_physical_channel(id_)) is not None:
             return device
 
-        if (device := self.get_pulse_channel_from_id(id_)) is not None:
+        if (device := self.get_pulse_channel(id_)) is not None:
             return device
 
         return self.get_physical_baseband(id_)
@@ -281,26 +333,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             self.add_physical_channel(device)
         else:
             self.add_quantum_device(device)
-
-    def _resolve_qb_pulse_channel(self, chanbit: Union[Qubit, PulseChannel]):
-        if isinstance(chanbit, Qubit):
-            return chanbit, chanbit.get_default_pulse_channel()
-        else:
-            quantum_devices = self.get_devices_from_pulse_channel(chanbit.full_id())
-            primary_devices = [
-                device
-                for device in quantum_devices
-                if device.get_default_pulse_channel() == chanbit
-            ]
-            if len(primary_devices) > 1:
-                raise NotImplementedError(
-                    f"Too many devices use the channel with id {chanbit.full_id()} as "
-                    "a default channel to resolve a primary device."
-                )
-            elif len(primary_devices) == 0:
-                return None, chanbit
-            else:
-                return primary_devices[0], chanbit
 
     @property
     def is_calibrated(self):
@@ -454,3 +486,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             ]
         else:
             raise ValueError("Generic ZX gate not implemented yet!")
+
+    def __setstate__(self, state):
+        error_mitigation = state.pop("error_mitigation", None)
+        if error_mitigation is None or isinstance(error_mitigation, ErrorMitigation):
+            self.error_mitigation = error_mitigation
+        else:
+            raise ValueError(
+                f"Expected {ErrorMitigation.__class__} but got {type(error_mitigation)}"
+            )
+
+        self.__dict__.update(state)

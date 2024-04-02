@@ -3,7 +3,7 @@ include "qelib1.inc";
 
 gate fake_cswap a,b,c
 {
-  cx c,b;
+  cx c[1],b;
   ccx a,b,c;
   cx c,b;
 }

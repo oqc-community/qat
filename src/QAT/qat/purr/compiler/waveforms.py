@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from dataclasses import dataclass
 from typing import Dict
 
@@ -33,18 +34,14 @@ class SquareWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Square")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale)
 
 
 class GaussianWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Gaussian")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale)
 
 
 class SoftSquareWaveform(AbstractWaveform):
@@ -60,9 +57,7 @@ class BlackmanWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Blackman")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale)
 
 
 class SetupHoldWaveform(AbstractWaveform):
@@ -80,24 +75,6 @@ class SofterSquareWaveform(AbstractWaveform):
     def __init__(self, channel, width, amp, ignore_channel_scale):
         super().__init__(
             channel, PulseShapeType.SOFTER_SQUARE, width, amp, ignore_channel_scale
-        )
-
-
-class ExtraSoftSquareWaveform(AbstractWaveform):
-    waveform_definition: WaveformDef = WaveformDef(name="Extra soft square")
-
-    def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.EXTRA_SOFT_SQUARE, width, amp, ignore_channel_scale
-        )
-
-
-class SofterGaussianWaveform(AbstractWaveform):
-    waveform_definition: WaveformDef = WaveformDef(name="Softer Gaussian")
-
-    def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.SOFTER_GAUSSIAN, width, amp, ignore_channel_scale
         )
 
 

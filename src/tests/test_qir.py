@@ -1,18 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import base64
-import numpy as np
 from os.path import abspath, dirname, join
 from unittest import mock
 
+import numpy as np
 import pytest
+
+from qat import Features, enable_feature, execute, execute_qir
+from qat.features import disable_feature, is_rasqal_enabled
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.backends.realtime_chip_simulator import qutip_available
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
+from qat.purr.backends.realtime_chip_simulator import (
+    get_default_RTCS_hardware,
+    qutip_available,
+)
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
-from qat.qat import execute, execute_qir
-
+from qat.purr.integrations.rasqal import create_runtime
 from tests.qasm_utils import TestFileType, get_test_file_path
 from tests.utils import get_jagged_echo_hardware
 
@@ -46,16 +53,11 @@ class TestQIR:
 
     def test_qir_bell(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         results = execute_qir(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
         )
         assert results == "00"
-
-    def test_base_profile_ops(self):
-        parser = QIRParser(get_default_echo_hardware(7))
-        builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
-        assert len(builder.instructions) == 181
 
     def test_cudaq_input(self):
         results = execute(
@@ -63,12 +65,12 @@ class TestQIR:
             get_default_echo_hardware(6),
         )
 
-        assert results.get("r00000") == [0]
+        assert results.get("r00000")["0"] == 1000
 
     @pytest.mark.skip("Needs full runtime.")
     def test_bell_measure_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(
             _get_qir_path("bell_qir_measure.bc"), get_default_echo_hardware(4), config
         )
@@ -76,21 +78,19 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_complicated(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
-        execute_qir(
-            _get_qir_path("complicated.ll"), get_default_echo_hardware(4), config
-        )
+        config.results_format.most_probable_bitstring()
+        execute_qir(_get_qir_path("complicated.ll"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
     def test_hello_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         execute_qir(_get_qir_path("hello.bc"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
     def test_select_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
+        config.results_format.most_probable_bitstring()
         results = execute_qir(
             _get_qir_path("select.bc"), get_default_echo_hardware(4), config
         )
@@ -99,15 +99,8 @@ class TestQIR:
     @pytest.mark.skip("Needs full runtime.")
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
-        config.results_format.squash_binary_result_arrays()
-        execute_qir(
-            _get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config
-        )
-
-    def test_qir_instruction_builder(self):
-        parser = QIRParser(get_default_echo_hardware(4))
-        builder = parser.parse(_get_qir_path("generator-bell.ll"))
-        assert len(builder.instructions) == 97
+        config.results_format.most_probable_bitstring()
+        execute_qir(_get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config)
 
     def test_common_entrypoint_file(self):
         config = CompilerConfig()
@@ -226,7 +219,9 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("generator-bell.ll"), compiler_config=config
+            _get_qir_path("generator-bell.ll"),
+            get_default_RTCS_hardware(),
+            compiler_config=config,
         )
         assert len(results) == 4
         assert results["00"] > 1
@@ -241,7 +236,9 @@ class TestQIR:
         config = CompilerConfig()
         config.results_format.binary_count()
         results = execute_qir(
-            _get_qir_path("out_of_order_measure.ll"), compiler_config=config
+            _get_qir_path("out_of_order_measure.ll"),
+            get_default_RTCS_hardware(),
+            compiler_config=config,
         )
         assert len(results) == 4
 
@@ -254,7 +251,6 @@ class TestQIR:
             "bell_psi_plus.ll",
             "bell_theta_minus.ll",
             "bell_theta_plus.ll",
-            "complicated.ll",
             "generator-bell.ll",
             "hello.bc",
             "out_of_order_measure.ll",
@@ -282,4 +278,65 @@ class TestQIR:
         )
 
         with pytest.raises(TypeError):
-            execute_qir(qat_input=builder.instructions)
+            execute_qir(builder.instructions)
+
+    def test_too_big(self):
+        enable_feature(Features.Rasqal)
+        model = get_default_qiskit_hardware()
+        runner = create_runtime(model)
+        with pytest.raises(ValueError):
+            runner.run(_get_qir_path("qaoa.ll"))
+
+        disable_feature(Features.Rasqal)
+
+    def test_rasqal_runner(self):
+        enable_feature(Features.Rasqal)
+        model = get_default_qiskit_hardware()
+        runner = create_runtime(model)
+        results = runner.run(_get_qir_path("generator-bell.ll"))
+
+        assert len(results) == 2
+        assert results["00"] > 300
+        assert results["11"] > 300
+        disable_feature(Features.Rasqal)
+
+    def test_rasqal_full_pipeline(self):
+        enable_feature(Features.Rasqal)
+        assert is_rasqal_enabled()
+
+        config = CompilerConfig()
+        config.results_format.binary_count()
+        results = execute_qir(
+            _get_qir_path("generator-bell.ll"),
+            get_default_qiskit_hardware(),
+            compiler_config=config,
+        )
+
+        disable_feature(Features.Rasqal)
+        assert len(results) == 2
+        assert results["00"] > 300
+        assert results["11"] > 300
+
+    def test_rasqal_fails_if_unavailable(self):
+        enable_feature(Features.Rasqal)
+        assert is_rasqal_enabled()
+
+        # Simulate that we don't have Rasqal to force it to error if it takes the right path.
+        import qat
+
+        qat.purr.integrations.rasqal.rasqal_available = False
+
+        with pytest.raises(ValueError) as e:
+            config = CompilerConfig()
+            config.results_format.binary_count()
+            results = execute_qir(
+                _get_qir_path("generator-bell.ll"),
+                get_default_qiskit_hardware(),
+                compiler_config=config,
+            )
+
+        assert "Rasqal is not available" in str(e)
+
+        qat.purr.integrations.rasqal.rasqal_available = True
+        disable_feature(Features.Rasqal)
+        assert not is_rasqal_enabled()

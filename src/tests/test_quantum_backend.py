@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import tempfile
 from os.path import dirname, join
 
 import numpy as np
 import pytest
+from scipy import fftpack
 
-from qat.qat import execute
+from qat import execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine, sync_baseband_frequencies_to_value
 from qat.purr.backends.realtime_chip_simulator import (
@@ -18,7 +20,6 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
-    FreqShiftPulseChannel,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
@@ -33,9 +34,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
-from scipy import fftpack
 
-from tests.qasm_utils import get_qasm2
+from .qasm_utils import get_qasm2
+from .test_readout_mitigation import apply_error_mitigation_setup
 
 
 class TestBaseQuantumExecution(LiveDeviceEngine):
@@ -71,7 +72,7 @@ class TestBaseQuantumExecution(LiveDeviceEngine):
                     start = round(aq.start + aq.delay / dt)
                     response = self.buffers[increment][aq.physical_channel.full_id()][
                         start : start + aq.samples
-                    ]
+                    ]  # yapf: disable
 
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
@@ -151,9 +152,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 class TestBaseQuantum:
     def get_qasm2(self, file_name):
-        with open(
-            join(dirname(__file__), "files", "qasm", file_name), "r"
-        ) as qasm_file:
+        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
             return qasm_file.read()
 
     def test_batched_execution(self):
@@ -162,7 +161,6 @@ class TestBaseQuantum:
 
         config = CompilerConfig()
         config.repeats = 50
-        config.results_format.binary_count()
 
         results = execute(get_qasm2("basic.qasm"), hw, config)
 
@@ -175,28 +173,13 @@ class TestBaseQuantum:
     def test_invalid_qubit_numbers(self):
         qasm_string = get_qasm2("example.qasm")
         with pytest.raises(ValueError):
-            Qasm2Parser().parse(get_builder(get_default_RTCS_hardware()), qasm_string)
-
-    def test_load_predefined_qutip_hardware_config(self):
-        hw = get_test_model()
-        for id_, device in hw.quantum_devices.items():
-            assert hw.get_quantum_device(id_) is not None
-            for pc_id, pc in device.pulse_channels.items():
-                pc_id_decomp = pc_id.split(".")
-                assert (
-                    hw.get_pulse_channel_from_device(
-                        ChannelType[pc_id_decomp[-1]], id_, pc_id_decomp[:-1]
-                    )
-                    is not None
-                )
-        for id_ in hw.physical_channels.keys():
-            assert hw.get_physical_channel(id_) is not None
-        for id_ in hw.basebands.keys():
-            assert hw.get_physical_baseband(id_) is not None
+            process = Qasm2Parser().parse(
+                get_builder(get_default_RTCS_hardware()), qasm_string
+            )
 
     def test_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
-        pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
+        pulse_channel = hw.get_qubit(0).get_drive_channel()
         physical_channel = pulse_channel.physical_channel
         baseband = physical_channel.baseband
         pulse_channel.frequency = 5e9
@@ -211,7 +194,7 @@ class TestBaseQuantum:
             get_builder(hw)
             .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
             .measure_scope_mode(qubit)
-        )
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -227,7 +210,7 @@ class TestBaseQuantum:
 
     def test_not_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
-        pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
+        pulse_channel = hw.get_qubit(0).get_drive_channel()
         physical_channel = pulse_channel.physical_channel
         baseband = physical_channel.baseband
         pulse_channel.frequency = 5e9
@@ -242,7 +225,7 @@ class TestBaseQuantum:
             get_builder(hw)
             .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
             .measure_scope_mode(qubit)
-        )
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -253,7 +236,7 @@ class TestBaseQuantum:
         if_freq = np.argmax(x) / physical_channel.sample_time / len(pulses)
         assert if_freq == pytest.approx(pulse_channel.frequency - baseband.frequency)
 
-    def test_fixed_if_pulse_channel_frequency_priority_with_multiple_pulse_channels(
+    def test_fixed_if_pulse_channel_frequency_priority_when_multiple_pulse_channels_used(
         self,
     ):
         hw = get_test_model()
@@ -280,11 +263,9 @@ class TestBaseQuantum:
             get_builder(hw)
             .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
             .synchronize([drive_channel, second_state_channel])
-            .pulse(
-                second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate
-            )
+            .pulse(second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate)
             .measure_scope_mode(qubit)
-        )
+        )  # yapf: disable
 
         engine = get_test_execution_engine(hw)
         execute_instructions(engine, builder)
@@ -323,14 +304,10 @@ class TestBaseQuantum:
         sync_baseband_frequencies_to_value(hw, common_lo_frequency, [0, 1])
         assert drive_channel_1.frequency == 5.0e9
         assert drive_channel_2.frequency == 5.5e9
-        assert (
-            baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
-        )
+        assert baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
         assert baseband_1.frequency == common_lo_frequency
         assert baseband_2.frequency == common_lo_frequency
-        assert (
-            baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
-        )
+        assert baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
 
     def test_setup_hold_measure_pulse(self):
         hw = get_test_model()
@@ -348,9 +325,7 @@ class TestBaseQuantum:
         )
         result = result[0]
         setup_length = (
-            int(
-                qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time
-            )
+            int(qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time)
             + 1
         )
         full_length = int(
@@ -402,8 +377,7 @@ class TestBaseQuantum:
             result[: setup_length - delay_length].real,
         )
         assert np.array_equal(
-            qubit.pulse_measure["amp"]
-            * np.ones(full_length - setup_length + delay_length),
+            qubit.pulse_measure["amp"] * np.ones(full_length - setup_length + delay_length),
             result[setup_length - delay_length : full_length].real,
         )
 
@@ -424,6 +398,27 @@ class TestBaseQuantum:
             assert coupling_direction == empty_hw.qubit_direction_couplings[0].direction
             assert coupling_quality == empty_hw.qubit_direction_couplings[0].quality
 
+    def test_error_mitigation_calibration(self):
+        original_hw = get_test_model()
+        assert original_hw.error_mitigation is None
+
+        apply_error_mitigation_setup(
+            original_hw,
+            q0_ro_fidelity_0=0.8,
+            q0_ro_fidelity_1=0.7,
+            q1_ro_fidelity_0=0.9,
+            q1_ro_fidelity_1=0.6,
+        )
+        assert original_hw.error_mitigation is not None
+
+        original_hw_cal_string = original_hw.get_calibration()
+        loaded_hw = Calibratable.load_calibration(original_hw_cal_string)
+        assert loaded_hw.error_mitigation is not None
+
+        original_linear_rm = original_hw.error_mitigation.readout_mitigation.linear
+        loaded_linear_rm = loaded_hw.error_mitigation.readout_mitigation.linear
+        assert loaded_linear_rm == original_linear_rm
+
     def test_sweep_pulse_length_exceeds_max_throws_error(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -435,7 +430,7 @@ class TestBaseQuantum:
             .sweep(SweepValue("t", time))
             .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
             .measure_scope_mode(qubit)
-        )
+        )  # yapf: disable
         engine = get_test_execution_engine(hw)
         try:
             pytest.raises(ValueError, execute_instructions(engine, builder))
@@ -448,8 +443,67 @@ class TestBaseQuantum:
             .sweep(SweepValue("t", time))
             .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
             .measure_scope_mode(qubit)
-        )
+        )  # yapf: disable
         assert nb_points == execute_instructions(engine, builder)[0].shape[0]
+
+    def setup_frequency_shift(self, hardware, freq_shift_qubits=[]):
+        builder = get_builder(hardware)
+
+        for qid in freq_shift_qubits:
+            qubit = hardware.get_qubit(qid)
+            freq_channel = qubit.create_pulse_channel(
+                channel_type=ChannelType.freq_shift,
+                frequency=8.5e9,
+                scale=1.0,
+                amp=1.0,
+                id_="freq_shift",
+            )
+            hardware.add_pulse_channel(
+                freq_channel,
+            )
+
+        for qubit in hardware.qubits:
+            builder.pulse(
+                qubit.get_drive_channel(),
+                PulseShapeType.SQUARE,
+                width=1e-6,
+                amp=1,
+                ignore_channel_scale=True,
+            )
+
+        return builder
+
+    def get_qubit_buffers(self, hw, engine, ids):
+        if not isinstance(ids, list):
+            ids = [ids]
+        return [engine.buffers[0][hw.get_qubit(_id).physical_channel.id] for _id in ids]
+
+    def test_no_freq_shift(self):
+        hardware = get_default_echo_hardware(2)
+        engine = get_test_execution_engine(hardware)
+
+        builder = self.setup_frequency_shift(hardware)
+
+        execute_instructions(engine, builder)
+        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
+        assert len(qubit1_buffer) > 0
+        assert len(qubit2_buffer) > 0
+        assert np.isclose(qubit1_buffer, 1 + 0j).all()
+        assert np.isclose(qubit2_buffer, 1 + 0j).all()
+
+    def test_freq_shift(self):
+        hardware = get_default_echo_hardware(2)
+        engine = get_test_execution_engine(hardware)
+
+        builder = self.setup_frequency_shift(hardware, freq_shift_qubits=[0])
+
+        execute_instructions(engine, builder)
+        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
+
+        assert len(qubit1_buffer) > 0
+        assert len(qubit2_buffer) > 0
+        assert np.isclose([abs(val) for val in qubit1_buffer], 2).all()
+        assert np.isclose([abs(val) for val in qubit2_buffer], 1).all()
 
     def test_phase_shift_optimisation_squashes_down_adjacent_phase_shifts(self):
         hw = get_test_model()
@@ -489,7 +543,6 @@ class TestBaseQuantum:
         )
         engine = get_test_execution_engine(hw)
         optimized_instructions = engine.optimize(builder.instructions)
-        print(optimized_instructions)
         phase_shift_list = [
             instr for instr in optimized_instructions if isinstance(instr, PhaseShift)
         ]
@@ -520,48 +573,54 @@ class TestBaseQuantum:
         assert phase_shift_list[1].phase == phase_shift_fixed
         assert isinstance(phase_shift_list[0].phase, Variable)
 
-    def setup_frequency_shift(self, hardware, freq_shift_qubits=[]):
-        builder = get_builder(hardware)
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results, post_combine",
+        [
+            ({}, {}, {}),
+            ({}, {"a": [1]}, {"a": [1]}),
+            ({"a": [1]}, {"a": [2]}, {"a": [1, 2]}),
+        ],
+    )
+    def test_combining_python_list_results_succeeds(
+        self, pre_combine, batch_results, post_combine
+    ):
+        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        assert results == post_combine
 
-        for qid in freq_shift_qubits:
-            qubit = hardware.get_qubit(qid)
-            freq_channel = qubit.create_pulse_channel(ChannelType.freq_shift, amp=1.0, scale=1.0, frequency=8.5e9)
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results, post_combine",
+        [
+            ({"a": np.array([1, 2])}, {"a": np.array([3])}, {"a": np.array([1, 2, 3])}),
+        ],
+    )
+    def test_combining_numpy_array_results_succeeds(
+        self, pre_combine, batch_results, post_combine
+    ):
+        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        assert results.keys() == post_combine.keys()
+        for k in results.keys():
+            assert results[k].tolist() == post_combine[k].tolist()
 
-        for qubit in hardware.qubits:
-            builder.pulse(
-                qubit.get_drive_channel(), PulseShapeType.SQUARE, width=1e-6, amp=1, ignore_channel_scale=True
-            )
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results",
+        [
+            ({"a": [1]}, {"b": [2]}),
+            ({"a": None}, {"a": [3]}),
+            ({"a": {1, 2}}, {"a": [3]}),
+            ({"a": np.array([1, 2])}, {"a": [3]}),
+        ],
+    )
+    def test_combining_results_fails(self, pre_combine, batch_results):
+        with pytest.raises(ValueError):
+            TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
 
-        return builder
-
-    def get_qubit_buffers(self, hw, engine, ids):
-        if not isinstance(ids, list):
-            ids = [ids]
-        return [engine.buffers[0][hw.get_qubit(_id).physical_channel.id] for _id in ids]
-
-    def test_no_freq_shift(self):
-        hardware = get_default_echo_hardware(2)
-        engine = get_test_execution_engine(hardware)
-
-        builder = self.setup_frequency_shift(hardware)
-
-        execute_instructions(engine, builder)
-        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
-        assert len(qubit1_buffer) > 0
-        assert len(qubit2_buffer) > 0
-        assert np.isclose(qubit1_buffer, 1+0j).all()
-        assert np.isclose(qubit2_buffer, 1+0j).all()
-
-    def test_freq_shift(self):
-        hardware = get_default_echo_hardware(2)
-        engine = get_test_execution_engine(hardware)
-
-        builder = self.setup_frequency_shift(hardware, freq_shift_qubits=[0])
-
-        execute_instructions(engine, builder)
-        qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
-
-        assert len(qubit1_buffer) > 0
-        assert len(qubit2_buffer) > 0
-        assert np.isclose([abs(val) for val in qubit1_buffer], 2).all()
-        assert np.isclose([abs(val) for val in qubit2_buffer], 1).all()
+    @pytest.mark.parametrize(
+        "repeat_count, repeat_limit, expected_batches",
+        [(123, 5, [5] * 24 + [3]), (124, 5, [5] * 24 + [4]), (125, 5, [5] * 25)],
+    )
+    def test_execution_batching(self, repeat_count, repeat_limit, expected_batches):
+        hw = get_test_model()
+        hw.shot_limit = repeat_limit
+        engine = get_test_execution_engine(hw)
+        generated_batches = engine._generate_repeat_batches(repeat_count)
+        assert generated_batches == expected_batches

@@ -3,6 +3,7 @@
 
 import numpy as np
 import pytest
+
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
@@ -15,7 +16,6 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import (
     Acquire,
-    Instruction,
     PostProcessType,
     Pulse,
     Sweep,
@@ -24,7 +24,8 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
-from tests.utils import ListReturningEngine
+from .utils import ListReturningEngine
+
 
 class TestInstruction:
     def test_name_assignment(self):
@@ -73,70 +74,13 @@ class TestInstruction:
             qie.validate(
                 [
                     Pulse(
-                        PulseChannel(
-                            "", PhysicalChannel("", 1, PhysicalBaseband("", 1))
-                        ),
+                        PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
                         PulseShapeType.SQUARE,
                         0,
                     )
                     for _ in range(201000)
                 ]
             )
-
-    def test_no_entanglement(self):
-        hw = get_default_echo_hardware(2)
-        builder = get_builder(hw)
-        qubit0 = hw.get_qubit(0)
-        qubit1 = hw.get_qubit(1)
-        builder.X(qubit0)
-        builder.X(qubit1)
-        assert builder._entanglement_map == {qubit0: {qubit0}, qubit1: {qubit1}}
-
-    def test_01_entanglement(self):
-        hw = get_default_echo_hardware(3)
-        builder = get_builder(hw)
-        qubit0 = hw.get_qubit(0)
-        qubit1 = hw.get_qubit(1)
-        qubit2 = hw.get_qubit(2)
-        builder.ECR(qubit0, qubit1)
-        assert builder._entanglement_map == {
-            qubit0: {qubit0, qubit1},
-            qubit1: {qubit1, qubit0},
-            qubit2: {qubit2}
-        }
-
-    def test_012_entanglement(self):
-        hw = get_default_echo_hardware(3)
-        builder = get_builder(hw)
-        qubit0 = hw.get_qubit(0)
-        qubit1 = hw.get_qubit(1)
-        qubit2 = hw.get_qubit(2)
-        builder.ECR(qubit0, qubit1)
-        builder.ECR(qubit1, qubit2)
-        assert builder._entanglement_map == {
-            qubit0: {qubit0, qubit1, qubit2},
-            qubit1: {qubit1, qubit0, qubit2},
-            qubit2: {qubit0, qubit1, qubit2}
-        }
-
-
-class TestSweep:
-
-    def test_sweep_runs(self):
-        hw = get_default_echo_hardware(2)
-        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable')))
-        execute_instructions(EchoEngine(hw), builder)
-
-    def test_sweep_reverts(self):
-        hw = get_default_echo_hardware(2)
-        hw.get_qubit(0).get_drive_channel().scale = 5.0
-        builder = (get_builder(hw).sweep(SweepValue('variable', [0.0, 1.0, 2.0]))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'scale', Variable('variable'))
-                   .device_assign(hw.get_qubit(0).get_drive_channel(), 'sclae', Variable('variable')))
-        with pytest.raises(Exception):
-            execute_instructions(EchoEngine(hw), builder)
-        assert(hw.get_qubit(0).get_drive_channel().scale == 5.0)
 
 
 class TestInstructionExecution:
@@ -190,15 +134,19 @@ class TestInstructionExecution:
     )
     @pytest.mark.parametrize(
         "sweeps",
-        [{}, {
-            "amp": [i * 1e6 for i in range(5)]
-        }, {
-            "amp": [i * 1e6 for i in range(5)], "width": [i * 100e-9 for i in range(1, 4)]
-        }], ids=lambda val: f"{len(val)} sweep variables"
+        [
+            {},
+            {"amp": [i * 1e6 for i in range(5)]},
+            {
+                "amp": [i * 1e6 for i in range(5)],
+                "width": [i * 100e-9 for i in range(1, 4)],
+            },
+        ],
+        ids=lambda val: f"{len(val)} sweep variables",
     )
     def test_batched_instruction_execution(self, sweeps, engine, form):
         hw = get_default_echo_hardware()
-        hw.default_repeat_count = int(hw.repeat_limit * 1.5)
+        hw.default_repeat_count = int(hw.shot_limit * 1.5)
         eng = engine(hw)
 
         vars_ = {"amp": 1e6, "width": 100e-9}
@@ -217,17 +165,17 @@ class TestInstructionExecution:
             qubit.get_drive_channel(),
             width=vars_["width"],
             shape=PulseShapeType.SQUARE,
-            amp=vars_["amp"]
+            amp=vars_["amp"],
         )
         builder.measure_single_shot_z(qubit)
-        results = execute_instructions(eng, builder)[0]
+        results, metrics = execute_instructions(eng, builder)
         assert isinstance(results, form)
         self.check_size(results, shape)
 
     @pytest.mark.skip("Needs fixing for combining bathes of mean results.")
     def test_batched_instruction_execution_with_mean(self):
         hw = get_default_echo_hardware()
-        hw.default_repeat_count = int(hw.repeat_limit * 1.5)
+        hw.default_repeat_count = int(hw.shot_limit * 1.5)
         eng = EchoEngine(hw)
 
         qubit = hw.get_qubit(0)
@@ -237,11 +185,41 @@ class TestInstructionExecution:
             qubit.get_drive_channel(),
             width=100e-9,
             shape=PulseShapeType.SQUARE,
-            amp=Variable('amp')
+            amp=Variable("amp"),
         )
         builder.measure_mean_z(qubit)
         results = execute_instructions(eng, builder)[0]
-        assert results.shape == (5, )
+        assert results.shape == (5,)
+
+
+class TestSweep:
+    def test_sweep_runs(self):
+        hw = get_default_echo_hardware(2)
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("variable", [0.0, 1.0, 2.0]))
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "scale", Variable("variable")
+            )
+        )
+        execute_instructions(EchoEngine(hw), builder)
+
+    def test_sweep_reverts(self):
+        hw = get_default_echo_hardware(2)
+        hw.get_qubit(0).get_drive_channel().scale = 5.0
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("variable", [0.0, 1.0, 2.0]))
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "scale", Variable("variable")
+            )
+            .device_assign(
+                hw.get_qubit(0).get_drive_channel(), "sclae", Variable("variable")
+            )
+        )
+        with pytest.raises(Exception):
+            execute_instructions(EchoEngine(hw), builder)
+        assert hw.get_qubit(0).get_drive_channel().scale == 5.0
 
 
 class TestInstructionSerialisation:
@@ -252,20 +230,24 @@ class TestInstructionSerialisation:
             .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)
             .measure_mean_z(hw.get_qubit(0))
         )
+
         seri = builder.serialize()
         deseri = InstructionBuilder.deserialize(seri)
+
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)
 
     def test_most_instructions(self):
-        hw = get_default_echo_hardware(20)
+        hw = get_default_echo_hardware(20, connectivity=None)
+
+        # yapf: disable
         builder = (
             get_builder(hw)
             .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)
             .Y(hw.get_qubit(1))
             .Z(hw.get_qubit(2))
             .reset([hw.get_qubit(7), hw.get_qubit(8)])
-            .cnot(hw.get_qubit(2), hw.get_qubit(3))
+            .cnot(hw.get_qubit(2), hw.get_qubit(6))
             .delay(hw.get_qubit(12), 0.2)
             .had(hw.get_qubit(19))
             .assign("dave", 5)
@@ -280,16 +262,17 @@ class TestInstructionSerialisation:
             .SXdg(hw.get_qubit(7))
             .phase_shift(hw.get_qubit(7).get_drive_channel(), 0.72)
             .pulse(hw.get_qubit(12).get_drive_channel(), PulseShapeType.GAUSSIAN, 0.002)
+            .acquire(hw.get_qubit(4).get_acquire_channel())
             .results_processing("something", InlineResultsProcessing.Program)
-            .post_processing(
-                Acquire(hw.get_qubit(4).get_acquire_channel()),
-                PostProcessType.DOWN_CONVERT,
-            )
+            .post_processing(Acquire(hw.get_qubit(4).get_acquire_channel()), PostProcessType.DOWN_CONVERT)
             .sweep([SweepValue("1", [5]), SweepValue("2", [True])])
             .synchronize([hw.get_qubit(5), hw.get_qubit(7), hw.get_qubit(9)])
             .measure_mean_z(hw.get_qubit(0))
         )
+        # yapf: enable
+
         seri = builder.serialize()
         deseri = InstructionBuilder.deserialize(seri)
+
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)

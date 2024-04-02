@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import json
 import re
 import sys
@@ -10,7 +11,7 @@ from json import JSONDecoder, JSONEncoder
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from scc.compiler.hardware_models import QuantumHardwareModel
+    from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 # Set of common methods so we don't have to add/remove the custom serializer.
@@ -23,9 +24,7 @@ def json_loads(
     *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
 ):
     kwargs.setdefault("cls", CustomJsonDecoder)
-    return json.loads(
-        *args, serializable_types=serializable_types, model=model, **kwargs
-    )
+    return json.loads(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 def json_dump(*args, serializable_types=None, **kwargs):
@@ -37,9 +36,7 @@ def json_load(
     *args, serializable_types=None, model: "QuantumHardwareModel" = None, **kwargs
 ):
     kwargs.setdefault("cls", CustomJsonDecoder)
-    return json.load(
-        *args, serializable_types=serializable_types, model=model, **kwargs
-    )
+    return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
 class CustomJsonDecoder(JSONDecoder):
@@ -72,17 +69,15 @@ class CustomJsonDecoder(JSONDecoder):
             return tuple(obj["$data"])
 
         if self.serializable_types is not None:
-            old_paths = ["scc.compiler.config"]
-            for old_path in old_paths:
-                if old_path in obj_type:
-                    obj_type = obj_type.replace(old_path, "qat.purr.compiler.config")
+            legacy_paths = ["scc.compiler.config"]
+            for legacy_path in legacy_paths:
+                if legacy_path in obj_type:
+                    obj_type = obj_type.replace(legacy_path, "qat.purr.compiler.config")
                     break
 
             typ = self.serializable_types.get(obj_type)
             if typ is None:
-                raise ValueError(
-                    f"Invalid type attempted to be serialized: {obj_type}."
-                )
+                raise ValueError(f"Invalid type attempted to be serialized: {obj_type}.")
         else:
             typ = _get_type(obj_type)
 
@@ -96,9 +91,7 @@ class CustomJsonDecoder(JSONDecoder):
                 return typ(**fields)
             elif isinstance(data, dict):
                 new_obj = object.__new__(typ)
-                new_obj.__dict__ = {
-                    key: self.default(value) for key, value in data.items()
-                }
+                new_obj.__dict__ = {key: self.default(value) for key, value in data.items()}
                 return new_obj
             elif isinstance(data, str):
                 return typ(data)
@@ -143,13 +136,11 @@ class CustomJSONEncoder(JSONEncoder):
                 typ_str not in self.serializable_types
                 and type(obj).__module__ != "builtins"
             ):
-                raise ValueError(
-                    f"Invalid type attempted to be serialized: {(type(obj))}."
-                )
+                raise ValueError(f"Invalid type attempted to be serialized: {(type(obj))}.")
 
         try:
-            from qat.purr.compiler.instructions import Acquire
             from qat.purr.compiler.devices import QuantumComponent
+            from qat.purr.compiler.instructions import Acquire
 
             # TODO: Acquire is a special wrapper component, not an actual component. Have a few too many special-cases
             #   for it now, think about reverting its special status.
