@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import os
+
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.utils.logger import load_object_from_log_folder, save_object_to_log_folder
 
 
 class TestCalibrations:
@@ -77,7 +78,7 @@ class TestCalibrationSavingAndLoading:
             original_channel = copied_echo.physical_channels[channel_key]
             assert (
                 id(value.physical_channel) == id(original_channel),
-                "Copied references are different objects."
+                "Copied references are different objects.",
             )
 
         assert len(echo.basebands) == len(copied_echo.basebands)
@@ -87,23 +88,6 @@ class TestCalibrationSavingAndLoading:
         assert len(echo.qubit_direction_couplings) == len(
             copied_echo.qubit_direction_couplings
         )
-
-    def test_save_calibration(self):
-        saved_path = save_object_to_log_folder(
-            get_default_echo_hardware().get_calibration(), self.calibration_filename
-        )
-        assert os.path.exists(saved_path)
-
-    def test_load_calibration(self):
-        echo = get_default_echo_hardware()
-        original_calibration = echo.get_calibration()
-        saved_path = save_object_to_log_folder(
-            original_calibration, self.calibration_filename
-        )
-        loaded_calibration = load_object_from_log_folder(self.calibration_filename)
-        echo.load_calibration(loaded_calibration)
-        assert os.path.exists(saved_path)
-        assert original_calibration == echo.get_calibration()
 
     @pytest.mark.parametrize("qubit_count", [4, 8, 35])
     def test_load_hardware_definition(self, qubit_count):
@@ -116,25 +100,3 @@ class TestCalibrationSavingAndLoading:
         assert len(echo.quantum_devices) == len(empty_hw.quantum_devices)
         assert len(echo.basebands) == len(empty_hw.basebands)
         assert len(echo.physical_channels) == len(empty_hw.physical_channels)
-
-    def test_load_calibration_for_only_one_qubit(self):
-        echo = get_default_echo_hardware()
-        qubit1 = echo.get_qubit(0)
-        qubit2 = echo.get_qubit(1)
-
-        drive0 = qubit1.get_drive_channel()
-        drive0_frequency = drive0.frequency
-        drive1 = qubit2.get_drive_channel()
-        drive1_frequency = drive1.frequency
-        save_object_to_log_folder(
-            echo.get_qubit(0).get_calibration(), self.calibration_filename
-        )
-
-        drive1.frequency += 200
-        loaded_calibration = Calibratable.load_calibration(
-            load_object_from_log_folder(self.calibration_filename)
-        )
-        echo.quantum_devices["Q0"] = loaded_calibration
-
-        assert drive0_frequency == drive0.frequency
-        assert drive1_frequency != drive1.frequency

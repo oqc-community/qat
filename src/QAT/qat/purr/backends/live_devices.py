@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from abc import abstractmethod
 from typing import Dict, Union
 
@@ -11,11 +12,13 @@ log = get_default_logger()
 
 class Instrument(Calibratable):
     """
-    An interface for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
-    It is derived from Calibratable so the instruments will be saved in the calibration files. To avoid saving
-    driver specific data in the calibration files, the actual drivers should be a property of this object, so the
+    An interface for any live instrument. It requires a unique address (IP address, USB
+    VISA address, etc.). It is derived from Calibratable so the instruments will be
+    saved in the calibration files. To avoid saving driver specific data in the
+    calibration files, the actual drivers should be a property of this object, so the
     calibration will skip it.
     """
+
     def __init__(self, address, id_=None):
         super().__init__()
         self.id = id_ if id_ else address
@@ -24,8 +27,6 @@ class Instrument(Calibratable):
         self.is_connected = False
 
     def connect(self):
-        if self.is_connected:
-            self.disconnect()
         self.is_connected = True
 
     def close(self):
@@ -35,11 +36,13 @@ class Instrument(Calibratable):
         if self.driver is not None:
             try:
                 self.driver.close()
+                # The current version of the drivers required the link to be removed for
+                # proper operation. Adjust this when it is no longer needed.
                 self._driver = None
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
-                    f'Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}'
+                    f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
                 )
 
     @property
@@ -48,13 +51,14 @@ class Instrument(Calibratable):
 
     @driver.setter
     def driver(self, obj):
+        # Checks if there is a driver already before allociating the new driver
         if self._driver is not None:
             self.disconnect()
         self._driver = obj
 
     def __getstate__(self) -> Dict:
         results = super(Instrument, self).__getstate__()
-        results['_driver'] = None
+        results["_driver"] = None
         return results
 
     def __setstate__(self, state):
@@ -73,12 +77,12 @@ class ControlHardwareChannel(PhysicalChannel):
     """
 
     def __init__(
-        self, id_, hardware_id, dcbiaschannel_pair, switch_ch=None, *args, **kwargs
+        self, id_, hardware_id, dcbiaschannel_pair, *args, switch_ch=None, **kwargs
     ):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
         self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
-        self.switch_ch = switch_ch
+        self.switch_ch: str = switch_ch
 
 
 class ControlHardware(Instrument):

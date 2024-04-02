@@ -2,6 +2,19 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from typing import List, Union
 
+from pyqir import (
+    Call,
+    Constant,
+    Context,
+    FloatConstant,
+    IntConstant,
+    Module,
+    extract_byte_string,
+    is_entry_point,
+    qubit_id,
+    result_id,
+)
+
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.execution import InstructionExecutionEngine
@@ -9,23 +22,6 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Variable
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logging_utils import log_duration
-
-qir_available = True
-try:
-    from pyqir import (
-        Call,
-        Constant,
-        Context,
-        FloatConstant,
-        IntConstant,
-        Module,
-        extract_byte_string,
-        is_entry_point,
-        qubit_id,
-        result_id,
-    )
-except ImportError:
-    qir_available = False
 
 
 class QIRParser:
@@ -188,9 +184,6 @@ class QIRParser:
                     self.result_variables.append((Variable(str(res)), label))
 
     def parse(self, qir_file: str):
-        if not qir_available:
-            raise RuntimeError("QIR parser unavailable.")
-
         with log_duration("QIR parsing completed, took {} seconds."):
             if qir_file.endswith(".bc"):
                 with open(qir_file, "rb") as f:
@@ -218,9 +211,7 @@ class QIRParser:
                 else:
                     result_name = "_".join(potential_names)
 
-                self.builder.assign(
-                    result_name, [val[0] for val in self.result_variables]
-                )
+                self.builder.assign(result_name, [val[0] for val in self.result_variables])
                 self.builder.returns(result_name)
             else:
                 self.builder.returns()

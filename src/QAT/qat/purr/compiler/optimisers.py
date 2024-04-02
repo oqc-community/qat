@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
+from qiskit import QuantumCircuit, transpile
+from qiskit.transpiler import TranspilerError
+
 from qat.purr.compiler.config import (
     MetricsType,
     OptimizationConfig,
@@ -13,8 +17,6 @@ from qat.purr.compiler.metrics import MetricsMixin
 from qat.purr.integrations.tket import run_tket_optimizations
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
-from qiskit import QuantumCircuit, transpile
-from qiskit.transpiler import TranspilerError
 
 log = get_default_logger()
 
@@ -40,8 +42,7 @@ class DefaultOptimizers(MetricsMixin):
                     qasm_string, optimizations.tket_optimizations, hardware
                 )
 
-            # TODO: [QK] Spend time looking at qiskit optimization and seeing if it's
-            #   worth keeping around.
+            # TODO: Look to see what we're missing in regards to optimizations and what Qiskit can supplement.
             if (
                 isinstance(optimizations, Qiskit)
                 and optimizations.qiskit_optimizations != QiskitOptimizations.Empty
@@ -54,10 +55,7 @@ class DefaultOptimizers(MetricsMixin):
             return qasm_string
 
     def run_qiskit_optimization(self, qasm_string, level):
-        """
-        TODO: [QK] Current setup is unlikely to provide much benefit, refine settings
-            before using.
-        """
+        # TODO: Current setup is unlikely to provide much benefit, refine settings.
         if level is not None:
             try:
                 optimized_circuits = transpile(

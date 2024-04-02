@@ -1,16 +1,42 @@
 import pytest
+from numpy import array, random
+from qiskit_aer.noise import (
+    NoiseModel,
+    depolarizing_error,
+    pauli_error,
+    thermal_relaxation_error,
+)
 
-from qiskit_aer.noise import pauli_error, NoiseModel, thermal_relaxation_error, depolarizing_error
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
 from tests.qasm_utils import get_qasm2
-from numpy import random, array
 
 
 class TestQiskitBackend:
+
+    @pytest.mark.parametrize("strict_placement", [True, False])
+    @pytest.mark.parametrize("qi0, qi1, valid", [(0, 1, True), (0, 2, False)])
+    def test_coupling_enforcement_on_qasm_hardware(self, strict_placement, qi0, qi1, valid):
+        coupling_map = [(0, 1), (1, 2)]
+        hardware = get_default_qiskit_hardware(
+            qubit_count=3, strict_placement=strict_placement, connectivity=coupling_map
+        )
+        builder = hardware.create_builder()
+        builder.had(hardware.get_qubit(qi0))
+        builder.cnot(hardware.get_qubit(qi0), hardware.get_qubit(qi1))
+        builder.measure(hardware.get_qubit(qi0))
+        builder.measure(hardware.get_qubit(qi1))
+        runtime = hardware.create_runtime()
+        if not valid and strict_placement:
+            with pytest.raises(RuntimeError):
+                runtime.execute(builder)
+        else:
+            results = runtime.execute(builder)
+            assert len(results) > 0
+
     def test_bitflip_noise_model(self):
         # Example error probabilities
         p_reset = 0.03
@@ -18,9 +44,9 @@ class TestQiskitBackend:
         p_gate1 = 0.05
 
         # QuantumError objects
-        error_reset = pauli_error([('X', p_reset), ('I', 1 - p_reset)])
-        error_meas = pauli_error([('X', p_meas), ('I', 1 - p_meas)])
-        error_gate1 = pauli_error([('X', p_gate1), ('I', 1 - p_gate1)])
+        error_reset = pauli_error([("X", p_reset), ("I", 1 - p_reset)])
+        error_meas = pauli_error([("X", p_meas), ("I", 1 - p_meas)])
+        error_gate1 = pauli_error([("X", p_gate1), ("I", 1 - p_gate1)])
         error_gate2 = error_gate1.tensor(error_gate1)
 
         # Add errors to noise model
@@ -44,11 +70,14 @@ class TestQiskitBackend:
         results = runtime.execute(builder)
         print(results)
 
-
     def test_thermal_relaxation_noise_model(self):
         # T1 and T2 values for qubits 0-3
-        T1s = random.normal(50e3, 10e3, 4)  # Sampled from normal distribution mean 50 microsec
-        T2s = random.normal(70e3, 10e3, 4)  # Sampled from normal distribution mean 50 microsec
+        T1s = random.normal(
+            50e3, 10e3, 4
+        )  # Sampled from normal distribution mean 50 microsec
+        T2s = random.normal(
+            70e3, 10e3, 4
+        )  # Sampled from normal distribution mean 50 microsec
 
         # Truncate random T2s <= T1s
         T2s = array([min(T2s[j], 2 * T1s[j]) for j in range(4)])
@@ -71,13 +100,15 @@ class TestQiskitBackend:
         errors_u1 = [thermal_relaxation_error(t1, t2, time_u1) for t1, t2 in zip(T1s, T2s)]
         errors_u2 = [thermal_relaxation_error(t1, t2, time_u2) for t1, t2 in zip(T1s, T2s)]
         errors_u3 = [thermal_relaxation_error(t1, t2, time_u3) for t1, t2 in zip(T1s, T2s)]
-        errors_cx = [[
-            thermal_relaxation_error(t1a, t2a, time_cx).expand(
-                thermal_relaxation_error(t1b, t2b, time_cx)
-            ) for t1a,
-            t2a in zip(T1s, T2s)
-        ] for t1b,
-                     t2b in zip(T1s, T2s)]
+        errors_cx = [
+            [
+                thermal_relaxation_error(t1a, t2a, time_cx).expand(
+                    thermal_relaxation_error(t1b, t2b, time_cx)
+                )
+                for t1a, t2a in zip(T1s, T2s)
+            ]
+            for t1b, t2b in zip(T1s, T2s)
+        ]
 
         # Add errors to noise model
         noise_thermal = NoiseModel()
@@ -91,7 +122,9 @@ class TestQiskitBackend:
                 noise_thermal.add_quantum_error(errors_cx[j][k], "cx", [j, k])
 
         qubit_count = 2
-        hardware = get_default_qiskit_hardware(qubit_count=qubit_count, noise_model=noise_thermal)
+        hardware = get_default_qiskit_hardware(
+            qubit_count=qubit_count, noise_model=noise_thermal
+        )
         builder = hardware.create_builder()
         builder.had(hardware.get_qubit(0))
         builder.cnot(hardware.get_qubit(0), hardware.get_qubit(1))
@@ -101,7 +134,6 @@ class TestQiskitBackend:
         runtime = hardware.create_runtime()
         results = runtime.execute(builder)
         print(results)
-
 
     def test_depolarising_noise_model(self):
         prob_1 = 0.001  # 1-qubit gate
@@ -113,11 +145,13 @@ class TestQiskitBackend:
 
         # Add errors to noise model
         noise_depo = NoiseModel()
-        noise_depo.add_all_qubit_quantum_error(error_1, ['u1', 'u2', 'u3'])
-        noise_depo.add_all_qubit_quantum_error(error_2, ['cx'])
+        noise_depo.add_all_qubit_quantum_error(error_1, ["u1", "u2", "u3"])
+        noise_depo.add_all_qubit_quantum_error(error_2, ["cx"])
 
         qubit_count = 2
-        hardware = get_default_qiskit_hardware(qubit_count=qubit_count, noise_model=noise_depo)
+        hardware = get_default_qiskit_hardware(
+            qubit_count=qubit_count, noise_model=noise_depo
+        )
         builder = hardware.create_builder()
         builder.had(hardware.get_qubit(0))
         builder.cnot(hardware.get_qubit(0), hardware.get_qubit(1))
@@ -127,7 +161,6 @@ class TestQiskitBackend:
         runtime = hardware.create_runtime()
         results = runtime.execute(builder)
         print(results)
-
 
     def test_no_noise_model(self):
         qubit_count = 2
@@ -142,9 +175,13 @@ class TestQiskitBackend:
         results = runtime.execute(builder)
         print(results)
 
-
     def parse_and_apply_optimiziations(
-        self, qasm_file_name, qubit_count=6, parser=None, opt_config=None, noise_model=None
+        self,
+        qasm_file_name,
+        qubit_count=6,
+        parser=None,
+        opt_config=None,
+        noise_model=None,
     ) -> InstructionBuilder:
         """
         Helper that builds a basic hardware, applies general optimizations, parses the QASM
@@ -163,13 +200,11 @@ class TestQiskitBackend:
 
         return parser.parse(hardware.create_builder(), qasm)
 
-
     def test_qasm_frontend_no_noise(self):
         builder = self.parse_and_apply_optimiziations("ghz.qasm", qubit_count=4)
         runtime = builder.model.create_runtime()
         results = runtime.execute(builder)
         print(results)
-
 
     def test_qasm_frontend_noise(self):
         # Example error probabilities
@@ -178,9 +213,9 @@ class TestQiskitBackend:
         p_gate1 = 0.05
 
         # QuantumError objects
-        error_reset = pauli_error([('X', p_reset), ('I', 1 - p_reset)])
-        error_meas = pauli_error([('X', p_meas), ('I', 1 - p_meas)])
-        error_gate1 = pauli_error([('X', p_gate1), ('I', 1 - p_gate1)])
+        error_reset = pauli_error([("X", p_reset), ("I", 1 - p_reset)])
+        error_meas = pauli_error([("X", p_meas), ("I", 1 - p_meas)])
+        error_gate1 = pauli_error([("X", p_gate1), ("I", 1 - p_gate1)])
         error_gate2 = error_gate1.tensor(error_gate1)
 
         # Add errors to noise model
@@ -196,7 +231,6 @@ class TestQiskitBackend:
         runtime = builder.model.create_runtime()
         results = runtime.execute(builder)
         print(results)
-
 
     def test_merge_builders(self):
         qubit_count = 2

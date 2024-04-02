@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
 import os
@@ -12,11 +13,12 @@ import jsonpickle.ext.numpy as jsonpickle_numpy
 import numpy as np
 from jsonpickle import Pickler, Unpickler
 from jsonpickle.util import is_picklable
+
 from qat.purr.utils.logger import get_default_logger
 
 # TODO: Remove the setting of the recursion limit as soon as the pickling of hardware is
 # not blocked by the default limit.
-sys.setrecursionlimit(2000)
+sys.setrecursionlimit(3000)
 
 log = get_default_logger()
 jsonpickle_numpy.register_handlers()
@@ -44,7 +46,7 @@ def build_resonator(
 
 def build_qubit(
     index,
-    resonator,
+    resonator: Resonator,
     physical_channel,
     drive_freq,
     second_state_freq=None,
@@ -56,9 +58,7 @@ def build_qubit(
     Helper method tp build a qubit with assumed default values on the channels. Modelled
     after the live hardware.
     """
-    qubit = Qubit(
-        index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id
-    )
+    qubit = Qubit(index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id)
     qubit.create_pulse_channel(
         ChannelType.drive,
         frequency=drive_freq,
@@ -118,11 +118,12 @@ class QuantumComponent:
     Qubit or various channels for a simple example.
     """
 
-    def __init__(self, id_, *args, **kwargs):
+    def __init__(self, id_, related_devices=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
         self.id = str(id_)
+        self.related_devices: list = related_devices or []
 
     def full_id(self):
         return self.id
@@ -179,13 +180,9 @@ class Calibratable:
 
     @staticmethod
     def load_calibration(calibration_string):
-        reconstituted = jsonpickle.decode(
-            calibration_string, context=CyclicRefUnpickler()
-        )
+        reconstituted = jsonpickle.decode(calibration_string, context=CyclicRefUnpickler())
         if isinstance(reconstituted, str):
-            raise ValueError(
-                "Loading from calibration string failed. Please regenerate."
-            )
+            raise ValueError("Loading from calibration string failed. Please regenerate.")
 
         return reconstituted
 
@@ -232,8 +229,9 @@ class CyclicRefPickler(Pickler):
 
     def _log_ref(self, obj):
         is_new = super()._log_ref(obj)
-        # We don't want complex' or enums to be referenced. Just create a new one on
-        # each instance.
+
+        # We don't want complex' or enums or numpy numbers to be referenced.
+        # Just create a new one on each instance.
         if isinstance(obj, (complex, Enum, np.number)):
             return True
 
@@ -269,7 +267,7 @@ class FakeList(dict):
         try:
             return super().__getitem__(item)
         except KeyError:
-            raise IndexError()
+            raise IndexError(f"Error with: {item}")
 
 
 class CyclicRefUnpickler(Unpickler):
@@ -319,10 +317,14 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         acquire_allowed: bool = False,
         pulse_channel_min_frequency: float = 0.0,
         pulse_channel_max_frequency: float = np.inf,
+        *args,
+        **kwargs,
     ):
-        super().__init__(id_)
+        super().__init__(id_, *args, **kwargs)
         self.sample_time: float = sample_time
         self.baseband: PhysicalBaseband = baseband
+        self.baseband.related_devices.append(self)
+
         self.block_size: int = block_size or 1
         self.phase_offset: float = phase_offset
         self.imbalance: float = imbalance
@@ -331,31 +333,49 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         self.pulse_channel_min_frequency: float = pulse_channel_min_frequency
         self.pulse_channel_max_frequency: float = pulse_channel_max_frequency
 
-    def create_pulse_channel(
-        self,
-        id_: str,
-        frequency=0.0,
-        bias=0.0 + 0.0j,
-        scale=1.0 + 0.0j,
-        fixed_if: bool = False,
-    ):
-        pulse_channel = PulseChannel(id_, self, frequency, bias, scale, fixed_if)
+    @property
+    def related_pulse_channels(self):
+        return [qb for qb in self.related_devices if isinstance(qb, PulseChannel)]
 
-        return pulse_channel
+    @property
+    def related_resonator(self):
+        primary_resonator = next(
+            (res for res in self.related_devices if isinstance(res, Resonator)), None
+        )
+        if primary_resonator is not None:
+            return primary_resonator
 
-    def create_freq_shift_pulse_channel(
-        self,
-        id_: str,
-        frequency=0.0,
-        bias=0.0 + 0.0j,
-        scale=1.0 + 0.0j,
-        amp=0.0,
-        active: bool = True,
-        fixed_if: bool = False
-    ):
-        pulse_channel = FreqShiftPulseChannel(id_, self, frequency, bias, scale, amp, active, fixed_if)
+        proxy_resonator = next(
+            (qb.related_resonator for qb in self.related_devices if isinstance(qb, Qubit)),
+            None,
+        )
+        if proxy_resonator is not None:
+            return proxy_resonator
 
-        return pulse_channel
+        return None
+
+    @property
+    def related_qubit(self):
+        primary_qubit = next(
+            (qb for qb in self.related_devices if isinstance(qb, Qubit)), None
+        )  # yapf: disable
+
+        if primary_qubit is not None:
+            return primary_qubit
+
+        proxy_qubit = next(
+            (
+                res.related_qubit
+                for res in self.related_devices
+                if isinstance(res, Resonator)
+            ),
+            None,
+        )  # yapf: disable
+
+        if proxy_qubit is not None:
+            return proxy_qubit
+
+        return None
 
     @property
     def block_time(self):
@@ -371,10 +391,18 @@ class PhysicalChannel(QuantumComponent, Calibratable):
 
 
 class PhysicalBaseband(QuantumComponent, Calibratable):
-    def __init__(self, id_: str, frequency: float, if_frequency: float = 250e6):
-        super().__init__(id_)
+    def __init__(
+        self, id_: str, frequency: float, if_frequency: float = 250e6, *args, **kwargs
+    ):
+        super().__init__(id_, *args, **kwargs)
         self.frequency: float = frequency
         self.if_frequency: Optional[float] = if_frequency
+
+    @property
+    def related_physical_channel(self):
+        return next(
+            (qb for qb in self.related_devices if isinstance(qb, PhysicalChannel)), None
+        )  # yapf: disable
 
 
 class PulseChannel(QuantumComponent, Calibratable):
@@ -388,10 +416,16 @@ class PulseChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
+        is_temporary=False,
+        *args,
         **kwargs,
     ):
-        super().__init__(id_, **kwargs)
+        super().__init__(id_, *args, **kwargs)
         self.physical_channel: PhysicalChannel = physical_channel
+
+        # If our pulse channel is only temporary, don't add to constant relations.
+        if not is_temporary:
+            self.physical_channel.related_devices.append(self)
 
         self.frequency: float = frequency
         self.bias: complex = bias
@@ -405,6 +439,39 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
+
+    @staticmethod
+    def build(*args, channel_type: ChannelType = None, **kwargs):
+        """
+        Dynamically builds the PulseChannel using the specific subclasses depending upon ChannelType - MeasureChannel,
+        DriveChannel, etc.
+
+        Pass is_temporary if the pulse channel is meant to only live for as long as a single execution.
+        """
+        if channel_type == ChannelType.measure:
+            creation_class = MeasureChannel
+        elif channel_type == ChannelType.drive:
+            creation_class = DriveChannel
+        elif channel_type == ChannelType.second_state:
+            creation_class = SecondStateDriveChannel
+        elif channel_type == ChannelType.cross_resonance:
+            creation_class = CrossResonanceDriveChannel
+        elif channel_type == ChannelType.cross_resonance_cancellation:
+            creation_class = CrossResonanceCancellationDriveChannel
+        elif channel_type == ChannelType.freq_shift:
+            creation_class = FreqShiftPulseChannel
+        else:
+            creation_class = PulseChannel
+
+        return creation_class(*args, **kwargs)
+
+    @property
+    def related_resonator(self):
+        return self.physical_channel.related_resonator
+
+    @property
+    def related_qubit(self):
+        return self.physical_channel.related_qubit
 
     @property
     def sample_time(self):
@@ -450,11 +517,8 @@ class PulseChannel(QuantumComponent, Calibratable):
     def max_frequency(self):
         return self.physical_channel.pulse_channel_max_frequency
 
-    def partial_id(self):
-        return self.id
-
     def full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
+        return self.physical_channel_id + "." + self.id
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
@@ -463,71 +527,32 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.full_id() == other.full_id()
 
     def __hash__(self):
-        return hash(self.full_id())
+        # TODO: Attributes don't exist during serialization, so catch this instance and default.
+        #   Should just try and work without this little hack.
+        try:
+            return hash(self.full_id())
+        except AttributeError:
+            pass
+
+        return super().__hash__()
 
 
-class FreqShiftPulseChannel(PulseChannel):
-    def __init__(
-        self,
-        id_: str,
-        physical_channel: PhysicalChannel,
-        frequency=0.0,
-        bias=0.0 + 0.0j,
-        scale=1.0 + 0.0j,
-        amp=0.0,
-        active: bool = True,
-        fixed_if: bool = False,
-        **kwargs
-    ):
-        super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
-        self.amp: float = amp
-        self.active: bool = active
+class AcquireChannel(PulseChannel):
+    """Channel on which responses to a pulse are measured."""
 
 
-class QubitCoupling(Calibratable):
-    def __init__(self, direction, quality=1):
-        """
-        Direction of coupling stated in a tuple: (4,5) means we have a  4 -> 5 coupling.
-        Quality is the quality-level of the coupling.
-        """
-        super().__init__()
-        self.direction = tuple(direction)
-        self.quality = 1 if quality < 1 else quality
+class MeasureChannel(PulseChannel):
+    """Channel on which pulses to measure a qubit are sent."""
 
 
-class PulseChannelView(PulseChannel):
-    """
-    Each quantum device will have a unique view of a PulseChannel, which this class
-    helps encapsulate. For example, a PulseChannel may be the driving channel for one
-    qubit but to another qubit the same PulseChannel might be driving its second state.
-    We need to be able to share pulse channel instances with different usages in this
-    particular case.
+class DriveChannel(PulseChannel):
+    pass
 
-    Functionally this acts as an opaque wrapper to PulseChannel, forwarding all calls to
-    the wrapped object.
-    """
 
-    # noinspection PyMissingConstructor
-    def __init__(
-        self,
-        pulse_channel: PulseChannel,
-        channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None,
-    ):
-        """
-        pulse_channel: The PulseChannel this device is viewing.
-        channel_type: How this devices intends the PulseChannel to be used.
-        auxiliary_devices: Any extra devices this PulseChannel could be effecting except
-                           the current one.
-                           For example in cross resonance pulses.
-        """
-        # We aren't calling super().__init__ on purpose. Inheriting is purely for show
-        # (and typing).
-        if auxiliary_devices is None:
-            auxiliary_devices = []
+class ChannelReference(PulseChannel):
+    def __init__(self, pulse_channel):
+        # Not calling parent on purpose here.
         self.pulse_channel: PulseChannel = pulse_channel
-        self.channel_type: ChannelType = channel_type
-        self.auxiliary_devices: List[QuantumDevice] = auxiliary_devices
         if not any(self._pulse_channel_attributes):
             self._pulse_channel_attributes = {
                 val
@@ -547,31 +572,77 @@ class PulseChannelView(PulseChannel):
             return getattr(self.pulse_channel, item)
         return super().__getattribute__(item)
 
-    def __setattr__(self, key, value):
-        if key in self._pulse_channel_attributes:
-            return setattr(self.pulse_channel, key, value)
-        return super().__setattr__(key, value)
+
+class CrossResonanceCancellationDriveChannel(DriveChannel):
+    """
+    Virtual drive channel that drives the qubit at a frequency that cancels the
+    cross resonance with the other qubit and has no physical representation on hardware.
+    """
+
+
+class CrossResonanceDriveChannel(DriveChannel):
+    """
+    Virtual drive channel that drives the qubit at the frequency of the other qubit
+    with which there is a cross resonance. Has no physical representation on hardware.
+    """
+
+
+class SecondStateDriveChannel(DriveChannel):
+    """
+    Virtual drive channel that drives the qubit to the second state and has no
+    physical representation on hardware.
+    """
+
+
+class FreqShiftPulseChannel(PulseChannel):
+    def __init__(
+        self,
+        id_: str,
+        physical_channel: PhysicalChannel,
+        frequency=0.0,
+        bias=0.0 + 0.0j,
+        scale=1.0 + 0.0j,
+        amp=0.0,
+        active: bool = True,
+        fixed_if: bool = False,
+        **kwargs,
+    ):
+        super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
+        self.amp: float = amp
+        self.active: bool = active
+
+
+class QubitCoupling(Calibratable):
+    def __init__(self, direction, quality=1):
+        """
+        Direction of coupling stated in a tuple: (4,5) means we have a  4 -> 5 coupling.
+        Quality is the quality-level of the coupling.
+        """
+        super().__init__()
+        self.direction = tuple(direction)
+        self.quality = 1 if quality < 1 else quality
 
 
 class QuantumDevice(QuantumComponent, Calibratable):
     """A physical device whose main form of operation involves pulse channels."""
-
-    multi_device_pulse_channel_types = (
-        ChannelType.cross_resonance,
-        ChannelType.cross_resonance_cancellation,
-    )
 
     def __init__(
         self,
         id_: str,
         physical_channel: PhysicalChannel,
         measure_device: QuantumDevice = None,
+        *args,
+        **kwargs,
     ):
-        super().__init__(id_)
+        super().__init__(id_, *args, **kwargs)
         self.measure_device: QuantumDevice = measure_device
-        self.pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]] = {}
+        if self.measure_device is not None:
+            self.measure_device.related_devices.append(self)
+
+        self.pulse_channels: Dict[str, PulseChannel] = {}
         self.default_pulse_channel_type = ChannelType.measure
         self.physical_channel: PhysicalChannel = physical_channel
+        self.physical_channel.related_devices.append(self)
 
     def create_pulse_channel(
         self,
@@ -579,75 +650,60 @@ class QuantumDevice(QuantumComponent, Calibratable):
         frequency=0.0,
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
-        amp=0.0,
-        active: bool = True,
         fixed_if: bool = False,
         auxiliary_devices: List[QuantumDevice] = None,
         id_: str = None,
+        **kwargs,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
+
         if id_ is None:
-            id_ = self._create_pulse_channel_id(
-                channel_type, [self] + auxiliary_devices
-            )
-        if channel_type == ChannelType.freq_shift:
-            pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(id_, frequency, bias, scale, amp,
-                                                                                  active, fixed_if)
-        else:
-            pulse_channel = self.physical_channel.create_pulse_channel(
-                id_, frequency, bias, scale, fixed_if
-            )
-        self.add_pulse_channel(pulse_channel, channel_type, auxiliary_devices)
+            id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
+
+        pulse_channel = PulseChannel.build(
+            id_,
+            self.physical_channel,
+            frequency=frequency,
+            bias=bias,
+            scale=scale,
+            fixed_if=fixed_if,
+            channel_type=channel_type,
+            related_devices=[self] + auxiliary_devices,
+            **kwargs,
+        )
+
+        if id_ in self.pulse_channels:
+            raise KeyError(f"Pulse channel with id '{id_}' already exists.")
+
+        self.pulse_channels[id_] = pulse_channel
 
         return pulse_channel
+
+    multi_device_pulse_channel_types = (
+        ChannelType.cross_resonance,
+        ChannelType.cross_resonance_cancellation,
+    )
 
     def _create_pulse_channel_id(
         self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
     ):
+        # Anything that has no auxiliary is inherently targeted at us.
         if (
             channel_type in self.multi_device_pulse_channel_types
             and len(auxiliary_devices) == 0
         ):
             raise ValueError(
-                f"Channel type {channel_type.name} requires at least one "
-                "auxillary_device"
+                f"Channel type {channel_type.name} requires at least one auxillary_device"
             )
-        return ".".join(
-            [str(x.full_id()) for x in (auxiliary_devices)] + [channel_type.name]
-        )
-
-    def add_pulse_channel(
-        self,
-        pulse_channel: PulseChannel,
-        channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None,
-    ):
-        if auxiliary_devices is None:
-            auxiliary_devices = []
-
-        if pulse_channel.physical_channel != self.physical_channel:
-            raise ValueError(
-                "Pulse channel has physical channel and device physical channel must "
-                f"be equal. Device {self} has physical channel {self.physical_channel} "
-                "while pulse channel has physical channel "
-                f"{pulse_channel.physical_channel}"
-            )
-
-        id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
-        if id_ in self.pulse_channels:
-            raise KeyError(f"Pulse channel with id '{id_}' already exists.")
-
-        self.pulse_channels[id_] = PulseChannelView(
-            pulse_channel, channel_type, auxiliary_devices
-        )
+        return f"{'.'.join(sorted([str(x.full_id()) for x in auxiliary_devices] + [self.full_id()]))}.{channel_type.name}"
 
     PTType = TypeVar("PTType", bound=PulseChannel, covariant=True)
 
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
-        auxiliary_devices: List[QuantumDevice] = None,
+        auxiliary_devices: Union[QuantumDevice, List[QuantumDevice]] = None,
     ) -> PTType:
         if channel_type is None:
             channel_type = self.default_pulse_channel_type
@@ -667,14 +723,13 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def get_default_pulse_channel(self):
         return self.get_pulse_channel(self.default_pulse_channel_type)
 
-    def get_auxiliary_devices(self, pulse_channel: PulseChannel):
-        if isinstance(pulse_channel, PulseChannelView):
-            return pulse_channel.auxiliary_devices
-        return []
-
 
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
+
+    @property
+    def related_qubit(self):
+        return next((qb for qb in self.related_devices if isinstance(qb, Qubit)), None)
 
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.measure)
@@ -699,8 +754,10 @@ class Qubit(QuantumDevice):
         coupled_qubits: List[Qubit] = None,
         drive_amp: float = 1.0,
         id_=None,
+        *args,
+        **kwargs,
     ):
-        super().__init__(id_ or f"Q{index}", physical_channel, resonator)
+        super().__init__(id_ or f"Q{index}", physical_channel, resonator, *args, **kwargs)
         self.index = index
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
@@ -729,6 +786,10 @@ class Qubit(QuantumDevice):
         }
 
         self.measure_acquire = {"delay": 180e-9, "sync": True, "width": 1e-6}
+
+    @property
+    def related_resonator(self):
+        return self.measure_device
 
     def add_coupled_qubit(self, qubit: Qubit):
         if qubit is None:
@@ -762,7 +823,9 @@ class Qubit(QuantumDevice):
     def get_freq_shift_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.freq_shift)
 
-    def get_cross_resonance_channel(self, linked_qubits: List[Qubit]) -> PulseChannel:
+    def get_cross_resonance_channel(
+        self, linked_qubits: Union[List[Qubit], Qubit]
+    ) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.cross_resonance, linked_qubits)
 
     def get_cross_resonance_cancellation_channel(
@@ -787,16 +850,12 @@ class Qubit(QuantumDevice):
 class PulseShapeType(Enum):
     SQUARE = "square"
     GAUSSIAN = "gaussian"
+    GAUSSIAN_SQUARE = "gaussian_square"
     SOFT_SQUARE = "soft_square"
     BLACKMAN = "blackman"
     SETUP_HOLD = "setup_hold"
     SOFTER_SQUARE = "softer_square"
-    EXTRA_SOFT_SQUARE = "extra_soft_square"
-    SOFTER_GAUSSIAN = "softer_gaussian"
     ROUNDED_SQUARE = "rounded_square"
-    GAUSSIAN_DRAG = "gaussian_drag"
-    GAUSSIAN_ZERO_EDGE = "gaussian_zero_edge"
-    GAUSSIAN_SQUARE = "gaussian_square"
     SECH = "sech"
     SIN = "sin"
     COS = "cos"
@@ -828,4 +887,4 @@ def _strip_aliases(key: str, build_unaliased=False):
     return key
 
 
-MaxPulseLength = 1e-3  # seconds
+MaxPulseLength = 1e-3

@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import time
 import uuid
 from typing import List
 
-from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.compiler.config import CompilerConfig
-from qat.purr.utils.logger import get_default_logger
-from qat.qat import execute_qasm
 from qiskit import QuantumCircuit, assemble, transpile
 from qiskit.providers.basicaer import BasicAerJob, QasmSimulatorPy
 from qiskit.result import Result
 from qiskit.result.models import ExperimentResult, ExperimentResultData
+
+from qat.core import execute_qasm
+from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+from qat.purr.compiler.config import CompilerConfig
+from qat.purr.utils.logger import get_default_logger
 
 logger = get_default_logger()
 
@@ -79,7 +81,7 @@ class QatBackend(QasmSimulatorPy):
         assembled_data = assemble(
             qobj,
             self,
-            **{key: val for key, val in backend_options.items() if key in options_keys}
+            **{key: val for key, val in backend_options.items() if key in options_keys},
         )
 
         if self.comp_config is None:
@@ -96,7 +98,7 @@ class QatBackend(QasmSimulatorPy):
                 assembled_data.experiments[i].header,
             )
             for i, val in enumerate(qobj)
-        ]
+        ]  # yapf: disable
 
         results = []
         full_start = time.time()

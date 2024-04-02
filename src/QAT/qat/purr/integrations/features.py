@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from qat.purr.compiler.devices import Qubit, Resonator
+from qat.purr.compiler.devices import MeasureChannel
 from qat.purr.compiler.waveforms import AbstractWaveform
 from qat.purr.integrations.qasm import (
     extern_port_name,
@@ -25,7 +26,6 @@ class FeatureMetadata:
         returned dictionaries should be able to be merged together without additional
         effort, so make sure a root node with the name of the feature is available.
         """
-        pass
 
 
 class Scale(Enum):
@@ -52,15 +52,14 @@ class Unit(Enum):
     FREQUENCY = "Hz"
 
 
-# TODO: You don't want something lke this, just have two different objects for
-#   time/frequency.
+# TODO: Should be two different objects to deal with time/frequency isntead of an enum.
 @dataclass
 class Quantity:
     amount: float
     unit: Unit
     scale: Scale
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.amount} {self.scale.value}{self.unit.value}"
 
 
@@ -82,33 +81,21 @@ class OpenPulseFeatures(FeatureMetadata):
         self.waveforms = dict()
         self.constraints: Optional[Constraints] = None
 
+    @staticmethod
+    def from_hardware(hardware):
+        feature = OpenPulseFeatures()
+        feature.for_hardware(hardware)
+        return feature
+
     def for_hardware(self, hardware):
-        def _find_qubit(qubit) -> Qubit:
-            if isinstance(qubit, Resonator):
-                for qb in hardware.qubits:
-                    if qb.measure_device == qubit:
-                        qubit = qb
+        for frame_name, frame in get_frame_mappings(hardware).items():
+            if isinstance(frame, MeasureChannel):
+                qb = [frame.related_qubit]
+            else:
+                qb = frame.related_devices
 
-            if isinstance(qubit, Resonator):
-                raise ValueError(f"{str(qubit)} was unable to be matched to a qubit.")
-
-            return qubit
-
-        for frame_name, channel_view in get_frame_mappings(hardware).items():
-            frame = channel_view.pulse_channel
-            qubit = _find_qubit(
-                hardware.get_devices_from_pulse_channel(frame.full_id())[0]
-            )
-            qubits = [qubit.id]
-            qubits.extend(
-                [
-                    qubit.id
-                    for qubit in channel_view.auxiliary_devices
-                    if isinstance(qubit, Qubit)
-                ]
-            )
             self.frames[frame_name] = dict(
-                qubits=qubits,
+                qubits=qb if qb is not None else [],
                 port_id=extern_port_name(frame.physical_channel),
                 frequency=frame.frequency,
                 bandwidth_centre=frame.baseband_frequency,
@@ -116,14 +103,11 @@ class OpenPulseFeatures(FeatureMetadata):
             )
 
         for port_name, port in get_port_mappings(hardware).items():
+            qb = port.related_qubit
             self.ports[port_name] = dict(
                 direction="two-way" if port.acquire_allowed else "one-way",
                 type="port_type_1",
-                associated_qubits=[
-                    _find_qubit(qb).index
-                    for qb in hardware.quantum_devices.values()
-                    if qb.physical_channel == port
-                ],
+                associated_qubits=[qb] if qb is not None else [],
             )
 
         self.waveforms = {
@@ -140,6 +124,6 @@ class OpenPulseFeatures(FeatureMetadata):
                 "ports": self.ports,
                 "frames": self.frames,
                 "waveforms": self.waveforms,
-                "constraints": self.constraints,
+                "constraints": self.constraints.__dict__,
             }
         }

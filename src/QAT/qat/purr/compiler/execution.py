@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import abc
 from decimal import ROUND_DOWN, Decimal
 from math import ceil
 from numbers import Number
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
+
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -17,8 +19,14 @@ from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
     software_post_process_mean,
 )
-from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import ChannelType, MaxPulseLength, PulseChannel, PulseShapeType
+from qat.purr.compiler.config import InlineResultsProcessing, ResultsFormatting
+from qat.purr.compiler.devices import (
+    ChannelType,
+    MaxPulseLength,
+    MeasureChannel,
+    PulseChannel,
+    PulseShapeType,
+)
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -35,13 +43,17 @@ from qat.purr.compiler.instructions import (
     PostProcessing,
     PostProcessType,
     Pulse,
+    QuantumInstruction,
+    Repeat,
     Reset,
     ResultsProcessing,
     Sweep,
     Synchronize,
     Variable,
-    Waveform, QuantumInstruction,
+    Waveform,
+    is_generated_name,
 )
+from qat.purr.compiler.interrupt import NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -63,13 +75,11 @@ class InstructionExecutionEngine(abc.ABC):
 
     def startup(self):
         """Starts up the underlying hardware or does nothing if already started."""
-        pass
-
-    def run_calibrations(self, qubits_to_calibrate=None):
-        pass
 
     @abc.abstractmethod
-    def execute(self, instructions: List[Instruction]) -> Dict[str, Any]:
+    def execute(
+        self, instructions: List[Instruction], results_format=None
+    ) -> Dict[str, Any]:
         pass
 
     @abc.abstractmethod
@@ -84,15 +94,12 @@ class InstructionExecutionEngine(abc.ABC):
         """
         Shuts down the underlying hardware when this instance is no longer in use.
         """
-        pass
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
-    def __init__(
-        self, model: QuantumHardwareModel = None, max_instruction_len: int = 200000
-    ):
+    def __init__(self, model: QuantumHardwareModel = None, instruction_limit: int = 200000):
         super().__init__(model)
-        self.max_instruction_len = max_instruction_len
+        self.instruction_limit = instruction_limit
 
     def _model_exists(self):
         if self.model is None:
@@ -101,9 +108,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def _process_assigns(self, results, qfile: "QatFile"):
         """
         As assigns are classical instructions they are not processed as a part of the
-        quantum execution (right now).
-        Read through the results dictionary and perform the assigns directly, return the
-        results.
+        quantum execution (right now). Read through the results dictionary and perform
+        the assigns directly, return the results.
         """
 
         def recurse_arrays(results_map, value):
@@ -146,8 +152,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         missing_results = {
             val.output_variable
             for val in qfile.instructions
-            if isinstance(val, Acquire)
-            and val.output_variable not in results_processing
+            if isinstance(val, Acquire) and val.output_variable not in results_processing
         }
 
         # For any acquires that are raw, assume they're experiment results.
@@ -159,9 +164,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         for inst in results_processing.values():
             target_values = results.get(inst.variable, None)
             if target_values is None:
-                raise ValueError(
-                    f"Variable {inst.variable} not found in results output."
-                )
+                raise ValueError(f"Variable {inst.variable} not found in results output.")
 
             if (
                 InlineResultsProcessing.Raw in inst.results_processing
@@ -184,6 +187,64 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return results
 
+    def _apply_results_formatting(self, results, format_flags: ResultsFormatting, repeats):
+        """
+        Transform the raw results into the format that we've been asked to provide. Look at individual transformation
+        documentation for descriptions on what they do.
+        """
+        if len(results) == 0:
+            return []
+
+        # If we have no flags at all just infer structure simplification.
+        if format_flags is None:
+            format_flags = ResultsFormatting.DynamicStructureReturn
+
+        def simplify_results(simplify_target):
+            """
+            To facilitate backwards compatability and being able to run low-level experiments alongside quantum
+            programs we make some assumptions based upon form of the results.
+
+            If all results have default variable names then the user didn't care about value assignment or this was a
+            low-level experiment - in both cases, it means we can throw away the names and simply return the results in
+            the order they were defined in the instructions.
+
+            If we only have one result after this, just return that list directly instead, as it's probably just a single
+            experiment.
+            """
+            if all([is_generated_name(k) for k in simplify_target.keys()]):
+                if len(simplify_target) == 1:
+                    return list(simplify_target.values())[0]
+                else:
+                    squashed_results = list(simplify_target.values())
+                    if all(isinstance(val, np.ndarray) for val in squashed_results):
+                        return np.array(squashed_results)
+                    return squashed_results
+            else:
+                return simplify_target
+
+        if ResultsFormatting.BinaryCount in format_flags:
+            results = {key: _binary_count(val, repeats) for key, val in results.items()}
+
+        def find_most_probable(results_dict):
+            highest = 0
+            result = None
+            for key, value in results_dict.items():
+                if value > highest:
+                    result = key
+                    highest = value
+
+            return result
+
+        if ResultsFormatting.ReturnMostProbable in format_flags:
+            results = {key: find_most_probable(val) for key, val in results.items()}
+
+        # Dynamic structure return is an ease-of-use flag to strip things that you know your
+        # use-case won't use, such as variable names and nested lists.
+        if ResultsFormatting.DynamicStructureReturn in format_flags:
+            results = simplify_results(results)
+
+        return results
+
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         """Runs optimization passes specific to this hardware."""
         self._model_exists()
@@ -200,14 +261,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         instruction.channel, instruction.phase
                     )
             elif isinstance(instruction, Pulse):
-                quantum_targets = getattr(instruction, "quantum_targets", [])
-                if not isinstance(quantum_targets, List):
-                    quantum_targets = [quantum_targets]
-                for quantum_target in quantum_targets:
+                for quantum_target in instruction.quantum_targets:
                     if quantum_target in accum_phaseshifts:
-                        optimized_instructions.append(
-                            accum_phaseshifts.pop(quantum_target)
-                        )
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
@@ -220,9 +276,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def validate(self, instructions: List[Instruction]):
         """Validates this graph for execution on the current hardware."""
         self._model_exists()
-
         instruction_length = len(instructions)
-        if instruction_length > self.max_instruction_len:
+        if instruction_length > self.instruction_limit:
             raise ValueError(
                 f"Program too large to be run in a single block on current hardware. "
                 f"{instruction_length} instructions."
@@ -258,22 +313,49 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                             f"given: {values} s"
                         )
 
+            if (
+                isinstance(inst, Repeat)
+                and inst.repeat_count is not None
+                and inst.repeat_count < 1
+            ):
+                raise ValueError(
+                    f"{inst.repeat_count} shots is invalid. Please use 1 and above."
+                )
+
     def _generate_repeat_batches(self, repeats):
         """
         Batches together executions if we have more than the amount the hardware can
         handle at once. A repeat limit of -1 disables this functionality and just runs
         everything at once.
         """
-        batch_limit = self.model.repeat_limit
+        batch_limit = self.model.shot_limit
         if batch_limit == -1:
             return [repeats]
 
         list_expansion_ratio = int(
             (Decimal(repeats) / Decimal(batch_limit)).to_integral(ROUND_DOWN)
         )
-        return ([batch_limit] * list_expansion_ratio) + [repeats % batch_limit]
+        remainder = repeats % batch_limit
+        batches = [batch_limit] * list_expansion_ratio
+        if remainder > 0:
+            batches.append(remainder)
 
-    def execute(self, instructions):
+        return batches
+
+    def execute(self, instructions, results_format=None):
+        """Executes this qat file against this current hardware."""
+        return self._common_execute(instructions, results_format)
+
+    def execute_with_interrupt(
+        self, instructions, results_format=None, interrupt=NullInterrupt()
+    ):
+        """
+        Executes this qat file against this current hardware.
+        Execution allows for interrupts triggered by events
+        """
+        return self._common_execute(instructions, results_format, interrupt)
+
+    def _common_execute(self, instructions, results_format=None, interrupt=NullInterrupt()):
         """Executes this qat file against this current hardware."""
         self._model_exists()
 
@@ -284,19 +366,18 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             # Rebuild repeat list if the hardware can't support the current setup.
             repeat_count = qat_file.repeat.repeat_count
-            if repeat_count > self.model.repeat_limit:
+            if repeat_count > self.model.shot_limit:
                 log.info(
                     f"Running {repeat_count} shots at once is "
                     f"unsupported on the current hardware. Batching execution."
                 )
-                batches = self._generate_repeat_batches(repeat_count)
-            else:
-                batches = [repeat_count]
+            batches = self._generate_repeat_batches(repeat_count)
 
             # Set up the sweep and device injectors, passing all appropriate data to
             # the specific execute methods and deal with clean-up afterwards.
             results = {}
-            for batch_count in batches:
+            for i, batch_count in enumerate(batches):
+                interrupt.if_triggered(iteration=i, throw=True)
                 if batch_count <= 0:
                     continue
 
@@ -314,40 +395,66 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     dinjectors.revert()
                     qat_file.repeat.repeat_count = repeat_count
 
-                if not any(results):
-                    results = batch_results
-                else:
-                    # As it's the same execution we can assume it has the same keys.
-                    for key in results:
-                        existing = results[key]
-                        appending = batch_results[key]
-
-                        # If one is a numpy array, both are. Otherwise traditional list.
-                        if isinstance(existing, np.ndarray):
-                            # TODO: Certian postprocessing instructions result in
-                            # strange concatination, e.g. sequential mean.
-                            results[key] = np.concatenate((existing, appending),
-                                                          axis=existing.ndim - 1)
-                        else:
-                            def combine_lists(exi, new):
-                                if len(new) > 0 and not isinstance(new[0], list):
-                                    exi += new
-                                    return
-                                for i, item in enumerate(new):
-                                    combine_lists(exi[i], item)
-                            combine_lists(existing, appending)
+                results = self._accumulate_results(results, batch_results)
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.
             results = self._process_results(results, qat_file)
             results = self._process_assigns(results, qat_file)
 
+            repeats = (
+                qat_file.repeat.repeat_count
+                if qat_file.repeat is not None
+                else self.model.default_repeat_count
+            )
+            results = self._apply_results_formatting(results, results_format, repeats)
             return results
 
+    @staticmethod
+    def _accumulate_results(results: Dict, batch_results: Dict):
+        if not any(batch_results):
+            return results
+
+        if any(results):
+            if results.keys() != batch_results.keys():
+                raise ValueError(
+                    f"Dictionaries' keys mismatch, {results.keys()} != {batch_results.keys()}"
+                )
+
+            for key in results:
+                existing = results[key]
+                appending = batch_results[key]
+
+                if type(existing) is not type(appending):
+                    raise ValueError(
+                        f"Expected objects with the same type, got {type(existing)} and {type(appending)} instead"
+                    )
+
+                if isinstance(existing, np.ndarray):
+                    results[key] = np.concatenate(
+                        (existing, appending), axis=existing.ndim - 1
+                    )
+                elif isinstance(existing, List):
+
+                    def combine_lists(exi, new):
+                        if len(new) > 0 and not isinstance(new[0], list):
+                            exi += new
+                            return
+                        for i, item in enumerate(new):
+                            combine_lists(exi[i], item)
+
+                    combine_lists(existing, appending)
+                else:
+                    raise ValueError(
+                        f"Cannot combine objects of unsupported type {type(existing)}"
+                    )
+        else:
+            results = batch_results
+
+        return results
+
     @abc.abstractmethod
-    def _execute_on_hardware(
-        self, sweep_iterator, package: "QatFile"
-    ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]:
+    def _execute_on_hardware(self, sweep_iterator, package: "QatFile"):
         pass
 
     def calculate_duration(self, instruction, return_samples: bool = True):
@@ -411,9 +518,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 if isinstance(qtarget, Acquire):
                     qtarget = qtarget.channel
 
-                device_instructions: List[PositionData] = results.setdefault(
-                    qtarget, []
-                )
+                device_instructions: List[PositionData] = results.setdefault(qtarget, [])
                 if not any(device_instructions):
                     sample_start = 0
                 else:
@@ -424,7 +529,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 # channels to that point in time.
                 position_data = None
                 if isinstance(instruction, Synchronize):
-                    current_durations = {qt: total_durations.setdefault(qt, 0) for qt in instruction.quantum_targets}
+                    current_durations = {
+                        qt: total_durations.setdefault(qt, 0)
+                        for qt in instruction.quantum_targets
+                    }
                     longest_length = max(current_durations.values(), default=0.0)
                     delay_time = longest_length - total_durations[qtarget]
                     if delay_time > 0:
@@ -436,17 +544,19 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         )
                 else:
                     position_data = PositionData(
-                            sample_start,
-                            sample_start + self.calculate_duration(instruction),
-                            instruction,
-                        )
+                        sample_start,
+                        sample_start + self.calculate_duration(instruction),
+                        instruction,
+                    )
 
                 if position_data is not None:
                     device_instructions.append(position_data)
 
                     # Calculate running durations for sync/delay evaluation
                     current_duration = total_durations.setdefault(qtarget, 0)
-                    total_durations[qtarget] = current_duration + position_data.instruction.duration
+                    total_durations[qtarget] = (
+                        current_duration + position_data.instruction.duration
+                    )
 
         # Strip timelines that only hold delays, since that just means nothing is
         # happening on this channel.
@@ -454,23 +564,25 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             if all(isinstance(pos_data.instruction, Delay) for pos_data in timeline):
                 del results[key]
 
-        if final_positions := [final_position[-1].end for final_position in list(results.values())]:
+        if final_positions := [
+            final_position[-1].end for final_position in list(results.values())
+        ]:
             end_point = max(final_positions)
 
             for qubit in self.model.qubits:
-                freq_channel = next(
-                    (channel for channel in qubit.get_all_channels() if channel.channel_type == ChannelType.freq_shift),
-                    None)
-
-                if freq_channel is not None:
+                if freq_channel := qubit.pulse_channels.get(
+                    ChannelType.freq_shift.name, None
+                ):
                     if freq_channel.active:
                         pulse = Pulse(
                             freq_channel,
                             shape=PulseShapeType.SQUARE,
                             amp=freq_channel.amp,
-                            width=end_point*qubit.physical_channel.sample_time
+                            width=end_point * qubit.physical_channel.sample_time,
                         )
-                        results[freq_channel] = [PositionData(0, end_point, pulse), ]
+                        results[freq_channel] = [
+                            PositionData(0, end_point, pulse),
+                        ]
         return results
 
     def build_pulse_channel_buffers(
@@ -498,9 +610,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 elif isinstance(pos.instruction, Reset):
                     self.process_reset(pos)
                 elif isinstance(pos.instruction, FrequencyShift):
-                    frequency = self.process_frequencyshift(
-                        pos, frequency, pulse_channel
-                    )
+                    frequency = self.process_frequencyshift(pos, frequency, pulse_channel)
 
         return buffers
 
@@ -521,7 +631,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         t = np.linspace(
             start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=samples
         )
-        pulse = evaluate_shape(position.instruction, t, phase)
+        half_sample = isinstance(pulse_channel, MeasureChannel)
+        pulse = evaluate_shape(position.instruction, t, phase, half_sample)
 
         scale = pulse_channel.scale
         if (
@@ -554,13 +665,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         self, position: PositionData, frequency: float, pulse_channel: PulseChannel
     ):
         # Check no pulse channels on this physical channel used a fixed if
-        for channel in self.model.get_pulse_channels_from_physical_channel(
-            pulse_channel.physical_channel_id
-        ):
+        for channel in pulse_channel.physical_channel.related_pulse_channels:
             if channel.fixed_if:
                 raise NotImplementedError(
-                    "Hardware does not currently support frequency shifts on the "
-                    f"physical channel {pulse_channel.physical_channel}."
+                    f"Hardware does not currently support frequency shifts on the physical channel "
+                    f"{pulse_channel.physical_channel}."
                 )
 
         new_frequency = frequency + position.instruction.frequency
@@ -671,6 +780,40 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         if self.model is not None:
             return f"{self.__class__.__name__} with {len(self.model.qubits)} qubits"
         return "No hardware loaded."
+
+
+def _binary_count(results_list, repeats):
+    """
+    Returns a dictionary of binary number: count. So for a two qubit register it'll return the various counts for
+    00, 01, 10 and 11.
+    """
+
+    def flatten(res):
+        """Combine binary result from the QPU into composite key result. Aka '0110' or '0001'"""
+        if isinstance(res, Iterable):
+            return "".join([flatten(val) for val in res])
+        else:
+            return str(res)
+
+    def get_tuple(res, index):
+        return [val[index] if isinstance(val, (List, np.ndarray)) else val for val in res]
+
+    binary_results = _binary(results_list)
+
+    # If our results are a single qubit then pretend to be a register of one.
+    if (
+        isinstance(next(iter(binary_results), None), Number)
+        and len(binary_results) == repeats
+    ):
+        binary_results = [binary_results]
+
+    result_count = dict()
+    for qubit_result in [list(get_tuple(binary_results, i)) for i in range(repeats)]:
+        key = flatten(qubit_result)
+        value = result_count.get(key, 0)
+        result_count[key] = value + 1
+
+    return result_count
 
 
 def _complex_to_binary(number: complex):
@@ -830,9 +973,11 @@ class IteratorInjector(ValueReplacement):
             return type_to_check(expanded)
         elif isinstance(self.iteration, Dict):
             return {
-                key: replacements[value.name][index]
-                if isinstance(value, Variable) and key in replacements
-                else value
+                key: (
+                    replacements[value.name][index]
+                    if isinstance(value, Variable) and key in replacements
+                    else value
+                )
                 for key, value in self.iteration.items()
             }
         else:
@@ -1028,9 +1173,7 @@ class SweepIterator:
                         val, replacers, index, revert, recursion_guard
                     )
             else:
-                self._inject_sweep_values(
-                    value, replacers, index, revert, recursion_guard
-                )
+                self._inject_sweep_values(value, replacers, index, revert, recursion_guard)
 
     def reset_iteration(self):
         """
@@ -1062,9 +1205,7 @@ class SweepIterator:
             return
 
         for inst in instructions:
-            self._inject_sweep_values(
-                inst, self.sweep.variables, self.current_iteration
-            )
+            self._inject_sweep_values(inst, self.sweep.variables, self.current_iteration)
 
         if self.nested_sweep is not None:
             self.nested_sweep.do_sweep(instructions)
@@ -1102,7 +1243,7 @@ class SweepIterator:
     def get_results_shape(self, shape: Tuple = None):
         """Return a default array that mirrors the structure for this set of sweeps."""
         if self.nested_sweep is not None:
-            return (self.sweep.length, *self.nested_sweep.get_results_shape(shape))
+            return self.sweep.length, *self.nested_sweep.get_results_shape(shape)
         return (self.length, *shape) if shape is not None else (self.length,)
 
     @property

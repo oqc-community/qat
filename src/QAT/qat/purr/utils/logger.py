@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import atexit
 import logging
 import os
@@ -11,8 +12,7 @@ from logging.config import dictConfig
 from pathlib import Path
 from typing import IO, List, Union
 
-from numpy import savetxt
-from qat.purr.utils.serializer import json_dump, json_load
+from qat.purr.utils.serializer import json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
 default_logger_format = (
@@ -31,8 +31,6 @@ class LoggerLevel(Enum):
     WARNING = logging.WARNING
     INFO = logging.INFO
     DEBUG = logging.DEBUG
-    OUTPUT = logging.NOTSET + 2
-    CODE = logging.NOTSET + 1
     NOTSET = logging.NOTSET
 
     def __repr__(self):
@@ -57,94 +55,6 @@ class BasicLogger(logging.Logger):
     @property
     def logs_path(self):
         return self.log_folder.folder_path
-
-    def output(
-        self,
-        data,
-        *args,
-        cell_type: str = None,
-        fit_type: str = None,
-        msg: str = "",
-        section_level=1,
-    ):
-        """
-        Displays the result of some experiment or computation. This logging function is
-        PuRR specific.
-
-        The output depends on the :paramref:`cell_type` parameter:
-
-        - ``table`` - it creates a table in markdown syntax. The data needs to be a list
-          of lists of strings, where the first list will be the header of the table, and
-          then each list represents a row.
-        - ``fit`` - it displays the Fit function in LaTeX syntax. It also requires the
-          :paramref:`fit_type` parameter
-        - ``new_section`` - creates a new section in markdown syntax. The title will be
-          the string provided by :paramref:`data`
-
-        :param data: The data to output based on the rest of the parameters.
-        :param cell_type: It can have multiple values: ``table``, ``fit``,
-            ``new_section``
-        :param fit_type: Required when :paramref:`cell_type` is ``fit``. It can be one
-            of the following types: ``SINUSOID``, ``SINUSOID_EXPONENTIAL``,
-            ``POLYNOMIAL``, ``EXPONENTIAL``, ``LORENTZIAN``
-        :param msg: Message to insert in front of the table if :paramref:`cell_type` is
-            ``table``
-        :param section_level: The level of the new section in markdown, if
-            :paramref:`cell_type` is ``new_section``
-        """
-        logging.Logger.log(
-            self,
-            level=LoggerLevel.OUTPUT.value,
-            msg=data,
-            *args,
-            extra={
-                "cell_type": cell_type,
-                "fit_type": fit_type,
-                "note": msg,
-                "section_level": section_level,
-            },
-        )
-
-    def code(self, source: List[str]):
-        """
-        Outputs a section of executable code (used for Jupyter files). This logging
-        function is PuRR specific.
-
-        :param source: The list of code lines as strings
-        """
-        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(source))
-
-    def save_object(self, obj, name: str, numpy_arr: bool = False):
-        """
-        Serializes the specified object. This logging function is PuRR specific.
-
-        :param obj: The object to be serialized.
-        :param name: A name must be also provided, which will be used as the file name
-                     and in case of Jupyter loggers, also as the name of the variable
-                     which will contain the loaded object.
-        """
-        if numpy_arr:
-            code = [
-                "# load the measured data from the file",
-                "from numpy import loadtxt",
-                f"{name} = loadtxt(r'{name}.txt')",
-            ]
-            logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(code))
-            return
-        file_name = f"{name}.json"
-        file_path = os.path.join(self.logs_path, file_name)
-        with open(file_path, "w") as f:
-            json_dump(obj, f, indent=4, ensure_ascii=False)
-
-        # After serializing the object above, a code snippet will be added to the
-        # Jupyter notebook to load the object from the JSON, and save it to a variable.
-        # This will allow the user to actively analyse the saved object after running
-        # the Jupyter script.
-        code = [
-            "from qat.purr.logger import *",
-            f"{name} = load_data('{os.path.relpath(file_path, self.logs_path)}')",
-        ]
-        logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(code))
 
     def close(self):
         """Closes this logger, cleans up the file handles and appropriate folder."""
@@ -289,9 +199,7 @@ class JsonHandler(FileLoggerHandler):
             self.stream = self._open()
             self.create_initial_file()
         self.stream.seek(0, os.SEEK_END)
-        self.stream.seek(
-            self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET
-        )
+        self.stream.seek(self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET)
         FileLoggerHandler.emit(self, record)
         self.stream.write(self.file_terminator)
         self.flush()
@@ -352,13 +260,7 @@ class CompositeLogger(BasicLogger):
 
         # Set the root to the lowest non-custom log level activated.
         root.setLevel(
-            min(
-                [
-                    val.level
-                    for val in self.loggers
-                    if (float(val.level / 10)).is_integer()
-                ]
-            )
+            min([val.level for val in self.loggers if (float(val.level / 10)).is_integer()])
         )
 
     def add_loggers(self, loggers_or_names: List[Union[str, logging.Logger]] = ()):
@@ -413,38 +315,6 @@ class CompositeLogger(BasicLogger):
         kwargs = self._add_stack_levels(kwargs)
         for logger in self.loggers:
             logger.exception(msg, *args, **kwargs)
-
-    def output(self, data, **kwargs):
-        for logger in self.loggers:
-            if isinstance(logger, BasicLogger):
-                logger.output(data, **kwargs)
-
-    def code(self, source: List[str]):
-        for logger in self.loggers:
-            if isinstance(logger, BasicLogger):
-                logger.code(source)
-
-    def save_object(self, obj, name: str, numpy_arr: bool = False, overwrite=False):
-        """
-        Iterates through the list of loggers and calls the corresponding save_object
-        implementations for each of them. This is the method that should be called from
-        the code.
-        """
-        if numpy_arr:
-            if not overwrite:
-                i = 2
-                original_name = name
-                while os.path.exists(
-                    os.path.join(self.log_folder.folder_path, f"{name}.txt")
-                ):
-                    name = f"{original_name}_{i}"
-                    i += 1
-            file_path = os.path.join(self.log_folder.folder_path, f"{name}.txt")
-            savetxt(file_path, obj)
-        for logger in self.loggers:
-            if isinstance(logger, BasicLogger):
-                logger.save_object(obj, name, numpy_arr=numpy_arr)
-        return name
 
     def close(self):
         super(CompositeLogger, self).close()
@@ -621,12 +491,6 @@ class LevelFilter(logging.Filter):
 
 
 logging.setLoggerClass(BasicLogger)
-"""
-These specialized logging levels are registered with the logging system, so they can be
-retrieved by using for example logging.getLevelName('CODE').
-"""
-logging.addLevelName(LoggerLevel.OUTPUT.value, "OUTPUT")
-logging.addLevelName(LoggerLevel.CODE.value, "CODE")
 
 
 def import_logger_configuration(logger_config: dict, log_folder: LogFolder = None):
@@ -748,44 +612,6 @@ def close_logger():
         def_logger.close()
 
 
-def load_object_from_log_folder(file_path: str):
-    """
-    Loads and deserializes an object from its JSON representation from the disk.
-
-    :param file_path: The JSON file on the disk
-    :return: The loaded object after deserialization
-    """
-    extension = Path(file_path).suffix
-    if not extension == ".json":
-        raise ValueError("Only JSON file paths are accepted!")
-    with open(
-        os.path.join(get_default_logger().log_folder.folder_path, file_path), "r"
-    ) as f:
-        obj = json_load(f)
-    get_default_logger().debug(f"Object loaded: {str(obj)}")
-    return obj
-
-
-def save_object_to_log_folder(obj, sub_folder_path: str):
-    """
-    Serializes the specified object.
-    """
-    extension = Path(sub_folder_path).suffix
-    if not extension == ".json":
-        raise ValueError("Only JSON file paths are accepted!")
-    sub_folder_path = os.path.join(
-        get_default_logger().log_folder.folder_path, sub_folder_path
-    )
-    dir_name = os.path.dirname(sub_folder_path)
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
-
-    with open(sub_folder_path, "w") as f:
-        json_dump(obj, f, indent=4, ensure_ascii=False)
-
-    return sub_folder_path
-
-
 _default_logging_instance = None
 
 
@@ -804,8 +630,7 @@ def get_default_logger():
 
             stack = traceback.extract_stack()
             is_test_env = any(
-                val.filename is not None
-                and val.filename.endswith(f"unittest\\loader.py")
+                val.filename is not None and val.filename.endswith(f"unittest\\loader.py")
                 for val in stack
             )
             if is_test_env:

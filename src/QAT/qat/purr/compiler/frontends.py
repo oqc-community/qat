@@ -1,21 +1,29 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import abc
 import os
 import tempfile
-from enum import Enum
-from typing import Tuple
+from pathlib import Path
+from typing import Any, List, Optional, Tuple, Union
 
 import regex
-from qat.purr.backends.calibrations.remote import find_calibration
-from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+
+from qat.features import is_rasqal_enabled
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config
+from qat.purr.compiler.config import CompilerConfig, Languages, default_language_options
+from qat.purr.compiler.execution import QuantumExecutionEngine
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.optimisers import DefaultOptimizers
-from qat.purr.compiler.runtime import execute_instructions, get_builder, get_model
+from qat.purr.compiler.runtime import (
+    execute_instructions_via_config,
+    get_builder,
+    get_model,
+)
 from qat.purr.integrations.qasm import get_qasm_parser
 from qat.purr.integrations.qir import QIRParser
+from qat.purr.integrations.rasqal import create_runtime
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -28,140 +36,165 @@ def _get_file_contents(file_path):
         return ifile.read()
 
 
-path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
-
-
 class LanguageFrontend(abc.ABC):
-    def _build_instructions(
+    @abc.abstractmethod
+    def execute(
         self,
-        quantum_builder: InstructionBuilder,
+        instructions: Union[InstructionBuilder, str, bytes],
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
+        args: Optional[List[Any]],
+    ): ...
+
+    @abc.abstractmethod
+    def parse_and_execute(
+        self,
+        file_or_str: str,
         hardware,
         compiler_config: CompilerConfig,
-    ):
-        instructions = (
-            get_builder(hardware)
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
-            .add(quantum_builder)
-        )
-        return instructions
-
-    def _execute(self, hardware, compiler_config: CompilerConfig, instructions):
-        calibrations = [
-            find_calibration(arg) for arg in compiler_config.active_calibrations
-        ]
-
-        return execute_instructions(
-            hardware,
-            instructions,
-            compiler_config.results_format,
-            calibrations,
-            compiler_config.repeats,
-        )
-
-    def _default_common_args(self, hardware=None, compiler_config=None):
-        hardware = hardware or get_default_RTCS_hardware()
-        compiler_config = compiler_config or CompilerConfig()
-        return hardware, compiler_config
+        args: Optional[List[Any]],
+    ): ...
 
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> Tuple[InstructionBuilder, CompilationMetrics]:
-        ...
-
-    @abc.abstractmethod
-    def execute(
-        self,
-        instructions: InstructionBuilder,
-        hardware,
-        compiler_config: CompilerConfig,
-    ):
-        ...
+    ) -> Tuple[InstructionBuilder, CompilationMetrics]: ...
 
 
 class QIRFrontend(LanguageFrontend):
-    def _parse_from_file(
-        self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None
+    def execute(
+        self,
+        path_or_contents: Union[str, bytes],
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
+        args: Optional[List[Any]] = None,
     ):
-        hardware, compiler_config = self._default_common_args(hardware, compiler_config)
+        if is_rasqal_enabled():
+            runtime = create_runtime(get_model(hardware))
+            if is_path(path_or_contents):
+                result = runtime.run(path_or_contents, args)
+            elif isinstance(path_or_contents, str):
+                result = runtime.run_ll(path_or_contents, args)
+            elif isinstance(path_or_contents, bytes):
+                result = runtime.run_bitcode(path_or_contents, args)
+            else:
+                raise TypeError(
+                    f"Tried to execute QIR file of invalid type: {type(path_or_contents)}"
+                )
 
+            # TODO: Metrics for the runtime in general are very different, even if we still have some
+            #  from the engine. Either way, currently not propagated.
+            metrics = CompilationMetrics()
+            return result, metrics
+        else:
+            if is_path(path_or_contents):
+                builder, parse_metrics = self._parse_legacy(
+                    path_or_contents, hardware, compiler_config
+                )
+            elif isinstance(path_or_contents, (str, bytes)):
+                suffix = ".bc" if isinstance(path_or_contents, bytes) else ".ll"
+                with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
+                    if suffix == ".ll":
+                        fp.write(path_or_contents.encode())
+                    else:
+                        fp.write(path_or_contents)
+                    fp.close()
+                    try:
+                        builder, parse_metrics = self._parse_legacy(
+                            fp.name, hardware, compiler_config
+                        )
+                    finally:
+                        os.remove(fp.name)
+            else:
+                raise TypeError(
+                    f"Tried to execute QIR file of invalid type: {type(path_or_contents)}"
+                )
+
+            result, execution_metrics = execute_instructions_via_config(
+                hardware, builder, compiler_config
+            )
+            execution_metrics.merge(parse_metrics)
+            return result, execution_metrics
+
+    def parse_and_execute(
+        self,
+        path_or_str: Union[str, bytes],
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
+        args: Optional[List[Any]] = None,
+    ):
+        return self.execute(path_or_str, hardware, compiler_config, args)
+
+    def _parse_legacy(
+        self,
+        qir_file: str,
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
+    ):
         metrics = CompilationMetrics()
-        metrics.enable(compiler_config.metrics)
+        metrics.initialize(compiler_config.metrics)
 
         parser = QIRParser(hardware)
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(Languages.QIR)
+        default_language_options(Languages.QIR, compiler_config)
 
         if compiler_config.results_format.format is not None:
             parser.results_format = compiler_config.results_format.format
 
-        quantum_builder = parser.parse(path_or_str)
-        return self._build_instructions(quantum_builder, hardware, compiler_config), metrics
+        return parser.parse(qir_file), metrics
 
     def parse(
-        self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None
+        self,
+        path_or_contents: str,
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
     ):
-        # Parse from file
-        if not os.path.exists(path_or_str):
-            suffix = ".bc" if isinstance(path_or_str, bytes) else ".ll"
-            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
-                if suffix == ".ll":
-                    fp.write(path_or_str.encode())
-                else:
-                    fp.write(path_or_str)
-                fp.close()
-                try:
-                    return self._parse_from_file(fp.name, hardware, compiler_config)
-                finally:
-                    os.remove(fp.name)
-        return self._parse_from_file(path_or_str, hardware, compiler_config)
+        # Parsing doesn't happen here, but if we're a file we want the contents of the
+        # file to send over.
+        if is_path(path_or_contents):
+            return _get_file_contents(path_or_contents)
 
+        return path_or_contents
+
+
+class QASMFrontend(LanguageFrontend):
     def execute(
         self,
         instructions: InstructionBuilder,
-        hardware=None,
-        compiler_config: CompilerConfig = None,
+        hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+        compiler_config: CompilerConfig,
+        args: Optional[List[Any]] = None,
     ):
-        hardware, compiler_config = self._default_common_args(hardware, compiler_config)
-
-        with log_duration("Execution completed, took {} seconds."):
-            return self._execute(hardware, compiler_config, instructions)
+        return execute_instructions_via_config(hardware, instructions, compiler_config)
 
     def parse_and_execute(
-        self, qir_file: str, hardware=None, compiler_config: CompilerConfig = None
+        self,
+        file_or_str: str,
+        hardware,
+        compiler_config: CompilerConfig,
+        args: Optional[List[Any]] = None,
     ):
-        instructions, parse_metrics = self.parse(qir_file, hardware, compiler_config)
+        instructions, parse_metrics = self.parse(file_or_str, hardware, compiler_config)
         result, execution_metrics = self.execute(
-            instructions, hardware, compiler_config
+            instructions, hardware, compiler_config, args
         )
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
 
-
-class QASMFrontend(LanguageFrontend):
-    def parse(
-        self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None
-    ):
+    def parse(self, path_or_str: str, hardware, compiler_config: CompilerConfig):
         # Parse from contents
         qasm_string = path_or_str
         if os.path.isfile(path_or_str):
             qasm_string = _get_file_contents(path_or_str)
 
-        hardware, compiler_config = self._default_common_args(hardware, compiler_config)
-
         metrics = CompilationMetrics()
-        metrics.enable(compiler_config.metrics)
+        metrics.initialize(compiler_config.metrics)
 
         parser = get_qasm_parser(qasm_string)
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(
-                parser.parser_language()
-            )
+        default_language_options(parser.parser_language(), compiler_config)
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(
-                f"Processing QASM with {str(parser)} as parser and {str(hardware)} "
-                "as hardware."
+                f"Processing QASM with {str(parser)} as parser and {str(hardware)} as hardware."
             )
 
             qasm_string = DefaultOptimizers(metrics).optimize_qasm(
@@ -172,32 +205,42 @@ class QASMFrontend(LanguageFrontend):
                 parser.results_format = compiler_config.results_format.format
 
             quantum_builder = parser.parse(get_builder(hardware), qasm_string)
-            return (
-                self._build_instructions(quantum_builder, hardware, compiler_config),
-                metrics,
-            )
+            return quantum_builder, metrics
 
-    def execute(
-        self,
-        instructions: InstructionBuilder,
-        hardware=None,
-        compiler_config: CompilerConfig = None,
-    ):
-        hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
-        with log_duration("Execution completed, took {} seconds."):
-            return self._execute(hardware, compiler_config, instructions)
+def is_path(potential_path):
+    return isinstance(potential_path, str) and path_regex.match(potential_path) is not None
 
-    def parse_and_execute(
-        self, qasm_string: str, hardware=None, compiler_config: CompilerConfig = None
-    ):
-        """
-        Execute a qasm string against a particular piece of hardware. Initializes a
-        default qubit simulator if no hardware provided.
-        """
-        instructions, parse_metrics = self.parse(qasm_string, hardware, compiler_config)
-        result, execution_metrics = self.execute(
-            instructions, hardware, compiler_config
-        )
-        parse_metrics.merge(execution_metrics)
-        return result, parse_metrics
+
+path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
+
+
+contents_match_pattern = regex.compile(
+    '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
+)
+
+
+def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
+    if is_path(path_or_str):
+        if not os.path.exists(path_or_str):
+            raise ValueError(f"Path {path_or_str} does not exist.")
+
+        path = Path(path_or_str)
+        if path.suffix == ".qasm":
+            return QASMFrontend()
+        elif path.suffix in (".bc", ".ll"):
+            return QIRFrontend()
+        else:
+            raise ValueError(f"File with extension {path.suffix} unrecognized.")
+
+    if isinstance(path_or_str, bytes):
+        return QIRFrontend()
+
+    results = regex.search(contents_match_pattern, path_or_str)
+    if results is not None:
+        if results.captures(1):
+            return QASMFrontend()
+        if results.captures(3):
+            return QIRFrontend()
+
+    raise ValueError("Cannot establish a LanguageFrontend based on contents")

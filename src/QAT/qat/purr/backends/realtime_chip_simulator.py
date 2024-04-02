@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from random import random
@@ -7,7 +8,8 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from qat.purr.compiler.builders import QuantumInstructionBuilder
+from scipy.interpolate import CubicSpline
+
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -26,10 +28,9 @@ from qat.purr.compiler.instructions import (
     Reset,
 )
 from qat.purr.utils.logger import get_default_logger
-from scipy.interpolate import CubicSpline
 
 from ..compiler.execution import QuantumExecutionEngine, SweepIterator
-from ..compiler.hardware_models import QuantumHardwareModel
+from ..compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from ..utils.logging_utils import log_duration
 from .utilities import UPCONVERT_SIGN, PositionData, get_axis_map
 
@@ -74,9 +75,7 @@ class Section:
 
 
 class MeasurementStatistics:
-    def __init__(
-        self, state, level=0, probability=1, qubits_measured=None, result=None
-    ):
+    def __init__(self, state, level=0, probability=1, qubits_measured=None, result=None):
         self.state: "Qobj" = state
         self.level: int = level
         self.probability: float = probability
@@ -137,6 +136,7 @@ class MeasurementStatistics:
             empty_state = H0 - H0
             qubit_indices.sort()
             sub_space_size = len(qubit_indices)
+
             # Create list of sub states from qubits to be measured
             measurement_operators = {
                 format(out_state, f"0{sub_space_size}b"): empty_state
@@ -152,9 +152,11 @@ class MeasurementStatistics:
                 probability = (operator * final_state).tr()
                 self.measurement_statistics.append(
                     MeasurementStatistics(
-                        state=operator * final_state * operator.dag() / probability
-                        if probability.real > 0
-                        else empty_state,
+                        state=(
+                            operator * final_state * operator.dag() / probability
+                            if probability.real > 0
+                            else empty_state
+                        ),
                         level=self.level + 1,
                         probability=probability if probability.real > 0 else 0,
                         qubits_measured=qubit_indices,
@@ -165,12 +167,8 @@ class MeasurementStatistics:
         elif control_type == ControlType.RESET:
             for idx in qubit_indices:
                 final_state = (
-                    reset_operators[0][idx]
-                    * final_state
-                    * reset_operators[0][idx].dag()
-                    + reset_operators[1][idx]
-                    * final_state
-                    * reset_operators[1][idx].dag()
+                    reset_operators[0][idx] * final_state * reset_operators[0][idx].dag()
+                    + reset_operators[1][idx] * final_state * reset_operators[1][idx].dag()
                 )
 
             self.measurement_statistics.append(
@@ -205,9 +203,11 @@ class MeasurementStatistics:
                 result_list = result_dict.setdefault(qubit, [])
                 result_list.insert(
                     0,
-                    self.result
-                    if self.result == ControlType.RESET
-                    else int(self.result[i]),
+                    (
+                        self.result
+                        if self.result == ControlType.RESET
+                        else int(self.result[i])
+                    ),
                 )
 
             return result_dict
@@ -245,8 +245,8 @@ class MeasurementStatistics:
     def extract_branch_trajectory(
         self, operators: List["Qobj"], branch: int, step: int = 1, plot_end=False
     ):
-        section_dynamics = [[] for i in range(len(operators))]
-        sim_t = [[] for i in range(len(operators))]
+        section_dynamics = [[] for _ in range(len(operators))]
+        sim_t = [[] for _ in range(len(operators))]
         dynamics = self.dynamics_results
         measurement_statistic = self
         with log_duration("Branch trajectory extracted in {} seconds."):
@@ -257,7 +257,7 @@ class MeasurementStatistics:
                             (operators[j] * dynamics[s]).tr()
                             for s in range(0, len(dynamics), step)
                         ]
-                    )
+                    )  # yapf: disable
                     if measurement_statistic.sim_t is not None:
                         sim_t[j].extend(measurement_statistic.sim_t[::step])
                     else:
@@ -301,22 +301,23 @@ class RTCSQubit(Qubit):
         self._N = 2
         self._rotating_frame_frequency = 0
 
-        self.N = N  # number of qubit energy levels to be simulated
+        # number of qubit energy levels to be simulated
+        self.N = N
+
         self.frequency = frequency
         self.rotating_frame_frequency = rotating_frame_frequency
         self.anharmonicity = anharmonicity
         self.decay_rate = decay_rate
         self.absorb_rate = absorb_rate
         self.dephase_rate = dephase_rate
-        self._set_qutip_operators()
 
-    def _set_qutip_operators(self):
         # Qutip values / operators
         self.I = qeye(self.N)  # identity
         self.a = destroy(self.N)  # destruction
         self.qutip_N = create(self.N) * destroy(self.N)  # population number
+
         # Use Pauli if 2 energy levels
-        if self.N == 2:
+        if N == 2:
             self.Z = self.I - 2 * self.qutip_N
             self.H0 = -np.pi * self.frequency * self.Z
         else:
@@ -327,12 +328,16 @@ class RTCSQubit(Qubit):
                 * (self.frequency + 0.5 * (self.qutip_N - 1) * self.anharmonicity)
                 * self.qutip_N
             )
+
+        # collapse operators
         self.cops = [
             self.decay_rate**0.5 * self.a,
             self.absorb_rate**0.5 * self.a.dag(),
             self.dephase_rate**0.5 * self.qutip_N,
-        ]  # collapse operators
-        self.rho0 = basis(self.N, 0) * basis(self.N, 0).dag()  # Initial state
+        ]
+
+        # Initial state
+        self.rho0 = basis(self.N, 0) * basis(self.N, 0).dag()
 
     @property
     def N(self):
@@ -365,20 +370,10 @@ class RTCSQubit(Qubit):
     def __getstate__(self):
         dictionary_basis = super().__getstate__()
 
-        del dictionary_basis["I"]
-        del dictionary_basis["a"]
-        del dictionary_basis["qutip_N"]
-        del dictionary_basis["Z"]
-        del dictionary_basis["H0"]
-        del dictionary_basis["cops"]
-        del dictionary_basis["rho0"]
+        del dictionary_basis["_N"]
+        del dictionary_basis["_rotating_frame_frequency"]
 
         return dictionary_basis
-
-    def __setstate__(self, state):
-        for key, value in state.items():
-            self.__dict__[key] = value
-        self._set_qutip_operators()
 
 
 class RTCSResonator(Resonator):
@@ -395,6 +390,7 @@ class RTCSResonator(Resonator):
         super().__init__(id_ or f"R{index}", physical_channel, *args, **kwargs)
         self.index = index
         self.frequency = frequency
+
         # width of lorentzian amplitude about resonator resonant frequency
         self.width = width
 
@@ -466,6 +462,7 @@ def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
     hw.add_physical_channel(ch1, ch2)
 
     highest_resonator_id = _get_highest_id(list(hw.quantum_devices.keys()), "R", -1)
+
     # Currently the frequency of the resonator isn't used in the simulations so we can
     # have the same frequency for all of them without issue
     r = RTCSResonator(highest_resonator_id + 1, ch2, 8.0e9, 1.0e6)
@@ -482,9 +479,7 @@ def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
         N=N,
     )
     q.create_pulse_channel(ChannelType.drive, frequency=frequency)
-    q.create_pulse_channel(
-        ChannelType.second_state, frequency=frequency + anharmonicity
-    )
+    q.create_pulse_channel(ChannelType.second_state, frequency=frequency + anharmonicity)
 
     q_r_coupling = RTCSCoupling(
         f"R{highest_resonator_id+1}<->Q{highest_qubit_id+1}",
@@ -638,13 +633,15 @@ def apply_setup_to_hardware(hw, rotating_frame=True):
 # noinspection PyPep8Naming
 def get_default_RTCS_hardware(repeats=1000, rotating_frame=True):
     model = apply_setup_to_hardware(
-        RealtimeSimHardwareModel(repeat_count=repeats), rotating_frame=rotating_frame
+        RealtimeSimHarwareModel(repeat_count=repeats), rotating_frame=rotating_frame
     )
     return model
 
 
-class RealtimeSimHardwareModel(QuantumHardwareModel):
-    couplings: List[RTCSCoupling] = []
+class RealtimeSimHarwareModel(QuantumHardwareModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.couplings: List[RTCSCoupling] = []
 
     def create_engine(self):
         return RealtimeChipSimEngine(self)
@@ -660,7 +657,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
     and be confident that the results are close to reality.
     """
 
-    model: RealtimeSimHardwareModel
+    model: RealtimeSimHarwareModel
 
     def __init__(self, model=None, auto_plot=False, sim_qubit_dt=0.25e-10):
         super().__init__(model)
@@ -678,7 +675,6 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         When the superclass process_reset is implemented, it should remain empty for the
         simulator.
         """
-        pass
 
     def build_simulator_resets(self, position_map: Dict[str, List[PositionData]]):
         """
@@ -708,31 +704,22 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
             return instructions
 
-    def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile
-    ) -> Dict[str, np.ndarray]:
+    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
         """
-        Derivation of the mathematics behind this simulation can be found in the docs
-        folder, "Realtime chip simulator mathematical derivation.pdf". Emulate the
-        effects of the firmware and quantum hardware for a given input. Before
-        instructions are passed to execute they are optimised for this specific function
-        so that all measurements occur consecutively and never at the same time across
-        all channels.
+        Emulate the effects of the firmware and quantum hardware for a given input. Before instructions
+        are passed to execute they are optimised for this specific function so that all measurements
+        occur consecutively and never at the same time across all channels.
 
-        Before a measurement is made all quantum channels executing instructions up to
-        the measurement must have finished operating and only one one measurement
-        channel executes at time. This is achieved by synchronising a measurement
-        channel with qubit channels before measurement. This may not be how the hardware
-        will handle measurements as it is an inefficent use of time but it makes
-        splicing up the simulation into sections between measurements easier for the
-        emulator.
+        Before a measurement is made all quantum channels executing instructions up to the measurement must have
+        finished operating and only one one measurement channel executes at time. This is achieved by
+        synchronising a measurement channel with qubit channels before measurement. This may not be how the
+        hardware will handle measurements as it is an inefficent use of time but it makes splicing up the simulation
+        into sections between measurements easier for the emulator.
         """
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
-            logger.debug(
-                f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}"
-            )
+            logger.debug(f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}")
 
             position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
@@ -769,14 +756,13 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
             if all(len(buf) == 0 for buf in resonator_buffers.values()):
                 raise NotImplementedError(
-                    "There must be at least one qubit measurement to perform a "
-                    "simulation"
+                    "There must be at least one qubit measurement to perform a simulation"
                 )
 
             # Get resonator channel time steps
             min_resonator_dt = 1.0
             for buffer_idx in resonator_buffers.keys():
-                physical_channel = self.model.get_physical_channel(buffer_idx)
+                physical_channel = self.model.physical_channels.get(buffer_idx, None)
                 resonator_dt = physical_channel.sample_time
                 if min_resonator_dt > resonator_dt:
                     min_resonator_dt = resonator_dt
@@ -789,8 +775,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # pulse channel to physical channel
             for key in list(resets.keys()):
                 item = resets.pop(key)
-                pulse_channel = self.model.get_pulse_channel_from_id(key)
-                qubit, _ = self.model._resolve_qb_pulse_channel(pulse_channel)
+                pulse_channel = self.model.pulse_channels[key]
+                qubit, _ = resolve_qb_pulse_channel(pulse_channel)
                 measure_channel = qubit.get_measure_channel()
                 resets[measure_channel.id] = [
                     int(reset * pulse_channel.sample_time / measure_channel.sample_time)
@@ -813,7 +799,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                         if qb.get_measure_channel().physical_channel_id == buffer_idx
                     ),
                     None,
-                )
+                )  # yapf: disable
                 if target_device is None:
                     continue
 
@@ -822,15 +808,14 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                     (
                         coup
                         for coup in self.model.couplings
-                        if target_device in coup.targets()
-                        and resonator in coup.targets()
+                        if target_device in coup.targets() and resonator in coup.targets()
                     ),
                     None,
-                )
+                )  # yapf: disable
                 if res_qubit_coupling is None:
                     continue
 
-                phys_channel = self.model.get_physical_channel(buffer_idx)
+                phys_channel = self.model.physical_channels.get(buffer_idx, None)
 
                 target_devices[buffer_idx] = target_device
                 lo = phys_channel.baseband.frequency
@@ -839,17 +824,17 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 # state.
                 for i, segment in enumerate(buffer_segment):
                     if segment[0] == ControlType.MEASURE:
-                        lorentzian_responses[buffer_idx][
-                            i
-                        ] = get_resonator_response_signal_segment(
-                            resonator_input=resonator_buffers[buffer_idx][
-                                segment[1] : segment[2]
-                            ],
-                            resonator_dt=phys_channel.sample_time,
-                            width=resonator.width,
-                            res_freq=resonator.frequency,
-                            shift=res_qubit_coupling.frequency,
-                            lo_freq=lo,
+                        lorentzian_responses[buffer_idx][i] = (
+                            get_resonator_response_signal_segment(
+                                resonator_input=resonator_buffers[buffer_idx][
+                                    segment[1] : segment[2]
+                                ],
+                                resonator_dt=phys_channel.sample_time,
+                                width=resonator.width,
+                                res_freq=resonator.frequency,
+                                shift=res_qubit_coupling.frequency,
+                                lo_freq=lo,
+                            )
                         )
 
             # Generate projection operators for each possible system state
@@ -870,12 +855,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 j: [0 for _ in range(len(self.model.qubits))] for j in range(2)
             }
             for idx, device in enumerate(self.model.qubits):
-                P0 = self.get_tensor(
-                    {idx: basis(device.N, 0) * basis(device.N, 0).dag()}
-                )
-                P1 = self.get_tensor(
-                    {idx: basis(device.N, 1) * basis(device.N, 1).dag()}
-                )
+                P0 = self.get_tensor({idx: basis(device.N, 0) * basis(device.N, 0).dag()})
+                P1 = self.get_tensor({idx: basis(device.N, 1) * basis(device.N, 1).dag()})
                 Px = self.get_tensor(
                     {
                         idx: basis(device.N, 0) * basis(device.N, 1).dag()
@@ -891,9 +872,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # sections and the second the channels measured at the end of each section.
             for key in list(buffer_segments.keys()):
                 buffer_segments[target_devices[key].index] = buffer_segments.pop(key)
-            simulation_sections: Dict[
-                Section
-            ] = get_resonator_response_splicing_indices(buffer_segments)
+            simulation_sections: Dict[Section] = get_resonator_response_splicing_indices(
+                buffer_segments
+            )
 
             # Construct uncoupled Hamiltonian and find collapse operators
             H0 = 0.0 * self.get_tensor()
@@ -958,11 +939,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
                     bb = self.model.basebands[baseband.full_id()]
                     LO = bb.frequency
-                    d = (
-                        np.pi
-                        * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * LO * self.sim_t)
-                        * d
-                    )
+                    d = np.pi * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * LO * self.sim_t) * d
 
                     # Split the Hamiltonian into measurement sections, specifying which
                     # qubits are to be measured at the end of each section
@@ -1053,7 +1030,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                             and prob < val
                         ),
                         None,
-                    )
+                    )  # yapf: disable
 
                     # Just keep trying until we get a value.
                     if branch is not None:
@@ -1071,16 +1048,17 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                         if measurement != ControlType.RESET:
                             response_buffers[buffer_idx][i][
                                 segment[1] : segment[2]
-                            ] = lorentzian_responses[buffer_idx][j][measurement]
+                            ] = lorentzian_responses[buffer_idx][j][
+                                measurement
+                            ]  # yapf: disable
 
             # Perform post processing to generate a single complex number result for
             # each measurement.
-            # Map the result onto the classical registers using
             for channel, aqs in aq_map.items():
                 for aq in aqs:
                     response = response_buffers[aq.physical_channel.full_id()][
                         :, aq.start : aq.start + aq.samples
-                    ]
+                    ]  # yapf: disable
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(
@@ -1162,15 +1140,16 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         else:
             plot_end = True
 
-        # we separate out operators and their names as it is more efficient to process
+        # We separate out operators and their names as it is more efficient to process
         # all operators at once
         operators = []
         operator_names = []
+
         # Plot all qubits if not specified
         if operator_info is None:
             operator_info = list(range(len(self.model.qubits)))
         for i, op in enumerate(operator_info):
-            # if an int is given, plot pauli x, y and z for the qubit with the
+            # If an int is given, plot pauli x, y and z for the qubit with the
             # corresponding id
             if isinstance(op, int):
                 device = self.model.qubits[op]
@@ -1220,6 +1199,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             ) = self.measurement_statistics.extract_branch_trajectory(
                 operators, branch, step, plot_end
             )
+
             # Sort by qubit id
             trajectory_dict = {}
             for name, trajectory, time in zip(
@@ -1243,7 +1223,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         plt.show()
 
     def get_branches(self):
-        """Return the branch ids along with the measurements associated with them.
+        """
+        Return the branch ids along with the measurements associated with them.
 
         :Example:
 
@@ -1347,9 +1328,12 @@ def get_resonator_response_splicing_indices(buffer_segments):
     section_num = -1
     simulation_sections: Dict[Section] = {}
     ordered_segments = []
-    for qubit, segments in buffer_segments.items():  # Order segments from first to last
+
+    # Order segments from first to last
+    for qubit, segments in buffer_segments.items():
         for segment in segments:
             ordered_segments.append([qubit, *segment])
+
     # sort by last index if first indices are the same to make sure reset are before
     # measures
     ordered_segments.sort(key=lambda x: (x[2], x[3]))
@@ -1358,7 +1342,8 @@ def get_resonator_response_splicing_indices(buffer_segments):
     for segment in ordered_segments:
         indices = [segment[2], segment[3]]
         if indices[0] == previous_start_indice and segment[1] == previous_control_type:
-            if section_num == -1:  # Catch case measurement occurs at time 0
+            # Catch case measurement occurs at time 0
+            if section_num == -1:
                 section_num += 1
                 simulation_sections[section_num] = Section(
                     indices, [segment[0]], segment[1]
@@ -1367,9 +1352,7 @@ def get_resonator_response_splicing_indices(buffer_segments):
                 simulation_sections[section_num].qubits.append(segment[0])
         else:
             section_num += 1
-            simulation_sections[section_num] = Section(
-                indices, [segment[0]], segment[1]
-            )
+            simulation_sections[section_num] = Section(indices, [segment[0]], segment[1])
 
         previous_start_indice = indices[0]
         previous_control_type = segment[1]
@@ -1382,6 +1365,7 @@ def get_resonator_response_signal_segment(
 ):
     # Peak of resonator resonant frequency relative to LO freq
     centre0 = res_freq - lo_freq
+
     # Peak of resonator resonant frequency relative to LO freq with excited qubit
     centre1 = centre0 + shift
 
@@ -1395,12 +1379,12 @@ def get_resonator_response_signal_segment(
 
     # Create Lorentzian curves in the Fourier transform of the buffer segment
     # representing the resonator spectrum
-    resonator_output_0 = np.fft.ifft(
-        o * lorentzian(f, centre0, width)
-    )  # Response if qubit in ground state
-    resonator_output_1 = np.fft.ifft(
-        o * lorentzian(f, centre1, width)
-    )  # Response if qubit in excited state
+
+    # Response if qubit in ground state
+    resonator_output_0 = np.fft.ifft(o * lorentzian(f, centre0, width))
+
+    # Response if qubit in excited state
+    resonator_output_1 = np.fft.ifft(o * lorentzian(f, centre1, width))
 
     return [resonator_output_0, resonator_output_1]
 
@@ -1411,9 +1395,10 @@ def get_simple_resonator_response(
     centre0 = res_freq - lo_freq
     centre1 = centre0 + shift
 
+    # Create array of sample times
     iq_t = np.linspace(
         0.0, resonator_dt * len(resonator_iq), len(resonator_iq), endpoint=False
-    )  # Create array of sample times
+    )
     resonator_iq *= np.exp(-UPCONVERT_SIGN * 2.0j * np.pi * (res_freq - lo_freq) * iq_t)
 
     ZERO_TOLERANCE = 1e-6
@@ -1454,9 +1439,7 @@ def get_simple_resonator_response(
 
     factor = qubit_dt / resonator_dt
 
-    qsegments = [
-        (int(round(factor * s[0])), int(round(factor * s[1]))) for s in segments
-    ]
+    qsegments = [(int(round(factor * s[0])), int(round(factor * s[1]))) for s in segments]
 
     qzsegments = []
     for start, stop in qsegments:
@@ -1510,7 +1493,7 @@ def get_simple_resonator_response(
         # plt.plot(o.imag)
         # plt.show()
 
-        # todo: maybe method to force signal continuity should be here, but this method
+        # TODO: maybe method to force signal continuity should be here, but this method
         #   messes up sometimes
         # diff = o[0] - sig0[0]
         # o -= diff

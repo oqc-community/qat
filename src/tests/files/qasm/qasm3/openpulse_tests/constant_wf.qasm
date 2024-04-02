@@ -4,7 +4,7 @@ cal {
     extern frame q0_drive;
 }
 cal {
-    waveform wf = constant(1e-06, 1.0);
+    waveform wf = constant(10e-9, 1.0);
 }
 defcal pulse $0 {
     play(q0_drive, wf);

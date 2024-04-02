@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from __future__ import annotations
 
 import inspect
@@ -43,34 +44,62 @@ class ResultsFormatting(Flag):
     # should have a way to disable it for certain uses.
     DynamicStructureReturn = auto()
 
-    # If your qubit results are lists of binary, squash to one string representation.
-    # Changes 1: [1, 0, 0, 1] to 1: '1001'.
-    # Only works when Binary format is returned.
-    SquashBinaryResultArrays = auto()
+    # Returns the most probably binary string from your result. Meant to work in conjunction
+    # with BinaryCount
+    ReturnMostProbable = auto()
 
     def __repr__(self):
         return self.name
 
 
 class QuantumResultsFormat:
+    """
+    There are numerous types of results people want from a quantum computer, from low-level experimentation
+    to circuit and quantum program execution. Usually these all start at the raw readout and then progressively get
+    simplified and condensed into whatever format you want.
+
+    We mirror this approach and all of our transformations are layered upon one another allowing quite a bit of
+    flexibility in the results you get back. This does also mean that some transformations are meant to work together,
+    or after one another, or have various conditions that are more subtle.
+
+    To that end we've provided combinations of flags that allow for the most current results formats to be targeted
+    in this object.
+
+    Note: binary_count() is a results distribution, and for most circuit runs you'll want to use that.
+
+    Here's an example for results distribution:
+    ::
+        config = CompilerConfig()
+        config.results_format.binary_count()
+
+    And here's for the raw results:
+    ::
+        config = CompilerConfig()
+        config.results_format.raw()
+    """
+
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
-        self.transforms: Optional[
-            ResultsFormatting
-        ] = ResultsFormatting.DynamicStructureReturn
+        self.transforms: Optional[ResultsFormatting] = (
+            ResultsFormatting.DynamicStructureReturn
+        )
 
     def raw(self) -> QuantumResultsFormat:
+        """Raw QPU output."""
         self.format = InlineResultsProcessing.Raw
         return self
 
     def binary(self) -> QuantumResultsFormat:
+        """
+        Returns a definitive 0/1 for each qubit instead of raw measurement results * shots.
+        """
         self.format = InlineResultsProcessing.Binary
         return self
 
     def binary_count(self):
         """
-        Returns a count of each instance of measured qubit registers.
-        Switches result format to raw.
+        Returns the count of each time a particular bitstring was seen in a result.
+        {'00': 40, '01': 150, ...}
         """
         self.transforms = (
             ResultsFormatting.BinaryCount | ResultsFormatting.DynamicStructureReturn
@@ -78,16 +107,17 @@ class QuantumResultsFormat:
         self.format = InlineResultsProcessing.Raw
         return self
 
-    def squash_binary_result_arrays(self):
+    def most_probable_bitstring(self):
         """
-        Squashes binary result list into a singular bit string. Switches results to
-        binary.
+        Returns the most probable bitstring from your execution. Clusters the results then
+        picks the one with the highest incident.
         """
         self.transforms = (
-            ResultsFormatting.SquashBinaryResultArrays
+            ResultsFormatting.BinaryCount
+            | ResultsFormatting.ReturnMostProbable
             | ResultsFormatting.DynamicStructureReturn
         )
-        self.format = InlineResultsProcessing.Binary
+        self.format = InlineResultsProcessing.Raw
         return self
 
     def __contains__(self, other):
@@ -166,6 +196,14 @@ class QatOptimizations(Flag):
 
 
 class MetricsType(Flag):
+    """
+    A variety of metrics can be returned about compilation and execution. The default metrics are a selection of
+    information that people generally want to know such as what the post-optimization circuit/IR looks like before we
+    start executing.
+
+    Default metrics will only have a minute impact on runtime, so are fine to leave enabled.
+    """
+
     Empty = auto()
 
     # Returns circuit after optimizations have been run.
@@ -196,12 +234,57 @@ class MetricsType(Flag):
         return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
+class ErrorMitigationConfig(Flag):
+    """
+    Configuration for management of error mitigation passes to be switched on or off.
+
+    Currently, we have two different options for readout mitigation, namely matrix mitigation and linear mitigation.
+
+    Note: MatrixMitigation has an exponential calibration and runtime overhead and is only potentially available for
+    Lucy generation of QPU.
+
+    For a deep dive into the theory of matrix mitigation the qiskit textbook includes a notebook going through this
+    https://github.com/Qiskit/textbook/blob/main/notebooks/quantum-hardware/measurement-error-mitigation.ipynb
+
+    Matrix mitigation starts by noting, the output vector of results C_output can be modeled by a purely classical
+    process which starts with the perfect results C_perfect and is transformed by a noisy channel to the actual output
+    vector observed. That is C_output = M*C_perfect, where M is the transfer matrix that takes us away from the
+    theoretical perfect results to C_output. Multiplying both sides by the inverse of M, M^{-1}, gets us,
+    M^{-1}*C_output = C_perfect. We can compute the elements of M_{i,j} = p(i|j), where i is the measured bit string
+    from the input bitstring, j.
+
+    LinearMitigation is a simplification of the above that is constant time in calibration. We measure the "all zero"
+    state and "all one" state. From this, for each qubit we are able to extract p(0/1|0/1). We can then, for each
+    measured bitstring, for each qubit we are able to invert the measured bitstring up to a first order correction.
+    This is a much simplified version of the full MatrixMitigation and will only correct for uncorrelated readout
+    errors.
+    """
+
+    Empty = auto()
+    MatrixMitigation = auto()
+    LinearMitigation = auto()
+
+
 class CompilerConfig:
     """
-    Full settings for the compiler. All values are defaulted on initialization.
+    Main configuration for many compiler passes and features. All defaults are chosen based upon target
+    machine and IR used (QASM, QIR, etc) if not explicitly passed in.
 
-    If no explicit optimizations are passed then the default set of optimization for the
-    language you're attempting to compile will be applied.
+    Look at the documentation on each object for more detailed uses.
+
+    Usage Example:
+    ::
+        conf = CompilerConfig()
+        conf.results_format.binary_count()
+        conf.optimizations = QIR2Optimizations()
+        results = execute(..., ..., conf)
+
+    You can also use `get_default_config` to build a default configuration for a particular language, which
+    is usually the easier option.
+    ::
+        conf = get_default_config(Languages.Qasm2, repeats=5000)
+
+    Note: 'repeats' are more commonly known as shots.
     """
 
     def __init__(
@@ -212,15 +295,15 @@ class CompilerConfig:
         metrics=MetricsType.Default,
         active_calibrations=None,
         optimizations: "OptimizationConfig" = None,
+        error_mitigation: ErrorMitigationConfig = None,
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
-        self.results_format: QuantumResultsFormat = (
-            results_format or QuantumResultsFormat()
-        )
+        self.results_format: QuantumResultsFormat = results_format or QuantumResultsFormat()
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
+        self.error_mitigation: Optional[ErrorMitigationConfig] = error_mitigation
 
     def to_json(self):
         return json_dumps(self, serializable_types=get_serializable_types())
@@ -234,6 +317,23 @@ class CompilerConfig:
     @classmethod
     def create_from_json(cls, json: str):
         return CompilerConfig().from_json(json)
+
+    def validate(self, hardware):
+        from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+        if (
+            self.error_mitigation is not None
+            and self.error_mitigation != ErrorMitigationConfig.Empty
+        ):
+            if isinstance(hardware, QuantumHardwareModel) and (
+                hardware.error_mitigation is None
+                or not hardware.error_mitigation.readout_mitigation
+            ):
+                raise ValueError("Error mitigation not calibrated on this device.")
+            if ResultsFormatting.BinaryCount not in self.results_format:
+                raise ValueError(
+                    "Binary Count format required for readout error mitigation"
+                )
 
 
 class CalibrationArguments:
@@ -281,9 +381,28 @@ class Languages(IntEnum):
 
 class OptimizationConfig:
     """
-    Base class for instantiated optimizations as well as mix-in classes. Built this way
-    so we can mix and match optimization objects across multiple setups and languages
-    without duplication.
+    We have a variety of third-party libraries that can be run before your program reaches our
+    main compilation and runtime pipeline. Each of these will have an associated set of flags (like `TketOptimizations`)
+    where you can tell us which passes you want run.
+
+    Each flag is associated with a particular run/feature in the various libraries. We try and keep a thin wrapper
+    around them to keep maintenance/usage easy. Please look for a flags name in the associated library for specific
+    information about that pass. For example, for `TketOptimizations.ThreeQubitSquash` just look up ThreeQubitSquash
+    in Tkets documentation.
+
+    There are helper composites for various languages such as `Qasm2Optimizations` and `QIROptimizations`. These
+    allow you to set multiple optimizers settings in one object and filter to only the ones that work for that language.
+
+    It's recommended you use these over the raw optimization flags, but you can also use those as well.
+
+    Example:
+    ::
+        conf = CompilerConfig(optimizations = Qasm2Optimizations())
+        conf.optimizations = conf.optimizations
+            | TketOptimizations.ThreeQubitSquash
+            | TketOptimizations.RemoveDiscarded
+
+    You can also use `get_optimizer_config` to return an optimization config for a particular language.
     """
 
     def __init__(self):
@@ -360,8 +479,10 @@ class Qasm3Optimizations(OptimizationConfig):
     pass
 
 
-class QIROptimizations(OptimizationConfig):
-    pass
+class QIROptimizations(Tket):
+    def __init__(self):
+        super().__init__()
+        self.default()
 
 
 def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:
@@ -378,13 +499,35 @@ def get_optimizer_config(lang: Languages) -> Optional[OptimizationConfig]:
     return None
 
 
-def get_config(lang: Languages, **kwargs):
+_default_results_format = QuantumResultsFormat()
+
+
+def default_language_options(lang: Languages, config: CompilerConfig):
+    """Applies default language-specific options to an existing configuration."""
+    if lang == Languages.Qasm2:
+        if config.optimizations is None:
+            config.optimizations = Qasm2Optimizations()
+        if config.results_format == _default_results_format:
+            config.results_format.binary_count()
+
+    elif lang == Languages.Qasm3:
+        if config.optimizations is None:
+            config.optimizations = Qasm3Optimizations()
+
+    elif lang == Languages.QIR:
+        if config.optimizations is None:
+            config.optimizations = QIROptimizations()
+        if config.results_format == _default_results_format:
+            config.results_format.binary_count()
+
+
+def get_default_config(lang: Languages, **kwargs):
     """
     Helper method to build a compiler config for a particular language. Forwards
     keywords to the CompilerConfig constructor.
     """
     config = CompilerConfig(**kwargs)
-    config.optimizations = get_optimizer_config(lang)
+    default_language_options(lang, config)
     return config
 
 
@@ -401,9 +544,7 @@ def get_serializable_types():
 
     def update_dict(type):
         if issubclass(type, Enum):
-            serializable_types.update(
-                {f"<enum '{type.__module__}.{type.__name__}'>": type}
-            )
+            serializable_types.update({f"<enum '{type.__module__}.{type.__name__}'>": type})
         else:
             serializable_types.update({str(type): type})
 

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from typing import Dict, Union
 
 from qat.purr.compiler.config import CalibrationArguments
@@ -17,9 +18,7 @@ def find_calibration(args: "CalibrationArguments"):
             break
 
     if calibration is None:
-        raise ValueError(
-            f"Calibration with an argument of {str(args)} couldn't be found."
-        )
+        raise ValueError(f"Calibration with an argument of {str(args)} couldn't be found.")
 
     return calibration
 
@@ -39,8 +38,6 @@ _standard_calibrations: Dict[str, "BuiltinRemoteCalibration"] = dict()
 
 class CustomCalibration(RemoteCalibration):
     """Bespoke calibration built by external users."""
-
-    pass
 
 
 class BuiltinRemoteCalibration(RemoteCalibration):

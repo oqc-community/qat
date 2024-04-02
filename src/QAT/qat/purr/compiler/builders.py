@@ -1,28 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import itertools
 import math
-from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
 
 import jsonpickle
 import numpy as np
+
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     ChannelType,
     CyclicRefPickler,
     CyclicRefUnpickler,
     PulseChannel,
-    PulseChannelView,
+    QuantumComponent,
     Qubit,
-    Resonator,
 )
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, resolve_qb_pulse_channel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
     Assign,
-    CrossResonancePulse,
     Delay,
     DeviceUpdate,
     Instruction,
@@ -44,7 +44,6 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.serializer import json_dumps, json_loads
 
 log = get_default_logger()
 
@@ -61,17 +60,12 @@ class InstructionBuilder:
     hardware-by-hardware basis.
     """
 
-    def __init__(
-        self,
-        hardware_model,
-        instructions: List[Union["InstructionBuilder", Instruction]] = None,
-    ):
+    def __init__(self, hardware_model: QuantumHardwareModel):
         super().__init__()
         self._instructions = []
         self.existing_names = set()
-        self._entanglement_map = {qubit:{qubit} for qubit in hardware_model.qubits}
+        self._entanglement_map = dict()
         self.model = hardware_model
-        self.add(instructions)
 
     @property
     def instructions(self):
@@ -102,14 +96,45 @@ class InstructionBuilder:
         """Resets builder internal state for building a new set of instructions."""
         self._instructions = []
         self.existing_names = set()
-        self._entanglement_map = defaultdict(set)
+        self._entanglement_map = dict()
 
     def get_child_builder(self, inherit=False):
+        """
+        Returns a clean builder for nested contexts. If you want to inherit all tertiary state,
+        such as name sets and entanglement checker, set inherit=True.
+        """
         builder = InstructionBuilder(self.model)
         builder._entanglement_map = self._entanglement_map
         if inherit:
             builder.existing_names = set(self.existing_names)
         return builder
+
+    def _get_entangled_qubits(self, inst):
+        """
+        Gets qubit ID's in relation to quantum entanglement for the current instruction.
+        Important to note that it will route up or out to a qubit from things like resonators and pulse channels.
+        """
+        if not isinstance(inst, Pulse):
+            return set()
+
+        def _recurse_relationships(item: QuantumComponent, infinity_guard: set) -> set:
+            if id(item) in infinity_guard:
+                return set()
+
+            recurse_results = set()
+            guard.add(id(item))
+            for rel in item.related_devices:
+                if isinstance(rel, Qubit):
+                    recurse_results.add(rel)
+                else:
+                    recurse_results.update(_recurse_relationships(rel, infinity_guard))
+            return recurse_results
+
+        results = set()
+        guard = set()
+        for target in inst.quantum_targets:
+            results.update(_recurse_relationships(target, guard))
+        return results
 
     def _fix_clashing_label_names(
         self, invalid_label_names: Set[str], existing_names: Set[str]
@@ -176,37 +201,14 @@ class InstructionBuilder:
 
         for inst in inst_list:
             # Naive entanglement checker for syncronization.
-            if isinstance(inst, CrossResonancePulse):
+            if isinstance(inst, QuantumInstruction):
                 ent_qubits = self._get_entangled_qubits(inst)
                 for qubit in ent_qubits:
-                    self._entanglement_map[qubit].update(ent_qubits)
-                for qubit in self.model.qubits:
-                    # entanglement is transitive, if A<>B and B<>C then C<>A
-                    tmp = set()
-                    for entangled in self._entanglement_map[qubit]:
-                        tmp.update(self._entanglement_map[entangled])
-                    self._entanglement_map[qubit].update(tmp)
+                    existing_ent = self._entanglement_map.setdefault(qubit, set())
+                    existing_ent.update(ent_qubits)
+
             self._instructions.append(inst)
         return self
-
-    def _get_entangled_qubits(self, inst):
-        """
-        Gets qubit ID's in relation to quantum entanglement for the current instruction.
-        Important to note that it will route up or out to a qubit from things like resonators and pulse channels.
-        """
-        if not isinstance(inst, CrossResonancePulse):
-            # Crossress pulses are the only mechanism by which entanglement is generated.
-            return set()
-        results = set()
-        pulse_channel_view: PulseChannelView
-        for pulse_channel_view in inst.quantum_targets:
-            for target_qubit in pulse_channel_view.auxilary_devices:
-                results.update(target_qubit)
-            physical_channel = pulse_channel_view.pulse_channel.physical_channel
-            for control_qubit in self.model.qubits:
-                if control_qubit.physical_channel == physical_channel:
-                    results.update(control_qubit)
-        return results
 
     def results_processing(self, variable: str, res_format: InlineResultsProcessing):
         return self.add(ResultsProcessing(variable, res_format))
@@ -232,49 +234,54 @@ class InstructionBuilder:
     def measure(
         self, target: Qubit, axis: ProcessAxis = None, output_variable: str = None
     ) -> "InstructionBuilder":
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
+
+    def R(
+        self, axis: Axis, target: Union[Qubit, PulseChannel], radii=None
+    ) -> "InstructionBuilder":
+        raise ValueError("Not available on this hardware model.")
 
     def X(self, target: Union[Qubit, PulseChannel], radii=None):
-        raise NotImplementedError("Not available on this hardware model.")
+        return self.R(Axis.X, target, radii)
 
     def Y(self, target: Union[Qubit, PulseChannel], radii=None):
-        raise NotImplementedError("Not available on this hardware model.")
+        return self.R(Axis.Y, target, radii)
 
     def Z(self, target: Union[Qubit, PulseChannel], radii=None):
-        raise NotImplementedError("Not available on this hardware model.")
+        return self.R(Axis.Z, target, radii)
 
     def U(self, target: Union[Qubit, PulseChannel], theta, phi, lamb):
         return self.Z(target, lamb).Y(target, theta).Z(target, phi)
 
     def swap(self, target: Qubit, destination: Qubit):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def had(self, qubit: Qubit):
-        self.Y(qubit, math.pi / 2)
-        return self.Z(qubit)
+        self.Z(qubit)
+        return self.Y(qubit, math.pi / 2)
 
     def post_processing(
         self, acq: Acquire, process, axes=None, target: Qubit = None, args=None
     ):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def sweep(self, variables_and_values):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def pulse(self, *args, **kwargs):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def acquire(self, *args, **kwargs):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def delay(self, target: Union[Qubit, PulseChannel], time: float):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def synchronize(self, targets: Union[Qubit, List[Qubit]]):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def phase_shift(self, target: PulseChannel, phase):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def SX(self, target):
         return self.X(target, np.pi / 2)
@@ -294,35 +301,35 @@ class InstructionBuilder:
     def Tdg(self, target):
         return self.Z(target, -(np.pi / 4))
 
-    def controlled(
-        self, controllers: Union[Qubit, List[Qubit]], builder: "InstructionBuilder"
+    def cR(
+        self,
+        axis: Axis,
+        controllers: Union[Qubit, List[Qubit]],
+        target: Qubit,
+        theta: float,
     ):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Generic controlled rotations not available.")
 
     def cX(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
-        builder = self.get_child_builder()
-        return self.controlled(controllers, builder.X(target, radii))
+        return self.cR(Axis.X, controllers, target, radii)
 
     def cY(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
-        builder = self.get_child_builder()
-        return self.controlled(controllers, builder.Y(target, radii))
+        return self.cR(Axis.Y, controllers, target, radii)
 
     def cZ(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
-        builder = self.get_child_builder()
-        return self.controlled(controllers, builder.Z(target, radii))
+        return self.cR(Axis.Z, controllers, target, radii)
 
-    def cnot(self, control: Union[Qubit, List[Qubit]], target_qubit: Qubit):
+    def cnot(self, control: Qubit, target_qubit: Qubit):
         return self.cX(control, target_qubit, np.pi)
 
-    def ccnot(self, controllers: List[Qubit], target_qubit: Qubit):
-        raise NotImplementedError("Not available on this hardware model.")
+    def ccnot(self, cone: Qubit, ctwo: Qubit, target_qubit: Qubit):
+        raise self.cX([cone, ctwo], target_qubit, np.pi)
 
     def cswap(self, controllers: Union[Qubit, List[Qubit]], target, destination):
-        builder = self.get_child_builder()
-        return self.controlled(controllers, builder.swap(target, destination))
+        raise ValueError("Not available on this hardware model.")
 
     def ECR(self, control: Qubit, target: Qubit):
-        raise NotImplementedError("Not available on this hardware model.")
+        raise ValueError("Not available on this hardware model.")
 
     def jump(self, label: Union[str, Label], condition=None):
         return self.add(Jump(label, condition))
@@ -358,6 +365,10 @@ class InstructionBuilder:
             log.warning(f"Label name {name} already exists. Replacing with {new_name}.")
 
         return Label(name)
+
+    def create_name(self):
+        """Helper to generate a free name that will be valid for this builder."""
+        return Label.generate_name(self.existing_names)
 
 
 class FluidBuilderWrapper(tuple):
@@ -437,21 +448,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
-        return self.post_processing(
-            acquire, PostProcessType.MEAN, ProcessAxis.TIME, target
-        )
+        return self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
 
-    def measure_mean_z(
-        self, target: Qubit, axis: str = None, output_variable: str = None
-    ):
+    def measure_mean_z(self, target: Qubit, axis: str = None, output_variable: str = None):
         _, acquire = self.measure(target, axis, output_variable)
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
         self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, target)
-        self.post_processing(
-            acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target
-        )
+        self.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, target)
         return self.post_processing(
             acquire, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, qubit=target
         )
@@ -496,33 +501,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
         return self.post_processing(acquire, PostProcessType.DISCRIMINATE, qubit=target)
 
-    def _get_entangled_qubits(self, inst):
-        """
-        Gets qubit ID's in relation to quantum entanglement for the current instruction.
-        Important to note that it will route up or out to a qubit from things like
-        resonators and pulse channels.
-        """
-        if not isinstance(inst, Pulse):
-            return []
-
-        results = []
-        for target in inst.quantum_targets:
-            if isinstance(target, PulseChannel):
-                devices = self.model.get_devices_from_pulse_channel(target.full_id())
-                for device in devices:
-                    if isinstance(device, Resonator):
-                        for qubit in self.model.qubits:
-                            if qubit.measure_device.id == device.id:
-                                results.append(qubit)
-                    else:
-                        results.append(device)
-                        results.extend(device.get_auxiliary_devices(target))
-
-            else:
-                results.append(target)
-
-        return results
-
     def measure(
         self, qubit: Qubit, axis: ProcessAxis = None, output_variable: str = None
     ) -> "QuantumInstructionBuilder":
@@ -542,8 +520,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             raise ValueError(f"Wrong measure axis '{str(axis)}'!")
 
-        # Naive entanglement checker to assure all entangled qubits are sync before a
-        # measurement is done on any of them.
         entangled_qubits = list(self._entanglement_map.get(qubit, []))
 
         # List of node types that a measurement can be made up of.
@@ -574,9 +550,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         acquire_channel = qubit.get_acquire_channel()
         acquire_instruction = Acquire(
             acquire_channel,
-            qubit.pulse_measure["width"]
-            if qubit.measure_acquire["sync"]
-            else qubit.measure_acquire["width"],
+            (
+                qubit.pulse_measure["width"]
+                if qubit.measure_acquire["sync"]
+                else qubit.measure_acquire["width"]
+            ),
             mode,
             output_variable,
             self.existing_names,
@@ -589,9 +567,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         phase_resets = [
             val for val in previous_measure_block if isinstance(val, PhaseReset)
         ]
-        full_measure_block = set(
-            [val.__class__ for val in previous_measure_block]
-        ) == set(mblock_types + optional_block_types)
+
+        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
+            mblock_types + optional_block_types
+        )
+
         if full_measure_block and len(syncs) >= 2 and len(phase_resets) >= 1:
             # Find the pre-measure sync in the preceeding measure block and merge our
             # values into it.
@@ -637,25 +617,25 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return FluidBuilderWrapper(self, acquire_instruction)
 
     def X(self, target: Union[Qubit, PulseChannel], radii=None):
-        qubit, channel = self.model._resolve_qb_pulse_channel(target)
+        qubit, channel = resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_X(qubit, math.pi if radii is None else radii, channel)
         )
 
     def Y(self, target: Union[Qubit, PulseChannel], radii=None):
-        qubit, channel = self.model._resolve_qb_pulse_channel(target)
+        qubit, channel = resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_Y(qubit, math.pi if radii is None else radii, channel)
         )
 
     def Z(self, target: Union[Qubit, PulseChannel], radii=None):
-        qubit, channel = self.model._resolve_qb_pulse_channel(target)
+        qubit, channel = resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_Z(qubit, math.pi if radii is None else radii, channel)
         )
 
     def U(self, target: Union[Qubit, PulseChannel], theta, phi, lamb):
-        qubit, channel = self.model._resolve_qb_pulse_channel(target)
+        qubit, channel = resolve_qb_pulse_channel(target)
         return self.add(self.model.get_gate_U(qubit, theta, phi, lamb, channel))
 
     def post_processing(
@@ -681,11 +661,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 args = [qubit.discriminator]
             elif process == PostProcessType.DOWN_CONVERT:
                 phys = acq.channel.physical_channel
-                resonator = next(
-                    dev
-                    for dev in self.model.get_devices_from_physical_channel(phys.id)
-                    if isinstance(dev, Resonator)
-                )
+                resonator = phys.related_resonator
                 pulse = resonator.get_measure_channel()
                 base = phys.baseband
                 if pulse.fixed_if:
@@ -703,17 +679,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def acquire(self, channel: "PulseChannel", *args, delay=None, **kwargs):
         if delay is None:
-            devices = self.model.get_devices_from_pulse_channel(channel)
-            qubits = [i for i in devices if isinstance(i, Qubit)]
-            if len(qubits) > 1:
-                raise ValueError(
-                    "Wrong channel type given to acquire, please give a channel with a single qubit!"
-                )
-            delay = qubits[0].measure_acquire["delay"]
+            delay = channel.related_qubit.measure_acquire["delay"]
+
         return self.add(Acquire(channel, *args, delay, **kwargs))
 
     def delay(self, target: Union[Qubit, PulseChannel], time: float):
-        _, channel = self.model._resolve_qb_pulse_channel(target)
+        _, channel = resolve_qb_pulse_channel(target)
         return self.add(Delay(channel, time))
 
     def synchronize(self, targets: Union[Qubit, List[Qubit]]):
@@ -735,7 +706,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         if phase == 0:
             return self
 
-        _, channel = self.model._resolve_qb_pulse_channel(target)
+        _, channel = resolve_qb_pulse_channel(target)
         return self.add(PhaseShift(channel, phase))
 
     def cnot(self, controlled_qubit: Qubit, target_qubit: Qubit):
@@ -756,9 +727,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_channels = [
             control.get_pulse_channel(ChannelType.drive),
             control.get_pulse_channel(ChannelType.cross_resonance, [target]),
-            control.get_pulse_channel(
-                ChannelType.cross_resonance_cancellation, [target]
-            ),
+            control.get_pulse_channel(ChannelType.cross_resonance_cancellation, [target]),
             target.get_pulse_channel(ChannelType.drive),
         ]
 

@@ -2,17 +2,16 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import List, Optional
 
+from qat import execute
 from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
-from qat.purr.compiler.emitter import QatFile
+from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction
-
-from qat.qat import execute
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -54,10 +53,9 @@ class VerificationModel(LiveHardwareModel):
     def __init__(
         self,
         qpu_version,
-        verification_engine: "VerificationEngine",
-        control_hardware: ControlHardware = ControlHardware(),
+        verification_engine: type,
     ):
-        super().__init__(control_hardware)
+        super().__init__(ControlHardware())
         self.version = qpu_version
         self.verification_engine = verification_engine
 
@@ -80,8 +78,9 @@ def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
             f"Cannot verify instructions, {qpu_type} isn't a valid QPU version."
         )
 
-    engine: VerificationEngine = model.get_engine()
-    engine.verify_instructions(builder.instructions)
+    engine: VerificationEngine = model.create_engine()
+    qat_file = InstructionEmitter().emit(builder.instructions, model)
+    engine.verify_instructions(qat_file.instructions, qat_file.meta_instructions)
 
 
 def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
@@ -125,12 +124,10 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
         return results
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction], metadata):
-        ...
+    def verify_instructions(self, instructions: List[Instruction], metadata): ...
 
 
 class LucyVerificationEngine(VerificationEngine):
-
     max_circuit_duration = 90000e-9
 
     def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
@@ -141,17 +138,15 @@ class LucyVerificationEngine(VerificationEngine):
 
         circuit_duration = max([duration for duration in durations.values()])
 
-        log.debug(
-            f"The circuit duration is {circuit_duration/1e-6} microseconds."
-        )
+        log.debug(f"The circuit duration is {circuit_duration/1e-6} microseconds.")
 
         if circuit_duration > self.max_circuit_duration:
-            raise VerificationError(f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}.")
+            raise VerificationError(
+                f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}."
+            )
 
 
-def verify_program(
-    program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion
-):
+def verify_program(program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion):
     model = get_verification_model(qpu_version)
     if model is None:
         raise ValueError("Unable to find model to verify against.")
@@ -159,5 +154,4 @@ def verify_program(
     return execute(program, model, compiler_config)
 
 
-class VerificationError(ValueError):
-    ...
+class VerificationError(ValueError): ...

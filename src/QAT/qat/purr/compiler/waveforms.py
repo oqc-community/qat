@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from dataclasses import dataclass
 from typing import Dict
 
@@ -80,24 +81,6 @@ class SofterSquareWaveform(AbstractWaveform):
     def __init__(self, channel, width, amp, ignore_channel_scale):
         super().__init__(
             channel, PulseShapeType.SOFTER_SQUARE, width, amp, ignore_channel_scale
-        )
-
-
-class ExtraSoftSquareWaveform(AbstractWaveform):
-    waveform_definition: WaveformDef = WaveformDef(name="Extra soft square")
-
-    def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.EXTRA_SOFT_SQUARE, width, amp, ignore_channel_scale
-        )
-
-
-class SofterGaussianWaveform(AbstractWaveform):
-    waveform_definition: WaveformDef = WaveformDef(name="Softer Gaussian")
-
-    def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.SOFTER_GAUSSIAN, width, amp, ignore_channel_scale
         )
 
 

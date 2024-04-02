@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
-from qat.purr.backends.echo import get_default_echo_hardware
+
+from qat import execute, execute_with_metrics
+from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
     InlineResultsProcessing,
@@ -16,19 +19,17 @@ from qat.purr.compiler.config import (
     ResultsFormatting,
     TketOptimizations,
 )
-from qat.purr.compiler.instructions import Delay
-from qat.qat import execute_with_metrics
+from qat.purr.compiler.devices import QuantumComponent
 
-from tests.qasm_utils import TestFileType, get_test_file_path
+from .qasm_utils import TestFileType, get_qasm2, get_test_file_path
+from .utils import ListReturningEngine
 
-SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
+SUPPORTED_CONFIG_VERSIONS = ["legacy", "v1"]
 
 
 def _get_json_path(file_name):
     return join(
-        abspath(
-            join(dirname(__file__), "serialised_compiler_config_templates", file_name)
-        )
+        abspath(join(dirname(__file__), "serialised_compiler_config_templates", file_name))
     )
 
 
@@ -44,16 +45,24 @@ class TestConfigGeneral:
         assert TketOptimizations.DefaultMappingPass in opt
         assert QiskitOptimizations.Empty in opt
 
+
+class TestConfigSerialization:
+    def test_binary(self):
+        conf = CompilerConfig()
+        conf.results_format.most_probable_bitstring()
+        results = execute(get_qasm2("example.qasm"), get_default_echo_hardware(6), conf)
+
+        assert len(results) == 2
+        assert results["c"] == "000"
+        assert results["d"] == "000"
+
     def test_default_config(self):
         first_conf = CompilerConfig()
         serialized_data = first_conf.to_json()
         second_conf = CompilerConfig.create_from_json(serialized_data)
 
         assert first_conf.results_format.format == second_conf.results_format.format
-        assert (
-            first_conf.results_format.transforms
-            == second_conf.results_format.transforms
-        )
+        assert first_conf.results_format.transforms == second_conf.results_format.transforms
 
         conf1_dict = dict(vars(first_conf))
         del conf1_dict["results_format"]
@@ -143,7 +152,7 @@ class TestConfigGeneral:
         with pytest.raises(ValueError):
             first_conf.to_json()
 
-        first_conf.optimizations = Delay  # Not an allowed custom type in project
+        first_conf.optimizations = QuantumComponent  # Not an allowed custom type in project
 
         with pytest.raises(ValueError):
             first_conf.to_json()
@@ -165,7 +174,9 @@ class TestConfigGeneral:
 
     @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
     def test_json_version_compatibility(self, version):
-        serialised_data = _get_contents(f"serialised_default_compiler_config_{version}.json")
+        serialised_data = _get_contents(
+            f"serialised_default_compiler_config_{version}.json"
+        )
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.metrics == MetricsType.Default
         assert deserialised_conf.results_format == QuantumResultsFormat()
@@ -184,9 +195,7 @@ class TestConfigGeneral:
             deserialised_conf.optimizations.qiskit_optimizations
             == QiskitOptimizations.Empty
         )
-        assert (
-            deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
-        )
+        assert deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
 
     @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
     def test_runs_successfully_with_config(self, version):
@@ -199,3 +208,75 @@ class TestConfigGeneral:
         results, metrics = execute_with_metrics(program, hardware, deserialised_conf)
         assert results is not None
         assert metrics is not None
+
+
+class TestConfigExecution:
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type", "instruction_length"),
+        [
+            ("ghz.qasm", TestFileType.QASM2, 196),
+        ],
+    )
+    def test_all_metrics_are_returned(self, input_string, file_type, instruction_length):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is not None
+        assert metrics["optimized_instruction_count"] == instruction_length
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+        ],
+    )
+    def test_only_optim_circuitmetrics_are_returned(self, input_string, file_type):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        config.metrics = MetricsType.OptimizedCircuit
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is not None
+        assert metrics["optimized_instruction_count"] is None
+
+    @pytest.mark.parametrize(
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+        ],
+    )
+    def test_only_inst_len_circuitmetrics_are_returned(self, input_string, file_type):
+        program = get_test_file_path(file_type, input_string)
+        hardware = get_default_echo_hardware()
+        config = CompilerConfig()
+        config.metrics = MetricsType.OptimizedInstructionCount
+        results, metrics = execute_with_metrics(program, hardware, config)
+        assert metrics["optimized_circuit"] is None
+        assert metrics["optimized_instruction_count"] is not None
+
+    @pytest.mark.parametrize("engine", [EchoEngine, ListReturningEngine])
+    @pytest.mark.parametrize(
+        ("input_string", "file_type"),
+        [
+            ("ghz.qasm", TestFileType.QASM2),
+            ("basic.qasm", TestFileType.QASM3),
+            ("generator-bell.ll", TestFileType.QIR),
+        ],
+    )
+    def test_batched_execution(self, input_string, file_type, engine):
+        hardware = get_default_echo_hardware()
+        program = get_test_file_path(file_type, input_string)
+        config = CompilerConfig(
+            repeats=int(hardware.shot_limit * 1.5),
+            results_format=QuantumResultsFormat().raw(),
+        )
+
+        result, _ = execute_with_metrics(program, engine(hardware), config)
+        if isinstance(result, dict):
+            result = list(result.values())[0]
+        assert isinstance(result, list)
+        for res in result:
+            # list of measurements for each qubit
+            assert len(res) == config.repeats

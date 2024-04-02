@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+
 import datetime
 import inspect
 import json
@@ -106,7 +107,7 @@ class TestFileLogger:
             file_handler = self.TestFileLoggerHandler(
                 os.path.join(
                     logs_path,
-                    "initial_test_file_initial_text_is_written_if_specified.txt",
+                    f"initial_test_file_initial_text_is_written_if_specified.txt",
                 )
             )
             file_logger.addHandler(file_handler)
@@ -221,9 +222,7 @@ class LogFolderTests(unittest.TestCase):
             log_folder = logger.LogFolder(
                 base_folder_path=tempdir, folder_name=name, prefix=prefix, suffix=suffix
             )
-            assert f"{prefix}_{name}_{suffix}" == os.path.basename(
-                log_folder.folder_path
-            )
+            assert f"{prefix}_{name}_{suffix}" == os.path.basename(log_folder.folder_path)
             assert os.path.exists(log_folder.folder_path)
 
     def test_temp_folder_with_cleanup(self):

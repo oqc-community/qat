@@ -16,7 +16,6 @@ which are then transformed and delivered to an appropriate driver.
 
 For more information, please see the `main package <https://pypi.org/project/qat-compiler/>`_.
 
-For the official QAT documentation, please see `QAT <https://oqc-community.github.io/qat>`_.
 |
 
 ----------------------
