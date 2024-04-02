@@ -16,9 +16,7 @@ class QatCache:
 
     def __init__(self, root_folder=None):
         if root_folder is None:
-            root_folder = os.path.realpath(
-                os.path.join(__file__, "..", "..", "..", "..")
-            )
+            root_folder = os.path.realpath(os.path.join(__file__, "..", "..", "..", ".."))
 
         self.qat_root = os.path.join(root_folder, ".qat")
         self.ll_cache = os.path.realpath(os.path.join(self.qat_root, "ll"))
