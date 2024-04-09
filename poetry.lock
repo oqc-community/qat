@@ -1895,6 +1895,25 @@ setuptools = "*"
 
 [[package]]
 name = "rasqal"
+version = "0.1.0"
+description = "A dynamically executed quantum-classical hybrid optimizing runtime."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "rasqal-0.1.0-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:fb9c744e4f045dd25d3d3cae7160dd48c5284edebb719ba63fa023d37d84abfc"},
+    {file = "rasqal-0.1.0-cp37-abi3-manylinux_2_31_x86_64.whl", hash = "sha256:8cf8de022fa275a6bc7fc6a0ed8b086695682c9a07b90747b7c053773e839cff"},
+    {file = "rasqal-0.1.0-cp37-abi3-win_amd64.whl", hash = "sha256:57e868983f38a9092ceacf73554071517929a67f404e394fb7e4f6730636105b"},
+]
+
+[package.dependencies]
+pytket = ">=1.23.0"
+qiskit = "==0.45.*"
+qiskit-aer = ">=0.13.0"
+qiskit-ignis = ">=0.7.0"
+qiskit-optimization = ">=0.4.0"
+
+[[package]]
+name = "rasqal"
 version = "0.1.3"
 description = "A dynamically executed quantum-classical hybrid optimizing runtime."
 optional = false
@@ -2652,4 +2671,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "0c8c8849edb21a42f27f8d2f633f039e40a8d61c4ab37ab9ceebf6effe6e987a"
+content-hash = "5c990cf8a99e17b7f70e1d7bad0b7bb21394d620d8795e36508f315d7746492e"
