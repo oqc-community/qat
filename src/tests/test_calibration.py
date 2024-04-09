@@ -93,6 +93,7 @@ class TestCalibrationSavingAndLoading:
     @pytest.mark.parametrize("qubit_count", [4, 8, 35])
     def test_load_hardware_definition(self, qubit_count):
         if sys.platform == "win32" and qubit_count == 35:
+            # TODO: check github windows runner memory options
             pytest.skip("Windows runner do not have sufficient memory and overflow.")
         echo = get_default_echo_hardware(qubit_count)
         original_calibration = echo.get_calibration()

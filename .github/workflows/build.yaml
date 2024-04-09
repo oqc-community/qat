@@ -47,11 +47,6 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-#      - name: Add to path
-#        #        run: set PATH=%PATH%;%USERPROFILE%\AppData\Roaming\pypoetry\venv\Scripts
-#        run: set PATH=%PATH%;%APPDATA%\Python\Scripts
-#        if: runner.os == 'Windows'
-
       - name: Install dependancies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --with dev
@@ -96,11 +91,6 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-#      - name: Add to path
-##        run: set PATH=%PATH%;%USERPROFILE%\AppData\Roaming\pypoetry\venv\Scripts
-#        run: set PATH=%PATH%;%APPDATA%\Python\Scripts
-#        if: runner.os == 'Windows'
 
       - name: Install dependancies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
