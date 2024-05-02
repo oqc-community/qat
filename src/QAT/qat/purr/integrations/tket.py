@@ -366,12 +366,16 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         )
         return qasm_string
 
-    couplings = hardware.qubit_direction_couplings
+    couplings = hardware.qubit_direction_couplings.copy()
     optimizations_failed = False
     architecture = None
     if any(couplings):
         # Without default remapping pass multi-qubit gates don't get moved around, so
         # trying to apply them to a limited subset of qubits provides no value.
+        logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
+        for c in couplings:
+            control_ind, targer_ind = c.direction
+            c.direction = (logical_qubit_map[control_ind], logical_qubit_map[targer_ind])
         if TketOptimizations.DefaultMappingPass not in opts:
             architecture = Architecture([val.direction for val in couplings])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
