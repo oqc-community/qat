@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from copy import deepcopy
 from numbers import Number
 from typing import List
 
@@ -388,7 +389,7 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         )
         return qasm_string
 
-    couplings = hardware.qubit_direction_couplings.copy()
+    couplings = deepcopy(hardware.qubit_direction_couplings)
     optimizations_failed = False
     architecture = None
     if any(couplings):
