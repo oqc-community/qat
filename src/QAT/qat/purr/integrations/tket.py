@@ -397,8 +397,8 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         # trying to apply them to a limited subset of qubits provides no value.
         logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
         for c in couplings:
-            control_ind, targer_ind = c.direction
-            c.direction = (logical_qubit_map[control_ind], logical_qubit_map[targer_ind])
+            control_ind, target_ind = c.direction
+            c.direction = (logical_qubit_map[control_ind], logical_qubit_map[target_ind])
         if TketOptimizations.DefaultMappingPass not in opts:
             architecture = Architecture([val.direction for val in couplings])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
