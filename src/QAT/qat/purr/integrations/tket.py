@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from copy import deepcopy
 from numbers import Number
 from typing import List
 
@@ -346,6 +347,28 @@ def optimize_circuit(circ, architecture, opts):
         return False
 
 
+def get_coupling_subgraphs(couplings):
+    """
+    Given a list of connections which potentially describe a disconnected graph,
+    this returns a list of connected subgraphs
+    """
+    subgraphs = []
+    for coupling in couplings:
+        subgraph_added_to = None
+        for subgraph in subgraphs:
+            # check whether coupling joins to subgraph
+            if set(coupling) & {qubit for connection in subgraph for qubit in connection}:
+                if subgraph_added_to is None:
+                    subgraph.append(coupling) # add the coupling to the subgraph
+                    subgraph_added_to = subgraph
+                else:
+                    subgraph_added_to.extend(subgraph) # if coupling joins to 2nd subgraph, the subgraphs combine
+                    subgraphs.remove(subgraph)
+        if subgraph_added_to is None: # if coupling doesn't join to any of the current subgraphs, make it a new one
+            subgraphs.append([coupling])
+    return subgraphs
+
+
 def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) -> str:
     """
     Runs tket-based optimizations and modifications. Routing will always happen no
@@ -366,37 +389,36 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
         )
         return qasm_string
 
-    couplings = hardware.qubit_direction_couplings
+    couplings = deepcopy(hardware.qubit_direction_couplings)
     optimizations_failed = False
     architecture = None
     if any(couplings):
         # Without default remapping pass multi-qubit gates don't get moved around, so
         # trying to apply them to a limited subset of qubits provides no value.
+        logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
+        for coupling in couplings:
+            control_ind, target_ind = coupling.direction
+            coupling.direction = (
+                logical_qubit_map[control_ind],
+                logical_qubit_map[target_ind],
+            )
         if TketOptimizations.DefaultMappingPass not in opts:
             architecture = Architecture([val.direction for val in couplings])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
-            min_quality = min([val.quality for val in couplings], default=0)
-            max_quality = max([val.quality for val in couplings], default=0)
-            chunks = (max_quality - min_quality) / 3
-            steps = 2
-            last_couplings = 0
-            while steps >= 0:
-                quality_level = min_quality + chunks * steps
-                filtered_couplings = [
-                    val.direction for val in couplings if val.quality >= quality_level
-                ]
-                steps = steps - 1
-                if not any(filtered_couplings) or last_couplings == len(
-                    filtered_couplings
-                ):
-                    continue
-
-                # Attempt optimization with good quality couplings, then degrade every
-                # failed try until we use everything.
-                last_couplings = len(filtered_couplings)
-                architecture = Architecture(filtered_couplings)
-                optimizations_failed = not optimize_circuit(circ, architecture, opts)
+            coupling_qualities = list({val.quality for val in couplings})
+            coupling_qualities.sort(reverse=True)
+            for quality_level in coupling_qualities:
+                filtered_couplings = [val.direction for val in couplings if val.quality >= quality_level]
+                coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
+                for subgraph in coupling_subgraphs:
+                    if circ.n_qubits <= len(set([qubit for coupling in subgraph for qubit in coupling])):
+                        architecture = Architecture(subgraph)
+                        optimizations_failed = not optimize_circuit(circ, architecture, opts)
+                        if not optimizations_failed:
+                            break
+                    else:
+                        optimizations_failed = True
                 if not optimizations_failed:
                     break
     else:

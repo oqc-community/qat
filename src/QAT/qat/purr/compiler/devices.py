@@ -494,6 +494,9 @@ class QubitCoupling(Calibratable):
         self.direction = tuple(direction)
         self.quality = 1 if quality < 1 else quality
 
+    def __repr__(self):
+        return f"{str(self.direction)} @{self.quality}"
+
 
 class PulseChannelView(PulseChannel):
     """

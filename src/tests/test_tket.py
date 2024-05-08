@@ -1,11 +1,36 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import pytest
 
 from pytket.architecture import Architecture, RingArch
 from qat.purr.compiler.config import Qasm2Optimizations, TketOptimizations
-from qat.purr.integrations.tket import TketBuilder, TketQasmParser, optimize_circuit
+from qat.purr.integrations.tket import (
+    TketBuilder,
+    TketQasmParser,
+    get_coupling_subgraphs,
+    optimize_circuit,
+)
 
 from tests.qasm_utils import get_qasm2
+
+
+@pytest.mark.parametrize(
+    "couplings,subgraphs",
+    [
+        pytest.param(
+            [(0, 1), (1, 2), (2, 3), (4, 3)],
+            [[(0, 1), (1, 2), (2, 3), (4, 3)]],
+            id="Continuous",
+        ),
+        pytest.param(
+            [(23, 20), (25, 16), (25, 26)],
+            [[(23, 20)], [(25, 16), (25, 26)]],
+            id="Split",
+        ),
+    ],
+)
+def test_get_coupling_subgraphs(couplings, subgraphs):
+    assert get_coupling_subgraphs(couplings) == subgraphs
 
 
 class TestTketOptimization:
