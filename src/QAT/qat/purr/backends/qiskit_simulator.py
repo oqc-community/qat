@@ -55,7 +55,7 @@ class QiskitBuilder(InstructionBuilder):
     ):
         super().__init__(hardware_model=hardware_model, instructions=instructions)
         self.circuit = QuantumCircuit(qubit_count, qubit_count)
-        self.shot_count = 1024
+        self.shot_count = hardware_model.default_repeat_count
         self.bit_count = 0
 
     def measure(self, target: Qubit, *args, **kwargs) -> "InstructionBuilder":
@@ -153,6 +153,8 @@ class QiskitBuilder(InstructionBuilder):
         # Compiler config may attempt to pass None
         if repeat_value is not None:
             self.shot_count = repeat_value
+        else:
+            self.shot_count = self.model.default_repeat_count
         return self
 
     def clear(self):
