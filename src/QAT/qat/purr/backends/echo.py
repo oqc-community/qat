@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from typing import Dict
+from enum import Enum, auto
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from qat.purr.backends.utilities import get_axis_map
@@ -17,7 +18,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import AcquireMode, PostProcessing
 
 
-def apply_setup_to_hardware(hw, qubit_count: int = 4):
+def apply_setup_to_hardware(
+    hw, qubit_count: int = 4, connectivity: Optional[List[Tuple[int, int]]] = None
+):
     """Apply the default echo hardware setup to the passed-in hardware."""
     qubit_devices = []
     resonator_devices = []
@@ -52,32 +55,98 @@ def apply_setup_to_hardware(hw, qubit_count: int = 4):
     #   connected but coupled qubits are only in a ring architecture. I think it would be
     #   more approriate for cross resonace channels to also be a ring architecture but
     #   that can be done in a later PR.
-    for i, qubit in enumerate(qubit_devices):
-        for other_qubit in qubit_devices:
-            if qubit != other_qubit:
-                qubit.create_pulse_channel(
-                    auxiliary_devices=[other_qubit],
-                    channel_type=ChannelType.cross_resonance,
-                    frequency=5.5e9,
-                    scale=50,
-                )
-                qubit.create_pulse_channel(
-                    auxiliary_devices=[other_qubit],
-                    channel_type=ChannelType.cross_resonance_cancellation,
-                    frequency=5.5e9,
-                    scale=0.0,
-                )
-            qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
-            qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
+    qubits_by_index = {qb.index: qb for qb in qubit_devices}
+    if connectivity is None:
+        for i, qubit in enumerate(qubit_devices):
+            for other_qubit in qubit_devices:
+                if qubit != other_qubit:
+                    qubit.create_pulse_channel(
+                        auxiliary_devices=[other_qubit],
+                        channel_type=ChannelType.cross_resonance,
+                        frequency=5.5e9,
+                        scale=50,
+                    )
+                    qubit.create_pulse_channel(
+                        auxiliary_devices=[other_qubit],
+                        channel_type=ChannelType.cross_resonance_cancellation,
+                        frequency=5.5e9,
+                        scale=0.0,
+                    )
+                qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
+                qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
+    else:
+        for connection in connectivity:
+            left_index, right_index = connection
+            qubit_left = qubits_by_index.get(left_index)
+            qubit_right = qubits_by_index.get(right_index)
+            qubit_right.create_pulse_channel(
+                auxiliary_devices=[qubit_left],
+                channel_type=ChannelType.cross_resonance,
+                frequency=5.5e9,
+                scale=50,
+            )
+            qubit_right.create_pulse_channel(
+                auxiliary_devices=[qubit_left],
+                channel_type=ChannelType.cross_resonance_cancellation,
+                frequency=5.5e9,
+                scale=0.0,
+            )
+            qubit_left.create_pulse_channel(
+                auxiliary_devices=[qubit_right],
+                channel_type=ChannelType.cross_resonance,
+                frequency=5.5e9,
+                scale=50,
+            )
+            qubit_left.create_pulse_channel(
+                auxiliary_devices=[qubit_right],
+                channel_type=ChannelType.cross_resonance_cancellation,
+                frequency=5.5e9,
+                scale=0.0,
+            )
+            qubit_left.add_coupled_qubit(qubit_right)
+            qubit_right.add_coupled_qubit(qubit_left)
 
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True
+
     return hw
 
 
-def get_default_echo_hardware(qubit_count=4) -> "QuantumHardwareModel":
+def generate_connectivity(con_type, qubit_count):
+    if con_type == Connectivity.Ring:
+        if qubit_count == 1:
+            return []
+        if qubit_count == 2:
+            return [(0, 1)]
+        return [(i, (i + 1) % qubit_count) for i in range(qubit_count)]
+    return None
+
+
+def add_direction_couplings_to_hardware(model, connectivity):
+    for edge in connectivity:
+        model.qubit_direction_couplings.append(
+            QubitCoupling(edge, quality=random.randrange(1, 20))
+        )
+    return model
+
+
+class Connectivity(Enum):
+    Ring = auto()
+
+
+def get_default_echo_hardware(
+    qubit_count=4,
+    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+) -> "QuantumHardwareModel":
+    """
+    Generate a default echo backend optionally providing the type of connectivity. Either you pass a pre-defined connectivity as
+    defined in the Connectivity enum or a specific connectivity list of which qubits connect to which.
+    """
     model = QuantumHardwareModel()
-    return apply_setup_to_hardware(model, qubit_count)
+    if isinstance(connectivity, Connectivity):
+        connectivity = generate_connectivity(connectivity, qubit_count)
+
+    return apply_setup_to_hardware(model, qubit_count, connectivity)
 
 
 class EchoEngine(QuantumExecutionEngine):
