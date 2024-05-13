@@ -407,8 +407,11 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
         else:
             coupling_qualities = list({val.quality for val in couplings})
-            coupling_qualities.sort(reverse=True)
-            for quality_level in coupling_qualities:
+            min_quality = min(coupling_qualities)
+            difference = max(coupling_qualities) - min_quality
+            steps = difference / 3
+
+            for quality_level in [min_quality + (steps * 2), min_quality + steps, min_quality]:
                 filtered_couplings = [val.direction for val in couplings if val.quality >= quality_level]
                 coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
                 for subgraph in coupling_subgraphs:
