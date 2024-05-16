@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
@@ -223,8 +224,11 @@ class TestSweep:
 
 
 class TestInstructionSerialisation:
-    def test_basic_gate(self):
-        hw = get_default_echo_hardware(4)
+    @pytest.mark.parametrize(
+        "hardware_model_type", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
+    def test_basic_gate(self, hardware_model_type):
+        hw = hardware_model_type(4)
         builder = (
             get_builder(hw)
             .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)
