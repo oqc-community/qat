@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 from functools import wraps
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -440,8 +440,8 @@ def software_post_process_linear_map_complex_to_real(
 
 
 def software_post_process_discriminate(
-    args, raw: List[np.ndarray], axes: Dict[ProcessAxis, int]
+    args, raw: Union[np.ndarray, List[np.ndarray]], axes: Dict[ProcessAxis, int]
 ):
-    z_vals = raw[0]
+    z_vals = raw[0] if isinstance(raw, list) else raw
     discr = args[0]
     return np.array([-1 if z_val < discr else 1 for z_val in z_vals]), axes

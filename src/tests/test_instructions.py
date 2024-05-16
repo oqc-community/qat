@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
@@ -135,8 +136,19 @@ class TestInstruction:
 
 
 class TestInstructionExecution:
-    @pytest.mark.skip("Needs fixing post processing and down-conversion issues.")
-    def test_measure_instructions(hw):
+    @pytest.mark.parametrize(
+        "measure_instruction",
+        [
+            lambda b: b.measure_mean_z,
+            lambda b: b.measure_mean_signal,
+            lambda b: b.measure_single_shot_z,
+            lambda b: b.measure_scope_mode,
+            lambda b: b.measure_single_shot_binned,
+            lambda b: b.measure_single_shot_signal,
+        ],
+        ids=lambda v: v.__code__.co_names[0],
+    )
+    def test_measure_instructions(self, measure_instruction):
         hw = get_default_echo_hardware(3)
         qubit = hw.get_qubit(0)
         phase_shift_1 = 0.2
@@ -147,15 +159,9 @@ class TestInstructionExecution:
             .X(qubit, np.pi / 2.0)
             .phase_shift(qubit, phase_shift_2)
             .X(qubit, np.pi / 2.0)
-            .measure_mean_z(qubit)  # triggers a KeyError
-            .measure_mean_signal(qubit)
-            .measure_single_shot_z(qubit)
-            .measure_scope_mode(qubit)
-            .measure_single_shot_binned(qubit)
-            .measure_single_shot_signal(qubit)
         )
-        engine = EchoEngine(hw)
-        results = engine.execute(builder.instructions)
+        measure_instruction(builder)(qubit)
+        results = execute_instructions(hw, builder)
         assert results is not None
 
     def check_size(self, results, expected_shape):
@@ -269,8 +275,11 @@ class TestSweep:
 
 
 class TestInstructionSerialisation:
-    def test_basic_gate(self):
-        hw = get_default_echo_hardware(4)
+    @pytest.mark.parametrize(
+        "hardware_model_type", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
+    def test_basic_gate(self, hardware_model_type):
+        hw = hardware_model_type(4)
         builder = (
             get_builder(hw)
             .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)

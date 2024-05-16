@@ -21,17 +21,15 @@ packages = [
 license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
-# We're a 3.9 project, but certain dependencies require an upper bound.
 python = ">=3.9,<3.11"
 numpy = "~=1.22.3"
 networkx = "~=2.5"
 matplotlib = "^3.3.2"
 logging-config = "~=1.0.4"
-qutip = { version = "~=4.7.1", markers = "sys_platform == 'win32' or sys_platform == 'linux'" }
+qutip = { version = "^4.7.6" }
 toml = "^0.10.2"
 pytket = "^1.11.1"
-# Fixed due to issue with qutip
-scipy = "1.10.1"
+scipy = "^1.10.1"
 pyqir = "^0.10.0"
 qiskit = "^0.45.0"
 qiskit-optimization = "~=0.4.0"
@@ -40,7 +38,7 @@ qiskit-aer = "^0.13.0"
 lark = "~=0.12"
 regex = "^2022.6.2"
 jsonpickle = "^2.2.0"
-rasqal = "^0.1.0"
+rasqal = "^0.1.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "24.2.0"
