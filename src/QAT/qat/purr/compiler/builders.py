@@ -78,9 +78,9 @@ class InstructionBuilder:
         return list(self._instructions)
 
     @staticmethod
-    def deserialize(blob) -> "QuantumInstructionBuilder":
+    def deserialize(blob) -> "InstructionBuilder":
         builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
-        if not isinstance(builder, QuantumInstructionBuilder):
+        if not isinstance(builder, InstructionBuilder):
             raise ValueError("Attempt to deserialize has failed.")
 
         return builder
