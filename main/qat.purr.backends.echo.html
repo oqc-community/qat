@@ -142,6 +142,18 @@
   <section id="module-qat.purr.backends.echo">
 <span id="qat-purr-backends-echo-module"></span><h1>qat.purr.backends.echo module<a class="headerlink" href="#module-qat.purr.backends.echo" title="Permalink to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.echo.Connectivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.Connectivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.echo.Connectivity.Ring">
+<span class="sig-name descname"><span class="pre">Ring</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.backends.echo.Connectivity.Ring" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.echo.EchoEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_instruction_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.EchoEngine" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine" title="qat.purr.compiler.execution.QuantumExecutionEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumExecutionEngine</span></code></a></p>
@@ -161,15 +173,27 @@ no-backend situations.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.echo.add_direction_couplings_to_hardware">
+<span class="sig-name descname"><span class="pre">add_direction_couplings_to_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.add_direction_couplings_to_hardware" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.backends.echo.apply_setup_to_hardware">
-<span class="sig-name descname"><span class="pre">apply_setup_to_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.apply_setup_to_hardware" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">apply_setup_to_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.apply_setup_to_hardware" title="Permalink to this definition"></a></dt>
 <dd><p>Apply the default echo hardware setup to the passed-in hardware.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.echo.generate_connectivity">
+<span class="sig-name descname"><span class="pre">generate_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.generate_connectivity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.backends.echo.get_default_echo_hardware">
-<span class="sig-name descname"><span class="pre">get_default_echo_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.get_default_echo_hardware" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">get_default_echo_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.echo.get_default_echo_hardware" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a default echo backend optionally providing the type of connectivity. Either you pass a pre-defined connectivity as
+defined in the Connectivity enum or a specific connectivity list of which qubits connect to which.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span></p>
 </dd>
