@@ -16,6 +16,7 @@ docs/sphinx/source/api/generated
 # Visual studio
 .vs/
 *.csproj.user
+.vscode
 
 # C# / Q#
 bin/

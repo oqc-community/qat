@@ -12,6 +12,7 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction
+from qat.purr.compiler.interrupt import NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -110,7 +111,7 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile):
+    def _execute_on_hardware(self, sweep_iterator, package: QatFile, interrupt=NullInterrupt()):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
             self.verify_instructions(package.instructions, package.meta_instructions)
