@@ -13,7 +13,7 @@ permissions:
 run-name: Build from ${{ github.ref }}
 
 jobs:
-  formatting-tests:
+  static-tests:
     name: Consistency and formatting
     runs-on: ${{ matrix.os }}
     strategy:
@@ -61,6 +61,7 @@ jobs:
           poetry run black --check .
           poetry run isort --check .
           poetry run autoflake --check .
+          poetry run pip-audit --desc
 
 
   unit-tests:

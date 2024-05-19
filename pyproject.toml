@@ -47,6 +47,7 @@ pytest-cov = "~=2.10.1"
 autoflake = "^2.2.0"
 isort = "^5.13.2"
 docplex = "^2.21.207"
+pip-audit = "^2.7.3"
 
 [tool.poetry.group.licenses]
 optional = true
