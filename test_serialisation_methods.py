@@ -48,10 +48,12 @@ def logical_parse():
         print(instruction)
     output = builder.serialise()
     print(output)
-    print(sys.getsizeof(output))
+
     converted_builder = convert_to_other(output, echo)
     for instuct in converted_builder.instructions:
-        print(instuct)
+        if instuct:
+            print(instuct)
+            
     print(sys.getsizeof(output), sys.getsizeof(converted_builder.serialize()))
 
 

@@ -48,7 +48,6 @@ class LogicalHardware():
     def __init__(self, qubits: Optional[List[LogicalQubit]]=None, couplings: Optional[List[LogicalQubitCoupling]]=None):
         super().__init__()
         self.qubits = qubits
-        self.couping = couplings
         self.qubit_direction_couplings = couplings
 
 
@@ -107,10 +106,6 @@ class LogicalBuilder(InstructionBuilder):
         self._instructions = []
     
     def serialise(self):
-        # output = []
-        # for inst in self._instructions:
-        #     if isinstance(inst, LogicalGate):
-        #         output.append(inst.make_dict())
         return ";".join(str(inst.make_dict()) for inst in self._instructions if isinstance(inst, LogicalGate))
 
     def add(self, inst: Union[List[Gate], Gate]):
@@ -132,122 +127,20 @@ class LogicalBuilder(InstructionBuilder):
             self._instructions.append(self.model.get_hw_z(qubit=target, phase=radii))
         return self
 
-    def results_processing(self, variable: str, res_format: InlineResultsProcessing):
-        return self.add(ResultsProcessing(variable, res_format))
-
-    def measure_single_shot_z(
-        self, target: LogicalQubit, axis: ProcessAxis = None, output_variable: str = None
-    ):
-        return self.measure(target, axis, output_variable)
-
-    def measure_single_shot_signal(
-        self, target: LogicalQubit, axis: ProcessAxis = None, output_variable: str = None
-    ):
-        return self.measure(target, axis, output_variable)
-
-    def measure_mean_z(
-        self, target: LogicalQubit, axis: ProcessAxis = None, output_variable: str = None
-    ):
-        return self.measure(target, axis, output_variable)
-
-    def measure_mean_signal(self, target: LogicalQubit, output_variable: str = None):
-        return self.measure(target, output_variable=output_variable)
-
     def measure(
         self, target: LogicalQubit, axis: ProcessAxis = None, output_variable: str = None
     ) -> "InstructionBuilder":
         self.add(LogicalGate(qubit=target.index, gate=Gate.meas))
 
 
-    def X(self, target: LogicalQubit, radii=None):
-        return self.R(Axis.X, target, radii)
-
-    def Y(self, target: LogicalQubit, radii=None):
-        return self.R(Axis.Y, target, radii)
-
-    def Z(self, target: LogicalQubit, radii=None):
-        return self.R(Axis.Z, target, radii)
-
-    def U(self, target: LogicalQubit, theta, phi, lamb):
-        return self.Z(target, lamb).Y(target, theta).Z(target, phi)
-
-    def swap(self, target: LogicalQubit, destination: LogicalQubit):
-        raise ValueError("Not available on this hardware model.")
-
-    def had(self, qubit: LogicalQubit):
-        self.Z(qubit)
-        return self.Y(qubit, math.pi / 2)
-
-    def post_processing(
-        self, acq: Acquire, process, axes=None, target: LogicalQubit = None, args=None
-    ):
-        raise ValueError("Not available on this hardware model.")
-
-    def sweep(self, variables_and_values):
-        raise ValueError("Not available on this hardware model.")
-
-    def pulse(self, *args, **kwargs):
-        raise ValueError("Not available on this hardware model.")
-
-    def acquire(self, *args, **kwargs):
-        raise ValueError("Not available on this hardware model.")
-
-    def delay(self, target: LogicalQubit, time: float):
-        raise ValueError("Not available on this hardware model.")
-
-    def synchronize(self, targets: Union[LogicalQubit, List[LogicalQubit]]):
-        raise ValueError("Not available on this hardware model.")
-
-    def phase_shift(self, target: LogicalQubit, phase):
-        raise ValueError("Not available on this hardware model.")
-
-    def SX(self, target):
-        return self.X(target, np.pi / 2)
-
-    def SXdg(self, target):
-        return self.X(target, -(np.pi / 2))
-
-    def S(self, target):
-        return self.Z(target, np.pi / 2)
-
-    def Sdg(self, target):
-        return self.Z(target, -(np.pi / 2))
-
-    def T(self, target):
-        return self.Z(target, np.pi / 4)
-
-    def Tdg(self, target):
-        return self.Z(target, -(np.pi / 4))
-
-    def cR(
-        self,
-        axis: Axis,
-        controllers: Union[LogicalQubit, List[LogicalQubit]],
-        target: LogicalQubit,
-        theta: float,
-    ):
-        raise ValueError("Generic controlled rotations not available.")
-
     def cX(self, controllers: Union[LogicalQubit, List[LogicalQubit]], target: LogicalQubit, radii=None):
         return self.cnot(Axis.X, controllers, target, radii)
-
-    def cY(self, controllers: Union[LogicalQubit, List[LogicalQubit]], target: LogicalQubit, radii=None):
-        return self.cR(Axis.Y, controllers, target, radii)
-
-    def cZ(self, controllers: Union[LogicalQubit, List[LogicalQubit]], target: LogicalQubit, radii=None):
-        return self.cR(Axis.Z, controllers, target, radii)
 
     def cnot(self, control: LogicalQubit, target_qubit: LogicalQubit):
         self.ECR(control, target_qubit)
         self.X(control)
         self.Z(control, -np.pi / 2)
         return self.X(target_qubit, -np.pi / 2)
-
-    def ccnot(self, cone: LogicalQubit, ctwo: LogicalQubit, target_qubit: LogicalQubit):
-        raise self.cX([cone, ctwo], target_qubit, np.pi)
-
-    def cswap(self, controllers: Union[LogicalQubit, List[LogicalQubit]], target, destination):
-        raise ValueError("Not available on this hardware model.")
 
     def ECR(self, control: LogicalQubit, target: LogicalQubit):
         instructions = []
