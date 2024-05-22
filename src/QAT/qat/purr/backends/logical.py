@@ -39,7 +39,17 @@ class LogicalGate:
         self.target_qubit=target_qubit
     
     def make_dict(self):
-        return {"qubit":self.qubit, "gate": self.gate.name, "angle": self.angle, "target_qubit": self.target_qubit}
+        angle = self.angle
+        if self.angle is not None:
+            if np.isclose(self.angle, np.pi):
+                angle = "p"
+            elif np.isclose(self.angle, -np.pi):
+                angle = "-p"
+            if np.isclose(self.angle, np.pi/2):
+                angle = "p2"
+            elif np.isclose(self.angle, -np.pi/2):
+                angle = "-p2"
+        return {"q":self.qubit, "g": self.gate.name, "a": angle, "t": self.target_qubit}
 
     def __str__(self):
         return f"{self.gate}[{self.qubit},{self.target_qubit} , {self.angle}]"
@@ -149,6 +159,18 @@ class LogicalBuilder(InstructionBuilder):
         instructions.extend(self.model.get_gate_ZX(control, -np.pi / 4.0, target))
         self.add(instructions)
 
+def get_angle(angle):
+    if isinstance(angle, float):
+        return angle
+    if angle == "p":
+        return np.pi
+    elif angle == "-p":
+        return -np.pi
+    elif angle == "p2":
+        return np.pi/2
+    elif angle == "-p2":
+        return -np.pi/2
+    return None
 
 def convert_to_other(logical_string, hardware:QuantumHardwareModel):
     gates =[ast.literal_eval(string) for string in logical_string.split(";")]
@@ -156,12 +178,12 @@ def convert_to_other(logical_string, hardware:QuantumHardwareModel):
     builder = get_builder(hardware)
 
     for gate in gates:
-        logical_gate = gate['gate']
-        qubit = hardware.get_qubit(gate['qubit'])
+        logical_gate = gate['g']
+        qubit = hardware.get_qubit(gate['q'])
         if logical_gate == Gate.x.name:
             builder._instructions.append(hardware.get_hw_x_pi_2(qubit=qubit))
         elif logical_gate == Gate.rz.name:
-            builder._instructions.append(hardware.get_hw_z(qubit=qubit, phase=gate['angle']))
+            builder._instructions.append(hardware.get_hw_z(qubit=qubit, phase=get_angle(gate['a'])))
         elif logical_gate == Gate.zx.name:
-            builder._instructions.append(hardware.get_hw_zx_pi_4(qubit=qubit, target_qubit=hardware.get_qubit(gate['target_qubit'])))
+            builder._instructions.append(hardware.get_hw_zx_pi_4(qubit=qubit, target_qubit=hardware.get_qubit(gate['t'])))
     return builder
