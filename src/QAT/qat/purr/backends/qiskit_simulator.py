@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional, Tuple
 
 import numpy as np
 from qat.purr.backends.echo import (
+    add_direction_couplings_to_hardware,
     apply_setup_to_hardware,
+    generate_connectivity,
+    Connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
 from qat.purr.compiler.config import ResultsFormatting
@@ -16,15 +19,24 @@ from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
 from qiskit import QiskitError, QuantumCircuit, transpile
+from qiskit.providers.models import QasmBackendConfiguration
 from qiskit_aer import AerSimulator
 
 log = get_default_logger()
 
-def get_default_qiskit_hardware(qubit_count=20, noise_model=None) -> "QiskitHardwareModel":
+def get_default_qiskit_hardware(
+    qubit_count=20,
+    noise_model=None,
+    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+) -> "QiskitHardwareModel":
     model = QiskitHardwareModel(qubit_count, noise_model)
+    if isinstance(connectivity, Connectivity):
+        connectivity = generate_connectivity(connectivity, qubit_count)
 
-    # Copy the echo model builders way of doing things.
-    return apply_setup_to_hardware(model, qubit_count)
+    model = apply_setup_to_hardware(model, qubit_count, connectivity)
+    if connectivity is not None:
+        model = add_direction_couplings_to_hardware(model, connectivity)
+    return model
 
 
 class QiskitBuilder(InstructionBuilder):
@@ -184,15 +196,23 @@ class QiskitEngine(InstructionExecutionEngine):
                 "execute input must be a QiskitBuilder"
             )
 
-        qasm_sim = AerSimulator(noise_model=builder.model.noise_model)
+        coupling_map = None
+        if any(self.model.qubit_direction_couplings):
+            coupling_map = [list(coupling.direction) for coupling in self.model.qubit_direction_couplings]
+
+        # With no coupling map the backend defaults to create couplings for qubit count, which
+        # defaults to 30. So we change that.
+        aer_config = QasmBackendConfiguration.from_dict(AerSimulator._DEFAULT_CONFIGURATION)
+        aer_config.n_qubits = self.model.qubit_count
+        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
+
         circuit = builder.circuit
-        # TODO: Needs a more nuanced try/catch. Some exceptions we should catch, others we should re-throw.
         try:
-            job = qasm_sim.run(transpile(circuit, qasm_sim), shots=builder.shot_count)
+            job = qasm_sim.run(transpile(circuit, qasm_sim, coupling_map=coupling_map), shots=builder.shot_count)
             results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
-            distribution = dict()
+            raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
 
         removals = self.model.qubit_count - builder.bit_count
 

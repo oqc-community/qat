@@ -11,6 +11,15 @@ from numpy import random, array
 
 
 class TestQiskitBackend:
+    @pytest.mark.parametrize("hardware", [
+        get_default_qiskit_hardware(35),
+    ])
+    def test_coupled_qasm_hardware(self, hardware):
+        builder = self.parse_and_apply_optimiziations(hardware, "20qb.qasm")
+        runtime = hardware.create_runtime()
+        results = runtime.execute(builder)
+        assert len(results) > 0
+
     def test_bitflip_noise_model(self):
         # Example error probabilities
         p_reset = 0.03
@@ -144,28 +153,22 @@ class TestQiskitBackend:
 
 
     def parse_and_apply_optimiziations(
-        self, qasm_file_name, qubit_count=6, parser=None, opt_config=None, noise_model=None
-    ) -> InstructionBuilder:
+        self, hardware, qasm_file_name, parser=None, opt_config=None) -> InstructionBuilder:
         """
         Helper that builds a basic hardware, applies general optimizations, parses the QASM
         then returns the resultant builder.
         """
-        hardware = get_default_qiskit_hardware(qubit_count, noise_model=noise_model)
         qasm = get_qasm2(qasm_file_name)
-
         if opt_config is None:
             opt_config = Qasm2Optimizations()
-
         qasm = DefaultOptimizers().optimize_qasm(qasm, hardware, opt_config)
-
         if parser is None:
             parser = Qasm2Parser()
-
         return parser.parse(hardware.create_builder(), qasm)
 
 
     def test_qasm_frontend_no_noise(self):
-        builder = self.parse_and_apply_optimiziations("ghz.qasm", qubit_count=4)
+        builder = self.parse_and_apply_optimiziations(get_default_qiskit_hardware(4), "ghz.qasm")
         runtime = builder.model.create_runtime()
         results = runtime.execute(builder)
         print(results)
@@ -191,7 +194,7 @@ class TestQiskitBackend:
         noise_bit_flip.add_all_qubit_quantum_error(error_gate2, ["cx"])
 
         builder = self.parse_and_apply_optimiziations(
-            "ghz.qasm", qubit_count=4, noise_model=noise_bit_flip
+            get_default_qiskit_hardware(4, noise_bit_flip), "ghz.qasm"
         )
         runtime = builder.model.create_runtime()
         results = runtime.execute(builder)
