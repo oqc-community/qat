@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import abc
+import queue
+import threading
 from decimal import ROUND_DOWN, Decimal
 from math import ceil
 from numbers import Number
@@ -42,6 +44,7 @@ from qat.purr.compiler.instructions import (
     Variable,
     Waveform, QuantumInstruction,
 )
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -275,6 +278,16 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def execute(self, instructions):
         """Executes this qat file against this current hardware."""
+        return self._common_execute(instructions)
+
+    def execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
+        """ Executes this qat file against this current hardware.
+            Execution allows for interrupts triggered by events
+        """
+        return self._common_execute(instructions, interrupt)
+
+    def _common_execute(self, instructions, interrupt: Interrupt = NullInterrupt()):
+        """Executes this qat file against this current hardware."""
         self._model_exists()
 
         with log_duration("QPU returned results in {} seconds."):
@@ -296,7 +309,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             # Set up the sweep and device injectors, passing all appropriate data to
             # the specific execute methods and deal with clean-up afterwards.
             results = {}
-            for batch_count in batches:
+            for i, batch_count in enumerate(batches):
+                interrupt.if_triggered(iteration=i, throw=True)
                 if batch_count <= 0:
                     continue
 
