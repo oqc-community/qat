@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import random
 from enum import Enum, auto
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -10,6 +11,7 @@ from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
+    QubitCoupling,
     Resonator,
 )
 from qat.purr.compiler.emitter import QatFile

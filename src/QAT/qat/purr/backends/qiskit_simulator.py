@@ -4,11 +4,17 @@
 from typing import List, Union, Dict, Any, Optional, Tuple
 
 import numpy as np
+from qiskit import QiskitError, QuantumCircuit, transpile
+from qiskit.providers.models import QasmBackendConfiguration
+from qiskit.transpiler import CouplingMap
+from qiskit.transpiler.passes import CheckMap
+from qiskit_aer import AerSimulator
+
 from qat.purr.backends.echo import (
+    Connectivity,
     add_direction_couplings_to_hardware,
     apply_setup_to_hardware,
     generate_connectivity,
-    Connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
 from qat.purr.compiler.config import ResultsFormatting
@@ -18,25 +24,24 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
-from qiskit import QiskitError, QuantumCircuit, transpile
-from qiskit.providers.models import QasmBackendConfiguration
-from qiskit_aer import AerSimulator
 
 log = get_default_logger()
 
 def get_default_qiskit_hardware(
     qubit_count=20,
     noise_model=None,
+    strict_placement=True,
     connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
 ) -> "QiskitHardwareModel":
     model = QiskitHardwareModel(qubit_count, noise_model)
+    model.strict_placement = strict_placement
+
     if isinstance(connectivity, Connectivity):
         connectivity = generate_connectivity(connectivity, qubit_count)
+    connectivity = connectivity or generate_connectivity(Connectivity.Ring, qubit_count)
 
     model = apply_setup_to_hardware(model, qubit_count, connectivity)
-    if connectivity is not None:
-        model = add_direction_couplings_to_hardware(model, connectivity)
-    return model
+    return add_direction_couplings_to_hardware(model, connectivity)
 
 
 class QiskitBuilder(InstructionBuilder):
@@ -166,9 +171,10 @@ class QiskitBuilder(InstructionBuilder):
 
 
 class QiskitHardwareModel(QuantumHardwareModel):
-    def __init__(self, qubit_count, noise_model=None):
+    def __init__(self, qubit_count, noise_model=None, strict_placement=True):
         self.qubit_count = qubit_count
         self.noise_model = noise_model
+        self.strict_placement = strict_placement
         super().__init__()
 
     def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
@@ -180,6 +186,24 @@ class QiskitHardwareModel(QuantumHardwareModel):
 
     def create_engine(self) -> InstructionExecutionEngine:
         return QiskitEngine(hardware_model=self)
+
+
+def verify_placement(coupling_map, circuit):
+    """
+    Check that the circuit can be directly mapped according to the
+    wire map defined by the coupling map
+
+    Raises if placement cannot happen without swaps
+    """
+
+    cmap = CouplingMap(coupling_map)
+    checker = CheckMap(cmap)
+    checker(circuit)
+    if not checker.property_set["is_swap_mapped"]:
+        raise RuntimeError(
+            f"Cannot achieve placement on set couplings with operation:"
+            f" {checker.property_set['check_map_msg']}"
+        )
 
 
 class QiskitEngine(InstructionExecutionEngine):
@@ -198,7 +222,14 @@ class QiskitEngine(InstructionExecutionEngine):
 
         coupling_map = None
         if any(self.model.qubit_direction_couplings):
-            coupling_map = [list(coupling.direction) for coupling in self.model.qubit_direction_couplings]
+            coupling_map = [
+                list(coupling.direction)
+                for coupling in self.model.qubit_direction_couplings
+            ]
+
+        circuit = builder.circuit
+        if self.model.strict_placement:
+            verify_placement(coupling_map, circuit)
 
         # With no coupling map the backend defaults to create couplings for qubit count, which
         # defaults to 30. So we change that.
@@ -206,9 +237,11 @@ class QiskitEngine(InstructionExecutionEngine):
         aer_config.n_qubits = self.model.qubit_count
         qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
 
-        circuit = builder.circuit
         try:
-            job = qasm_sim.run(transpile(circuit, qasm_sim, coupling_map=coupling_map), shots=builder.shot_count)
+            job = qasm_sim.run(
+                transpile(circuit, qasm_sim, coupling_map=coupling_map),
+                shots=builder.shot_count,
+            )
             results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
