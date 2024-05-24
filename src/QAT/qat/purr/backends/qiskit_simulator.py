@@ -21,7 +21,12 @@ from qat.purr.compiler.config import ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.instructions import (
+    Assign,
+    Instruction,
+    Return,
+    is_generated_name,
+)
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
 
@@ -251,9 +256,19 @@ class QiskitEngine(InstructionExecutionEngine):
 
         removals = self.model.qubit_count - builder.bit_count
 
-        # Because qiskit needs all values up-front we just provide a maximal classical register then strim off
+        # Because qiskit needs all values up-front we just provide a maximal classical register then trim off
         # the values we aren't going to use.
-        return {key[removals:]: value for key, value in distribution.items()}
+        trimmed = {key[removals:]: value for key, value in distribution.items()}
+        assigns = {}
+        returns = []
+        for inst in builder.instructions:
+            if isinstance(inst, Assign):
+                assigns[inst.name] = inst.value
+            elif isinstance(inst, Return):
+                returns.extend(inst.variables)
+        if len(assigns) > 1:
+            log.warning("Qasm Simulator does not support multiple assignment.")
+        return {key: trimmed for key in returns} if returns else trimmed
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
@@ -275,4 +290,15 @@ class QiskitRuntime(QuantumRuntime):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
 
-        return self.engine.execute(builder)
+        results = self.engine.execute(builder)
+
+        if all([is_generated_name(k) for k in results.keys()]):
+            if len(results) == 1:
+                return list(results.values())[0]
+            else:
+                squashed_results = list(results.values())
+                if all(isinstance(val, np.ndarray) for val in squashed_results):
+                    return np.array(squashed_results)
+                return squashed_results
+        else:
+            return results

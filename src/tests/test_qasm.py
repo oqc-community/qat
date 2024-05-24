@@ -828,7 +828,7 @@ class TestExecutionFrontend:
     def test_qasm_sim(self):
         model = get_default_qiskit_hardware(20)
         qasm = get_qasm2("basic.qasm")
-        results = execute(qasm, model, CompilerConfig())
+        results = execute(qasm, model, CompilerConfig()).get("c")
         assert len(results) == 4
         assert results["11"] > 200
         assert results["01"] > 200
