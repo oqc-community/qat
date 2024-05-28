@@ -313,7 +313,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             # the specific execute methods and deal with clean-up afterwards.
             results = {}
             for i, batch_count in enumerate(batches):
-                interrupt.if_triggered(iteration=i, throw=True)
+                metadata = {"batch_iteration": i}
+                interrupt.if_triggered(metadata, throw=True)
                 if batch_count <= 0:
                     continue
 
@@ -325,7 +326,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 qat_file.repeat.repeat_count = batch_count
                 try:
                     dinjectors.inject()
-                    batch_results = self._execute_on_hardware(switerator, qat_file)
+                    batch_results = self._execute_on_hardware(switerator, qat_file, interrupt)
                 finally:
                     switerator.revert(qat_file.instructions)
                     dinjectors.revert()
@@ -386,7 +387,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     @abc.abstractmethod
     def _execute_on_hardware(
-        self, sweep_iterator, package: "QatFile"
+        self, sweep_iterator, package: "QatFile", interrupt: Interrupt=NullInterrupt()
     ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]:
         pass
 
@@ -979,6 +980,19 @@ class SweepIterator:
             )
         else:
             return self.current_iteration + 1
+
+    def get_current_sweep_iteration(self):
+        """
+        Returns the current iteration of the entire loop nest seen as a polyhedra.
+        The returned structure is a list representing a lattice point p where p[i]
+        indicates the current iteration of the sweep at level i
+        """
+        if self.sweep is None:
+            return []
+        elif self.nested_sweep is None:
+            return [self.current_iteration]
+        else:
+            return [self.current_iteration] + self.nested_sweep.get_current_sweep_iteration()
 
     @staticmethod
     def from_qfile(qfile: "QatFile"):

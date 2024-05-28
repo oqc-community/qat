@@ -48,7 +48,7 @@ class TestBaseQuantumExecution(LiveDeviceEngine):
     def shutdown(self):
         pass
 
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile):
+    def _execute_on_hardware(self, sweep_iterator, package: QatFile, interrupt=None):
         self.buffers = {}
         self.baseband_frequencies = {}
 
