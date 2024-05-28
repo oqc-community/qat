@@ -187,7 +187,7 @@ class QuantumRuntime(MetricsMixin):
         results = fexecute(instructions)
         return self._transform_results(results, results_format, repeats)
 
-    def execute_with_interrupt(
+    def _execute_with_interrupt(
         self,
         instructions,
         results_format=None,
@@ -198,7 +198,7 @@ class QuantumRuntime(MetricsMixin):
         Executes these instructions against the current engine and returns the results.
         """
         def fexecute(instrs):
-            return self.engine.execute_with_interrupt(instrs, interrupt)
+            return self.engine._execute_with_interrupt(instrs, interrupt)
 
         return self._common_execute(fexecute, instructions, results_format, repeats)
 
@@ -283,6 +283,8 @@ def execute_instructions(
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     repeats: Optional[int] = None,
+    *args,
+    **kwargs,
 ):
     active_runtime = get_runtime(hardware)
 
@@ -293,18 +295,20 @@ def execute_instructions(
     )
 
 
-def execute_instructions_with_interrupt(
+def _execute_instructions_with_interrupt(
     hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
     instructions: Union[List[Instruction], QuantumInstructionBuilder],
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     repeats: Optional[int] = None,
-    interrupt: Interrupt = NullInterrupt()
+    interrupt: Interrupt = NullInterrupt(),
+    *args,
+    **kwargs,
 ):
     active_runtime = get_runtime(hardware)
     active_runtime.run_quantum_executable(executable_blocks)
 
     return (
-        active_runtime.execute_with_interrupt(instructions, results_format, repeats, interrupt),
+        active_runtime._execute_with_interrupt(instructions, results_format, repeats, interrupt),
         active_runtime.compilation_metrics
     )

@@ -285,7 +285,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         """Executes this qat file against this current hardware."""
         return self._common_execute(instructions)
 
-    def execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
+    def _execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
         """ Executes this qat file against this current hardware.
             Execution allows for interrupts triggered by events
         """

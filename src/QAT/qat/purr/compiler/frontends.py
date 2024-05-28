@@ -45,7 +45,14 @@ class LanguageFrontend(abc.ABC):
         )
         return instructions
 
-    def _execute(self, hardware, compiler_config: CompilerConfig, instructions):
+    def _execute(
+        self,
+        hardware,
+        compiler_config: CompilerConfig,
+        instructions,
+        *args,
+        **kwargs,
+    ):
         calibrations = [
             find_calibration(arg) for arg in compiler_config.active_calibrations
         ]
@@ -75,6 +82,8 @@ class LanguageFrontend(abc.ABC):
         instructions: InstructionBuilder,
         hardware,
         compiler_config: CompilerConfig,
+        *args,
+        **kwargs,
     ):
         ...
 
@@ -121,18 +130,25 @@ class QIRFrontend(LanguageFrontend):
         instructions: InstructionBuilder,
         hardware=None,
         compiler_config: CompilerConfig = None,
+        *args,
+        **kwargs,
     ):
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
         with log_duration("Execution completed, took {} seconds."):
-            return self._execute(hardware, compiler_config, instructions)
+            return self._execute(hardware, compiler_config, instructions, *args, **kwargs)
 
     def parse_and_execute(
-        self, qir_file: str, hardware=None, compiler_config: CompilerConfig = None
+        self,
+        qir_file: str,
+        hardware=None,
+        compiler_config: CompilerConfig = None,
+        *args,
+        **kwargs,
     ):
         instructions, parse_metrics = self.parse(qir_file, hardware, compiler_config)
         result, execution_metrics = self.execute(
-            instructions, hardware, compiler_config
+            instructions, hardware, compiler_config, *args, **kwargs
         )
         execution_metrics.merge(parse_metrics)
         return result, execution_metrics
@@ -182,14 +198,21 @@ class QASMFrontend(LanguageFrontend):
         instructions: InstructionBuilder,
         hardware=None,
         compiler_config: CompilerConfig = None,
+        *args,
+        **kwargs,
     ):
         hardware, compiler_config = self._default_common_args(hardware, compiler_config)
 
         with log_duration("Execution completed, took {} seconds."):
-            return self._execute(hardware, compiler_config, instructions)
+            return self._execute(hardware, compiler_config, instructions, *args, **kwargs)
 
     def parse_and_execute(
-        self, qasm_string: str, hardware=None, compiler_config: CompilerConfig = None
+        self,
+        qasm_string: str,
+        hardware=None,
+        compiler_config: CompilerConfig = None,
+        *args,
+        **kwargs,
     ):
         """
         Execute a qasm string against a particular piece of hardware. Initializes a
@@ -197,7 +220,7 @@ class QASMFrontend(LanguageFrontend):
         """
         instructions, parse_metrics = self.parse(qasm_string, hardware, compiler_config)
         result, execution_metrics = self.execute(
-            instructions, hardware, compiler_config
+            instructions, hardware, compiler_config, *args, **kwargs
         )
         parse_metrics.merge(execution_metrics)
         return result, parse_metrics

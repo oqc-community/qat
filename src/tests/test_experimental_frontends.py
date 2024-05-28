@@ -3,6 +3,7 @@ from operator import mul
 from typing import List
 from unittest.mock import create_autospec
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import PulseShapeType
@@ -24,30 +25,38 @@ def _get_qasm_path(file_name):
     return get_qasm2(file_name)
 
 
-def test_execute_using_interruptable_QIRFrontend():
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                          get_default_qiskit_hardware,])
+def test_execute_using_interruptable_QIRFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
     frontend = QIRFrontend()
-    hardware = get_default_echo_hardware(4)
+    hardware = get_hardware(4)
     path = _get_qir_path("generator-bell.ll")
-    res = _execute_with_metrics(frontend, path, hardware, config)
-    assert res[0]['00'] == 1000
+    res, _ = _execute_with_metrics(frontend, path, hardware, config)
+    assert sum(res.values()) == 1000
+    assert '00' in res.keys()
 
 
-def test_execute_using_interruptable_QasmFrontend():
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                          get_default_qiskit_hardware,])
+def test_execute_using_interruptable_QasmFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
     frontend = QASMFrontend()
-    hardware = get_default_echo_hardware(4)
+    hardware = get_hardware(4)
     path = _get_qasm_path("ghz_2.qasm")
-    res = _execute_with_metrics(frontend, path, hardware, config)
-    assert res[0]['b']['00'] == 1000
+    res, _ = _execute_with_metrics(frontend, path, hardware, config)
+    assert sum(res['b'].values()) == 1000
+    assert '00' in res['b'].keys()
 
 
-def test_interrupt_triggered_on_batch():
+# TODO: Test with simulator when implemented.
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,])
+def test_interrupt_triggered_on_batch(get_hardware):
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
-    hardware = get_default_echo_hardware(2)
+    hardware = get_hardware(2)
     frontend = QASMFrontend()
     instructions, _ = frontend.parse(path, hardware, config)
     assert isinstance(instructions, (InstructionBuilder, List))
@@ -55,8 +64,9 @@ def test_interrupt_triggered_on_batch():
     event = Event()
     interrupt = BasicInterrupt(event, queue)
     t = Thread(
-        target=frontend.execute_with_interrupt,
+        target=frontend.execute,
         args=(instructions, hardware, config, interrupt),
+        kwargs={'interrupt': interrupt},
         daemon=True
     )
     # Set event before starting thread to prevent race conditions
@@ -69,10 +79,12 @@ def test_interrupt_triggered_on_batch():
     assert why_finished["metadata"]["batch_iteration"] == 0
 
 
+# TODO: Test with simulator when implemented.
 @pytest.mark.parametrize(
     "kill_index, repeat_count, repeat_limit", [(0, 10, 5), (3, 20, 5), (0, 10, 10), (0, 10, 20)]
 )
-def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit):
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,])
+def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit, get_hardware):
     num_batches = repeat_count // repeat_limit
     if repeat_count % repeat_limit > 0:
         num_batches = num_batches + 1
@@ -80,7 +92,7 @@ def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit):
     side_effects = [False] * (2 * num_batches) # Account for sweep checkpoints
     side_effects[2 * kill_index] = True # Account for sweep checkpoints
 
-    hardware = get_default_echo_hardware(2)
+    hardware = get_hardware(2)
     # Force more than one batch in the batches
     hardware.repeat_limit = repeat_limit
     hardware.default_repeat_count = repeat_count
@@ -96,8 +108,9 @@ def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit):
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
     t = Thread(
-        target=frontend.execute_with_interrupt,
+        target=frontend.execute,
         args=(instructions, hardware, config, interrupt),
+        kwargs={'interrupt': interrupt},
         daemon=True
     )
     t.start()
@@ -107,9 +120,11 @@ def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit):
     assert why_finished["metadata"]["batch_iteration"] == kill_index
 
 
-def test_interrupt_not_triggered_on_n_batches():
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                          get_default_qiskit_hardware,])
+def test_interrupt_not_triggered_on_n_batches(get_hardware):
 
-    hardware = get_default_echo_hardware(2)
+    hardware = get_hardware(2)
     # Force more than one batch in the batches
     hardware.repeat_limit = 10
     hardware.default_repeat_count = 20
@@ -122,8 +137,9 @@ def test_interrupt_not_triggered_on_n_batches():
     interrupt = BasicInterrupt()
 
     t = Thread(
-        target=frontend.execute_with_interrupt,
+        target=frontend.execute,
         args=(instructions, hardware, config, interrupt),
+        kwargs={'interrupt': interrupt},
         daemon=True
     )
     t.start()
@@ -145,6 +161,7 @@ def _builder_1d_sweep_example(hw):
     return builder, [len(amps)]
 
 
+# TODO: Test with simulator when implemented.
 @pytest.mark.parametrize(
     "batch_n, repeat_count, repeat_limit, sweep_m", [
         (0, 10, 5, [0]),
@@ -154,12 +171,13 @@ def _builder_1d_sweep_example(hw):
         (0, 10, 20, [3])
     ]
 )
-def test_interrupt_triggered_on_sweep_m_1d(batch_n, repeat_count, repeat_limit, sweep_m):
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,])
+def test_interrupt_triggered_on_sweep_m_1d(batch_n, repeat_count, repeat_limit, sweep_m, get_hardware):
     num_batches = repeat_count // repeat_limit
     if repeat_count % repeat_limit > 0:
         num_batches = num_batches + 1
 
-    hardware = get_default_echo_hardware(2)
+    hardware = get_hardware(2)
     # Force more than one batch in the batches
     hardware.repeat_limit = repeat_limit
     hardware.default_repeat_count = repeat_count
@@ -184,8 +202,9 @@ def test_interrupt_triggered_on_sweep_m_1d(batch_n, repeat_count, repeat_limit, 
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
     t = Thread(
-        target=frontend.execute_with_interrupt,
+        target=frontend.execute,
         args=(instructions, hardware, config, interrupt),
+        kwargs={'interrupt': interrupt},
         daemon=True
     )
     t.start()
@@ -211,6 +230,7 @@ def _builder_2d_sweep_example(hw):
     return builder, [len(amps), len(widths)]
 
 
+# TODO: Test with simulator when implemented.
 @pytest.mark.parametrize(
     "batch_n, repeat_count, repeat_limit, sweep_m", [
         (0, 10, 5, [0, 0]),
@@ -220,12 +240,13 @@ def _builder_2d_sweep_example(hw):
         (0, 10, 20, [3, 0])
     ]
 )
-def test_interrupt_triggered_on_sweep_m_2d(batch_n, repeat_count, repeat_limit, sweep_m):
+@pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,])
+def test_interrupt_triggered_on_sweep_m_2d(batch_n, repeat_count, repeat_limit, sweep_m, get_hardware):
     num_batches = repeat_count // repeat_limit
     if repeat_count % repeat_limit > 0:
         num_batches = num_batches + 1
 
-    hardware = get_default_echo_hardware(2)
+    hardware = get_hardware(2)
     # Force more than one batch in the batches
     hardware.repeat_limit = repeat_limit
     hardware.default_repeat_count = repeat_count
@@ -250,8 +271,9 @@ def test_interrupt_triggered_on_sweep_m_2d(batch_n, repeat_count, repeat_limit, 
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
     t = Thread(
-        target=frontend.execute_with_interrupt,
+        target=frontend.execute,
         args=(instructions, hardware, config, interrupt),
+        kwargs={'interrupt': interrupt},
         daemon=True
     )
     t.start()
