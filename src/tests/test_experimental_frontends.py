@@ -1,5 +1,7 @@
+from typing import List
 from unittest.mock import create_autospec
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.qat import _execute_with_metrics
 from os.path import join, dirname, abspath, exists
@@ -42,7 +44,8 @@ def test_interrupt_triggered_on_batch():
     path = _get_qasm_path("ghz_2.qasm")
     hardware = get_default_echo_hardware(2)
     frontend = QASMFrontend()
-    instructions = frontend.parse(path, hardware, config)
+    instructions, _ = frontend.parse(path, hardware, config)
+    assert isinstance(instructions, (InstructionBuilder, List))
     queue = Queue(maxsize=1)
     event = Event()
     interrupt = BasicInterrupt(event, queue)
@@ -60,20 +63,27 @@ def test_interrupt_triggered_on_batch():
     assert why_finished["iteration"] == 0
 
 
-@pytest.mark.parametrize("kill_index", range(3))
-def test_interrupt_triggered_on_batch_n(kill_index):
-    side_effects = [False] * 3
+@pytest.mark.parametrize(
+    "kill_index, repeat_count, repeat_limit", [(0, 10, 5), (3, 20, 5), (0, 10, 10), (0, 10, 20)]
+)
+def test_interrupt_triggered_on_batch_n(kill_index, repeat_count, repeat_limit):
+    num_batches = repeat_count // repeat_limit
+    if repeat_count % repeat_limit > 0:
+        num_batches = num_batches + 1
+
+    side_effects = [False] * num_batches
     side_effects[kill_index] = True
 
     hardware = get_default_echo_hardware(2)
     # Force more than one batch in the batches
-    hardware.repeat_limit = 10
-    hardware.default_repeat_count = 20
+    hardware.repeat_limit = repeat_limit
+    hardware.default_repeat_count = repeat_count
 
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
     frontend = QASMFrontend()
-    instructions = frontend.parse(path, hardware, config)
+    instructions, _ = frontend.parse(path, hardware, config)
+    assert isinstance(instructions, (InstructionBuilder, List))
     mock_event = create_autospec(Event)
 
     # Trigger cancellation on the nth batch
@@ -101,7 +111,8 @@ def test_interrupt_not_triggered_on_n_batches():
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
     frontend = QASMFrontend()
-    instructions = frontend.parse(path, hardware, config)
+    instructions, _ = frontend.parse(path, hardware, config)
+    assert isinstance(instructions, (InstructionBuilder, List))
     interrupt = BasicInterrupt()
 
     t = Thread(

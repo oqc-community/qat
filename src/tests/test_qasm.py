@@ -3,6 +3,7 @@
 from itertools import permutations
 from os import listdir
 from os.path import dirname, isfile, join
+from typing import List
 
 import networkx as nx
 import numpy as np
@@ -18,7 +19,7 @@ from qat.purr.backends.realtime_chip_simulator import (
     qutip_available,
 )
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
-from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -828,7 +829,8 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware()
         contents = get_qasm2("basic.qasm")
         frontend = fetch_frontend(contents, use_experimental=use_experimental)
-        built = frontend.parse(contents, hardware=hardware)
+        built, _ = frontend.parse(contents, hardware=hardware)
+        assert isinstance(built, (InstructionBuilder, List))
         results = frontend.execute(instructions=built, hardware=hardware)
         assert results is not None
 

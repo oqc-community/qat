@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import tempfile
-from os.path import dirname, join
+from os.path import dirname, join, exists
 
 import numpy as np
 import pytest
@@ -565,3 +565,43 @@ class TestBaseQuantum:
         assert len(qubit2_buffer) > 0
         assert np.isclose([abs(val) for val in qubit1_buffer], 2).all()
         assert np.isclose([abs(val) for val in qubit2_buffer], 1).all()
+
+    @pytest.mark.parametrize("pre_combine, batch_results, post_combine", [
+        ({}, {}, {}),
+        ({}, {"a": [1]}, {"a": [1]}),
+        ({"a": [1]}, {"a": [2]}, {"a": [1, 2]}),
+    ])
+    def test_combining_python_list_results_succeeds(self, pre_combine, batch_results, post_combine):
+        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        assert results == post_combine
+
+    @pytest.mark.parametrize("pre_combine, batch_results, post_combine", [
+        ({"a": np.array([1, 2])}, {"a": np.array([3])}, {"a": np.array([1, 2, 3])}),
+    ])
+    def test_combining_numpy_array_results_succeeds(self, pre_combine, batch_results, post_combine):
+        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        assert results.keys() == post_combine.keys()
+        for k in results.keys():
+            assert results[k].tolist() == post_combine[k].tolist()
+
+    @pytest.mark.parametrize("pre_combine, batch_results", [
+        ({"a": [1]}, {"b": [2]}),
+        ({"a": None}, {"a": [3]}),
+        ({"a": {1, 2}}, {"a": [3]}),
+        ({"a": np.array([1, 2])}, {"a": [3]})
+    ])
+    def test_combining_results_fails(self, pre_combine, batch_results):
+        with pytest.raises(ValueError):
+            TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+
+    @pytest.mark.parametrize("repeat_count, repeat_limit, expected_batches", [
+        (123, 5, [5] * 24 + [3]),
+        (124, 5, [5] * 24 + [4]),
+        (125, 5, [5] * 25)
+    ])
+    def test_execution_batching(self, repeat_count, repeat_limit, expected_batches):
+        hw = get_test_model()
+        hw.repeat_limit = repeat_limit
+        engine = get_test_execution_engine(hw)
+        generated_batches = engine._generate_repeat_batches(repeat_count)
+        assert generated_batches == expected_batches
