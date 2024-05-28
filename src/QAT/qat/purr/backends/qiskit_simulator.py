@@ -1,30 +1,52 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional, Tuple
 
 import numpy as np
+from qiskit import QiskitError, QuantumCircuit, transpile
+from qiskit.providers.models import QasmBackendConfiguration
+from qiskit.transpiler import CouplingMap
+from qiskit.transpiler.passes import CheckMap
+from qiskit_aer import AerSimulator
+
 from qat.purr.backends.echo import (
+    Connectivity,
+    add_direction_couplings_to_hardware,
     apply_setup_to_hardware,
+    generate_connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
 from qat.purr.compiler.config import ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.instructions import (
+    Assign,
+    Instruction,
+    Return,
+    is_generated_name,
+)
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
-from qiskit import QiskitError, QuantumCircuit, transpile
-from qiskit_aer import AerSimulator
 
 log = get_default_logger()
 
-def get_default_qiskit_hardware(qubit_count=20, noise_model=None) -> "QiskitHardwareModel":
+def get_default_qiskit_hardware(
+    qubit_count=20,
+    noise_model=None,
+    strict_placement=True,
+    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+) -> "QiskitHardwareModel":
     model = QiskitHardwareModel(qubit_count, noise_model)
+    model.strict_placement = strict_placement
 
-    # Copy the echo model builders way of doing things.
-    return apply_setup_to_hardware(model, qubit_count)
+    if isinstance(connectivity, Connectivity):
+        connectivity = generate_connectivity(connectivity, qubit_count)
+    connectivity = connectivity or generate_connectivity(Connectivity.Ring, qubit_count)
+
+    model = apply_setup_to_hardware(model, qubit_count, connectivity)
+    return add_direction_couplings_to_hardware(model, connectivity)
 
 
 class QiskitBuilder(InstructionBuilder):
@@ -38,7 +60,7 @@ class QiskitBuilder(InstructionBuilder):
     ):
         super().__init__(hardware_model=hardware_model, instructions=instructions)
         self.circuit = QuantumCircuit(qubit_count, qubit_count)
-        self.shot_count = 1024
+        self.shot_count = hardware_model.default_repeat_count
         self.bit_count = 0
 
     def measure(self, target: Qubit, *args, **kwargs) -> "InstructionBuilder":
@@ -136,6 +158,8 @@ class QiskitBuilder(InstructionBuilder):
         # Compiler config may attempt to pass None
         if repeat_value is not None:
             self.shot_count = repeat_value
+        else:
+            self.shot_count = self.model.default_repeat_count
         return self
 
     def clear(self):
@@ -154,9 +178,10 @@ class QiskitBuilder(InstructionBuilder):
 
 
 class QiskitHardwareModel(QuantumHardwareModel):
-    def __init__(self, qubit_count, noise_model=None):
+    def __init__(self, qubit_count, noise_model=None, strict_placement=True):
         self.qubit_count = qubit_count
         self.noise_model = noise_model
+        self.strict_placement = strict_placement
         super().__init__()
 
     def create_runtime(self, existing_engine: InstructionExecutionEngine = None):
@@ -168,6 +193,24 @@ class QiskitHardwareModel(QuantumHardwareModel):
 
     def create_engine(self) -> InstructionExecutionEngine:
         return QiskitEngine(hardware_model=self)
+
+
+def verify_placement(coupling_map, circuit):
+    """
+    Check that the circuit can be directly mapped according to the
+    wire map defined by the coupling map
+
+    Raises if placement cannot happen without swaps
+    """
+
+    cmap = CouplingMap(coupling_map)
+    checker = CheckMap(cmap)
+    checker(circuit)
+    if not checker.property_set["is_swap_mapped"]:
+        raise RuntimeError(
+            f"Cannot achieve placement on set couplings with operation:"
+            f" {checker.property_set['check_map_msg']}"
+        )
 
 
 class QiskitEngine(InstructionExecutionEngine):
@@ -184,21 +227,48 @@ class QiskitEngine(InstructionExecutionEngine):
                 "execute input must be a QiskitBuilder"
             )
 
-        qasm_sim = AerSimulator(noise_model=builder.model.noise_model)
+        coupling_map = None
+        if any(self.model.qubit_direction_couplings):
+            coupling_map = [
+                list(coupling.direction)
+                for coupling in self.model.qubit_direction_couplings
+            ]
+
         circuit = builder.circuit
-        # TODO: Needs a more nuanced try/catch. Some exceptions we should catch, others we should re-throw.
+        if self.model.strict_placement:
+            verify_placement(coupling_map, circuit)
+
+        # With no coupling map the backend defaults to create couplings for qubit count, which
+        # defaults to 30. So we change that.
+        aer_config = QasmBackendConfiguration.from_dict(AerSimulator._DEFAULT_CONFIGURATION)
+        aer_config.n_qubits = self.model.qubit_count
+        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
+
         try:
-            job = qasm_sim.run(transpile(circuit, qasm_sim), shots=builder.shot_count)
+            job = qasm_sim.run(
+                transpile(circuit, qasm_sim, coupling_map=coupling_map),
+                shots=builder.shot_count,
+            )
             results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
-            distribution = dict()
+            raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
 
         removals = self.model.qubit_count - builder.bit_count
 
-        # Because qiskit needs all values up-front we just provide a maximal classical register then strim off
+        # Because qiskit needs all values up-front we just provide a maximal classical register then trim off
         # the values we aren't going to use.
-        return {key[removals:]: value for key, value in distribution.items()}
+        trimmed = {key[removals:]: value for key, value in distribution.items()}
+        assigns = {}
+        returns = []
+        for inst in builder.instructions:
+            if isinstance(inst, Assign):
+                assigns[inst.name] = inst.value
+            elif isinstance(inst, Return):
+                returns.extend(inst.variables)
+        if len(assigns) > 1:
+            log.warning("Qasm Simulator does not support multiple assignment.")
+        return {key: trimmed for key in returns} if returns else trimmed
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
@@ -220,4 +290,15 @@ class QiskitRuntime(QuantumRuntime):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
 
-        return self.engine.execute(builder)
+        results = self.engine.execute(builder)
+
+        if all([is_generated_name(k) for k in results.keys()]):
+            if len(results) == 1:
+                return list(results.values())[0]
+            else:
+                squashed_results = list(results.values())
+                if all(isinstance(val, np.ndarray) for val in squashed_results):
+                    return np.array(squashed_results)
+                return squashed_results
+        else:
+            return results
