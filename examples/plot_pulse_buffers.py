@@ -112,4 +112,5 @@ if __name__ == "__main__":
     builder = parser.parse(get_builder(hw), qasm)
 
     plot_physical_buffers(builder)
+    plt.savefig("./fig")
     plt.show()
