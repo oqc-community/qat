@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from functools import reduce
+from operator import mul
 
 import numpy as np
 import pytest
@@ -37,6 +39,29 @@ class TestInstruction:
         assert label1.name in builder.existing_names
         assert label2.name in builder.existing_names
 
+    def _get_sweep_size(self, sweep_iter: SweepIterator):
+        """
+        Returns the size of the entire loop nest seen as a polyhedra.
+        The returned structure is a list s where s[i] represents the sweep length at level i
+        """
+        if sweep_iter.sweep is None:
+            return []
+        elif sweep_iter.nested_sweep is None:
+            return [sweep_iter.sweep.length]
+        else:
+            return [sweep_iter.sweep.length] + self._get_sweep_size(sweep_iter.nested_sweep)
+
+    def _decompose(self, accumulated: int, sweep_iter: SweepIterator):
+        result = []
+        sweep_size = self._get_sweep_size(sweep_iter)
+        for i in range(len(sweep_size) - 1):
+            subspace = reduce(mul, sweep_size[i + 1:], 1)
+            result.append(accumulated // subspace)
+            accumulated = accumulated % subspace
+        result.append(accumulated)
+
+        return result
+
     def test_nested_sweep_iterator(self):
         sweep_iter = SweepIterator(
             Sweep(SweepValue("dave", [1, 2, 3, 4, 5])),
@@ -45,9 +70,15 @@ class TestInstruction:
                 SweepIterator(Sweep(SweepValue("dave", [1, 2, 3, 4, 5, 6, 7, 8]))),
             ),
         )
+        assert self._get_sweep_size(sweep_iter) == [5, 3, 8]
+        assert sweep_iter.get_current_sweep_iteration() == [-1, -1, -1]
+
         incrementor = 0
         while not sweep_iter.is_finished():
             sweep_iter.do_sweep([])
+            assert sweep_iter.get_current_sweep_iteration() == self._decompose(
+                incrementor, sweep_iter
+            )
             incrementor += 1
 
         # Test that actual cycles are both equal the accumulated values, as well as the
@@ -56,18 +87,38 @@ class TestInstruction:
         assert sweep_iter.length == sweep_iter.accumulated_sweep_iteration
         assert sweep_iter.length == 120
 
+        sweep_iter.reset_iteration()
+        assert sweep_iter.get_current_sweep_iteration() == [-1, -1, -1]
+
     def test_sweep_iterator(self):
         sweep_iter = SweepIterator(Sweep(SweepValue("dave", [1, 2, 3, 4, 5])))
+        assert self._get_sweep_size(sweep_iter) == [5]
+        assert sweep_iter.get_current_sweep_iteration() == [-1]
+
         incrementor = 0
         while not sweep_iter.is_finished():
             sweep_iter.do_sweep([])
+            assert sweep_iter.get_current_sweep_iteration() == [incrementor]
             incrementor += 1
+
+        assert sweep_iter.get_current_sweep_iteration() == [incrementor - 1]
 
         # Test that actual cycles are both equal the accumulated values, as well as the
         # length
         assert incrementor == sweep_iter.accumulated_sweep_iteration
         assert sweep_iter.length == sweep_iter.accumulated_sweep_iteration
         assert sweep_iter.length == 5
+
+        sweep_iter.reset_iteration()
+        assert sweep_iter.get_current_sweep_iteration() == [-1]
+
+    def test_empty_sweep_iterator(self):
+        sweep_iter = SweepIterator()
+        assert self._get_sweep_size(sweep_iter) == []
+        assert sweep_iter.get_current_sweep_iteration() == []
+
+        sweep_iter.reset_iteration()
+        assert sweep_iter.get_current_sweep_iteration() == []
 
     def test_instruction_limit(self):
         qie = EchoEngine()

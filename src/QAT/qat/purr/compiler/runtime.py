@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from collections import Iterable
 from numbers import Number
-from typing import List, Optional, TypeVar, Union
+from typing import List, Optional, Sized, TypeVar, Union
 
 import numpy
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
@@ -18,6 +18,7 @@ from qat.purr.compiler.execution import (
 )
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Instruction, is_generated_name
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
 
@@ -159,7 +160,9 @@ class QuantumRuntime(MetricsMixin):
         for exe in executables:
             exe.run(self)
 
-    def execute(self, instructions, results_format=None, repeats=None):
+    def _common_execute(
+        self, fexecute: callable, instructions, results_format=None, repeats=None
+    ):
         """
         Executes these instructions against the current engine and returns the results.
         """
@@ -181,8 +184,32 @@ class QuantumRuntime(MetricsMixin):
         )
         log.info(f"Optimized instruction count: {opt_inst_count}")
 
-        results = self.engine.execute(instructions)
+        results = fexecute(instructions)
         return self._transform_results(results, results_format, repeats)
+
+    def _execute_with_interrupt(
+        self,
+        instructions,
+        results_format=None,
+        repeats=None,
+        interrupt: Interrupt = NullInterrupt()
+    ):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+        def fexecute(instrs):
+            return self.engine._execute_with_interrupt(instrs, interrupt)
+
+        return self._common_execute(fexecute, instructions, results_format, repeats)
+
+    def execute(self, instructions, results_format=None, repeats=None):
+        """
+        Executes these instructions against the current engine and returns the results.
+        """
+        def fexecute(instrs):
+            return self.engine.execute(instrs)
+
+        return self._common_execute(fexecute, instructions, results_format, repeats)
 
 
 def _binary_count(results_list, repeats):
@@ -256,6 +283,8 @@ def execute_instructions(
     results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     repeats: Optional[int] = None,
+    *args,
+    **kwargs,
 ):
     active_runtime = get_runtime(hardware)
 
@@ -263,4 +292,23 @@ def execute_instructions(
     return (
         active_runtime.execute(instructions, results_format, repeats),
         active_runtime.compilation_metrics,
+    )
+
+
+def _execute_instructions_with_interrupt(
+    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+    instructions: Union[List[Instruction], QuantumInstructionBuilder],
+    results_format=None,
+    executable_blocks: List[QuantumExecutableBlock] = None,
+    repeats: Optional[int] = None,
+    interrupt: Interrupt = NullInterrupt(),
+    *args,
+    **kwargs,
+):
+    active_runtime = get_runtime(hardware)
+    active_runtime.run_quantum_executable(executable_blocks)
+
+    return (
+        active_runtime._execute_with_interrupt(instructions, results_format, repeats, interrupt),
+        active_runtime.compilation_metrics
     )

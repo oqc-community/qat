@@ -25,6 +25,7 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Reset,
 )
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from scipy.interpolate import CubicSpline
 
@@ -709,7 +710,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             return instructions
 
     def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile
+        self, sweep_iterator: SweepIterator, package: QatFile, interrupt: Interrupt=NullInterrupt()
     ) -> Dict[str, np.ndarray]:
         """
         Derivation of the mathematics behind this simulation can be found in the docs
@@ -733,6 +734,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             logger.debug(
                 f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}"
             )
+
+            metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
+            interrupt.if_triggered(metadata, throw=True)
 
             position_map = self.create_duration_timeline(package.instructions)
             pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)

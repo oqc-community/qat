@@ -3,19 +3,23 @@
 from itertools import permutations
 from os import listdir
 from os.path import dirname, isfile, join
+from typing import List
 
 import networkx as nx
 import numpy as np
 import pytest
 from docplex.mp.model import Model
 from pytket.qasm import circuit_from_qasm_str
+
+import qat.purr.compiler.frontends as core_frontends
+import qat.purr.compiler.experimental.frontends as experimental_frontends
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
-from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
@@ -26,7 +30,6 @@ from qat.purr.compiler.config import (
 )
 from qat.purr.compiler.devices import ChannelType, PulseShapeType, QubitCoupling
 from qat.purr.compiler.emitter import InstructionEmitter
-from qat.purr.compiler.frontends import QASMFrontend, QIRFrontend
 from qat.purr.compiler.instructions import (
     Acquire,
     CrossResonancePulse,
@@ -801,27 +804,33 @@ class TestExecutionFrontend:
         # correctly assigned, aka that measuring c[0] then c[1] results in c = [c0, c1].
         assert len(results["c"]) == 2
 
-    def test_frontend_peek(self):
+    @pytest.mark.parametrize("use_experimental,frontend_mod",
+                             [(True, experimental_frontends),
+                              (False, core_frontends),
+                             ], ids=("Experimental", "Standard"))
+    def test_frontend_peek(self, use_experimental, frontend_mod):
         with pytest.raises(ValueError):
-            fetch_frontend("")
+            fetch_frontend("", use_experimental=use_experimental)
 
         qasm2_string = get_qasm2("basic.qasm")
-        frontend = fetch_frontend(qasm2_string)
-        assert isinstance(frontend, QASMFrontend)
+        frontend = fetch_frontend(qasm2_string, use_experimental=use_experimental)
+        assert isinstance(frontend, frontend_mod.QASMFrontend)
 
         qasm3_string = get_qasm3("basic.qasm")
-        frontend = fetch_frontend(qasm3_string)
-        assert isinstance(frontend, QASMFrontend)
+        frontend = fetch_frontend(qasm3_string, use_experimental=use_experimental)
+        assert isinstance(frontend, frontend_mod.QASMFrontend)
 
         qir_string = get_test_file_path(TestFileType.QIR, "generator-bell.ll")
-        frontend = fetch_frontend(qir_string)
-        assert isinstance(frontend, QIRFrontend)
+        frontend = fetch_frontend(qir_string, use_experimental=use_experimental)
+        assert isinstance(frontend, frontend_mod.QIRFrontend)
 
-    def test_separate_compilation_from_execution(self):
+    @pytest.mark.parametrize("use_experimental", [True, False])
+    def test_separate_compilation_from_execution(self, use_experimental):
         hardware = get_default_echo_hardware()
         contents = get_qasm2("basic.qasm")
-        frontend = fetch_frontend(contents)
-        built = frontend.parse(contents, hardware=hardware)
+        frontend = fetch_frontend(contents, use_experimental=use_experimental)
+        built, _ = frontend.parse(contents, hardware=hardware)
+        assert isinstance(built, (InstructionBuilder, List))
         results = frontend.execute(instructions=built, hardware=hardware)
         assert results is not None
 
@@ -857,7 +866,7 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware(8)
         config = CompilerConfig()
 
-        frontend = QASMFrontend()
+        frontend = core_frontends.QASMFrontend()
         builder, metrics = frontend.parse(qasm_string, hardware, config)
 
         serialized_builder = builder.serialize()

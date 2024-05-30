@@ -6,9 +6,12 @@ from pathlib import Path
 from typing import Union
 
 import regex
+
+import qat.purr.compiler.frontends as core_frontends
+import qat.purr.compiler.experimental.frontends as experimental_frontends
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
-from qat.purr.compiler.frontends import LanguageFrontend, QASMFrontend, QIRFrontend
+from qat.purr.compiler.frontends import LanguageFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.utils.logger import get_default_logger
@@ -46,9 +49,15 @@ contents_match_pattern = regex.compile(
 path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 
-def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
+def fetch_frontend(
+    path_or_str: Union[str, bytes],
+    use_experimental:bool = False,
+) -> LanguageFrontend:
+    frontend_mod = core_frontends
+    if use_experimental:
+        frontend_mod = experimental_frontends
     if isinstance(path_or_str, bytes) and path_or_str.startswith(b"BC"):
-        return QIRFrontend()
+        return frontend_mod.QIRFrontend()
 
     if path_regex.match(path_or_str) is not None:
         if not os.path.exists(path_or_str):
@@ -56,18 +65,18 @@ def fetch_frontend(path_or_str: Union[str, bytes]) -> LanguageFrontend:
 
         path = Path(path_or_str)
         if path.suffix == ".qasm":
-            return QASMFrontend()
+            return frontend_mod.QASMFrontend()
         elif path.suffix in (".bc", ".ll"):
-            return QIRFrontend()
+            return frontend_mod.QIRFrontend()
 
         raise ValueError(f"File with extension {path.suffix} unrecognized.")
 
     results = regex.search(contents_match_pattern, path_or_str)
     if results is not None:
         if results.captures(1):
-            return QASMFrontend()
+            return frontend_mod.QASMFrontend()
         if results.captures(3):
-            return QIRFrontend()
+            return frontend_mod.QIRFrontend()
     else:
         raise ValueError("Cannot establish a LanguageFrontend based on contents")
 
@@ -93,7 +102,7 @@ def execute_qir(
 def execute_qir_with_metrics(
     qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
 ):
-    frontend = QIRFrontend()
+    frontend = core_frontends.QIRFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)
 
 
@@ -107,7 +116,7 @@ def execute_qasm(
 def execute_qasm_with_metrics(
     qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
 ):
-    frontend = QASMFrontend()
+    frontend = core_frontends.QASMFrontend()
     return _execute_with_metrics(frontend, qat_input, hardware, compiler_config)
 
 

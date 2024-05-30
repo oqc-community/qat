@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import abc
+import queue
+import threading
 from decimal import ROUND_DOWN, Decimal
 from math import ceil
 from numbers import Number
@@ -42,6 +44,7 @@ from qat.purr.compiler.instructions import (
     Variable,
     Waveform, QuantumInstruction,
 )
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -271,9 +274,24 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         list_expansion_ratio = int(
             (Decimal(repeats) / Decimal(batch_limit)).to_integral(ROUND_DOWN)
         )
-        return ([batch_limit] * list_expansion_ratio) + [repeats % batch_limit]
+        remainder = repeats % batch_limit
+        batches = [batch_limit] * list_expansion_ratio
+        if remainder > 0:
+            batches.append(remainder)
+
+        return batches
 
     def execute(self, instructions):
+        """Executes this qat file against this current hardware."""
+        return self._common_execute(instructions)
+
+    def _execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
+        """ Executes this qat file against this current hardware.
+            Execution allows for interrupts triggered by events
+        """
+        return self._common_execute(instructions, interrupt)
+
+    def _common_execute(self, instructions, interrupt: Interrupt = NullInterrupt()):
         """Executes this qat file against this current hardware."""
         self._model_exists()
 
@@ -289,14 +307,14 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     f"Running {repeat_count} shots at once is "
                     f"unsupported on the current hardware. Batching execution."
                 )
-                batches = self._generate_repeat_batches(repeat_count)
-            else:
-                batches = [repeat_count]
+            batches = self._generate_repeat_batches(repeat_count)
 
             # Set up the sweep and device injectors, passing all appropriate data to
             # the specific execute methods and deal with clean-up afterwards.
             results = {}
-            for batch_count in batches:
+            for i, batch_count in enumerate(batches):
+                metadata = {"batch_iteration": i}
+                interrupt.if_triggered(metadata, throw=True)
                 if batch_count <= 0:
                     continue
 
@@ -308,34 +326,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 qat_file.repeat.repeat_count = batch_count
                 try:
                     dinjectors.inject()
-                    batch_results = self._execute_on_hardware(switerator, qat_file)
+                    batch_results = self._execute_on_hardware(switerator, qat_file, interrupt)
                 finally:
                     switerator.revert(qat_file.instructions)
                     dinjectors.revert()
                     qat_file.repeat.repeat_count = repeat_count
 
-                if not any(results):
-                    results = batch_results
-                else:
-                    # As it's the same execution we can assume it has the same keys.
-                    for key in results:
-                        existing = results[key]
-                        appending = batch_results[key]
-
-                        # If one is a numpy array, both are. Otherwise traditional list.
-                        if isinstance(existing, np.ndarray):
-                            # TODO: Certian postprocessing instructions result in
-                            # strange concatination, e.g. sequential mean.
-                            results[key] = np.concatenate((existing, appending),
-                                                          axis=existing.ndim - 1)
-                        else:
-                            def combine_lists(exi, new):
-                                if len(new) > 0 and not isinstance(new[0], list):
-                                    exi += new
-                                    return
-                                for i, item in enumerate(new):
-                                    combine_lists(exi[i], item)
-                            combine_lists(existing, appending)
+                results = self._accumulate_results(results, batch_results)
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.
@@ -344,9 +341,53 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             return results
 
+    @staticmethod
+    def _accumulate_results(results: Dict, batch_results: Dict):
+        if not any(batch_results):
+            return results
+
+        if any(results):
+            if results.keys() != batch_results.keys():
+                raise ValueError(
+                    f"Dictionaries' keys mismatch, {results.keys()} != {batch_results.keys()}"
+                )
+
+            for key in results:
+                existing = results[key]
+                appending = batch_results[key]
+
+                if type(existing) is not type(appending):
+                    raise ValueError(
+                        f"Expected objects with the same type, got {type(existing)} and {type(appending)} instead"
+                    )
+
+                if isinstance(existing, np.ndarray):
+                    # TODO: Certain postprocessing instructions result in
+                    # strange concatenation, e.g. sequential mean.
+                    results[key] = np.concatenate((existing, appending),
+                                                  axis=existing.ndim - 1)
+                elif isinstance(existing, List):
+
+                    def combine_lists(exi, new):
+                        if len(new) > 0 and not isinstance(new[0], list):
+                            exi += new
+                            return
+                        for i, item in enumerate(new):
+                            combine_lists(exi[i], item)
+
+                    combine_lists(existing, appending)
+                else:
+                    raise ValueError(
+                        f"Cannot combine objects of unsupported type {type(existing)}"
+                    )
+        else:
+            results = batch_results
+
+        return results
+
     @abc.abstractmethod
     def _execute_on_hardware(
-        self, sweep_iterator, package: "QatFile"
+        self, sweep_iterator, package: "QatFile", interrupt: Interrupt=NullInterrupt()
     ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]:
         pass
 
@@ -939,6 +980,19 @@ class SweepIterator:
             )
         else:
             return self.current_iteration + 1
+
+    def get_current_sweep_iteration(self):
+        """
+        Returns the current iteration of the entire loop nest seen as a polyhedra.
+        The returned structure is a list representing a lattice point p where p[i]
+        indicates the current iteration of the sweep at level i
+        """
+        if self.sweep is None:
+            return []
+        elif self.nested_sweep is None:
+            return [self.current_iteration]
+        else:
+            return [self.current_iteration] + self.nested_sweep.get_current_sweep_iteration()
 
     @staticmethod
     def from_qfile(qfile: "QatFile"):
