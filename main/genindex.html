@@ -64,6 +64,10 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
@@ -73,6 +77,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
@@ -322,6 +327,8 @@
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.baseband_if_frequency">(PulseChannel property)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt">BasicInterrupt (class in qat.purr.compiler.interrupt)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger">BasicLogger (class in qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.bias_value">bias_value (DCBiasChannel property)</a>
@@ -812,6 +819,8 @@
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.evaluate_shape">evaluate_shape() (in module qat.purr.backends.utilities)</a>
 </li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.event">event (BasicInterrupt property)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.exception">exception() (CompositeLogger method)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.CouplingType.Exchange">Exchange (CouplingType attribute)</a>
@@ -986,6 +995,8 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_cross_resonance_channel">get_cross_resonance_channel() (Qubit method)</a>
 </li>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration">get_current_sweep_iteration() (SweepIterator method)</a>
+</li>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.get_default_echo_hardware">get_default_echo_hardware() (in module qat.purr.backends.echo)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.get_default_logger">get_default_logger() (in module qat.purr.utils.logger)</a>
@@ -1010,10 +1021,10 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_freq_shift_channel">get_freq_shift_channel() (Qubit method)</a>
 </li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_U">get_gate_U() (QuantumHardwareModel method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_U">get_gate_U() (QuantumHardwareModel method)</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_X">get_gate_X() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_Y">get_gate_Y() (QuantumHardwareModel method)</a>
@@ -1120,6 +1131,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id">Id (class in qat.purr.compiler.instructions)</a>
 </li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.if_triggered">if_triggered() (BasicInterrupt method)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt.if_triggered">(Interrupt method)</a>
+</li>
+        <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt.if_triggered">(NullInterrupt method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.imbalance">imbalance (PulseChannel property)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.import_logger_configuration">import_logger_configuration() (in module qat.purr.utils.logger)</a>
@@ -1173,6 +1192,10 @@
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument">Instrument (class in qat.purr.backends.live_devices)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.INTEGRATOR">INTEGRATOR (AcquireMode attribute)</a>
+</li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt">Interrupt (class in qat.purr.compiler.interrupt)</a>
+</li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.InterruptError">InterruptError</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.is_basic_gate">is_basic_gate() (TketBuilder method)</a>
 </li>
@@ -1388,14 +1411,14 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.mode">mode (SimpleAcquire attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.model">model (LiveDeviceEngine attribute)</a>
 
       <ul>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.model">(RealtimeChipSimEngine attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.modify">modify() (Qasm2Parser method)</a>
 </li>
       <li>
@@ -1434,9 +1457,13 @@
 </li>
         <li><a href="qat.purr.compiler.execution.html#module-qat.purr.compiler.execution">qat.purr.compiler.execution</a>
 </li>
+        <li><a href="qat.purr.compiler.experimental.html#module-qat.purr.compiler.experimental">qat.purr.compiler.experimental</a>
+</li>
         <li><a href="qat.purr.compiler.hardware_models.html#module-qat.purr.compiler.hardware_models">qat.purr.compiler.hardware_models</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#module-qat.purr.compiler.instructions">qat.purr.compiler.instructions</a>
+</li>
+        <li><a href="qat.purr.compiler.interrupt.html#module-qat.purr.compiler.interrupt">qat.purr.compiler.interrupt</a>
 </li>
         <li><a href="qat.purr.compiler.metrics.html#module-qat.purr.compiler.metrics">qat.purr.compiler.metrics</a>
 </li>
@@ -1489,13 +1516,15 @@
         <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.name">(WaveformDef attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.NANO">NANO (Scale attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.NotEquals">NotEquals (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.NOTSET">NOTSET (LoggerLevel attribute)</a>
+</li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt">NullInterrupt (class in qat.purr.compiler.interrupt)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.NumericFunction">NumericFunction (class in qat.purr.backends.utilities)</a>
 </li>
@@ -1870,6 +1899,13 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.compiler.experimental
+
+      <ul>
+        <li><a href="qat.purr.compiler.experimental.html#module-qat.purr.compiler.experimental">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.compiler.hardware_models
 
       <ul>
@@ -1884,12 +1920,21 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.compiler.interrupt
+
+      <ul>
+        <li><a href="qat.purr.compiler.interrupt.html#module-qat.purr.compiler.interrupt">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.compiler.metrics
 
       <ul>
         <li><a href="qat.purr.compiler.metrics.html#module-qat.purr.compiler.metrics">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.optimisers
 
@@ -1897,8 +1942,6 @@
         <li><a href="qat.purr.compiler.optimisers.html#module-qat.purr.compiler.optimisers">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.waveforms
 
@@ -2028,6 +2071,8 @@
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.qubits">(Section attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.queue">queue (BasicInterrupt property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -2374,10 +2419,10 @@
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder">TketBuilder (class in qat.purr.integrations.tket)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations">TketOptimizations (class in qat.purr.compiler.config)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQasmParser">TketQasmParser (class in qat.purr.integrations.tket)</a>
 </li>
       <li><a href="qat.purr.compiler.config.html#qat.purr.compiler.config.CalibrationArguments.to_json">to_json() (CalibrationArguments method)</a>
@@ -2394,6 +2439,14 @@
       </ul></li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.transform_to_value">transform_to_value() (Qasm3Parser method)</a>
 </li>
+      <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.trigger">trigger() (BasicInterrupt method)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt.trigger">(Interrupt method)</a>
+</li>
+        <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt.trigger">(NullInterrupt method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.tukey_window">tukey_window() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.LivePhysicalBaseband.turn_off">turn_off() (LivePhysicalBaseband method)</a>

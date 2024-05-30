@@ -6,6 +6,14 @@ qat.purr.compiler package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.purr.compiler.experimental
+
 Submodules
 ----------
 
@@ -21,6 +29,7 @@ Submodules
    qat.purr.compiler.frontends
    qat.purr.compiler.hardware_models
    qat.purr.compiler.instructions
+   qat.purr.compiler.interrupt
    qat.purr.compiler.metrics
    qat.purr.compiler.optimisers
    qat.purr.compiler.runtime

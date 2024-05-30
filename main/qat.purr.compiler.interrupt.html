@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.integrations.qir module &mdash; QAT 1.0.0 documentation</title>
+  <title>qat.purr.compiler.interrupt module &mdash; QAT 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.purr.integrations.qiskit module" href="qat.purr.integrations.qiskit.html" />
-    <link rel="prev" title="qat.purr.integrations.qasm module" href="qat.purr.integrations.qasm.html" /> 
+    <link rel="next" title="qat.purr.compiler.metrics module" href="qat.purr.compiler.metrics.html" />
+    <link rel="prev" title="qat.purr.compiler.instructions module" href="qat.purr.compiler.instructions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,7 +66,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
 </ul>
@@ -80,17 +80,17 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.compiler.interrupt module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
-<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
-<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
 </ul>
@@ -131,10 +131,10 @@
           <li class="breadcrumb-item"><a href="modules.html">QAT</a></li>
           <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
           <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.integrations.html">qat.purr.integrations package</a></li>
-      <li class="breadcrumb-item active">qat.purr.integrations.qir module</li>
+          <li class="breadcrumb-item"><a href="qat.purr.compiler.html">qat.purr.compiler package</a></li>
+      <li class="breadcrumb-item active">qat.purr.compiler.interrupt module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/qat.purr.integrations.qir.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/qat.purr.compiler.interrupt.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -144,8 +144,77 @@
              
 
 
-  <section id="qat-purr-integrations-qir-module">
-<h1>qat.purr.integrations.qir module<a class="headerlink" href="#qat-purr-integrations-qir-module" title="Permalink to this heading"></a></h1>
+  <section id="module-qat.purr.compiler.interrupt">
+<span id="qat-purr-compiler-interrupt-module"></span><h1>qat.purr.compiler.interrupt module<a class="headerlink" href="#module-qat.purr.compiler.interrupt" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.BasicInterrupt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BasicInterrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event=&lt;threading.Event</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue=&lt;queue.Queue</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.BasicInterrupt" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.interrupt.Interrupt" title="qat.purr.compiler.interrupt.Interrupt"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interrupt</span></code></a></p>
+<p>Interrupt supporting multi-threading and multi-process concurrency</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.BasicInterrupt.event">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#qat.purr.compiler.interrupt.BasicInterrupt.event" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.BasicInterrupt.if_triggered">
+<span class="sig-name descname"><span class="pre">if_triggered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.BasicInterrupt.if_triggered" title="Permalink to this definition"></a></dt>
+<dd><p>Capture context if triggered</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.BasicInterrupt.queue">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">queue</span></span><a class="headerlink" href="#qat.purr.compiler.interrupt.BasicInterrupt.queue" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.BasicInterrupt.trigger">
+<span class="sig-name descname"><span class="pre">trigger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.BasicInterrupt.trigger" title="Permalink to this definition"></a></dt>
+<dd><p>Set the triggered status</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.Interrupt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Interrupt</span></span><a class="headerlink" href="#qat.purr.compiler.interrupt.Interrupt" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.Interrupt.if_triggered">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">if_triggered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.Interrupt.if_triggered" title="Permalink to this definition"></a></dt>
+<dd><p>Capture context if triggered</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.Interrupt.trigger">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trigger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.Interrupt.trigger" title="Permalink to this definition"></a></dt>
+<dd><p>Set the triggered status</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.InterruptError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InterruptError</span></span><a class="headerlink" href="#qat.purr.compiler.interrupt.InterruptError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.NullInterrupt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NullInterrupt</span></span><a class="headerlink" href="#qat.purr.compiler.interrupt.NullInterrupt" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.NullInterrupt.if_triggered">
+<span class="sig-name descname"><span class="pre">if_triggered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.NullInterrupt.if_triggered" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.interrupt.NullInterrupt.trigger">
+<span class="sig-name descname"><span class="pre">trigger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.interrupt.NullInterrupt.trigger" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -153,8 +222,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.purr.integrations.qasm.html" class="btn btn-neutral float-left" title="qat.purr.integrations.qasm module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.purr.integrations.qiskit.html" class="btn btn-neutral float-right" title="qat.purr.integrations.qiskit module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.purr.compiler.instructions.html" class="btn btn-neutral float-left" title="qat.purr.compiler.instructions module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.compiler.metrics.html" class="btn btn-neutral float-right" title="qat.purr.compiler.metrics module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -187,7 +256,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="qat.purr.integrations.qir.html">main</a></dd>
+      <dd><a href="qat.purr.compiler.interrupt.html">main</a></dd>
     </dl>
   </div>
 </div><script>
