@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-
+import re
 from typing import List, Union, Dict, Any, Optional, Tuple
 
 import numpy as np
@@ -19,6 +19,7 @@ from qat.purr.backends.echo import (
 from qat.purr.compiler.builders import Axis, InstructionBuilder
 from qat.purr.compiler.config import ResultsFormatting, ErrorMitigationConfig
 from qat.purr.compiler.devices import PulseChannel, Qubit
+from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -278,8 +279,45 @@ class QiskitEngine(InstructionExecutionEngine):
         pass
 
 
+cl2qu_index_pattern = re.compile('(.*)\[(?P<clbit_index>[0-9]+)\]_(?P<qubit_index>[0-9]+)')
+
+
+def get_cl2qu_index_mapping(instructions):
+    mapping = {}
+    for instruction in instructions:
+        if not isinstance(instruction, Assign):
+            continue
+        for value in instruction.value:
+            result = cl2qu_index_pattern.match(value.name)
+            if result is None:
+                raise ValueError(
+                    f"Could not extract cl register index from {instruction.output_variable}"
+                )
+            mapping[result.group("clbit_index")] = int(result.group("qubit_index"))
+    return mapping
+
+
 class QiskitRuntime(QuantumRuntime):
-    model: QiskitHardwareModel
+
+    def _apply_error_mitigation(self, results, instructions, error_mitigation):
+        if error_mitigation is None:
+            return results
+
+        # TODO: add support for multiple registers
+        # TODO: reconsider results length
+        if len(results) > 1:
+            raise ValueError(
+                "Cannot have multiple registers in conjunction with readout error mitigation."
+            )
+
+
+        mapping = get_cl2qu_index_mapping(instructions)
+
+        for mitigator in get_readout_mitigation(error_mitigation):
+            new_result = mitigator.apply_error_mitigation(results, mapping, self.model)
+            results[mitigator.name] = new_result
+
+        return results # TODO: new results object
 
     def execute(
         self,
@@ -293,6 +331,7 @@ class QiskitRuntime(QuantumRuntime):
 
         # TODO - add error_mitigation for Qasm sim
         results = self.engine.execute(builder)
+        results = self._apply_error_mitigation(results, builder.instructions, error_mitigation)
 
         if all([is_generated_name(k) for k in results.keys()]):
             if len(results) == 1:

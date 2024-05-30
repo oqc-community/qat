@@ -7,6 +7,7 @@ from numpy.random import rand
 from qiskit import QuantumCircuit
 
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     RealtimeChipSimEngine,
     get_default_RTCS_hardware,
@@ -66,11 +67,6 @@ class TestReadoutMitigation:
         readout = ReadoutMitigation(linear=linear, matrix=matrix, m3=m3)
         return ErrorMitigation(readout_mitigation=readout)
 
-    def build_hardware(self, qubit_count, error_mitigation):
-        hw = get_default_echo_hardware(qubit_count)
-        hw.error_mitigation = error_mitigation
-        return hw
-
     def generate_random_linear(self, qubit_count, random_data=True):
         output = {}
         for qubit in range(qubit_count):
@@ -99,9 +95,10 @@ class TestReadoutMitigation:
         )
         return compiler_config
 
-    def build_hardware_with_options(self, qubit_count, random_cal, config_options):
+    def apply_hardware_options(self, hardware, random_cal, config_options):
         matrix = None
         linear = None
+        qubit_count = len(hardware.qubits)
         if "matrix_readout_mitigation" in config_options:
             if random_cal:
                 matrix = rand(2**qubit_count, 2**qubit_count)
@@ -109,15 +106,15 @@ class TestReadoutMitigation:
                 matrix = identity(2**qubit_count)
         if "linear_readout_mitigation":
             linear = self.generate_random_linear(qubit_count, random_cal)
-        hw = self.build_hardware(
-            qubit_count, self.build_error_mitigation(matrix=matrix, linear=linear)
-        )
-        return hw
+        hardware.error_mitigation = self.build_error_mitigation(matrix=matrix, linear=linear)
 
+    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                              get_default_qiskit_hardware])
     @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
     @pytest.mark.parametrize("random_cal", [True, False])
-    def test_something_changes_qasm(self, qubit_count, random_cal, config_options):
-        hw = self.build_hardware_with_options(qubit_count, random_cal, config_options)
+    def test_something_changes_qasm(self, get_hardware, qubit_count, random_cal, config_options):
+        hw = get_hardware(qubit_count)
+        self.apply_hardware_options(hw, random_cal, config_options)
         compiler_config = self.build_config(config_options)
         result = execute_qasm(
             self.get_qasm(qubit_count=qubit_count), hw, compiler_config=compiler_config
@@ -128,15 +125,19 @@ class TestReadoutMitigation:
                 assert all([i > 0 for i in result[config].values()])
             else:
                 original = result["b"]
-                assert original["0" * qubit_count] == 1000.0
+                zero = "0" * qubit_count
+                one = "11"+zero[2:]
+                assert sum([original.get(zero), original.get(one, 0)]) == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
-                    if key == "0" * qubit_count:
-                        assert isclose(value, 1.0)
+                    if key in original:
+                        assert isclose(value, original[key]/1000.0)
                     else:
                         assert isclose(value, 0.0)
 
-    def test_multiple_creg_fail(self, config_options):
+    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                              get_default_qiskit_hardware])
+    def test_multiple_creg_fail(self, get_hardware, config_options):
         qasm = """
         OPENQASM 2.0;
         include "qelib1.inc";
@@ -148,20 +149,27 @@ class TestReadoutMitigation:
         measure q[0] -> b[0];
         measure q[1] -> c[0];
         """
-        hw = self.build_hardware_with_options(2, False, config_options)
+        hw = get_hardware(2)
+        self.apply_hardware_options(hw, False, config_options)
         compiler_config = self.build_config(config_options)
         with pytest.raises(ValueError):
             execute_qasm(qasm, hw, compiler_config=compiler_config)
 
-    def test_non_binary_count_format_fails(self, config_options):
-        hw = self.build_hardware_with_options(2, False, config_options)
+    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                              get_default_qiskit_hardware])
+    def test_non_binary_count_format_fails(self, get_hardware, config_options):
+        hw = get_hardware(2)
+        self.apply_hardware_options(hw, False, config_options)
         compiler_config = self.build_config(config_options)
         compiler_config.results_format = QuantumResultsFormat().raw()
         with pytest.raises(ValueError):
             execute_qasm(self.get_qasm(2), hw, compiler_config=compiler_config)
 
-    def test_lack_of_hardware_calibration_fails(self, config_options):
-        hw = self.build_hardware_with_options(2, False, [])
+    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
+                                              get_default_qiskit_hardware])
+    def test_lack_of_hardware_calibration_fails(self, get_hardware, config_options):
+        hw = get_hardware(2)
+        self.apply_hardware_options(hw, False, [])
         compiler_config = self.build_config(config_options)
         compiler_config.results_format = QuantumResultsFormat().raw()
         with pytest.raises(ValueError):
