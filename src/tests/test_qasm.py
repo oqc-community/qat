@@ -30,6 +30,8 @@ from qat.purr.compiler.config import (
 )
 from qat.purr.compiler.devices import ChannelType, PulseShapeType, QubitCoupling
 from qat.purr.compiler.emitter import InstructionEmitter
+from qat.purr.compiler.frontends import QASMFrontend
+from qat.purr.compiler.hardware_models import get_cl2qu_index_mapping
 from qat.purr.compiler.instructions import (
     Acquire,
     CrossResonancePulse,
@@ -1300,3 +1302,49 @@ class TestQiskitBackend:
         result = backend.run(circuit, shots=1000).result()
         counts = result.get_counts()
         assert counts["1"] > 900
+
+mapping_setup1 = (
+    """
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[2];
+        creg b[2];
+        measure q[0] -> b[1];
+        measure q[1] -> b[0];
+        """,
+    {"0": 1, "1": 0},
+)
+mapping_setup2 = (
+    """
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[3];
+    creg b[3];
+    measure q[0] -> b[2];
+    measure q[1] -> b[1];
+    measure q[2] -> b[0];
+    """,
+    {"0": 2, "1": 1, "2": 0},
+)
+mapping_setup3 = (
+    """
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[3];
+    creg b[3];
+    measure q -> b;
+    """,
+    {"0": 0, "1": 1, "2": 2},
+)
+
+
+@pytest.mark.parametrize(
+    "qasm_string, expected_mapping", [mapping_setup1, mapping_setup2, mapping_setup3]
+)
+def test_cl2qu_index_mapping(qasm_string, expected_mapping):
+    hw = get_default_echo_hardware(3)
+    parser = Qasm2Parser()
+    result = parser.parse(get_builder(hw), qasm_string)
+    instructions = result.instructions
+    mapping = get_cl2qu_index_mapping(instructions, hw)
+    assert mapping == expected_mapping

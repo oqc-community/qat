@@ -34,9 +34,8 @@ class InterruptableExecutingMixin:
         return exe_method(
             hardware,
             instructions,
-            compiler_config.results_format,
+            compiler_config,
             calibrations,
-            compiler_config.repeats,
             interrupt
         )
 

@@ -60,9 +60,8 @@ class LanguageFrontend(abc.ABC):
         return execute_instructions(
             hardware,
             instructions,
-            compiler_config.results_format,
+            compiler_config,
             calibrations,
-            compiler_config.repeats,
         )
 
     def _default_common_args(self, hardware=None, compiler_config=None):
