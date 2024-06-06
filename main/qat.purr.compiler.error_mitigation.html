@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.backends.qiskit_simulator module &mdash; QAT 1.0.0 documentation</title>
+  <title>qat.purr.compiler.error_mitigation package &mdash; QAT 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.purr.backends.realtime_chip_simulator module" href="qat.purr.backends.realtime_chip_simulator.html" />
-    <link rel="prev" title="qat.purr.backends.live_devices module" href="qat.purr.backends.live_devices.html" /> 
+    <link rel="next" title="qat.purr.compiler.error_mitigation.readout_mitigation module" href="qat.purr.compiler.error_mitigation.readout_mitigation.html" />
+    <link rel="prev" title="qat.purr.compiler package" href="qat.purr.compiler.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,7 +52,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">QAT</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
 </ul>
@@ -60,14 +60,14 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
-<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.compiler.error_mitigation package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
 </ul>
 </li>
@@ -135,10 +135,10 @@
           <li class="breadcrumb-item"><a href="modules.html">QAT</a></li>
           <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
           <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.backends.html">qat.purr.backends package</a></li>
-      <li class="breadcrumb-item active">qat.purr.backends.qiskit_simulator module</li>
+          <li class="breadcrumb-item"><a href="qat.purr.compiler.html">qat.purr.compiler package</a></li>
+      <li class="breadcrumb-item active">qat.purr.compiler.error_mitigation package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/qat.purr.backends.qiskit_simulator.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/qat.purr.compiler.error_mitigation.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -148,8 +148,48 @@
              
 
 
-  <section id="qat-purr-backends-qiskit-simulator-module">
-<h1>qat.purr.backends.qiskit_simulator module<a class="headerlink" href="#qat-purr-backends-qiskit-simulator-module" title="Permalink to this heading"></a></h1>
+  <section id="module-qat.purr.compiler.error_mitigation">
+<span id="qat-purr-compiler-error-mitigation-package"></span><h1>qat.purr.compiler.error_mitigation package<a class="headerlink" href="#module-qat.purr.compiler.error_mitigation" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyHybridReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyHybridReadoutMitigation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyHybridReadoutMitigation.apply_error_mitigation"><code class="docutils literal notranslate"><span class="pre">ApplyHybridReadoutMitigation.apply_error_mitigation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyHybridReadoutMitigation.name"><code class="docutils literal notranslate"><span class="pre">ApplyHybridReadoutMitigation.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyLinearReadoutMitigation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.apply_correction_qubit"><code class="docutils literal notranslate"><span class="pre">ApplyLinearReadoutMitigation.apply_correction_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.apply_error_mitigation"><code class="docutils literal notranslate"><span class="pre">ApplyLinearReadoutMitigation.apply_error_mitigation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.name"><code class="docutils literal notranslate"><span class="pre">ApplyLinearReadoutMitigation.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation.apply_error_mitigation"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation.apply_error_mitigation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation.create_array_from_dict"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation.create_array_from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation.name"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation.remap_result"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation.remap_result()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyPostProcReadoutMitigation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation.apply_error_mitigation"><code class="docutils literal notranslate"><span class="pre">ApplyPostProcReadoutMitigation.apply_error_mitigation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation.name"><code class="docutils literal notranslate"><span class="pre">ApplyPostProcReadoutMitigation.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyReadoutMitigation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation.apply_error_mitigation"><code class="docutils literal notranslate"><span class="pre">ApplyReadoutMitigation.apply_error_mitigation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation.name"><code class="docutils literal notranslate"><span class="pre">ApplyReadoutMitigation.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation.process_results"><code class="docutils literal notranslate"><span class="pre">ApplyReadoutMitigation.process_results()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.get_readout_mitigation"><code class="docutils literal notranslate"><span class="pre">get_readout_mitigation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 </section>
 
 
@@ -157,8 +197,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.purr.backends.live_devices.html" class="btn btn-neutral float-left" title="qat.purr.backends.live_devices module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.purr.backends.realtime_chip_simulator.html" class="btn btn-neutral float-right" title="qat.purr.backends.realtime_chip_simulator module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.purr.compiler.html" class="btn btn-neutral float-left" title="qat.purr.compiler package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.compiler.error_mitigation.readout_mitigation.html" class="btn btn-neutral float-right" title="qat.purr.compiler.error_mitigation.readout_mitigation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -191,7 +231,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="qat.purr.backends.qiskit_simulator.html">main</a></dd>
+      <dd><a href="qat.purr.compiler.error_mitigation.html">main</a></dd>
     </dl>
   </div>
 </div><script>
