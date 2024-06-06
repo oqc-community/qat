@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QAT 1.0.0 documentation &mdash; QAT 1.0.0 documentation</title>
+  <title>Installation &mdash; QAT 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
@@ -67,7 +67,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">QAT 1.0.0 documentation</li>
+      <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,24 +79,24 @@
              
 
 
-  <section id="qat-version-documentation">
-<h1>QAT 1.0.0 documentation<a class="headerlink" href="#qat-version-documentation" title="Permalink to this heading"></a></h1>
+  <hr class="docutils" />
 <a class="reference internal image-reference" href="_images/qat-logo.png"><img alt="_images/qat-logo.png" src="_images/qat-logo.png" style="width: 400px;" /></a>
 <div class="toctree-wrapper compound">
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<p><strong>QAT</strong> (Quantum Assembly Toolchain) is a low-level quantum compiler and runtime which facilitates executing quantum IRs
-such as <a class="reference external" href="https://openqasm.com/">QASM</a> , <a class="reference external" href="https://openqasm.com/language/openpulse.html">OpenPulse</a> and
+<p><strong>QAT</strong> (Quantum Assembly Toolkit/Toolchain) is a low-level quantum compiler and runtime which facilitates executing quantum IRs
+such as <a class="reference external" href="https://openqasm.com/">QASM</a>, <a class="reference external" href="https://openqasm.com/language/openpulse.html">OpenPulse</a> and
 <a class="reference external" href="https://devblogs.microsoft.com/qsharp/introducing-quantum-intermediate-representation-qir/">QIR</a> against QPU drivers.
-It facilitates the execution of largely-optimised code, converted into abstract pulse- and hardware-level instructions,
+It facilitates the execution of largely-optimised code, converted into abstract pulse-level and hardware-level instructions,
 which are then transformed and delivered to an appropriate driver.</p>
+<p>For the official QAT documentation, please see <a class="reference external" href="https://oqc-community.github.io/qat">QAT</a>.</p>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
 <p>QAT can be installed from <a class="reference external" href="https://pypi.org/project/qat-compiler/">PyPI</a> via:
 <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">qat-compiler</span></code></p>
 <div class="line-block">
@@ -104,24 +104,18 @@ which are then transformed and delivered to an appropriate driver.</p>
 </div>
 </section>
 <section id="building-from-source">
-<h2>Building from Source<a class="headerlink" href="#building-from-source" title="Permalink to this heading"></a></h2>
+<h1>Building from Source<a class="headerlink" href="#building-from-source" title="Permalink to this heading"></a></h1>
 <p>We use <a class="reference external" href="https://python-poetry.org/">poetry</a> for dependency management and run on
 <a class="reference external" href="https://www.python.org/downloads/">Python 3.8+</a>.
 Once both of these are installed run this in the root folder to install all the dependencies that you need:
 <code class="code docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are contributing to the project we recommend that you also run</p>
-<p><code class="code docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">pre-commit</span> <span class="pre">install</span></code>
-to enable pre-commit checks.</p>
-</div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 </section>
 <section id="roadmap">
-<h2>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this heading"></a></h2>
-<p>This is a list of what we’re currently working on! If you want to get involved, contact the person or group linked.</p>
+<h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this heading"></a></h1>
+<p>Here’s a list of what we’re currently working on, if you want to get involved contact the person or group linked.</p>
 <p>In-development:</p>
 <ul class="simple">
 <li><p>Classical-quantum hybrid computation. <a class="reference external" href="mailto:jdumbell&#37;&#52;&#48;oxfordquantumcircuits&#46;com">John Dumbell</a></p></li>
@@ -140,7 +134,7 @@ to enable pre-commit checks.</p>
 </div>
 </section>
 <section id="contributing">
-<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading"></a></h2>
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading"></a></h1>
 <p>To take the first steps towards contributing to QAT, visit our
 <a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CONTRIBUTING.rst">contribution</a> documents, which provides details about our
 process.
@@ -152,14 +146,14 @@ expectations.</p>
 </div>
 </section>
 <section id="where-to-get-help">
-<h2>Where to get help<a class="headerlink" href="#where-to-get-help" title="Permalink to this heading"></a></h2>
+<h1>Where to get help<a class="headerlink" href="#where-to-get-help" title="Permalink to this heading"></a></h1>
 <p>For support, please reach out in the <a class="reference external" href="https://github.com/oqc-community/qat/discussions">Discussions</a> tab of this repository or file an <a class="reference external" href="https://github.com/oqc-community/qat/issues">issue</a>.</p>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 </section>
 <section id="licence">
-<h2>Licence<a class="headerlink" href="#licence" title="Permalink to this heading"></a></h2>
+<h1>Licence<a class="headerlink" href="#licence" title="Permalink to this heading"></a></h1>
 <p>This code in this repository is licensed under the BSD 3-Clause Licence.
 Please see <a class="reference external" href="https://github.com/oqc-community/qat/blob/main/LICENSE">LICENSE</a> for more information.</p>
 <div class="line-block">
@@ -167,7 +161,7 @@ Please see <a class="reference external" href="https://github.com/oqc-community/
 </div>
 </section>
 <section id="feedback">
-<h2>Feedback<a class="headerlink" href="#feedback" title="Permalink to this heading"></a></h2>
+<h1>Feedback<a class="headerlink" href="#feedback" title="Permalink to this heading"></a></h1>
 <p>Please let us know your feedback and any suggestions by reaching out in <a class="reference external" href="https://github.com/oqc-community/qat/discussions">Discussions</a>.
 Additionally, to report any concerns or
 <a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CODE_OF_CONDUCT.rst">code of conduct</a> violations please use this
@@ -177,7 +171,7 @@ Additionally, to report any concerns or
 </div>
 </section>
 <section id="faq">
-<h2>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading"></a></h2>
+<h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this heading"></a></h1>
 <blockquote>
 <div><p>Why is this in Python?</p>
 </div></blockquote>
@@ -213,15 +207,14 @@ reading this are likely busy doing just that.</p>
 <p>We have a real-time chip simulator that is used to help test potential changes and their ramifications to hardware.
 It focuses on accuracy and testing small-scale changes so should not be considered a general simulator. 3/4 qubit
 simulations is its maximum without runtime being prohibitive.</p>
-</section>
-</section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+</section>
 </section>
 
 
@@ -252,14 +245,14 @@ simulations is its maximum without runtime being prohibitive.</p>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: 1.0.0
+    v: 1.1.0
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
-      <dd><a href="index.html">1.0.0</a></dd>
-      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="index.html">1.1.0</a></dd>
     </dl>
   </div>
 </div><script>
