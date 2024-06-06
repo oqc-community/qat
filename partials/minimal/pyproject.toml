@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qat-compiler-minimal"
-version = "1.0.0"
+version = "1.1.0"
 description = "A minimal version of the `qat-compiler` package."
 readme = "README.rst"
 documentation = "https://oqc-community.github.io/qat"
