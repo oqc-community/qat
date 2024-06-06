@@ -16,7 +16,8 @@ which are then transformed and delivered to an appropriate driver.
 
 For more information, please see the `main package <https://pypi.org/project/qat-compiler/>`_.
 
-For the official QAT documentation, please see `QAT <https://oqc-community.github.io/qat>`_.
+For the official QAT documentation, please see `QAT <https://oqc-community.github.io/qat>`__.
+
 |
 
 ----------------------
@@ -32,7 +33,7 @@ This minimal version of QAT can be installed from `PyPI <https://pypi.org/projec
 Building from Source
 ----------------------
 
-We do not distribute the minimal package source code as a separate entity. Please see the main `QAT <https://github.com/oqc-community/qat>`_ repository for source code.
+We do not distribute the minimal package source code as a separate entity. Please see the main `QAT <https://github.com/oqc-community/qat>`__ repository for source code.
 
 |
 
