@@ -337,28 +337,30 @@ class Acquire(QuantumComponent, QuantumInstruction):
         output_variable=None,
         existing_names: Set[str] = None,
         delay=None,
-        filter: Pulse = None,
+        filter: Union[Pulse, CustomPulse] = None
     ):
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
         self.time: float = time or 1.0e-6
         self.mode: AcquireMode = mode or AcquireMode.RAW
         self.delay = delay
-        self.filter: Pulse = filter
         self.output_variable = output_variable or self.generate_name(existing_names)
 
         if filter is not None:
-            if not isinstance(filter, Pulse):
+            if isinstance(filter, (list, np.ndarray)):
+                filter = CustomPulse(channel, filter)
+            elif not isinstance(filter, (Pulse, CustomPulse)):
                 raise ValueError(
                     "Filter on an acquire has to be a Pulse. Instead it's a "
                     f"{type(filter)}"
                 )
 
-            if filter.duration != self.time:
+            if not np.isclose(filter.duration, self.time):
                 raise ValueError(
                     f"Filter duration '{filter.duration}' must be equal to Acquire "
                     f"duration '{self.time}'."
                 )
+        self.filter: Union[Pulse, CustomPulse] = filter
 
     def generate_name(self, existing_names=None):
         return build_generated_name(existing_names, f"{self.channel.id}")

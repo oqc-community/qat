@@ -572,6 +572,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
+        weights = qubit.measure_acquire.get('weights', None) if qubit.measure_acquire.get('use_weights', False) else None
         acquire_instruction = Acquire(
             acquire_channel,
             qubit.pulse_measure["width"]
@@ -581,6 +582,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             output_variable,
             self.existing_names,
             qubit.measure_acquire["delay"],
+            weights,
         )
 
         # If we detect a full measure block before us, merge it together if we're
