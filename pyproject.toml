@@ -39,6 +39,7 @@ lark = "~=0.12"
 regex = "^2022.6.2"
 jsonpickle = "^2.2.0"
 rasqal = "^0.1.4"
+ujson = "^5.10.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "24.2.0"
