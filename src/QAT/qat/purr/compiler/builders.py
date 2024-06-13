@@ -4,7 +4,7 @@
 import itertools
 import math
 from enum import Enum, auto
-from typing import List, Optional, Set, Union
+from typing import List, Set, Union
 
 import jsonpickle
 import numpy as np
@@ -47,17 +47,16 @@ from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
+
 class SerialiserBackend(Enum):
     json = "json"
     ujson = "ujson"
-
 
 
 class Axis(Enum):
     X = auto()
     Y = auto()
     Z = auto()
-
 
 
 class InstructionBuilder:
@@ -76,9 +75,11 @@ class InstructionBuilder:
     @property
     def instructions(self):
         return list(self._instructions)
-    
+
     @staticmethod
-    def deserialize(blob, backend: SerialiserBackend=SerialiserBackend.json) -> "InstructionBuilder":
+    def deserialize(
+        blob, backend: SerialiserBackend = SerialiserBackend.json
+    ) -> "InstructionBuilder":
         jsonpickle.load_backend(backend.value)
         jsonpickle.set_preferred_backend(backend.value)
 
@@ -88,7 +89,7 @@ class InstructionBuilder:
 
         return builder
 
-    def serialize(self, backend: SerialiserBackend=SerialiserBackend.json):
+    def serialize(self, backend: SerialiserBackend = SerialiserBackend.json):
         """
         Currently only serializes the instructions, not the supporting objects of the builder itself.
         This could be supported pretty easily, but not required right now.

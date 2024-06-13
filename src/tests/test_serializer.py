@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-from dataclasses import asdict, dataclass, is_dataclass
 import math
+from dataclasses import asdict, dataclass, is_dataclass
 
 import pytest
-
 from numpy import isclose
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -232,26 +231,30 @@ class TestDeserialize:
         assert type(loaded_obj) == complex
         assert loaded_obj == test_obj
 
-@pytest.mark.parametrize(
-            "backend",
-            [SerialiserBackend.json, SerialiserBackend.ujson]
-    )
+
+@pytest.mark.parametrize("backend", [SerialiserBackend.json, SerialiserBackend.ujson])
 class TestBuilderSerialiser:
     """
     Note here, that typically doing a direct float comparison is not meaningful in a test.
     Here however, we need to ensure that the integrity of the floats is exactly preserved across serialisation.
     """
-    floating_point_num = math.sqrt(math.pi)/2.14324354
+
+    floating_point_num = math.sqrt(math.pi) / 2.14324354
 
     @pytest.fixture
     def builder(self):
         hardware = get_default_echo_hardware(4)
-        
+
         hardware.get_qubit(0).get_drive_channel().frequency = self.floating_point_num
-        
+
         builder = get_builder(hardware)
         builder.X(hardware.get_qubit(0))
-        builder.U(hardware.get_qubit(0), theta=self.floating_point_num, phi=self.floating_point_num, lamb=self.floating_point_num)
+        builder.U(
+            hardware.get_qubit(0),
+            theta=self.floating_point_num,
+            phi=self.floating_point_num,
+            lamb=self.floating_point_num,
+        )
         return builder
 
     def test_floating_point_numbers_hardware(self, backend, builder):
@@ -262,13 +265,15 @@ class TestBuilderSerialiser:
 
         new_builder = InstructionBuilder.deserialize(string, backend=backend)
 
-        assert new_builder.model.get_qubit(0).get_drive_channel().frequency == self.floating_point_num
+        assert (
+            new_builder.model.get_qubit(0).get_drive_channel().frequency
+            == self.floating_point_num
+        )
 
-    
     def test_floating_point_numbers_instructions(self, backend, builder):
         """
         Testing that different serialisation backends respect floating point numbers in hardware
-         
+
         """
         string = builder.serialize(backend=backend)
 
