@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import itertools
 import math
-from collections import defaultdict
+from collections.abc import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
 
