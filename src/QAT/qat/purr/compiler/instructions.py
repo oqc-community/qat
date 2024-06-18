@@ -345,22 +345,16 @@ class Acquire(QuantumComponent, QuantumInstruction):
         self.mode: AcquireMode = mode or AcquireMode.RAW
         self.delay = delay
         self.output_variable = output_variable or self.generate_name(existing_names)
+        self.filter: Union[Pulse, CustomPulse] = self._check_filter(filter)
 
+    def _check_filter(self, filter):
         if filter is not None:
-            if isinstance(filter, (list, np.ndarray)):
-                filter = CustomPulse(channel, filter)
-            elif not isinstance(filter, (Pulse, CustomPulse)):
-                raise ValueError(
-                    "Filter on an acquire has to be a Pulse. Instead it's a "
-                    f"{type(filter)}"
-                )
-
             if not np.isclose(filter.duration, self.time):
                 raise ValueError(
                     f"Filter duration '{filter.duration}' must be equal to Acquire "
                     f"duration '{self.time}'."
                 )
-        self.filter: Union[Pulse, CustomPulse] = filter
+        return filter
 
     def generate_name(self, existing_names=None):
         return build_generated_name(existing_names, f"{self.channel.id}")
