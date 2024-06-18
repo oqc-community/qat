@@ -349,7 +349,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
 
     def _check_filter(self, filter):
         if filter is not None:
-            if not np.isclose(filter.duration, self.time):
+            if not np.isclose(filter.duration, self.time, atol=1e-12):
                 raise ValueError(
                     f"Filter duration '{filter.duration}' must be equal to Acquire "
                     f"duration '{self.time}'."
