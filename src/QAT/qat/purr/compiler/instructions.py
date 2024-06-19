@@ -348,12 +348,15 @@ class Acquire(QuantumComponent, QuantumInstruction):
         self.filter: Union[Pulse, CustomPulse] = self._check_filter(filter)
 
     def _check_filter(self, filter):
-        if filter is not None:
-            if not np.isclose(filter.duration, self.time, atol=1e-12):
-                raise ValueError(
-                    f"Filter duration '{filter.duration}' must be equal to Acquire "
-                    f"duration '{self.time}'."
-                )
+        if filter:
+            for target in self.quantum_targets:
+                if isinstance(target, PulseChannel):
+                    dt = target.physical_channel.sample_time
+                    if not np.isclose(filter.duration, dt * (self.time // dt), atol=1e-12):
+                        raise ValueError(
+                            f"Filter duration '{filter.duration}' must be equal to Acquire "
+                            f"duration '{self.time}'."
+                        )
         return filter
 
     def generate_name(self, existing_names=None):
