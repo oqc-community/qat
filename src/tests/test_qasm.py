@@ -806,10 +806,14 @@ class TestExecutionFrontend:
         # correctly assigned, aka that measuring c[0] then c[1] results in c = [c0, c1].
         assert len(results["c"]) == 2
 
-    @pytest.mark.parametrize("use_experimental,frontend_mod",
-                             [(True, experimental_frontends),
-                              (False, core_frontends),
-                             ], ids=("Experimental", "Standard"))
+    @pytest.mark.parametrize(
+        "use_experimental,frontend_mod",
+        [
+            (True, experimental_frontends),
+            (False, core_frontends),
+        ],
+        ids=("Experimental", "Standard"),
+    )
     def test_frontend_peek(self, use_experimental, frontend_mod):
         with pytest.raises(ValueError):
             fetch_frontend("", use_experimental=use_experimental)
@@ -961,7 +965,6 @@ class TestParsing:
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))
 
-
     @pytest.mark.parametrize(
         "qasm_file",
         [
@@ -990,7 +993,9 @@ class TestQatOptimization:
     def _measure_merge_timings(self, file, qubit_count, keys, expected):
         builder = parse_and_apply_optimiziations(file, qubit_count=qubit_count)
         qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
-        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file.instructions)
+        timeline = EchoEngine(builder.model).create_duration_timeline(
+            qat_file.instructions
+        )
 
         def get_start_end(key, instruction, channel_type):
             pulse_channel = builder.model.get_pulse_channel_from_device(
@@ -1303,6 +1308,7 @@ class TestQiskitBackend:
         counts = result.get_counts()
         assert counts["1"] > 900
 
+
 mapping_setup1 = (
     """
         OPENQASM 2.0;
@@ -1345,6 +1351,10 @@ def test_cl2qu_index_mapping(qasm_string, expected_mapping):
     hw = get_default_echo_hardware(3)
     parser = Qasm2Parser()
     result = parser.parse(get_builder(hw), qasm_string)
-    instructions = result.instructions
-    mapping = get_cl2qu_index_mapping(instructions, hw)
+    mapping = get_cl2qu_index_mapping(result.instructions, hw)
+    assert mapping == expected_mapping
+
+    blob = result.serialize()
+    result2 = InstructionBuilder.deserialize(blob)
+    mapping = get_cl2qu_index_mapping(result2.instructions, hw)
     assert mapping == expected_mapping

@@ -79,7 +79,7 @@ def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardw
 
         qubit = next((
             qubit for qubit in model.qubits
-            if qubit.get_acquire_channel().full_id == instruction.channel.full_id
+            if qubit.get_acquire_channel().full_id() == instruction.channel.full_id()
         ),
                      None)
         if qubit is None:
