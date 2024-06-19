@@ -11,6 +11,7 @@ from qat.purr.compiler.config import (
     CompilerConfig,
     MetricsType,
     ResultsFormatting,
+    ErrorMitigationConfig,
 )
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import (
@@ -18,7 +19,10 @@ from qat.purr.compiler.execution import (
     QuantumExecutionEngine,
     _binary,
 )
-from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
+from qat.purr.compiler.hardware_models import (
+    QuantumHardwareModel,
+    get_cl2qu_index_mapping,
+)
 from qat.purr.compiler.instructions import Instruction, Repeat, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
@@ -146,7 +150,7 @@ class QuantumRuntime(MetricsMixin):
         return results
 
     def _apply_error_mitigation(self, results, instructions, error_mitigation):
-        if error_mitigation is None:
+        if error_mitigation is None or error_mitigation == ErrorMitigationConfig.Empty:
             return results
 
         # TODO: add support for multiple registers
@@ -181,7 +185,12 @@ class QuantumRuntime(MetricsMixin):
             exe.run(self)
 
     def _common_execute(
-        self, fexecute: callable, instructions, results_format=None, repeats=None, error_mitigation=None
+        self,
+        fexecute: callable,
+        instructions,
+        results_format=None,
+        repeats=None,
+        error_mitigation=None,
     ):
         """
         Executes these instructions against the current engine and returns the results.
@@ -219,19 +228,27 @@ class QuantumRuntime(MetricsMixin):
         """
         Executes these instructions against the current engine and returns the results.
         """
+
         def fexecute(instrs):
             return self.engine._execute_with_interrupt(instrs, interrupt)
 
-        return self._common_execute(fexecute, instructions, results_format, repeats, error_mitigation)
+        return self._common_execute(
+            fexecute, instructions, results_format, repeats, error_mitigation
+        )
 
-    def execute(self, instructions, results_format=None, repeats=None, error_mitigation=None):
+    def execute(
+        self, instructions, results_format=None, repeats=None, error_mitigation=None
+    ):
         """
         Executes these instructions against the current engine and returns the results.
         """
+
         def fexecute(instrs):
             return self.engine.execute(instrs)
 
-        return self._common_execute(fexecute, instructions, results_format, repeats, error_mitigation)
+        return self._common_execute(
+            fexecute, instructions, results_format, repeats, error_mitigation
+        )
 
 
 def _binary_count(results_list, repeats):

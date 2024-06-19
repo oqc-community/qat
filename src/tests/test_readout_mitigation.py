@@ -21,6 +21,7 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.qat import execute_qasm
+from .utils import get_jagged_echo_hardware
 
 
 def apply_error_mitigation_setup(
@@ -106,13 +107,18 @@ class TestReadoutMitigation:
                 matrix = identity(2**qubit_count)
         if "linear_readout_mitigation":
             linear = self.generate_random_linear(qubit_count, random_cal)
-        hardware.error_mitigation = self.build_error_mitigation(matrix=matrix, linear=linear)
+        hardware.error_mitigation = self.build_error_mitigation(
+            matrix=matrix, linear=linear
+        )
 
-    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
-                                              get_default_qiskit_hardware])
+    @pytest.mark.parametrize(
+        "get_hardware", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
     @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
     @pytest.mark.parametrize("random_cal", [True, False])
-    def test_something_changes_qasm(self, get_hardware, qubit_count, random_cal, config_options):
+    def test_something_changes_qasm(
+        self, get_hardware, qubit_count, random_cal, config_options
+    ):
         hw = get_hardware(qubit_count)
         self.apply_hardware_options(hw, random_cal, config_options)
         compiler_config = self.build_config(config_options)
@@ -126,17 +132,18 @@ class TestReadoutMitigation:
             else:
                 original = result["b"]
                 zero = "0" * qubit_count
-                one = "11"+zero[2:]
+                one = "11" + zero[2:]
                 assert sum([original.get(zero), original.get(one, 0)]) == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
                     if key in original:
-                        assert isclose(value, original[key]/1000.0)
+                        assert isclose(value, original[key] / 1000.0)
                     else:
                         assert isclose(value, 0.0)
 
-    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
-                                              get_default_qiskit_hardware])
+    @pytest.mark.parametrize(
+        "get_hardware", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
     def test_multiple_creg_fail(self, get_hardware, config_options):
         qasm = """
         OPENQASM 2.0;
@@ -155,8 +162,9 @@ class TestReadoutMitigation:
         with pytest.raises(ValueError):
             execute_qasm(qasm, hw, compiler_config=compiler_config)
 
-    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
-                                              get_default_qiskit_hardware])
+    @pytest.mark.parametrize(
+        "get_hardware", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
     def test_non_binary_count_format_fails(self, get_hardware, config_options):
         hw = get_hardware(2)
         self.apply_hardware_options(hw, False, config_options)
@@ -165,8 +173,9 @@ class TestReadoutMitigation:
         with pytest.raises(ValueError):
             execute_qasm(self.get_qasm(2), hw, compiler_config=compiler_config)
 
-    @pytest.mark.parametrize("get_hardware", [get_default_echo_hardware,
-                                              get_default_qiskit_hardware])
+    @pytest.mark.parametrize(
+        "get_hardware", [get_default_echo_hardware, get_default_qiskit_hardware]
+    )
     def test_lack_of_hardware_calibration_fails(self, get_hardware, config_options):
         hw = get_hardware(2)
         self.apply_hardware_options(hw, False, [])
@@ -174,6 +183,43 @@ class TestReadoutMitigation:
         compiler_config.results_format = QuantumResultsFormat().raw()
         with pytest.raises(ValueError):
             execute_qasm(self.get_qasm(2), hw, compiler_config=compiler_config)
+
+
+class TestErrorMitigationConfig:
+@pytest.mark.parametrize(
+    "get_hardware",
+    [
+        get_default_echo_hardware,
+        get_default_qiskit_hardware,
+        get_jagged_echo_hardware,
+    ],
+)
+@pytest.mark.parametrize(
+    "error_mitigation",
+    [None, ErrorMitigationConfig.Empty],
+)
+class TestNoReadoutMitigation:
+    def get_qasm(self, qubit_count):
+        return f"""
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[{qubit_count}];
+        creg b[{qubit_count}];
+        h q[0];
+        cx q[0], q[1];
+        measure q -> b;
+        """
+
+    def test_execution(self, get_hardware, error_mitigation):
+        hw = get_hardware(2)
+        config = CompilerConfig(
+            results_format=QuantumResultsFormat().binary_count(),
+            error_mitigation=error_mitigation,
+            repeats=10000,
+        )
+        results = execute_qasm(self.get_qasm(2), hw, compiler_config=config)
+        assert results is not None
+        assert len(results) == 1
 
 
 class TestOnNoisySimulator:
@@ -189,15 +235,17 @@ class TestOnNoisySimulator:
             self.fidelity_r0 = {qubit.index: 1.0 for qubit in self.model.qubits}
             self.fidelity_r1 = {qubit.index: 1.0 for qubit in self.model.qubits}
 
-        def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None):
+        def _execute_on_hardware(
+            self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None
+        ):
             result = super()._execute_on_hardware(sweep_iterator, package)
             for key in result.keys():
                 q = int(key.split("_", 1)[1])
                 for array in result[key]:
                     for j in range(len(array)):
-                        if (array[j] > 0 and np.random.rand() > self.fidelity_r0[q]) or (
-                            array[j] < 0 and np.random.rand() > self.fidelity_r1[q]
-                        ):
+                        if (
+                            array[j] > 0 and np.random.rand() > self.fidelity_r0[q]
+                        ) or (array[j] < 0 and np.random.rand() > self.fidelity_r1[q]):
                             array[j] *= -1
             return result
 
@@ -230,7 +278,9 @@ class TestOnNoisySimulator:
         eng.fidelity_r0 = [q0_ro_fidelity_0, q1_ro_fidelity_0]
         eng.fidelity_r1 = [q0_ro_fidelity_1, q1_ro_fidelity_1]
 
-        mitigated_result = execute_qasm(qasm, eng, self.config)["linear_readout_mitigation"]
+        mitigated_result = execute_qasm(qasm, eng, self.config)[
+            "linear_readout_mitigation"
+        ]
         for output_bits, probability in mitigated_result.items():
             if output_bits == bitstring:
                 assert abs(probability - 1) < 0.05
