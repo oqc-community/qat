@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing to QAT &mdash; QAT 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Code of Conduct" href="coc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing to QAT</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contribute.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="contributing-to-qat">
+<h1>Contributing to QAT<a class="headerlink" href="#contributing-to-qat" title="Permalink to this heading"></a></h1>
+<p>First and foremost, thank you for considering contributing to QAT - an open-source, community maintained project.
+We are very excited to have you and your ideas working to improve both the codebase and the community.
+To begin, read the project overview and guidelines to help you quickly familiarise yourself with the project and the way
+we do things.</p>
+<p>The areas you could contribute to QAT include:</p>
+<ul class="simple">
+<li><p>Submitting bug reports and feature requests</p></li>
+<li><p>Contributing to the codebase (e.g. new features, improving the test suite etc.)</p></li>
+<li><p>Documentation</p></li>
+<li><p>Helping to answer questions which are asked in the discussion forum</p></li>
+</ul>
+<p>All contributions to QAT are governed by our
+<a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CODE_OF_CONDUCT.rst">code of conduct</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#contributing-to-qat" id="id2">Contributing to QAT</a></p>
+<ul>
+<li><p><a class="reference internal" href="#installation" id="id3">Installation</a></p></li>
+<li><p><a class="reference internal" href="#pull-requests" id="id4">Pull Requests</a></p></li>
+<li><p><a class="reference internal" href="#your-first-contribution" id="id5">Your First Contribution</a></p>
+<ul>
+<li><p><a class="reference internal" href="#first-timer-help" id="id6">First-Timer Help</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#how-to-report-a-bug" id="id7">How to Report a Bug</a></p>
+<ul>
+<li><p><a class="reference internal" href="#security-vulnerabilities" id="id8">Security Vulnerabilities</a></p></li>
+<li><p><a class="reference internal" href="#opening-an-issue" id="id9">Opening an Issue</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#new-features" id="id10">New Features</a></p></li>
+<li><p><a class="reference internal" href="#additional-information" id="id11">Additional Information</a></p>
+<ul>
+<li><p><a class="reference internal" href="#unit-tests" id="id12">Unit Tests</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>To get started, see the Building from Source section of the
+<a class="reference external" href="https://github.com/oqc-community/qat/blob/main/README.rst">README</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="pull-requests">
+<h2>Pull Requests<a class="headerlink" href="#pull-requests" title="Permalink to this heading"></a></h2>
+<p>To begin, fork this repository, make changes in your own fork, and then submit a pull request (PR).
+All new code should have associated unit tests that validate implemented features and ensure the proper functionality of
+the code.</p>
+<p>A PR must receive maintainer approval before it can be merged. We aim to review significant contributions within two weeks
+and minor changes within a few days, but we cannot guarantee this will always be the case. We expect reviews to be carried
+out respectfully and that a commitment to maintain a standard of excellence in the code base will be paramount.
+If a pull request has become stale and inactive, the project team may choose to close the PR.
+As an open source project, your patience is appreciated when waiting for PR reviews.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="your-first-contribution">
+<h2>Your First Contribution<a class="headerlink" href="#your-first-contribution" title="Permalink to this heading"></a></h2>
+<p>Now you are all set to start contributing to QAT!
+If you are unsure where to start, please check out our ‘good first issue’ and ‘help wanted’ issues.
+The ‘good first issue’ tasks will require only small changes to the code base and are intended to provide you with a smooth
+accessible learning curve whilst familiarising yourself with QAT.
+The ‘help wanted’ issues will require greater interaction/modifications to the codebase and are intended for more
+experienced contributors.</p>
+<section id="first-timer-help">
+<h3>First-Timer Help<a class="headerlink" href="#first-timer-help" title="Permalink to this heading"></a></h3>
+<p>If you’re entirely new to contributing to open source projects, some of the following helpful links may be useful to you:</p>
+<ul class="simple">
+<li><p>For an overview of how to take part in an open-source project, please read
+<a class="reference external" href="https://www.freecodecamp.org/news/how-to-contribute-to-open-source-projects-beginners-guide/">this</a></p></li>
+<li><p>Need some help with how to PR? Please visit this
+<a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests">guide</a></p></li>
+<li><p>Never had your code reviewed before? For information about how this process works, please click
+<a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews">here</a></p></li>
+</ul>
+<p>Please ask for help when you need it- after all, we were all beginners at first.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="how-to-report-a-bug">
+<h2>How to Report a Bug<a class="headerlink" href="#how-to-report-a-bug" title="Permalink to this heading"></a></h2>
+<section id="security-vulnerabilities">
+<h3>Security Vulnerabilities<a class="headerlink" href="#security-vulnerabilities" title="Permalink to this heading"></a></h3>
+<p>If you believe you have found a security vulnerability, do not open an issue or report it publicly.
+Instead, please email the security team at <a class="reference external" href="mailto:qat_security&#37;&#52;&#48;oqc&#46;tech">qat_security<span>&#64;</span>oqc<span>&#46;</span>tech</a>. Once a security vulnerability has
+been reported, you should receive an acknowledgement in two working days.
+If you suspect you have found a security issue but are unsure, please email the project team in any case.</p>
+</section>
+<section id="opening-an-issue">
+<h3>Opening an Issue<a class="headerlink" href="#opening-an-issue" title="Permalink to this heading"></a></h3>
+<p>If you believe you’ve found an issue and would like to raise it:</p>
+<ul class="simple">
+<li><p>First check to see if your issue has already been fixed. If so, download the version with the fix and try again.</p></li>
+<li><p>Has it been raised before by someone else? If an issue is already open, see if you can add additional information to help diagnose or recreate the issue.</p></li>
+<li><p>Otherwise open an issue. We have an issue template set up so please use that
+to guide you and give examples of the information we’re looking for. The more precise details you provide the higher chance we’ll be able to reproduce and fix the issue in
+a decent timeframe.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="new-features">
+<h2>New Features<a class="headerlink" href="#new-features" title="Permalink to this heading"></a></h2>
+<p>Before trying to add a new feature, open an <a class="reference external" href="https://github.com/oqc-community/qat/issues">issue</a> or start a <a class="reference external" href="https://github.com/oqc-community/qat/discussions">discussion</a> with an overview of what you’d like to see.
+This is to save disappointment as some features we will refuse because purely it doesn’t fit with QAT as a whole or where we’re currently going.</p>
+<p>Once a new feature has approval of the team as a whole you can start work on it and we’ll support you where possible. If you do not want to work on it personally it’ll go on the backlog and we’ll get to it when possible.</p>
+<p>For ideas about where the project is heading, checkout the <a class="reference external" href="https://github.com/oqc-community/qat/issues">issues</a> list
+or the Roadmap in the <a class="reference external" href="https://github.com/oqc-community/qat/blob/main/README.rst">README</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="additional-information">
+<h2>Additional Information<a class="headerlink" href="#additional-information" title="Permalink to this heading"></a></h2>
+<section id="unit-tests">
+<h3>Unit Tests<a class="headerlink" href="#unit-tests" title="Permalink to this heading"></a></h3>
+<p>QAT has an existing test suite, which can be found in the tests directory of the code base.
+It is our policy that these tests should pass at all times, unless a test is skipped in which case justification should
+be provided.
+New features should be accompanied by a comprehensive test suite which makes sure that the feature is behaving as
+intended, and that future merges do not unintentionally break this functionality.</p>
+</section>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="coc.html" class="btn btn-neutral float-left" title="Code of Conduct" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 1.1.1
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/contribute.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/contribute.html">1.1.0</a></dd>
+      <dd><a href="contribute.html">1.1.1</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
