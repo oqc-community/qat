@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 
-from qat.purr.backends.qblox.live import QbloxLiveEngine
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
@@ -13,7 +12,7 @@ log = get_default_logger()
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngine:
     def test_measure_amp_sweep(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         for amp in [0.5, 1.0]:
@@ -23,7 +22,7 @@ class TestQbloxLiveEngine:
             assert results is not None
 
     def test_measure_freq_sweep(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         q0.pulse_measure["amp"] = 0.3
@@ -42,7 +41,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_instruction_execution(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         amp = 1
@@ -63,7 +62,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_one_channel(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         amp = 1
@@ -88,7 +87,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_two_channels(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
         q1 = model.get_qubit(1)
 
@@ -123,7 +122,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_sync_two_channel(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
         q1 = model.get_qubit(1)
 
@@ -158,7 +157,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_play_very_long_pulse(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         drive_channel = q0.get_drive_channel()
@@ -170,7 +169,7 @@ class TestQbloxLiveEngine:
             results, _ = execute_instructions(engine, builder.instructions)
 
     def test_bare_measure(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         amp = 1
@@ -187,7 +186,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_measure_scope_mode(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         amp = 1
@@ -207,7 +206,7 @@ class TestQbloxLiveEngine:
 @pytest.mark.parametrize("model", [None], indirect=True)
 class Test1QMeasurements:
     def test_resonator_spect(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         qubit = model.get_qubit(0)
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
@@ -229,7 +228,7 @@ class Test1QMeasurements:
         assert results is not None
 
     def test_qubit_spect(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         qubit = model.get_qubit(0)
         drive_channel = qubit.get_drive_channel()
 
@@ -259,7 +258,7 @@ class Test1QMeasurements:
         assert results is not None
 
     def test_zmap(self, model):
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
 
         do_X = True  # excited state
         x12 = False

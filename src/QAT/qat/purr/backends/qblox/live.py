@@ -2,13 +2,18 @@ from typing import Dict
 
 import numpy as np
 
-from qat.purr.backends.live import LiveDeviceEngine
+from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.qblox.codegen import QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.compiler.interrupt import NullInterrupt
+
+
+class QbloxLiveHardwareModel(LiveHardwareModel):
+    def create_engine(self):
+        return QbloxLiveEngine(self)
 
 
 class QbloxLiveEngine(LiveDeviceEngine):

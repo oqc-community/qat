@@ -1,6 +1,6 @@
 import pytest
 
-from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 
 from .utils import setup_qblox_hardware_model
 
@@ -9,7 +9,7 @@ from .utils import setup_qblox_hardware_model
 def model(request):
     cluster_kit = request.param
     name = request.node.originalname
-    model = LiveHardwareModel()
+    model = QbloxLiveHardwareModel()
     setup_qblox_hardware_model(model, cluster_kit, name)
     model.control_hardware.connect()
     yield model

@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.qblox.codegen import QbloxEmitter
-from qat.purr.backends.qblox.live import QbloxLiveEngine
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import SweepValue, Variable
@@ -29,7 +28,7 @@ class TestDummyQbloxControlHardware:
             .frequency_shift(drive_channel, frequency)
         )
 
-        engine = QbloxLiveEngine(model)
+        engine = model.create_engine()
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
