@@ -501,6 +501,7 @@ class DeviceUpdate(QuantumInstruction):
         self.target = target
         self.attribute = attribute
         self.value = value
+        self.quantum_targets.append(target)
 
     def __repr__(self):
         return f"{self.target.full_id()}.{self.attribute} = {str(self.value)}"
