@@ -21,8 +21,6 @@ from qat.purr.compiler.instructions import (
     FrequencyShift,
     Id,
     Instruction,
-    Jump,
-    Label,
     MeasurePulse,
     PhaseReset,
     PhaseShift,
@@ -46,9 +44,12 @@ class QbloxPackage:
 
 class QatEmitter:
     def emit(self, instructions: List[Instruction]) -> CatGraph:
+        catg = CatGraph()
+
         basic_blocks = self.basic_blocks(instructions)
         basic_blocks = [bb for bb in basic_blocks if bb.instructions]
-        catg = CatGraph(basic_blocks)
+
+
         return catg
 
     def basic_blocks(self, instructions: List[Instruction]) -> List[BasicBlock]:
