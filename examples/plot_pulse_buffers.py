@@ -38,7 +38,7 @@ class PhysicalBufferPlotEngine(EchoEngine):
         self.name = name
 
     def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile):
-        position_map = self.target.create_duration_timeline(package)
+        position_map = self.target.create_duration_timeline(package.instructions)
         pulse_buffers = self.target.build_pulse_channel_buffers(
             position_map, do_upconvert=self.upconvert
         )
