@@ -31,4 +31,4 @@ jobs:
       - name: Unit tests
         run: |
           poetry install
-          poetry run pytest -v src/tests/
+          poetry run pytest -v src/QAT/tests/
