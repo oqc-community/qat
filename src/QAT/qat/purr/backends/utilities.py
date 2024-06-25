@@ -418,9 +418,15 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
             f"'{str(data)}' is an unknown pulse type. Can't evaluate shape."
         )
 
-    amplitude_differential = num_func.derivative(t, amplitude)
     buf = scale_factor * amp * np.exp(1.0j * phase_offset) * amplitude
     if not drag == 0.0:
+        amplitude_differential = num_func.derivative(t, amplitude)
+        if len(amplitude_differential) < len(buf):
+            amplitude_differential = np.pad(
+                amplitude_differential,
+                (0,len(buf)-len(amplitude_differential)),
+                'edge'
+            )
         buf += (
             drag
             * 1.0j

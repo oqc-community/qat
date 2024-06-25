@@ -19,6 +19,7 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import (
     Acquire,
+    CustomPulse,
     Instruction,
     PostProcessType,
     Pulse,
@@ -171,6 +172,26 @@ class TestInstruction:
             qubit1: {qubit1, qubit0, qubit2},
             qubit2: {qubit0, qubit1, qubit2}
         }
+
+    def test_acquire_filter(self):
+        hw = get_default_echo_hardware(1)
+        measure_ch = hw.get_qubit(0).get_measure_channel()
+        acquire_ch = hw.get_qubit(0).get_acquire_channel()
+        width = 1e-6
+        samples = np.linspace(0, width, int(width//1e-9), dtype=np.complex64)
+        filter = CustomPulse(measure_ch, samples)
+        acquire = Acquire(
+            acquire_ch,
+            time=width,
+            filter=filter,
+        )
+        assert all(samples == acquire.filter.samples)
+        with pytest.raises(ValueError):
+            Acquire(
+                acquire_ch,
+                time=0.8e-6,
+                filter=filter,
+            )
 
 
 class TestSweep:

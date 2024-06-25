@@ -4,10 +4,12 @@ import numpy as np
 import pytest
 from qat.purr.backends.utilities import (
     BlackmanFunction,
+    evaluate_shape,
     GaussianFunction,
     NumericFunction,
     SquareFunction,
 )
+from qat.purr.compiler.instructions import CustomPulse
 
 
 @pytest.mark.parametrize("sizes", [1, 2, 5, 7])
@@ -101,3 +103,12 @@ def test_numeric_derivative():
     f = SomeFunction()
     d_y = f.derivative(np.arange(start=0, stop=5))
     assert np.allclose(d_y, np.ones(5), atol=1e-6)
+
+
+def test_custom_pulse_evaluate_shape():
+    samples = np.linspace(0, 1, 100, dtype=np.complex64)
+    t = np.linspace(0, 1e-6, 100)
+    pulse = CustomPulse(None, samples)
+    buffer = evaluate_shape(pulse, t)
+    assert len(buffer) == len(t)
+    assert all(buffer == samples)

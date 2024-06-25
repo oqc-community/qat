@@ -731,7 +731,13 @@ class Qubit(QuantumDevice):
             "rise": 0.0,
         }
 
-        self.measure_acquire = {"delay": 180e-9, "sync": True, "width": 1e-6}
+        self.measure_acquire = {
+            "delay": 180e-9,
+            "sync": True,
+            "width": 1e-6,
+            'weights': None,
+            'use_weights': False
+        }
 
     def add_coupled_qubit(self, qubit: Qubit):
         if qubit is None:
