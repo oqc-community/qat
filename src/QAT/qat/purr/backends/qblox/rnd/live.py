@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from qat.purr.backends.live import LiveDeviceEngine
-from qat.purr.backends.qblox.fast.codegen import QbloxEmitter
+from qat.purr.backends.qblox.rnd.codegen import QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.instructions import AcquireMode, Instruction, Repeat

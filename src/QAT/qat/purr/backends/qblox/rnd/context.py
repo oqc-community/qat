@@ -4,10 +4,11 @@ from typing import List, Dict
 
 import numpy as np
 
+from qat.purr.backends.qblox.codegen import calculate_duration
 from qat.purr.backends.qblox.ir import Constants, SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.devices import PulseChannel
-from qat.purr.compiler.instructions import Sweep, Repeat, Waveform, calculate_duration, CustomPulse, \
+from qat.purr.compiler.instructions import Sweep, Repeat, Waveform, CustomPulse, \
     Pulse, Acquire, Delay, MeasurePulse, Synchronize, PhaseReset, PhaseShift
 
 

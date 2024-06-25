@@ -2,7 +2,8 @@ from typing import Union, List
 
 import numpy as np
 
-from qat.purr.compiler.instructions import SweepValue, Sweep
+from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.instructions import SweepValue, Sweep, Instruction
 
 
 class ReducedSweepValue(SweepValue):
@@ -45,3 +46,26 @@ class ReducedSweep(Sweep):
             operations = [operations]
 
         self.operations = operations
+
+
+class EndSweep(Instruction):
+    """
+    Basic scoping.Marks the end of the nearest prior sweep
+    """
+    pass
+
+
+class EndRepeat(Instruction):
+    """
+    Basic scoping.
+    Marks the end of the nearest prior repeat
+    """
+    pass
+
+
+class HybridInstructionBuilder(QuantumInstructionBuilder):
+    def end_repeat(self):
+        return self.add(EndRepeat())
+
+    def end_sweep(self):
+        return self.add(EndSweep())

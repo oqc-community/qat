@@ -1,8 +1,9 @@
 import numpy as np
+import pytest
 
 from qat.purr.backends.live import LiveHardwareModel
-from qat.purr.backends.qblox.rnd.codegen import QbloxEmitter
-from qat.purr.backends.qblox.rnd.instructions import ReducedSweep, ReducedSweepValue
+from qat.purr.backends.qblox.rnd.codegen import QbloxEmitter, QatEmitter
+from qat.purr.backends.qblox.rnd.instructions import ReducedSweep, ReducedSweepValue, HybridInstructionBuilder
 from qat.purr.backends.qblox.rnd.live import QbloxLiveEngine
 from src.tests.qblox.utils import setup_qblox_hardware_model
 from qat.purr.compiler.emitter import InstructionEmitter
@@ -48,3 +49,27 @@ def test_fast_resonator_spect():
     qblox_packages = QbloxEmitter(qat_file).emit(qat_file)
     assert qblox_packages is not None
 
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+def test_qat_graph(model):
+    qubit = model.get_qubit(0)
+    measure_channel = qubit.get_measure_channel()
+    acquire_channel = qubit.get_acquire_channel()
+    assert acquire_channel == measure_channel
+
+    num_points = 10
+    freq_range = 20e6
+    center_freq = qubit.get_acquire_channel().frequency
+    freqs = center_freq + np.linspace(-freq_range, freq_range, num_points)
+    builder = (
+        HybridInstructionBuilder(model)
+        #.sweep(SweepValue(f'freq{0}', freqs))
+        .repeat(400, 500e-6)
+        .device_assign(measure_channel, "frequency", Variable(f'freq{0}'))
+        .device_assign(acquire_channel, "frequency", Variable(f'freq{0}'))
+        .measure_mean_signal(qubit, output_variable=f'Q{0}')
+        .end_repeat()
+    )
+    qat_graph = QatEmitter().emit(builder.instructions)
+    qblox_packages = QbloxEmitter().emit(qat_graph)
+    assert qblox_packages is not None

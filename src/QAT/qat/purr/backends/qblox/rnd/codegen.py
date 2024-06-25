@@ -1,13 +1,38 @@
+from builtins import isinstance
 from contextlib import ExitStack
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict, List
 
-from qat.purr.backends.qblox.rnd.context import QbloxContext, SweepContext, RepeatContext, AbstractContext
-from qat.purr.backends.qblox.ir import Sequence, Opcode
+from qat.purr.backends.qblox.ir import Opcode, Sequence
+from qat.purr.backends.qblox.rnd.context import (
+    AbstractContext,
+    QbloxContext,
+    RepeatContext,
+    SweepContext,
+)
+from qat.purr.backends.qblox.rnd.control_flow import BasicBlock, CatGraph
+from qat.purr.backends.qblox.rnd.instructions import EndRepeat, EndSweep
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.instructions import QuantumInstruction, Repeat, Sweep, PhaseReset, PostProcessing, Synchronize, \
-    MeasurePulse, Acquire, Waveform, Delay, PhaseShift, FrequencyShift, Id, DeviceUpdate
+from qat.purr.compiler.instructions import (
+    Acquire,
+    Delay,
+    DeviceUpdate,
+    FrequencyShift,
+    Id,
+    Instruction,
+    Jump,
+    Label,
+    MeasurePulse,
+    PhaseReset,
+    PhaseShift,
+    PostProcessing,
+    QuantumInstruction,
+    Repeat,
+    Sweep,
+    Synchronize,
+    Waveform,
+)
 
 
 @dataclass
@@ -17,6 +42,47 @@ class QbloxPackage:
 
     def is_empty(self):
         return not (any(self.sequence.waveforms) or any(self.sequence.acquisitions))
+
+
+class QatEmitter:
+    def emit(self, instructions: List[Instruction]) -> CatGraph:
+        basic_blocks = self.basic_blocks(instructions)
+        basic_blocks = [bb for bb in basic_blocks if bb.instructions]
+        catg = CatGraph(basic_blocks)
+        return catg
+
+    def basic_blocks(self, instructions: List[Instruction]) -> List[BasicBlock]:
+        i = None
+        for j, inst in enumerate(instructions):
+            if isinstance(inst, (Sweep, Repeat)):
+                i = j
+                break
+
+        if i is None:
+            return [BasicBlock(instructions)]
+
+        end_type = EndRepeat if isinstance(instructions[i], Repeat) else EndSweep
+
+        j = None
+        for k, inst in enumerate(instructions[-1:i:-1]):
+            if isinstance(inst, end_type):
+                if (isinstance(inst, EndRepeat) and end_type != EndRepeat) or (
+                    isinstance(inst, EndSweep) and end_type != EndSweep
+                ):
+                    raise ValueError("Scoping violated")
+                j = len(instructions) - k - 1
+                break
+
+        if j is None:
+            raise ValueError("Missing scope end")
+
+        return (
+            self.basic_blocks(instructions[:i])
+            + [BasicBlock(instructions[i])]
+            + self.basic_blocks(instructions[i + 1: j])
+            + [BasicBlock(instructions[j])]
+            + self.basic_blocks(instructions[j + 1:])
+        )
 
 
 class QbloxEmitter:
@@ -122,22 +188,24 @@ class QbloxEmitter:
         target_contexts = self.optimize(target_contexts)
 
         return [
-            self.create_package(target, context) for target,
-            context in target_contexts.items()
+            self.create_package(target, context)
+            for target, context in target_contexts.items()
         ]
 
     def optimize(self, qblox_contexts: Dict) -> Dict:
         # Remove empty contexts
         qblox_contexts = {
-            target: context for target,
-            context in qblox_contexts.items() if not context.is_empty()
+            target: context
+            for target, context in qblox_contexts.items()
+            if not context.is_empty()
         }
 
         # Remove Opcode.WAIT_SYNC instructions when the experiment contains only a singleton context
         if len(qblox_contexts) == 1:
             context = list(qblox_contexts.values())[0]
             context.builder.q1asm_instructions = [
-                inst for inst in context.builder.q1asm_instructions
+                inst
+                for inst in context.builder.q1asm_instructions
                 if not inst.opcode == Opcode.WAIT_SYNC
             ]
 
