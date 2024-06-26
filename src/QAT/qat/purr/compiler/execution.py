@@ -202,7 +202,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     accum_phaseshifts[instruction.channel] = PhaseShift(
                         instruction.channel, instruction.phase
                     )
-            elif isinstance(instruction, Pulse):
+            elif isinstance(instruction, (Pulse, CustomPulse)):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, List):
                     quantum_targets = [quantum_targets]
@@ -237,7 +237,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     f"Cannot perform an acquire on the physical channel with id "
                     f"{inst.channel.physical_channel}"
                 )
-            if isinstance(inst, Pulse):
+            if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
                     raise ValueError(
