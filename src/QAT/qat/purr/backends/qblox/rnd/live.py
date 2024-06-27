@@ -47,7 +47,7 @@ class QbloxLiveEngine(LiveDeviceEngine):
         return batches
 
     def _common_execute(self, instructions, interrupt=NullInterrupt()):
-        """ Executes this qat file against this current hardware. """
+        """Executes this qat file against this current hardware."""
         self._model_exists()
 
         with log_duration("QPU returned results in {} seconds."):
@@ -92,13 +92,16 @@ class QbloxLiveEngine(LiveDeviceEngine):
                 dt = physical_channel.sample_time
                 physical_channel.readout_start = aq.start * dt + aq.delay
                 physical_channel.readout_length = aq.samples * dt
-                physical_channel.acquire_mode_integrator = aq.mode == AcquireMode.INTEGRATOR
+                physical_channel.acquire_mode_integrator = (
+                    aq.mode == AcquireMode.INTEGRATOR
+                )
 
             for aq in aqs:
                 response = playback_results[aq.physical_channel.id]
                 response_axis = get_axis_map(aq.mode, response)
                 for pp in package.get_pp_for_variable(aq.output_variable):
-                    response, response_axis = self.run_post_processing(pp, response, response_axis)
+                    response, response_axis = self.run_post_processing(
+                        pp, response, response_axis
+                    )
 
         return results
-

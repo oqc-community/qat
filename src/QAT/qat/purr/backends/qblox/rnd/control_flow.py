@@ -1,7 +1,6 @@
-from typing import Tuple
+from typing import Any, Dict, List, Tuple
 
 from qat.purr.compiler.instructions import Instruction
-from typing import List, Dict, Any
 
 
 class BasicBlock:

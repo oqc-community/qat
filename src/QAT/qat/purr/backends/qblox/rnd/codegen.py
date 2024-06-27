@@ -49,7 +49,6 @@ class QatEmitter:
         basic_blocks = self.basic_blocks(instructions)
         basic_blocks = [bb for bb in basic_blocks if bb.instructions]
 
-
         return catg
 
     def basic_blocks(self, instructions: List[Instruction]) -> List[BasicBlock]:
@@ -80,9 +79,9 @@ class QatEmitter:
         return (
             self.basic_blocks(instructions[:i])
             + [BasicBlock(instructions[i])]
-            + self.basic_blocks(instructions[i + 1: j])
+            + self.basic_blocks(instructions[i + 1 : j])
             + [BasicBlock(instructions[j])]
-            + self.basic_blocks(instructions[j + 1:])
+            + self.basic_blocks(instructions[j + 1 :])
         )
 
 

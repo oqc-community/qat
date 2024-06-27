@@ -1,6 +1,6 @@
 from abc import ABC
 from contextlib import contextmanager
-from typing import List, Dict
+from typing import Dict, List
 
 import numpy as np
 
@@ -8,8 +8,19 @@ from qat.purr.backends.qblox.codegen import calculate_duration
 from qat.purr.backends.qblox.ir import Constants, SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.devices import PulseChannel
-from qat.purr.compiler.instructions import Sweep, Repeat, Waveform, CustomPulse, \
-    Pulse, Acquire, Delay, MeasurePulse, Synchronize, PhaseReset, PhaseShift
+from qat.purr.compiler.instructions import (
+    Acquire,
+    CustomPulse,
+    Delay,
+    MeasurePulse,
+    PhaseReset,
+    PhaseShift,
+    Pulse,
+    Repeat,
+    Sweep,
+    Synchronize,
+    Waveform,
+)
 
 
 def get_nco_phase_arguments(phase_rad: float) -> int:
@@ -206,7 +217,9 @@ class AbstractContext(ABC):
 
     def _process_acquire(self, acquire: Acquire, target: PulseChannel):
         acq_index = self._acq_index
-        self.builder.add_acquisition(acquire.output_variable, acq_index, 131072)# self._repeat_count)
+        self.builder.add_acquisition(
+            acquire.output_variable, acq_index, 131072
+        )  # self._repeat_count)
         self._acq_index = acq_index + 1
         return acq_index
 
