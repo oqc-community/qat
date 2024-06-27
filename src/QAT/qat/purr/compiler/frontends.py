@@ -3,10 +3,10 @@
 import abc
 import os
 import tempfile
-from enum import Enum
 from typing import Tuple
 
 import regex
+
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
@@ -72,8 +72,7 @@ class LanguageFrontend(abc.ABC):
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> Tuple[InstructionBuilder, CompilationMetrics]:
-        ...
+    ) -> Tuple[InstructionBuilder, CompilationMetrics]: ...
 
     @abc.abstractmethod
     def execute(
@@ -83,8 +82,7 @@ class LanguageFrontend(abc.ABC):
         compiler_config: CompilerConfig,
         *args,
         **kwargs,
-    ):
-        ...
+    ): ...
 
 
 class QIRFrontend(LanguageFrontend):
@@ -169,9 +167,7 @@ class QASMFrontend(LanguageFrontend):
 
         parser = get_qasm_parser(qasm_string)
         if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(
-                parser.parser_language()
-            )
+            compiler_config.optimizations = get_optimizer_config(parser.parser_language())
 
         with log_duration("Compilation completed, took {} seconds."):
             log.info(

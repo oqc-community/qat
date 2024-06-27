@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import numpy as np
 import pytest
+
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
@@ -10,9 +11,7 @@ from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
 
-@pytest.mark.skipif(
-    not qutip_available, reason="Qutip is not available on this platform"
-)
+@pytest.mark.skipif(not qutip_available, reason="Qutip is not available on this platform")
 class TestBaseQuantumQutip:
     def get_simulator(self):
         hw = get_default_RTCS_hardware()
@@ -61,10 +60,12 @@ class TestBaseQuantumQutip:
                         .X(target_q, -np.pi / 2.0)
                         .Z(control_q, -np.pi / 2.0)
                         .measure_mean_z(control_q)
-                        .measure_mean_z(target_q)
+                        .measure_mean_z(target_q),
                     )[0]
-                ) for t in prep
-            ] for c in prep
+                )
+                for t in prep
+            ]
+            for c in prep
         ]
 
         for i in [0, 1]:

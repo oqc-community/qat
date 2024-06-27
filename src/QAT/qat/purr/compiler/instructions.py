@@ -5,20 +5,15 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from enum import Enum
-from typing import Any, Dict, List, Set, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
+
 from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.devices import (
-    PulseChannel,
-    PulseShapeType,
-    QuantumComponent,
-    Qubit,
-)
-from qat.purr.utils.serializer import json_dumps, json_loads
+from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
 
 if TYPE_CHECKING:
-    from qat.purr.compiler.hardware_models import QuantumHardwareModel
+    pass
 
 
 def _stringify_qubits(qubits):
@@ -86,7 +81,7 @@ class QuantumInstruction(Instruction):
 
 def _add_channels(
     instruction: QuantumInstruction,
-    channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+    channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
 ):
     """Returns the union of `channels` and `instruction`'s quantum targets"""
     if channels is None:
@@ -97,7 +92,8 @@ def _add_channels(
 
     unique_targets = set(instruction.quantum_targets)
     for target in (
-        chan for val in channels
+        chan
+        for val in channels
         for chan in (val.get_all_channels() if isinstance(val, Qubit) else [val])
     ):
         if not isinstance(target, PulseChannel):
@@ -184,6 +180,7 @@ class Synchronize(QuantumInstruction):
     Tells the QPU to wait for all the related channels to be free before continuing
     execution on any of them.
     """
+
     quantum_targets: List[PulseChannel]
 
     def __init__(
@@ -194,8 +191,7 @@ class Synchronize(QuantumInstruction):
         self.add_channels(sync_channels)
 
     def add_channels(
-        self,
-        sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+        self, sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
     ):
         self.quantum_targets = _add_channels(self, sync_channels)
 
@@ -337,7 +333,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         output_variable=None,
         existing_names: Set[str] = None,
         delay=None,
-        filter: Union[Pulse, CustomPulse] = None
+        filter: Union[Pulse, CustomPulse] = None,
     ):
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
@@ -371,9 +367,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         return next(iter(self.quantum_targets), None)
 
     def __repr__(self):
-        out_var = (
-            f"->{self.output_variable}" if self.output_variable is not None else ""
-        )
+        out_var = f"->{self.output_variable}" if self.output_variable is not None else ""
         mode = f",{self.mode.value}" if self.mode is not None else ""
         return f"acquire {self.channel.full_id()},{self.time}{mode}{out_var}"
 
@@ -404,13 +398,11 @@ class PostProcessing(QuantumInstruction):
 
     def __repr__(self):
         axis = ",".join([axi.value for axi in self.axes])
-        args = (
-            f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
+        args = f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
+        output_var = f"->{self.output_variable}" if self.output_variable is not None else ""
+        return (
+            f"{self.process.value} {self.acquire.output_variable}{args}{axis}{output_var}"
         )
-        output_var = (
-            f"->{self.output_variable}" if self.output_variable is not None else ""
-        )
-        return f"{self.process.value} {self.acquire.output_variable}{args}{axis}{output_var}"
 
 
 class Reset(QuantumInstruction):
@@ -430,10 +422,7 @@ class Reset(QuantumInstruction):
             )
 
         super().__init__(
-            [
-                val.get_drive_channel() if isinstance(val, Qubit) else val
-                for val in qubit
-            ]
+            [val.get_drive_channel() if isinstance(val, Qubit) else val for val in qubit]
         )
 
     def __repr__(self):
@@ -623,9 +612,7 @@ def build_generated_name(existing_names=None, prefix=None):
     if any(prefix) and not prefix.endswith("_"):
         prefix = f"{prefix}_"
 
-    variable_name = (
-        f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
-    )
+    variable_name = f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
     while variable_name in existing_names:
         variable_name = (
             f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"

@@ -7,8 +7,8 @@ from typing import Union
 
 import regex
 
-import qat.purr.compiler.frontends as core_frontends
 import qat.purr.compiler.experimental.frontends as experimental_frontends
+import qat.purr.compiler.frontends as core_frontends
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.frontends import LanguageFrontend
@@ -51,7 +51,7 @@ path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
 
 def fetch_frontend(
     path_or_str: Union[str, bytes],
-    use_experimental:bool = False,
+    use_experimental: bool = False,
 ) -> LanguageFrontend:
     frontend_mod = core_frontends
     if use_experimental:
@@ -92,9 +92,7 @@ def execute_with_metrics(
     return _execute_with_metrics(frontend, path_or_str, hardware, compiler_config)
 
 
-def execute_qir(
-    qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None
-):
+def execute_qir(qat_input: QATInput, hardware=None, compiler_config: CompilerConfig = None):
     results, _ = execute_qir_with_metrics(qat_input, hardware, compiler_config)
     return results
 
@@ -135,9 +133,7 @@ def _execute_with_metrics(
     )
     metrics.merge(build_metrics)
 
-    results, execution_metrics = frontend.execute(
-        instructions, hardware, compiler_config
-    )
+    results, execution_metrics = frontend.execute(instructions, hardware, compiler_config)
     metrics.merge(execution_metrics)
 
     return results, metrics.as_dict()

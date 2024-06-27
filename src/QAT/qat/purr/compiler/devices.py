@@ -12,6 +12,7 @@ import jsonpickle.ext.numpy as jsonpickle_numpy
 import numpy as np
 from jsonpickle import Pickler, Unpickler
 from jsonpickle.util import is_picklable
+
 from qat.purr.utils.logger import get_default_logger
 
 # TODO: Remove the setting of the recursion limit as soon as the pickling of hardware is
@@ -56,9 +57,7 @@ def build_qubit(
     Helper method tp build a qubit with assumed default values on the channels. Modelled
     after the live hardware.
     """
-    qubit = Qubit(
-        index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id
-    )
+    qubit = Qubit(index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id)
     qubit.create_pulse_channel(
         ChannelType.drive,
         frequency=drive_freq,
@@ -179,13 +178,9 @@ class Calibratable:
 
     @staticmethod
     def load_calibration(calibration_string):
-        reconstituted = jsonpickle.decode(
-            calibration_string, context=CyclicRefUnpickler()
-        )
+        reconstituted = jsonpickle.decode(calibration_string, context=CyclicRefUnpickler())
         if isinstance(reconstituted, str):
-            raise ValueError(
-                "Loading from calibration string failed. Please regenerate."
-            )
+            raise ValueError("Loading from calibration string failed. Please regenerate.")
 
         return reconstituted
 
@@ -351,9 +346,11 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         scale=1.0 + 0.0j,
         amp=0.0,
         active: bool = True,
-        fixed_if: bool = False
+        fixed_if: bool = False,
     ):
-        pulse_channel = FreqShiftPulseChannel(id_, self, frequency, bias, scale, amp, active, fixed_if)
+        pulse_channel = FreqShiftPulseChannel(
+            id_, self, frequency, bias, scale, amp, active, fixed_if
+        )
 
         return pulse_channel
 
@@ -477,7 +474,7 @@ class FreqShiftPulseChannel(PulseChannel):
         amp=0.0,
         active: bool = True,
         fixed_if: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
         self.amp: float = amp
@@ -591,12 +588,11 @@ class QuantumDevice(QuantumComponent, Calibratable):
         if auxiliary_devices is None:
             auxiliary_devices = []
         if id_ is None:
-            id_ = self._create_pulse_channel_id(
-                channel_type, [self] + auxiliary_devices
-            )
+            id_ = self._create_pulse_channel_id(channel_type, [self] + auxiliary_devices)
         if channel_type == ChannelType.freq_shift:
-            pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(id_, frequency, bias, scale, amp,
-                                                                                  active, fixed_if)
+            pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(
+                id_, frequency, bias, scale, amp, active, fixed_if
+            )
         else:
             pulse_channel = self.physical_channel.create_pulse_channel(
                 id_, frequency, bias, scale, fixed_if
@@ -735,8 +731,8 @@ class Qubit(QuantumDevice):
             "delay": 180e-9,
             "sync": True,
             "width": 1e-6,
-            'weights': None,
-            'use_weights': False
+            "weights": None,
+            "use_weights": False,
         }
 
     def add_coupled_qubit(self, qubit: Qubit):

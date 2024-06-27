@@ -2,16 +2,17 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from collections import Iterable
 from numbers import Number
-from typing import List, Optional, Sized, TypeVar, Union
+from typing import List, Optional, TypeVar, Union
 
 import numpy
+
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CalibrationArguments,
     CompilerConfig,
+    ErrorMitigationConfig,
     MetricsType,
     ResultsFormatting,
-    ErrorMitigationConfig,
 )
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import (
@@ -19,15 +20,11 @@ from qat.purr.compiler.execution import (
     QuantumExecutionEngine,
     _binary,
 )
-from qat.purr.compiler.hardware_models import (
-    QuantumHardwareModel,
-    get_cl2qu_index_mapping,
-)
-from qat.purr.compiler.instructions import Instruction, Repeat, is_generated_name
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
+from qat.purr.compiler.instructions import Instruction, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -62,9 +59,7 @@ class QuantumExecutableBlock:
 class CalibrationWithArgs(QuantumExecutableBlock):
     """Wrapper for a calibration and argument combination."""
 
-    def __init__(
-        self, calibration: RemoteCalibration, args: CalibrationArguments = None
-    ):
+    def __init__(self, calibration: RemoteCalibration, args: CalibrationArguments = None):
         self.calibration = calibration
         self.args = args or CalibrationArguments()
 

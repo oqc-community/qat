@@ -33,18 +33,14 @@ class SquareWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Square")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.SQUARE, width, amp, ignore_channel_scale)
 
 
 class GaussianWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Gaussian")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.GAUSSIAN, width, amp, ignore_channel_scale)
 
 
 class SoftSquareWaveform(AbstractWaveform):
@@ -60,9 +56,7 @@ class BlackmanWaveform(AbstractWaveform):
     waveform_definition: WaveformDef = WaveformDef(name="Blackman")
 
     def __init__(self, channel, width, amp, ignore_channel_scale):
-        super().__init__(
-            channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale
-        )
+        super().__init__(channel, PulseShapeType.BLACKMAN, width, amp, ignore_channel_scale)
 
 
 class SetupHoldWaveform(AbstractWaveform):

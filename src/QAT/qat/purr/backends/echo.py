@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.devices import (
     ChannelType,
@@ -172,7 +173,10 @@ class EchoEngine(QuantumExecutionEngine):
         return instructions
 
     def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile, interrupt: Interrupt=NullInterrupt()
+        self,
+        sweep_iterator: SweepIterator,
+        package: QatFile,
+        interrupt: Interrupt = NullInterrupt(),
     ) -> Dict[str, np.ndarray]:
         results = {}
         while not sweep_iterator.is_finished():

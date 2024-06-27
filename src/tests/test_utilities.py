@@ -2,12 +2,13 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import numpy as np
 import pytest
+
 from qat.purr.backends.utilities import (
     BlackmanFunction,
-    evaluate_shape,
     GaussianFunction,
     NumericFunction,
     SquareFunction,
+    evaluate_shape,
 )
 from qat.purr.compiler.instructions import CustomPulse
 
