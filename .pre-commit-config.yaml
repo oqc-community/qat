@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-merge-conflict
+        stages: [commit, manual]
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.3.1
+    hooks:
+      - id: autoflake
+        name: autoflake
+        args: [ --remove-all-unused-imports, --ignore-init-module-imports, --ignore-pass-after-docstring, --in-place, --recursive ]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort
+        args: [ --profile, black, --line-length, "92" ]
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+    rev: 24.4.2
+    hooks:
+      - id: black
+        name: black
+        args: [ --line-length, "92" ]

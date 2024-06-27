@@ -47,6 +47,7 @@ autoflake = "^2.2.0"
 isort = "^5.10.1"
 black = "^23.11.0"
 docplex = "^2.21.207"
+pre-commit = "^3.5.0"
 
 [tool.poetry.group.licenses]
 optional = true
@@ -78,11 +79,15 @@ build-backend = "poetry.core.masonry.api"
 remove-all-unused-imports = true
 ignore-init-module-imports = true
 ignore-pass-after-docstring = true
+in-place = true
+recursive = true
 
 [tool.isort]
-py_version = 38
-profile = "wemake"
+profile = "black"
 line_length = 92
+
+[tool.black]
+line-length = 92
 
 [[tool.poetry.source]]
 name = "PyPI"

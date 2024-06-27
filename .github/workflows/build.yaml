@@ -13,6 +13,27 @@ permissions:
 run-name: Build from ${{ github.ref }}
 
 jobs:
+  formatting-tests:
+    name: Consistency and formatting
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Consistency and formatting tests
+        run: |
+          poetry install --with dev
+          poetry run autoflake --check-diff --ignore-pass-after-docstring --recursive .
+          poetry run isort --check-only --profile black --line-length 92 .
+          poetry run black --check --diff --color --line-length 92 .
   unit-tests:
     name: Unit Tests
     runs-on: [ubuntu-latest]
