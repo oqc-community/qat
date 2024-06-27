@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 from qat.purr.backends.live_devices import (
@@ -15,7 +15,7 @@ from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling, Physic
     ChannelType
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import ErrorMitigation, QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -135,9 +135,18 @@ class LiveHardwareModel(QuantumHardwareModel):
     def __init__(
         self,
         control_hardware: ControlHardware = None,
+        shot_limit=10000,
+        acquire_mode=None,
+        repeat_count=1000,
+        repetition_period=100e-6,
+        error_mitigation: Optional[ErrorMitigation] = None,
     ):
         super().__init__(
-            acquire_mode=AcquireMode.INTEGRATOR,
+            shot_limit=shot_limit,
+            acquire_mode=acquire_mode or AcquireMode.INTEGRATOR,
+            repeat_count=repeat_count,
+            repetition_period=repetition_period,
+            error_mitigation=error_mitigation,
         )
         self.control_hardware: ControlHardware = control_hardware
         self.instruments: Dict[str, Instrument] = {}
