@@ -96,9 +96,7 @@ class OpenPulseFeatures(FeatureMetadata):
 
         for frame_name, channel_view in get_frame_mappings(hardware).items():
             frame = channel_view.pulse_channel
-            qubit = _find_qubit(
-                hardware.get_devices_from_pulse_channel(frame.full_id())[0]
-            )
+            qubit = _find_qubit(hardware.get_devices_from_pulse_channel(frame.full_id())[0])
             qubits = [qubit.id]
             qubits.extend(
                 [

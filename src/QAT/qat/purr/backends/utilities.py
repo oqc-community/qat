@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpmath import cosh
 from numpy import append, cos, pi, sin
+from scipy.special import erf
+
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -18,7 +20,6 @@ from qat.purr.compiler.instructions import (
     QuantumInstruction,
     Waveform,
 )
-from scipy.special import erf
 
 UPCONVERT_SIGN = 1.0
 
@@ -42,8 +43,7 @@ def remove_axes(original_dims, removed_axis_indices, axis_locations):
     }
     new_dims = original_dims - len(removed_axis_indices)
     new_axis_locations = {
-        k: (v - new_dims) if axis_negative[k] else v
-        for k, v in new_axis_locations.items()
+        k: (v - new_dims) if axis_negative[k] else v for k, v in new_axis_locations.items()
     }
     return new_axis_locations
 
@@ -193,9 +193,7 @@ class DragGaussianFunction(ComplexFunction):
         self.zero_at_edges = zero_at_edges
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        zae_chunk = -self.zero_at_edges * (
-            np.exp(-0.5 * (self.width / self.width) ** 2)
-        )
+        zae_chunk = -self.zero_at_edges * (np.exp(-0.5 * (self.width / self.width) ** 2))
         beta_chunk = 1 - 1j * self.beta * x / self.width**2
         coef = beta_chunk / (1 - zae_chunk)
         gauss = np.exp(-0.5 * (x / (2 * self.width)) ** 2)
@@ -254,9 +252,7 @@ class RoundedSquareFunction(ComplexFunction):
             - 1
         )
         return rescaling * (
-            self.step((x - x1) / self.rise_time)
-            + self.step(-(x - x2) / self.rise_time)
-            - 1
+            self.step((x - x1) / self.rise_time) + self.step(-(x - x2) / self.rise_time) - 1
         )
 
 
@@ -287,9 +283,7 @@ class SoftSquareFunction(NumericFunction):
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
         return 0.5 * (
-            np.tanh(
-                (x + (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype
-            )
+            np.tanh((x + (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype)
             - np.tanh(
                 (x - (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype
             )
@@ -319,9 +313,9 @@ class ExtraSoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh(
-            (x + self._width / 2.0 - 2.0 * self._rise) / self._rise
-        ) - np.tanh((x - self._width / 2.0 + 2.0 * self._rise) / self._rise)
+        pulse = np.tanh((x + self._width / 2.0 - 2.0 * self._rise) / self._rise) - np.tanh(
+            (x - self._width / 2.0 + 2.0 * self._rise) / self._rise
+        )
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
@@ -374,9 +368,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
         elif data.shape == PulseShapeType.BLACKMAN:
             num_func = BlackmanFunction(data.width)
         elif data.shape == PulseShapeType.SETUP_HOLD:
-            num_func = SetupHoldFunction(
-                data.std_dev, data.rise, data.amp_setup, data.amp
-            )
+            num_func = SetupHoldFunction(data.std_dev, data.rise, data.amp_setup, data.amp)
         elif data.shape == PulseShapeType.SOFTER_SQUARE:
             num_func = SofterSquareFunction(data.std_dev, data.rise)
         elif data.shape == PulseShapeType.EXTRA_SOFT_SQUARE:
@@ -414,18 +406,14 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
         num_func = NumericFunction()
         amplitude = np.array(data.samples, dtype=np.csingle)
     else:
-        raise ValueError(
-            f"'{str(data)}' is an unknown pulse type. Can't evaluate shape."
-        )
+        raise ValueError(f"'{str(data)}' is an unknown pulse type. Can't evaluate shape.")
 
     buf = scale_factor * amp * np.exp(1.0j * phase_offset) * amplitude
     if not drag == 0.0:
         amplitude_differential = num_func.derivative(t, amplitude)
         if len(amplitude_differential) < len(buf):
             amplitude_differential = np.pad(
-                amplitude_differential,
-                (0,len(buf)-len(amplitude_differential)),
-                'edge'
+                amplitude_differential, (0, len(buf) - len(amplitude_differential)), "edge"
             )
         buf += (
             drag

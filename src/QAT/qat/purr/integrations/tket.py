@@ -35,17 +35,13 @@ from pytket.passes import (
 )
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
-from qat.purr.compiler.config import TketOptimizations
-from qat.purr.compiler.execution import QuantumHardwareModel
-from qat.purr.integrations.qasm import (
-    BitRegister,
-    Qasm2Parser,
-    QasmContext,
-    QubitRegister,
-)
-from qat.purr.utils.logger import get_default_logger
 from qiskit.qasm.node import Cnot, UniversalUnitary
 from sympy import pi, sympify
+
+from qat.purr.compiler.config import TketOptimizations
+from qat.purr.compiler.execution import QuantumHardwareModel
+from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
+from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
@@ -94,9 +90,7 @@ class TketBuilder:
         params = [params] if not isinstance(params, List) else params
         self.circuit.add_gate(target_gate, params, qubits, **conditions)
 
-    def custom_gate(
-        self, gate_def: CustomGateDef, qubits, params=None, conditions=None
-    ):
+    def custom_gate(self, gate_def: CustomGateDef, qubits, params=None, conditions=None):
         conditions = conditions or {}
         params = params or []
         qubits = [qubits] if not isinstance(qubits, List) else qubits
@@ -359,12 +353,16 @@ def get_coupling_subgraphs(couplings):
             # check whether coupling joins to subgraph
             if set(coupling) & {qubit for connection in subgraph for qubit in connection}:
                 if subgraph_added_to is None:
-                    subgraph.append(coupling) # add the coupling to the subgraph
+                    subgraph.append(coupling)  # add the coupling to the subgraph
                     subgraph_added_to = subgraph
                 else:
-                    subgraph_added_to.extend(subgraph) # if coupling joins to 2nd subgraph, the subgraphs combine
+                    subgraph_added_to.extend(
+                        subgraph
+                    )  # if coupling joins to 2nd subgraph, the subgraphs combine
                     subgraphs.remove(subgraph)
-        if subgraph_added_to is None: # if coupling doesn't join to any of the current subgraphs, make it a new one
+        if (
+            subgraph_added_to is None
+        ):  # if coupling doesn't join to any of the current subgraphs, make it a new one
             subgraphs.append([coupling])
     return subgraphs
 
@@ -409,12 +407,18 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             coupling_qualities = list({val.quality for val in couplings})
             coupling_qualities.sort(reverse=True)
             for quality_level in coupling_qualities:
-                filtered_couplings = [val.direction for val in couplings if val.quality >= quality_level]
+                filtered_couplings = [
+                    val.direction for val in couplings if val.quality >= quality_level
+                ]
                 coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
                 for subgraph in coupling_subgraphs:
-                    if circ.n_qubits <= len(set([qubit for coupling in subgraph for qubit in coupling])):
+                    if circ.n_qubits <= len(
+                        set([qubit for coupling in subgraph for qubit in coupling])
+                    ):
                         architecture = Architecture(subgraph)
-                        optimizations_failed = not optimize_circuit(circ, architecture, opts)
+                        optimizations_failed = not optimize_circuit(
+                            circ, architecture, opts
+                        )
                         if not optimizations_failed:
                             break
                     else:
@@ -445,9 +449,7 @@ def run_tket_optimizations(qasm_string, opts, hardware: QuantumHardwareModel) ->
             try:
                 # Tket just throws an exception if the list is none, so skip if that's
                 # the case.
-                default_passes = fetch_default_passes(
-                    architecture, opts, add_delay=False
-                )
+                default_passes = fetch_default_passes(architecture, opts, add_delay=False)
                 if len(default_passes) > 0:
                     SequencePass(default_passes).apply(circ)
             except RuntimeError as e:

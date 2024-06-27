@@ -1,18 +1,19 @@
-from qat.purr.backends.calibrations.remote import find_calibration
-from qat.purr.backends.qiskit_simulator import QiskitHardwareModel, QiskitEngine
-from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
-
-from qat.purr.compiler.runtime import execute_instructions, _execute_instructions_with_interrupt
 import qat.purr.compiler.frontends as core_frontends
+from qat.purr.backends.calibrations.remote import find_calibration
+from qat.purr.backends.qiskit_simulator import QiskitEngine, QiskitHardwareModel
+from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
-from qat.purr.utils.logging_utils import log_duration
+from qat.purr.compiler.runtime import (
+    _execute_instructions_with_interrupt,
+    execute_instructions,
+)
 
 
 class InterruptableExecutingMixin:
     """
     Support experimental wait interrupt capabilities
     """
+
     def _execute(
         self,
         hardware,
@@ -22,7 +23,6 @@ class InterruptableExecutingMixin:
         interrupt: Interrupt = NullInterrupt(),
         **kwargs,
     ):
-
         calibrations = [
             find_calibration(arg) for arg in compiler_config.active_calibrations
         ]
@@ -31,19 +31,14 @@ class InterruptableExecutingMixin:
         if isinstance(hardware, (QiskitHardwareModel, QiskitEngine)):
             exe_method = execute_instructions
 
-        return exe_method(
-            hardware,
-            instructions,
-            compiler_config,
-            calibrations,
-            interrupt
-        )
+        return exe_method(hardware, instructions, compiler_config, calibrations, interrupt)
 
 
 class QIRFrontend(InterruptableExecutingMixin, core_frontends.QIRFrontend):
     """
     Static decorated QIR frontend for interruptibility
     """
+
     pass
 
 
@@ -51,4 +46,5 @@ class QASMFrontend(InterruptableExecutingMixin, core_frontends.QASMFrontend):
     """
     Static decorated QASM frontend for interruptibility
     """
+
     pass

@@ -3,6 +3,7 @@
 from typing import Dict, List
 
 import numpy as np
+
 from qat.purr.backends.live_devices import (
     ControlHardware,
     ControlHardwareChannel,
@@ -10,9 +11,14 @@ from qat.purr.backends.live_devices import (
     LivePhysicalBaseband,
 )
 from qat.purr.backends.utilities import UPCONVERT_SIGN, get_axis_map
-from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, Qubit, QubitCoupling, PhysicalBaseband, PhysicalChannel, Resonator, \
-    ChannelType
+from qat.purr.compiler.devices import (
+    ChannelType,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    QubitCoupling,
+    Resonator,
+)
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine, SweepIterator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -36,13 +42,14 @@ def build_lucy_hardware(hw: QuantumHardwareModel):
     return apply_setup_to_hardware(hw, 8, 25e-9, 3.18e-07, 2.41e-06)
 
 
-def apply_setup_to_hardware(hw: QuantumHardwareModel,
-                            qubit_count: int,
-                            pulse_hw_x_pi_2_width: float,
-                            pulse_hw_zx_pi_4_width: float,
-                            pulse_measure_width: float) -> QuantumHardwareModel:
-
-    """ Apply lucy to the passed-in hardware. """
+def apply_setup_to_hardware(
+    hw: QuantumHardwareModel,
+    qubit_count: int,
+    pulse_hw_x_pi_2_width: float,
+    pulse_hw_zx_pi_4_width: float,
+    pulse_measure_width: float,
+) -> QuantumHardwareModel:
+    """Apply lucy to the passed-in hardware."""
     qubit_devices = []
     resonator_devices = []
     channel_index = 1
@@ -50,8 +57,12 @@ def apply_setup_to_hardware(hw: QuantumHardwareModel,
     control_hardware = ControlHardware()
 
     for primary_index in range(qubit_count):
-        bb1 = LivePhysicalBaseband(f"LO{channel_index}", 5.5e9, if_frequency=250e6, instrument=control_hardware)
-        bb2 = LivePhysicalBaseband(f"LO{channel_index + 1}", 8.5e9,  if_frequency=250e6, instrument=control_hardware)
+        bb1 = LivePhysicalBaseband(
+            f"LO{channel_index}", 5.5e9, if_frequency=250e6, instrument=control_hardware
+        )
+        bb2 = LivePhysicalBaseband(
+            f"LO{channel_index + 1}", 8.5e9, if_frequency=250e6, instrument=control_hardware
+        )
         hw.add_physical_baseband(bb1, bb2)
 
         ch1 = PhysicalChannel(f"CH{channel_index}", 1.0e-9, bb1, 1)
@@ -71,8 +82,8 @@ def apply_setup_to_hardware(hw: QuantumHardwareModel,
         qubit = Qubit(primary_index, resonator, ch1)
         qubit.create_pulse_channel(ChannelType.drive, frequency=5.5e9)
 
-        qubit.pulse_hw_x_pi_2.update({'width': pulse_hw_x_pi_2_width})
-        qubit.pulse_hw_zx_pi_4.update({'width': pulse_hw_zx_pi_4_width})
+        qubit.pulse_hw_x_pi_2.update({"width": pulse_hw_x_pi_2_width})
+        qubit.pulse_hw_zx_pi_4.update({"width": pulse_hw_zx_pi_4_width})
         qubit.pulse_measure.update({"width": pulse_measure_width})
 
         qubit_devices.append(qubit)
@@ -90,13 +101,13 @@ def apply_setup_to_hardware(hw: QuantumHardwareModel,
                     auxiliary_devices=[other_qubit],
                     channel_type=ChannelType.cross_resonance,
                     frequency=5.5e9,
-                    scale=50
+                    scale=50,
                 )
                 qubit.create_pulse_channel(
                     auxiliary_devices=[other_qubit],
                     channel_type=ChannelType.cross_resonance_cancellation,
                     frequency=5.5e9,
-                    scale=0.0
+                    scale=0.0,
                 )
             qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
             qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
@@ -106,9 +117,7 @@ def apply_setup_to_hardware(hw: QuantumHardwareModel,
     return hw
 
 
-def sync_baseband_frequencies_to_value(
-    hw: QuantumHardwareModel, lo_freq, target_qubits
-):
+def sync_baseband_frequencies_to_value(hw: QuantumHardwareModel, lo_freq, target_qubits):
     # Round the drive channel frequencies to the multiple of 1kHz
     for qubit in target_qubits:
         hw.get_qubit(qubit).get_drive_channel().frequency = 1e9 * round(
@@ -119,15 +128,11 @@ def sync_baseband_frequencies_to_value(
         drive_channel = hw.get_qubit(qubit).get_drive_channel()
         physical_channel = drive_channel.physical_channel
         baseband = physical_channel.baseband
-        log.info(
-            f"Old baseband IF frequency of qubit '{qubit}': {baseband.if_frequency}"
-        )
+        log.info(f"Old baseband IF frequency of qubit '{qubit}': {baseband.if_frequency}")
         log.info(f"Old baseband frequency of qubit '{qubit}': {baseband.frequency}")
         baseband.if_frequency = float(round(drive_channel.frequency - lo_freq))
         baseband.frequency = lo_freq
-        log.info(
-            f"Baseband IF frequency of qubit '{qubit}' set to {baseband.if_frequency}"
-        )
+        log.info(f"Baseband IF frequency of qubit '{qubit}' set to {baseband.if_frequency}")
         log.info(f"Baseband frequency of qubit '{qubit}' set to {baseband.frequency}")
 
 
@@ -231,9 +236,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         for pulse_channel in pulse_channel_buffers.keys():
             if pulse_channel.fixed_if:
                 if (
-                    baseband_freqs_fixed_if.get(
-                        pulse_channel.physical_channel_id, False
-                    )
+                    baseband_freqs_fixed_if.get(pulse_channel.physical_channel_id, False)
                     and baseband_freqs[pulse_channel.physical_channel_id]
                     != pulse_channel.frequency
                     - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
@@ -261,7 +264,10 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         return baseband_freqs
 
     def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile, interrupt: Interrupt=NullInterrupt()
+        self,
+        sweep_iterator: SweepIterator,
+        package: QatFile,
+        interrupt: Interrupt = NullInterrupt(),
     ) -> Dict[str, np.ndarray]:
         if self.model.control_hardware is None:
             raise ValueError("Please add a control hardware first!")
@@ -403,8 +409,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     # Find target qubit from instruction and check whether it's been
                     # measured already.
                     acquired_qubits = [
-                        self.model._resolve_qb_pulse_channel(chanbit)[0]
-                        in consumed_qubits
+                        self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
                         for chanbit in inst.quantum_targets
                         if isinstance(chanbit, (Qubit, PulseChannel))
                     ]

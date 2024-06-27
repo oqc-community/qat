@@ -1,6 +1,6 @@
 import abc
-from threading import Event
 from queue import Queue
+from threading import Event
 
 
 class InterruptError(RuntimeError):
@@ -35,6 +35,7 @@ class BasicInterrupt(Interrupt):
     """
     Interrupt supporting multi-threading and multi-process concurrency
     """
+
     def __init__(self, event=Event(), queue=Queue()):
         self._event = event
         self._queue = queue

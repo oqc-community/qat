@@ -7,7 +7,8 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from qat.purr.compiler.builders import QuantumInstructionBuilder
+from scipy.interpolate import CubicSpline
+
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -27,7 +28,6 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
-from scipy.interpolate import CubicSpline
 
 from ..compiler.execution import QuantumExecutionEngine, SweepIterator
 from ..compiler.hardware_models import QuantumHardwareModel
@@ -75,9 +75,7 @@ class Section:
 
 
 class MeasurementStatistics:
-    def __init__(
-        self, state, level=0, probability=1, qubits_measured=None, result=None
-    ):
+    def __init__(self, state, level=0, probability=1, qubits_measured=None, result=None):
         self.state: "Qobj" = state
         self.level: int = level
         self.probability: float = probability
@@ -166,12 +164,8 @@ class MeasurementStatistics:
         elif control_type == ControlType.RESET:
             for idx in qubit_indices:
                 final_state = (
-                    reset_operators[0][idx]
-                    * final_state
-                    * reset_operators[0][idx].dag()
-                    + reset_operators[1][idx]
-                    * final_state
-                    * reset_operators[1][idx].dag()
+                    reset_operators[0][idx] * final_state * reset_operators[0][idx].dag()
+                    + reset_operators[1][idx] * final_state * reset_operators[1][idx].dag()
                 )
 
             self.measurement_statistics.append(
@@ -483,9 +477,7 @@ def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
         N=N,
     )
     q.create_pulse_channel(ChannelType.drive, frequency=frequency)
-    q.create_pulse_channel(
-        ChannelType.second_state, frequency=frequency + anharmonicity
-    )
+    q.create_pulse_channel(ChannelType.second_state, frequency=frequency + anharmonicity)
 
     q_r_coupling = RTCSCoupling(
         f"R{highest_resonator_id+1}<->Q{highest_qubit_id+1}",
@@ -710,7 +702,10 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             return instructions
 
     def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile, interrupt: Interrupt=NullInterrupt()
+        self,
+        sweep_iterator: SweepIterator,
+        package: QatFile,
+        interrupt: Interrupt = NullInterrupt(),
     ) -> Dict[str, np.ndarray]:
         """
         Derivation of the mathematics behind this simulation can be found in the docs
@@ -731,9 +726,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
-            logger.debug(
-                f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}"
-            )
+            logger.debug(f"Starting sweep #{sweep_iterator.accumulated_sweep_iteration}")
 
             metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
             interrupt.if_triggered(metadata, throw=True)
@@ -826,8 +819,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                     (
                         coup
                         for coup in self.model.couplings
-                        if target_device in coup.targets()
-                        and resonator in coup.targets()
+                        if target_device in coup.targets() and resonator in coup.targets()
                     ),
                     None,
                 )
@@ -874,12 +866,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 j: [0 for _ in range(len(self.model.qubits))] for j in range(2)
             }
             for idx, device in enumerate(self.model.qubits):
-                P0 = self.get_tensor(
-                    {idx: basis(device.N, 0) * basis(device.N, 0).dag()}
-                )
-                P1 = self.get_tensor(
-                    {idx: basis(device.N, 1) * basis(device.N, 1).dag()}
-                )
+                P0 = self.get_tensor({idx: basis(device.N, 0) * basis(device.N, 0).dag()})
+                P1 = self.get_tensor({idx: basis(device.N, 1) * basis(device.N, 1).dag()})
                 Px = self.get_tensor(
                     {
                         idx: basis(device.N, 0) * basis(device.N, 1).dag()
@@ -895,9 +883,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # sections and the second the channels measured at the end of each section.
             for key in list(buffer_segments.keys()):
                 buffer_segments[target_devices[key].index] = buffer_segments.pop(key)
-            simulation_sections: Dict[
-                Section
-            ] = get_resonator_response_splicing_indices(buffer_segments)
+            simulation_sections: Dict[Section] = get_resonator_response_splicing_indices(
+                buffer_segments
+            )
 
             # Construct uncoupled Hamiltonian and find collapse operators
             H0 = 0.0 * self.get_tensor()
@@ -962,11 +950,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
                     bb = self.model.basebands[baseband.full_id()]
                     LO = bb.frequency
-                    d = (
-                        np.pi
-                        * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * LO * self.sim_t)
-                        * d
-                    )
+                    d = np.pi * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * LO * self.sim_t) * d
 
                     # Split the Hamiltonian into measurement sections, specifying which
                     # qubits are to be measured at the end of each section
@@ -1371,9 +1355,7 @@ def get_resonator_response_splicing_indices(buffer_segments):
                 simulation_sections[section_num].qubits.append(segment[0])
         else:
             section_num += 1
-            simulation_sections[section_num] = Section(
-                indices, [segment[0]], segment[1]
-            )
+            simulation_sections[section_num] = Section(indices, [segment[0]], segment[1])
 
         previous_start_indice = indices[0]
         previous_control_type = segment[1]
@@ -1458,9 +1440,7 @@ def get_simple_resonator_response(
 
     factor = qubit_dt / resonator_dt
 
-    qsegments = [
-        (int(round(factor * s[0])), int(round(factor * s[1]))) for s in segments
-    ]
+    qsegments = [(int(round(factor * s[0])), int(round(factor * s[1]))) for s in segments]
 
     qzsegments = []
     for start, stop in qsegments:

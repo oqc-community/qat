@@ -10,15 +10,31 @@ import numpy as np
 import pytest
 from docplex.mp.model import Model
 from pytket.qasm import circuit_from_qasm_str
+from qiskit import QuantumCircuit
+from qiskit.algorithms import QAOA, VQE, NumPyMinimumEigensolver
+from qiskit.algorithms.optimizers import SPSA
+from qiskit.circuit.library import TwoLocal
+from qiskit.utils import QuantumInstance, algorithm_globals
+from qiskit_optimization import QuadraticProgram
+from qiskit_optimization.algorithms import (
+    ADMMOptimizer,
+    ADMMParameters,
+    CobylaOptimizer,
+    GroverOptimizer,
+    MinimumEigenOptimizer,
+)
+from qiskit_optimization.applications import Maxcut, Tsp
+from qiskit_optimization.converters import QuadraticProgramToQubo
+from qiskit_optimization.translators import from_docplex_mp
 
-import qat.purr.compiler.frontends as core_frontends
 import qat.purr.compiler.experimental.frontends as experimental_frontends
+import qat.purr.compiler.frontends as core_frontends
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CompilerConfig,
@@ -30,7 +46,6 @@ from qat.purr.compiler.config import (
 )
 from qat.purr.compiler.devices import ChannelType, PulseShapeType, QubitCoupling
 from qat.purr.compiler.emitter import InstructionEmitter
-from qat.purr.compiler.frontends import QASMFrontend
 from qat.purr.compiler.hardware_models import get_cl2qu_index_mapping
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -54,24 +69,8 @@ from qat.purr.integrations.qasm import (
 )
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
-from qiskit import QuantumCircuit
-from qiskit.algorithms import QAOA, VQE, NumPyMinimumEigensolver
-from qiskit.algorithms.optimizers import SPSA
-from qiskit.circuit.library import TwoLocal
-from qiskit.utils import QuantumInstance, algorithm_globals
-from qiskit_optimization import QuadraticProgram
-from qiskit_optimization.algorithms import (
-    ADMMOptimizer,
-    ADMMParameters,
-    CobylaOptimizer,
-    GroverOptimizer,
-    MinimumEigenOptimizer,
-)
-from qiskit_optimization.applications import Maxcut, Tsp
-from qiskit_optimization.converters import QuadraticProgramToQubo
-from qiskit_optimization.translators import from_docplex_mp
-
 from qat.qat import execute, execute_qasm, fetch_frontend
+
 from .qasm_utils import (
     TestFileType,
     get_qasm2,
@@ -94,9 +93,7 @@ class TestQASM3:
         hw = get_default_echo_hardware(8)
         comp = CompilerConfig()
         comp.results_format.binary_count()
-        results = execute_qasm(
-            get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp
-        )
+        results = execute_qasm(get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp)
         results = next(iter(results.values()), dict())
         assert len(results) == 1
         assert results["00"] == 1000
@@ -212,9 +209,7 @@ class TestQASM3:
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
-        assert any(
-            isinstance(inst, CrossResonancePulse) for inst in result.instructions
-        )
+        assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
 
     def test_cx_override(self):
         hw = get_default_echo_hardware()
@@ -375,9 +370,7 @@ class TestQASM3:
         "file_name,attribute,test_value",
         (("scale", "scale_factor", 42), ("phase_shift", "phase", 4 + 2j)),
     )
-    def test_waveform_processing_single_waveform(
-        self, file_name, attribute, test_value
-    ):
+    def test_waveform_processing_single_waveform(self, file_name, attribute, test_value):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
@@ -923,9 +916,7 @@ class TestParsing:
 
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
-        builder = parse_and_apply_optimiziations(
-            "move_measurements.qasm", qubit_count=12
-        )
+        builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
         assert 93378 == len(builder.instructions)
 
     def test_random_n5_d5(self):
@@ -957,9 +948,7 @@ class TestParsing:
 
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
-        assert any(
-            isinstance(inst, CrossResonancePulse) for inst in builder.instructions
-        )
+        assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
         assert 118 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
@@ -993,14 +982,10 @@ class TestQatOptimization:
     def _measure_merge_timings(self, file, qubit_count, keys, expected):
         builder = parse_and_apply_optimiziations(file, qubit_count=qubit_count)
         qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
-        timeline = EchoEngine(builder.model).create_duration_timeline(
-            qat_file.instructions
-        )
+        timeline = EchoEngine(builder.model).create_duration_timeline(qat_file.instructions)
 
         def get_start_end(key, instruction, channel_type):
-            pulse_channel = builder.model.get_pulse_channel_from_device(
-                channel_type, key
-            )
+            pulse_channel = builder.model.get_pulse_channel_from_device(channel_type, key)
             return (
                 (0, 0)
                 if (
@@ -1094,9 +1079,7 @@ class TestQiskitOptimization:
         model.minimize(-x0 + 2 * x1 - 3 * x2 - 2 * x0 * x2 - 1 * x1 * x2)
         qp = from_docplex_mp(model)
 
-        grover_optimizer = GroverOptimizer(
-            6, num_iterations=10, quantum_instance=backend
-        )
+        grover_optimizer = GroverOptimizer(6, num_iterations=10, quantum_instance=backend)
         results = grover_optimizer.solve(qp)
 
         exact_solver = MinimumEigenOptimizer(NumPyMinimumEigensolver())

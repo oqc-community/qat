@@ -2,11 +2,12 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, TypeVar, Union, Optional
-
 import re
+from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union
+
 import numpy as np
+
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -19,14 +20,14 @@ from qat.purr.compiler.devices import (
     Resonator,
 )
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     CrossResonanceCancelPulse,
     CrossResonancePulse,
     DrivePulse,
+    Instruction,
     PhaseShift,
     Synchronize,
-    Instruction,
-    Acquire,
 )
 
 if TYPE_CHECKING:
@@ -77,11 +78,14 @@ def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardw
         if not isinstance(instruction, Acquire):
             continue
 
-        qubit = next((
-            qubit for qubit in model.qubits
-            if qubit.get_acquire_channel().full_id() == instruction.channel.full_id()
-        ),
-                     None)
+        qubit = next(
+            (
+                qubit
+                for qubit in model.qubits
+                if qubit.get_acquire_channel().full_id() == instruction.channel.full_id()
+            ),
+            None,
+        )
         if qubit is None:
             raise ValueError(
                 f"Could not find any qubits by acquire channel {instruction.channel}"
@@ -226,9 +230,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             id_ = f"Q{id_}"
 
         if id_ not in self.quantum_devices:
-            raise ValueError(
-                f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist."
-            )
+            raise ValueError(f"Tried to retrieve a qubit ({str(id_)}) that doesn't exist.")
 
         found_qubit = self.quantum_devices.get(id_)
         if not isinstance(found_qubit, Qubit):
@@ -316,9 +318,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_physical_channel(self, *physical_channels: PhysicalChannel):
         for physical_channel in physical_channels:
-            existing_channel = self.physical_channels.get(
-                physical_channel.full_id(), None
-            )
+            existing_channel = self.physical_channels.get(physical_channel.full_id(), None)
             if existing_channel is not None:
                 # If we're the same instance just don't throw.
                 if existing_channel is physical_channel:
@@ -341,9 +341,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
                 if existing_baseband is baseband:
                     continue
 
-                raise KeyError(
-                    f"Baseband with id '{baseband.full_id()}' already exists."
-                )
+                raise KeyError(f"Baseband with id '{baseband.full_id()}' already exists.")
 
             self.basebands[baseband.full_id()] = baseband
 

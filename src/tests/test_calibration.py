@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import os
+
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -77,7 +78,7 @@ class TestCalibrationSavingAndLoading:
             original_channel = copied_echo.physical_channels[channel_key]
             assert (
                 id(value.physical_channel) == id(original_channel),
-                "Copied references are different objects."
+                "Copied references are different objects.",
             )
 
         assert len(echo.basebands) == len(copied_echo.basebands)

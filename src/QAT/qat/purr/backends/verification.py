@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
@@ -12,9 +12,8 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
-
-from qat.qat import execute
 from qat.purr.utils.logger import get_default_logger
+from qat.qat import execute
 
 log = get_default_logger()
 
@@ -112,7 +111,9 @@ def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
 
 
 class VerificationEngine(QuantumExecutionEngine, ABC):
-    def _execute_on_hardware(self, sweep_iterator, package: QatFile, interrupt: Interrupt=NullInterrupt()):
+    def _execute_on_hardware(
+        self, sweep_iterator, package: QatFile, interrupt: Interrupt = NullInterrupt()
+    ):
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)
 
@@ -134,7 +135,6 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
 
 
 class LucyVerificationEngine(VerificationEngine):
-
     max_circuit_duration = 90000e-9
 
     def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
@@ -145,17 +145,15 @@ class LucyVerificationEngine(VerificationEngine):
 
         circuit_duration = max([duration for duration in durations.values()])
 
-        log.debug(
-            f"The circuit duration is {circuit_duration/1e-6} microseconds."
-        )
+        log.debug(f"The circuit duration is {circuit_duration/1e-6} microseconds.")
 
         if circuit_duration > self.max_circuit_duration:
-            raise VerificationError(f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}.")
+            raise VerificationError(
+                f"Circuit duration exceeds maximum allowed. Duration {circuit_duration}, max: {self.max_circuit_duration}."
+            )
 
 
-def verify_program(
-    program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion
-):
+def verify_program(program: str, compiler_config: CompilerConfig, qpu_version: QPUVersion):
     model = get_verification_model(qpu_version)
     if model is None:
         raise ValueError("Unable to find model to verify against.")
