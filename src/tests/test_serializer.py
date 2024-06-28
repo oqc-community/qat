@@ -1,8 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
+import math
 from dataclasses import asdict, dataclass, is_dataclass
 
+import pytest
+from numpy import isclose
+
+from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.builders import InstructionBuilder, SerialiserBackend
+from qat.purr.compiler.instructions import PhaseShift
+from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils import serializer
 from qat.purr.utils.serializer import json_dumps, json_loads
 
@@ -222,3 +230,90 @@ class TestDeserialize:
         loaded_obj = json_loads(serialized_obj)
         assert type(loaded_obj) == complex
         assert loaded_obj == test_obj
+
+
+@pytest.mark.parametrize("backend", [SerialiserBackend.json, SerialiserBackend.ujson])
+@pytest.mark.parametrize(
+    "floating_point_num",
+    [
+        1 / 3,
+        math.sqrt(math.pi) / 2.14324354,
+        0.0000000000000000000001,
+        1e-10,
+        5.23408933745434352,
+        math.pi,
+        math.sqrt(2),
+    ],
+)
+class TestBuilderSerialiser:
+    """
+    Note here, that typically doing a direct float comparison is not meaningful in a test.
+    Here however, we need to ensure that the integrity of the floats is exactly preserved across serialisation.
+    """
+
+    @pytest.fixture
+    def builder(self):
+        def builder_factory(floating_point_num):
+            hardware = get_default_echo_hardware(4)
+
+            hardware.get_qubit(0).get_drive_channel().frequency = floating_point_num
+
+            builder = get_builder(hardware)
+            builder.X(hardware.get_qubit(0))
+            builder.U(
+                hardware.get_qubit(0),
+                theta=floating_point_num,
+                phi=floating_point_num,
+                lamb=floating_point_num,
+            )
+            return builder
+
+        return builder_factory
+
+    def test_floating_point_numbers_hardware(self, backend, floating_point_num, builder):
+        """
+        Testing that different serialisation backends respect floating point numbers in hardware
+        """
+        builder = builder(floating_point_num)
+        string = builder.serialize(backend=backend)
+
+        new_builder = InstructionBuilder.deserialize(string, backend=backend)
+
+        assert (
+            new_builder.model.get_qubit(0).get_drive_channel().frequency
+            == floating_point_num
+        )
+
+    def test_floating_point_numbers_instructions(
+        self, backend, floating_point_num, builder
+    ):
+        """
+        Testing that different serialisation backends respect floating point numbers in hardware
+
+        """
+        builder = builder(floating_point_num)
+        string = builder.serialize(backend=backend)
+
+        new_builder = InstructionBuilder.deserialize(string, backend=backend)
+
+        for instruction in new_builder.instructions:
+            if isinstance(instruction, PhaseShift):
+                phase = instruction.phase
+                if isclose(phase, floating_point_num):
+                    # There are phase instructions that aren't just the pure rotation, easiest way to find them
+                    assert instruction.phase == floating_point_num
+
+    def test_object_reconstruction(self, backend, floating_point_num, builder):
+        builder = builder(floating_point_num)
+        string = builder.serialize(backend=backend)
+        new_builder = InstructionBuilder.deserialize(string, backend=backend)
+        model = new_builder.model
+
+        qubit_route_1 = model.get_qubit(0)
+        print(model.physical_channels)
+        qubit_route_2 = model.get_physical_channel("CH1").related_qubit
+
+        qubit_2 = model.get_qubit(1)
+
+        assert qubit_route_1.id == qubit_route_2.id
+        assert qubit_2.id != qubit_route_1.id
