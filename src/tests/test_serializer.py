@@ -233,48 +233,65 @@ class TestDeserialize:
 
 
 @pytest.mark.parametrize("backend", [SerialiserBackend.json, SerialiserBackend.ujson])
+@pytest.mark.parametrize(
+    "floating_point_num",
+    [
+        1 / 3,
+        math.sqrt(math.pi) / 2.14324354,
+        0.0000000000000000000001,
+        1e-10,
+        5.23408933745434352,
+        math.pi,
+        math.sqrt(2),
+    ],
+)
 class TestBuilderSerialiser:
     """
     Note here, that typically doing a direct float comparison is not meaningful in a test.
     Here however, we need to ensure that the integrity of the floats is exactly preserved across serialisation.
     """
 
-    floating_point_num = math.sqrt(math.pi) / 2.14324354
-
     @pytest.fixture
     def builder(self):
-        hardware = get_default_echo_hardware(4)
+        def builder_factory(floating_point_num):
+            hardware = get_default_echo_hardware(4)
 
-        hardware.get_qubit(0).get_drive_channel().frequency = self.floating_point_num
+            hardware.get_qubit(0).get_drive_channel().frequency = floating_point_num
 
-        builder = get_builder(hardware)
-        builder.X(hardware.get_qubit(0))
-        builder.U(
-            hardware.get_qubit(0),
-            theta=self.floating_point_num,
-            phi=self.floating_point_num,
-            lamb=self.floating_point_num,
-        )
-        return builder
+            builder = get_builder(hardware)
+            builder.X(hardware.get_qubit(0))
+            builder.U(
+                hardware.get_qubit(0),
+                theta=floating_point_num,
+                phi=floating_point_num,
+                lamb=floating_point_num,
+            )
+            return builder
 
-    def test_floating_point_numbers_hardware(self, backend, builder):
+        return builder_factory
+
+    def test_floating_point_numbers_hardware(self, backend, floating_point_num, builder):
         """
         Testing that different serialisation backends respect floating point numbers in hardware
         """
+        builder = builder(floating_point_num)
         string = builder.serialize(backend=backend)
 
         new_builder = InstructionBuilder.deserialize(string, backend=backend)
 
         assert (
             new_builder.model.get_qubit(0).get_drive_channel().frequency
-            == self.floating_point_num
+            == floating_point_num
         )
 
-    def test_floating_point_numbers_instructions(self, backend, builder):
+    def test_floating_point_numbers_instructions(
+        self, backend, floating_point_num, builder
+    ):
         """
         Testing that different serialisation backends respect floating point numbers in hardware
 
         """
+        builder = builder(floating_point_num)
         string = builder.serialize(backend=backend)
 
         new_builder = InstructionBuilder.deserialize(string, backend=backend)
@@ -282,11 +299,12 @@ class TestBuilderSerialiser:
         for instruction in new_builder.instructions:
             if isinstance(instruction, PhaseShift):
                 phase = instruction.phase
-                if isclose(phase, self.floating_point_num):
+                if isclose(phase, floating_point_num):
                     # There are phase instructions that aren't just the pure rotation, easiest way to find them
-                    assert instruction.phase == self.floating_point_num
+                    assert instruction.phase == floating_point_num
 
-    def test_object_reconstruction(self, backend, builder):
+    def test_object_reconstruction(self, backend, floating_point_num, builder):
+        builder = builder(floating_point_num)
         string = builder.serialize(backend=backend)
         new_builder = InstructionBuilder.deserialize(string, backend=backend)
         model = new_builder.model
