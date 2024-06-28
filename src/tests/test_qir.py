@@ -1,18 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import base64
-import numpy as np
 from os.path import abspath, dirname, join
 from unittest import mock
 
+import numpy as np
 import pytest
+
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
-
 from tests.qasm_utils import TestFileType, get_test_file_path
 from tests.utils import get_jagged_echo_hardware
 
@@ -77,9 +77,7 @@ class TestQIR:
     def test_complicated(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
-        execute_qir(
-            _get_qir_path("complicated.ll"), get_default_echo_hardware(4), config
-        )
+        execute_qir(_get_qir_path("complicated.ll"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
     def test_hello_bitcode(self):
@@ -100,9 +98,7 @@ class TestQIR:
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
-        execute_qir(
-            _get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config
-        )
+        execute_qir(_get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config)
 
     def test_qir_instruction_builder(self):
         parser = QIRParser(get_default_echo_hardware(4))
@@ -225,9 +221,7 @@ class TestQIR:
     def test_qir_bell_binary_count(self):
         config = CompilerConfig()
         config.results_format.binary_count()
-        results = execute_qir(
-            _get_qir_path("generator-bell.ll"), compiler_config=config
-        )
+        results = execute_qir(_get_qir_path("generator-bell.ll"), compiler_config=config)
         assert len(results) == 4
         assert results["00"] > 1
         assert results["01"] > 1

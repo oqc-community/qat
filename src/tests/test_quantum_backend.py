@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import tempfile
-from os.path import dirname, join, exists
+from os.path import dirname, join
 
 import numpy as np
 import pytest
+from scipy import fftpack
 
-from qat.qat import execute
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.live import LiveDeviceEngine, sync_baseband_frequencies_to_value
 from qat.purr.backends.realtime_chip_simulator import (
@@ -18,7 +18,6 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
-    FreqShiftPulseChannel,
     MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
@@ -33,8 +32,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
-from scipy import fftpack
-
+from qat.qat import execute
 from tests.qasm_utils import get_qasm2
 from tests.test_readout_mitigation import apply_error_mitigation_setup
 
@@ -152,9 +150,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 class TestBaseQuantum:
     def get_qasm2(self, file_name):
-        with open(
-            join(dirname(__file__), "files", "qasm", file_name), "r"
-        ) as qasm_file:
+        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
             return qasm_file.read()
 
     def test_batched_execution(self):
@@ -281,9 +277,7 @@ class TestBaseQuantum:
             get_builder(hw)
             .pulse(drive_channel, PulseShapeType.SQUARE, width=1e-6, amp=drive_rate)
             .synchronize([drive_channel, second_state_channel])
-            .pulse(
-                second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate
-            )
+            .pulse(second_state_channel, PulseShapeType.SQUARE, width=2e-6, amp=drive_rate)
             .measure_scope_mode(qubit)
         )
 
@@ -324,14 +318,10 @@ class TestBaseQuantum:
         sync_baseband_frequencies_to_value(hw, common_lo_frequency, [0, 1])
         assert drive_channel_1.frequency == 5.0e9
         assert drive_channel_2.frequency == 5.5e9
-        assert (
-            baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
-        )
+        assert baseband_1.if_frequency == drive_channel_1.frequency - baseband_1.frequency
         assert baseband_1.frequency == common_lo_frequency
         assert baseband_2.frequency == common_lo_frequency
-        assert (
-            baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
-        )
+        assert baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
 
     def test_setup_hold_measure_pulse(self):
         hw = get_test_model()
@@ -349,9 +339,7 @@ class TestBaseQuantum:
         )
         result = result[0]
         setup_length = (
-            int(
-                qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time
-            )
+            int(qubit.pulse_measure["rise"] / hw.get_physical_channel("Ch2").sample_time)
             + 1
         )
         full_length = int(
@@ -403,8 +391,7 @@ class TestBaseQuantum:
             result[: setup_length - delay_length].real,
         )
         assert np.array_equal(
-            qubit.pulse_measure["amp"]
-            * np.ones(full_length - setup_length + delay_length),
+            qubit.pulse_measure["amp"] * np.ones(full_length - setup_length + delay_length),
             result[setup_length - delay_length : full_length].real,
         )
 
@@ -547,11 +534,17 @@ class TestBaseQuantum:
 
         for qid in freq_shift_qubits:
             qubit = hardware.get_qubit(qid)
-            freq_channel = qubit.create_pulse_channel(ChannelType.freq_shift, amp=1.0, scale=1.0, frequency=8.5e9)
+            freq_channel = qubit.create_pulse_channel(
+                ChannelType.freq_shift, amp=1.0, scale=1.0, frequency=8.5e9
+            )
 
         for qubit in hardware.qubits:
             builder.pulse(
-                qubit.get_drive_channel(), PulseShapeType.SQUARE, width=1e-6, amp=1, ignore_channel_scale=True
+                qubit.get_drive_channel(),
+                PulseShapeType.SQUARE,
+                width=1e-6,
+                amp=1,
+                ignore_channel_scale=True,
             )
 
         return builder
@@ -571,8 +564,8 @@ class TestBaseQuantum:
         qubit1_buffer, qubit2_buffer = self.get_qubit_buffers(hardware, engine, [0, 1])
         assert len(qubit1_buffer) > 0
         assert len(qubit2_buffer) > 0
-        assert np.isclose(qubit1_buffer, 1+0j).all()
-        assert np.isclose(qubit2_buffer, 1+0j).all()
+        assert np.isclose(qubit1_buffer, 1 + 0j).all()
+        assert np.isclose(qubit2_buffer, 1 + 0j).all()
 
     def test_freq_shift(self):
         hardware = get_default_echo_hardware(2)
@@ -588,39 +581,51 @@ class TestBaseQuantum:
         assert np.isclose([abs(val) for val in qubit1_buffer], 2).all()
         assert np.isclose([abs(val) for val in qubit2_buffer], 1).all()
 
-    @pytest.mark.parametrize("pre_combine, batch_results, post_combine", [
-        ({}, {}, {}),
-        ({}, {"a": [1]}, {"a": [1]}),
-        ({"a": [1]}, {"a": [2]}, {"a": [1, 2]}),
-    ])
-    def test_combining_python_list_results_succeeds(self, pre_combine, batch_results, post_combine):
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results, post_combine",
+        [
+            ({}, {}, {}),
+            ({}, {"a": [1]}, {"a": [1]}),
+            ({"a": [1]}, {"a": [2]}, {"a": [1, 2]}),
+        ],
+    )
+    def test_combining_python_list_results_succeeds(
+        self, pre_combine, batch_results, post_combine
+    ):
         results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
         assert results == post_combine
 
-    @pytest.mark.parametrize("pre_combine, batch_results, post_combine", [
-        ({"a": np.array([1, 2])}, {"a": np.array([3])}, {"a": np.array([1, 2, 3])}),
-    ])
-    def test_combining_numpy_array_results_succeeds(self, pre_combine, batch_results, post_combine):
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results, post_combine",
+        [
+            ({"a": np.array([1, 2])}, {"a": np.array([3])}, {"a": np.array([1, 2, 3])}),
+        ],
+    )
+    def test_combining_numpy_array_results_succeeds(
+        self, pre_combine, batch_results, post_combine
+    ):
         results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
         assert results.keys() == post_combine.keys()
         for k in results.keys():
             assert results[k].tolist() == post_combine[k].tolist()
 
-    @pytest.mark.parametrize("pre_combine, batch_results", [
-        ({"a": [1]}, {"b": [2]}),
-        ({"a": None}, {"a": [3]}),
-        ({"a": {1, 2}}, {"a": [3]}),
-        ({"a": np.array([1, 2])}, {"a": [3]})
-    ])
+    @pytest.mark.parametrize(
+        "pre_combine, batch_results",
+        [
+            ({"a": [1]}, {"b": [2]}),
+            ({"a": None}, {"a": [3]}),
+            ({"a": {1, 2}}, {"a": [3]}),
+            ({"a": np.array([1, 2])}, {"a": [3]}),
+        ],
+    )
     def test_combining_results_fails(self, pre_combine, batch_results):
         with pytest.raises(ValueError):
             TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
 
-    @pytest.mark.parametrize("repeat_count, repeat_limit, expected_batches", [
-        (123, 5, [5] * 24 + [3]),
-        (124, 5, [5] * 24 + [4]),
-        (125, 5, [5] * 25)
-    ])
+    @pytest.mark.parametrize(
+        "repeat_count, repeat_limit, expected_batches",
+        [(123, 5, [5] * 24 + [3]), (124, 5, [5] * 24 + [4]), (125, 5, [5] * 25)],
+    )
     def test_execution_batching(self, repeat_count, repeat_limit, expected_batches):
         hw = get_test_model()
         hw.repeat_limit = repeat_limit

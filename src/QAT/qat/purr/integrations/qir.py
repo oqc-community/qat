@@ -218,9 +218,7 @@ class QIRParser:
                 else:
                     result_name = "_".join(potential_names)
 
-                self.builder.assign(
-                    result_name, [val[0] for val in self.result_variables]
-                )
+                self.builder.assign(result_name, [val[0] for val in self.result_variables])
                 self.builder.returns(result_name)
             else:
                 self.builder.returns()

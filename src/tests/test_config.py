@@ -4,6 +4,7 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
+
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.config import (
     CompilerConfig,
@@ -18,7 +19,6 @@ from qat.purr.compiler.config import (
 )
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics
-
 from tests.qasm_utils import TestFileType, get_test_file_path
 
 SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
@@ -26,9 +26,7 @@ SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
 
 def _get_json_path(file_name):
     return join(
-        abspath(
-            join(dirname(__file__), "serialised_compiler_config_templates", file_name)
-        )
+        abspath(join(dirname(__file__), "serialised_compiler_config_templates", file_name))
     )
 
 
@@ -50,10 +48,7 @@ class TestConfigGeneral:
         second_conf = CompilerConfig.create_from_json(serialized_data)
 
         assert first_conf.results_format.format == second_conf.results_format.format
-        assert (
-            first_conf.results_format.transforms
-            == second_conf.results_format.transforms
-        )
+        assert first_conf.results_format.transforms == second_conf.results_format.transforms
 
         conf1_dict = dict(vars(first_conf))
         del conf1_dict["results_format"]
@@ -165,7 +160,9 @@ class TestConfigGeneral:
 
     @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
     def test_json_version_compatibility(self, version):
-        serialised_data = _get_contents(f"serialised_default_compiler_config_{version}.json")
+        serialised_data = _get_contents(
+            f"serialised_default_compiler_config_{version}.json"
+        )
         deserialised_conf = CompilerConfig.create_from_json(serialised_data)
         assert deserialised_conf.metrics == MetricsType.Default
         assert deserialised_conf.results_format == QuantumResultsFormat()
@@ -184,9 +181,7 @@ class TestConfigGeneral:
             deserialised_conf.optimizations.qiskit_optimizations
             == QiskitOptimizations.Empty
         )
-        assert (
-            deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
-        )
+        assert deserialised_conf.optimizations.tket_optimizations == TketOptimizations.One
 
     @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
     def test_runs_successfully_with_config(self, version):

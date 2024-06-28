@@ -21,6 +21,7 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.qat import execute_qasm
+
 from .utils import get_jagged_echo_hardware
 
 
@@ -314,9 +315,9 @@ class TestOnNoisySimulator:
                 q = int(key.split("_", 1)[1])
                 for array in result[key]:
                     for j in range(len(array)):
-                        if (
-                            array[j] > 0 and np.random.rand() > self.fidelity_r0[q]
-                        ) or (array[j] < 0 and np.random.rand() > self.fidelity_r1[q]):
+                        if (array[j] > 0 and np.random.rand() > self.fidelity_r0[q]) or (
+                            array[j] < 0 and np.random.rand() > self.fidelity_r1[q]
+                        ):
                             array[j] *= -1
             return result
 
@@ -349,9 +350,7 @@ class TestOnNoisySimulator:
         eng.fidelity_r0 = [q0_ro_fidelity_0, q1_ro_fidelity_0]
         eng.fidelity_r1 = [q0_ro_fidelity_1, q1_ro_fidelity_1]
 
-        mitigated_result = execute_qasm(qasm, eng, self.config)[
-            "linear_readout_mitigation"
-        ]
+        mitigated_result = execute_qasm(qasm, eng, self.config)["linear_readout_mitigation"]
         for output_bits, probability in mitigated_result.items():
             if output_bits == bitstring:
                 assert abs(probability - 1) < 0.05

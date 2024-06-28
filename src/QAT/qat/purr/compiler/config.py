@@ -55,9 +55,9 @@ class ResultsFormatting(Flag):
 class QuantumResultsFormat:
     def __init__(self):
         self.format: Optional[InlineResultsProcessing] = None
-        self.transforms: Optional[
-            ResultsFormatting
-        ] = ResultsFormatting.DynamicStructureReturn
+        self.transforms: Optional[ResultsFormatting] = (
+            ResultsFormatting.DynamicStructureReturn
+        )
 
     def raw(self) -> QuantumResultsFormat:
         self.format = InlineResultsProcessing.Raw
@@ -226,9 +226,7 @@ class CompilerConfig:
     ):
         self.repeats: Optional[int] = repeats
         self.repetition_period: Optional = repetition_period
-        self.results_format: QuantumResultsFormat = (
-            results_format or QuantumResultsFormat()
-        )
+        self.results_format: QuantumResultsFormat = results_format or QuantumResultsFormat()
         self.metrics: MetricsType = metrics
         self.active_calibrations: List[CalibrationArguments] = active_calibrations or []
         self.optimizations: Optional[OptimizationConfig] = optimizations
@@ -430,9 +428,7 @@ def get_serializable_types():
 
     def update_dict(type):
         if issubclass(type, Enum):
-            serializable_types.update(
-                {f"<enum '{type.__module__}.{type.__name__}'>": type}
-            )
+            serializable_types.update({f"<enum '{type.__module__}.{type.__name__}'>": type})
         else:
             serializable_types.update({str(type): type})
 

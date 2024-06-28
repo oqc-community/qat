@@ -16,6 +16,7 @@ class Instrument(Calibratable):
     driver specific data in the calibration files, the actual drivers should be a property of this object, so the
     calibration will skip it.
     """
+
     def __init__(self, address, id_=None):
         super().__init__()
         self.id = id_ if id_ else address
@@ -39,7 +40,7 @@ class Instrument(Calibratable):
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
-                    f'Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}'
+                    f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
                 )
 
     @property
@@ -54,7 +55,7 @@ class Instrument(Calibratable):
 
     def __getstate__(self) -> Dict:
         results = super(Instrument, self).__getstate__()
-        results['_driver'] = None
+        results["_driver"] = None
         return results
 
     def __setstate__(self, state):

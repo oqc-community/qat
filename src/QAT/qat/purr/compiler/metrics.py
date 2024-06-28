@@ -42,9 +42,7 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
     optimized_instruction_count: Optional[int]
 
     def __init__(self, enabled_metrics=None):
-        self.enabled_metrics: Optional[MetricsType] = (
-            enabled_metrics or MetricsType.Default
-        )
+        self.enabled_metrics: Optional[MetricsType] = enabled_metrics or MetricsType.Default
         for key in [val.snake_case_name() for val in self._target_metrics()]:
             setattr(self, key, None)
 
@@ -84,8 +82,7 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
     def as_dict(self):
         """Generates a dictionary of the valid metrics."""
         return {
-            met.snake_case_name(): self.get_metric(met)
-            for met in self._target_metrics()
+            met.snake_case_name(): self.get_metric(met) for met in self._target_metrics()
         }
 
     def merge(self, other: "CompilationMetrics"):

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import IO, List, Union
 
 from numpy import savetxt
+
 from qat.purr.utils.serializer import json_dump, json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
@@ -289,9 +290,7 @@ class JsonHandler(FileLoggerHandler):
             self.stream = self._open()
             self.create_initial_file()
         self.stream.seek(0, os.SEEK_END)
-        self.stream.seek(
-            self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET
-        )
+        self.stream.seek(self.stream.tell() - len(self.file_terminator) - 1, os.SEEK_SET)
         FileLoggerHandler.emit(self, record)
         self.stream.write(self.file_terminator)
         self.flush()
@@ -352,13 +351,7 @@ class CompositeLogger(BasicLogger):
 
         # Set the root to the lowest non-custom log level activated.
         root.setLevel(
-            min(
-                [
-                    val.level
-                    for val in self.loggers
-                    if (float(val.level / 10)).is_integer()
-                ]
-            )
+            min([val.level for val in self.loggers if (float(val.level / 10)).is_integer()])
         )
 
     def add_loggers(self, loggers_or_names: List[Union[str, logging.Logger]] = ()):
@@ -804,8 +797,7 @@ def get_default_logger():
 
             stack = traceback.extract_stack()
             is_test_env = any(
-                val.filename is not None
-                and val.filename.endswith(f"unittest\\loader.py")
+                val.filename is not None and val.filename.endswith(f"unittest\\loader.py")
                 for val in stack
             )
             if is_test_env:
