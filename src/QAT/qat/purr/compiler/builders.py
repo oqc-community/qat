@@ -2,7 +2,12 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import itertools
 import math
-from collections.abc import defaultdict
+import sys
+
+if sys.version_info < (3, 10):
+    from collections import defaultdict
+else:
+    from collections.abc import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
 
