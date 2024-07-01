@@ -43,15 +43,14 @@ class QbloxPackage:
 
 
 class QatEmitter:
-    def emit(self, instructions: List[Instruction]) -> CatGraph:
+    def emit_cfg(self, instructions: List[Instruction]) -> CatGraph:
         catg = CatGraph()
-
-        basic_blocks = self.basic_blocks(instructions)
-        basic_blocks = [bb for bb in basic_blocks if bb.instructions]
-
+        self.build_catg(instructions, catg)
         return catg
 
-    def basic_blocks(self, instructions: List[Instruction]) -> List[BasicBlock]:
+    def build_catg(
+        self, instructions: List[Instruction], catg: CatGraph
+    ) -> List[BasicBlock]:
         i = None
         for j, inst in enumerate(instructions):
             if isinstance(inst, (Sweep, Repeat)):
@@ -64,25 +63,39 @@ class QatEmitter:
         end_type = EndRepeat if isinstance(instructions[i], Repeat) else EndSweep
 
         j = None
-        for k, inst in enumerate(instructions[-1:i:-1]):
+        for k, inst in enumerate(instructions[i + 1 :]):
             if isinstance(inst, end_type):
                 if (isinstance(inst, EndRepeat) and end_type != EndRepeat) or (
                     isinstance(inst, EndSweep) and end_type != EndSweep
                 ):
-                    raise ValueError("Scoping violated")
-                j = len(instructions) - k - 1
+                    raise ValueError("Scoping semantics violated")
+                j = k + i + 1
                 break
 
         if j is None:
             raise ValueError("Missing scope end")
 
-        return (
-            self.basic_blocks(instructions[:i])
-            + [BasicBlock(instructions[i])]
-            + self.basic_blocks(instructions[i + 1 : j])
-            + [BasicBlock(instructions[j])]
-            + self.basic_blocks(instructions[j + 1 :])
-        )
+        before_i = self.build_catg(instructions[:i], catg)
+        ith = BasicBlock(instructions[i])
+        i2j = self.build_catg(instructions[i + 1 : j], catg)
+        jth = BasicBlock(instructions[i])
+        after_j = self.build_catg(instructions[j + 1 :], catg)
+
+        nodes = before_i + [ith] + i2j + [jth] + after_j
+        edges = [
+            (before_i[-1] if before_i else None, ith),
+            (ith, i2j[0] if i2j else None),
+            (i2j[-1] if i2j else None, jth),
+            (jth, after_j[0] if after_j else None),
+        ]
+
+        for n in nodes:
+            catg.add_node(n)
+
+        for src, dest in edges:
+            catg.add_edge(src, dest)
+
+        return nodes
 
 
 class QbloxEmitter:

@@ -75,13 +75,61 @@ def test_qat_graph(model):
     freqs = center_freq + np.linspace(-freq_range, freq_range, num_points)
     builder = (
         HybridInstructionBuilder(model)
-        # .sweep(SweepValue(f'freq{0}', freqs))
+        .sweep(SweepValue(f'freq{0}', freqs))
         .repeat(400, 500e-6)
         .device_assign(measure_channel, "frequency", Variable(f"freq{0}"))
         .device_assign(acquire_channel, "frequency", Variable(f"freq{0}"))
         .measure_mean_signal(qubit, output_variable=f"Q{0}")
         .end_repeat()
+        .end_sweep()
     )
-    qat_graph = QatEmitter().emit(builder.instructions)
+    qat_graph = QatEmitter().emit_cfg(builder.instructions)
     qblox_packages = QbloxEmitter().emit(qat_graph)
     assert qblox_packages is not None
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+def test_emit_qat_graph_fails_scoping_semantics(model):
+    qubit = model.get_qubit(0)
+    measure_channel = qubit.get_measure_channel()
+    acquire_channel = qubit.get_acquire_channel()
+    assert acquire_channel == measure_channel
+
+    num_points = 10
+    freq_range = 20e6
+    center_freq = qubit.get_acquire_channel().frequency
+    freqs = center_freq + np.linspace(-freq_range, freq_range, num_points)
+    builder = (
+        HybridInstructionBuilder(model)
+        .sweep(SweepValue(f"freq{0}", freqs))
+        .device_assign(measure_channel, "frequency", Variable(f"freq{0}"))
+        .device_assign(acquire_channel, "frequency", Variable(f"freq{0}"))
+        .measure_mean_signal(qubit, output_variable=f"Q{0}")
+    )
+
+    with pytest.raises(ValueError):
+        QatEmitter().emit_cfg(builder.instructions)
+
+    builder = (
+        HybridInstructionBuilder(model)
+        .sweep(SweepValue(f"freq{0}", freqs))
+        .device_assign(measure_channel, "frequency", Variable(f"freq{0}"))
+        .device_assign(acquire_channel, "frequency", Variable(f"freq{0}"))
+        .measure_mean_signal(qubit, output_variable=f"Q{0}")
+        .end_repeat()
+    )
+
+    with pytest.raises(ValueError):
+        QatEmitter().emit_cfg(builder.instructions)
+
+    builder = (
+        HybridInstructionBuilder(model)
+        .repeat(400, 500e-6)
+        .device_assign(measure_channel, "frequency", Variable(f"freq{0}"))
+        .device_assign(acquire_channel, "frequency", Variable(f"freq{0}"))
+        .measure_mean_signal(qubit, output_variable=f"Q{0}")
+        .end_sweep()
+    )
+
+    with pytest.raises(ValueError):
+        QatEmitter().emit_cfg(builder.instructions)

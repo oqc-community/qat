@@ -26,3 +26,10 @@ class CatGraph:
 
         self.entry = None
         self.exit = None
+
+    def add_node(self, node: BasicBlock):
+        if not node in self.nodes:
+            self.nodes.append(node)
+
+    def add_edge(self, src: BasicBlock, dest: BasicBlock):
+        self.edges.append((src, dest))
