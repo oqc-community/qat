@@ -450,6 +450,9 @@ def _get_highest_id(id_list, prefix, start_id=0):
 
 
 def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
+    if not qutip_available:
+        raise RuntimeError("qutip unavailable")
+
     highest_channel_id = _get_highest_id(list(hw.physical_channels.keys()), "CH")
     highest_baseband_id = _get_highest_id(list(hw.basebands.keys()), "L")
 
@@ -537,6 +540,10 @@ def add_qubit_coupling(hw, qubit1, qubit2, frequency):
 
 def apply_setup_to_hardware(hw, rotating_frame=True):
     """Apply the default real-time chip sim hardware setup to the passed-in hardware."""
+
+    if not qutip_available:
+        raise RuntimeError("qutip unavailable")
+
     bb1 = PhysicalBaseband("L1", 5.0e9)
     bb2 = PhysicalBaseband("L2", 8.0e9)
     bb3 = PhysicalBaseband("L3", 5.09e9)
