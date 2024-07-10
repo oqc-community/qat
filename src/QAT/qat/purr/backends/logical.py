@@ -9,7 +9,7 @@ from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.instructions import Acquire, ProcessAxis, ResultsProcessing
 from qat.purr.compiler.runtime import get_builder
 
-from src.QAT.qat.purr.compiler.hardware_models import HardwareModel, QuantumHardwareModel
+from qat.purr.compiler.hardware_models import HardwareModel, QuantumHardwareModel
 import numpy as np
 
 class LogicalQubit:
