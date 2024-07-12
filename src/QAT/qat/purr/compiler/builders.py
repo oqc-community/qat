@@ -422,6 +422,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self, target: Qubit, axis: str = None, output_variable: str = None
     ):
         _, acquire = self.measure(target, axis, output_variable)
+        if acquire is None:
+            return self
         self.post_processing(
             acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, target
         )
