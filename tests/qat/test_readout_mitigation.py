@@ -137,9 +137,7 @@ class TestLinearReadoutMitigation(TestReadoutMitigation):
                 assert all([i > 0 for i in result[config].values()])
             else:
                 original = result["b"]
-                zero = "0" * qubit_count
-                one = "11" + zero[2:]
-                assert sum([original.get(zero), original.get(one, 0)]) == 1000.0
+                assert sum(list(original.values())) == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
                     if key in original:
@@ -212,9 +210,7 @@ class TestMatrixReadoutMitigation(TestReadoutMitigation):
                 assert all([i > 0 for i in result[config].values()])
             else:
                 original = result["b"]
-                zero = "0" * qubit_count
-                one = "11" + zero[2:]
-                assert sum([original.get(zero), original.get(one, 0)]) == 1000.0
+                assert sum(list(original.values())) == 1000.0
                 mitigated = result[config]
                 for key, value in mitigated.items():
                     if key in original:

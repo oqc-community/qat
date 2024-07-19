@@ -257,7 +257,7 @@ class QiskitEngine(InstructionExecutionEngine):
 
         # Because qiskit needs all values up-front we just provide a maximal classical register then trim off
         # the values we aren't going to use.
-        trimmed = {key[removals:]: value for key, value in distribution.items()}
+        trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
         assigns = {}
         returns = []
         for inst in builder.instructions:
