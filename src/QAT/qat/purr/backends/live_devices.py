@@ -28,9 +28,10 @@ class Instrument(Calibratable):
         if self.is_connected:
             self.disconnect()
         self.is_connected = True
+        return self.is_connected
 
     def close(self):
-        self.disconnect()
+        return self.disconnect()
 
     def disconnect(self):
         if self.driver is not None:
@@ -42,6 +43,7 @@ class Instrument(Calibratable):
                 log.warning(
                     f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
                 )
+        return self.is_connected
 
     @property
     def driver(self):
