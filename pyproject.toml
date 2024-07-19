@@ -27,7 +27,7 @@ numpy = "^1.24.0"
 networkx = "~=2.5"
 matplotlib = "^3.3.2"
 logging-config = "~=1.0.4"
-qutip = { version = "~=4.6.3"}
+qutip = { version = "^4.7.6"}
 toml = "^0.10.2"
 pytket = "~=1.2.2"
 qiskit = "^0.45.0"

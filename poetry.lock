@@ -2292,46 +2292,46 @@ visualization = ["ipywidgets (>=7.3.0)", "matplotlib (>=3.3)", "pillow (>=4.2.1)
 
 [[package]]
 name = "qutip"
-version = "4.6.3"
+version = "4.7.6"
 description = "QuTiP: The Quantum Toolbox in Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "qutip-4.6.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:48b101a3c07973ef02794d07eaa02299a46d043339df08eae68d6d8c4a837f67"},
-    {file = "qutip-4.6.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c4709e3bb2bacc6cbd45e57e687fbc11891115911325a88b4c4a38c5ff2c6b15"},
-    {file = "qutip-4.6.3-cp310-cp310-win_amd64.whl", hash = "sha256:52595f3776c4779468ece414076898e12fbe4e54c8cece8572776db956446ae8"},
-    {file = "qutip-4.6.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:83368597df61dc4495dfb1d35f64d214ffc2656ba240793e0496a789694e7a71"},
-    {file = "qutip-4.6.3-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:3622307c4c40d8930d8eb31154fe00548e7399c9771d4606bef6bb1c65d10425"},
-    {file = "qutip-4.6.3-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6c3af350a186626e3b599ad62833a4796b9477cbada95e57756b0d4fb7acbae7"},
-    {file = "qutip-4.6.3-cp36-cp36m-win32.whl", hash = "sha256:32f8d439027b1ce6d48cf45f0209f2b2f81b542694b7f84c9b574c3909259028"},
-    {file = "qutip-4.6.3-cp36-cp36m-win_amd64.whl", hash = "sha256:8b3f1e98738f277cabe4cc54c0911d556a2de07a653c69e7a3bda0b0d98e996a"},
-    {file = "qutip-4.6.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:d7ad7654feb9ddacceea0fdec7d76d780e9368656db52986274b60669ca24424"},
-    {file = "qutip-4.6.3-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:e7c91f7bc716c49549067b2c0c634787b7140888d32e36b5d9214ef8a64cf218"},
-    {file = "qutip-4.6.3-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f6cd747540c87f4615f8faab7490242c4b180c9e3a4493c81d52aa87c5f8741e"},
-    {file = "qutip-4.6.3-cp37-cp37m-win32.whl", hash = "sha256:559e6398a318867285314c4f414a5a891cbc090bb51bbc446d8ea349b0d9522a"},
-    {file = "qutip-4.6.3-cp37-cp37m-win_amd64.whl", hash = "sha256:185b62899ed6e5463ea5c22fdce10d6f53f98d69208987cf7ce753f706b6a052"},
-    {file = "qutip-4.6.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:babd7d981118ad7a4cfe12cbfad82283928f89dda1ab9aa5342490388c55bf2c"},
-    {file = "qutip-4.6.3-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:85161806aae43874e4227e6b51fb0d08e40c5996722c05980beee4a930e76677"},
-    {file = "qutip-4.6.3-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:826d58b783bfc63fc2375764316c8752cfaff0348b652eebf9f14880fabecfe0"},
-    {file = "qutip-4.6.3-cp38-cp38-win32.whl", hash = "sha256:61d485624477f7176b994def8adb83064ef7dc9f170c3d454ed403d8f2808044"},
-    {file = "qutip-4.6.3-cp38-cp38-win_amd64.whl", hash = "sha256:6cfc113c9a9b0692c44294a224b810877961e217b8652b8489d0f31c90caec18"},
-    {file = "qutip-4.6.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ce4244dbe96cd0fa96c75bbb89f666b568b3ca89985594a872e40c9ddf379ad7"},
-    {file = "qutip-4.6.3-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:de8e5b5e68a1b1c9f1c7a4bc8f88e1194e5d787657d5670e82289d2d8db1fee7"},
-    {file = "qutip-4.6.3-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:5851f15f0336c9cfd8a258e50a665f52e98ee0c7cb7fca01698dc5b323978f9b"},
-    {file = "qutip-4.6.3-cp39-cp39-win32.whl", hash = "sha256:819437efc588319dab0fedad46098e0d20c4fe4b8e15196b7be710f0e89460d8"},
-    {file = "qutip-4.6.3-cp39-cp39-win_amd64.whl", hash = "sha256:2b23217d4daa77fae3804a9258ee44f51c81cb1e073a3a4faa51ab27cbb4df3a"},
-    {file = "qutip-4.6.3.tar.gz", hash = "sha256:caf7c577e01478b488384822f08cb19686a7882969a88115a15f4636585d4fa8"},
+    {file = "qutip-4.7.6-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:917a6944835de95d8c37800dc276542227956f6e7a055ea53f733344d2ee9d8a"},
+    {file = "qutip-4.7.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4d8d2ac1313d676b6269b1e01f02971e44be6f86099059a920251e8606f5ff8c"},
+    {file = "qutip-4.7.6-cp310-cp310-win_amd64.whl", hash = "sha256:6c857a0768f31d3d1d6f9b43234c5b8d30836c9f57b4fd6f013bbcd555bd3e10"},
+    {file = "qutip-4.7.6-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:182222738030ed6bff70e7d5ed7332aeae0045c8d90a66f49e210a3cc853021a"},
+    {file = "qutip-4.7.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:48568d8396dd96a6acce4d35250ccffbfc63adc9e6c3097349e31f2fd63a65e2"},
+    {file = "qutip-4.7.6-cp311-cp311-win_amd64.whl", hash = "sha256:bcd191a4719ab76368dc8b306b9489318a365a694ce9df49aa054b9b690edb4a"},
+    {file = "qutip-4.7.6-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:1e84ea286ff4f117f68a05cd3979375059523ea302541955928b5db3cf8fcc9f"},
+    {file = "qutip-4.7.6-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:e4e1ebb1dd35ede090493760d0a642e8bc88fca0ad339b40ccf453b99c9e5eb5"},
+    {file = "qutip-4.7.6-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f5c30a948077a6b4e90b92161be91d787a8bd6d443e5f8dc598e3a75fa3a7efe"},
+    {file = "qutip-4.7.6-cp36-cp36m-win32.whl", hash = "sha256:81bcdfdfe6ebdbf305efc827725b76a2f6a0a3be7ab2ca46b4921694241272e1"},
+    {file = "qutip-4.7.6-cp36-cp36m-win_amd64.whl", hash = "sha256:3f297b9fb15b6b415bb5737fd7edb23b13dca541724925f1810ec562024d26d5"},
+    {file = "qutip-4.7.6-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:fced202491fd7cc44d69e074b3c0321b5213d8a013eaeec8a73048f5a9dec910"},
+    {file = "qutip-4.7.6-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:a40cbc67f9f8215e9bf0c6cbac9764dde711a146459faf65583ddc1643380eaa"},
+    {file = "qutip-4.7.6-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:9af3b9be76dcfc007ea3111af2a31a4d8ca55fb9c27c3cbeb09d6af0e950f5b1"},
+    {file = "qutip-4.7.6-cp37-cp37m-win32.whl", hash = "sha256:8ddca69a2e543ca3f760fa68294503a51251c5b58981ab5ea2057f5380acb906"},
+    {file = "qutip-4.7.6-cp37-cp37m-win_amd64.whl", hash = "sha256:dc7a5dca4047f1e5bab80b0cd28a5a8fc7dbe890aa58329b14885dbfdcf0c2fb"},
+    {file = "qutip-4.7.6-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:d1e079eda5849d52e1232ae6ff64badbc400a934a57228814fc7c76f57489c17"},
+    {file = "qutip-4.7.6-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:30e36a0c805bf20108e6240e638a4c0de170f1899b39dfe50a994830b3d30e83"},
+    {file = "qutip-4.7.6-cp38-cp38-win_amd64.whl", hash = "sha256:b675e781f02b941c2097c5c0506e65c48e7aa0e28c6d2c167e0c6df4a072d709"},
+    {file = "qutip-4.7.6-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:a7f899be25715d978036df5d6bc0b85d412f1b68b240d3091ec371f42b57a1a6"},
+    {file = "qutip-4.7.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ca3b33b20fee4f10cd55c64cef536b0f277dccc252c8df72a6158cf9b3f14bc4"},
+    {file = "qutip-4.7.6-cp39-cp39-win_amd64.whl", hash = "sha256:d1a5e3ed1fea466ecee6a15d011afd1c812880b45ec50267070b9abe03fa242f"},
+    {file = "qutip-4.7.6.tar.gz", hash = "sha256:f569d3e986f07d4017ad6217e6bf502131587138e3753dfa5a353338a34eade9"},
 ]
 
 [package.dependencies]
 numpy = ">=1.16.6"
 packaging = "*"
-scipy = ">=1.0"
+scipy = ">=1.0,<1.13.0"
 
 [package.extras]
-full = ["cvxopt", "cvxpy (>=1.0)", "cython (>=0.29.20)", "matplotlib (>=1.2.1)", "pytest (>=5.2)", "pytest-rerunfailures"]
+full = ["cvxopt", "cvxpy (>=1.0)", "cython (>=0.29.20,<3.0.0)", "ipython", "matplotlib (>=1.2.1)", "pytest (>=5.2)", "pytest-rerunfailures"]
 graphics = ["matplotlib (>=1.2.1)"]
-runtime-compilation = ["cython (>=0.29.20)"]
+ipython = ["ipython"]
+runtime-compilation = ["cython (>=0.29.20,<3.0.0)"]
 semidefinite = ["cvxopt", "cvxpy (>=1.0)"]
 tests = ["pytest (>=5.2)", "pytest-rerunfailures"]
 
@@ -3080,4 +3080,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "0a4f89918b0489220e3b797d193c703849dd14064864b5da5447b97dc0223706"
+content-hash = "e1967f5a6d42a8b2a0d3ddd6ed2a08abe80cb0328a4321fa8191f016b8ff8b8f"
