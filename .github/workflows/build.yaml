@@ -25,7 +25,7 @@ jobs:
           # - os: macos-latest
           #   python: 3.9
           - os: macos-latest
-            python: 3.11
+            python: "3.11"
     defaults:
       run:
         shell: bash
@@ -76,7 +76,7 @@ jobs:
           # - os: macos-latest
           #   python: 3.9
           - os: macos-latest
-            python: 3.11
+            python: "3.11"
     defaults:
       run:
         shell: bash
