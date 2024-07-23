@@ -427,3 +427,14 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                         raise ValueError(
                             "Mid-circuit measurements currently unable to be used."
                         )
+
+
+class UnsafeExecutionEngine(LiveDeviceEngine):
+    """
+    An engine that intentionally skips slow phases such as optimisation.
+    The benefit is to improve runtime for experienced users.
+    Use only if you know what you're doing.
+    """
+
+    def optimize(self, instructions):
+        pass
