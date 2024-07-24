@@ -106,7 +106,7 @@ jobs:
 
     env:
       name: testpypi
-      url: https://test.pypi.org/p/qat-compiler
+      url: https://test.pypi.org/p/qat-compiler-test
 
     permissions:
       id-token: write
