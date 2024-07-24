@@ -9,16 +9,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
-    - name: Install pypa/build
-      run: >-
-        poetry install
-        poetry build
+    - name: Install poetry build
+      run: poetry install
+
     - name: Build a binary wheel and a source tarball
-      run: python3 -m build
+      run: poetry build
+
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:
@@ -46,6 +50,8 @@ jobs:
         path: dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
 
   github-release:
     name: >-
@@ -89,6 +95,8 @@ jobs:
         gh release upload
         '${{ github.ref_name }}' dist/**
         --repo '${{ github.repository }}'
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
 
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
