@@ -32,11 +32,11 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-latest
-    environment:
+    env:
       name: pypi
       url: https://pypi.org/p/qat-compiler  # Replace <package-name> with your PyPI project name
     permissions:
-      id-token: {secrets.PYPI_TEST_PUBLISH_TOKEN}
+      id-token: write
 
     steps:
     - name: Download all the dists
@@ -54,7 +54,6 @@ jobs:
     needs:
     - publish-to-pypi
     runs-on: ubuntu-latest
-    on: [pull-request]
 
     permissions:
       contents: write  # IMPORTANT: mandatory for making GitHub Releases
@@ -97,12 +96,12 @@ jobs:
     - build
     runs-on: ubuntu-latest
 
-    environment:
+    env:
       name: testpypi
       url: https://test.pypi.org/p/qat-compiler
 
     permissions:
-      id-token: {secrets.PYPI_TEST_PUBLISH_TOKEN}
+      id-token: write
 
     steps:
     - name: Download all the dists
