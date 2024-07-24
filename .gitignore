@@ -22,6 +22,9 @@ docs/source/*
 !docs/source/changelog.rst
 !docs/source/qat-logo.png
 
+# VS Code
+.vscode
+
 # Visual studio
 .vs/
 *.csproj.user
