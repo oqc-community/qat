@@ -1,17 +1,16 @@
+from dataclasses import dataclass
+
+import numpy as np
 from qblox_instruments import ClusterType
 
 from qat.purr.backends.qblox.config import (
     AttConfig,
-    AwgConfig,
     ConnectionConfig,
     LoConfig,
     ModuleConfig,
-    NcoConfig,
     OffsetConfig,
     QbloxConfig,
-    ScopeAcqConfig,
     SequencerConfig,
-    SquareWeightAcq,
 )
 from qat.purr.backends.qblox.device import (
     DummyQbloxControlHardware,
@@ -19,40 +18,68 @@ from qat.purr.backends.qblox.device import (
     QbloxPhysicalBaseband,
     QbloxPhysicalChannel,
 )
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 
 
-def choose_module_slots(cluster_kit):
-    if cluster_kit is None:
+@dataclass
+class ClusterInfo:
+    id: int = None
+    name: str = None
+    sid: str = None
+    ip: str = None
+
+
+@dataclass
+class MixerTestValues:
+    num_points = 2  # Low value for testing to reduce the size of the cartesian products
+
+    # Module values
+    qcm_i_offsets = np.linspace(-2.5, 2.5, num_points)  # I offsets (Volt)
+    qcm_q_offsets = np.linspace(-2.5, 2.5, num_points)  # Q offsets (Volt)
+    qcm_rf_i_offsets = np.linspace(-84, 73, num_points)  # I offsets (mVolt)
+    qcm_rf_q_offsets = np.linspace(-84, 73, num_points)  # Q offsets (mVolt)
+    qrm_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
+    qrm_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
+    qrm_rf_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
+    qrm_rf_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
+
+    # Sequencer values
+    phase_offsets = np.linspace(-45, 45, num_points)  # Phase offsets (Degree)
+    gain_ratios = np.linspace(0.5, 2, num_points)  # Gain ratios
+
+
+def choose_module_slots(cluster_kit: ClusterInfo):
+    if cluster_kit.id is None:
         qcmrf_slot = next(
             (k for k, v in DUMMY_CONFIG.items() if v == ClusterType.CLUSTER_QCM_RF)
         )
         qrmrf_slot = next(
             (k for k, v in DUMMY_CONFIG.items() if v == ClusterType.CLUSTER_QRM_RF)
         )
-    elif cluster_kit == 1:
-        qcmrf_slot, qrmrf_slot = 12, 14
-    elif cluster_kit == 2:
-        qcmrf_slot, qrmrf_slot = 4, 14
     else:
-        raise ValueError(f"Expected cluster id 1 or 2, got {cluster_kit} instead")
+        raise NotImplementedError(f"Depends on your live physical setup")
 
     return qcmrf_slot, qrmrf_slot
 
 
 DUMMY_CONFIG = {
+    1: ClusterType.CLUSTER_QCM,
     2: ClusterType.CLUSTER_QCM_RF,
     4: ClusterType.CLUSTER_QCM_RF,
     12: ClusterType.CLUSTER_QCM_RF,
+    13: ClusterType.CLUSTER_QRM,
     14: ClusterType.CLUSTER_QRM_RF,
     16: ClusterType.CLUSTER_QRM_RF,
     18: ClusterType.CLUSTER_QRM_RF,
 }
 
 
-def setup_qblox_hardware_model(model, cluster_kit=None, name=None) -> QbloxControlHardware:
+def setup_qblox_hardware_model(
+    model: QbloxLiveHardwareModel, info: ClusterInfo = ClusterInfo()
+) -> QbloxControlHardware:
     """
-    cluster_kit is just an integer referring to any live QBlox clusters available
-    When provided, some environment variables need to be defined:
+    cluster_kit wraps information about a QBlox cluster. When provided, some environment
+    variables need to be defined:
 
     QBLOX_DEV_ID: Cluster Serial ID
     QBLOX_DEV_NAME: Cluster designation name
@@ -60,13 +87,13 @@ def setup_qblox_hardware_model(model, cluster_kit=None, name=None) -> QbloxContr
 
     If none is provided then a Dummy cluster is set up
     """
-    qcmrf_slot, qrmrf_slot = choose_module_slots(cluster_kit)
+    qcmrf_slot, qrmrf_slot = choose_module_slots(info)
 
-    if cluster_kit is None:
-        instrument = DummyQbloxControlHardware(name=name, cfg=DUMMY_CONFIG)
+    if info.id is None:
+        instrument = DummyQbloxControlHardware(name=info.name, cfg=DUMMY_CONFIG)
         qcmrf_config, qrmrf_config = dummy_qblox_config()
     else:
-        instrument = QbloxControlHardware(name=name)
+        instrument = QbloxControlHardware(name=info.name)
         qcmrf_config, qrmrf_config = live_qblox_config()
 
     bb1 = QbloxPhysicalBaseband(
@@ -124,55 +151,7 @@ def setup_qblox_hardware_model(model, cluster_kit=None, name=None) -> QbloxContr
 
 
 def live_qblox_config():
-    qcmrf_config = QbloxConfig(
-        module=ModuleConfig(
-            lo=LoConfig(out0_en=True, out1_en=True),
-            attenuation=AttConfig(out0=30, out1=30),
-            offset=OffsetConfig(out0_path0=0, out0_path1=0, out1_path0=0, out1_path1=0),
-        ),
-        sequencers={
-            0: SequencerConfig(
-                sync_en=True,
-                connection=ConnectionConfig(bulk_value=["out0"]),
-                awg=AwgConfig(mod_en=True),
-                nco=NcoConfig(prop_delay_comp_en=True),
-            ),
-            1: SequencerConfig(
-                sync_en=True,
-                connection=ConnectionConfig(bulk_value=["out0"]),
-                awg=AwgConfig(mod_en=True),
-                nco=NcoConfig(prop_delay_comp_en=True),
-            ),
-            2: SequencerConfig(
-                sync_en=True,
-                connection=ConnectionConfig(bulk_value=["out0"]),
-                awg=AwgConfig(mod_en=True),
-                nco=NcoConfig(prop_delay_comp_en=True),
-            ),
-        },
-    )
-
-    qrmrf_config = QbloxConfig(
-        module=ModuleConfig(
-            lo=LoConfig(out0_in0_en=True),
-            attenuation=AttConfig(out0=0, in0=0),
-            offset=OffsetConfig(out0_path0=0, out0_path1=0, in0_path0=0, in0_path1=0),
-            scope_acq=ScopeAcqConfig(avg_mode_en_path0=True, avg_mode_en_path1=True),
-        ),
-        sequencers={
-            i: SequencerConfig(
-                sync_en=True,
-                demod_en_acq=True,
-                square_weight_acq=SquareWeightAcq(integration_length=4000),
-                connection=ConnectionConfig(bulk_value=["out0", "in0"]),
-                awg=AwgConfig(mod_en=True),
-                nco=NcoConfig(prop_delay_comp_en=True),
-            )
-            for i in range(6)
-        },
-    )
-
-    return qcmrf_config, qrmrf_config
+    raise NotImplementedError(f"Depends on your live physical setup")
 
 
 def dummy_qblox_config():
@@ -195,7 +174,7 @@ def dummy_qblox_config():
     )
 
     qrmrf_config = QbloxConfig(
-        module=ModuleConfig(),
+        module=ModuleConfig(lo=LoConfig(out0_in0_en=True)),
         sequencers={
             0: SequencerConfig(
                 sync_en=True,

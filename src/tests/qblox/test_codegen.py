@@ -12,11 +12,12 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire, MeasurePulse
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
+from tests.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [None], indirect=True)
+@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
 class TestQbloxEmitter:
     def test_play_guassian(self, model):
         width = 100e-9
@@ -109,5 +110,6 @@ class TestQbloxEmitter:
         assert isinstance(channel, QbloxPhysicalChannel)
         assert isinstance(channel.baseband, QbloxPhysicalBaseband)
         assert len(channel.config.sequencers) > 0
-        for sequencer in channel.config.sequencers.values():
-            assert sequencer.square_weight_acq.integration_length == int(time * 1e9)
+        assert package.sequencer_config.square_weight_acq.integration_length == int(
+            time * 1e9
+        )
