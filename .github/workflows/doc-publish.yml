@@ -1,4 +1,4 @@
-name: publish sphinx pages
+name: Publish documentation
 on:
   push:
       tags:

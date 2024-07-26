@@ -1,5 +1,4 @@
-
-name: test building sphinx docs
+name: Build documentation
 on:
   pull_request:
     branches: [main, develop]
