@@ -155,8 +155,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         missing_results = {
             val.output_variable
             for val in qfile.instructions
-            if isinstance(val, Acquire)
-            and val.output_variable not in results_processing
+            if isinstance(val, Acquire) and val.output_variable not in results_processing
         }
 
         # For any acquires that are raw, assume they're experiment results.
@@ -168,9 +167,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         for inst in results_processing.values():
             target_values = results.get(inst.variable, None)
             if target_values is None:
-                raise ValueError(
-                    f"Variable {inst.variable} not found in results output."
-                )
+                raise ValueError(f"Variable {inst.variable} not found in results output.")
 
             if (
                 InlineResultsProcessing.Raw in inst.results_processing
@@ -214,9 +211,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
                     if quantum_target in accum_phaseshifts:
-                        optimized_instructions.append(
-                            accum_phaseshifts.pop(quantum_target)
-                        )
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
@@ -291,9 +286,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         """Executes this qat file against this current hardware."""
         return self._common_execute(instructions)
 
-    def _execute_with_interrupt(
-        self, instructions, interrupt: Interrupt = NullInterrupt()
-    ):
+    def _execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
         """Executes this qat file against this current hardware.
         Execution allows for interrupts triggered by events
         """
@@ -463,9 +456,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 if isinstance(qtarget, Acquire):
                     qtarget = qtarget.channel
 
-                device_instructions: List[PositionData] = results.setdefault(
-                    qtarget, []
-                )
+                device_instructions: List[PositionData] = results.setdefault(qtarget, [])
                 if not any(device_instructions):
                     sample_start = 0
                 else:
@@ -564,9 +555,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 elif isinstance(pos.instruction, Reset):
                     self.process_reset(pos)
                 elif isinstance(pos.instruction, FrequencyShift):
-                    frequency = self.process_frequencyshift(
-                        pos, frequency, pulse_channel
-                    )
+                    frequency = self.process_frequencyshift(pos, frequency, pulse_channel)
 
         return buffers
 
@@ -1111,9 +1100,7 @@ class SweepIterator:
                         val, replacers, index, revert, recursion_guard
                     )
             else:
-                self._inject_sweep_values(
-                    value, replacers, index, revert, recursion_guard
-                )
+                self._inject_sweep_values(value, replacers, index, revert, recursion_guard)
 
     def reset_iteration(self):
         """
@@ -1145,9 +1132,7 @@ class SweepIterator:
             return
 
         for inst in instructions:
-            self._inject_sweep_values(
-                inst, self.sweep.variables, self.current_iteration
-            )
+            self._inject_sweep_values(inst, self.sweep.variables, self.current_iteration)
 
         if self.nested_sweep is not None:
             self.nested_sweep.do_sweep(instructions)
