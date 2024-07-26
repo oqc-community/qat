@@ -57,17 +57,18 @@ log = get_default_logger()
 
 
 class InstructionExecutionEngine(abc.ABC):
-    def __init__(self, model: QuantumHardwareModel = None):
+    def __init__(self, model: QuantumHardwareModel = None, startup_engine: bool = True):
         self.model: Optional[QuantumHardwareModel] = None
         if model is not None:
-            self.load_model(model)
+            self.load_model(model, startup_engine)
 
-    def load_model(self, model: QuantumHardwareModel):
+    def load_model(self, model: QuantumHardwareModel, startup_engine: bool = True):
         """Shuts down the current hardware, loads the new model then restarts."""
         if self.model is not None:
             self.shutdown()
         self.model = model
-        self.startup()
+        if startup_engine:
+            self.startup()
 
     def startup(self):
         """Starts up the underlying hardware or does nothing if already started."""
