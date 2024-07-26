@@ -106,6 +106,7 @@ class ChannelType(Enum):
     cross_resonance_cancellation = auto()
     acquire = auto()
     freq_shift = auto()
+    macq = auto()
 
     def __repr__(self):
         return self.name

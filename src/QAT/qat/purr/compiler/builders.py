@@ -26,6 +26,7 @@ from qat.purr.compiler.instructions import (
     CrossResonancePulse,
     Delay,
     DeviceUpdate,
+    FrequencyShift,
     Instruction,
     Jump,
     Label,
@@ -739,6 +740,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         _, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(PhaseShift(channel, phase))
+
+    def frequency_shift(self, target: PulseChannel, frequency):
+        if frequency == 0:
+            return self
+
+        _, channel = self.model._resolve_qb_pulse_channel(target)
+        return self.add(FrequencyShift(channel, frequency))
 
     def cnot(self, controlled_qubit: Qubit, target_qubit: Qubit):
         if isinstance(controlled_qubit, List):
