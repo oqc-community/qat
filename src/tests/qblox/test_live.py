@@ -5,11 +5,12 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
+from tests.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [None], indirect=True)
+@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
 class TestQbloxLiveEngine:
     def test_measure_amp_sweep(self, model):
         engine = model.create_engine()

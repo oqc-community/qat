@@ -7,11 +7,12 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
+from tests.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [None], indirect=True)
+@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
 class TestDummyQbloxControlHardware:
     def test_instruction_execution(self, model):
         amp = 1

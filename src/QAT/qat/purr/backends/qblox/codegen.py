@@ -1,10 +1,12 @@
 from contextlib import ExitStack, contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
 
-from qat.purr.backends.qblox.ir import Constants, Opcode, Sequence, SequenceBuilder
+from qat.purr.backends.qblox.config import SequencerConfig
+from qat.purr.backends.qblox.constants import Constants
+from qat.purr.backends.qblox.ir import Opcode, Sequence, SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.emitter import QatFile
@@ -88,8 +90,9 @@ def calculate_duration(instruction, return_samples: bool = True):
 
 @dataclass
 class QbloxPackage:
-    target: PulseChannel
-    sequence: Sequence
+    target: PulseChannel = None
+    sequence: Sequence = None
+    sequencer_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
 
 
 class QbloxEmitter:
@@ -172,6 +175,7 @@ class QbloxEmitter:
 class QbloxContext:
     def __init__(self, repeat: Repeat):
         self.sequence_builder = SequenceBuilder()
+        self.sequencer_config = SequencerConfig()
 
         self._repeat_count = repeat.repeat_count
         self._repeat_period = repeat.repetition_period
@@ -286,7 +290,7 @@ class QbloxContext:
 
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence)
+        return QbloxPackage(target, sequence, self.sequencer_config)
 
     def _wait(self, duration: float):
         if duration == 0:
@@ -351,9 +355,9 @@ class QbloxContext:
         return i_index, q_index, pulse.size
 
     def _process_acquire(self, acquire: Acquire, target: PulseChannel):
-        config = target.physical_channel.baseband.config
-        for sequencer in config.sequencers.values():
-            sequencer.square_weight_acq.integration_length = int(acquire.duration * 1e9)
+        self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
+            acquire
+        )
 
         acq_index = self._acq_index
         self.sequence_builder.add_acquisition(

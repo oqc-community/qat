@@ -154,6 +154,35 @@ class QbloxControlHardware(ControlHardware):
 
         return module.get_acquisitions(sequencer.seq_idx)
 
+    def _prepare_config(self, package: QbloxPackage, sequencer: Sequencer):
+        if package.target.fixed_if:  # NCO freq constant
+            nco_freq = package.target.baseband_if_frequency
+            lo_freq = package.target.frequency - nco_freq
+        else:  # LO freq constant
+            lo_freq = package.target.baseband_frequency
+            nco_freq = package.target.frequency - lo_freq
+
+        qblox_config = package.target.physical_channel.config
+
+        module_config = qblox_config.module
+        if module_config.lo.out0_en:
+            module_config.lo.out0_freq = lo_freq
+        if module_config.lo.out1_en:
+            module_config.lo.out1_freq = lo_freq
+        if module_config.lo.out0_in0_en:
+            module_config.lo.out0_in0_freq = lo_freq
+
+        # Sequencer config from the HwM
+        hwm_seq_config = qblox_config.sequencers[sequencer.seq_idx]
+        # Sequencer config from QAT IR
+        pkg_seq_config = package.sequencer_config
+        hwm_seq_config.nco.freq = nco_freq
+        hwm_seq_config.square_weight_acq.integration_length = (
+            pkg_seq_config.square_weight_acq.integration_length
+        )
+
+        return qblox_config
+
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(
@@ -178,23 +207,19 @@ class QbloxControlHardware(ControlHardware):
                 )
 
     def install(self, package: QbloxPackage):
-        # Temporary hack to work with both in-memory un-pickled hw model
-        # Reason is that integer keys are coerced into strings during pickling
-        config: QbloxConfig = package.target.physical_channel.config
-        config.sequencers = {int(k): v for k, v in config.sequencers.items()}
-
         module, sequencer = self.allocate_resources(package.target)
         log.debug(f"Configuring module {module}, sequencer {sequencer}")
+        config = self._prepare_config(package, sequencer)
         if module.is_qcm_type:
             if module.is_rf_type:
-                QcmRfConfigHelper(package.target).configure(module, sequencer)
+                QcmRfConfigHelper(config).configure(module, sequencer)
             else:
-                QcmConfigHelper(package.target).configure(module, sequencer)
+                QcmConfigHelper(config).configure(module, sequencer)
         elif module.is_qrm_type:
             if module.is_rf_type:
-                QrmRfConfigHelper(package.target).configure(module, sequencer)
+                QrmRfConfigHelper(config).configure(module, sequencer)
             else:
-                QrmConfigHelper(package.target).configure(module, sequencer)
+                QrmConfigHelper(config).configure(module, sequencer)
 
         sequence = asdict(package.sequence)
         if self.dump_sequence:

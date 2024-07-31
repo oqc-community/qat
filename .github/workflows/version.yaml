@@ -27,6 +27,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Bump version and push tag
         id: update
         run: |

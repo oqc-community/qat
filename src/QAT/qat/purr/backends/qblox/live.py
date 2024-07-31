@@ -3,6 +3,7 @@ from typing import Dict
 import numpy as np
 
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
+from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.backends.qblox.codegen import QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import QatFile
@@ -12,8 +13,22 @@ from qat.purr.compiler.interrupt import NullInterrupt
 
 
 class QbloxLiveHardwareModel(LiveHardwareModel):
+    def __init__(self, control_hardware: ControlHardware = None):
+        super().__init__(control_hardware)
+        self._reverse_coercion()
+
     def create_engine(self):
         return QbloxLiveEngine(self)
+
+    def _reverse_coercion(self):
+        """
+        HwM pickler coerces primitive types into strings. This is a temporary
+        workaround to support in-memory, pickled, and un-pickled dict key types
+        of the qblox config
+        """
+        for channel in self.physical_channels.values():
+            config = channel.config
+            config.sequencers = {int(k): v for k, v in config.sequencers.items()}
 
 
 class QbloxLiveEngine(LiveDeviceEngine):

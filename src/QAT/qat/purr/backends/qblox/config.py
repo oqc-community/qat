@@ -5,8 +5,6 @@ from typing import Dict, List
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
-from qat.purr.compiler.devices import PulseChannel
-
 
 @dataclass
 class ConnectionConfig:
@@ -86,15 +84,17 @@ class SequencerConfig:
     trigger_count_thresholds: int = field(default_factory=dict)  # key in [0,15]
     trigger_threshold_inverts: bool = field(default_factory=dict)  # key in [0,15]
 
-    connection: ConnectionConfig = ConnectionConfig()
-    nco: NcoConfig = NcoConfig()
-    awg: AwgConfig = AwgConfig()
-    mixer: MixerConfig = MixerConfig()
+    connection: ConnectionConfig = field(default_factory=lambda: ConnectionConfig())
+    nco: NcoConfig = field(default_factory=lambda: NcoConfig())
+    awg: AwgConfig = field(default_factory=lambda: AwgConfig())
+    mixer: MixerConfig = field(default_factory=lambda: MixerConfig())
 
     demod_en_acq: bool = None
-    square_weight_acq: SquareWeightAcq = SquareWeightAcq()
-    thresholded_acq: ThresholdedAcqConfig = ThresholdedAcqConfig()
-    ttl_acq: TtlAcqConfig = TtlAcqConfig()
+    square_weight_acq: SquareWeightAcq = field(default_factory=lambda: SquareWeightAcq())
+    thresholded_acq: ThresholdedAcqConfig = field(
+        default_factory=lambda: ThresholdedAcqConfig()
+    )
+    ttl_acq: TtlAcqConfig = field(default_factory=lambda: TtlAcqConfig())
 
 
 @dataclass
@@ -155,29 +155,28 @@ class ScopeAcqConfig:
 class ModuleConfig:
     marker_inverts: Dict[int, bool] = field(default_factory=dict)
 
-    offset: OffsetConfig = OffsetConfig()
-    lo: LoConfig = LoConfig()
-    attenuation: AttConfig = AttConfig()
-    gain: GainConfig = GainConfig()
-    scope_acq: ScopeAcqConfig = ScopeAcqConfig()
+    offset: OffsetConfig = field(default_factory=lambda: OffsetConfig())
+    lo: LoConfig = field(default_factory=lambda: LoConfig())
+    attenuation: AttConfig = field(default_factory=lambda: AttConfig())
+    gain: GainConfig = field(default_factory=lambda: GainConfig())
+    scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
 
 
 @dataclass
 class QbloxConfig:
     slot_idx: int = None
-    module: ModuleConfig = ModuleConfig()
+    module: ModuleConfig = field(default_factory=lambda: ModuleConfig())
     sequencers: Dict[int, SequencerConfig] = field(default_factory=dict)
 
 
 class QbloxConfigHelper(ABC):
-    def __init__(self, target: PulseChannel):
-        self.target = target
+    def __init__(self, config: QbloxConfig):
+        self.config = config
 
     def configure(self, module: Module, sequencer: Sequencer):
-        config: QbloxConfig = self.target.physical_channel.config
         self.clear(module, sequencer)
-        self.configure_module(module, config.module)
-        self.configure_sequencer(sequencer, config.sequencers[sequencer.seq_idx])
+        self.configure_module(module, self.config.module)
+        self.configure_sequencer(sequencer, self.config.sequencers[sequencer.seq_idx])
 
     def clear(self, module: Module, sequencer: Sequencer):
         module.disconnect_outputs()
@@ -195,9 +194,8 @@ class QbloxConfigHelper(ABC):
             sequencer.connect_sequencer(*config.connection.bulk_value)
 
     def configure_nco(self, sequencer: Sequencer, config: SequencerConfig):
-        physical_channel = self.target.physical_channel
-        bb_if_frequency = physical_channel.baseband_if_frequency
-        sequencer.nco_freq(bb_if_frequency)
+        if config.nco.freq:
+            sequencer.nco_freq(config.nco.freq)
         if config.nco.prop_delay_comp_en:
             sequencer.nco_prop_delay_comp_en(config.nco.prop_delay_comp_en)
         if config.nco.prop_delay_comp:
@@ -216,6 +214,32 @@ class QbloxConfigHelper(ABC):
             sequencer.offset_awg_path0(config.awg.offset_path0)
         if config.awg.offset_path1:
             sequencer.offset_awg_path1(config.awg.offset_path1)
+
+        if config.awg.cont_mode_en_path0:
+            sequencer.cont_mode_en_awg_path0(config.awg.cont_mode_en_path0)
+        if config.awg.cont_mode_en_path1:
+            sequencer.cont_mode_en_awg_path1(config.awg.cont_mode_en_path1)
+        if config.awg.cont_mode_waveform_idx_path0:
+            sequencer.cont_mode_waveform_idx_awg_path0(
+                config.awg.cont_mode_waveform_idx_path0
+            )
+        if config.awg.cont_mode_waveform_idx_path1:
+            sequencer.cont_mode_waveform_idx_awg_path1(
+                config.awg.cont_mode_waveform_idx_path1
+            )
+
+        if config.awg.cont_mode_en_path0:
+            sequencer.cont_mode_en_awg_path0(config.awg.cont_mode_en_path0)
+        if config.awg.cont_mode_en_path1:
+            sequencer.cont_mode_en_awg_path1(config.awg.cont_mode_en_path1)
+        if config.awg.cont_mode_waveform_idx_path0:
+            sequencer.cont_mode_waveform_idx_awg_path0(
+                config.awg.cont_mode_waveform_idx_path0
+            )
+        if config.awg.cont_mode_waveform_idx_path1:
+            sequencer.cont_mode_waveform_idx_awg_path1(
+                config.awg.cont_mode_waveform_idx_path1
+            )
 
     def configure_mixer(self, sequencer: Sequencer, config: SequencerConfig):
         if config.mixer.phase_offset:
@@ -243,15 +267,14 @@ class QcmRfConfigHelper(QcmConfigHelper):
         self.configure_mixer(sequencer, config)
 
     def configure_lo(self, module, config):
-        physical_channel = self.target.physical_channel
-        bb_if_frequency = physical_channel.baseband_if_frequency
-        bb_frequency = self.target.frequency - bb_if_frequency  # TMP
         if config.lo.out0_en:
             module.out0_lo_en(config.lo.out0_en)  # Switch the LO 0 on
-            module.out0_lo_freq(bb_frequency)
+        if config.lo.out0_freq:
+            module.out0_lo_freq(config.lo.out0_freq)
         if config.lo.out1_en:
             module.out1_lo_en(config.lo.out1_en)  # Switch the LO 1 on
-            module.out1_lo_freq(bb_frequency)
+        if config.lo.out1_freq:
+            module.out1_lo_freq(config.lo.out1_freq)
 
     def configure_attenuation(self, module, config):
         if config.attenuation.out0:
@@ -308,12 +331,10 @@ class QrmRfConfigHelper(QrmConfigHelper):
         self.configure_acq(sequencer, config)
 
     def configure_lo(self, module, config):
-        physical_channel = self.target.physical_channel
-        bb_if_frequency = physical_channel.baseband_if_frequency
-        bb_frequency = self.target.frequency - bb_if_frequency  # TMP
         if config.lo.out0_in0_en:
             module.out0_in0_lo_en(config.lo.out0_in0_en)  # Switch the LO on
-            module.out0_in0_lo_freq(bb_frequency)
+        if config.lo.out0_in0_freq:
+            module.out0_in0_lo_freq(config.lo.out0_in0_freq)
 
     def configure_attenuation(self, module, config):
         if config.attenuation.out0:
@@ -326,6 +347,10 @@ class QrmRfConfigHelper(QrmConfigHelper):
             module.out0_offset_path0(config.offset.out0_path0)
         if config.offset.out0_path1:
             module.out0_offset_path1(config.offset.out0_path1)
+        if config.offset.in0_path0:
+            module.in0_offset_path0(config.offset.in0_path0)
+        if config.offset.in0_path1:
+            module.in0_offset_path1(config.offset.in0_path1)
 
     def configure_acq(self, sequencer, config):
         # Square weight integration
