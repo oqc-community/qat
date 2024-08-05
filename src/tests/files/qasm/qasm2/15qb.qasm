@@ -29,7 +29,6 @@ cx qr[13],qr[10];
 cx qr[10],qr[6];
 cx qr[6],qr[13];
 cx qr[14],qr[6];
-cx qr[16],qr[6];
 h qr[0];
 s qr[2];
 s qr[3];
