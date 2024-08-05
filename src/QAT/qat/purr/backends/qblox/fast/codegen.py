@@ -1,6 +1,5 @@
 from collections import defaultdict
 from contextlib import contextmanager
-from dataclasses import dataclass
 from functools import reduce
 from operator import mul
 from typing import Dict, List, Set, Tuple, Any
@@ -14,7 +13,8 @@ from qat.purr.backends.qblox.codegen import (
     get_nco_set_frequency_arguments,
 )
 from qat.purr.backends.qblox.config import SequencerConfig
-from qat.purr.backends.qblox.ir import Constants, SequenceBuilder
+from qat.purr.backends.qblox.constants import Constants
+from qat.purr.backends.qblox.ir import SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.analysis import extract_iter_bounds, Attribute
 from qat.purr.compiler.control_flow.graph import DfsTraversal, EmitterMixin
@@ -42,11 +42,6 @@ from qat.purr.compiler.instructions import (
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
-
-
-@dataclass
-class FastQbloxPackage(QbloxPackage):
-    config: SequencerConfig
 
 
 class RegisterManager:
@@ -525,4 +520,4 @@ class FastQbloxContext:
             context.builder.stop()
 
     def create_package(self, target: PulseChannel):
-        return FastQbloxPackage(target, self.builder.build(), self.config)
+        return QbloxPackage(target, self.builder.build(), self.config)
