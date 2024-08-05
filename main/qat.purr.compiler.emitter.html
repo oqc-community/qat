@@ -14,7 +14,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -158,66 +158,66 @@
 
 
   <section id="module-qat.purr.compiler.emitter">
-<span id="qat-purr-compiler-emitter-module"></span><h1>qat.purr.compiler.emitter module<a class="headerlink" href="#module-qat.purr.compiler.emitter" title="Permalink to this heading"></a></h1>
+<span id="qat-purr-compiler-emitter-module"></span><h1>qat.purr.compiler.emitter module<a class="headerlink" href="#module-qat.purr.compiler.emitter" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.InstructionEmitter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionEmitter</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.InstructionEmitter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionEmitter</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.InstructionEmitter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Interface to the LLVM-driven QAT optimization and construction passes. For now we
 simulate what it might do in the future and ust output a Python object that
 simulates what our instruction set might look like.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.InstructionEmitter.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.InstructionEmitter.emit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.InstructionEmitter.emit" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QatFile</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QatFile</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>In-memory representation of our instruction file.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.add" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.add" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.add_meta">
-<span class="sig-name descname"><span class="pre">add_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.add_meta" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.add_meta" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.get_pp_for_variable">
-<span class="sig-name descname"><span class="pre">get_pp_for_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_var</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.get_pp_for_variable" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_pp_for_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_var</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.get_pp_for_variable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.instructions">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.instructions" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.repeat">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeat</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.repeat" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeat</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.repeat" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.return_">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.return_" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.return_" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.QatFile.sweeps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sweeps</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.sweeps" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sweeps</span></span><a class="headerlink" href="#qat.purr.compiler.emitter.QatFile.sweeps" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.emitter.TimelineSegment">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reliant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.TimelineSegment" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reliant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.emitter.TimelineSegment" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Segment of the execution timeline.</p>
 </dd></dl>

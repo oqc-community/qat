@@ -14,7 +14,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -159,365 +159,365 @@
 
 
   <section id="module-qat.purr.backends.qblox.ir">
-<span id="qat-purr-backends-qblox-ir-module"></span><h1>qat.purr.backends.qblox.ir module<a class="headerlink" href="#module-qat.purr.backends.qblox.ir" title="Permalink to this heading"></a></h1>
+<span id="qat-purr-backends-qblox-ir-module"></span><h1>qat.purr.backends.qblox.ir module<a class="headerlink" href="#module-qat.purr.backends.qblox.ir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Opcode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Opcode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.ACQUIRE">
-<span class="sig-name descname"><span class="pre">ACQUIRE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ACQUIRE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.ACQUIRE_TTL">
-<span class="sig-name descname"><span class="pre">ACQUIRE_TTL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire_ttl'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE_TTL" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ACQUIRE_TTL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire_ttl'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE_TTL" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.ACQUIRE_WEIGHED">
-<span class="sig-name descname"><span class="pre">ACQUIRE_WEIGHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire_weighed'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE_WEIGHED" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ACQUIRE_WEIGHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'acquire_weighed'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ACQUIRE_WEIGHED" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.ADD">
-<span class="sig-name descname"><span class="pre">ADD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'add'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ADD" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ADD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'add'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ADD" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.ADDRESS">
-<span class="sig-name descname"><span class="pre">ADDRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ADDRESS" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ADDRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.ADDRESS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.AND">
-<span class="sig-name descname"><span class="pre">AND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'and'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.AND" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'and'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.AND" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.JUMP">
-<span class="sig-name descname"><span class="pre">JUMP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jmp'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">JUMP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jmp'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.JUMP_GREATER_EQUALS">
-<span class="sig-name descname"><span class="pre">JUMP_GREATER_EQUALS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jge'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP_GREATER_EQUALS" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">JUMP_GREATER_EQUALS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jge'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP_GREATER_EQUALS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.JUMP_LESS_THAN">
-<span class="sig-name descname"><span class="pre">JUMP_LESS_THAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jlt'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP_LESS_THAN" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">JUMP_LESS_THAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jlt'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.JUMP_LESS_THAN" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.LOOP">
-<span class="sig-name descname"><span class="pre">LOOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'loop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.LOOP" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LOOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'loop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.LOOP" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.MOVE">
-<span class="sig-name descname"><span class="pre">MOVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'move'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.MOVE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">MOVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'move'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.MOVE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.NEW_LINE">
-<span class="sig-name descname"><span class="pre">NEW_LINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NEW_LINE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">NEW_LINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NEW_LINE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.NOP">
-<span class="sig-name descname"><span class="pre">NOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NOP" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">NOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NOP" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.NOT">
-<span class="sig-name descname"><span class="pre">NOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'not'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NOT" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">NOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'not'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NOT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.OR">
-<span class="sig-name descname"><span class="pre">OR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'or'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.OR" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">OR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'or'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.OR" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.PLAY">
-<span class="sig-name descname"><span class="pre">PLAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'play'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.PLAY" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">PLAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'play'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.PLAY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.RESET_PHASE">
-<span class="sig-name descname"><span class="pre">RESET_PHASE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reset_ph'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.RESET_PHASE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">RESET_PHASE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reset_ph'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.RESET_PHASE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_AWG_GAIN">
-<span class="sig-name descname"><span class="pre">SET_AWG_GAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_awg_gain'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_AWG_GAIN" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_AWG_GAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_awg_gain'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_AWG_GAIN" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_AWG_OFFSET">
-<span class="sig-name descname"><span class="pre">SET_AWG_OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_awg_offs'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_AWG_OFFSET" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_AWG_OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_awg_offs'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_AWG_OFFSET" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_MARKER">
-<span class="sig-name descname"><span class="pre">SET_MARKER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_mrk'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_MARKER" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_MARKER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_mrk'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_MARKER" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_NCO_FREQUENCY">
-<span class="sig-name descname"><span class="pre">SET_NCO_FREQUENCY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_freq'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_FREQUENCY" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_NCO_FREQUENCY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_freq'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_FREQUENCY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE">
-<span class="sig-name descname"><span class="pre">SET_NCO_PHASE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_ph'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_NCO_PHASE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_ph'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE_OFFSET">
-<span class="sig-name descname"><span class="pre">SET_NCO_PHASE_OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_ph_delta'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE_OFFSET" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SET_NCO_PHASE_OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_ph_delta'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_NCO_PHASE_OFFSET" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.STOP">
-<span class="sig-name descname"><span class="pre">STOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.STOP" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">STOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'stop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.STOP" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SUB">
-<span class="sig-name descname"><span class="pre">SUB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sub'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SUB" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SUB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sub'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SUB" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">
-<span class="sig-name descname"><span class="pre">UPDATE_PARAMETERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'upd_param'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">UPDATE_PARAMETERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'upd_param'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.WAIT">
-<span class="sig-name descname"><span class="pre">WAIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WAIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.WAIT_SYNC">
-<span class="sig-name descname"><span class="pre">WAIT_SYNC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait_sync'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT_SYNC" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WAIT_SYNC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait_sync'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT_SYNC" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.WAIT_TRIGGER">
-<span class="sig-name descname"><span class="pre">WAIT_TRIGGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait_trigger'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT_TRIGGER" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WAIT_TRIGGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wait_trigger'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.WAIT_TRIGGER" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.XOR">
-<span class="sig-name descname"><span class="pre">XOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xor'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.XOR" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">XOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xor'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.XOR" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Q1asmInstruction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1asmInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opcode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">operands</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Q1asmInstruction" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1asmInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opcode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">operands</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Q1asmInstruction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Sequence">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Sequence.acquisitions">
-<span class="sig-name descname"><span class="pre">acquisitions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.acquisitions" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquisitions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.acquisitions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Sequence.program">
-<span class="sig-name descname"><span class="pre">program</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.program" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">program</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.program" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Sequence.waveforms">
-<span class="sig-name descname"><span class="pre">waveforms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.waveforms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">waveforms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.waveforms" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Sequence.weights">
-<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.weights" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Sequence.weights" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequenceBuilder</span></span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequenceBuilder</span></span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>High-level builder apis for sequence codegen.
 This includes q1asm, waveforms, weights, and acquisitions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.acquire">
-<span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.acquire_ttl">
-<span class="sig-name descname"><span class="pre">acquire_ttl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_ttl" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquire_ttl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_ttl" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed">
-<span class="sig-name descname"><span class="pre">acquire_weighed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquire_weighed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.add_acquisition">
-<span class="sig-name descname"><span class="pre">add_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_acquisition" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_acquisition" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.add_waveform">
-<span class="sig-name descname"><span class="pre">add_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_waveform" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_waveform" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.add_weight">
-<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_weight" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.add_weight" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.build">
-<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.build" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.build" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.jge">
-<span class="sig-name descname"><span class="pre">jge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jge" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">jge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jge" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.jlt">
-<span class="sig-name descname"><span class="pre">jlt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jlt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">jlt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jlt" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.jmp">
-<span class="sig-name descname"><span class="pre">jmp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jmp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">jmp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.jmp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.label">
-<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.label" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.label" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.logic_and">
-<span class="sig-name descname"><span class="pre">logic_and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_and" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logic_and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_and" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.logic_not">
-<span class="sig-name descname"><span class="pre">logic_not</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_not" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logic_not</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_not" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.logic_or">
-<span class="sig-name descname"><span class="pre">logic_or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_or" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logic_or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_or" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.logic_xor">
-<span class="sig-name descname"><span class="pre">logic_xor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_xor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logic_xor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_xor" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.loop">
-<span class="sig-name descname"><span class="pre">loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.loop" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.loop" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.move">
-<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.move" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.move" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.nop">
-<span class="sig-name descname"><span class="pre">nop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.nop" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">nop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.nop" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.play">
-<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.play" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.play" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.reset_ph">
-<span class="sig-name descname"><span class="pre">reset_ph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.reset_ph" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset_ph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.reset_ph" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_gain">
-<span class="sig-name descname"><span class="pre">set_awg_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gain_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_gain" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_awg_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gain_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_gain" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_offs">
-<span class="sig-name descname"><span class="pre">set_awg_offs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_offs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_awg_offs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_awg_offs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_freq">
-<span class="sig-name descname"><span class="pre">set_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_freq" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_freq" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_mrk">
-<span class="sig-name descname"><span class="pre">set_mrk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_mrk" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_mrk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_mrk" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_ph">
-<span class="sig-name descname"><span class="pre">set_ph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_ph" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_ph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_ph" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_ph_delta">
-<span class="sig-name descname"><span class="pre">set_ph_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_ph_delta" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_ph_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_ph_delta" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.stop" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.stop" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.sub">
-<span class="sig-name descname"><span class="pre">sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.sub" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.sub" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.upd_param">
-<span class="sig-name descname"><span class="pre">upd_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.upd_param" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">upd_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.upd_param" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.wait">
-<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.wait_sync">
-<span class="sig-name descname"><span class="pre">wait_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait_sync" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait_sync" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.wait_trigger">
-<span class="sig-name descname"><span class="pre">wait_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait_trigger" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.wait_trigger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
