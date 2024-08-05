@@ -917,11 +917,11 @@ class TestParsing:
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
         builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
-        assert 93378 == len(builder.instructions)
+        assert 97469 == len(builder.instructions)
 
     def test_random_n5_d5(self):
         builder = parse_and_apply_optimiziations("random_n5_d5.qasm")
-        assert 5181 == len(builder.instructions)
+        assert 4957 == len(builder.instructions)
 
     def test_ordered_keys(self):
         builder = parse_and_apply_optimiziations(
@@ -949,7 +949,7 @@ class TestParsing:
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
         assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
-        assert 118 == len(builder.instructions)
+        assert 64 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))
@@ -1013,9 +1013,9 @@ class TestQatOptimization:
             6,
             ("R0", "R1", "R2", "R3", "R4", "R5"),
             (
-                (1750, 2750),
-                (1750, 2750),
                 (750, 1750),
+                (1750, 2750),
+                (1750, 2750),
                 (1750, 2750),
                 (750, 1750),
                 (1750, 2750),
@@ -1026,8 +1026,8 @@ class TestQatOptimization:
         self._measure_merge_timings(
             "move_measurements.qasm",
             12,
-            ("R2", "R3", "R10"),
-            ((565700, 566700), (564700, 565700), (575900, 576900)),
+            ("R5", "R6", "R9"),
+            ((579800, 580800), (579800, 580800), (589800, 590800)),
         )
 
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from collections import Iterable
+from collections.abc import Iterable
 from numbers import Number
 from typing import List, Optional, TypeVar, Union
 

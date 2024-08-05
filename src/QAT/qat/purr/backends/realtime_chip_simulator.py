@@ -997,7 +997,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                     )
 
             options = Options()
-            options.max_step = 1e-11
+            options["max_step"] = 1e-11
 
             # Initial state.
             rho0 = tensor(*[qb.rho0 for qb in self.model.qubits])

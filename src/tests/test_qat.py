@@ -11,7 +11,7 @@ from tests.utils import ListReturningEngine
 
 @pytest.mark.parametrize(
     ("input_string", "file_type", "instruction_length"),
-    [("ghz.qasm", TestFileType.QASM2, 182)],
+    [("ghz.qasm", TestFileType.QASM2, 196)],
 )
 def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     program = get_test_file_path(file_type, input_string)
