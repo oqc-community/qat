@@ -38,7 +38,9 @@ class PhysicalBufferPlotEngine(EchoEngine):
         self.figsize = figsize
         self.name = name
 
-    def _execute_on_hardware(self, sweep_iterator: SweepIterator, package: QatFile, *args, **kwargs):
+    def _execute_on_hardware(
+        self, sweep_iterator: SweepIterator, package: QatFile, *args, **kwargs
+    ):
         position_map = self.target.create_duration_timeline(package.instructions)
         pulse_buffers = self.target.build_pulse_channel_buffers(
             position_map, do_upconvert=self.upconvert
@@ -49,7 +51,7 @@ class PhysicalBufferPlotEngine(EchoEngine):
         if not isinstance(channels, Iterable):
             channels = [channels]
 
-        tot_chan = sum(1 if buffers[channel].any() else 0 for channel in channels )
+        tot_chan = sum(1 if buffers[channel].any() else 0 for channel in channels)
         print(tot_chan)
 
         figsize = self.figsize
@@ -124,7 +126,9 @@ if __name__ == "__main__":
     measure q -> c;
     """
 
-    hw = Calibratable.load_calibration_from_file("/home/kristianb/farm_fresh_code/whisqrs/qctrl_hw.json")
+    hw = Calibratable.load_calibration_from_file(
+        "/home/kristianb/farm_fresh_code/whisqrs/qctrl_hw.json"
+    )
     parser = Qasm3Parser()
     builder = parser.parse(get_builder(hw), qasm)
 
