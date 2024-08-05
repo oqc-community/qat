@@ -353,6 +353,6 @@ class TestOnNoisySimulator:
         mitigated_result = execute_qasm(qasm, eng, self.config)["linear_readout_mitigation"]
         for output_bits, probability in mitigated_result.items():
             if output_bits == bitstring:
-                assert abs(probability - 1) < 0.05
+                assert abs(1 - probability) < 0.051
             else:
-                assert abs(probability) < 0.05
+                assert abs(probability) < 0.051

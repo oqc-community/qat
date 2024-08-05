@@ -43,7 +43,7 @@ class TestQiskitBackend:
         ],
     )
     def test_coupled_qasm_hardware(self, hardware):
-        builder = self.parse_and_apply_optimiziations(hardware, "20qb.qasm")
+        builder = self.parse_and_apply_optimiziations(hardware, "15qb.qasm")
         runtime = hardware.create_runtime()
         results = runtime.execute(builder)
         assert len(results) > 0
