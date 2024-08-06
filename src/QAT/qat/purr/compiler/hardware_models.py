@@ -30,6 +30,8 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 
+from qat.purr.compiler.ir.concept import PassManager
+
 if TYPE_CHECKING:
     from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
     from qat.purr.compiler.execution import InstructionExecutionEngine
@@ -187,6 +189,13 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         from qat.purr.compiler.builders import QuantumInstructionBuilder
 
         return QuantumInstructionBuilder(self)
+
+    def build_pass_pipeline(self):
+        """
+        A pipeline of transforms and analysis passes that will be applied on the IR.
+        Returns a PassManager.
+        """
+        return PassManager()
 
     def resolve_qb_pulse_channel(
         self, chanbit: Union[Qubit, PulseChannel]

@@ -15,7 +15,7 @@ class AnalysisPass:
         pass
 
 
-class HwLowerability(AnalysisPass):
+class CtrlHwAnalysis(AnalysisPass):
     def run(self, ir: InstructionBuilder, *args):
         pass
 
@@ -160,3 +160,7 @@ class CFGAnalysis(AnalysisPass):
             return
 
         self._build_cfg(ir, cfg)
+
+
+class TimelineAnalysis(AnalysisPass):
+    pass

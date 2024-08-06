@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class PassConcept(ABC):
@@ -27,3 +28,23 @@ class ResultModel(ResultConcept):
 
     def invalidate(self, ir):
         self._result.invalidate(ir)
+
+
+class PassInfoMixin:
+    def id(self):
+        pass
+
+    def name(self):
+        pass
+
+
+class PassManager(PassInfoMixin):
+    def __init__(self):
+        self.passes: List = []
+
+    def run(self, ir, *args):
+        for p in self.passes:
+            result = p.run(ir, args)
+
+    def add_pass(self, pass_obj):
+        self.passes.append(pass_obj)
