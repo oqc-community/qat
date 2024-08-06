@@ -3,7 +3,7 @@ from qat.purr.compiler.instructions import Instruction
 
 class EndSweep(Instruction):
     """
-    Basic scoping.Marks the end of the nearest prior sweep
+    Basic scoping. Marks the end of the most recent sweep
     """
 
     pass
@@ -11,7 +11,7 @@ class EndSweep(Instruction):
 
 class EndRepeat(Instruction):
     """
-    Basic scoping. Marks the end of the nearest prior repeat
+    Basic scoping. Marks the end of the most recent repeat
     """
 
     pass

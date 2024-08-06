@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.qblox.fast.live import FastQbloxLiveEngine
-from qat.purr.compiler.control_flow.instructions import EndRepeat, EndSweep
 from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.ir.instructions import EndRepeat, EndSweep
 from qat.purr.compiler.devices import PulseShapeType
-from qat.purr.compiler.instructions import SweepValue, Variable, Repeat, Sweep
+from qat.purr.compiler.instructions import Repeat, Sweep, SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
 from src.tests.qblox.builder_nuggets import resonator_spect
 

@@ -8,8 +8,7 @@ log = get_default_logger()
 
 count = 100
 cases = [([1, 2, 4, 10], None), ([-0.1, 0, 0.1, 0.2, 0.3], (-0.1, 0.1, 0.3, 5))] + [
-    (np.linspace(b[0], b[1], count), (b[0], 1, b[1], count))
-    for b in [(1, 100), (-50, 49)]
+    (np.linspace(b[0], b[1], count), (b[0], 1, b[1], count)) for b in [(1, 100), (-50, 49)]
 ]
 
 
