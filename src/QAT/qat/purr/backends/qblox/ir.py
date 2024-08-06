@@ -103,9 +103,7 @@ class SequenceBuilder:
 
     def optimize(self):
         self.q1asm_instructions = [
-            inst
-            for inst in self.q1asm_instructions
-            if inst.opcode != Opcode.WAIT_SYNC
+            inst for inst in self.q1asm_instructions if inst.opcode != Opcode.WAIT_SYNC
         ]
 
     def add_waveform(self, name: str, index: int, data: np.ndarray):

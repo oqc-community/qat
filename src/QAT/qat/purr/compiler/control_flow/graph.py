@@ -154,11 +154,7 @@ class EmitterMixin:
                     cfg.get_or_create_edge(src, dest)
                 type = Sweep if isinstance(inst_at_h, EndSweep) else Repeat
                 p = next(
-                    (
-                        p
-                        for p in headers[i::-1]
-                        if isinstance(self.instructions[p], type)
-                    )
+                    (p for p in headers[i::-1] if isinstance(self.instructions[p], type))
                 )
                 next_headers.add(p)
                 next_flow.add((h, p))

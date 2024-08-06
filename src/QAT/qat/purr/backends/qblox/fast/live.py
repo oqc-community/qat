@@ -5,12 +5,9 @@ import numpy as np
 from qat.purr.backends.qblox.fast.codegen import FastQbloxEmitter
 from qat.purr.backends.qblox.live import QbloxLiveEngine
 from qat.purr.compiler.control_flow.instructions import EndRepeat, EndSweep
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
-    Acquire,
     DeviceUpdate,
     Instruction,
-    QuantumInstruction,
     Repeat,
     Sweep,
     SweepValue,
@@ -78,9 +75,7 @@ class FastQbloxLiveEngine(QbloxLiveEngine):
                 type = Sweep if isinstance(inst, EndSweep) else Repeat
                 try:
                     if not isinstance(stack.pop(), type):
-                        raise ValueError(
-                            f"Unbalanced {type} scope. Found orphan {inst}"
-                        )
+                        raise ValueError(f"Unbalanced {type} scope. Found orphan {inst}")
                 except IndexError:
                     raise ValueError(f"Unbalanced {type} scope. Found orphan {inst}")
 
@@ -95,9 +90,9 @@ class FastQbloxLiveEngine(QbloxLiveEngine):
             instructions = self.optimize(instructions)
             packages = FastQbloxEmitter(instructions).emit_packages()
             self.model.control_hardware.set_data(packages)
-            playback_results: Dict[
-                str, np.ndarray
-            ] = self.model.control_hardware.start_playback(None, None)
+            playback_results: Dict[str, np.ndarray] = (
+                self.model.control_hardware.start_playback(None, None)
+            )
 
             # Process metadata assign/return values to make sure the data is in the
             # right form.

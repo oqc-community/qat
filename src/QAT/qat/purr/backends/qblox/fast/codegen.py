@@ -2,7 +2,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from functools import reduce
 from operator import mul
-from typing import Dict, List, Set, Tuple, Any
+from typing import Any, Dict, List, Set, Tuple
 
 import numpy as np
 
@@ -16,7 +16,7 @@ from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.ir import SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
-from qat.purr.compiler.analysis import extract_iter_bounds, Attribute
+from qat.purr.compiler.analysis import Attribute, extract_iter_bounds
 from qat.purr.compiler.control_flow.graph import DfsTraversal, EmitterMixin
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
@@ -36,8 +36,8 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Sweep,
     Synchronize,
-    Waveform,
     Variable,
+    Waveform,
 )
 from qat.purr.utils.logger import get_default_logger
 
@@ -126,7 +126,13 @@ class FastQbloxEmitter(DfsTraversal, EmitterMixin):
                         )
                     du_value = [x - du_inst.target.baseband_frequency for x in value]
                     start, step, end, count = extract_iter_bounds(du_value)
-                    du_bounds = tuple([get_nco_set_frequency_arguments(int(x)) for x in [start, step, end]] + [count])
+                    du_bounds = tuple(
+                        [
+                            get_nco_set_frequency_arguments(int(x))
+                            for x in [start, step, end]
+                        ]
+                        + [count]
+                    )
                     context = contexts[du_inst.target]
                     context.set_iter_bounds(inst, du_bounds)
                     register = context.get_attribute(inst, "register")
@@ -188,9 +194,7 @@ class FastQbloxEmitter(DfsTraversal, EmitterMixin):
                             raise ValueError(
                                 "Found a MeasurePulse but no Acquire instruction followed"
                             )
-                        scope_heads = [
-                            self.instructions[b.head()] for b in self._entered
-                        ]
+                        scope_heads = [self.instructions[b.head()] for b in self._entered]
                         counts = [
                             context.get_attribute(h, "iter_bounds")[-1] or 1
                             for h in scope_heads
@@ -232,10 +236,7 @@ class FastQbloxEmitter(DfsTraversal, EmitterMixin):
             context = next(iter(self.contexts.values()))
             context.builder.optimize()
 
-        return [
-            context.create_package(target)
-            for target, context in self.contexts.items()
-        ]
+        return [context.create_package(target) for target, context in self.contexts.items()]
 
 
 class FastQbloxContext:
