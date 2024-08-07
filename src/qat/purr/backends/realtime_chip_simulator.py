@@ -1271,7 +1271,7 @@ def spline_time(dt, sim_t, buffer):
     t = np.linspace(0.0, (len(buffer) - 1) * dt, len(buffer))
     if t[-1] < sim_t[-1]:
         extra_t = np.arange(t[-1] + dt, sim_t[-1], dt)
-        extra_d = np.zeros(len(extra_t), dtype="cfloat")
+        extra_d = np.zeros(len(extra_t), dtype=np.complex128)
 
         t = np.concatenate((t, extra_t))
         buffer = np.concatenate((buffer, extra_d))
