@@ -157,8 +157,8 @@ class LiveHardwareModel(QuantumHardwareModel):
         self.instruments: Dict[str, Instrument] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
 
-    def create_engine(self):
-        return LiveDeviceEngine(self)
+    def create_engine(self, startup_engine: bool = True):
+        return LiveDeviceEngine(self, startup_engine)
 
     def add_device(self, device):
         if isinstance(device, Instrument):
@@ -200,8 +200,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
     model: LiveHardwareModel
 
-    def __init__(self, model: LiveHardwareModel):
-        super().__init__(model)
+    def __init__(self, model: LiveHardwareModel, startup_engine: bool = True):
+        super().__init__(model, startup_engine)
 
     def __enter__(self):
         return self
