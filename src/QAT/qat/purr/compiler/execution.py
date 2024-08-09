@@ -72,7 +72,7 @@ class InstructionExecutionEngine(abc.ABC):
 
     def startup(self):
         """Starts up the underlying hardware or does nothing if already started."""
-        pass
+        return True
 
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
@@ -93,7 +93,7 @@ class InstructionExecutionEngine(abc.ABC):
         """
         Shuts down the underlying hardware when this instance is no longer in use.
         """
-        pass
+        return True
 
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
