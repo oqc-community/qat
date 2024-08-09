@@ -22,7 +22,7 @@ from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.qat import execute_qasm
 
-from .utils import get_jagged_echo_hardware
+from test_qat.utils import get_jagged_echo_hardware
 
 
 def apply_error_mitigation_setup(

@@ -13,7 +13,7 @@ from qat.purr.backends.verification import (
 from qat.purr.compiler.config import CompilerConfig, Tket
 from qat.qat import execute
 
-from .qasm_utils import TestFileType, get_qasm2, get_test_file_path
+from test_qat.qasm_utils import TestFileType, get_qasm2, get_test_file_path
 
 
 class TestFirmwareVerificationEngines:

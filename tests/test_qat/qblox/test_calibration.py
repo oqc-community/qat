@@ -5,7 +5,7 @@ from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.utils.logger import load_object_from_log_folder, save_object_to_log_folder
 
-from .utils import setup_qblox_hardware_model
+from test_qat.qblox.utils import setup_qblox_hardware_model
 
 
 class TestHardwareModelLifecycle(unittest.TestCase):
