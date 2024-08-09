@@ -26,6 +26,14 @@ from qiskit_optimization.algorithms import (
 from qiskit_optimization.applications import Maxcut, Tsp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_docplex_mp
+from test_qat.qasm_utils import (
+    TestFileType,
+    get_qasm2,
+    get_qasm3,
+    get_test_file_path,
+    parse_and_apply_optimiziations,
+)
+from test_qat.utils import get_jagged_echo_hardware, update_qubit_indices
 
 import qat.purr.compiler.experimental.frontends as experimental_frontends
 import qat.purr.compiler.frontends as core_frontends
@@ -70,15 +78,6 @@ from qat.purr.integrations.qasm import (
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
-
-from .qasm_utils import (
-    TestFileType,
-    get_qasm2,
-    get_qasm3,
-    get_test_file_path,
-    parse_and_apply_optimiziations,
-)
-from .utils import get_jagged_echo_hardware, update_qubit_indices
 
 
 class TestQASM3:

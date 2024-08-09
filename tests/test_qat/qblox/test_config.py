@@ -4,6 +4,7 @@ import pytest
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
+from test_qat.qblox.utils import DUMMY_CONFIG, ClusterInfo, MixerTestValues
 
 from qat.purr.backends.qblox.codegen import QbloxEmitter, calculate_duration
 from qat.purr.backends.qblox.config import (
@@ -19,7 +20,6 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
-from tests.qblox.utils import DUMMY_CONFIG, ClusterInfo, MixerTestValues
 
 
 class TestQbloxConfigMixin:

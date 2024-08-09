@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import pytest
 from pytket.architecture import Architecture, RingArch
+from test_qat.qasm_utils import get_qasm2
 
 from qat.purr.compiler.config import Qasm2Optimizations, TketOptimizations
 from qat.purr.integrations.tket import (
@@ -10,7 +11,6 @@ from qat.purr.integrations.tket import (
     get_coupling_subgraphs,
     optimize_circuit,
 )
-from tests.qasm_utils import get_qasm2
 
 
 @pytest.mark.parametrize(

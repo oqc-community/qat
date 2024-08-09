@@ -5,6 +5,7 @@ import pytest
 from numpy import identity, isclose
 from numpy.random import rand
 from qiskit import QuantumCircuit
+from test_qat.utils import get_jagged_echo_hardware
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -21,8 +22,6 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.qat import execute_qasm
-
-from .utils import get_jagged_echo_hardware
 
 
 def apply_error_mitigation_setup(
