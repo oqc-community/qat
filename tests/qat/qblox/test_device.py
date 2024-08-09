@@ -7,7 +7,7 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
-from tests.qblox.utils import ClusterInfo
+from tests.qat.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 

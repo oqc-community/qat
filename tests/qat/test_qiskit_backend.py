@@ -12,7 +12,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
-from tests.qasm_utils import get_qasm2
+from tests.qat.qasm_utils import get_qasm2
 
 
 class TestQiskitBackend:

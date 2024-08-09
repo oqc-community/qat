@@ -10,7 +10,7 @@ from qat.purr.integrations.tket import (
     get_coupling_subgraphs,
     optimize_circuit,
 )
-from tests.qasm_utils import get_qasm2
+from tests.qat.qasm_utils import get_qasm2
 
 
 @pytest.mark.parametrize(
