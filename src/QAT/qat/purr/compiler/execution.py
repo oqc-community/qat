@@ -98,9 +98,12 @@ class InstructionExecutionEngine(abc.ABC):
 
 class QuantumExecutionEngine(InstructionExecutionEngine):
     def __init__(
-        self, model: QuantumHardwareModel = None, max_instruction_len: int = 200000
+        self,
+        model: QuantumHardwareModel = None,
+        startup_engine=True,
+        max_instruction_len: int = 200000,
     ):
-        super().__init__(model)
+        super().__init__(model, startup_engine)
         self.max_instruction_len = max_instruction_len
 
     def _model_exists(self):
