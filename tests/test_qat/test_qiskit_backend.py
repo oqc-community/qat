@@ -6,13 +6,13 @@ from qiskit_aer.noise import (
     pauli_error,
     thermal_relaxation_error,
 )
+from test_qat.qasm_utils import get_qasm2
 
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
-from test_qat.qasm_utils import get_qasm2
 
 
 class TestQiskitBackend:

@@ -6,6 +6,8 @@ from typing import List
 from unittest.mock import create_autospec
 
 import pytest
+from test_qat.qasm_utils import get_qasm2
+from test_qat.test_qir import _get_qir_path
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -17,8 +19,6 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.interrupt import BasicInterrupt
 from qat.purr.compiler.runtime import get_builder
 from qat.qat import _execute_with_metrics
-from test_qat.qasm_utils import get_qasm2
-from test_qat.test_qir import _get_qir_path
 
 
 def _get_qasm_path(file_name):

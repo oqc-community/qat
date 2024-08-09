@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import pytest
+from test_qat.qasm_utils import TestFileType, get_test_file_path
+from test_qat.utils import ListReturningEngine
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import CompilerConfig, MetricsType, QuantumResultsFormat
 from qat.qat import execute_with_metrics
-from test_qat.qasm_utils import TestFileType, get_test_file_path
-from test_qat.utils import ListReturningEngine
 
 
 @pytest.mark.parametrize(
