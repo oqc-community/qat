@@ -227,8 +227,10 @@ class LogFolderTests(unittest.TestCase):
     def test_temp_folder_with_cleanup(self):
         with tempfile.TemporaryDirectory() as tempdir:
             log_folder = logger.LogFolder(tempdir, cleanup=True)
+            assert os.path.exists(log_folder.base_folder_path)
             assert os.path.exists(log_folder.folder_path)
             log_folder.close()
+            assert not os.path.exists(log_folder.base_folder_path)
             assert not os.path.exists(log_folder.folder_path)
 
     def test_temp_folder_without_cleanup(self):

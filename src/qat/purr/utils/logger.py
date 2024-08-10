@@ -495,7 +495,8 @@ class LogFolder:
         if base_folder_path is None:
             base_folder_path = "logs"
 
-        os.makedirs(os.path.abspath(base_folder_path), exist_ok=True)
+        self.base_folder_path = os.path.abspath(base_folder_path)
+        os.makedirs(self.base_folder_path, exist_ok=True)
 
         folder_name = folder_name or ""
         if prefix is not None:
@@ -548,10 +549,10 @@ class LogFolder:
     def close(self):
         if self.folder_path is not None and os.path.isdir(self.folder_path):
             if self.needs_cleanup:
-                shutil.rmtree(self.folder_path)
+                shutil.rmtree(self.base_folder_path)
             else:
                 try:
-                    os.removedirs(self.folder_path)
+                    os.removedirs(self.base_folder_path)
                 except OSError:
                     pass
 

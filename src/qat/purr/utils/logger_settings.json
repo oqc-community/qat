@@ -41,6 +41,6 @@
     },
     "log_folder": {
         "labber_style": true,
-        "cleanup": false
+        "cleanup": true
     }
 }
