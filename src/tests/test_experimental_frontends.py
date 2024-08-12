@@ -12,11 +12,11 @@ from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import PulseShapeType
-from qat.purr.compiler.experimental.frontends import QASMFrontend, QIRFrontend
+from qat.purr.compiler.experimental.frontends import InterruptableQIRFrontend, \
+    InterruptableQASMFrontend
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.interrupt import BasicInterrupt
 from qat.purr.compiler.runtime import get_builder
-from qat.qat import _execute_with_metrics
 from tests.qasm_utils import get_qasm2
 from tests.test_qir import _get_qir_path
 
@@ -35,10 +35,10 @@ def _get_qasm_path(file_name):
 def test_execute_using_interruptable_QIRFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
-    frontend = QIRFrontend()
+    frontend = InterruptableQIRFrontend()
     hardware = get_hardware(4)
     path = _get_qir_path("generator-bell.ll")
-    res, _ = _execute_with_metrics(frontend, path, hardware, config)
+    res, _ = frontend.execute(path, hardware, config)
     assert sum(res.values()) == 1000
     assert "00" in res.keys()
 
@@ -53,10 +53,10 @@ def test_execute_using_interruptable_QIRFrontend(get_hardware):
 def test_execute_using_interruptable_QasmFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
-    frontend = QASMFrontend()
+    frontend = InterruptableQASMFrontend()
     hardware = get_hardware(4)
     path = _get_qasm_path("ghz_2.qasm")
-    res, _ = _execute_with_metrics(frontend, path, hardware, config)
+    res, _ = frontend.parse_and_execute(path, hardware, config)
     assert sum(res["b"].values()) == 1000
     assert "00" in res["b"].keys()
 
@@ -72,16 +72,16 @@ def test_interrupt_triggered_on_batch(get_hardware):
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
     hardware = get_hardware(2)
-    frontend = QASMFrontend()
-    instructions, _ = frontend.parse(path, hardware, config)
-    assert isinstance(instructions, (InstructionBuilder, List))
     queue = Queue(maxsize=1)
     event = Event()
     interrupt = BasicInterrupt(event, queue)
+
+    frontend = InterruptableQASMFrontend(interrupt)
+    instructions, _ = frontend.parse(path, hardware, config)
+    assert isinstance(instructions, (InstructionBuilder, List))
     t = Thread(
         target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
+        args=(instructions, hardware, config),
         daemon=True,
     )
     # Set event before starting thread to prevent race conditions
@@ -122,18 +122,19 @@ def test_interrupt_triggered_on_batch_n(
 
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
-    frontend = QASMFrontend()
-    instructions, _ = frontend.parse(path, hardware, config)
-    assert isinstance(instructions, (InstructionBuilder, List))
-    mock_event = create_autospec(Event)
 
-    # Trigger cancellation on the nth batch
+    mock_event = create_autospec(Event)
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
+
+    frontend = InterruptableQASMFrontend(interrupt)
+    instructions, _ = frontend.parse(path, hardware, config)
+    assert isinstance(instructions, (InstructionBuilder, List))
+
+    # Trigger cancellation on the nth batch
     t = Thread(
         target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
+        args=(instructions, hardware, config),
         daemon=True,
     )
     t.start()
@@ -159,7 +160,7 @@ def test_interrupt_not_triggered_on_n_batches(get_hardware):
 
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
-    frontend = QASMFrontend()
+    frontend = InterruptableQASMFrontend()
     instructions, _ = frontend.parse(path, hardware, config)
     assert isinstance(instructions, (InstructionBuilder, List))
     interrupt = BasicInterrupt()
@@ -231,16 +232,17 @@ def test_interrupt_triggered_on_sweep_m_1d(
     side_effects[batch_n * (switerator_length + 1) + coordinates] = True
 
     config = CompilerConfig()
-    frontend = QASMFrontend()
-    mock_event = create_autospec(Event)
 
     # Trigger cancellation on the nth batch
+    mock_event = create_autospec(Event)
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
+
+    frontend = InterruptableQASMFrontend(interrupt)
+
     t = Thread(
         target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
+        args=(instructions, hardware, config),
         daemon=True,
     )
     t.start()
@@ -314,17 +316,17 @@ def test_interrupt_triggered_on_sweep_m_2d(
     # side_effects[batch_n * (switerator_length + 1)] = True  # Batch checkpoints are separated by sweep checkpoints
     side_effects[batch_n * (switerator_length + 1) + coordinates] = True
 
-    config = CompilerConfig()
-    frontend = QASMFrontend()
-    mock_event = create_autospec(Event)
-
     # Trigger cancellation on the nth batch
+    mock_event = create_autospec(Event)
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
+
+    config = CompilerConfig()
+    frontend = InterruptableQASMFrontend(interrupt)
+
     t = Thread(
         target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
+        args=(instructions, hardware, config),
         daemon=True,
     )
     t.start()

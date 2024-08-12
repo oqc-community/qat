@@ -42,6 +42,7 @@ qblox-instruments = "^0.13.0"
 lark-parser = "^0.12.0"
 pip-audit = "^2.7.3"
 black = ">=24.3.0"
+rasqal = ">=0.1.6"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^6.3.2"

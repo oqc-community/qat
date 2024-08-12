@@ -6,25 +6,25 @@ from typing import List, Optional, TypeVar, Union
 
 import numpy
 
+from typing import List, TypeVar, Union, Optional
+
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.config import (
     CalibrationArguments,
     CompilerConfig,
-    ErrorMitigationConfig,
     MetricsType,
-    ResultsFormatting,
+    ResultsFormatting, ErrorMitigationConfig,
 )
-from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
-from qat.purr.compiler.execution import (
-    InstructionExecutionEngine,
-    QuantumExecutionEngine,
-    _binary,
+from qat.purr.compiler.error_mitigation.readout_mitigation import (
+    get_readout_mitigation
 )
+from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumExecutionEngine, _binary
 from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
-from qat.purr.compiler.instructions import Instruction, is_generated_name
+from qat.purr.compiler.instructions import Repeat, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -183,7 +183,7 @@ class QuantumRuntime(MetricsMixin):
         self,
         fexecute: callable,
         instructions,
-        results_format=None,
+        results_format: ResultsFormatting = None,
         repeats=None,
         error_mitigation=None,
     ):
@@ -197,9 +197,7 @@ class QuantumRuntime(MetricsMixin):
             instructions = instructions.instructions
 
         if instructions is None or not any(instructions):
-            raise ValueError(
-                "No instructions passed to the process or stored for execution."
-            )
+            return dict()
 
         instructions = self.engine.optimize(instructions)
         self.engine.validate(instructions)
@@ -212,12 +210,12 @@ class QuantumRuntime(MetricsMixin):
         results = self._transform_results(results, results_format, repeats)
         return self._apply_error_mitigation(results, instructions, error_mitigation)
 
-    def _execute_with_interrupt(
+    def execute_with_interrupt(
         self,
         instructions,
-        results_format=None,
+        interrupt: Interrupt,
+        results_format: ResultsFormatting = None,
         repeats=None,
-        interrupt: Interrupt = NullInterrupt(),
         error_mitigation=None,
     ):
         """
@@ -308,56 +306,53 @@ def get_builder(
 ) -> QuantumInstructionBuilder:
     if isinstance(model, QuantumExecutionEngine):
         model = model.model
+
     return model.create_builder()
+
+
+def execute_instructions_via_config(
+    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
+    instructions: InstructionBuilder,
+    config: CompilerConfig,
+    interrupt=None,
+):
+    # If we don't have a repeat, default it.
+    if not any(val for val in instructions.instructions if isinstance(val, Repeat)):
+        instructions.repeat(config.repeats, config.repetition_period)
+
+    from qat.purr.backends.calibrations.remote import find_calibration
+
+    config.validate(hardware)
+    calibrations = [find_calibration(arg) for arg in config.active_calibrations]
+
+    return execute_instructions(
+        hardware,
+        instructions,
+        config.results_format,
+        calibrations,
+        config.repeats,
+        config.metrics,
+        config.error_mitigation,
+        interrupt
+    )
 
 
 def execute_instructions(
     hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
-    instructions: Union[List[Instruction], QuantumInstructionBuilder],
-    config: CompilerConfig = None,
+    instructions: InstructionBuilder,
+    results_format=None,
     executable_blocks: List[QuantumExecutableBlock] = None,
     repeats: Optional[int] = None,
     metrics: MetricsType = None,
-    *args,
-    **kwargs,
+    error_mitigation=None,
+    interrupt=None
 ):
-    if config is None:
-        config = CompilerConfig()
-    config.validate(hardware)
-
-    active_runtime = get_runtime(hardware)
-
-    active_runtime.run_quantum_executable(executable_blocks)
-    results = active_runtime.execute(
-        instructions,
-        config.results_format,
-        config.repeats,
-        config.error_mitigation,
-    )
-    return results, active_runtime.compilation_metrics
-
-
-def _execute_instructions_with_interrupt(
-    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
-    instructions: Union[List[Instruction], QuantumInstructionBuilder],
-    config: CompilerConfig = None,
-    executable_blocks: List[QuantumExecutableBlock] = None,
-    interrupt: Interrupt = NullInterrupt(),
-    *args,
-    **kwargs,
-):
-    if config is None:
-        config = CompilerConfig()
-    config.validate(hardware)
-
-    active_runtime = get_runtime(hardware)
-    active_runtime.run_quantum_executable(executable_blocks)
-
-    results = active_runtime._execute_with_interrupt(
-        instructions,
-        config.results_format,
-        config.repeats,
-        interrupt,
-        config.error_mitigation,
-    )
-    return results, active_runtime.compilation_metrics
+    with log_duration("Execution completed, took {} seconds."):
+        active_runtime = get_runtime(hardware)
+        active_runtime.init_then_enable_metrics(metrics)
+        active_runtime.run_quantum_executable(executable_blocks)
+        results = active_runtime.execute_with_interrupt(instructions, interrupt, results_format, repeats, error_mitigation) if interrupt is not None else active_runtime.execute(instructions, results_format, repeats, error_mitigation)
+        return (
+            results,
+            active_runtime.compilation_metrics,
+        )

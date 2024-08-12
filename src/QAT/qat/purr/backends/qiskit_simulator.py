@@ -211,6 +211,8 @@ def verify_placement(coupling_map, circuit):
 
 
 class QiskitEngine(InstructionExecutionEngine):
+    model: QiskitHardwareModel
+
     def __init__(self, hardware_model: QiskitHardwareModel = None):
         super().__init__(hardware_model)
 
@@ -313,6 +315,16 @@ class QiskitRuntime(QuantumRuntime):
             results[mitigator.name] = new_result
 
         return results  # TODO: new results object
+
+    def execute_with_interrupt(
+        self,
+        builder,
+        _,
+        results_format=None,
+        repeats=None,
+        error_mitigation=None,
+    ):
+        return self.execute(builder, results_format, repeats, error_mitigation)
 
     def execute(
         self,

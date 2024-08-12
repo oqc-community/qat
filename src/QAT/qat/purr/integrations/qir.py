@@ -1,228 +1,147 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from typing import List, Union
+import math
+from typing import Dict, Optional, List
+
+from rasqal.adaptors import BuilderAdaptor, RequiredFeatures, RuntimeAdaptor
+from rasqal.routing import TketBuilder, TketRuntime
+from rasqal.runtime import RasqalRunner
 
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing
-from qat.purr.compiler.execution import InstructionExecutionEngine
+from qat.purr.compiler.config import InlineResultsProcessing, QuantumResultsFormat, TketOptimizations
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Variable
-from qat.purr.compiler.runtime import get_builder
-from qat.purr.utils.logging_utils import log_duration
-
-qir_available = True
-try:
-    from pyqir import (
-        Call,
-        Constant,
-        Context,
-        FloatConstant,
-        IntConstant,
-        Module,
-        extract_byte_string,
-        is_entry_point,
-        qubit_id,
-        result_id,
-    )
-except ImportError:
-    qir_available = False
+from qat.purr.compiler.runtime import QuantumRuntime, get_builder, get_runtime
+from qat.purr.integrations.tket import apply_iterative_optimization
 
 
-class QIRParser:
+class RasqalBuilder(BuilderAdaptor):
     def __init__(
         self,
-        hardware: Union[QuantumHardwareModel, InstructionExecutionEngine],
-        builder=None,
+        model: QuantumHardwareModel,
+        results_format: InlineResultsProcessing,
     ):
-        if isinstance(hardware, InstructionExecutionEngine):
-            hardware = hardware.model
+        self.model: QuantumHardwareModel = model
+        self.builder: InstructionBuilder = get_builder(model)
+        self.results_format = results_format
 
-        self.hardware: QuantumHardwareModel = hardware
-        self.builder: InstructionBuilder = builder or get_builder(hardware)
-        self.results_format = InlineResultsProcessing.Program
-        self.result_variables = []
+        # As the results Rasqal desires is always a full QPU distribution just add a return to the end
+        # of the builder, and only once in the case of multi-execution.
+        self.acquire_variables = []
+        self.added_return = False
 
     def _get_qubit(self, id_: int):
-        return self.hardware.qubits[id_]
+        return self.model.get_qubit(id_)
 
-    def ccx(self, control1, control2, target):
-        self.builder.ccnot(
-            [self._get_qubit(control1), self._get_qubit(control2)],
-            target,
+    def cx(self, controls, target, radii):
+        # TODO: Hack as most builders have cnot but don't have generic controlled operations implemented yet.
+        if len(controls) == 1 and radii == math.pi:
+            self.builder.cnot(self._get_qubit(controls[0]), self._get_qubit(target))
+        else:
+            self.builder.cX(
+                [self._get_qubit(c) for c in controls], self._get_qubit(target), radii
+            )
+
+    def cz(self, controls, target, radii):
+        self.builder.cZ(
+            [self._get_qubit(c) for c in controls], self._get_qubit(target), radii
         )
 
-    def cx(self, control: int, target: int):
-        self.builder.cnot(self._get_qubit(control), self._get_qubit(target))
+    def cy(self, controls, target, radii):
+        self.builder.cY(
+            [self._get_qubit(c) for c in controls], self._get_qubit(target), radii
+        )
 
-    def cz(self, control: int, target: int):
-        self.builder.cZ(self._get_qubit(control), self._get_qubit(target))
+    def x(self, qubit, radii):
+        self.builder.X(self._get_qubit(qubit), radii)
 
-    def h(self, target: int):
-        self.builder.had(self._get_qubit(target))
+    def y(self, qubit, radii):
+        self.builder.Y(self._get_qubit(qubit), radii)
 
-    def mz(self, qubit: int, target: int):
-        result_var = str(target)
+    def z(self, qubit, radii):
+        self.builder.Z(self._get_qubit(qubit), radii)
+
+    def swap(self, qubit1, qubit2):
+        self.builder.swap(self._get_qubit(qubit1), self._get_qubit(qubit2))
+
+    def reset(self, qubit):
+        self.builder.reset(self._get_qubit(qubit))
+
+    def measure(self, qubit):
+        # Create throwaway label and retrieve the name.
+        result_var = self.builder.create_name()
+        self.acquire_variables.append(result_var)
         self.builder.measure_single_shot_z(
             self._get_qubit(qubit), output_variable=result_var
         )
         self.builder.results_processing(result_var, self.results_format)
 
-    def reset(self, target: int):
-        self.builder.reset(self._get_qubit(target))
+    def clear(self):
+        self.builder.clear()
+        self.acquire_variables.clear()
 
-    def rx(self, theta: float, qubit: int):
-        self.builder.X(self._get_qubit(qubit), theta)
 
-    def ry(self, theta: float, qubit: int):
-        self.builder.Y(self._get_qubit(qubit), theta)
+class RasqalRuntime(RuntimeAdaptor):
+    def __init__(self, model: QuantumHardwareModel, results_format: QuantumResultsFormat,
+                 interrupt_hook=None, error_mitigation=None):
+        self.model = model
+        self.runtime: QuantumRuntime = get_runtime(model)
+        self.results_format: QuantumResultsFormat = results_format
+        self.interrupt_hook = interrupt_hook
+        self.error_mitigation = error_mitigation
 
-    def rz(self, theta: float, qubit: int):
-        self.builder.Z(self._get_qubit(qubit), theta)
-
-    def s(self, qubit: int):
-        self.builder.S(self._get_qubit(qubit))
-
-    def s_adj(self, qubit: int):
-        self.builder.Sdg(self._get_qubit(qubit))
-
-    def t(self, qubit: int):
-        self.builder.T(self._get_qubit(qubit))
-
-    def t_adj(self, qubit: int):
-        self.builder.Tdg(self._get_qubit(qubit))
-
-    def x(self, qubit: int):
-        self.builder.X(self._get_qubit(qubit))
-
-    def y(self, qubit: int):
-        self.builder.Y(self._get_qubit(qubit))
-
-    def z(self, qubit: int):
-        self.builder.Z(self._get_qubit(qubit))
-
-    def process_instructions(self, instructions):
-        for inst in instructions:
-            if isinstance(inst, Call):
-
-                def throw_on_invalid_args(actual_args, expected_args):
-                    if actual_args != expected_args:
-                        raise ValueError(
-                            f"{intrinsic_name} has {actual_args} arguments, "
-                            f"expected {expected_args}."
-                        )
-
-                args: List[Constant] = inst.args
-                intrinsic_name = inst.callee.name
-                if intrinsic_name in (
-                    "__quantum__qis__ccx__body",
-                    "__quantum__qis__ccnot__body",
-                ):
-                    throw_on_invalid_args(len(args), 3)
-                    self.ccx(qubit_id(args[0]), qubit_id(args[1]), qubit_id(args[2]))
-                elif intrinsic_name in (
-                    "__quantum__qis__cnot__body",
-                    "__quantum__qis__cx__body",
-                ):
-                    throw_on_invalid_args(len(args), 2)
-                    self.cx(qubit_id(args[0]), qubit_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__cz__body":
-                    throw_on_invalid_args(len(args), 2)
-                    self.cz(qubit_id(args[0]), qubit_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__h__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.h(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__mz__body":
-                    throw_on_invalid_args(len(args), 2)
-                    self.mz(qubit_id(args[0]), result_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__reset__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.reset(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__rx__body":
-                    throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
-                    self.rx(radii.value, qubit_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__ry__body":
-                    throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
-                    self.ry(radii.value, qubit_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__rz__body":
-                    throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
-                    self.rz(radii.value, qubit_id(args[1]))
-                elif intrinsic_name == "__quantum__qis__s__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.s(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__s_adj":
-                    throw_on_invalid_args(len(args), 1)
-                    self.s_adj(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__t__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.t(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__t__adj":
-                    throw_on_invalid_args(len(args), 1)
-                    self.t_adj(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__x__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.x(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__y__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.y(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__qis__z__body":
-                    throw_on_invalid_args(len(args), 1)
-                    self.z(qubit_id(args[0]))
-                elif intrinsic_name == "__quantum__rt__initialize":
-                    pass
-                elif intrinsic_name == "__quantum__rt__tuple_record_output":
-                    pass
-                elif intrinsic_name == "__quantum__rt__array_record_output":
-                    pass
-                elif intrinsic_name == "__quantum__rt__result_record_output":
-                    throw_on_invalid_args(len(args), 2)
-                    res = result_id(args[0])
-                    label_ptr = args[1]
-                    label = ""
-                    if (not label_ptr.is_null) and (
-                        byte_string := extract_byte_string(label_ptr)
-                    ):
-                        label = byte_string.decode("utf-8").rstrip("\x00")
-                    self.result_variables.append((Variable(str(res)), label))
-
-    def parse(self, qir_file: str):
-        if not qir_available:
-            raise RuntimeError("QIR parser unavailable.")
-
-        with log_duration("QIR parsing completed, took {} seconds."):
-            if qir_file.endswith(".bc"):
-                with open(qir_file, "rb") as f:
-                    mod = Module.from_bitcode(Context(), f.read())
-            elif qir_file.endswith(".ll"):
-                with open(qir_file) as f:
-                    mod = Module.from_ir(Context(), f.read())
-
-            entry_point = next(
-                iter(filter(lambda fnc: is_entry_point(fnc), mod.functions)), None
+    def execute(self, adaptor: RasqalBuilder) -> Dict[str, int]:
+        if not adaptor.added_return:
+            final_result_name = adaptor.builder.create_name()
+            adaptor.builder.assign(
+                final_result_name, [Variable(val) for val in adaptor.acquire_variables]
             )
-            if entry_point is None:
-                raise ValueError("Entry point unable to be found in QIR file.")
+            adaptor.builder.returns(final_result_name)
+            adaptor.added_return = True
 
-            self.process_instructions(
-                [inst for bb in entry_point.basic_blocks for inst in bb.instructions]
-            )
+        if self.interrupt_hook is not None:
+            results = self.runtime.execute_with_interrupt(
+                adaptor.builder, self.interrupt_hook, self.results_format.transforms, error_mitigation=self.error_mitigation)
+        else:
+            results = self.runtime.execute(adaptor.builder, self.results_format.transforms, self.error_mitigation)
 
-            if any(self.result_variables):
-                potential_names = [
-                    val[1] for val in self.result_variables if len(val[1] or "") != 0
-                ]
-                if not any(potential_names):
-                    result_name = Variable.generate_name()
-                else:
-                    result_name = "_".join(potential_names)
+        return results
 
-                self.builder.assign(result_name, [val[0] for val in self.result_variables])
-                self.builder.returns(result_name)
-            else:
-                self.builder.returns()
+    def create_builder(self) -> BuilderAdaptor:
+        return RasqalBuilder(self.model, self.results_format.format)
 
-            complete_builder = self.builder
-            self.builder = get_builder(self.hardware)
-            return complete_builder
+    def has_features(self, required_features: RequiredFeatures):
+        return True
+
+
+class RasqalRouter(TketRuntime):
+    """Wrapper around the Tket routing techniques to allow for incremental routing across a web of couplings."""
+
+    def __init__(self, model: QuantumHardwareModel, forwarded_runtime: RuntimeAdaptor):
+        # We don't use the couplings here anyway.
+        super().__init__([(0, 1)], forwarded_runtime)
+        self.model = model
+
+    def execute(self, builder) -> Dict[str, int]:
+        builder: TketBuilder
+        apply_iterative_optimization(builder.circuit, TketOptimizations.DefaultMappingPass, self.model, group_qualities=True)
+        self._apply_rebase(builder.circuit)
+        return self.forwarded.execute(self._forward_circuit(builder))
+
+
+def create_runtime(
+    model: QuantumHardwareModel,
+    step_count: Optional[int] = 2500,
+    interrupt_hook=None,
+    error_mitigation=None
+) -> RasqalRunner:
+    # TODO: Routing disabled for now.
+    # runner = RasqalRunner(
+    #     RasqalRouter(model, RasqalRuntime(model, QuantumResultsFormat().binary_count(), interrupt_hook, error_mitigation))
+    # )
+
+    runner = RasqalRunner(RasqalRuntime(model, QuantumResultsFormat().binary_count(), interrupt_hook, error_mitigation))
+
+    # For now, we enforce a very limited step-count when building one with the default setup.
+    if step_count is not None:
+        runner.step_count_limit(step_count)
+
+    return runner

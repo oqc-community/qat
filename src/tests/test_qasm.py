@@ -568,7 +568,7 @@ class TestExecutionFrontend:
     )
     def test_primitives(self):
         qasm_string = get_qasm2("primitives.qasm")
-        results = execute_qasm(qasm_string)
+        results = execute_qasm(qasm_string, get_default_RTCS_hardware())
 
         assert len(results) == 1
         assert "c" in results
@@ -609,7 +609,7 @@ class TestExecutionFrontend:
         qasm_string = get_qasm2("basic_results_formats.qasm")
         config = CompilerConfig()
         config.results_format = QuantumResultsFormat().binary_count()
-        results = execute_qasm(qasm_string, compiler_config=config)
+        results = execute_qasm(qasm_string, get_default_RTCS_hardware(), compiler_config=config)
         assert "ab" in results
         assert "c" in results
 
@@ -733,7 +733,7 @@ class TestExecutionFrontend:
         metrics.record_metric(MetricsType.OptimizedCircuit, value)
         assert metrics.get_metric(MetricsType.OptimizedCircuit) == value
 
-    def test_parllel_execution(self):
+    def test_parallel_execution(self):
         qasm_string = get_qasm2("parallel_test.qasm")
 
         opts = Qasm2Optimizations()
@@ -764,7 +764,7 @@ class TestExecutionFrontend:
     )
     def test_binary_count_return(self):
         config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
-        results = execute_qasm(get_qasm2("basic.qasm"), compiler_config=config)
+        results = execute_qasm(get_qasm2("basic.qasm"), get_default_RTCS_hardware(), compiler_config=config)
         assert "c" in results
         assert len(results["c"]) == 4
         assert {"11", "01", "00", "10"} == set(results["c"].keys())
@@ -828,9 +828,9 @@ class TestExecutionFrontend:
         hardware = get_default_echo_hardware()
         contents = get_qasm2("basic.qasm")
         frontend = fetch_frontend(contents, use_experimental=use_experimental)
-        built, _ = frontend.parse(contents, hardware=hardware)
+        built, _ = frontend.parse(contents, hardware, CompilerConfig())
         assert isinstance(built, (InstructionBuilder, List))
-        results = frontend.execute(instructions=built, hardware=hardware)
+        results = frontend.execute(built, hardware, CompilerConfig())
         assert results is not None
 
     def test_qasm_sim(self):

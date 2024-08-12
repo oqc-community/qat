@@ -50,7 +50,6 @@ def test_only_inst_len_circuitmetrics_are_returned(input_string, file_type):
     [
         ("ghz.qasm", TestFileType.QASM2),
         ("basic.qasm", TestFileType.QASM3),
-        ("generator-bell.ll", TestFileType.QIR),
     ],
 )
 def test_batched_execution(input_string, file_type, engine):

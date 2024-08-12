@@ -19,7 +19,7 @@ class TestQbloxLiveEngine:
         for amp in [0.5, 1.0]:
             q0.pulse_measure["amp"] = amp
             builder = get_builder(model).measure(q0).repeat(10000)
-            results, _ = execute_instructions(engine, builder.instructions)
+            results, _ = execute_instructions(engine, builder)
             assert results is not None
 
     def test_measure_freq_sweep(self, model):
@@ -38,7 +38,7 @@ class TestQbloxLiveEngine:
             .device_assign(q0.get_acquire_channel(), "frequency", Variable("frequency"))
             .repeat(1000)
         )
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_instruction_execution(self, model):
@@ -59,7 +59,7 @@ class TestQbloxLiveEngine:
             .frequency_shift(drive_channel, frequency)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_one_channel(self, model):
@@ -84,7 +84,7 @@ class TestQbloxLiveEngine:
             .delay(drive_channel, 100e-9)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_two_channels(self, model):
@@ -119,7 +119,7 @@ class TestQbloxLiveEngine:
             )
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_sync_two_channel(self, model):
@@ -154,7 +154,7 @@ class TestQbloxLiveEngine:
             )
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_play_very_long_pulse(self, model):
@@ -167,7 +167,7 @@ class TestQbloxLiveEngine:
         )
 
         with pytest.raises(ValueError):
-            results, _ = execute_instructions(engine, builder.instructions)
+            results, _ = execute_instructions(engine, builder)
 
     def test_bare_measure(self, model):
         engine = model.create_engine()
@@ -183,7 +183,7 @@ class TestQbloxLiveEngine:
             .measure(qubit)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_measure_scope_mode(self, model):
@@ -200,5 +200,5 @@ class TestQbloxLiveEngine:
             .measure_scope_mode(qubit)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None

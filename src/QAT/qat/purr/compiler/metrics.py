@@ -54,17 +54,21 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
             if not val.is_composite()
         ]
 
-    def enable(self, enabled_metrics: MetricsType, overwrite=False):
-        """
-        Enable these sets of metrics for collection. If overwrite is True then the
-        passed-in values will overwrite existing ones.
-        """
-        if enabled_metrics is None:
-            return
+    def init_then_enable(self, enabled_metrics: MetricsType):
+        self.initialize(enabled_metrics)
+        self.enable(enabled_metrics)
 
-        if overwrite:
+    def initialize(self, enabled_metrics: MetricsType):
+        """Initializes this collection with these metrics."""
+        if enabled_metrics is not None:
             self.enabled_metrics = enabled_metrics
-        else:
+
+    def enable(self, enabled_metrics: MetricsType):
+        """
+        Enables these metrics for collection. Only appends metrics without disabling or overwriting.
+        Use initialize if you want to selectively disable/enable metrics.
+        """
+        if enabled_metrics is not None:
             self.enabled_metrics = self.enabled_metrics | enabled_metrics
 
     def are_enabled(self, metric: MetricsType):
@@ -116,19 +120,28 @@ class MetricsMixin:
         if self.are_metrics_enabled(metric):
             self.compilation_metrics.record_metric(metric, value)
 
-    def enable_metrics(self, enabled_metrics=None, overwrite=True):
+    def init_then_enable_metrics(self, enabled_metrics: MetricsType = None):
+        self.initialize_metrics(enabled_metrics)
+        self.enable_metrics(enabled_metrics)
+
+    def initialize_metrics(self, enabled_metrics: MetricsType = None):
+        if enabled_metrics is None:
+            log.warning(f"Attempted to enable metrics with no value. Defaulting.")
+            enabled_metrics = MetricsType.Default
+
+        if self.compilation_metrics is None:
+            self.compilation_metrics = CompilationMetrics()
+
+        self.compilation_metrics.initialize(enabled_metrics)
+
+    def enable_metrics(self, enabled_metrics: MetricsType = None):
         """
         Enables the set of metrics in the current collection. If overwrite is set to
         true, or there are no compilation metrics it'll create a new collection, if
         overwrite is false it'll enable these metrics in the currently-active
         collection.
         """
-        if enabled_metrics is None:
-            log.warning("Attempted to enable metrics with no value. Defaulting.")
-            enabled_metrics = MetricsType.Default
-
         if self.compilation_metrics is None:
-            return
-
-        log.info(f"Enabling metrics with flags: {str(enabled_metrics)}")
-        self.compilation_metrics.enable(enabled_metrics, overwrite)
+            self.initialize_metrics(enabled_metrics)
+        else:
+            self.compilation_metrics.enable(enabled_metrics)

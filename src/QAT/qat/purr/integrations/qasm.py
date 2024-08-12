@@ -171,7 +171,7 @@ class AbstractParser:
     def _add_qreg(self, reg_name, reg_length, context: QasmContext, builder):
         index_range = self._get_qreg_index_range(reg_length, context, builder)
         context.registers.quantum[reg_name] = QubitRegister(
-            [builder.model.get_qubit(val) for val in index_range]
+            [builder.model.get_qubit(val) if val is not None else None for val in index_range]
         )
 
     def _add_creg(self, reg_name, reg_length, context):
@@ -244,7 +244,12 @@ class AbstractParser:
             next_free = available_indices.index(max_used) + 1
         index_range = available_indices[next_free : next_free + reg_length]
         if len(index_range) < reg_length:
-            raise ValueError("Attempted to allocate more qubits than available.")
+            # If our array is jagged but the numbers reach the max, expand qubits in register out.
+            if max(index_range) == (reg_length-1):
+                matcher = set(index_range)
+                index_range = [index if index in matcher else None for index in list(range(reg_length))]
+            else:
+                raise ValueError("Attempted to allocate more qubits than available.")
 
         return index_range
 

@@ -93,9 +93,13 @@ def apply_setup_to_hardware(hw, qubit_indices: list):
 
 
 def get_jagged_echo_hardware(
-    qubit_count: int = 4, qubit_indices: List[int] = []
+    qubit_count: int = 4, qubit_indices: List[int] = None, applied_model=None
 ) -> "QuantumHardwareModel":
-    model = QuantumHardwareModel()
+
+    if qubit_indices is None:
+        qubit_indices = []
+
+    model = QuantumHardwareModel() if applied_model is None else applied_model
     if len(qubit_indices) == 0:
         qubit_indices = random.sample(range(1, qubit_count + 5), qubit_count)
     qubit_indices.sort()

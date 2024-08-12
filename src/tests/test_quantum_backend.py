@@ -155,7 +155,7 @@ class TestBaseQuantum:
 
     def test_batched_execution(self):
         hw = get_default_echo_hardware()
-        hw.shot_limit = 10
+        hw.repeat_limit = 10
 
         config = CompilerConfig()
         config.repeats = 50

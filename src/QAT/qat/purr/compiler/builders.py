@@ -360,6 +360,10 @@ class InstructionBuilder:
 
         return Label(name)
 
+    def create_name(self):
+        """Helper to generate a free name that will be valid for this builder."""
+        return Label.generate_name(self.existing_names)
+
 
 class FluidBuilderWrapper(tuple):
     """
