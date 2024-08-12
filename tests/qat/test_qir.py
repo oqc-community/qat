@@ -13,8 +13,8 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
-from tests.qasm_utils import TestFileType, get_test_file_path
-from tests.utils import get_jagged_echo_hardware
+from tests.qat.qasm_utils import TestFileType, get_test_file_path
+from tests.qat.utils import get_jagged_echo_hardware
 
 
 def _get_qir_path(file_name):

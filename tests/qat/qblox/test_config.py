@@ -19,7 +19,7 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
-from tests.qblox.utils import DUMMY_CONFIG, ClusterInfo, MixerTestValues
+from tests.qat.qblox.utils import DUMMY_CONFIG, ClusterInfo, MixerTestValues
 
 
 class TestQbloxConfigMixin:

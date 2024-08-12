@@ -5,8 +5,8 @@ import pytest
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import CompilerConfig, MetricsType, QuantumResultsFormat
 from qat.qat import execute_with_metrics
-from tests.qasm_utils import TestFileType, get_test_file_path
-from tests.utils import ListReturningEngine
+from tests.qat.qasm_utils import TestFileType, get_test_file_path
+from tests.qat.utils import ListReturningEngine
 
 
 @pytest.mark.parametrize(

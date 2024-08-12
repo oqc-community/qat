@@ -55,7 +55,7 @@ jobs:
         git fetch --all
         git checkout ${{ steps.extract_branch.outputs.branch }}
         rm -rf .gitignore
-        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
+        poetry run sphinx-apidoc -f -M -e -o docs/source/ src
         git add .
         git commit -m "temporarily commiting api docs"
         poetry run sphinx-multiversion docs/source/ docs/build/
@@ -73,7 +73,7 @@ jobs:
         git fetch --all
         git checkout ${{ steps.extract_branch.outputs.branch }} -b ${{ steps.extract_tag.outputs.tag }} 
         rm -rf .gitignore
-        poetry run sphinx-apidoc -f -M -e -o docs/source/ src/QAT "**/tests/**"
+        poetry run sphinx-apidoc -f -M -e -o docs/source/ src
         git add --force .
         git commit -a -m "temporarily commiting api docs"
         poetry run sphinx-multiversion docs/source/ docs/build/

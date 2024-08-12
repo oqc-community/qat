@@ -70,15 +70,14 @@ from qat.purr.integrations.qasm import (
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
-
-from .qasm_utils import (
+from tests.qat.qasm_utils import (
     TestFileType,
     get_qasm2,
     get_qasm3,
     get_test_file_path,
     parse_and_apply_optimiziations,
 )
-from .utils import get_jagged_echo_hardware, update_qubit_indices
+from tests.qat.utils import get_jagged_echo_hardware, update_qubit_indices
 
 
 class TestQASM3:
