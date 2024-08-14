@@ -144,6 +144,11 @@ class QbloxControlHardware(ControlHardware):
 
         raise ValueError(f"No more available sequencers on module {module}")
 
+    def get_resource(self, mod_index: int, seq_index: int):
+        module: Module = self._driver.modules[mod_index]
+        sequencer: Sequencer = module.sequencers[seq_index]
+        return module, sequencer
+
     def _get_acquisitions(self, module: Module, sequencer: Sequencer):
         module.get_sequencer_status(sequencer.seq_idx, timeout=1)
         module.get_acquisition_status(sequencer.seq_idx, timeout=1)
