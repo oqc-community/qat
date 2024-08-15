@@ -2,7 +2,7 @@
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
-version = "2.0.0"
+version = "2.0.1"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 documentation = "https://oqc-community.github.io/qat"
