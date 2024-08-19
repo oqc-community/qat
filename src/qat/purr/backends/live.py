@@ -230,6 +230,8 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         return all(is_connected)
 
     def shutdown(self):
+        # Store the instrument connection statuses.
+        # All instruments should be disconnected (represented as a False entry)
         is_connected = []
         for instrument in self.model.instruments.values():
             is_connected.append(instrument.close())
