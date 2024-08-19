@@ -16,9 +16,7 @@ from numpy import savetxt
 from qat.purr.utils.serializer import json_dump, json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
-default_logger_format = (
-    "[%(levelname)s] %(asctime)s (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"
-)
+default_logger_format = "[%(levelname)s] %(asctime)s - %(name)s - (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"
 json_format = (
     '{"level": "%(levelname)s", "time": "%(asctime)s",'
     '"module name": "%(module)s", "function name": "%(funcName)s", "line number": %(lineno)d,'
