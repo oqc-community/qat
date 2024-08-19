@@ -28,6 +28,11 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_in
 from qat.purr.compiler.instructions import Instruction, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
+from qat.purr.compiler.optimisation_passes import (
+    PhaseOptimisation,
+    PostProcessingOptimisation,
+)
+from qat.purr.compiler.verification_passes import CtrlHwValidation, PostProcessingValidation
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -250,6 +255,54 @@ class QuantumRuntime(MetricsMixin):
         return self._common_execute(
             fexecute, instructions, results_format, repeats, error_mitigation
         )
+
+
+class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
+    """
+    Uses the new pass pipeline.
+
+    Notice how polymorphic calls to optimize() and validate() are avoided. Instead, we have a flat structure
+    of passes:
+        - Easy and efficient testing of individual passes
+        - Easy plug-in passes
+
+    Similar plug-in model can be applied to metrics (another story)
+    """
+
+    def build_pass_pipeline(self, *args, **kwargs):
+        pipeline = PassManager()
+        pipeline.add(PhaseOptimisation())
+        pipeline.add(PostProcessingOptimisation())
+        pipeline.add(CtrlHwValidation(self.engine))
+        pipeline.add(PostProcessingValidation(self.model))
+        return pipeline
+
+    def _common_execute(
+        self,
+        fexecute: callable,
+        builder,
+        results_format=None,
+        repeats=None,
+        error_mitigation=None,
+    ):
+        if self.engine is None:
+            raise ValueError("No execution engine available.")
+
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(
+                f"Expected InstructionBuilder, but got {type(builder)} instead"
+            )
+
+        self.run_pass_pipeline(builder)
+        self.record_metric(
+            MetricsType.OptimizedInstructionCount,
+            opt_inst_count := len(builder.instructions),
+        )
+        log.info(f"Optimized instruction count: {opt_inst_count}")
+
+        results = fexecute(builder)
+        results = self._transform_results(results, results_format, repeats)
+        return self._apply_error_mitigation(results, builder, error_mitigation)
 
 
 def _binary_count(results_list, repeats):

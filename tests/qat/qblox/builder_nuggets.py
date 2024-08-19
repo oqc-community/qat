@@ -66,3 +66,30 @@ def qubit_spect(model, qubit_indices=None):
             .measure_mean_signal(qubit, output_variable=output_variable)
         )
     return builder
+
+
+def multidim_sweep(model, qubit_index=0):
+    qubit = model.get_qubit(qubit_index)
+    drive_channel = qubit.get_drive_channel()
+    measure_channel = qubit.get_measure_channel()
+    acquire_channel = qubit.get_acquire_channel()
+    assert acquire_channel == measure_channel
+
+    num_points = 10
+    freq_range = 50e6
+
+    space1 = drive_channel.frequency + np.linspace(-freq_range, freq_range, num_points)
+    var1_name = f"drive_freq{qubit.index}"
+
+    space2 = acquire_channel.frequency + np.linspace(-freq_range, freq_range, num_points)
+    var2_name = f"acq_freq{qubit.index}"
+
+    builder = (
+        get_builder(model)
+        .sweep([SweepValue(var1_name, space1), SweepValue(var2_name, space2)])
+        .device_assign(drive_channel, "frequency", Variable(var1_name))
+        .device_assign(acquire_channel, "frequency", Variable(var2_name))
+        .measure_mean_signal(qubit, f"Q{qubit.index}")
+        .repeat(1000, 500e-6)
+    )
+    return builder

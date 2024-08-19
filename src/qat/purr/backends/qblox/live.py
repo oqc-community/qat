@@ -1,15 +1,33 @@
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 
+from qat.ir.pass_base import InvokerMixin, PassManager, PassResultSet
+from qat.purr.backends.analysis_passes import TriagePass
+from qat.purr.backends.codegen import CodegenResultType
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
+from qat.purr.backends.optimisation_passes import (
+    RepeatSanitisation,
+    ReturnSanitisation,
+    ScopeSanitisation,
+    SweepDecomposition,
+)
 from qat.purr.backends.qblox.codegen import QbloxEmitter
+from qat.purr.backends.qblox.fast.codegen import FastQbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
+from qat.purr.backends.verification_passes import (
+    RepeatSanitisationValidation,
+    ReturnSanitisationValidation,
+    ScopeSanitisationValidation,
+)
+from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.execution import SweepIterator
-from qat.purr.compiler.instructions import AcquireMode
-from qat.purr.compiler.interrupt import NullInterrupt
+from qat.purr.compiler.execution import SweepIterator, _binary_average, _numpy_array_to_list
+from qat.purr.compiler.instructions import AcquireMode, IndexAccessor, Instruction, Variable
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
+from qat.purr.compiler.runtime import NewQuantumRuntime
+from qat.purr.utils.logging_utils import log_duration
 
 
 class QbloxLiveHardwareModel(LiveHardwareModel):
@@ -17,8 +35,12 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
         super().__init__(control_hardware)
         self._reverse_coercion()
 
-    def create_engine(self):
-        return QbloxLiveEngine(self)
+    def create_engine(self, startup_engine: bool = True):
+        return FastQbloxLiveEngine(self, startup_engine)
+
+    def create_runtime(self, existing_engine=None):
+        engine = existing_engine or self.create_engine()
+        return NewQuantumRuntime(engine)
 
     def _reverse_coercion(self):
         """
@@ -103,3 +125,146 @@ class QbloxLiveEngine(LiveDeviceEngine):
                     sweep_iterator.insert_result_at_sweep_position(var_result, response)
 
         return results
+
+
+class FastQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        pipeline = PassManager()
+        pipeline.add(SweepDecomposition())
+        pipeline.add(RepeatSanitisation(self.model))
+        pipeline.add(ScopeSanitisation())
+        pipeline.add(ReturnSanitisation())
+        pipeline.add(ScopeSanitisationValidation())
+        pipeline.add(ReturnSanitisationValidation())
+        pipeline.add(RepeatSanitisationValidation())
+        pipeline.add(TriagePass())
+        return pipeline
+
+    def optimize(self, instructions):
+        pass
+
+    def validate(self, instructions: List[Instruction]):
+        pass
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        self._model_exists()
+
+        with log_duration("QPU returned results in {} seconds."):
+            analyses = self.run_pass_pipeline(builder)
+            packages = FastQbloxEmitter(analyses).emit_packages(builder)
+            self.model.control_hardware.set_data(packages)
+            playback_results: Dict[str, np.ndarray] = (
+                self.model.control_hardware.start_playback(None, None)
+            )
+
+            # Post execution step needs a lot of work
+            # TODO - Robust batching analysis (as a pass !)
+            # TODO - Lowerability analysis pass
+            # TODO - A generic loop nest model. Sth similar to SweepIterator but does not mixin injection stuff
+
+            results = {}
+            acquire_map = analyses.get_result(CodegenResultType.ACQUIRE_MAP)
+            pp_map = analyses.get_result(CodegenResultType.PP_MAP)
+            sweeps = analyses.get_result(CodegenResultType.SWEEPS)
+
+            def create_sweep_iterator():
+                switerator = SweepIterator()
+                for sweep in sweeps:
+                    switerator.add_sweep(sweep)
+                return switerator
+
+            for t, acquires in acquire_map.items():
+                big_response = playback_results[t.physical_channel.id]
+                switerator = create_sweep_iterator()
+                sweep_splits = np.split(big_response, switerator.length)
+                for acq in acquires:
+                    switerator.reset_iteration()
+                    while not switerator.is_finished():
+                        switerator.do_sweep(
+                            []
+                        )  # just to advance iteration, no need for injection
+                        response = sweep_splits[switerator.current_iteration]
+                        response_axis = get_axis_map(acq.mode, response)
+                        for pp in pp_map[acq.output_variable]:
+                            response, response_axis = self.run_post_processing(
+                                pp, response, response_axis
+                            )
+                            handle = results.setdefault(
+                                acq.output_variable,
+                                np.empty(
+                                    switerator.get_results_shape(response.shape),
+                                    response.dtype,
+                                ),
+                            )
+                            switerator.insert_result_at_sweep_position(handle, response)
+
+            results = self._process_results(results, analyses)
+            results = self._process_assigns(results, analyses)
+
+            return results
+
+    def _process_results(self, results, analyses: PassResultSet):
+        """
+        Process any software-driven results transformation, such as taking a raw
+        waveform result and turning it into a bit, or something else.
+        """
+        rp_map = analyses.get_result(CodegenResultType.RP_MAP)
+
+        for inst in rp_map.values():
+            target_values = results.get(inst.variable, None)
+            if target_values is None:
+                raise ValueError(f"Variable {inst.variable} not found in results output.")
+
+            if (
+                InlineResultsProcessing.Raw in inst.results_processing
+                and InlineResultsProcessing.Binary in inst.results_processing
+            ):
+                raise ValueError(
+                    f"Raw and Binary processing attempted to be applied "
+                    f"to {inst.variable}. Only one should be selected."
+                )
+
+            # Strip numpy arrays if we're set to do so.
+            if InlineResultsProcessing.NumpyArrays not in inst.results_processing:
+                target_values = _numpy_array_to_list(target_values)
+
+            # Transform to various formats if required.
+            if InlineResultsProcessing.Binary in inst.results_processing:
+                target_values = _binary_average(target_values)
+
+            results[inst.variable] = target_values
+
+        return results
+
+    def _process_assigns(self, results, analyses: PassResultSet):
+        """
+        As assigns are classical instructions they are not processed as a part of the
+        quantum execution (right now).
+        Read through the results dictionary and perform the assigns directly, return the
+        results.
+        """
+
+        def recurse_arrays(results_map, value):
+            """Recurse through assignment lists and fetch values in sequence."""
+            if isinstance(value, List):
+                return [recurse_arrays(results_map, val) for val in value]
+            elif isinstance(value, Variable):
+                if value.name not in results_map:
+                    raise ValueError(
+                        f"Attempt to assign variable that doesn't exist {value.name}."
+                    )
+
+                if isinstance(value, IndexAccessor):
+                    return results_map[value.name][value.index]
+                else:
+                    return results_map[value.name]
+            else:
+                return value
+
+        assigns = analyses.get_result(CodegenResultType.ASSIGNS)
+        ret_inst = analyses.get_result(CodegenResultType.RETURN)
+        assigned_results = dict(results)
+        for assign in assigns:
+            assigned_results[assign.name] = recurse_arrays(assigned_results, assign.value)
+
+        return {key: assigned_results[key] for key in ret_inst.variables}
