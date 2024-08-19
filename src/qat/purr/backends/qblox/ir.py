@@ -85,6 +85,12 @@ class SequenceBuilder:
         self.weights: Dict[str, Any] = {}
         self.q1asm_instructions: List[Q1asmInstruction] = []
 
+    def clear(self):
+        self.waveforms.clear()
+        self.acquisitions.clear()
+        self.weights.clear()
+        self.q1asm_instructions.clear()
+
     def build(self):
         return Sequence(
             waveforms=self.waveforms,
@@ -94,6 +100,11 @@ class SequenceBuilder:
                 [str(inst) for inst in self.q1asm_instructions]
             ),
         )
+
+    def optimize(self):
+        self.q1asm_instructions = [
+            inst for inst in self.q1asm_instructions if inst.opcode != Opcode.WAIT_SYNC
+        ]
 
     def add_waveform(self, name: str, index: int, data: np.ndarray):
         if name in self.waveforms:

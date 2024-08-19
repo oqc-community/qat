@@ -513,7 +513,7 @@ class DeviceUpdate(QuantumInstruction):
     """
 
     def __init__(self, target: QuantumComponent, attribute: str, value):
-        super().__init__()
+        super().__init__(target)
         self.target = target
         self.attribute = attribute
         self.value = value

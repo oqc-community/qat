@@ -216,3 +216,11 @@ class TestQbloxLiveEngine:
 
         results, _ = execute_instructions(engine, builder.instructions)
         assert results is not None
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+class TestFastQbloxLiveEngine:
+    def test_execute_resonator_spect(self, model):
+        builder = resonator_spect(model)
+        results = model.create_runtime().execute(builder)
+        assert results is not None
