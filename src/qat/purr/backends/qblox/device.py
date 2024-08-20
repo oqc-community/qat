@@ -223,7 +223,7 @@ class QbloxControlHardware(ControlHardware):
 
         sequence = asdict(package.sequence)
         if self.dump_sequence:
-            filename = f"schedules/sequence_{module.slot_idx}_{sequencer.seq_idx}_@_{datetime.utcnow()}.json"
+            filename = f"schedules/sequence_{module.slot_idx}_{sequencer.seq_idx}_@_{datetime.utcnow().strftime('%m-%d-%Y_%H%M%S')}.json"
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, "w") as f:
                 f.write(json.dumps(sequence))
