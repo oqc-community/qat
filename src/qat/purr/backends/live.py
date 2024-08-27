@@ -213,23 +213,32 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         self.shutdown()
 
     def startup(self):
+        is_connected = []
+
         for instrument in self.model.instruments.values():
-            instrument.connect()
+            is_connected.append(instrument.connect())
         if self.model.control_hardware is not None:
-            self.model.control_hardware.connect()
+            is_connected.append(self.model.control_hardware.connect())
         for baseband in self.model.basebands.values():
             if isinstance(baseband, LivePhysicalBaseband):
-                baseband.connect_to_instrument()
+                is_connected.append(baseband.connect_to_instrument())
         for physical_channel in self.model.physical_channels:
             if isinstance(physical_channel, ControlHardwareChannel):
                 for dc_bias_ch in physical_channel.dcbiaschannel_pair.values():
-                    dc_bias_ch.connect_to_instrument()
+                    is_connected.append(dc_bias_ch.connect_to_instrument())
+
+        return all(is_connected)
 
     def shutdown(self):
+        # Store the instrument connection statuses.
+        # All instruments should be disconnected (represented as a False entry)
+        is_connected = []
         for instrument in self.model.instruments.values():
-            instrument.close()
+            is_connected.append(instrument.close())
         if self.model.control_hardware is not None:
-            self.model.control_hardware.close()
+            is_connected.append(self.model.control_hardware.close())
+
+        return not any(is_connected)
 
     def process_reset(self, position):
         raise NotImplementedError(
