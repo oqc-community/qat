@@ -246,17 +246,6 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
         return not any(aggregate_result)
 
-    def engine_is_connected(self):
-        # Store the instrument connection statuses.
-        # All instruments should be disconnected (represented as a False entry)
-        aggregate_result = []
-        for instrument in self.model.instruments.values():
-            aggregate_result.append(instrument.is_connected)
-        if self.model.control_hardware is not None:
-            aggregate_result.append(self.model.control_hardware.is_connected)
-
-        return any(aggregate_result)
-
     def process_reset(self, position):
         raise NotImplementedError(
             "Active qubit reset is not currently implemented on live hardware."
