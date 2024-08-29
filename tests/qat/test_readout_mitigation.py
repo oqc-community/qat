@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy import identity, isclose
 from numpy.random import rand
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, qasm2
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -336,7 +336,7 @@ class TestOnNoisySimulator:
                 circuit.x(i)
         circuit.measure(0, 0)
         circuit.measure(1, 1)
-        qasm = circuit.qasm()
+        qasm = qasm2.dumps(circuit)
 
         # prepare and add readout mitigation to hardware model
         hw = get_default_RTCS_hardware()

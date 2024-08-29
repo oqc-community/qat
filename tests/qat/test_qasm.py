@@ -11,10 +11,11 @@ import pytest
 from docplex.mp.model import Model
 from pytket.qasm import circuit_from_qasm_str
 from qiskit import QuantumCircuit
-from qiskit.algorithms import QAOA, VQE, NumPyMinimumEigensolver
-from qiskit.algorithms.optimizers import SPSA
 from qiskit.circuit.library import TwoLocal
-from qiskit.utils import QuantumInstance, algorithm_globals
+from qiskit.primitives import Estimator as QuantumInstance
+from qiskit_algorithms import QAOA, VQE, NumPyMinimumEigensolver
+from qiskit_algorithms.optimizers import SPSA
+from qiskit_algorithms.utils import algorithm_globals
 from qiskit_optimization import QuadraticProgram
 from qiskit_optimization.algorithms import (
     ADMMOptimizer,

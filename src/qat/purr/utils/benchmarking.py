@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-import qiskit.ignis.verification.randomized_benchmarking as rb
+import qiskit_experiments.library.randomized_benchmarking as rb
+from qiskit import qasm2
 
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
@@ -28,7 +29,7 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     for seed_iter in rb_circs:
         circuit_list = []
         for circuit in seed_iter:
-            qasm = circuit.qasm()
+            qasm = qasm2.dumps(circuit)
             circuit_list.append(Qasm2Parser().parse(get_builder(hardware), qasm))
         results[index] = circuit_list
         index = index + 1

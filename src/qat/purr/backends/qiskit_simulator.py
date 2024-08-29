@@ -5,10 +5,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from qiskit import QiskitError, QuantumCircuit, transpile
-from qiskit.providers.models import QasmBackendConfiguration
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import CheckMap
 from qiskit_aer import AerSimulator
+from qiskit_aer.backends.backendconfiguration import AerBackendConfiguration
 
 from qat.purr.backends.echo import (
     Connectivity,
@@ -127,7 +127,7 @@ class QiskitBuilder(InstructionBuilder):
         return self
 
     def cnot(self, control: Qubit, target_qubit: Qubit):
-        self.circuit.cnot(control.index, target_qubit.index)
+        self.circuit.cx(control.index, target_qubit.index)
         return self
 
     def ccnot(self, cone: Qubit, ctwo: Qubit, target_qubit: Qubit):
@@ -237,7 +237,9 @@ class QiskitEngine(InstructionExecutionEngine):
 
         # With no coupling map the backend defaults to create couplings for qubit count, which
         # defaults to 30. So we change that.
-        aer_config = QasmBackendConfiguration.from_dict(AerSimulator._DEFAULT_CONFIGURATION)
+        aer_config = AerBackendConfiguration.from_dict(
+            AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
+        )
         aer_config.n_qubits = self.model.qubit_count
         qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
 

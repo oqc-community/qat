@@ -35,7 +35,7 @@ from pytket.passes import (
 )
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
-from qiskit.qasm.node import Cnot, UniversalUnitary
+from qiskit.circuit.library import CXGate, UGate
 from sympy import pi, sympify
 
 from qat.purr.compiler.config import TketOptimizations
@@ -105,16 +105,20 @@ class TketQasmParser(Qasm2Parser):
     """
 
     def process_qreg(self, node, context: QasmContext, builder: TketBuilder, **kwargs):
+        if node.name in context.registers.quantum:
+            return
         context.registers.quantum[node.name] = QubitRegister(
-            [Qubit(node.name, val) for val in range(node.id.index)]
+            [Qubit(node.name, val) for val in range(node.size)]
         )
-        builder.qreg(node.name, node.id.index)
+        builder.qreg(node.name, node.size)
 
     def process_creg(self, node, context, builder: TketBuilder, **kwargs):
+        if node.name in context.registers.classic:
+            return
         context.registers.classic[node.name] = BitRegister(
-            [Bit(node.name, val) for val in range(node.index)]
+            [Bit(node.name, val) for val in range(node.size)]
         )
-        builder.creg(node.name, node.index)
+        builder.creg(node.name, node.size)
 
     def process_gate_definition(self, node, context, _, **kwargs):
         # Just a declaration, gates are used when CustomUnitary is used
@@ -128,7 +132,7 @@ class TketQasmParser(Qasm2Parser):
                 raise ValueError("Cannot parse angle: {}".format(num))
 
         res = self._expand_to_match_registers(
-            self._get_qubits(node, context, follow_variable=True),
+            self._get_qubits(node, context),
             [
                 transform_to_halfturn(param) if isinstance(param, Number) else param
                 for param in self._get_parameters(node, context)
@@ -147,9 +151,9 @@ class TketQasmParser(Qasm2Parser):
     ):
         # For ease-of-use we just process CX and U as a normal gate, but the QASM nodes
         # don't have names. Infer them in this case.
-        if isinstance(method, UniversalUnitary):
+        if isinstance(method.op, UGate):
             gate_name = "U"
-        elif isinstance(method, Cnot):
+        elif isinstance(method.op, CXGate):
             gate_name = "CX"
         else:
             gate_name = method.name
