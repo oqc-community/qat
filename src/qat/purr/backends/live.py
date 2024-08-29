@@ -213,32 +213,38 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         self.shutdown()
 
     def startup(self):
-        is_connected = []
+        aggregate_result = []
 
         for instrument in self.model.instruments.values():
-            is_connected.append(instrument.connect())
+            instrument.connect()
+            aggregate_result.append(instrument.is_connected)
         if self.model.control_hardware is not None:
-            is_connected.append(self.model.control_hardware.connect())
+            self.model.control_hardware.connect()
+            aggregate_result.append(self.model.control_hardware.is_connected)
         for baseband in self.model.basebands.values():
             if isinstance(baseband, LivePhysicalBaseband):
-                is_connected.append(baseband.connect_to_instrument())
+                baseband.connect_to_instrument()
+                aggregate_result.append(baseband.instrument.is_connected)
         for physical_channel in self.model.physical_channels:
             if isinstance(physical_channel, ControlHardwareChannel):
                 for dc_bias_ch in physical_channel.dcbiaschannel_pair.values():
-                    is_connected.append(dc_bias_ch.connect_to_instrument())
+                    dc_bias_ch.connect_to_instrument()
+                    aggregate_result.append(dc_bias_ch.instrument.is_connected)
 
-        return all(is_connected)
+        return all(aggregate_result)
 
     def shutdown(self):
         # Store the instrument connection statuses.
         # All instruments should be disconnected (represented as a False entry)
-        is_connected = []
+        aggregate_result = []
         for instrument in self.model.instruments.values():
-            is_connected.append(instrument.close())
+            instrument.close()
+            aggregate_result.append(instrument.is_connected)
         if self.model.control_hardware is not None:
-            is_connected.append(self.model.control_hardware.close())
+            self.model.control_hardware.close()
+            aggregate_result.append(self.model.control_hardware.is_connected)
 
-        return not any(is_connected)
+        return not any(aggregate_result)
 
     def process_reset(self, position):
         raise NotImplementedError(
