@@ -80,11 +80,6 @@ sphinx-multiversion = "^0.2.4"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
-]
-
 [tool.autoflake]
 remove-all-unused-imports = true
 ignore-init-module-imports = true
@@ -101,6 +96,21 @@ known_first_party = ["qat"]
 [tool.black]
 line-length = 92
 target-version = ["py38", "py39", "py310"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+filterwarnings = [
+    #"error",
+    "ignore",
+    #"ignore:::qutip",
+    #"ignore:::qcodes",
+    "ignore::pytest.PytestUnhandledThreadExceptionWarning",
+    "ignore::pytest.PytestCollectionWarning",
+    "default:::qat",
+    "default:::tests",
+]
 
 [tool.poetry.scripts]
 format-code = "poetry_scripts:format_code"

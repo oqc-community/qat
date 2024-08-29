@@ -46,7 +46,7 @@ contents_match_pattern = regex.compile(
     '(OPENQASM [0-9]*(.0)?;|defcalgrammar "[a-zA-Z ]+";)|(@__quantum__qis)'
 )
 
-path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
+path_regex = regex.compile(r"^.+\.(qasm|ll|bc)$")
 
 
 def fetch_frontend(

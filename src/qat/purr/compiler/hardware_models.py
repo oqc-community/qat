@@ -70,7 +70,7 @@ def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardw
     Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
     """
     mapping = {}
-    pattern = re.compile("(.*)\[([0-9]+)\]")
+    pattern = re.compile(r"(.*)\[([0-9]+)\]")
 
     for instruction in instructions:
         if not isinstance(instruction, Acquire):

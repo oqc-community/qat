@@ -277,7 +277,7 @@ class QiskitEngine(InstructionExecutionEngine):
         pass
 
 
-cl2qu_index_pattern = re.compile("(.*)\[(?P<clbit_index>[0-9]+)\]_(?P<qubit_index>[0-9]+)")
+cl2qu_index_pattern = re.compile(r"(.*)\[(?P<clbit_index>[0-9]+)\]_(?P<qubit_index>[0-9]+)")
 
 
 def get_cl2qu_index_mapping(instructions):
