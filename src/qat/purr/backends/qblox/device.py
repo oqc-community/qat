@@ -6,6 +6,7 @@ from functools import reduce
 from typing import Dict, List
 
 import numpy as np
+import regex
 from qblox_instruments import Cluster, DummyScopeAcquisitionData
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
@@ -19,6 +20,8 @@ from qat.purr.backends.qblox.config import (
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
+from qat.purr.backends.qblox.constants import Constants
+from qat.purr.backends.qblox.ir import Sequence
 from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalChannel,
@@ -289,24 +292,40 @@ class QbloxControlHardware(ControlHardware):
 
 
 class DummyQbloxControlHardware(QbloxControlHardware):
-    def _setup_dummy_acq_data(self, module, sequencer: Sequencer):
-        if module.is_qrm_type:
-            waveforms = sequencer.get_waveforms()
-            dummy_data = reduce(lambda a, b: a + b, [a["data"] for a in waveforms.values()])
+    def _setup_dummy_scope_acq_data(self, module, sequencer: Sequencer, sequence: Sequence):
+        if sequence.waveforms:
+            dummy_data = reduce(
+                lambda a, b: a + b, [a["data"] for a in sequence.waveforms.values()]
+            )
             dummy_data = [(z, z) for z in dummy_data / np.linalg.norm(dummy_data)]
-            dummy_scope_acquisition_data = DummyScopeAcquisitionData(
-                data=dummy_data, out_of_range=(False, False), avg_cnt=(0, 0)
+        else:
+            playback_pattern = regex.compile(
+                "set_awg_offs( +)([0-9]+),([0-9]+)\nupd_param( +)([0-9]+)"
             )
-            module.set_dummy_scope_acquisition_data(
-                sequencer=sequencer.seq_idx, data=dummy_scope_acquisition_data
-            )
+            match = next(playback_pattern.finditer(sequence.program))
+            i_steps, q_steps = int(match.group(2)), int(match.group(3))
+            num_samples = int(match.group(5))
+            dummy_data = [
+                (
+                    i_steps / (Constants.MAX_OFFSET_SIZE // 2),
+                    q_steps / (Constants.MAX_OFFSET_SIZE // 2),
+                )
+            ] * num_samples
+
+        dummy_scope_acquisition_data = DummyScopeAcquisitionData(
+            data=dummy_data, out_of_range=(False, False), avg_cnt=(1, 1)
+        )
+        module.set_dummy_scope_acquisition_data(
+            sequencer=sequencer.seq_idx, data=dummy_scope_acquisition_data
+        )
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
         self._resources.clear()
         for package in qblox_packages:
             module, sequencer = self.install(package)
 
-            self._setup_dummy_acq_data(module, sequencer)
+            if module.is_qrm_type:
+                self._setup_dummy_scope_acq_data(module, sequencer, package.sequence)
 
     def start_playback(self, repetitions: int, repetition_time: float):
         if not any(self._resources):
