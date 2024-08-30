@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-import qiskit_experiments.library.randomized_benchmarking as rb
+import qiskit_experiments.library.randomized_benchmarking.standard_rb as rb
 from qiskit import qasm2
 
 from qat.purr.compiler.runtime import get_builder
@@ -18,20 +18,23 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     relates to the various benchmarking runs and a list of the sequence lengths.
     """
     # Due to the variable return value we can't directly unpack.
-    qiskit_results = rb.randomized_benchmarking_seq(nseeds, *args, **kwargs)
-    if len(qiskit_results) > 2:
-        raise NotImplementedError("Only standard rb currently supported.")
+    if 'lengths' not in kwargs:
+        lengths = [1, 10, 20]
+    if 'physical_qubits' not in kwargs:
+        physical_qubits = [0]
 
-    rb_circs = qiskit_results[0]
-    seq_lengths = qiskit_results[1]
     results = dict()
     index = 0
-    for seed_iter in rb_circs:
+    for seed in range(nseeds):
         circuit_list = []
-        for circuit in seed_iter:
+        qiskit_results = rb.StandardRB(nseeds, physical_qubits=physical_qubits, lengths=lengths,
+                                       num_samples=1, seed=seed, *args, **kwargs)
+        circuits = qiskit_results.circuits()
+        for circuit in circuits:
             qasm = qasm2.dumps(circuit)
             circuit_list.append(Qasm2Parser().parse(get_builder(hardware), qasm))
         results[index] = circuit_list
         index = index + 1
 
-    return results, seq_lengths
+    return results, lengths
+
