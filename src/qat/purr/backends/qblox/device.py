@@ -186,6 +186,27 @@ class QbloxControlHardware(ControlHardware):
 
         return qblox_config
 
+    def reset(self, hard=False):
+        """
+        TODO - Needs a rethink when daisy-chaining clusters
+        """
+
+        self._resources.clear()
+
+        if hard:
+            self._driver.reset()
+            return
+
+        for module in self._driver.get_connected_modules().values():
+            # Resetting I/O connections on all sequencers of module
+            module.disconnect_outputs()
+            if module.is_qrm_type:
+                module.disconnect_inputs()
+
+            # Resetting SYNC on all sequencers of module
+            for sequencer in module.sequencers:
+                sequencer.sync_en(False)
+
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(
@@ -237,7 +258,7 @@ class QbloxControlHardware(ControlHardware):
         return module, sequencer
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
-        self._resources.clear()
+        self.reset()
         for package in qblox_packages:
             self.install(package)
 
@@ -274,8 +295,6 @@ class QbloxControlHardware(ControlHardware):
                         results[result_id] = (
                             i + 1j * q
                         ) / sequencer.integration_length_acq()
-
-        self._resources.clear()
         return results
 
     def __getstate__(self) -> Dict:
@@ -320,7 +339,7 @@ class DummyQbloxControlHardware(QbloxControlHardware):
         )
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
-        self._resources.clear()
+        self.reset()
         for package in qblox_packages:
             module, sequencer = self.install(package)
 
@@ -350,6 +369,4 @@ class DummyQbloxControlHardware(QbloxControlHardware):
                         results[result_id] = (
                             i + 1j * q
                         ) / sequencer.integration_length_acq()
-
-        self._resources.clear()
         return results
