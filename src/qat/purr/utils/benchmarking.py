@@ -18,17 +18,24 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     relates to the various benchmarking runs and a list of the sequence lengths.
     """
     # Due to the variable return value we can't directly unpack.
-    if 'lengths' not in kwargs:
-        lengths = [1, 10, 20]
-    if 'physical_qubits' not in kwargs:
+    if "lengths" not in kwargs:
+        # TODO: Find out why length 10 generates some broken DAG when re-parsed
+        lengths = [1, 2, 4]
+    if "physical_qubits" not in kwargs:
         physical_qubits = [0]
 
     results = dict()
     index = 0
     for seed in range(nseeds):
         circuit_list = []
-        qiskit_results = rb.StandardRB(seed, physical_qubits=physical_qubits, lengths=lengths,
-                                       num_samples=1, seed=seed, *args, **kwargs)
+        qiskit_results = rb.StandardRB(
+            physical_qubits=physical_qubits,
+            lengths=lengths,
+            num_samples=1,
+            seed=seed,
+            *args,
+            **kwargs,
+        )
         circuits = qiskit_results.circuits()
         for circuit in circuits:
             qasm = qasm2.dumps(circuit)
@@ -37,4 +44,3 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
         index = index + 1
 
     return results, lengths
-
