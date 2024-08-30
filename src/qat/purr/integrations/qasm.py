@@ -818,7 +818,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             file_path = Path(node.filename)
         if not file_path.is_file():
             raise ValueError(f"File not found for '{str(file_path)}'.")
-        with file_path.open() as f:
+        with file_path.open(encoding="utf-8") as f:
             self._walk_program(oq3_parse(f.read()), context)
 
     def visit_QuantumGateDefinition(
