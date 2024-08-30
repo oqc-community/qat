@@ -27,7 +27,7 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     index = 0
     for seed in range(nseeds):
         circuit_list = []
-        qiskit_results = rb.StandardRB(nseeds, physical_qubits=physical_qubits, lengths=lengths,
+        qiskit_results = rb.StandardRB(seed, physical_qubits=physical_qubits, lengths=lengths,
                                        num_samples=1, seed=seed, *args, **kwargs)
         circuits = qiskit_results.circuits()
         for circuit in circuits:
