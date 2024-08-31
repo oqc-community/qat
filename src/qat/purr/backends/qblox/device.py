@@ -120,12 +120,12 @@ class QbloxControlHardware(ControlHardware):
         dev_id: str = None,
         name: str = None,
         address: str = None,
-        cfg: Dict = None,
+        dummy_cfg: Dict = None,
     ):
         super().__init__(id_=dev_id or os.environ.get("QBLOX_DEV_ID"))
         self.name = name or os.environ.get("QBLOX_DEV_NAME")
         self.address = address or os.environ.get("QBLOX_DEV_IP")
-        self.cfg = cfg
+        self.dummy_cfg = dummy_cfg
         self.dump_sequence = False
         self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
 
@@ -214,9 +214,7 @@ class QbloxControlHardware(ControlHardware):
             self._driver: Cluster = Cluster(
                 name=self.name,
                 identifier=self.address,
-                dummy_cfg=(
-                    self.cfg if self.address is None else None
-                ),  # Ignore dummy config if an address is given
+                dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
         log.info(self._driver.get_system_status())
