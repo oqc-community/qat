@@ -171,16 +171,21 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.IMMEDIATE_MAX_WAIT_TIME">
-<span class="sig-name descname"><span class="pre">IMMEDIATE_MAX_WAIT_TIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65532</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.IMMEDIATE_MAX_WAIT_TIME" title="Link to this definition"></a></dt>
-<dd><p>Max size of wait instruction immediates in Q1ASM programs. Max value allowed by
-assembler is 2**16-1, but this is the largest that is a multiple of 4 ns.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.LOOP_UNROLL_THRESHOLD">
 <span class="sig-name descname"><span class="pre">LOOP_UNROLL_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.LOOP_UNROLL_THRESHOLD" title="Link to this definition"></a></dt>
 <dd><p>Size above which loops have tolerable overhead</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_GAIN_SIZE">
+<span class="sig-name descname"><span class="pre">MAX_GAIN_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_GAIN_SIZE" title="Link to this definition"></a></dt>
+<dd><p>Max size of gain in Q1ASM programs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_OFFSET_SIZE">
+<span class="sig-name descname"><span class="pre">MAX_OFFSET_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_OFFSET_SIZE" title="Link to this definition"></a></dt>
+<dd><p>Max size of offset in Q1ASM programs.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -217,6 +222,13 @@ assembler is 2**16-1, but this is the largest that is a multiple of 4 ns.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_WAVEFORMS">
 <span class="sig-name descname"><span class="pre">MAX_SAMPLE_SIZE_WAVEFORMS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16384</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_WAVEFORMS" title="Link to this definition"></a></dt>
 <dd><p>Maximal amount of samples in the waveforms to be uploaded to a sequencer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_WAIT_TIME">
+<span class="sig-name descname"><span class="pre">MAX_WAIT_TIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65532</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_WAIT_TIME" title="Link to this definition"></a></dt>
+<dd><p>Max size of wait instruction immediates in Q1ASM programs. Max value allowed by
+assembler is 2**16-1, but this is the largest that is a multiple of 4 ns.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -332,6 +344,7 @@ For the minimum we multiply by -1.</p>
       <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
       <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
       <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>
