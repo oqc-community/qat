@@ -328,6 +328,11 @@ class QbloxContext:
             self.sequence_builder.wait(remainder)
 
     def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
+        """
+        The waveform is evaluated as a 1d complex array. In QBlox, the Real and Imag parts of the pulse
+        represent the digital offset on the AWG. They both must be within range [-1, 1].
+        """
+
         samples = int(calculate_duration(waveform, return_samples=True))
 
         dt = target.sample_time

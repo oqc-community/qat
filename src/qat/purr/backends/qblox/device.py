@@ -188,7 +188,9 @@ class QbloxControlHardware(ControlHardware):
 
     def reset(self, hard=False):
         """
-        TODO - Needs a rethink when daisy-chaining clusters
+        A softer and more convenient wrapper around QBlox's (hard) reset.
+        If hard is False, reset only I/O and SYNC on all sequencers of all connected modules.
+        TODO - This needs to span across all daisy-chained clusters when the time comes.
         """
 
         self._resources.clear()
