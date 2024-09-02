@@ -49,7 +49,7 @@ jobs:
 
       - name: Install dependancies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --with dev
+        run: poetry install --sync --with dev
 
       - name: Formatting tests
         run: |
@@ -95,7 +95,7 @@ jobs:
 
       - name: Install dependancies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install
+        run: poetry install --sync
 
       - name: Unit tests
         run: poetry run pytest
