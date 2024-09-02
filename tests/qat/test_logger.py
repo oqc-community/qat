@@ -14,7 +14,7 @@ import qat.purr.utils.logger as logger
 from qat.purr.utils.serializer import json_load
 
 info_msg_pattern = (
-    r"^\[INFO\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \(\w+.\w+:\d+\) - (.+)\n"
+    r"^\[INFO\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - .* - \(\w+.\w+:\d+\) - (.+)\n"
 )
 
 
