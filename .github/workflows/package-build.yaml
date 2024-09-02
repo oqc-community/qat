@@ -33,7 +33,6 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python }}
-          cache: 'poetry'
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
