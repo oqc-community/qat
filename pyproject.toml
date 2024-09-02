@@ -32,7 +32,7 @@ toml = "^0.10.2"
 pytket = "1.31.0"
 qiskit = "^0.45.0"
 qiskit-optimization = "~=0.4.0"
-qiskit-ignis = "~=0.7"
+qiskit-experiments = "~=0.7"
 qiskit-aer = "^0.13.0"
 scipy = ">=1.13.1"
 pyqir = { version = "^0.8.0a1", allow-prereleases = true }

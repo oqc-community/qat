@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
-import qiskit.ignis.verification.randomized_benchmarking as rb
+import qiskit_experiments.library.randomized_benchmarking as rb
 
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
