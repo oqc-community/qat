@@ -162,54 +162,37 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.integrations.qiskit.QatBackend">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QatBackend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qiskit.QatBackend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QasmSimulatorPy</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasicSimulator</span></code></p>
 <p>Basic qiskit backend built to run QASM on our own backends.</p>
-<dl class="simple">
+<dl>
 <dt>TODO: Expand this to become a proper back-end, as I don’t believe we need to inherit</dt><dd><p>off the QASM simulator as it stands.</p>
 </dd>
-</dl>
-<p>Initialize a backend class</p>
-<dl class="simple">
 <dt>Args:</dt><dd><dl class="simple">
-<dt>configuration (BackendConfiguration): A backend configuration</dt><dd><p>object for the backend object.</p>
-</dd>
-<dt>provider (qiskit.providers.Provider): Optionally, the provider</dt><dd><p>object that this Backend comes from.</p>
-</dd>
-<dt>fields: kwargs for the values to use to override the default</dt><dd><p>options.</p>
+<dt>provider: An optional backwards reference to the</dt><dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Provider</span></code> object that the backend
+is from.</p>
 </dd>
 </dl>
+<p>target: An optional target to configure the simulator.
+fields: kwargs for the values to use to override the default</p>
+<blockquote>
+<div><p>options.</p>
+</div></blockquote>
 </dd>
-<dt>Raises:</dt><dd><p>AttributeError: if input field not a valid options</p>
-</dd>
-</dl>
-<p>In addition to the public abstract methods, subclasses should also implement the following
-private methods:</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_default_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
-<dd><p>Return the default options</p>
-<p>This method will return a <code class="xref py py-class docutils literal notranslate"><span class="pre">qiskit.providers.Options</span></code>
-subclass object that will be used for the default options. These
-should be the default parameters to use for the options of the
-backend.</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><dl class="simple">
-<dt>qiskit.providers.Options: A options object with</dt><dd><p>default values set</p>
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>AttributeError: If a field is specified that’s outside the backend’s</dt><dd><p>options.</p>
 </dd>
 </dl>
 </dd>
 </dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.integrations.qiskit.QatBackend.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qobj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">backend_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.qiskit.QatBackend.run" title="Link to this definition"></a></dt>
 <dd><p>Run on the backend.</p>
 <dl>
-<dt>Args:</dt><dd><p>run_input (QuantumCircuit or list): payload of the experiment
-backend_options (dict): backend options</p>
+<dt>Args:</dt><dd><p>run_input: payload of the experiment
+backend_options: backend options</p>
 </dd>
-<dt>Returns:</dt><dd><p>BasicAerJob: derived from BaseJob</p>
+<dt>Returns:</dt><dd><p>BasicProviderJob: derived from BaseJob</p>
 </dd>
 <dt>Additional Information:</dt><dd><dl class="simple">
 <dt>backend_options: Is a dict of options for the backend. It may contain</dt><dd><ul class="simple">
@@ -223,7 +206,7 @@ zero state. This size of this vector must be correct for the number
 of qubits in <code class="docutils literal notranslate"><span class="pre">run_input</span></code> parameter.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">backend_options</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;initial_statevector&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;initial_statevector&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
 <span class="p">}</span>
 </pre></div>
 </div>
