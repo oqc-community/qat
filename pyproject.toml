@@ -101,14 +101,27 @@ addopts = [
     "--import-mode=importlib",
 ]
 filterwarnings = [
-    #"error",
-    "ignore",
-    #"ignore:::qutip",
-    #"ignore:::qcodes",
-    "ignore::pytest.PytestUnhandledThreadExceptionWarning",
-    "ignore::pytest.PytestCollectionWarning",
-    "default:::qat",
-    "default:::tests",
+    # Set warnings to raise errors in pytest runs.
+    "error",
+    # Specific warnings can be set to be handled differently if needed,
+    # E.g.:
+    # "default::DeprecationWarning", to show Deprecation Warnings
+    # "ignore:::qutip", to ignore warnings raised from the qutip package
+    # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
+    #
+    # Temporary default for pre-existing issues. Tickets exist for addressing these:
+    "default::pytest.PytestUnhandledThreadExceptionWarning",
+    "default::pytest.PytestCollectionWarning",
+    "default:::qutip",
+    "default:::qcodes",
+    # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.
+    'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
+    # Qiskit Experiment using deprecated version of PulseBackendConfiguration
+    'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
+    # Qiskit IBM Experiment package using an old pkg_resources version
+    'default:.*pkg_resources:DeprecationWarning:qiskit_ibm_experiment.client.session',
+    # Lark using deprecated version on sre_parse and sre_constants
+    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils'
 ]
 
 [tool.poetry.scripts]
