@@ -888,12 +888,17 @@ version = "2.28.240"
 description = "The IBM Decision Optimization CPLEX Modeling for Python"
 optional = false
 python-versions = "*"
-files = [
-    {file = "docplex-2.28.240.tar.gz", hash = "sha256:c0de407e33f8709bb4cd91b6efeb96fd88bfecbdce2caec51afb79253bde6ff5"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 six = "*"
+
+[package.source]
+type = "git"
+url = "https://github.com/keriksson-rosenqvist/docplex.git"
+reference = "01ac8f1"
+resolved_reference = "01ac8f11c1536eae6b9cf4c216b2e37a91ace5b5"
 
 [[package]]
 name = "docutils"
@@ -4915,4 +4920,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "44db66f652eed2cf27a7e546eb8f969d4e8ebdffa45451a60d31e4a2023b458f"
+content-hash = "0a235152c75f45d454e403307a07a19159ce4980cdb1f249d612ccf7acade65e"
