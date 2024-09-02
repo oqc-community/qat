@@ -21,7 +21,7 @@ jobs:
       with:
         python-version: "3.x"
     - name: Poetry install
-      run: poetry install
+      run: poetry install --sync
 
     - name: Poetry build
       run: poetry build
