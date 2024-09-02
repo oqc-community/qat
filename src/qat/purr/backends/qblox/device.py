@@ -331,16 +331,16 @@ class DummyQbloxControlHardware(QbloxControlHardware):
             playback_pattern = regex.compile(
                 "set_awg_offs( +)([0-9]+),([0-9]+)\nupd_param( +)([0-9]+)"
             )
-            match = next(playback_pattern.finditer(sequence.program))
-            i_steps, q_steps = int(match.group(2)), int(match.group(3))
-            num_samples = int(match.group(5))
-            dummy_data = [
-                (
-                    i_steps / (Constants.MAX_OFFSET_SIZE // 2),
-                    q_steps / (Constants.MAX_OFFSET_SIZE // 2),
-                )
-            ] * num_samples
-
+            dummy_data = []
+            if match := next(playback_pattern.finditer(sequence.program), None):
+                i_steps, q_steps = int(match.group(2)), int(match.group(3))
+                num_samples = int(match.group(5))
+                dummy_data = [
+                    (
+                        i_steps / (Constants.MAX_OFFSET_SIZE // 2),
+                        q_steps / (Constants.MAX_OFFSET_SIZE // 2),
+                    )
+                ] * num_samples
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(
             data=dummy_data, out_of_range=(False, False), avg_cnt=(1, 1)
         )

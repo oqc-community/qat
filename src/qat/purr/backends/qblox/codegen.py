@@ -153,13 +153,6 @@ class QbloxEmitter:
         return [context.create_package(target) for target, context in contexts.items()]
 
     def optimize(self, qblox_contexts: Dict) -> Dict:
-        # Remove empty contexts
-        qblox_contexts = {
-            target: context
-            for target, context in qblox_contexts.items()
-            if not context.is_empty()
-        }
-
         # Remove Opcode.WAIT_SYNC instructions when the experiment contains only a singleton context
         if len(qblox_contexts) == 1:
             context = list(qblox_contexts.values())[0]
@@ -276,29 +269,6 @@ class QbloxContext:
     @property
     def duration(self):
         return self._duration
-
-    def is_empty(self):
-        """
-        Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-        This is temporary and criteria will change with more features coming in
-        """
-        return not (
-            self.sequence_builder.waveforms
-            or self.sequence_builder.acquisitions
-            or [
-                inst
-                for inst in self.sequence_builder.q1asm_instructions
-                if inst.opcode
-                in [
-                    Opcode.PLAY,
-                    Opcode.SET_AWG_OFFSET,
-                    Opcode.SET_AWG_GAIN,
-                    Opcode.ACQUIRE,
-                    Opcode.ACQUIRE_TTL,
-                    Opcode.ACQUIRE_WEIGHED,
-                ]
-            ]
-        )
 
     def clear(self):
         self.sequence_builder.waveforms.clear()
