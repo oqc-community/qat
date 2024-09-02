@@ -541,7 +541,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         buffers = {}
         for pulse_channel, positions in position_map.items():
             buffers[pulse_channel] = buffer = np.zeros(
-                positions[-1].end if any(positions) else 0, dtype="cfloat"
+                positions[-1].end if any(positions) else 0, dtype=np.complex128
             )
 
             phase = 0.0
@@ -673,7 +673,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 physical_channel_id,
                 np.zeros(
                     max(map(len, physical_channel_pulse_buffers), default=0),
-                    dtype="cfloat",
+                    dtype=np.complex128,
                 ),
             )
             for buffer in physical_channel_pulse_buffers:

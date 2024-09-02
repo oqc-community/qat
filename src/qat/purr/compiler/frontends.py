@@ -28,7 +28,7 @@ def _get_file_contents(file_path):
         return ifile.read()
 
 
-path_regex = regex.compile("^.+\.(qasm|ll|bc)$")
+path_regex = regex.compile(r"^.+\.(qasm|ll|bc)$")
 
 
 class LanguageFrontend(abc.ABC):

@@ -4,8 +4,8 @@ import time
 import uuid
 from typing import List
 
-from qiskit import QuantumCircuit, assemble, transpile
-from qiskit.providers.basicaer import BasicAerJob, QasmSimulatorPy
+from qiskit import QuantumCircuit, assemble, qasm2, transpile
+from qiskit.providers.basic_provider import BasicProviderJob, BasicSimulator
 from qiskit.result import Result
 from qiskit.result.models import ExperimentResult, ExperimentResultData
 
@@ -18,7 +18,7 @@ logger = get_default_logger()
 
 
 def run_qasm_circuit(circuit):
-    backend_sim = QasmSimulatorPy()
+    backend_sim = BasicSimulator()
     transpiled_qc = transpile(circuit, backend_sim)
     result = backend_sim.run(transpiled_qc).result()
 
@@ -53,7 +53,7 @@ def run_qasm(qasm_str: str):
     return run_qasm_circuit(QuantumCircuit.from_qasm_str(qasm_str))
 
 
-class QatBackend(QasmSimulatorPy):
+class QatBackend(BasicSimulator):
     """
     Basic qiskit backend built to run QASM on our own backends.
 
@@ -92,7 +92,7 @@ class QatBackend(QasmSimulatorPy):
         # represented as a QASM string
         experiment_info = [
             (
-                val.qasm(),
+                qasm2.dumps(val),
                 assembled_data.experiments[i].config,
                 assembled_data.experiments[i].header,
             )
@@ -152,11 +152,11 @@ class QatBackend(QasmSimulatorPy):
 
         full_end = time.time()
         job_id = str(uuid.uuid4())
-        return BasicAerJob(
+        return BasicProviderJob(
             self,
             job_id,
             Result(
-                backend_name=self.name(),
+                backend_name=self.name,
                 backend_version=self._configuration.backend_version,
                 qobj_id=assembled_data.qobj_id,
                 job_id=job_id,

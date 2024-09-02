@@ -4,17 +4,32 @@ import abc
 import math
 import re
 from copy import deepcopy
+from importlib.util import find_spec
 from numbers import Number
 from os.path import dirname, join
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
-import qiskit.qasm.node as qasm_ast
 from lark import Lark, Token, Tree, UnexpectedCharacters
 from lark.visitors import Interpreter
 from numpy import append, array, exp, linspace
-from qiskit.qasm import Qasm
-from qiskit.qasm.node import Gate
-from qiskit.qasm.qasmparser import QasmParser as QiskitQasmParser
+from openqasm3 import ast
+from openqasm3.parser import parse as oq3_parse
+from openqasm3.visitor import QASMVisitor
+from qiskit import qasm2
+from qiskit.circuit import (
+    Barrier,
+    ClassicalRegister,
+    Delay,
+    Gate,
+    Measure,
+    QuantumRegister,
+    Reset,
+)
+from qiskit.circuit.library import CXGate, UGate
+from qiskit.converters import circuit_to_dag
+from qiskit.dagcircuit import DAGCircuit, DAGInNode, DAGNode, DAGOpNode, DAGOutNode
+from qiskit.qasm2 import CustomInstruction
 
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
@@ -137,24 +152,17 @@ class CregIndexValue:
         return self.variable
 
 
-def fetch_gate_node(qasm, gate_name):
-    """
-    Used to fetch particular nodes out of a minimalistic QASM program. Not used for
-    execution, more for retrieving particular things for insertion into Qiskit's QASM
-    parser later on.
-    """
-    program = Qasm(None, qasm).parse()
-    return [
-        val for val in program.children if isinstance(val, Gate) and val.name == gate_name
-    ][0]
-
-
 class AbstractParser:
     def __init__(self):
         self.results_format = InlineResultsProcessing.Program
+        self._cached_parses: Dict[int, Any] = dict()
 
-    def can_parse(self, qasm_str) -> ParseResults:
-        return ParseResults.success()
+    def can_parse(self, qasm: str) -> ParseResults:
+        try:
+            self._fetch_or_parse(qasm)
+            return ParseResults.success()
+        except Exception as ex:
+            return ParseResults.failure(str(ex))
 
     def parser_language(self) -> Languages:
         return Languages.Empty
@@ -169,12 +177,16 @@ class AbstractParser:
             builder.delay(qubit, delay)
 
     def _add_qreg(self, reg_name, reg_length, context: QasmContext, builder):
+        if reg_name in context.registers.quantum:
+            return
         index_range = self._get_qreg_index_range(reg_length, context, builder)
         context.registers.quantum[reg_name] = QubitRegister(
             [builder.model.get_qubit(val) for val in index_range]
         )
 
     def _add_creg(self, reg_name, reg_length, context):
+        if reg_name in context.registers.classic:
+            return
         context.registers.classic[reg_name] = BitRegister(
             [CregIndexValue(reg_name, val, 0) for val in range(reg_length)]
         )
@@ -336,19 +348,13 @@ class AbstractParser:
 
 
 class Qasm2Parser(AbstractParser):
-    ecr_qasm_str = """
-    OPENQASM 2.0;
-    include "qelib1.inc";
-    gate ecr q0, q1 { }
-    """
-
-    ecr_gate = fetch_gate_node(ecr_qasm_str, "ecr")
+    ecr_gate = Gate("ecr", 2, [])
 
     def __init__(self, order_result_vars=False, raw_results=False):
         super().__init__()
         self.order_result_vars = order_result_vars
         self.raw_results = raw_results
-        self._cached_parses: Dict[int, qasm_ast.Program] = dict()
+        self._cached_parses: Dict[int, DAGCircuit] = dict()
 
     def __repr__(self):
         return self.__class__.__name__
@@ -356,81 +362,27 @@ class Qasm2Parser(AbstractParser):
     def parser_language(self) -> Languages:
         return Languages.Qasm2
 
-    def _get_gate_variables(self, node: qasm_ast.CustomUnitary, context: QasmContext):
-        """
-        Looks at the gate definition values and maps across argument to parameter. Gate
-        definition needs to be recognized in the context, as both callsite and
-        declaration required.
-
-        For a concrete example:
-
-        .. code-block:: python
-
-            gate u2(phi,lambda) q { U(pi/2,phi,lambda) q; }
-            u2(0,pi) a
-
-        This maps ``phi=0``, ``lambda=pi`` and ``q=a`` when parsing ``u2`` to make sure
-        when we flatten everything the variables are correct.
-        """
-        gate_def = context.gates.get(node.name, None)
-        variables = dict()
-        if gate_def is None:
-            return variables
-
-        if gate_def.arguments is not None:
-            variables.update(
-                dict(
-                    zip(
-                        [val.name for val in gate_def.arguments.children],
-                        self._get_parameters(node, context),
-                    )
-                )
-            )
-
-        if gate_def.bitlist is not None:
-            variables.update(
-                dict(
-                    zip(
-                        [val.name for val in gate_def.bitlist.children],
-                        self._get_qubits(node, context),
-                    )
-                )
-            )
-
-        return variables
-
-    def _add_intrinsics_to_parser(self, parser, qasm=""):
-        """Adds details of our intrinsics to the parser if needed."""
-
-        # Can't parse if someone uses the ECR intrinsic without it set as a global
-        # symbol, but if they define their own gate with that name we can't know until
-        # it's parsed and failed due to duplicate definitions. As we currently don't
-        # allow imports this, while rough, is accurate.
+    def _get_intrinsics(self, qasm="") -> List[CustomInstruction]:
+        instrinsics = list(qasm2.LEGACY_CUSTOM_INSTRUCTIONS)
         if "gate ecr" not in qasm:
-            parser.global_symtab["ecr"] = self.ecr_gate
+            instrinsics.append(
+                qasm2.CustomInstruction("ecr", 0, 2, lambda: self.ecr_gate, builtin=True)
+            )
+        return instrinsics
 
-    def _get_qiskit_parser(self):
-        """
-        Should return a pre-setup qiskit QASM parser for use in parsing the program.
-        """
-        qiskit_parser = QiskitQasmParser("")
-        qiskit_parser.parse_debug(False)
-        return qiskit_parser
-
-    def _fetch_or_parse(self, qasm: str) -> qasm_ast.Program:
+    def _fetch_or_parse(self, qasm: str) -> DAGCircuit:
         # If we've seen this file before
         qasm_id = hash(qasm)
         if (cached_value := self._cached_parses.get(qasm_id, None)) is not None:
             return cached_value
 
-        with self._get_qiskit_parser() as parser:
-            self._add_intrinsics_to_parser(parser, qasm)
-            program = parser.parse(qasm)
+        circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
+        program = circuit_to_dag(circ)
 
         self._cached_parses[qasm_id] = program
         return program
 
-    def parse(self, builder, qasm: str):
+    def parse(self, builder: InstructionBuilder, qasm: str) -> InstructionBuilder:
         # Parse or pick up the cached version, then remove it as we're about to
         # interpret it.
         program = self._fetch_or_parse(qasm)
@@ -438,40 +390,31 @@ class Qasm2Parser(AbstractParser):
             del self._cached_parses[qasm_id]
         return self.process_program(builder, program)
 
-    def validate(self, qasm: qasm_ast.Program):
+    def validate(self, circ: DAGCircuit):
         pass
 
-    def modify(self, qasm: qasm_ast.Program):
+    def modify(self, circ: DAGCircuit):
         """
         Allows children to transform the program before validation/transforming into our
         AST occurs.
         """
-        # ECR is added by default, if we don't see a definition then add one.
-        if not any(
-            filter(
-                lambda node: isinstance(node, qasm_ast.Gate) and node.name == "ecr",
-                qasm.children,
-            )
-        ):
-            qasm.children.insert(1, self.ecr_gate)
+        pass
 
-    def can_parse(self, qasm: str) -> ParseResults:
-        try:
-            self._fetch_or_parse(qasm)
-            return ParseResults.success()
-        except Exception as ex:
-            return ParseResults.failure(str(ex))
+    def _walk_program(
+        self, builder: InstructionBuilder, circ: DAGCircuit, context: QasmContext
+    ):
+        self.modify(circ)
+        self.validate(circ)
+        self._current_dag = circ
 
-    def _walk_program(self, builder, qasm: qasm_ast.Program, context):
-        self.modify(qasm)
-        self.validate(qasm)
-
-        for node in qasm.children:
+        for node in circ.nodes():
             self.walk_node(node, context, builder)
 
-    def process_program(self, builder, qasm: qasm_ast.Program):
+    def process_program(
+        self, builder: InstructionBuilder, circ: DAGCircuit
+    ) -> InstructionBuilder:
         context = QasmContext()
-        self._walk_program(builder, qasm, context)
+        self._walk_program(builder, circ, context)
 
         # 'raw' results in this case simply means return the base measurement array in
         # the order of execution.
@@ -485,123 +428,154 @@ class Qasm2Parser(AbstractParser):
         builder.returns([key for key in register_keys])
         return builder
 
-    def process_gate(self, method, context: QasmContext, builder, **kwargs):
+    def process_gate(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         """Process a gate call."""
-        if not isinstance(method, qasm_ast.CustomUnitary):
+        if not isinstance(node.op, Gate):
             raise ValueError(
-                f"Node {str(method)} is not actually a gate but being treated like one."
+                f"Node {str(node)} is not actually a gate but being treated like one."
             )
 
-        gate_def = context.gates.get(method.name, None)
-        if gate_def is None or len(gate_def.body.children) == 0:
-            self.process_intrinsic(method, context, builder)
-        else:
-            current_context = QasmContext(
-                Registers(), context.gates, self._get_gate_variables(method, context)
-            )
-            for node in gate_def.body.children:
-                self.walk_node(node, current_context, builder)
+        gate_def = node.op.definition
+        if gate_def is None or len(gate_nodes := circuit_to_dag(gate_def).gate_nodes()) < 1:
+            self.process_intrinsic(node, context, builder)
+            return
+        for gate_node in gate_nodes:
+            qs = tuple([node.qargs[gate_def.qubits.index(q)] for q in gate_node.qargs])
+            gate_node.qargs = qs
+            self.walk_node(gate_node, context, builder)
 
-    def process_intrinsic(self, method, context: QasmContext, builder):
+    def process_intrinsic(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder
+    ):
         # Only process if it's an ECR gate and, more pertinently, our ECR gate.
-        if method.name == "ecr":
+        if node.name == "ecr":
             # TODO: Define precisely what rotation this should be, including argument.
-            qubits = self._get_gate_variables(method, context)
-            self._add_ecr([qb for qb in qubits.values()], builder)
+            qubits = self._get_qubits(node, context)
+            self._add_ecr(qubits, builder)
         else:
-            raise ValueError(f"Gate {method.name} isn't intrinsic and has no body.")
+            raise ValueError(f"Gate {node.name} isn't intrinsic and has no body.")
 
-    def process_barrier(self, node, context, builder, **kwargs):
+    def process_barrier(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         pass
 
-    def process_gate_definition(self, node, context, _, **kwargs):
-        # Just a declaration, gates are used when CustomUnitary is used
+    def process_delay(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
+        qubits = self._get_qubits(node, context)
+        delay = node.op.duration
+        self._add_delay(delay, qubits, builder)
+
+    def process_gate_definition(self, node: DAGOpNode, context: QasmContext, _, **kwargs):
         context.gates[node.name] = node
 
-    def process_creg(self, node, context, builder, **kwargs):
-        self._add_creg(node.name, node.index, context)
+    def process_creg(
+        self,
+        node: ClassicalRegister,
+        context: QasmContext,
+        builder: InstructionBuilder,
+        **kwargs,
+    ):
+        self._add_creg(node.name, node.size, context)
 
-    def process_qreg(self, node, context: QasmContext, builder, **kwargs):
-        self._add_qreg(node.name, node.id.index, context, builder)
+    def process_qreg(
+        self,
+        node: QuantumRegister,
+        context: QasmContext,
+        builder: InstructionBuilder,
+        **kwargs,
+    ):
+        self._add_qreg(node.name, node.size, context, builder)
 
-    def process_measure(self, node, context: QasmContext, builder, **kwargs):
+    def process_measure(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         self._add_measure(
             self._get_qubits(node, context),
-            self._get_parameters(node, context),
+            self._get_clbits(node, context),
             builder,
         )
 
-    def process_unitary(self, node, context, builder, **kwargs):
+    def process_unitary(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         """Unitary in QASM terms is just ``U(...)``."""
-        theta, phi, _lambda = (
-            self._resolve_value(val, context) for val in node.children[0].children
-        )
-
+        theta, phi, _lambda = node.op.params
         self._add_unitary(theta, phi, _lambda, self._get_qubits(node, context), builder)
 
-    def process_if(self, node, context, builder, **kwargs):
-        left = self._resolve_value(node.children[0], context)
-        right = self._resolve_value(node.children[1], context)
-        self._add_if(left, right, node.children[2], context, builder)
-
-    def process_cnot(self, node, context, builder, **kwargs):
+    def process_cnot(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         self._add_cnot(
-            self._get_qubits(node.children[0], context),
-            self._get_qubits(node.children[1], context),
+            *self._get_qubits(node, context),
             builder,
         )
 
-    def process_reset(self, node, context, builder, **kwargs):
+    def process_reset(
+        self, node: DAGOpNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         self._add_reset(self._get_qubits(node, context), builder)
 
-    def walk_node(self, node, context: QasmContext, builder, **kwargs):
+    def walk_node(
+        self, node: DAGNode, context: QasmContext, builder: InstructionBuilder, **kwargs
+    ):
         """
         Process each individual QASM node, builds context or forwards processing to
         relevant ``process_x`` method associated with each node type.
         """
-        if isinstance(node, qasm_ast.CustomUnitary):
-            self.process_gate(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Qreg):
-            self.process_qreg(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Gate):
-            self.process_gate_definition(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Measure):
-            self.process_measure(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.UniversalUnitary):
-            self.process_unitary(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Cnot):
-            self.process_cnot(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Reset):
-            self.process_reset(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.if_.If):
-            self.process_if(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Creg):
-            self.process_creg(node, context, builder, **kwargs)
-        elif isinstance(node, qasm_ast.Barrier):
-            self.process_barrier(node, context, builder, **kwargs)
+        if isinstance(node, (DAGInNode, DAGOutNode)):
+            for register, _ in self._current_dag.find_bit(node.wire).registers:
+                if isinstance(register, QuantumRegister):
+                    self.process_qreg(register, context, builder)
+                elif isinstance(register, ClassicalRegister):
+                    self.process_creg(register, context, builder)
+        elif isinstance(node, DAGOpNode):
+            kwargs.update(self._get_conditions(node, context))
+            match node.op:
+                case Delay():
+                    self.process_delay(node, context, builder, **kwargs)
+                case Barrier():
+                    self.process_barrier(node, context, builder, **kwargs)
+                case Measure():
+                    self.process_measure(node, context, builder, **kwargs)
+                case Reset():
+                    self.process_reset(node, context, builder, **kwargs)
+                case UGate():
+                    self.process_unitary(node, context, builder, **kwargs)
+                case CXGate():
+                    self.process_cnot(node, context, builder, **kwargs)
+                case Gate():
+                    self.process_gate(node, context, builder, **kwargs)
+                case _:
+                    raise NotImplementedError(
+                        "DAGNode action not implemented for '{type(node)}'."
+                    )
 
-    def _get_parameters(self, node, context):
+    def _get_conditions(self, node: DAGOpNode, context: QasmContext) -> dict:
+        conditions = None
+        if (op := node.op).condition is not None:
+            conditions = {
+                "condition_bits": self._get_clbits(op.condition_bits, context),
+                "condition_value": op.condition[1],
+            }
+        return {"conditions": conditions}
+
+    def _get_parameters(self, node: DAGOpNode, context: QasmContext) -> list:
         """Get the params of a gate. These are the non-qubit values of a gate."""
-        if isinstance(node, (qasm_ast.CustomUnitary, qasm_ast.UniversalUnitary)):
-            if node.arguments is not None:
-                args = []
-                for val in node.arguments.children:
-                    arg = self._resolve_value(val, context)
-                    if isinstance(arg, Iterable):
-                        args.extend(arg)
-                    else:
-                        args.append(arg)
-
-                return args
-        elif isinstance(node, qasm_ast.Measure):
-            bits = self._resolve_variable(node.children[1], context)
+        if isinstance(node.op, Gate):
+            return node.op.params
+        if isinstance(node.op, Measure):
+            bits = self._get_clbits(node, context)
             if not isinstance(bits, List):
                 bits = [bits]
 
             return bits
         return []
 
-    def _get_qubits(self, node, context: QasmContext, follow_variable=False):
+    def _get_qubits(self, node: DAGOpNode, context: QasmContext) -> list:
         """
         Resolve what qubits or qubit registers this node relates too.
 
@@ -617,108 +591,26 @@ class Qasm2Parser(AbstractParser):
         The above means the first target was a register referencing q1-3, whereas the
         second was a single qubit referenced directly. If we say our register is just
         called qb, the above would equate to an argument list of ``[qb, qb[2]]``.
-
-        ``follow_variable`` means that variables will be followed and their actual
-        register value returned.
         """
-        if isinstance(node, qasm_ast.UniversalUnitary):
-            return self._get_qubits(node.bitlist, context, follow_variable)
-        elif isinstance(node, qasm_ast.Cnot):
-            return [
-                qb
-                for qbl in node.children
-                for qb in self._get_qubits(qbl, context, follow_variable)
-            ]
-        elif isinstance(node, qasm_ast.Barrier):
-            return [
-                qb
-                for qbl in node.children[0].children
-                for qb in self._get_qubits(qbl, context, follow_variable)
-                if qb
-            ]
-        elif isinstance(node, qasm_ast.Reset):
-            return self._get_qubits(node.children[0], context, follow_variable)
-        elif isinstance(node, qasm_ast.Measure):
-            return self._get_qubits(node.children[0], context, follow_variable)
-        elif isinstance(node, qasm_ast.CustomUnitary):
-            if node.bitlist is None:
-                return []
-
-            qubits = []
-            for val in node.bitlist.children:
-                qubit = self._get_qubits(val, context, follow_variable)
-                qubits.extend(qubit)
-
-            return qubits
-
-        elif isinstance(node, qasm_ast.Id):
-            qb_register = context.registers.quantum.get(node.name, None)
-            if qb_register is not None:
-                return [qb_register]
-
-            # Sometimes our qubits are in a variable, such as calling new gates with an
-            # argument.
-            variable = context.variables.get(node.name, None)
-            if variable is not None:
-                if isinstance(variable, Variable) and follow_variable:
-                    variable = context.registers.quantum[variable.name]
-
-                if not isinstance(variable, List):
-                    variable = [variable]
-
-                return variable
-
-        elif isinstance(node, qasm_ast.IndexedId):
-            register = context.registers.quantum.get(node.name, None)
+        qubits = []
+        for qubit in node.qargs:
+            reg, ind = self._current_dag.find_bit(qubit).registers[0]
+            register = context.registers.quantum.get(reg.name, None)
             if register is not None:
-                return [register.qubits[node.index]]
+                qubits.append(register.qubits[ind])
+        return qubits
 
-        raise ValueError(f"Cannot resolve qubit from {str(node)}")
-
-    def _resolve_variable(self, node, context):
-        """If the value is a variable pointing to a classic register, resolve it."""
-        value = self._resolve_value(node, context)
-        if isinstance(value, Variable):
-            classic_reg = context.registers.classic.get(value.name, value)
-            return classic_reg
-        return value
-
-    def _resolve_value(self, node, context: QasmContext):
-        """
-        Resolves the values being used in node calls, such as parameters and constants.
-        """
-        if isinstance(node, qasm_ast.Id):
-            variable = context.registers.classic.get(node.name, None)
-            if variable is not None:
-                return Variable(node.name)
-
-            constant = context.variables.get(node.name, None)
-            if constant is not None:
-                return constant
-
-        elif isinstance(node, qasm_ast.IndexedId):
-            var_array = context.registers.classic.get(node.name, None)
-            if var_array is not None:
-                return var_array.bits[node.index]
-
-        elif isinstance(node, qasm_ast.BinaryOp):
-            operator = self._resolve_value(node.children[0], context)
-            left = self._resolve_value(node.children[1], context)
-            right = self._resolve_value(node.children[2], context)
-            return eval(f"{left}{operator}{right}")
-        elif isinstance(node, qasm_ast.Prefix):
-            prefix = self._resolve_value(node.children[0], context)
-            expression = self._resolve_value(node.children[1], context)
-            return eval(f"{prefix}{expression}")
-        elif isinstance(
-            node, (qasm_ast.Int, qasm_ast.BinaryOperator, qasm_ast.UnaryOperator)
-        ):
-            return node.value
-        elif isinstance(node, qasm_ast.Real):
-            # Reals are represented as strings and need transformation.
-            return float(node.value)
-
-        raise ValueError(f"Cannot resolve value from {str(node)}")
+    def _get_clbits(self, source: Union[DAGOpNode, tuple], context: QasmContext) -> list:
+        if isinstance(source, DAGOpNode):
+            return self._get_clbits(source.cargs, context)
+        else:
+            clbits = []
+            for clbit in source:
+                reg, ind = self._current_dag.find_bit(clbit).registers[0]
+                register = context.registers.classic.get(reg.name, None)
+                if register is not None:
+                    clbits.append(register.bits[ind])
+            return clbits
 
 
 class RestrictedQasm2Parser(Qasm2Parser):
@@ -729,25 +621,13 @@ class RestrictedQasm2Parser(Qasm2Parser):
         self.allowed_gates = allowed_gates
         self.disable_if = disable_if
 
-    def validate(self, qasm: qasm_ast.Program):
+    def validate(self, circ: DAGCircuit):
         if self.allowed_gates is not None:
-            intrinsic_gates = {
-                node.name: node
-                for node in qasm.children
-                if isinstance(node, qasm_ast.Gate) and node.file.endswith("qelib1.inc")
-            }
+            intrinsic_gates = {node.name: node for node in qasm2.LEGACY_CUSTOM_INSTRUCTIONS}
 
             # Look at both the main script and custom gate intrinsic usage.
             gate_nodes = {
-                val.name
-                for val in qasm.children
-                + [
-                    body_node
-                    for node in qasm.children
-                    if isinstance(node, qasm_ast.Gate) and node.name not in intrinsic_gates
-                    for body_node in node.body.children
-                ]
-                if isinstance(val, qasm_ast.CustomUnitary) and val.name in intrinsic_gates
+                val.name for val in circ.gate_nodes() if val.name in intrinsic_gates
             }
 
             invalid_gates = gate_nodes.difference(self.allowed_gates)
@@ -758,7 +638,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
                 )
 
         if self.disable_if and any(
-            [val for val in qasm.children if isinstance(val, qasm_ast.if_.If)]
+            [node.op for node in circ.op_nodes() if node.op.condition is not None]
         ):
             raise ValueError("If's are currently unable to be used.")
 
@@ -780,98 +660,10 @@ def _create_lark_parser():
     return Lark(lark_grammar_str, regex=True)
 
 
-class LarkOpenPulseContext(QasmContext):
+class OpenPulseContext(QasmContext):
     def __init__(self, registers=None, gates=None, variables=None, cali_methods=None):
         super().__init__(registers, gates, variables)
         self.calibration_methods: Dict[str, Any] = cali_methods or dict()
-
-
-class QasmMethodWrapper(qasm_ast.CustomUnitary):
-    def __init__(self, qasm_method, qubit_args, classic_args):
-        self.qasm_method = qasm_method
-        self.qubit_args = qubit_args
-        self.classic_args = classic_args
-
-        # Shadowed fields that get called in calling code.
-        self.name = qasm_method.name
-
-
-class LarkPatchingParser(Qasm2Parser):
-    """Parser built to route the lark limited QASM 3 requests into and through."""
-
-    base_include_str = """
-    OPENQASM 2.0;
-    include "qelib1.inc";
-    """
-
-    def load_default_gates(self, builder):
-        """Loads the default QASM 2 gates for further processing."""
-        context = LarkOpenPulseContext()
-        with self._get_qiskit_parser() as parser:
-            program: qasm_ast.Program = parser.parse(LarkPatchingParser.base_include_str)
-            self._walk_program(builder.get_child_builder(), program, context)
-
-        return context
-
-    def _get_gate_variables(self, node: QasmMethodWrapper, context: QasmContext):
-        if not isinstance(node, QasmMethodWrapper):
-            return super()._get_gate_variables(node, context)
-
-        variables = dict()
-        if node.qasm_method.arguments is not None:
-            variables.update(
-                dict(
-                    zip(
-                        [val.name for val in node.qasm_method.arguments.children],
-                        node.classic_args,
-                    )
-                )
-            )
-
-        if node.qasm_method.bitlist is not None:
-            variables.update(
-                dict(
-                    zip(
-                        [val.name for val in node.qasm_method.bitlist.children],
-                        node.qubit_args,
-                    )
-                )
-            )
-        return variables
-
-    def add_delay(self, delay, qubits, builder: InstructionBuilder):
-        self._add_delay(delay, qubits, builder)
-
-    def add_qreg(self, reg_name, reg_length, context: QasmContext, builder):
-        self._add_qreg(reg_name, reg_length, context, builder)
-
-    def add_creg(self, reg_name, reg_length, context):
-        self._add_creg(reg_name, reg_length, context)
-
-    def add_measure(self, qubits, bits, builder):
-        self._add_measure(qubits, bits, builder)
-
-    def add_unitary(
-        self,
-        theta,
-        phi,
-        _lambda,
-        qubit_or_register: List[Union[Qubit, QubitRegister]],
-        builder,
-    ):
-        self._add_unitary(theta, phi, _lambda, qubit_or_register, builder)
-
-    def add_cnot(self, control_qbs, target_qbs, builder):
-        self._add_cnot(control_qbs, target_qbs, builder)
-
-    def add_reset(self, qubits, builder):
-        self._add_reset(qubits, builder)
-
-    def add_if(self, left, right, if_body, context, builder):
-        self._add_if(left, right, if_body, context, builder)
-
-    def add_ecr(self, qubits, builder):
-        self._add_ecr(qubits, builder)
 
 
 def get_frame_mappings(model: QuantumHardwareModel):
@@ -944,16 +736,341 @@ class UntargetedPulse:
         return f"Partial instance of {type(self._ref_instance).__name__}"
 
 
+class Qasm3ParserBase(AbstractParser, QASMVisitor):
+
+    def parser_language(self) -> Languages:
+        return Languages.Qasm3
+
+    def _includes_standard_gates(self, qasm_str: str) -> bool:
+        return any(
+            [
+                include in qasm_str
+                for include in ('include "qelib1.inc";', 'include "stdgates.inc";')
+            ]
+        )
+
+    def load_default_gates(self, context) -> QasmContext:
+        node = ast.Include(filename="stdgates.inc")
+        self.visit(node, context)
+        return context
+
+    def parse(self, builder, qasm: str) -> InstructionBuilder:
+        self.builder = builder
+        # Parse or pick up the cached version, then remove it as we're about to
+        # interpret it.
+        program = self._fetch_or_parse(qasm)
+        if (qasm_id := hash(qasm)) in self._cached_parses:
+            del self._cached_parses[qasm_id]
+        context = QasmContext()
+        if not self._includes_standard_gates(qasm):
+            self.load_default_gates(context)
+        return self.process_program(program, context)
+
+    def process_program(
+        self, prog: ast.Program, context: Optional[QasmContext]
+    ) -> InstructionBuilder:
+        context = context or QasmContext()
+        self._walk_program(prog, context)
+        self._assign_returns(context)
+        return self.builder
+
+    def _fetch_or_parse(self, qasm_str: str) -> ast.Program:
+        if 'defcalgrammar "openpulse"' in qasm_str:
+            raise ValueError(f"QASM3ParserBase can not parse OpenPulse programs.")
+
+        # If we've seen this file before
+        qasm_id = hash(qasm_str)
+        if (cached_value := self._cached_parses.get(qasm_id, None)) is not None:
+            return cached_value
+
+        try:
+            program = oq3_parse(qasm_str)
+        except Exception as e:
+            invalid_string = str(e)
+            raise ValueError(f"Invalid QASM 3 syntax: '{invalid_string}'.")
+
+        self._cached_parses[qasm_id] = program
+        return program
+
+    def validate(self, prog: ast.Program):
+        pass
+
+    def modify(self, prog: ast.Program):
+        """
+        Allows children to transform the program before validation/transforming into our
+        AST occurs.
+        """
+        pass
+
+    def _walk_program(self, prog: ast.Program, context: QasmContext):
+        self.modify(prog)
+        self.validate(prog)
+
+        for node in prog.statements:
+            self.visit(node, context)
+
+    def visit_Include(self, node: ast.Include, context: QasmContext):
+        if node.filename in ("stdgates.inc", "qelib1.inc"):
+            file_path = Path(
+                find_spec("qiskit.qasm.libs").submodule_search_locations[0], node.filename
+            )
+        else:
+            file_path = Path(node.filename)
+        if not file_path.is_file():
+            raise ValueError(f"File not found for '{str(file_path)}'.")
+        with file_path.open(encoding="utf-8") as f:
+            self._walk_program(oq3_parse(f.read()), context)
+
+    def visit_QuantumGateDefinition(
+        self, node: ast.QuantumGateDefinition, context: QasmContext
+    ):
+        context.gates[node.name.name] = node
+
+    def _get_qubits(self, input_, context: QasmContext):
+        match input_:
+            case list():
+                qubits = []
+                for item in input_:
+                    qbs = self._get_qubits(item, context)
+                    if isinstance(qbs, list):
+                        qubits.extend(qbs)
+                    else:
+                        qubits.append(qbs)
+                return qubits
+            case ast.QASMNode():
+                return self.visit(input_, context)
+            case Qubit() | QubitRegister():
+                return input_
+            case _:
+                raise NotImplementedError(f"Cannot get qubits from {type(input_)}")
+
+    def _create_qb_specific_gate_suffix(
+        self, name: str, target_qubits: List[Qubit | QubitRegister]
+    ) -> str:
+        return f"{name}[{','.join([str(qb) for qb in target_qubits])}]"
+
+    def _attempt_declaration(self, var: Variable, context: QasmContext):
+        if var.name in context.variables:
+            raise ValueError(f"Can't redeclare variable {var.name}")
+        context.variables[var.name] = var
+
+    def visit_ClassicalDeclaration(
+        self, node: ast.ClassicalDeclaration, context: QasmContext
+    ):
+        self.add_creg(node.identifier.name, node.type.size.value, context)
+
+    def visit_QubitDeclaration(self, node: ast.QubitDeclaration, context: QasmContext):
+        self.add_qreg(node.qubit.name, node.size.value, context, self.builder)
+
+    def _get_node_arguments(self, node: ast.QASMNode, context: QasmContext) -> list:
+        args = []
+        for arg in node.arguments:
+            if isinstance(arg, ast.QASMNode):
+                args.append(self.visit(arg, context))
+            else:
+                args.append(arg)
+        return args
+
+    def visit_BinaryExpression(self, node: ast.BinaryExpression, context: QasmContext):
+        lhs = self.visit(node.lhs, context)
+        rhs = self.visit(node.rhs, context)
+        op = node.op.name
+
+        match op:
+            case "+":
+                return lhs + rhs
+            case "-":
+                return lhs - rhs
+            case "/":
+                return lhs / rhs
+            case "*":
+                return lhs * rhs
+            case ">":
+                return lhs > rhs
+            case "<":
+                return lhs < rhs
+            case ">=":
+                return lhs >= rhs
+            case "<=":
+                return lhs <= rhs
+            case "==":
+                return lhs == rhs
+            case "!=":
+                return lhs != rhs
+            case "&&":
+                return lhs and rhs
+            case "||":
+                return lhs or rhs
+            case _:
+                # | ^ & << >> % **
+                raise NotImplementedError(f"Unsupported operator '{op}'")
+
+    def visit_UnaryExpression(self, node: ast.UnaryExpression, context: QasmContext):
+        ex = self.visit(node.expression, context)
+        op = node.op.name
+        match op:
+            case "-":
+                return -ex
+            case "~":
+                return ~ex
+            case "!":
+                return not ex
+            case _:
+                raise NotImplementedError(f"Unsupported operator '{op}'")
+
+    def visit_IntegerLiteral(self, node: ast.IntegerLiteral, context: QasmContext) -> int:
+        return node.value
+
+    def visit_Identifier(self, node: ast.Identifier, context: QasmContext):
+        id_name = node.name
+
+        if id_name.startswith("$"):
+            return self.builder.model.get_qubit(int(id_name.strip("$")))
+
+        qubits = context.registers.quantum.get(id_name, None)
+        if qubits is not None:
+            return qubits
+
+        bits = context.registers.classic.get(id_name, None)
+        if bits is not None:
+            return bits
+
+        variable = context.variables.get(id_name, None)
+        if variable is not None:
+            return variable.value
+
+        # Return constant values
+        match id_name:
+            case "pi" | "π":
+                return math.pi
+            case "tau" | "𝜏":
+                return math.tau
+            case "euler" | "ℇ":
+                return math.e
+
+        return id_name
+
+    def visit_IndexedIdentifier(
+        self, node: ast.IndexedIdentifier, context: QasmContext
+    ) -> list:
+        indices = node.indices
+        if isinstance(indices, list):
+            indices = indices[0]
+        frame = self.visit(node.name, context)
+        match frame:
+            case QubitRegister():
+                return [frame.qubits[self.visit(ind, context)] for ind in indices]
+            case BitRegister():
+                return [frame.bits[self.visit(ind, context)] for ind in indices]
+            case _:
+                raise NotImplementedError(
+                    f"IndexIdentifier not implemented for '{type(frame)}' indexing."
+                )
+
+    def visit_QuantumGate(self, node: ast.QuantumGate, context: QasmContext):
+        target_qubits = self._get_qubits(node.qubits, context)
+        gate_name = node.name.name
+        arguments = self._get_node_arguments(node, context)
+
+        match gate_name:
+            case "u" | "U":
+                theta, phi, _lambda = arguments
+                return self.add_unitary(theta, phi, _lambda, target_qubits, self.builder)
+            case "cx" | "CX":
+                return self.add_cnot(*target_qubits, self.builder)
+            case "ecr" | "ECR":
+                return self.add_ecr(target_qubits, self.builder)
+
+        gate_context = QasmContext(
+            Registers(),
+            context.gates,
+            dict(context.variables),
+        )
+
+        if (gate_def := context.gates.get(gate_name, None)) is not None:
+            for arg, value in zip(gate_def.arguments, arguments):
+                self._attempt_declaration(
+                    Variable(self.visit(arg, context), type(value), value), gate_context
+                )
+            for qb_name, value in zip(gate_def.qubits, target_qubits):
+                if isinstance(qb_name, (QubitRegister, Qubit)):
+                    continue
+                self._attempt_declaration(
+                    Variable(qb_name.name, type(value), value), gate_context
+                )
+            for n in gate_def.body:
+                self.visit(n, gate_context)
+
+    def visit_QuantumMeasurementStatement(
+        self, node: ast.QuantumMeasurementStatement, context: QasmContext
+    ):
+        qubits = self.visit(node.measure, context)
+        bits = self.visit(node.target, context)
+        self.add_measure(qubits, bits, self.builder)
+
+    def visit_QuantumMeasurement(self, node: ast.QuantumMeasurement, context: QasmContext):
+        return self.visit(node.qubit, context)
+
+    def _assign_returns(self, context: QasmContext):
+        register_keys = context.registers.classic.keys()
+        if any(register_keys):
+            for key in register_keys:
+                self.builder.assign(
+                    key,
+                    [val.value for val in context.registers.classic[key].bits],
+                )
+
+            self.builder.returns([key for key in register_keys])
+
+    def add_delay(self, delay, qubits, builder: InstructionBuilder):
+        self._add_delay(delay, qubits, builder)
+
+    def add_qreg(
+        self, reg_name, reg_length, context: QasmContext, builder: InstructionBuilder
+    ):
+        self._add_qreg(reg_name, reg_length, context, builder)
+
+    def add_creg(self, reg_name, reg_length, context: QasmContext):
+        self._add_creg(reg_name, reg_length, context)
+
+    def add_measure(self, qubits, bits, builder: InstructionBuilder):
+        self._add_measure(qubits, bits, builder)
+
+    def add_unitary(
+        self,
+        theta,
+        phi,
+        _lambda,
+        qubit_or_register: List[Union[Qubit, QubitRegister]],
+        builder: InstructionBuilder,
+    ):
+        self._add_unitary(theta, phi, _lambda, qubit_or_register, builder)
+
+    def add_cnot(self, control_qbs, target_qbs, builder: InstructionBuilder):
+        self._add_cnot(control_qbs, target_qbs, builder)
+
+    def add_reset(self, qubits, builder: InstructionBuilder):
+        self._add_reset(qubits, builder)
+
+    def add_if(
+        self, left, right, if_body, context: QasmContext, builder: InstructionBuilder
+    ):
+        self._add_if(left, right, if_body, context, builder)
+
+    def add_ecr(self, qubits, builder: InstructionBuilder):
+        self._add_ecr(qubits, builder)
+
+
 class Qasm3Parser(Interpreter, AbstractParser):
     lark_parser = _create_lark_parser()
 
     def __init__(self):
         super().__init__()
         self.builder: Optional[InstructionBuilder] = None
-        self._general_context: Optional[LarkOpenPulseContext] = None
-        self._calibration_context: Optional[LarkOpenPulseContext] = None
-        self._current_context: Optional[LarkOpenPulseContext] = None
-        self._q2_patcher = LarkPatchingParser()
+        self._general_context: Optional[OpenPulseContext] = None
+        self._calibration_context: Optional[OpenPulseContext] = None
+        self._current_context: Optional[OpenPulseContext] = None
+        self._q3_patcher: Qasm3ParserBase = Qasm3ParserBase()
         self._port_mappings: Dict[str, PhysicalChannel] = dict()
         self._frame_mappings: Dict[str, PulseChannel] = dict()
         self._cached_parses: Dict[int, Any] = dict()
@@ -987,6 +1104,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
         except Exception as ex:
             return ParseResults.failure(str(ex))
 
+    def include(self, tree):
+        filename = self.transform_to_value(tree.children[0])
+        self._q3_patcher.visit(ast.Include(filename), self._current_context)
+
     def _reset_and_return(self):
         builder = self.builder
         self.builder = None
@@ -1005,10 +1126,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
     def initalize(self, builder: InstructionBuilder):
         self.builder = builder
+        self._q3_patcher.builder = builder
 
         # Both contexts share global state except for variables.
-        self._general_context = self._q2_patcher.load_default_gates(self.builder)
-        self._calibration_context = LarkOpenPulseContext(
+        self._general_context = self._q3_patcher.load_default_gates(OpenPulseContext())
+        self._calibration_context = OpenPulseContext(
             registers=self._general_context.registers,
             gates=self._general_context.gates,
             cali_methods=self._general_context.calibration_methods,
@@ -1545,7 +1667,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 for bit, result in zip(bits, results):
                     bit.value = result
         else:
-            self._q2_patcher.add_measure(qubits, bits, self.builder)
+            self._q3_patcher.add_measure(qubits, bits, self.builder)
 
     def _has_defcal_override(
         self,
@@ -1617,14 +1739,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
             cal_def = qb_specific_cal_def_expr_list
 
         if name in ("cnot", "CNOT"):
-            self._q2_patcher.add_cnot(qubits[0], qubits[1], self.builder)
+            self._q3_patcher.add_cnot(qubits[0], qubits[1], self.builder)
         elif name in ("u", "U"):
             # TODO: Untested as not in grammar.
-            self._q2_patcher.add_unitary(
+            self._q3_patcher.add_unitary(
                 others[0], others[1], others[2], qubits, self.builder
             )
         elif name in ("ecr", "ECR"):
-            self._q2_patcher.add_ecr(qubits, self.builder)
+            self._q3_patcher.add_ecr(qubits, self.builder)
 
         # Prioritize calibration definitions here if people override the base functions.
         # We also don't care about qubit scoping and restrictions.
@@ -1633,7 +1755,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             # everything in the defcal focuses on the qubits coming in.
             self.builder.synchronize(qubits)
             existing_context = self._current_context
-            self._current_context = LarkOpenPulseContext(
+            self._current_context = OpenPulseContext(
                 self._general_context.registers,
                 self._general_context.gates,
                 dict(self._calibration_context.variables),
@@ -1680,8 +1802,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
         elif gate_def is not None:
             # Our wrapper exposes any fields required and we override the argument
             # gathering.
-            wrapper = QasmMethodWrapper(gate_def, qubits, others)
-            self._q2_patcher.process_gate(wrapper, self._current_context, self.builder)
+            node = ast.QuantumGate(
+                name=ast.Identifier(name), qubits=qubits, arguments=others, modifiers=[]
+            )
+            self._q3_patcher.visit(node, self._current_context)
         elif throw_on_missing:
             raise ValueError(
                 f"Can't find gate implementation for '{name}' with supplied arguments."
@@ -1748,7 +1872,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 length = args[0]
                 variable = args[1]
 
-        self._q2_patcher.add_qreg(variable, length, self._current_context, self.builder)
+        self._q3_patcher.add_qreg(variable, length, self._current_context, self.builder)
 
     def bit_declaration_statement(self, tree: Tree):
         args = self.transform_to_value(tree)
@@ -1765,7 +1889,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 length = args[0]
                 variable = args[1]
 
-        self._q2_patcher.add_creg(variable, length, self._current_context)
+        self._q3_patcher.add_creg(variable, length, self._current_context)
 
     def complex_declaration_statement(self, tree: Tree):
         _, name = self.transform_to_value(tree)
@@ -2098,7 +2222,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             del self._cached_parses[qasm_id]
 
         # If we have a new results format, propagate it.
-        self._q2_patcher.results_format = self.results_format
+        self._q3_patcher.results_format = self.results_format
 
         self.visit(parsed)
         if not self._has_qasm_version:

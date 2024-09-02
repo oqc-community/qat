@@ -76,10 +76,9 @@ class TestCalibrationSavingAndLoading:
         for key, value in copied_echo.pulse_channels.items():
             channel_key = key[:3]
             original_channel = copied_echo.physical_channels[channel_key]
-            assert (
-                id(value.physical_channel) == id(original_channel),
-                "Copied references are different objects.",
-            )
+            assert id(value.physical_channel) == id(
+                original_channel
+            ), "Copied references are different objects."
 
         assert len(echo.basebands) == len(copied_echo.basebands)
         assert len(echo.physical_channels) == len(copied_echo.physical_channels)

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.transpiler import TranspilerError
 
 from qat.purr.compiler.config import (
@@ -66,7 +66,7 @@ class DefaultOptimizers(MetricsMixin):
                     basis_gates=["u1", "u2", "u3", "cx"],
                     optimization_level=level,
                 )
-                qasm_string = optimized_circuits.qasm()
+                qasm_string = qasm2.dumps(optimized_circuits)
             except TranspilerError as ex:
                 log.warning(f"Qiskit transpile pass failed. {str(ex)}")
 

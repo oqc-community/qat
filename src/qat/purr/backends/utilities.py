@@ -51,7 +51,7 @@ def remove_axes(original_dims, removed_axis_indices, axis_locations):
 class ComplexFunction:
     """Function object used to represent Complex 1D functions"""
 
-    _dtype = "cfloat"
+    _dtype = np.complex128
     dt = 0.5e-9
 
     def eval(self, x: np.ndarray) -> np.ndarray:
