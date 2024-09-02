@@ -5,13 +5,13 @@ import pytest
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.compiler.config import CompilerConfig, MetricsType, QuantumResultsFormat
 from qat.qat import execute_with_metrics
-from tests.qat.qasm_utils import TestFileType, get_test_file_path
+from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
 from tests.qat.utils import ListReturningEngine
 
 
 @pytest.mark.parametrize(
     ("input_string", "file_type", "instruction_length"),
-    [("ghz.qasm", TestFileType.QASM2, 196)],
+    [("ghz.qasm", ProgramFileType.QASM2, 196)],
 )
 def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     program = get_test_file_path(file_type, input_string)
@@ -22,7 +22,9 @@ def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     assert metrics["optimized_instruction_count"] == instruction_length
 
 
-@pytest.mark.parametrize(("input_string", "file_type"), [("ghz.qasm", TestFileType.QASM2)])
+@pytest.mark.parametrize(
+    ("input_string", "file_type"), [("ghz.qasm", ProgramFileType.QASM2)]
+)
 def test_only_optim_circuitmetrics_are_returned(input_string, file_type):
     program = get_test_file_path(file_type, input_string)
     hardware = get_default_echo_hardware()
@@ -33,7 +35,9 @@ def test_only_optim_circuitmetrics_are_returned(input_string, file_type):
     assert metrics["optimized_instruction_count"] is None
 
 
-@pytest.mark.parametrize(("input_string", "file_type"), [("ghz.qasm", TestFileType.QASM2)])
+@pytest.mark.parametrize(
+    ("input_string", "file_type"), [("ghz.qasm", ProgramFileType.QASM2)]
+)
 def test_only_inst_len_circuitmetrics_are_returned(input_string, file_type):
     program = get_test_file_path(file_type, input_string)
     hardware = get_default_echo_hardware()
@@ -48,9 +52,9 @@ def test_only_inst_len_circuitmetrics_are_returned(input_string, file_type):
 @pytest.mark.parametrize(
     ("input_string", "file_type"),
     [
-        ("ghz.qasm", TestFileType.QASM2),
-        ("basic.qasm", TestFileType.QASM3),
-        ("generator-bell.ll", TestFileType.QIR),
+        ("ghz.qasm", ProgramFileType.QASM2),
+        ("basic.qasm", ProgramFileType.QASM3),
+        ("generator-bell.ll", ProgramFileType.QIR),
     ],
 )
 def test_batched_execution(input_string, file_type, engine):

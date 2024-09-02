@@ -12,7 +12,7 @@ from qat.purr.backends.verification import (
 )
 from qat.purr.compiler.config import CompilerConfig, Tket
 from qat.qat import execute
-from tests.qat.qasm_utils import TestFileType, get_qasm2, get_test_file_path
+from tests.qat.qasm_utils import ProgramFileType, get_qasm2, get_test_file_path
 
 
 class TestFirmwareVerificationEngines:
@@ -27,12 +27,12 @@ class TestFirmwareVerificationEngines:
     @pytest.mark.parametrize(
         ("input_string", "file_type", "is_valid"),
         [
-            ("primitives.qasm", TestFileType.QASM2, True),
-            ("ghz.qasm", TestFileType.QASM3, True),
-            ("ghz.qasm", TestFileType.QASM3, True),
-            ("bell_psi_plus.ll", TestFileType.QIR, True),
-            ("cross_ressonance.qasm", TestFileType.OPENPULSE, True),
-            ("long_qasm.qasm", TestFileType.QASM2, False),
+            ("primitives.qasm", ProgramFileType.QASM2, True),
+            ("ghz.qasm", ProgramFileType.QASM3, True),
+            ("ghz.qasm", ProgramFileType.QASM3, True),
+            ("bell_psi_plus.ll", ProgramFileType.QIR, True),
+            ("cross_ressonance.qasm", ProgramFileType.OPENPULSE, True),
+            ("long_qasm.qasm", ProgramFileType.QASM2, False),
         ],
     )
     def test_circuit_length_validation(self, input_string, file_type, is_valid):

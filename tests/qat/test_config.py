@@ -19,7 +19,7 @@ from qat.purr.compiler.config import (
 )
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics
-from tests.qat.qasm_utils import TestFileType, get_test_file_path
+from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
 
 SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
 
@@ -185,7 +185,7 @@ class TestConfigGeneral:
 
     @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
     def test_runs_successfully_with_config(self, version):
-        program = get_test_file_path(TestFileType.QASM2, "ghz.qasm")
+        program = get_test_file_path(ProgramFileType.QASM2, "ghz.qasm")
         hardware = get_default_echo_hardware()
         serialised_data = _get_contents(f"serialised_full_compiler_config_{version}.json")
         deserialised_conf = CompilerConfig.create_from_json(

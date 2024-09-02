@@ -13,7 +13,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import CompilerConfig
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
-from tests.qat.qasm_utils import TestFileType, get_test_file_path
+from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
 from tests.qat.utils import get_jagged_echo_hardware
 
 
@@ -40,7 +40,7 @@ class TestQIR:
 
     def test_valid_ll_path(self):
         execute(
-            get_test_file_path(TestFileType.QIR, "generator-bell.ll"),
+            get_test_file_path(ProgramFileType.QIR, "generator-bell.ll"),
             get_default_echo_hardware(2),
         )
 
@@ -59,7 +59,7 @@ class TestQIR:
 
     def test_cudaq_input(self):
         results = execute(
-            get_test_file_path(TestFileType.QIR, "basic_cudaq.ll"),
+            get_test_file_path(ProgramFileType.QIR, "basic_cudaq.ll"),
             get_default_echo_hardware(6),
         )
 
