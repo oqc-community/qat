@@ -1,5 +1,9 @@
 class Constants:
-    IMMEDIATE_MAX_WAIT_TIME = pow(2, 16) - 4
+    MAX_GAIN_SIZE = pow(2, 16) - 1
+    """Max size of gain in Q1ASM programs."""
+    MAX_OFFSET_SIZE = pow(2, 16) - 1
+    """Max size of offset in Q1ASM programs."""
+    MAX_WAIT_TIME = pow(2, 16) - 4
     """Max size of wait instruction immediates in Q1ASM programs. Max value allowed by
     assembler is 2**16-1, but this is the largest that is a multiple of 4 ns."""
     REGISTER_SIZE = pow(2, 32) - 1

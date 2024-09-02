@@ -90,6 +90,7 @@ class TestSequencerConfig(TestQbloxConfigMixin):
         # Drive
         drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
         lo_freq, nco_freq = self.extract_lo_and_nco_freqs(drive_channel)
+        model.control_hardware.reset()
         module, sequencer = model.control_hardware.install(drive_pkg)
         assert sequencer.nco_freq() == nco_freq
         if module.out0_lo_en():
@@ -102,6 +103,7 @@ class TestSequencerConfig(TestQbloxConfigMixin):
             (inst for inst in qat_file.instructions if isinstance(inst, Acquire))
         )
         measure_pkg = next((pkg for pkg in packages if pkg.target == measure_channel))
+        model.control_hardware.reset()
         module, sequencer = model.control_hardware.install(measure_pkg)
         hwm_seq_config = measure_channel.physical_channel.config.sequencers[
             sequencer.seq_idx
