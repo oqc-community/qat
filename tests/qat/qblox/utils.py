@@ -90,7 +90,7 @@ def setup_qblox_hardware_model(
     qcmrf_slot, qrmrf_slot = choose_module_slots(info)
 
     if info.id is None:
-        instrument = DummyQbloxControlHardware(name=info.name, cfg=DUMMY_CONFIG)
+        instrument = DummyQbloxControlHardware(name=info.name, dummy_cfg=DUMMY_CONFIG)
         qcmrf_config, qrmrf_config = dummy_qblox_config()
     else:
         instrument = QbloxControlHardware(name=info.name)

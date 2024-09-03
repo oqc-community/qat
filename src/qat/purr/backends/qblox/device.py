@@ -2,6 +2,7 @@ import json
 import os
 from dataclasses import asdict
 from datetime import datetime
+from enum import Flag, auto
 from functools import reduce
 from typing import Dict, List
 
@@ -112,6 +113,14 @@ class QbloxPhysicalChannel(PhysicalChannel):
         return qubit
 
 
+class ResetLevel(Flag):
+    SYNC = auto()  # Reset SYNC only
+    IO_CON = auto()  # Reset sequencer's IO channel connectivity
+
+    SOFT = SYNC | IO_CON
+    HARD = auto()  # Equivalent to Qblox's Cluster.reset(), it wipes out everything
+
+
 class QbloxControlHardware(ControlHardware):
     _driver: Cluster
 
@@ -120,12 +129,12 @@ class QbloxControlHardware(ControlHardware):
         dev_id: str = None,
         name: str = None,
         address: str = None,
-        cfg: Dict = None,
+        dummy_cfg: Dict = None,
     ):
         super().__init__(id_=dev_id or os.environ.get("QBLOX_DEV_ID"))
         self.name = name or os.environ.get("QBLOX_DEV_NAME")
         self.address = address or os.environ.get("QBLOX_DEV_IP")
-        self.cfg = cfg
+        self.dummy_cfg = dummy_cfg
         self.dump_sequence = False
         self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
 
@@ -186,39 +195,37 @@ class QbloxControlHardware(ControlHardware):
 
         return qblox_config
 
-    def reset(self, hard=False):
+    def reset(self, flags=ResetLevel.SOFT):
         """
-        A softer and more convenient wrapper around QBlox's (hard) reset.
-        If hard is False, reset only I/O and SYNC on all sequencers of all connected modules.
-        TODO - This needs to span across all daisy-chained clusters when the time comes.
+        A more convenient wrapper around QBlox's (hard) reset.
+        TODO - This needs to span across all daisy-chained clusters.
         """
 
-        self._resources.clear()
-
-        if hard:
+        if ResetLevel.HARD in flags:
             self._driver.reset()
             return
 
-        for module in self._driver.get_connected_modules().values():
-            # Resetting I/O connections on all sequencers of module
-            module.disconnect_outputs()
-            if module.is_qrm_type:
-                module.disconnect_inputs()
+        if ResetLevel.IO_CON in flags:
+            # Resetting I/O connections on all sequencers of all connected modules
+            for module in self._driver.get_connected_modules().values():
+                module.disconnect_outputs()
+                if module.is_qrm_type:
+                    module.disconnect_inputs()
 
-            # Resetting SYNC on all sequencers of module
-            for sequencer in module.sequencers:
-                sequencer.sync_en(False)
+        if ResetLevel.SYNC in flags:
+            # Resetting SYNC on all sequencers of all connected modules
+            for module in self._driver.get_connected_modules().values():
+                for sequencer in module.sequencers:
+                    sequencer.sync_en(False)
 
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(
                 name=self.name,
                 identifier=self.address,
-                dummy_cfg=(
-                    self.cfg if self.address is None else None
-                ),  # Ignore dummy config if an address is given
+                dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
-            self._driver.reset()
+            self.reset(ResetLevel.HARD)
         log.info(self._driver.get_system_status())
         self.is_connected = True
 
@@ -260,7 +267,8 @@ class QbloxControlHardware(ControlHardware):
         return module, sequencer
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
-        self.reset()
+        self._resources.clear()
+        self.reset(ResetLevel.SOFT)
         for package in qblox_packages:
             self.install(package)
 
@@ -341,7 +349,8 @@ class DummyQbloxControlHardware(QbloxControlHardware):
         )
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
-        self.reset()
+        self._resources.clear()
+        self.reset(ResetLevel.SOFT)
         for package in qblox_packages:
             module, sequencer = self.install(package)
 
