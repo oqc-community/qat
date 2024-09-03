@@ -162,7 +162,7 @@
 <span id="qat-purr-backends-qblox-device-module"></span><h1>qat.purr.backends.qblox.device module<a class="headerlink" href="#module-qat.purr.backends.qblox.device" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.DummyQbloxControlHardware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DummyQbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DummyQbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.device.QbloxControlHardware" title="qat.purr.backends.qblox.device.QbloxControlHardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxControlHardware</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.DummyQbloxControlHardware.set_data">
@@ -178,7 +178,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.ControlHardware" title="qat.purr.backends.live_devices.ControlHardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlHardware</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">
@@ -202,10 +202,9 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.reset" title="Link to this definition"></a></dt>
-<dd><p>A softer and more convenient wrapper around QBlox’s (hard) reset.
-If hard is False, reset only I/O and SYNC on all sequencers of all connected modules.
-TODO - This needs to span across all daisy-chained clusters when the time comes.</p>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flags=&lt;ResetLevel.SOFT:</span> <span class="pre">3&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.reset" title="Link to this definition"></a></dt>
+<dd><p>A more convenient wrapper around QBlox’s (hard) reset.
+TODO - This needs to span across all daisy-chained clusters.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -284,6 +283,33 @@ for MeasurePulse and Acquire instructions.</p>
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.ResetLevel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.ResetLevel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.ResetLevel.HARD">
+<span class="sig-name descname"><span class="pre">HARD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.purr.backends.qblox.device.ResetLevel.HARD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.ResetLevel.IO_CON">
+<span class="sig-name descname"><span class="pre">IO_CON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.purr.backends.qblox.device.ResetLevel.IO_CON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.ResetLevel.SOFT">
+<span class="sig-name descname"><span class="pre">SOFT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#qat.purr.backends.qblox.device.ResetLevel.SOFT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.ResetLevel.SYNC">
+<span class="sig-name descname"><span class="pre">SYNC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.backends.qblox.device.ResetLevel.SYNC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

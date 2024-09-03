@@ -507,8 +507,27 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_lo_leakage">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer">
+<span class="sig-name descname"><span class="pre">calibrate_mixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer" title="Link to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Compensates for the LO leakage for input(s)/output(s) depending on module</p></li>
+<li><p>Suppresses undesired sideband on sequencer</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_sideband">
+<span class="sig-name descname"><span class="pre">calibrate_sideband</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_sideband" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure">
 <span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure" title="Link to this definition"></a></dt>
@@ -548,14 +567,19 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmConfigHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="qat.purr.backends.qblox.config.QcmConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage">
+<span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation">
 <span class="sig-name descname"><span class="pre">configure_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation" title="Link to this definition"></a></dt>
@@ -585,7 +609,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper.configure">
@@ -601,8 +625,13 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="qat.purr.backends.qblox.config.QrmConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QrmConfigHelper</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.calibrate_lo_leakage">
+<span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq">
 <span class="sig-name descname"><span class="pre">configure_acq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq" title="Link to this definition"></a></dt>
