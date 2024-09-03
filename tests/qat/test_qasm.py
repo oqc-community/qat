@@ -72,7 +72,7 @@ from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
 from tests.qat.qasm_utils import (
-    TestFileType,
+    ProgramFileType,
     get_qasm2,
     get_qasm3,
     get_test_file_path,
@@ -491,7 +491,7 @@ class TestExecutionFrontend:
 
     def test_valid_qasm_path(self):
         hardware = get_default_echo_hardware(2)
-        execute(get_test_file_path(TestFileType.QASM2, "basic.qasm"), hardware=hardware)
+        execute(get_test_file_path(ProgramFileType.QASM2, "basic.qasm"), hardware=hardware)
 
     def test_quality_couplings(self):
         qasm_string = get_qasm2("basic.qasm")
@@ -819,7 +819,7 @@ class TestExecutionFrontend:
         frontend = fetch_frontend(qasm3_string, use_experimental=use_experimental)
         assert isinstance(frontend, frontend_mod.QASMFrontend)
 
-        qir_string = get_test_file_path(TestFileType.QIR, "generator-bell.ll")
+        qir_string = get_test_file_path(ProgramFileType.QIR, "generator-bell.ll")
         frontend = fetch_frontend(qir_string, use_experimental=use_experimental)
         assert isinstance(frontend, frontend_mod.QIRFrontend)
 

@@ -111,7 +111,6 @@ filterwarnings = [
     #
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
     "default::pytest.PytestUnhandledThreadExceptionWarning",
-    "default::pytest.PytestCollectionWarning",
     "default:::qutip",
     "default:::qcodes",
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.

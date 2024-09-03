@@ -11,36 +11,36 @@ from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser, qasm_from_file
 
 
-class TestFileType(Enum):
+class ProgramFileType(Enum):
     QASM2 = (auto(),)
     QASM3 = (auto(),)
     QIR = auto()
     OPENPULSE = auto()
 
 
-def get_test_files_dir(ir_type: TestFileType):
-    if ir_type == TestFileType.QASM3:
+def get_test_files_dir(ir_type: ProgramFileType):
+    if ir_type == ProgramFileType.QASM3:
         return abspath(join(dirname(__file__), "files", "qasm", "qasm3"))
-    elif ir_type == TestFileType.QASM2:
+    elif ir_type == ProgramFileType.QASM2:
         return abspath(join(dirname(__file__), "files", "qasm", "qasm2"))
-    elif ir_type == TestFileType.QIR:
+    elif ir_type == ProgramFileType.QIR:
         return abspath(join(dirname(__file__), "files", "qir"))
-    elif ir_type == TestFileType.OPENPULSE:
+    elif ir_type == ProgramFileType.OPENPULSE:
         return abspath(join(dirname(__file__), "files", "qasm", "qasm3", "openpulse_tests"))
     else:
         raise ValueError("Test file directory dosen't exist for this IR type.")
 
 
-def get_test_file_path(ir_type: TestFileType, file_name):
+def get_test_file_path(ir_type: ProgramFileType, file_name):
     return join(get_test_files_dir(ir_type), file_name)
 
 
 def get_qasm3(file_name):
-    return qasm_from_file(get_test_file_path(TestFileType.QASM3, file_name))
+    return qasm_from_file(get_test_file_path(ProgramFileType.QASM3, file_name))
 
 
 def get_qasm2(file_name):
-    return qasm_from_file(get_test_file_path(TestFileType.QASM2, file_name))
+    return qasm_from_file(get_test_file_path(ProgramFileType.QASM2, file_name))
 
 
 def parse_and_apply_optimiziations(

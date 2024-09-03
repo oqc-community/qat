@@ -87,7 +87,7 @@ class TestFileLogger:
                 assert regex_match.group(1) == msg
             file_handler.close()
 
-    class TestFileLoggerHandler(logger.FileLoggerHandler):
+    class FakeFileLoggerHandler(logger.FileLoggerHandler):
         initial_text = "Initial text"
 
         def create_initial_file(self):
@@ -103,7 +103,7 @@ class TestFileLogger:
         ):
             file_logger.removeHandler(file_handler)
             file_handler.close()
-            file_handler = self.TestFileLoggerHandler(
+            file_handler = self.FakeFileLoggerHandler(
                 os.path.join(
                     logs_path,
                     "initial_test_file_initial_text_is_written_if_specified.txt",
@@ -116,7 +116,7 @@ class TestFileLogger:
 
             with open(file_handler.baseFilename, "r") as f:
                 text = f.read().split("\n")
-                assert text[0] == self.TestFileLoggerHandler.initial_text
+                assert text[0] == self.FakeFileLoggerHandler.initial_text
                 regex_match = re.match(info_msg_pattern, text[1] + "\n")
                 assert regex_match
                 assert regex_match.group(1) == msg

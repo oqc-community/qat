@@ -37,7 +37,7 @@ from tests.qat.qasm_utils import get_qasm2
 from tests.qat.test_readout_mitigation import apply_error_mitigation_setup
 
 
-class TestBaseQuantumExecution(LiveDeviceEngine):
+class FakeBaseQuantumExecution(LiveDeviceEngine):
     baseband_frequencies = {}
     buffers = {}
 
@@ -140,8 +140,8 @@ def get_test_model() -> QuantumHardwareModel:
     return model
 
 
-def get_test_execution_engine(model) -> TestBaseQuantumExecution:
-    return TestBaseQuantumExecution(model)
+def get_test_execution_engine(model) -> FakeBaseQuantumExecution:
+    return FakeBaseQuantumExecution(model)
 
 
 def get_test_runtime(model) -> QuantumRuntime:
@@ -592,7 +592,7 @@ class TestBaseQuantum:
     def test_combining_python_list_results_succeeds(
         self, pre_combine, batch_results, post_combine
     ):
-        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        results = FakeBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
         assert results == post_combine
 
     @pytest.mark.parametrize(
@@ -604,7 +604,7 @@ class TestBaseQuantum:
     def test_combining_numpy_array_results_succeeds(
         self, pre_combine, batch_results, post_combine
     ):
-        results = TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+        results = FakeBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
         assert results.keys() == post_combine.keys()
         for k in results.keys():
             assert results[k].tolist() == post_combine[k].tolist()
@@ -620,7 +620,7 @@ class TestBaseQuantum:
     )
     def test_combining_results_fails(self, pre_combine, batch_results):
         with pytest.raises(ValueError):
-            TestBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
+            FakeBaseQuantumExecution._accumulate_results(pre_combine, batch_results)
 
     @pytest.mark.parametrize(
         "repeat_count, repeat_limit, expected_batches",

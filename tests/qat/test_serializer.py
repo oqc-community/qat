@@ -7,30 +7,30 @@ from qat.purr.utils.serializer import json_dumps, json_loads
 
 
 @dataclass
-class TestDataClass:
+class FakeDataClass:
     field1: int
     field2: str
     field3: dict
     field4: str = "Default"
 
 
-class TestClass:
+class FakeClass:
     def __init__(self, name: str):
         self.field1 = name
         self.field2 = True
 
 
-class TestDerivedClass(TestClass):
+class FakeDerivedClass(FakeClass):
     def __init__(self, value: int):
         super().__init__("DerivedClass")
         self.field3 = value
 
 
 @dataclass
-class TestDataClassWithCustomClass:
+class FakeDataClassWithCustomClass:
     field1: int
     field2: str
-    field3: TestClass
+    field3: FakeClass
 
 
 class TestCustomJSONEncoder:
@@ -65,9 +65,9 @@ class TestCustomJSONEncoder:
         assert loaded_obj is None
 
     def test_serialize_dataclass(self):
-        test_obj = TestDataClass(23, "Hello World!", {"key1": "data1", "key2": "data2"})
+        test_obj = FakeDataClass(23, "Hello World!", {"key1": "data1", "key2": "data2"})
         serialized_obj = json_dumps(test_obj)
-        loaded_obj: TestDataClass = json_loads(serialized_obj)
+        loaded_obj: FakeDataClass = json_loads(serialized_obj)
         assert test_obj.field1 == loaded_obj.field1
         assert test_obj.field2 == loaded_obj.field2
         assert test_obj.field3 == loaded_obj.field3
@@ -75,7 +75,7 @@ class TestCustomJSONEncoder:
         assert test_obj.__class__ == loaded_obj.__class__
 
     def test_serialize_basic_custom_class(self):
-        test_obj = TestClass("TestParameter")
+        test_obj = FakeClass("TestParameter")
         serialized_obj = json_dumps(test_obj)
         loaded_obj = json_loads(serialized_obj)
         assert test_obj.field1 == loaded_obj.field1
@@ -83,7 +83,7 @@ class TestCustomJSONEncoder:
         assert test_obj.__class__ == loaded_obj.__class__
 
     def test_serialize_inherited_custom_class(self):
-        test_obj = TestDerivedClass(34)
+        test_obj = FakeDerivedClass(34)
         serialized_obj = json_dumps(test_obj)
         loaded_obj = json_loads(serialized_obj)
         assert test_obj.field1, loaded_obj.field1
@@ -92,8 +92,8 @@ class TestCustomJSONEncoder:
         assert test_obj.__class__, loaded_obj.__class__
 
     def test_serialize_dataclass_with_custom_field(self):
-        test_obj = TestDataClassWithCustomClass(
-            23, "Hello World!", TestClass("TestParameter")
+        test_obj = FakeDataClassWithCustomClass(
+            23, "Hello World!", FakeClass("TestParameter")
         )
         serialized_obj = json_dumps(test_obj)
         loaded_obj = json_loads(serialized_obj)
@@ -119,15 +119,15 @@ class TestGetType:
         assert complex == serializer._get_type(str(type(complex(3, 4))))
 
     def test_get_type_custom_class(self):
-        assert TestClass == serializer._get_type(str(type(TestClass("something"))))
+        assert FakeClass == serializer._get_type(str(type(FakeClass("something"))))
 
-    class TestNestedClass:
+    class FakeNestedClass:
         def __init__(self, name: str):
             self.field1 = name
 
     def test_get_type_nested_custom_class(self):
-        assert TestGetType.TestNestedClass == serializer._get_type(
-            str(type(TestGetType.TestNestedClass("something")))
+        assert TestGetType.FakeNestedClass == serializer._get_type(
+            str(type(TestGetType.FakeNestedClass("something")))
         )
 
 
@@ -163,7 +163,7 @@ class TestDeserialize:
         assert loaded_obj is None
 
     def test_deserialize_dataclass(self):
-        test_obj = TestDataClass(23, "Hello World!", {"key1": "data1", "key2": "data2"})
+        test_obj = FakeDataClass(23, "Hello World!", {"key1": "data1", "key2": "data2"})
         formatted_json = {
             "$type": str(type(test_obj)),
             "$dataclass": True,
@@ -171,29 +171,29 @@ class TestDeserialize:
         }
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)
-        assert type(loaded_obj) == TestDataClass
+        assert type(loaded_obj) == FakeDataClass
         assert is_dataclass(loaded_obj)
         assert asdict(loaded_obj) == asdict(test_obj)
 
     def test_deserialize_basic_custom_class(self):
-        test_obj = TestClass("TestParameter")
+        test_obj = FakeClass("TestParameter")
         formatted_json = {"$type": str(type(test_obj)), "$data": test_obj.__dict__}
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)
-        assert type(loaded_obj) == TestClass
+        assert type(loaded_obj) == FakeClass
         assert loaded_obj.__dict__ == test_obj.__dict__
 
     def test_deserialize_inherited_custom_class(self):
-        test_obj = TestDerivedClass(34)
+        test_obj = FakeDerivedClass(34)
         formatted_json = {"$type": str(type(test_obj)), "$data": test_obj.__dict__}
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)
-        assert type(loaded_obj) == TestDerivedClass
+        assert type(loaded_obj) == FakeDerivedClass
         assert loaded_obj.__dict__ == test_obj.__dict__
 
     def test_deserialize_dataclass_with_custom_field(self):
-        custom_field = TestClass("TestParameter")
-        test_obj = TestDataClassWithCustomClass(23, "Hello World!", custom_field)
+        custom_field = FakeClass("TestParameter")
+        test_obj = FakeDataClassWithCustomClass(23, "Hello World!", custom_field)
         formatted_json_data = asdict(test_obj)
         formatted_json_data.pop("field3")
         formatted_json_data["field3"] = {
@@ -207,11 +207,11 @@ class TestDeserialize:
         }
         serialized_obj = json_dumps(formatted_json)
         loaded_obj = json_loads(serialized_obj)
-        assert type(loaded_obj) == TestDataClassWithCustomClass
+        assert type(loaded_obj) == FakeDataClassWithCustomClass
         assert is_dataclass(loaded_obj)
         assert loaded_obj.field1 == test_obj.field1
         assert loaded_obj.field2 == test_obj.field2
-        assert type(loaded_obj.field3) == TestClass
+        assert type(loaded_obj.field3) == FakeClass
         assert loaded_obj.field3.__dict__ == custom_field.__dict__
 
     def test_deserialize_complex(self):
