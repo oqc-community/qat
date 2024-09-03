@@ -170,8 +170,8 @@ class QbloxConfig:
 
 
 class QbloxConfigHelper(ABC):
-    def __init__(self, config: QbloxConfig):
-        self.config = config
+    def __init__(self, config: QbloxConfig = None):
+        self.config = config or QbloxConfig()
 
     def configure(self, module: Module, sequencer: Sequencer):
         self.configure_module(module, self.config.module)
@@ -243,6 +243,23 @@ class QbloxConfigHelper(ABC):
         if config.mixer.gain_ratio:
             sequencer.mixer_corr_gain_ratio(config.mixer.gain_ratio)
 
+    def calibrate_mixer(self, module: Module, sequencer: Sequencer):
+        """
+        - Compensates for the LO leakage for input(s)/output(s) depending on module
+        - Suppresses undesired sideband on sequencer
+        """
+        self.calibrate_lo_leakage(module)
+        self.calibrate_sideband(sequencer)
+
+    @abstractmethod
+    def calibrate_lo_leakage(self, module):
+        pass
+
+    def calibrate_sideband(self, sequencer):
+        sequencer.sideband_cal()
+        sequencer.arm_sequencer()
+        sequencer.start_sequencer()
+
 
 class QcmConfigHelper(QbloxConfigHelper):
     pass
@@ -287,6 +304,10 @@ class QcmRfConfigHelper(QcmConfigHelper):
             module.out1_offset_path0(config.offset.out1_path0)
         if config.offset.out1_path1:
             module.out1_offset_path1(config.offset.out1_path1)
+
+    def calibrate_lo_leakage(self, module):
+        module.out0_lo_cal()
+        module.out1_lo_cal()
 
 
 class QrmConfigHelper(QbloxConfigHelper):
@@ -350,3 +371,6 @@ class QrmRfConfigHelper(QrmConfigHelper):
             sequencer.demod_en_acq(config.demod_en_acq)
         if config.square_weight_acq.integration_length:
             sequencer.integration_length_acq(config.square_weight_acq.integration_length)
+
+    def calibrate_lo_leakage(self, module):
+        module.out0_in0_lo_cal()
