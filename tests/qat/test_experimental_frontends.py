@@ -14,11 +14,12 @@ from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.experimental.frontends import QASMFrontend, QIRFrontend
 from qat.purr.compiler.instructions import SweepValue, Variable
-from qat.purr.compiler.interrupt import BasicInterrupt
+from qat.purr.compiler.interrupt import BasicInterrupt, InterruptError
 from qat.purr.compiler.runtime import get_builder
 from qat.qat import _execute_with_metrics
 from tests.qat.qasm_utils import get_qasm2
 from tests.qat.test_qir import _get_qir_path
+from tests.qat.utils import raises_thread_exception
 
 
 def _get_qasm_path(file_name):
@@ -78,19 +79,19 @@ def test_interrupt_triggered_on_batch(get_hardware):
     queue = Queue(maxsize=1)
     event = Event()
     interrupt = BasicInterrupt(event, queue)
-    t = Thread(
-        target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
-        daemon=True,
-    )
-    # Set event before starting thread to prevent race conditions
-    interrupt.trigger()
-    t.start()
-    t.join()
+    with raises_thread_exception(InterruptError):
+        t = Thread(
+            target=frontend.execute,
+            args=(instructions, hardware, config, interrupt),
+            kwargs={"interrupt": interrupt},
+            daemon=True,
+        )
+        # Set event before starting thread to prevent race conditions
+        interrupt.trigger()
+        t.start()
+        t.join()
     why_finished = interrupt.queue.get(block=False)
     assert why_finished["interrupted"]
-    print(why_finished["metadata"])
     assert why_finished["metadata"]["batch_iteration"] == 0
 
 
@@ -130,14 +131,15 @@ def test_interrupt_triggered_on_batch_n(
     # Trigger cancellation on the nth batch
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
-    t = Thread(
-        target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
-        daemon=True,
-    )
-    t.start()
-    t.join()
+    with raises_thread_exception(InterruptError):
+        t = Thread(
+            target=frontend.execute,
+            args=(instructions, hardware, config, interrupt),
+            kwargs={"interrupt": interrupt},
+            daemon=True,
+        )
+        t.start()
+        t.join()
     why_finished = interrupt.queue.get(block=False)
     assert why_finished["interrupted"]
     assert why_finished["metadata"]["batch_iteration"] == kill_index
@@ -237,14 +239,15 @@ def test_interrupt_triggered_on_sweep_m_1d(
     # Trigger cancellation on the nth batch
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
-    t = Thread(
-        target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
-        daemon=True,
-    )
-    t.start()
-    t.join()
+    with raises_thread_exception(InterruptError):
+        t = Thread(
+            target=frontend.execute,
+            args=(instructions, hardware, config, interrupt),
+            kwargs={"interrupt": interrupt},
+            daemon=True,
+        )
+        t.start()
+        t.join()
     why_finished = interrupt.queue.get(block=False)
     assert why_finished["interrupted"]
     assert why_finished["metadata"]["batch_iteration"] == batch_n
@@ -321,14 +324,15 @@ def test_interrupt_triggered_on_sweep_m_2d(
     # Trigger cancellation on the nth batch
     mock_event.is_set.side_effect = side_effects
     interrupt = BasicInterrupt(mock_event)
-    t = Thread(
-        target=frontend.execute,
-        args=(instructions, hardware, config, interrupt),
-        kwargs={"interrupt": interrupt},
-        daemon=True,
-    )
-    t.start()
-    t.join()
+    with raises_thread_exception(InterruptError):
+        t = Thread(
+            target=frontend.execute,
+            args=(instructions, hardware, config, interrupt),
+            kwargs={"interrupt": interrupt},
+            daemon=True,
+        )
+        t.start()
+        t.join()
     why_finished = interrupt.queue.get(block=False)
     assert why_finished["interrupted"]
     assert why_finished["metadata"]["batch_iteration"] == batch_n

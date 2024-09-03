@@ -2,9 +2,12 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import random
 import re
+import threading
+from contextlib import contextmanager
 from typing import List
 
 import numpy as np
+import pytest
 
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.compiler.devices import (
@@ -15,6 +18,25 @@ from qat.purr.compiler.devices import (
     Resonator,
 )
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+
+@contextmanager
+def raises_thread_exception(exception_type: type):
+    """Context to assert that an exception is raised by threads."""
+    _raised_exceptions = []
+
+    def _custom_hook(args):
+        _raised_exceptions.append(args.exc_value)
+
+    old_hook, threading.excepthook = threading.excepthook, _custom_hook
+    try:
+        yield old_hook
+    finally:
+        assert threading.excepthook is _custom_hook
+        threading.excepthook = old_hook
+        with pytest.raises(exception_type):
+            for ex in _raised_exceptions:
+                raise ex
 
 
 def apply_setup_to_hardware(hw, qubit_indices: list):
