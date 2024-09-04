@@ -484,11 +484,8 @@ class QbloxContext:
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
-        max_duration = max([cxt.duration for cxt in contexts.values()])
         for target in inst.quantum_targets:
             cxt = contexts[target]
-            delay_time = max_duration - cxt.duration
-            cxt.delay(Delay(target, delay_time))
             cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
