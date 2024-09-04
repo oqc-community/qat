@@ -215,7 +215,6 @@ class QbloxContext:
         register = self._reg_alloc()
         label = self._generate_label(label)
         self.sequence_builder.move(iter_count, register)
-        self.sequence_builder.nop()
         self.sequence_builder.label(label)
         yield register
         self.sequence_builder.loop(register, label)
@@ -233,11 +232,9 @@ class QbloxContext:
         register = self._reg_alloc()
         label = self._generate_label(label)
         self.sequence_builder.move(start, register)
-        self.sequence_builder.nop()
         self.sequence_builder.label(label)
         yield register
         self.sequence_builder.add(register, step, register)
-        self.sequence_builder.nop()
         self.sequence_builder.jlt(register, iter_count, label)
         self._reg_free(register)
 
@@ -249,7 +246,6 @@ class QbloxContext:
         self.sequence_builder.set_mrk(3)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
         self.sequence_builder.move(0, self._repeat_reg)
-        self.sequence_builder.nop()
         self.sequence_builder.label(self._repeat_label)
         self.sequence_builder.reset_ph()
 
@@ -258,7 +254,6 @@ class QbloxContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._wait(self._repeat_period)
         self.sequence_builder.add(self._repeat_reg, 1, self._repeat_reg)
-        self.sequence_builder.nop()
         self.sequence_builder.jlt(self._repeat_reg, self._repeat_count, self._repeat_label)
         self.sequence_builder.stop()
 
