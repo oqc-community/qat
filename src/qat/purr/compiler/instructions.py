@@ -349,7 +349,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     dt = target.physical_channel.sample_time
-                    if not np.isclose(filter.duration, dt * (self.time // dt), atol=1e-12):
+                    if not np.isclose(filter.duration, self.time, atol=1e-12):
                         raise ValueError(
                             f"Filter duration '{filter.duration}' must be equal to Acquire "
                             f"duration '{self.time}'."
