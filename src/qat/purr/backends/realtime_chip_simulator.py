@@ -37,7 +37,7 @@ from .utilities import UPCONVERT_SIGN, PositionData, get_axis_map
 logger = get_default_logger()
 
 try:
-    from qutip import Options, Qobj, basis, create, destroy, mesolve, qeye, tensor
+    from qutip import Qobj, basis, create, destroy, mesolve, qeye, tensor
 
     qutip_available = True
 except ModuleNotFoundError:
@@ -996,8 +996,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                         dt, self.sim_t, buf
                     )
 
-            options = Options()
-            options["max_step"] = 1e-11
+            options = {"max_step": 1e-11}
 
             # Initial state.
             rho0 = tensor(*[qb.rho0 for qb in self.model.qubits])

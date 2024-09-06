@@ -110,7 +110,6 @@ filterwarnings = [
     # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
     #
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
-    "default:::qutip",
     "default:::qcodes",
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.
     'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
