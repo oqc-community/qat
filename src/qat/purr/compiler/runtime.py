@@ -193,7 +193,7 @@ class QuantumRuntime(MetricsMixin):
         if self.engine is None:
             raise ValueError("No execution engine available.")
 
-        if isinstance(instructions, InstructionBuilder):
+        if isinstance(instructions, InstructionBuilder) or any([i for i in instructions if isinstance(i, InstructionBuilder)]):
             instructions = instructions.instructions
 
         if instructions is None or not any(instructions):
