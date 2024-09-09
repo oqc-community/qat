@@ -169,11 +169,6 @@
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qblox_packages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware.set_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.DummyQbloxControlHardware.start_playback">
-<span class="sig-name descname"><span class="pre">start_playback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware.start_playback" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -182,7 +177,7 @@
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.ControlHardware" title="qat.purr.backends.live_devices.ControlHardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlHardware</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">
-<span class="sig-name descname"><span class="pre">allocate_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">allocate_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -199,13 +194,6 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.install">
 <span class="sig-name descname"><span class="pre">install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.install" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flags=&lt;ResetLevel.SOFT:</span> <span class="pre">3&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.reset" title="Link to this definition"></a></dt>
-<dd><p>A more convenient wrapper around QBlox’s (hard) reset.
-TODO - This needs to span across all daisy-chained clusters.</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.set_data">

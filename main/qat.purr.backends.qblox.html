@@ -294,9 +294,13 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_module"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_module()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_nco"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_nco()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_sequencer"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_sequencer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.reset"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.reset()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmConfigHelper.reset"><code class="docutils literal notranslate"><span class="pre">QcmConfigHelper.reset()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.calibrate_lo_leakage()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_attenuation()</span></code></a></li>
@@ -309,6 +313,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.configure"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper.configure()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper.configure_scope_acq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.reset"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper.reset()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper</span></code></a><ul>
@@ -401,7 +406,6 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.DummyQbloxControlHardware"><code class="docutils literal notranslate"><span class="pre">DummyQbloxControlHardware</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.DummyQbloxControlHardware.set_data"><code class="docutils literal notranslate"><span class="pre">DummyQbloxControlHardware.set_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.DummyQbloxControlHardware.start_playback"><code class="docutils literal notranslate"><span class="pre">DummyQbloxControlHardware.start_playback()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware</span></code></a><ul>
@@ -409,7 +413,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.connect"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.connect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.disconnect"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.disconnect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.install"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.install()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.reset"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.reset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.set_data"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.set_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.start_playback"><code class="docutils literal notranslate"><span class="pre">QbloxControlHardware.start_playback()</span></code></a></li>
 </ul>
