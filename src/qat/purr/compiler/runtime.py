@@ -5,9 +5,12 @@ from numbers import Number
 from typing import List, Optional, TypeVar, Union
 
 import numpy
-from purr.compiler.builders import FluidBuilderWrapper
 
-from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
+from qat.purr.compiler.builders import (
+    FluidBuilderWrapper,
+    InstructionBuilder,
+    QuantumInstructionBuilder,
+)
 from qat.purr.compiler.config import (
     CalibrationArguments,
     CompilerConfig,
