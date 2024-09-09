@@ -141,7 +141,8 @@ class TestMixerConfig(TestQbloxConfigMixin):
         seq_idx, sequencer_config = 0, SequencerConfig()
         config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
-        name = f"{request.node.originalname}_{uuid.uuid4()}"
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
         cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
         module: Module = next(
             (
@@ -172,7 +173,8 @@ class TestMixerConfig(TestQbloxConfigMixin):
         seq_idx, sequencer_config = 0, SequencerConfig()
         config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
-        name = f"{request.node.originalname}_{uuid.uuid4()}"
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
         cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
         module: Module = next(
             (m for m in cluster.modules if m.present() and m.is_qcm_type and m.is_rf_type)
@@ -198,7 +200,8 @@ class TestMixerConfig(TestQbloxConfigMixin):
         seq_idx, sequencer_config = 0, SequencerConfig()
         config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
-        name = f"{request.node.originalname}_{uuid.uuid4()}"
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
         cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
         module: Module = next(
             (
@@ -229,7 +232,8 @@ class TestMixerConfig(TestQbloxConfigMixin):
         seq_idx, sequencer_config = 0, SequencerConfig()
         config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
-        name = f"{request.node.originalname}_{uuid.uuid4()}"
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
         cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
         module: Module = next(
             (m for m in cluster.modules if m.present() and m.is_qrm_type and m.is_rf_type)
