@@ -138,23 +138,21 @@ class QbloxControlHardware(ControlHardware):
         self.dump_sequence = False
         self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
 
-    def allocate_resources(self, target: PulseChannel):
-        module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
-        module: Module = self._driver.modules[module_id]
-        allocations = self._resources.setdefault(module, {})
-        if target in allocations:
-            return module, allocations[target]
+    def allocate_resources(self, packages: List[QbloxPackage]):
+        for pkg in packages:
+            target = pkg.target
+            module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
+            module: Module = self._driver.modules[module_id]
+            allocations = self._resources.setdefault(module, {})
+            if target not in allocations:
+                total = set(target.physical_channel.config.sequencers.keys())
+                allocated = set([seq.seq_idx for seq in allocations.values()])
 
-        total = set(target.physical_channel.config.sequencers.keys())
-        allocated = set([seq.seq_idx for seq in allocations.values()])
-
-        available = list(total - allocated)
-        if available:
-            sequencer: Sequencer = module.sequencers[available[0]]
-            allocations[target] = sequencer
-            return module, sequencer
-
-        raise ValueError(f"No more available sequencers on module {module}")
+                available = total - allocated
+                if not available:
+                    raise ValueError(f"No more available sequencers on module {module}")
+                sequencer: Sequencer = module.sequencers[next(iter(available))]
+                allocations[target] = sequencer
 
     def _get_acquisitions(self, module: Module, sequencer: Sequencer):
         module.get_sequencer_status(sequencer.seq_idx, timeout=1)
@@ -195,29 +193,6 @@ class QbloxControlHardware(ControlHardware):
 
         return qblox_config
 
-    def reset(self, flags=ResetLevel.SOFT):
-        """
-        A more convenient wrapper around QBlox's (hard) reset.
-        TODO - This needs to span across all daisy-chained clusters.
-        """
-
-        if ResetLevel.HARD in flags:
-            self._driver.reset()
-            return
-
-        if ResetLevel.IO_CON in flags:
-            # Resetting I/O connections on all sequencers of all connected modules
-            for module in self._driver.get_connected_modules().values():
-                module.disconnect_outputs()
-                if module.is_qrm_type:
-                    module.disconnect_inputs()
-
-        if ResetLevel.SYNC in flags:
-            # Resetting SYNC on all sequencers of all connected modules
-            for module in self._driver.get_connected_modules().values():
-                for sequencer in module.sequencers:
-                    sequencer.sync_en(False)
-
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(
@@ -225,7 +200,7 @@ class QbloxControlHardware(ControlHardware):
                 identifier=self.address,
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
-            self.reset(ResetLevel.HARD)
+            self._driver.reset()
         log.info(self._driver.get_system_status())
         self.is_connected = True
 
@@ -240,7 +215,13 @@ class QbloxControlHardware(ControlHardware):
                 )
 
     def install(self, package: QbloxPackage):
-        module, sequencer = self.allocate_resources(package.target)
+        module, sequencer = next(
+            (
+                (m, t2s[package.target])
+                for m, t2s in self._resources.items()
+                if m.slot_idx == package.target.physical_channel.slot_idx
+            )
+        )
         log.debug(f"Configuring module {module}, sequencer {sequencer}")
         config = self._prepare_config(package, sequencer)
         if module.is_qcm_type:
@@ -268,7 +249,7 @@ class QbloxControlHardware(ControlHardware):
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
         self._resources.clear()
-        self.reset(ResetLevel.SOFT)
+        self.allocate_resources(qblox_packages)
         for package in qblox_packages:
             self.install(package)
 
@@ -279,20 +260,15 @@ class QbloxControlHardware(ControlHardware):
         results = {}
         for module, allocations in self._resources.items():
             for target, sequencer in allocations.items():
-                if module.is_qrm_type:
-                    sequencer.delete_acquisition_data(all=True)
+                sequencer.arm_sequencer()
 
         for module, allocations in self._resources.items():
             for target, sequencer in allocations.items():
-                module.arm_sequencer(sequencer.seq_idx)
+                sequencer.start_sequencer()
 
         for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                module.start_sequencer(sequencer.seq_idx)
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                if module.is_qrm_type:
+            if module.is_qrm_type:
+                for target, sequencer in allocations.items():
                     result_id = target.physical_channel.id
                     if result_id in results:
                         raise ValueError(
@@ -305,6 +281,9 @@ class QbloxControlHardware(ControlHardware):
                         results[result_id] = (
                             i + 1j * q
                         ) / sequencer.integration_length_acq()
+
+                    sequencer.delete_acquisition_data(all=True)
+                    sequencer.sync_en(False)
         return results
 
     def __getstate__(self) -> Dict:
@@ -350,34 +329,9 @@ class DummyQbloxControlHardware(QbloxControlHardware):
 
     def set_data(self, qblox_packages: List[QbloxPackage]):
         self._resources.clear()
-        self.reset(ResetLevel.SOFT)
+        self.allocate_resources(qblox_packages)
         for package in qblox_packages:
             module, sequencer = self.install(package)
 
             if module.is_qrm_type:
                 self._setup_dummy_scope_acq_data(module, sequencer, package.sequence)
-
-    def start_playback(self, repetitions: int, repetition_time: float):
-        if not any(self._resources):
-            raise ValueError("No resources allocated. Install packages first")
-
-        results = {}
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                module.arm_sequencer(sequencer.seq_idx)
-                module.start_sequencer(sequencer.seq_idx)
-
-                if module.is_qrm_type:
-                    result_id = target.physical_channel.id
-                    if result_id in results:
-                        raise ValueError(
-                            "Two or more pulse channels on the same physical channel"
-                        )
-                    acquisitions = self._get_acquisitions(module, sequencer)
-                    for acq_name, acq in acquisitions.items():
-                        i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                        q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                        results[result_id] = (
-                            i + 1j * q
-                        ) / sequencer.integration_length_acq()
-        return results
