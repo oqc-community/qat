@@ -105,6 +105,13 @@ class TestConfigGeneral:
         assert first_conf.repeats == second_conf.repeats
         assert first_conf.repetition_period == second_conf.repetition_period
 
+    def test_config_repeats_limit(self):
+        with pytest.raises(
+            ValueError,
+            match="Number of shots (100001) exceeds the maximum amount of 100000.",
+        ):
+            conf = CompilerConfig(repeats=100001)
+
     def test_config_metrics(self):
         first_conf = CompilerConfig()
 
