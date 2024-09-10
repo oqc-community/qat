@@ -1,0 +1,224 @@
+syntax = "proto3";
+
+package instruction_builder;
+
+import "google/protobuf/any.proto";
+
+
+enum InlineResultsProcessing{
+    raw =0;
+    binary = 1;
+    number_arrays=2;
+    experiment=3;
+    program=4;
+}
+
+enum AcquireMode{
+    raw_accquire=0; // has to be unique name for cpp enums
+    scope_accquire=1;
+    integrator_accquire=2;
+}
+
+message Instructions{
+    repeated google.protobuf.Any instructions = 1;
+}
+
+
+message Acquire{
+    int32 channel = 1;
+    float time = 2;
+    AcquireMode mode = 3;
+    repeated string existing_names = 4;
+    float delay = 5;
+    google.protobuf.Any filter = 6;
+}
+
+message Pulse{
+    int32 quantum_target = 1;
+    string pulse_shape = 2;
+    float width = 3;
+    float amp = 4;
+    float phase = 5;
+    float drag = 6;
+    float rise = 7;
+    float amp_setup = 8;
+    float scale_factor = 9;
+    int32 zero_at_edges = 10;
+    float beta = 11;
+    float frequency = 12;
+    float internal_phase = 13;
+    float std_dev = 14;
+    float square_width = 15;
+    bool ignore_channel_scale = 16;
+}
+
+message CustomPulse{
+    int32 quantum_target = 1;
+    repeated float samples = 2;
+    bool ignore_channel_scale = 3;
+}
+
+message ResultsProcessing{
+    string variable = 1;
+    ResultsProcessing results_processing = 2;
+}
+
+message Measure{
+    int32 target = 1;
+    string axis=2;
+    string output_variable = 3;
+}
+
+message X{
+    int32 target =1;
+    float radii = 2;
+}
+
+
+message Y{
+    int32 target =1;
+    float radii = 2;
+}
+
+
+message Z{
+    int32 target =1;
+    float radii = 2;
+}
+
+
+message Swap{
+    int32 target=1;
+    int32 destination=2;
+}
+
+message Had{
+    int32 target=1;
+}
+
+message PostProcessing{
+    Acquire acquire = 1;
+    string process = 2;
+    repeated float axes = 3;
+    int32 target = 4;
+    repeated google.protobuf.Any args = 5;
+
+}
+
+message Delay{
+    int32 target = 1;
+    float time = 2;
+}
+
+message Syncronise{
+    repeated int32 targets = 1;
+    float time = 2;
+}
+
+message PhaseShift{
+    int32 target = 1;
+    repeated int32 targets = 2;
+}
+
+message SX{
+    int32 target = 1;
+}
+
+message SXdg{
+    int32 target = 1;
+}
+
+message S{
+    int32 target = 1;
+}
+
+message Sdg{
+    int32 target = 1;
+}
+
+message T{
+    int32 target = 1;
+}
+
+message Tdg{
+    int32 target = 1;
+}
+
+message cX{
+    int32 controlled = 1;
+    int32 target = 2;
+    float radii = 3;
+}
+
+message cY{
+    int32 controlled = 1;
+    int32 target = 2;
+    float radii = 3;
+}
+
+message cZ{
+    int32 controlled = 1;
+    int32 target = 2;
+    float radii = 3;
+}
+
+message cnot{
+    int32 controlled = 1;
+    int32 target = 2;
+}
+
+message ccnot{
+    repeated int32 controlled = 1;
+    int32 target = 2;
+}
+
+message cswap{
+    int32 controlled = 1;
+    int32 target = 2;
+}
+
+message ECR{
+    int32 controlled = 1;
+    int32 target = 2;
+}
+
+message jump{
+    string label = 1;
+    google.protobuf.Any condition = 2;
+}
+
+message repeat{
+    int32 repeat_value = 1;
+    float repition_period = 2;
+}
+
+message assign{
+    string name = 1;
+    string value = 2;
+}
+
+message returns{
+    repeated google.protobuf.Any variables = 1;
+}
+
+message reset{
+    repeated int32 qubits = 1;
+}
+
+message device_assign{
+    int32 target = 1;
+    string attribute = 2;
+    repeated google.protobuf.Any value = 3;
+}
+
+message CreateLabel{
+    string name=1;
+}
+
+message ExistingNames{
+    repeated string existing_names = 1;
+}
+
+message EngantanglementMap{
+    map<int32, int32> entanglement_map = 1;
+}

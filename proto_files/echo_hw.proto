@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package echo_hardware;
+
+import "google/protobuf/any.proto";
+
+
+enum complex{
+    real = 0;
+    imag = 1;
+}
+
+message ConditionalToProb{
+    map<string, float> element = 1;
+}
+
+message ReadoutMitigationQubit{
+    map<string, ConditionalToProb> qubit = 1;
+}
+
+message ReadoutMitigation{
+    repeated ReadoutMitigationQubit readout_migitation_qubit = 1;
+}
+
+message BaseBand{
+    string id = 1;
+    float frequency = 2;
+    float if_frequency = 3;
+}
+
+message x_pi_2{
+    string shape = 1;
+    float width = 2;
+    float rise = 3;
+    float amp = 4;
+    float drag = 5;
+    float phase = 6;
+}
+
+message zx_pi_4{
+    string shape = 1;
+    float width = 2;
+    float rise = 3;
+    float amp = 4;
+    float drag = 5;
+    float phase = 6;
+    int32 other_qubit = 7;
+}
+
+message pulse_measure{
+    string shape = 1;
+    float width = 2;
+    float amp = 3;
+    float amp_setup = 4;
+    float rise = 5;
+}
+
+message measure_accquir{
+    string shape = 1;
+    bool sync = 2;
+    float width = 3;
+    repeated float weights = 4;
+    float use_weights = 5;
+}
+
+
+message PhysicalChannel{
+    string id = 1;
+    int32 sample_time = 2;
+    BaseBand baseband = 3;
+    int32 block_size = 4;
+    float phase_offset = 5;
+    float imbalance = 6;
+    bool acquire_allowed = 7;
+    float pulse_channel_min_frequency = 8;
+    float pulse_channel_max_frequency = 9;
+}
+
+message PulseChannel {
+    string channel_type = 1;
+    string id = 2;
+    PhysicalChannel PhysicalChannel = 3;
+    float frequency = 4;
+    complex bias = 5;
+    complex scale = 6;
+    bool fixed_if = 7;
+}
+
+message Resonator{
+    string id = 1;
+    PhysicalChannel physical_chanel = 2;
+    PulseChannel measure_channel = 3;
+    PulseChannel acquire_channel = 4;
+}
+
+
+message Qubit{
+    int32 index = 1;
+    string id = 2;
+    PhysicalChannel physical_channel = 3;
+    repeated Resonator resonators = 4;
+    PulseChannel drive_channel = 5;
+    repeated int32 coupled_qubits = 6;
+    complex mean_z_args = 7;
+    float discriminator = 8;
+    x_pi_2 hw_x_pi_2 = 9;
+    pulse_measure measure_pulse = 10;
+    measure_accquir measure_accquire = 11;
+    complex z_map_args = 12;
+    repeated zx_pi_4 pulse_zx_pi_4 = 13;
+}
+
+message QubitCoupling{
+    repeated int32 direction = 1;
+    float quality = 2;
+}
+
+message hardware_model{
+    string acquire_mode = 1;
+    int32 repeat_count = 2;
+    float default_repition_period = 3;
+    repeated google.protobuf.Any quantum_devices = 4;
+    repeated PulseChannel pulse_channels = 5;
+    repeated PhysicalChannel physical_channels = 6;
+    repeated BaseBand basebands = 7;
+    repeated QubitCoupling qubit_coupling = 8;
+    ReadoutMitigation readout_mitigation = 9;
+}

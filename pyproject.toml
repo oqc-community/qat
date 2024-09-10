@@ -16,7 +16,8 @@ authors = [
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
 ]
 packages = [
-    { include = "qat", from = "src/" }
+    { include = "qat", from = "src/" },
+    {include="proto_files"}
 ]
 license = "BSD-3-Clause"
 
@@ -41,6 +42,11 @@ regex = ">=2022.6.2"
 jsonpickle = ">=2.2.0"
 qblox-instruments = "^0.14.0"
 lark-parser = "^0.12.0"
+
+# NOTE: 5.x.x doesn't work with the fast backend
+# upgrade when fixed
+# can use a pure python backend, but slow
+protobuf = "3.20.3"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
