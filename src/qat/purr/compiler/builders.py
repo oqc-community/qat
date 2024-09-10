@@ -175,7 +175,7 @@ class InstructionBuilder:
                 self.merge_builder(component)
             else:
                 if isinstance(component, Repeat):
-                    self.repeat += 1
+                    self.repeats += 1
                 inst_list.append(component)
 
         for inst in inst_list:
