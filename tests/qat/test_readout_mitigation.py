@@ -1,4 +1,4 @@
-from random import random
+from random import random, seed
 
 import numpy as np
 import pytest
@@ -329,9 +329,13 @@ class TestOnNoisySimulator:
         q1_ro_fidelity_0=0.9,
         q1_ro_fidelity_1=0.6,
         threshold=0.051,
-        repeats=5,
     ):
         assert len(bitstring) == 2
+        # Fix the seed for the experiment
+        np.random.seed(0)
+        seed(0)
+
+        # Create the circuit
         circuit = QuantumCircuit(2, 2)
         for i, bit in enumerate(bitstring):
             if bit == "1":
@@ -351,17 +355,14 @@ class TestOnNoisySimulator:
         eng.fidelity_r0 = [q0_ro_fidelity_0, q1_ro_fidelity_0]
         eng.fidelity_r1 = [q0_ro_fidelity_1, q1_ro_fidelity_1]
 
-        # Repeat results to reduce variance
-        results = {"00": 0.0, "01": 0.0, "10": 0.0, "11": 0.0}
-        for _ in range(repeats):
-            mitigated_result = execute_qasm(qasm, eng, self.config)[
-                "linear_readout_mitigation"
-            ]
-            for output_bits, probability in mitigated_result.items():
-                results[output_bits] += probability
+        # Run the simulation
+        mitigated_result = execute_qasm(qasm, eng, self.config)["linear_readout_mitigation"]
 
-        for output_bits, probability in results.items():
+        # reset the seed
+        np.random.seed(None)
+        seed(None)
+        for output_bits, probability in mitigated_result.items():
             if output_bits == bitstring:
-                assert abs(1 - probability / repeats) < threshold
+                assert abs(1 - probability) < threshold
             else:
-                assert abs(probability / repeats) < threshold
+                assert abs(probability) < threshold
