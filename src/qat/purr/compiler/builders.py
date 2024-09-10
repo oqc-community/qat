@@ -72,7 +72,6 @@ class InstructionBuilder:
         self.existing_names = set()
         self._entanglement_map = {qubit: {qubit} for qubit in hardware_model.qubits}
         self.model = hardware_model
-        self.repeats = 0
         self.add(instructions)
 
     @property
@@ -189,16 +188,7 @@ class InstructionBuilder:
                         tmp.update(self._entanglement_map[entangled])
                     self._entanglement_map[qubit].update(tmp)
 
-            if isinstance(inst, Repeat):
-                self.repeats += 1
-
             self._instructions.append(inst)
-
-        # Throw error if the number of errors exceeds the limit on qcaas.
-        if self.repeats > 100000:
-            raise ValueError(
-                "Number of shots ({self.repeats}) exceeds the maximum amount of 100,000."
-            )
 
         return self
 
