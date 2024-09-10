@@ -329,7 +329,7 @@ class TestOnNoisySimulator:
         q1_ro_fidelity_0=0.9,
         q1_ro_fidelity_1=0.6,
         threshold=0.051,
-        repeats=5
+        repeats=5,
     ):
         assert len(bitstring) == 2
         circuit = QuantumCircuit(2, 2)
@@ -352,9 +352,11 @@ class TestOnNoisySimulator:
         eng.fidelity_r1 = [q0_ro_fidelity_1, q1_ro_fidelity_1]
 
         # Repeat results to reduce variance
-        results = {'00': 0.0, '01': 0.0, '10': 0.0, '11': 0.0}
+        results = {"00": 0.0, "01": 0.0, "10": 0.0, "11": 0.0}
         for _ in range(repeats):
-            mitigated_result = execute_qasm(qasm, eng, self.config)["linear_readout_mitigation"]
+            mitigated_result = execute_qasm(qasm, eng, self.config)[
+                "linear_readout_mitigation"
+            ]
             for output_bits, probability in mitigated_result.items():
                 results[output_bits] += probability
 
