@@ -248,6 +248,12 @@ class CompilerConfig:
     def validate(self, hardware):
         from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
+        # Throw error if the number of errors exceeds the limit on qcaas.
+        if self.repeats and self.repeats > 100000:
+            raise ValueError(
+                "Number of shots ({self.repeats}) exceeds the maximum amount of 100,000."
+            )
+
         if (
             self.error_mitigation is not None
             and self.error_mitigation != ErrorMitigationConfig.Empty
