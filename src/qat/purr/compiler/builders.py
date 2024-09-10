@@ -187,9 +187,7 @@ class InstructionBuilder:
                     for entangled in self._entanglement_map[qubit]:
                         tmp.update(self._entanglement_map[entangled])
                     self._entanglement_map[qubit].update(tmp)
-
             self._instructions.append(inst)
-
         return self
 
     def _get_entangled_qubits(self, inst):
