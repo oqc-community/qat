@@ -251,7 +251,7 @@ class CompilerConfig:
         # Throw error if the number of errors exceeds the limit on qcaas.
         if self.repeats and self.repeats > 100000:
             raise ValueError(
-                "Number of shots ({self.repeats}) exceeds the maximum amount of 100,000."
+                f"Number of shots ({self.repeats}) exceeds the maximum amount of 100000."
             )
 
         if (
