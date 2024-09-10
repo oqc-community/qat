@@ -107,9 +107,13 @@ class TestConfigGeneral:
         assert first_conf.repetition_period == second_conf.repetition_period
 
     def test_config_repeats_limit(self):
-        conf = CompilerConfig(repeats=100001)
+        # This config is on the limit and should not throw an error.
+        conf = CompilerConfig(repeats=100000)
         hardware = QuantumHardwareModel()
 
+        # This config exceeds the allowed (total) amount of shots.
+        conf = CompilerConfig(repeats=100001)
+        hardware = QuantumHardwareModel()
         with pytest.raises(
             ValueError,
             match="Number of shots \\(100001\\) exceeds the maximum amount of 100000.",
