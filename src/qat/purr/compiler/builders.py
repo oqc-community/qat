@@ -72,6 +72,7 @@ class InstructionBuilder:
         self.existing_names = set()
         self._entanglement_map = {qubit: {qubit} for qubit in hardware_model.qubits}
         self.model = hardware_model
+        self.repeats = 0
         self.add(instructions)
 
     @property
@@ -173,6 +174,8 @@ class InstructionBuilder:
             if isinstance(component, InstructionBuilder):
                 self.merge_builder(component)
             else:
+                if isinstance(component, Repeat):
+                    self.repeat += 1
                 inst_list.append(component)
 
         for inst in inst_list:
