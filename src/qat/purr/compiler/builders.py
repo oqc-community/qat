@@ -174,8 +174,6 @@ class InstructionBuilder:
             if isinstance(component, InstructionBuilder):
                 self.merge_builder(component)
             else:
-                if isinstance(component, Repeat):
-                    self.repeats += 1
                 inst_list.append(component)
 
         for inst in inst_list:
@@ -190,7 +188,18 @@ class InstructionBuilder:
                     for entangled in self._entanglement_map[qubit]:
                         tmp.update(self._entanglement_map[entangled])
                     self._entanglement_map[qubit].update(tmp)
+
+            if isinstance(inst, Repeat):
+                self.repeats += 1
+
             self._instructions.append(inst)
+
+        # Throw error if the number of errors exceeds the limit on qcaas.
+        if self.repeats > 100000:
+            raise ValueError(
+                "Number of shots ({self.repeats}) exceeds the maximum amount of 100,000."
+            )
+
         return self
 
     def _get_entangled_qubits(self, inst):
