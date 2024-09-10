@@ -17,6 +17,7 @@ from qat.purr.compiler.config import (
     ResultsFormatting,
     TketOptimizations,
 )
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
@@ -106,11 +107,14 @@ class TestConfigGeneral:
         assert first_conf.repetition_period == second_conf.repetition_period
 
     def test_config_repeats_limit(self):
+        conf = CompilerConfig(repeats=100001)
+        hardware = QuantumHardwareModel()
+
         with pytest.raises(
             ValueError,
-            match="Number of shots (100001) exceeds the maximum amount of 100000.",
+            match="Number of shots \\(100001\\) exceeds the maximum amount of 100000.",
         ):
-            conf = CompilerConfig(repeats=100001)
+            conf.validate(hardware)
 
     def test_config_metrics(self):
         first_conf = CompilerConfig()
