@@ -356,9 +356,6 @@ class QbloxContext:
             dtype=np.complex128,
         )
 
-        if 2 * t.size > self._wf_memory:  # for both I and Q
-            raise ValueError(f"No more waveform memory left for pulse on channel {target}")
-
         pulse = evaluate_shape(waveform, t)
         scale = target.scale
         if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
