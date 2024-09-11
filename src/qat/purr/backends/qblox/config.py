@@ -174,8 +174,13 @@ class QbloxConfigHelper(ABC):
         self.config = config or QbloxConfig()
 
     def configure(self, module: Module, sequencer: Sequencer):
+        self.reset(module, sequencer)
         self.configure_module(module, self.config.module)
         self.configure_sequencer(sequencer, self.config.sequencers[sequencer.seq_idx])
+
+    @abstractmethod
+    def reset(self, module: Module, sequencer: Sequencer):
+        pass
 
     @abstractmethod
     def configure_module(self, module: Module, config: ModuleConfig):
@@ -262,7 +267,8 @@ class QbloxConfigHelper(ABC):
 
 
 class QcmConfigHelper(QbloxConfigHelper):
-    pass
+    def reset(self, module: Module, sequencer: Sequencer):
+        module.disconnect_outputs()
 
 
 class QcmRfConfigHelper(QcmConfigHelper):
@@ -318,6 +324,10 @@ class QrmConfigHelper(QbloxConfigHelper):
         module.scope_acq_sequencer_select(sequencer.seq_idx)
         module.scope_acq_trigger_mode_path0("sequencer")
         module.scope_acq_trigger_mode_path1("sequencer")
+
+    def reset(self, module: Module, sequencer: Sequencer):
+        module.disconnect_outputs()
+        module.disconnect_inputs()
 
     def configure_scope_acq(self, module, config):
         scope_acq = config.scope_acq
