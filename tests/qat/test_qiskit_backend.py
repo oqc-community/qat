@@ -245,10 +245,8 @@ class TestQiskitBackend:
         assert len(b.circuit.data) == 0
         b.merge_builder(a)
         assert len(b.circuit.data) == 1
-    
-    @pytest.mark.parametrize(
-            "index", [0,1]
-    )
+
+    @pytest.mark.parametrize("index", [0, 1])
     def test_bitstring_ordering(self, index):
         qubit_count = 2
         hardware = get_default_qiskit_hardware(qubit_count)
@@ -259,6 +257,5 @@ class TestQiskitBackend:
         runtime = builder.model.create_runtime()
         results = runtime.execute(builder)
 
-        bitstring = "".join(["1" if i==index else "0" for i in range(2) ])
+        bitstring = "".join(["1" if i == index else "0" for i in range(2)])
         assert results.get(bitstring) == 1000
-
