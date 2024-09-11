@@ -944,7 +944,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                     device: RTCSQubit
                     channel = device.get_drive_channel().physical_channel
                     baseband = channel.baseband
-                    buf = buffers[channel.full_id()]
+                    buf = buffers[channel.full_id]
                     dt = channel.sample_time
                     if len(buf) < 2:
                         continue
@@ -952,7 +952,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                     d = spline_time(dt, self.sim_t, buf)
                     self.channel_pulse_data[channel] = d
 
-                    bb = self.model.basebands[baseband.full_id()]
+                    bb = self.model.basebands[baseband.full_id]
                     LO = bb.frequency
                     d = np.pi * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * LO * self.sim_t) * d
 
@@ -988,11 +988,11 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                         previous_index = index
                 else:
                     channel = device.get_default_pulse_channel().physical_channel
-                    dt = self.model.physical_channels[channel.full_id()].sample_time
-                    buf = resonator_buffers[channel.full_id()]
+                    dt = self.model.physical_channels[channel.full_id].sample_time
+                    buf = resonator_buffers[channel.full_id]
                     if len(buf) < 2:
                         continue
-                    self.channel_pulse_data[channel.full_id()] = spline_time(
+                    self.channel_pulse_data[channel.full_id] = spline_time(
                         dt, self.sim_t, buf
                     )
 
@@ -1069,7 +1069,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # Map the result onto the classical registers using
             for channel, aqs in aq_map.items():
                 for aq in aqs:
-                    response = response_buffers[aq.physical_channel.full_id()][
+                    response = response_buffers[aq.physical_channel.full_id][
                         :, aq.start : aq.start + aq.samples
                     ]
                     response_axis = get_axis_map(aq.mode, response)

@@ -194,7 +194,7 @@ class EchoEngine(QuantumExecutionEngine):
             for channel_id, aqs in aq_map.items():
                 for aq in aqs:
                     # just echo the output pulse back for now
-                    response = buffers[aq.physical_channel.full_id()][
+                    response = buffers[aq.physical_channel.full_id][
                         aq.start : aq.start + aq.samples
                     ]
                     if aq.mode != AcquireMode.SCOPE:

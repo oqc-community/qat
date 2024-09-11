@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
+from functools import cached_property
 from typing import Dict, List, Optional, Set, TypeVar, Union
 
 import jsonpickle
@@ -124,11 +125,12 @@ class QuantumComponent:
             id_ = ""
         self.id = str(id_)
 
+    @cached_property
     def full_id(self):
         return self.id
 
     def __repr__(self):
-        return f"{self.full_id()}"
+        return f"{self.full_id}"
 
 
 class Calibratable:
@@ -401,7 +403,7 @@ class PulseChannel(QuantumComponent, Calibratable):
             raise ValueError(
                 f"Pulse channel frequency '{frequency}' must be between the bounds "
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
-                f"channel with id {self.full_id()}."
+                f"channel with id {self.full_id}."
             )
 
     @property
@@ -438,7 +440,7 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     @property
     def physical_channel_id(self):
-        return self.physical_channel.full_id()
+        return self.physical_channel.full_id
 
     @property
     def min_frequency(self):
@@ -451,6 +453,7 @@ class PulseChannel(QuantumComponent, Calibratable):
     def partial_id(self):
         return self.id
 
+    @cached_property
     def full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
 
@@ -458,10 +461,10 @@ class PulseChannel(QuantumComponent, Calibratable):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
+        return self.full_id == other.full_id
 
     def __hash__(self):
-        return hash(self.full_id())
+        return hash(self.full_id)
 
 
 class FreqShiftPulseChannel(PulseChannel):
@@ -613,9 +616,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
                 f"Channel type {channel_type.name} requires at least one "
                 "auxillary_device"
             )
-        return ".".join(
-            [str(x.full_id()) for x in (auxiliary_devices)] + [channel_type.name]
-        )
+        return ".".join([str(x.full_id) for x in (auxiliary_devices)] + [channel_type.name])
 
     def add_pulse_channel(
         self,
@@ -743,8 +744,8 @@ class Qubit(QuantumDevice):
         if qubit not in self.coupled_qubits:
             self.coupled_qubits.append(qubit)
 
-        if qubit.full_id() not in self.pulse_hw_zx_pi_4:
-            self.pulse_hw_zx_pi_4[qubit.full_id()] = {
+        if qubit.full_id not in self.pulse_hw_zx_pi_4:
+            self.pulse_hw_zx_pi_4[qubit.full_id] = {
                 "shape": PulseShapeType.SOFT_SQUARE,
                 "width": 125e-9,
                 "rise": 10e-9,

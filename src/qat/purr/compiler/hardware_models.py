@@ -80,7 +80,7 @@ def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardw
             (
                 qubit
                 for qubit in model.qubits
-                if qubit.get_acquire_channel().full_id() == instruction.channel.full_id()
+                if qubit.get_acquire_channel().full_id == instruction.channel.full_id
             ),
             None,
         )
@@ -238,7 +238,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_quantum_device(self, *devices: QuantumDevice):
         for device in devices:
-            existing_dev = self.quantum_devices.get(device.full_id(), None)
+            existing_dev = self.quantum_devices.get(device.full_id, None)
             if existing_dev is not None:
                 # If we're the same instance just don't throw.
                 if existing_dev is device:
@@ -246,7 +246,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
                 raise KeyError(f"Quantum Device with id '{device.id}' already exists.")
 
-            self.quantum_devices[device.full_id()] = device
+            self.quantum_devices[device.full_id] = device
 
             # add device pulse channels to hardware if not already present
             for pulse_channel in device.pulse_channels.values():
@@ -257,17 +257,17 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_pulse_channel(self, *pulse_channels: PulseChannel):
         for pulse_channel in pulse_channels:
-            existing_channel = self.pulse_channels.get(pulse_channel.full_id(), None)
+            existing_channel = self.pulse_channels.get(pulse_channel.full_id, None)
             if existing_channel is not None:
                 # If we're the same instance just don't throw.
                 if existing_channel is pulse_channel:
                     continue
 
                 raise KeyError(
-                    f"Pulse channel with id '{pulse_channel.full_id()}' already exists."
+                    f"Pulse channel with id '{pulse_channel.full_id}' already exists."
                 )
 
-            self.pulse_channels[pulse_channel.full_id()] = pulse_channel
+            self.pulse_channels[pulse_channel.full_id] = pulse_channel
 
         return pulse_channels
 
@@ -316,32 +316,32 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def add_physical_channel(self, *physical_channels: PhysicalChannel):
         for physical_channel in physical_channels:
-            existing_channel = self.physical_channels.get(physical_channel.full_id(), None)
+            existing_channel = self.physical_channels.get(physical_channel.full_id, None)
             if existing_channel is not None:
                 # If we're the same instance just don't throw.
                 if existing_channel is physical_channel:
                     continue
 
                 raise KeyError(
-                    f"Physical channel with id '{physical_channel.full_id()}' already exists."
+                    f"Physical channel with id '{physical_channel.full_id}' already exists."
                 )
 
-            self.physical_channels[physical_channel.full_id()] = physical_channel
+            self.physical_channels[physical_channel.full_id] = physical_channel
 
     def get_physical_channel(self, id_: str):
         return self.physical_channels.get(id_, None)
 
     def add_physical_baseband(self, *basebands: PhysicalBaseband):
         for baseband in basebands:
-            existing_baseband = self.basebands.get(baseband.full_id(), None)
+            existing_baseband = self.basebands.get(baseband.full_id, None)
             if existing_baseband is not None:
                 # If we're the same instance just don't throw.
                 if existing_baseband is baseband:
                     continue
 
-                raise KeyError(f"Baseband with id '{baseband.full_id()}' already exists.")
+                raise KeyError(f"Baseband with id '{baseband.full_id}' already exists.")
 
-            self.basebands[baseband.full_id()] = baseband
+            self.basebands[baseband.full_id] = baseband
 
     def get_physical_baseband(self, id_: str):
         return self.basebands.get(id_, None)
@@ -370,7 +370,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         if isinstance(chanbit, Qubit):
             return chanbit, chanbit.get_default_pulse_channel()
         else:
-            quantum_devices = self.get_devices_from_pulse_channel(chanbit.full_id())
+            quantum_devices = self.get_devices_from_pulse_channel(chanbit.full_id)
             primary_devices = [
                 device
                 for device in quantum_devices
@@ -378,7 +378,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             ]
             if len(primary_devices) > 1:
                 raise NotImplementedError(
-                    f"Too many devices use the channel with id {chanbit.full_id()} as "
+                    f"Too many devices use the channel with id {chanbit.full_id} as "
                     "a default channel to resolve a primary device."
                 )
             elif len(primary_devices) == 0:

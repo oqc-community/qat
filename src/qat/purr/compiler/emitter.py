@@ -25,7 +25,7 @@ class TimelineSegment:
     ):
         self.instruction = instruction
         self.scheduling_dependencies = dependencies or {
-            comp.full_id() for comp in instruction.quantum_targets
+            comp.full_id for comp in instruction.quantum_targets
         }
         self.reliant_instructions = reliant or []
 
@@ -109,7 +109,7 @@ class InstructionEmitter:
 
         for inst in instructions:
             if isinstance(inst, PostProcessing):
-                qatf.add(inst, [inst.acquire.channel.full_id()])
+                qatf.add(inst, [inst.acquire.channel.full_id])
             elif isinstance(inst, QuantumInstruction):
                 qatf.add(inst)
             else:

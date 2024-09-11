@@ -102,7 +102,7 @@ def _add_channels(
             )
         unique_targets.add(target)
 
-    return sorted(list(unique_targets), key=lambda x: x.full_id())
+    return sorted(list(unique_targets), key=lambda x: x.full_id)
 
 
 class Repeat(Instruction):
@@ -245,7 +245,7 @@ class CustomPulse(Waveform):
         return len(self.samples) * self.channel.sample_time
 
     def __repr__(self):
-        id_ = self.channel.full_id()
+        id_ = self.channel.full_id
         duration = self.duration
         return f"custom pulse {id_},{duration}"
 
@@ -297,7 +297,7 @@ class Pulse(Waveform):
 
     def __repr__(self):
         return (
-            f"pulse {self.channel.full_id()},{self.shape.value},{self.amp},"
+            f"pulse {self.channel.full_id},{self.shape.value},{self.amp},"
             f"{self.phase},{self.width},{self.drag},{self.rise}"
         )
 
@@ -335,7 +335,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         delay=None,
         filter: Union[Pulse, CustomPulse] = None,
     ):
-        super().__init__(channel.full_id())
+        super().__init__(channel.full_id)
         super(QuantumComponent, self).__init__(channel)
         self.time: float = time or 1.0e-6
         self.mode: AcquireMode = mode or AcquireMode.RAW
@@ -369,7 +369,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
     def __repr__(self):
         out_var = f"->{self.output_variable}" if self.output_variable is not None else ""
         mode = f",{self.mode.value}" if self.mode is not None else ""
-        return f"acquire {self.channel.full_id()},{self.time}{mode}{out_var}"
+        return f"acquire {self.channel.full_id},{self.time}{mode}{out_var}"
 
 
 class PostProcessing(QuantumInstruction):
@@ -503,7 +503,7 @@ class DeviceUpdate(QuantumInstruction):
         self.value = value
 
     def __repr__(self):
-        return f"{self.target.full_id()}.{self.attribute} = {str(self.value)}"
+        return f"{self.target.full_id}.{self.attribute} = {str(self.value)}"
 
 
 class Sweep(Instruction):

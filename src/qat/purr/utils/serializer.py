@@ -144,7 +144,7 @@ class CustomJSONEncoder(JSONEncoder):
             # TODO: Acquire is a special wrapper component, not an actual component. Have a few too many special-cases
             #   for it now, think about reverting its special status.
             if isinstance(obj, QuantumComponent) and not isinstance(obj, Acquire):
-                return {"$component_id": obj.full_id()}
+                return {"$component_id": obj.full_id}
             elif is_dataclass(obj):
                 return {
                     "$type": typ_str,
