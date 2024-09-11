@@ -282,6 +282,7 @@ class SoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
+        print(np.tanh((x + (self._width - self._rise) / 2.0)), flush=True)
         return 0.5 * (
             np.tanh((x + (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype)
             - np.tanh(
