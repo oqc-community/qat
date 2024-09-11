@@ -263,7 +263,7 @@ class Pulse(Waveform):
         amp: float = 1.0,
         phase: float = 0.0,
         drag: float = 0.0,
-        rise=0.0,
+        rise: float = 0.0,
         amp_setup: float = 0.0,
         scale_factor: float = 1.0,
         zero_at_edges: int = 0,
