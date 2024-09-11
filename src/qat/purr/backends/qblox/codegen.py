@@ -353,7 +353,7 @@ class QbloxContext:
             start=-centre + 0.5 * dt,
             stop=length - centre - 0.5 * dt,
             num=num_samples,
-            dtype=np.float64,
+            dtype=np.complex128,
         )
         pulse = evaluate_shape(waveform, t)
         scale = target.scale
