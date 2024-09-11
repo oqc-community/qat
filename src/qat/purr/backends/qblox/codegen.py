@@ -350,7 +350,10 @@ class QbloxContext:
         length = num_samples * dt
         centre = length / 2.0
         t = np.linspace(
-            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=num_samples
+            start=-centre + 0.5 * dt,
+            stop=length - centre - 0.5 * dt,
+            num=num_samples,
+            dtype=np.float64,
         )
         pulse = evaluate_shape(waveform, t)
         scale = target.scale
