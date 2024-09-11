@@ -112,8 +112,6 @@ filterwarnings = [
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.
     'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
-    # TODO: Investigate and resolve RuntimeWarning on Windows.
-    'default:.*overflow encountered in tanh:RuntimeWarning:qat.purr.backends.utilities',
     # Qiskit Experiment using deprecated version of PulseBackendConfiguration
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
     # Qiskit IBM Experiment package using an old pkg_resources version

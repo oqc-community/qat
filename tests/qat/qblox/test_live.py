@@ -158,7 +158,7 @@ class TestQbloxLiveEngine:
         assert results is not None
 
     def test_play_very_long_pulse(self, model):
-        model.create_engine()
+        engine = model.create_engine()
         q0 = model.get_qubit(0)
 
         drive_channel = q0.get_drive_channel()
@@ -166,8 +166,8 @@ class TestQbloxLiveEngine:
             drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
         )
 
-        # with pytest.raises(ValueError):
-        #    results, _ = execute_instructions(engine, builder.instructions)
+        with pytest.raises(ValueError):
+            results, _ = execute_instructions(engine, builder.instructions)
 
     def test_bare_measure(self, model):
         engine = model.create_engine()
