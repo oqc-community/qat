@@ -28,6 +28,7 @@ class Instrument(Calibratable):
         if self.is_connected:
             self.disconnect()
         self.is_connected = True
+        log.info(f"{str(self)} with ID {self.id} connected")
         return self.is_connected
 
     def close(self):
@@ -39,7 +40,7 @@ class Instrument(Calibratable):
                 self.driver.close()
                 self._driver = None
                 self.is_connected = False
-                log.info(f"{str(self)} disconnected")
+                log.info(f"{str(self)} with ID {self.id} disconnected")
             except BaseException as e:
                 log.warning(
                     f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
