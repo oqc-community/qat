@@ -2,7 +2,6 @@ import json
 import os
 from dataclasses import asdict
 from datetime import datetime
-from enum import Flag, auto
 from functools import reduce
 from typing import Dict, List
 
@@ -111,14 +110,6 @@ class QbloxPhysicalChannel(PhysicalChannel):
         qubit.measure_acquire["delay"] = 151e-9  # TOF
 
         return qubit
-
-
-class ResetLevel(Flag):
-    SYNC = auto()  # Reset SYNC only
-    IO_CON = auto()  # Reset sequencer's IO channel connectivity
-
-    SOFT = SYNC | IO_CON
-    HARD = auto()  # Equivalent to Qblox's Cluster.reset(), it wipes out everything
 
 
 class QbloxControlHardware(ControlHardware):

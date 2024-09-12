@@ -222,6 +222,33 @@ class TestSweep:
             execute_instructions(EchoEngine(hw), builder)
         assert hw.get_qubit(0).get_drive_channel().scale == 5.0
 
+    def test_deviceinjector_reverts(self):
+        hw = get_default_echo_hardware(2)
+        qubit = hw.get_qubit(0)
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        num_points = 10
+        freq_range = 50e6
+        center_freq = qubit.get_acquire_channel().frequency
+        freqs = center_freq + np.linspace(-freq_range, freq_range, num_points)
+        var_name = f"freq{qubit.index}"
+        output_variable = f"Q{qubit.index}"
+
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue(var_name, freqs))
+            .device_assign(measure_channel, "frequency", Variable(var_name))
+            .device_assign(acquire_channel, "ycneuqerf", Variable(var_name))
+            .measure_mean_signal(qubit, output_variable)
+            .repeat(1000, 500e-6)
+        )
+
+        measure_channel.frequency = 9e9
+        with pytest.raises(Exception):
+            execute_instructions(EchoEngine(hw), builder)
+        assert measure_channel.frequency == 9e9
+
 
 class TestInstructionExecution:
     @pytest.mark.parametrize(
