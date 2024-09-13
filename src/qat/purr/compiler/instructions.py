@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import math
 import re
 from copy import deepcopy
 from enum import Enum
@@ -348,10 +349,11 @@ class Acquire(QuantumComponent, QuantumInstruction):
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     dt = target.physical_channel.sample_time
-                    if not np.isclose(filter.duration, dt * (self.time // dt), atol=1e-12):
+                    no_samples_from_time = math.floor(round(self.time / dt))
+                    if not np.isclose(filter.duration, dt * no_samples_from_time, atol=1e-12):
                         raise ValueError(
                             f"Filter duration '{filter.duration}' must be equal to Acquire "
-                            f"duration '{self.time}'."
+                            f"duration '{dt * no_samples_from_time}' which was rounded."
                         )
         return filter
 
