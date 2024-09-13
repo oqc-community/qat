@@ -53,7 +53,6 @@ class TestReadoutMitigation:
         creg b[{qubit_count}];
         h q[0];
         cx q[0], q[1];
-        barrier q;
         measure q -> b;
         """
 
