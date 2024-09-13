@@ -6,7 +6,11 @@ from typing import List, Optional, TypeVar, Union
 
 import numpy
 
-from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
+from qat.purr.compiler.builders import (
+    FluidBuilderWrapper,
+    InstructionBuilder,
+    QuantumInstructionBuilder,
+)
 from qat.purr.compiler.config import (
     CalibrationArguments,
     CompilerConfig,
@@ -193,7 +197,9 @@ class QuantumRuntime(MetricsMixin):
         if self.engine is None:
             raise ValueError("No execution engine available.")
 
-        if isinstance(instructions, InstructionBuilder):
+        if isinstance(instructions, InstructionBuilder) or isinstance(
+            instructions, FluidBuilderWrapper
+        ):
             instructions = instructions.instructions
 
         if instructions is None or not any(instructions):
