@@ -173,7 +173,8 @@ class TestInstruction:
         }
 
     @pytest.mark.parametrize(
-        "acquire_width", np.linspace(1e-6,6e-6,10),
+        "acquire_width",
+        np.linspace(1e-6, 6e-6, 10),
     )
     def test_acquire_filter(self, acquire_width):
         hw = get_default_echo_hardware(1)
@@ -191,7 +192,7 @@ class TestInstruction:
         with pytest.raises(ValueError):
             Acquire(
                 acquire_ch,
-                time=acquire_width+0.5e-6,
+                time=acquire_width + 0.5e-6,
                 filter=filter,
             )
 
