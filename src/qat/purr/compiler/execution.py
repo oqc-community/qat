@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import abc
 from decimal import ROUND_DOWN, Decimal
-from math import ceil
 from numbers import Number
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -48,6 +47,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
     Variable,
     Waveform,
+    remove_floating_point,
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
@@ -423,8 +423,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         block_size = pc.block_size
         block_time = pc.block_time
 
-        # round to remove floating point errors
-        block_number = ceil(round(instruction.duration / block_time, 4))
+        block_number = remove_floating_point(instruction.duration / block_time, 4)
         if return_samples:
             calc_sample = block_number * block_size
         else:
