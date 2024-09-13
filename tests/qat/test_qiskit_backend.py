@@ -12,6 +12,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
+from qat.qat import execute_qasm_with_metrics
 from tests.qat.qasm_utils import get_qasm2
 
 
@@ -259,3 +260,115 @@ class TestQiskitBackend:
 
         bitstring = "".join(["1" if i == index else "0" for i in range(2)])
         assert results.get(bitstring) == 1000
+
+    @pytest.mark.parametrize(
+        "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
+    )
+    def test_bitstring_ordering_qasm(self, qubits):
+        """
+        Test the execution of a QASM script using the qiskit backend to ensure
+        that the readouts are in the correct order.
+        """
+
+        num_qubits = 6
+
+        # Bell test for the two qubits
+        qasm = f"""
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[{num_qubits}];
+        creg c[{num_qubits}];
+        h q[{qubits[0]}];
+        cx q[{qubits[0]}], q[{qubits[1]}];
+        measure q -> c;
+        """
+
+        # Execute the script
+        hw = get_default_qiskit_hardware(num_qubits)
+        result, _ = execute_qasm_with_metrics(qasm, hw)
+
+        # Check the results
+        bitstring0 = "0" * num_qubits
+        bitstring1 = (
+            ("0" * (qubits[0]))
+            + "1"
+            + ("0" * (qubits[1] - qubits[0] - 1))
+            + "1"
+            + ("0" * (num_qubits - qubits[1] - 1))
+        )
+        assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
+
+    @pytest.mark.parametrize(
+        "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
+    )
+    def test_bitstring_out_of_order_qasm(self, qubits):
+        """
+        Test the execution of a QASM script using the qiskit backend to ensure
+        that the readouts are in the correct order. The QASM script will ask
+        the results of a bell state on various qubits to be stored in the first two
+        bits of the classical register.
+        """
+
+        num_qubits = 6
+
+        # Bell test for the two qubits
+        qasm = f"""
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[{num_qubits}];
+        creg c[{num_qubits}];
+        h q[{qubits[0]}];
+        cx q[{qubits[0]}], q[{qubits[1]}];
+        measure q[{qubits[0]}] -> c[0];
+        measure q[{qubits[1]}] -> c[1];
+        """
+        ctr = 2
+        for i in range(num_qubits):
+            if i not in qubits:
+                qasm += f"""
+                measure q[{i}] -> c[{ctr}];
+                """
+                ctr += 1
+
+        # Execute the script
+        hw = get_default_qiskit_hardware(num_qubits)
+        result, _ = execute_qasm_with_metrics(qasm, hw)
+
+        # Check the results
+        bitstring0 = "0" * num_qubits
+        bitstring1 = "11" + ("0" * (num_qubits - 2))
+        assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
+
+    @pytest.mark.parametrize(
+        "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
+    )
+    def test_bitstring_limited_qasm(self, qubits):
+        """
+        Test the execution of a QASM script using the qiskit backend to ensure
+        that the readouts are in the correct order. The QASM script will ask
+        the results of a bell state on various qubits to be stored in just two
+        bits in a classical register.
+        """
+
+        num_qubits = 6
+
+        # Bell test for the two qubits
+        qasm = f"""
+        OPENQASM 2.0;
+        include "qelib1.inc";
+        qreg q[{num_qubits}];
+        creg c[2];
+        h q[{qubits[0]}];
+        cx q[{qubits[0]}], q[{qubits[1]}];
+        measure q[{qubits[0]}] -> c[0];
+        measure q[{qubits[1]}] -> c[1];
+        """
+
+        # Execute the script
+        hw = get_default_qiskit_hardware(num_qubits)
+        result, _ = execute_qasm_with_metrics(qasm, hw)
+
+        # Check the results
+        bitstring0 = "00"
+        bitstring1 = "11"
+        assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
