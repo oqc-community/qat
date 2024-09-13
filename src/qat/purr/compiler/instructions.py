@@ -234,7 +234,7 @@ class CustomPulse(Waveform):
     def __init__(
         self,
         quantum_target: "PulseChannel",
-        samples: np.array,
+        samples: List[np.complex],
         ignore_channel_scale: bool = False,
     ):
         super().__init__(quantum_target)
