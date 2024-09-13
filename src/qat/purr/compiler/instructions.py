@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import math
 import re
 from copy import deepcopy
 from enum import Enum
@@ -233,7 +234,7 @@ class CustomPulse(Waveform):
     def __init__(
         self,
         quantum_target: "PulseChannel",
-        samples: List[np.complex],
+        samples: np.array,
         ignore_channel_scale: bool = False,
     ):
         super().__init__(quantum_target)
@@ -242,8 +243,7 @@ class CustomPulse(Waveform):
 
     @property
     def duration(self):
-        decimal_place = int(f'{self.channel.sample_time:e}'.split('e')[-1]) * -1
-        return round(len(self.samples) * self.channel.sample_time, decimal_place)
+        return len(self.samples) * self.channel.sample_time
 
     def __repr__(self):
         id_ = self.channel.full_id()
@@ -349,10 +349,11 @@ class Acquire(QuantumComponent, QuantumInstruction):
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     dt = target.physical_channel.sample_time
-                    if not np.isclose(filter.duration, self.time, atol=1e-12):
+                    no_samples_from_time = math.floor(round(self.time / dt))
+                    if not np.isclose(filter.duration, dt * no_samples_from_time, atol=1e-12):
                         raise ValueError(
                             f"Filter duration '{filter.duration}' must be equal to Acquire "
-                            f"duration '{self.time}'."
+                            f"duration '{dt * no_samples_from_time}' which was rounded."
                         )
         return filter
 
