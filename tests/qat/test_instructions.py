@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
-# from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
@@ -339,7 +339,7 @@ class TestInstructionExecution:
 class TestInstructionSerialisation:
     @pytest.mark.parametrize(
         "hardware_model_type",
-        [get_default_echo_hardware, get_default_RTCS_hardware],
+        [get_default_echo_hardware, get_default_qiskit_hardware, get_default_RTCS_hardware],
     )
     def test_basic_gate(self, hardware_model_type):
         hw = hardware_model_type(4)
