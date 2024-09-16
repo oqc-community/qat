@@ -22,7 +22,7 @@ license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-numpy = ">=1.26.4"
+numpy = ">=2.0.0"
 networkx = ">=2.5"
 matplotlib = "^3.3.2"
 logging-config = "~=1.0.4"
@@ -110,10 +110,9 @@ filterwarnings = [
     # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
     #
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
+    'default:.*overflow encountered in tanh:RuntimeWarning:qat.purr.backends.utilities',
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.
     'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
-    # TODO: Investigate and resolve RuntimeWarning on Windows.
-    'default:.*overflow encountered in tanh:RuntimeWarning:qat.purr.backends.utilities',
     # Qiskit Experiment using deprecated version of PulseBackendConfiguration
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
     # Qiskit IBM Experiment package using an old pkg_resources version
