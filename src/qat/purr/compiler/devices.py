@@ -713,7 +713,7 @@ class Qubit(QuantumDevice):
 
         self.pulse_hw_x_pi_2 = {
             "shape": PulseShapeType.GAUSSIAN,
-            "width": 100e-9,
+            "width": 3.2e-08,
             "rise": 1.0 / 3.0,
             "amp": 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5),
             "drag": 0.0,
