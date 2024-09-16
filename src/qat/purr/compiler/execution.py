@@ -453,6 +453,14 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         total_durations: Dict[PulseChannel, int] = dict()
 
         for instruction in instructions:
+            # calculate the total durations for each component
+            if isinstance(instruction, Synchronize):
+                current_durations = [
+                    total_durations.setdefault(qt, 0) for qt in instruction.quantum_targets
+                ]
+                longest_length = max(current_durations, default=0.0)
+                ctr = 0  # count to eliminate dict search later
+
             for qtarget in instruction.quantum_targets:
                 # TODO: Acquire is a special quantum target for post processing.
                 #  This should probably be changed.
@@ -470,12 +478,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 # channels to that point in time.
                 position_data = None
                 if isinstance(instruction, Synchronize):
-                    current_durations = {
-                        qt: total_durations.setdefault(qt, 0)
-                        for qt in instruction.quantum_targets
-                    }
-                    longest_length = max(current_durations.values(), default=0.0)
-                    delay_time = longest_length - total_durations[qtarget]
+                    delay_time = longest_length - current_durations[ctr]
                     if delay_time > 0:
                         instr = Delay(qtarget, delay_time)
                         position_data = PositionData(
@@ -483,6 +486,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                             sample_start + self.calculate_duration(instr),
                             instr,
                         )
+                    ctr += 1
                 else:
                     position_data = PositionData(
                         sample_start,
