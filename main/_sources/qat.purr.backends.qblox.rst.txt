@@ -18,3 +18,4 @@ Submodules
    qat.purr.backends.qblox.device
    qat.purr.backends.qblox.ir
    qat.purr.backends.qblox.live
+   qat.purr.backends.qblox.visualisation
