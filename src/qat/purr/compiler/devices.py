@@ -567,12 +567,14 @@ class QuantumDevice(QuantumComponent, Calibratable):
         id_: str,
         physical_channel: PhysicalChannel,
         measure_device: QuantumDevice = None,
+        granularity: float = 8e-09,
     ):
         super().__init__(id_)
         self.measure_device: QuantumDevice = measure_device
         self.pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]] = {}
         self.default_pulse_channel_type = ChannelType.measure
         self.physical_channel: PhysicalChannel = physical_channel
+        self.granularity: float = granularity
 
     def create_pulse_channel(
         self,
@@ -699,8 +701,9 @@ class Qubit(QuantumDevice):
         coupled_qubits: List[Qubit] = None,
         drive_amp: float = 1.0,
         id_=None,
+        **kwargs,
     ):
-        super().__init__(id_ or f"Q{index}", physical_channel, resonator)
+        super().__init__(id_ or f"Q{index}", physical_channel, resonator, **kwargs)
         self.index = index
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
@@ -713,7 +716,7 @@ class Qubit(QuantumDevice):
 
         self.pulse_hw_x_pi_2 = {
             "shape": PulseShapeType.GAUSSIAN,
-            "width": 3.2e-08,
+            "width": 9.6e-08,
             "rise": 1.0 / 3.0,
             "amp": 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5),
             "drag": 0.0,

@@ -82,8 +82,22 @@ def apply_setup_to_hardware(
         qubit = Qubit(primary_index, resonator, ch1)
         qubit.create_pulse_channel(ChannelType.drive, frequency=5.5e9)
 
+        if not pulse_hw_x_pi_2_width % qubit.granularity:
+            log.warning(
+                f"Non-hardware-feasible pulse width detected: pulse_hw_x_pi_2_width is not a multiple of the qubit granularity, which is {np.round(qubit.granularity * 1e09, 3)} ns."
+            )
         qubit.pulse_hw_x_pi_2.update({"width": pulse_hw_x_pi_2_width})
+
+        if not pulse_hw_zx_pi_4_width % qubit.granularity:
+            log.warning(
+                f"Non-hardware-feasible pulse width detected: pulse_hw_zx_pi_4_width is not a multiple of the qubit granularity, which is {np.round(qubit.granularity * 1e09, 3)} ns."
+            )
         qubit.pulse_hw_zx_pi_4.update({"width": pulse_hw_zx_pi_4_width})
+
+        if not pulse_measure_width % qubit.granularity:
+            log.warning(
+                f"Non-hardware-feasible pulse width detected: pulse_measure_width is not a multiple of the qubit granularity, which is {np.round(qubit.granularity * 1e09, 3)} ns."
+            )
         qubit.pulse_measure.update({"width": pulse_measure_width})
 
         qubit_devices.append(qubit)
