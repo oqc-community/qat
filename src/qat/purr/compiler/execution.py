@@ -489,7 +489,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         sample_start + self.calculate_duration(instruction),
                         instruction,
                     )
-
                 if position_data is not None:
                     device_instructions.append(position_data)
 
