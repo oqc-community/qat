@@ -273,13 +273,14 @@ class QiskitEngine(InstructionExecutionEngine):
             log.warning("Qasm Simulator does not support multiple assignment.")
         if returns:
             # trim the qiskit returns to the classical register
-            removals = self.model.qubit_count - len(assigns[returns[0]])
+            labels = assigns[returns[0]]
+            removals = self.model.qubit_count - len(labels)
             trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
 
             # find the reordering
             ctr = 0
             order = []
-            for lbl in assigns[returns[0]]:
+            for lbl in labels:
                 if str(lbl) in builder.bit_ordering:
                     order.append(builder.bit_ordering.index(str(lbl)))
                 else:
