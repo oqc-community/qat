@@ -93,6 +93,7 @@ class QbloxPackage:
     target: PulseChannel = None
     sequence: Sequence = None
     sequencer_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
+    timeline: np.ndarray = None
 
 
 class QbloxEmitter:
@@ -183,6 +184,8 @@ class QbloxContext:
         self._repeat_label = None
 
         self._duration: int = 0
+        self._timeline: np.ndarray = np.empty(0)
+
         self._num_hw_avg = 1  # Technically disabled
         self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
         self._wf_index: int = 0
@@ -263,7 +266,7 @@ class QbloxContext:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._wait(self._repeat_period)
+        self._wait_seconds(self._repeat_period)
         self.sequence_builder.add(self._repeat_reg, 1, self._repeat_reg)
         self.sequence_builder.nop()
         self.sequence_builder.jlt(self._repeat_reg, self._repeat_count, self._repeat_label)
@@ -308,15 +311,17 @@ class QbloxContext:
 
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config)
+        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
-    def _wait(self, duration: float):
+    def _wait_seconds(self, duration: float):
+        self._wait_nanoseconds(int(duration * 1e9))
+
+    def _wait_nanoseconds(self, duration: int):
         if duration <= 0:
             return
 
-        duration_nanos = int(duration * 1e9)
-        quotient = duration_nanos // Constants.MAX_WAIT_TIME
-        remainder = duration_nanos % Constants.MAX_WAIT_TIME
+        quotient = duration // Constants.MAX_WAIT_TIME
+        remainder = duration % Constants.MAX_WAIT_TIME
         if quotient > Constants.LOOP_UNROLL_THRESHOLD:
             with self._loop("wait_label", quotient):
                 self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
@@ -416,31 +421,33 @@ class QbloxContext:
         capped_flight_nanos = min(flight_nanos, Constants.MAX_WAIT_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self._wait(delay)
+            self._wait_seconds(delay)
             self.sequence_builder.acquire(
                 acq_index,
                 self._repeat_reg,
                 capped_num_samples,
             )
-            self._wait((num_samples - capped_num_samples) / 1e9)
+            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             self.sequence_builder.play(i_index, q_index, capped_flight_nanos)
-            self._wait((flight_nanos - capped_flight_nanos) / 1e9)
+            self._wait_seconds((flight_nanos - capped_flight_nanos) / 1e9)
             self.sequence_builder.acquire(
                 acq_index,
                 self._repeat_reg,
                 capped_num_samples,
             )
-            self._wait((num_samples - capped_num_samples) / 1e9)
+            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
 
     def id(self):
         self.sequence_builder.nop()
 
     def delay(self, inst: Delay):
-        self._wait(inst.duration)
+        self._wait_seconds(inst.duration)
         self._duration = self._duration + inst.duration
+        num_samples = int(calculate_duration(inst))
+        self._timeline = np.append(self._timeline, [0] * num_samples)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         pulse = self._evaluate_waveform(waveform, target)
@@ -459,15 +466,16 @@ class QbloxContext:
             )
             self.sequence_builder.set_awg_offs(i_offs_steps, q_offs_steps)
             self.sequence_builder.upd_param(max_duration)
-            self._wait((num_samples - max_duration) / 1e9)
+            self._wait_seconds((num_samples - max_duration) / 1e9)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             i_index, q_index = self._register_waveform(waveform, target, pulse)
             self.sequence_builder.play(i_index, q_index, max_duration)
-            self._wait((num_samples - max_duration) / 1e9)
+            self._wait_seconds((num_samples - max_duration) / 1e9)
 
         self._duration = self._duration + waveform.duration
+        self._timeline = np.append(self._timeline, pulse)
 
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
@@ -516,6 +524,7 @@ class QbloxContext:
                 )
 
         self._duration = self._duration + measure.duration
+        self._timeline = np.append(self._timeline, pulse)
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
