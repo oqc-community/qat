@@ -18,13 +18,8 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     relates to the various benchmarking runs and a list of the sequence lengths.
     """
     # Due to the variable return value we can't directly unpack.
-    if "lengths" not in kwargs:
-        # TODO: Find out why length 10 generates some broken DAG when re-parsed
-        lengths = [1, 2, 4]
-    else:
-        lengths = kwargs.pop("lengths")
-    if "physical_qubits" not in kwargs:
-        physical_qubits = [0]
+    lengths = kwargs.pop("lengths", [1, 2, 4])
+    physical_qubits = kwargs.pop("physical_qubits", [0])
 
     results = dict()
     index = 0
