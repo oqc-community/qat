@@ -21,6 +21,8 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     if "lengths" not in kwargs:
         # TODO: Find out why length 10 generates some broken DAG when re-parsed
         lengths = [1, 2, 4]
+    else:
+        lengths = kwargs.pop("lengths")
     if "physical_qubits" not in kwargs:
         physical_qubits = [0]
 
