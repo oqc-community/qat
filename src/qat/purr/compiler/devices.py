@@ -315,6 +315,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         acquire_allowed: bool = False,
         pulse_channel_min_frequency: float = 0.0,
         pulse_channel_max_frequency: float = np.inf,
+        grid_time: float = 4e-09,  # 4 ns
     ):
         super().__init__(id_)
         self.sample_time: float = sample_time
@@ -326,6 +327,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         self.acquire_allowed: bool = acquire_allowed
         self.pulse_channel_min_frequency: float = pulse_channel_min_frequency
         self.pulse_channel_max_frequency: float = pulse_channel_max_frequency
+        self.grid_time: int = grid_time
 
     def create_pulse_channel(
         self,
