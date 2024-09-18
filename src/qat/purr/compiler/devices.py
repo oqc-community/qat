@@ -569,14 +569,12 @@ class QuantumDevice(QuantumComponent, Calibratable):
         id_: str,
         physical_channel: PhysicalChannel,
         measure_device: QuantumDevice = None,
-        granularity: float = 8e-09,
     ):
         super().__init__(id_)
         self.measure_device: QuantumDevice = measure_device
         self.pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]] = {}
         self.default_pulse_channel_type = ChannelType.measure
         self.physical_channel: PhysicalChannel = physical_channel
-        self.granularity: float = granularity
 
     def create_pulse_channel(
         self,
