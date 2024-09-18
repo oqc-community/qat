@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import logging
 import tempfile
 from os.path import dirname, join
 
@@ -32,9 +33,12 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
+from qat.purr.utils.logger import get_default_logger
 from qat.qat import execute
 from tests.qat.qasm_utils import get_qasm2
 from tests.qat.test_readout_mitigation import apply_error_mitigation_setup
+
+log = get_default_logger()
 
 
 class FakeBaseQuantumExecution(LiveDeviceEngine):
@@ -361,6 +365,33 @@ class TestBaseQuantum:
             np.zeros(full_length - setup_length),
             np.round(np.imag(result[setup_length:full_length]), 7),
         )
+
+    @pytest.mark.parametrize(
+        "width, warning_flag",
+        [
+            (3.2e-08, False),
+            (5e-09, True),
+            (3.3e-08, True),
+            (15e-09, True),
+            (1.6e-08, False),
+        ],
+    )
+    def test_pulse_validation_grid_time_throws_warning(self, width, warning_flag, caplog):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+        drive_channel = qubit.get_drive_channel()
+
+        builder = get_builder(hw).pulse(drive_channel, PulseShapeType.SQUARE, width=width)
+
+        engine = get_test_execution_engine(hw)
+
+        # Capture if warnings are sent to logger.
+        with caplog.at_level(logging.WARNING):
+            execute_instructions(engine, builder)
+            assert (
+                "Non-hardware-feasible pulse detected" in caplog.text
+                and str(width) in caplog.text
+            ) == warning_flag
 
     def test_variable_acquire_pulse(self):
         hw = get_test_model()
