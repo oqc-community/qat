@@ -393,6 +393,27 @@ class TestBaseQuantum:
                 and str(width) in caplog.text
             ) == warning_flag
 
+    def test_pulse_validation_grid_time_throws_warning_for_sweep(self, caplog):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+        drive_channel = qubit.get_drive_channel()
+        engine = get_test_execution_engine(hw)
+
+        time = np.linspace(
+            4e-09, 1.6e-8, 11
+        )  # Contains non-hardware-feasible pulse widths.
+        print(time)
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("t", time))
+            .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
+        )
+
+        # Capture if warnings are sent to logger.
+        with caplog.at_level(logging.WARNING):
+            execute_instructions(engine, builder)
+            assert "Non-hardware-feasible pulse detected" in caplog.text
+
     def test_variable_acquire_pulse(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
