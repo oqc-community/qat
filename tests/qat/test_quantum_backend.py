@@ -636,10 +636,10 @@ class TestBaseQuantum:
     def test_duration_timeline(self):
         """
         Tests the creation of a duration timeline with a two-qubit model and a
-        simple quantum circuit. The test is in three parts:
-        i) the timeline for each pulse has is concurrent,
+        simple quantum circuit. The test is in four parts:
+        i) the timeline for each pulse is concurrent,
         ii) Adding a redundant synchronize results in the same timeline
-        iii) The duration of the circuit matches that if its constituents.
+        iii) The duration of the circuit matches that of the sum of its constituents.
         """
         # Create the hardware model and engine
         hw = get_test_model()
@@ -718,3 +718,17 @@ class TestBaseQuantum:
         ts = [exec_time(engine, circ) for circ in circs]
         maxtime = max([chan[-1].end for chan in res1.values()])
         assert max(ts[0], ts[1]) + ts[2] + max(ts[3], ts[4]) == maxtime
+
+        # Check that synchronize gives the expected times
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .synchronize([q1, q2])
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+        maxtime = max([chan[-1].end for chan in res1.values()])
+        assert ts[0] + ts[1] + ts[2] + max(ts[3], ts[4]) == maxtime
