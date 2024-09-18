@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
+from functools import cached_property
 from typing import Dict, List, Optional, Set, TypeVar, Union
 
 import jsonpickle
@@ -404,7 +405,7 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"channel with id {self.full_id()}."
             )
         # store the full id
-        self.full_id_ = self.full_id()
+        self.hash_ = hash(self.full_id())
 
     @property
     def sample_time(self):
@@ -453,12 +454,13 @@ class PulseChannel(QuantumComponent, Calibratable):
     def partial_id(self):
         return self.id
 
-    def full_id(self, use_caching=False):
-        return (
-            self.full_id_
-            if use_caching
-            else self.physical_channel_id + "." + self.partial_id()
-        )
+    def full_id(self):
+        # return self.physical_channel_id + "." + self.partial_id()
+        return self.full_id_
+
+    @cached_property
+    def full_id_(self):
+        return self.physical_channel_id + "." + self.partial_id()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
@@ -466,8 +468,14 @@ class PulseChannel(QuantumComponent, Calibratable):
 
         return self.full_id() == other.full_id()
 
-    def __hash__(self):
+    @cached_property
+    def _hash(self):
         return hash(self.full_id())
+
+    def __hash__(self):
+        # return hash(self.full_id())
+        # return self.hash_
+        return self._hash
 
 
 class FreqShiftPulseChannel(PulseChannel):
