@@ -412,7 +412,6 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         with log_duration("Instructions validated in {} seconds."):
             super().validate(instructions)
 
-            grid_time = self.model.get_qubit(0).physical_channel.grid_time
             consumed_qubits: List[str] = []
             for inst in instructions:
                 if isinstance(inst, PostProcessing):
@@ -446,11 +445,6 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                         if qbit.get_measure_channel() == inst.channel:
                             consumed_qubits.append(qbit)
                 elif isinstance(inst, Pulse):
-                    if not inst.width % grid_time:
-                        log.warning(
-                            f"Non-hardware-feasible pulse detected: {inst} does not have a pulse width that is a multiple of the pulse resolution ({np.round(grid_time * 1e09, 3)} ns)."
-                        )
-
                     # Find target qubit from instruction and check whether it's been
                     # measured already.
                     acquired_qubits = [

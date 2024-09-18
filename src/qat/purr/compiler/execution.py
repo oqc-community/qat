@@ -235,6 +235,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 f"{instruction_length} instructions."
             )
 
+        grid_time = self.model.get_qubit(0).physical_channel.grid_time
         for inst in instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
                 raise ValueError(
@@ -243,27 +244,30 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 )
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
-                if isinstance(duration, Number) and duration > MaxPulseLength:
-                    raise ValueError(
-                        f"Max Waveform width is {MaxPulseLength} s "
-                        f"given: {inst.duration} s"
-                    )
+                if isinstance(duration, Number):
+                    values = np.array([duration])
                 elif isinstance(duration, Variable):
-                    values = next(
-                        iter(
-                            [
-                                sw.variables[duration.name]
-                                for sw in instructions
-                                if isinstance(sw, Sweep)
-                                and duration.name in sw.variables.keys()
-                            ]
+                    values = np.array(
+                        next(
+                            iter(
+                                [
+                                    sw.variables[duration.name]
+                                    for sw in instructions
+                                    if isinstance(sw, Sweep)
+                                    and duration.name in sw.variables.keys()
+                                ]
+                            )
                         )
                     )
-                    if np.max(values) > MaxPulseLength:
-                        raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {values} s"
-                        )
+
+                if np.any(values > MaxPulseLength):
+                    raise ValueError(
+                        f"Max Waveform width is {MaxPulseLength} s, given: {values} s."
+                    )
+                elif np.any(values % grid_time):
+                    log.warning(
+                        f"Non-hardware-feasible pulse detected: {inst} does not have a pulse width that is a multiple of the pulse resolution ({np.round(grid_time * 1e09, 3)} ns)."
+                    )
 
     def _generate_repeat_batches(self, repeats):
         """
