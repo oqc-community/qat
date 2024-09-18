@@ -403,6 +403,8 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
+        # store the full id
+        self.full_id_ = self.full_id()
 
     @property
     def sample_time(self):
@@ -451,8 +453,12 @@ class PulseChannel(QuantumComponent, Calibratable):
     def partial_id(self):
         return self.id
 
-    def full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
+    def full_id(self, use_caching=False):
+        return (
+            self.full_id_
+            if use_caching
+            else self.physical_channel_id + "." + self.partial_id()
+        )
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
