@@ -703,7 +703,7 @@ class Qubit(QuantumDevice):
         id_=None,
         **kwargs,
     ):
-        super().__init__(id_ or f"Q{index}", physical_channel, resonator, **kwargs)
+        super().__init__(id_ or f"Q{index}", physical_channel, resonator)
         self.index = index
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
