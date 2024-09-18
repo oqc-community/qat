@@ -235,7 +235,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 f"{instruction_length} instructions."
             )
 
-        grid_time = self.model.get_qubit(0).physical_channel.grid_time
+        grid_time = self.model.qubits[0].physical_channel.grid_time
         for inst in instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
                 raise ValueError(
