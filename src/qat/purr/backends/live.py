@@ -85,19 +85,19 @@ def apply_setup_to_hardware(
         grid_time = qubit.physical_channel.grid_time
         if not pulse_hw_x_pi_2_width % grid_time:
             log.warning(
-                f"Non-hardware-feasible pulse width detected: pulse_hw_x_pi_2_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
+                f"Non-hardware-feasible pulse width detected in hardware setup: pulse_hw_x_pi_2_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
             )
         qubit.pulse_hw_x_pi_2.update({"width": pulse_hw_x_pi_2_width})
 
         if not pulse_hw_zx_pi_4_width % grid_time:
             log.warning(
-                f"Non-hardware-feasible pulse width detected: pulse_hw_zx_pi_4_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
+                f"Non-hardware-feasible pulse width detected in hardware setup: pulse_hw_zx_pi_4_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
             )
         qubit.pulse_hw_zx_pi_4.update({"width": pulse_hw_zx_pi_4_width})
 
         if not pulse_measure_width % grid_time:
             log.warning(
-                f"Non-hardware-feasible pulse width detected: pulse_measure_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
+                f"Non-hardware-feasible pulse width detected in hardware setup: pulse_measure_width is not a multiple of the pulse resolution, which is {np.round(grid_time * 1e09, 3)} ns."
             )
         qubit.pulse_measure.update({"width": pulse_measure_width})
 
