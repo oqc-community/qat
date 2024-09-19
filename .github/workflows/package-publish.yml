@@ -4,7 +4,6 @@ on:
   push:
     tags: [ '[0-9]+.[0-9]+.[0-9]+' ]
 jobs:
-  # @see https://stackoverflow.com/a/72959712/8179249
   check-current-branch:
     runs-on: ubuntu-latest
     outputs:
