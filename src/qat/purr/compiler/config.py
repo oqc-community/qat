@@ -8,7 +8,7 @@ import sys
 from enum import Enum, Flag, IntEnum, auto
 from typing import List, Optional
 
-from qat.purr.qatconfig import qatconfig
+from qat import qatconfig
 from qat.purr.utils.serializer import json_dumps, json_loads
 
 

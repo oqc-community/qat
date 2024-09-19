@@ -110,12 +110,20 @@ class TestConfigGeneral:
     @pytest.mark.parametrize(
         "repeats, possible_error_throw",
         [
+            (None, does_not_raise()),
+            (0, does_not_raise()),
             (64_000, does_not_raise()),
             (100_000, does_not_raise()),
             (100_001, pytest.raises(ValueError, match="exceeds the maximum amount of")),
             (1_000_000, pytest.raises(ValueError, match="exceeds the maximum amount of")),
-            (0, does_not_raise()),
-            (None, does_not_raise()),
+        ],
+        ids=[
+            "None repeats",
+            "zero repeats",
+            "64_000 repeats (within limit)",
+            "100_000 repeats (edge case)",
+            "100_001 repeats (limit exceeded)",
+            "1_000_000 repeats (limit exceeded)",
         ],
     )
     def test_config_repeats_limit(self, repeats, possible_error_throw):
