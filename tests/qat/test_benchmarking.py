@@ -16,3 +16,13 @@ class TestBenchmarking:
             for inst in seed_list
         ]
         assert len(benchmarking_results) == 6
+
+    def test_randomized_benchmarking_lengths(self):
+        model = get_default_echo_hardware()
+        results, sequence_lengths = randomized_benchmarking(model, 2, lengths=[1, 2])
+        benchmarking_results = [
+            execute_instructions(model, inst)
+            for seed_list in results.values()
+            for inst in seed_list
+        ]
+        assert len(benchmarking_results) == 4
