@@ -14,7 +14,7 @@ authors = [
     "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>",
     "Norbert Deak <ndeak@oxfordquantumcircuits.com>",
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
-    "Benjamin sach <bsach@oxfordquantumcircuits.com>",
+    "Benjamin Sach <bsach@oxfordquantumcircuits.com>",
     "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>",
     "Luke Causer <lcauser@oxfordquantumcircuits.com>"
 ]
@@ -53,7 +53,7 @@ pytest = "^8.3.2"
 pytest-cov = ">=2.10.1"
 autoflake = "^2.2.0"
 isort = "^5.13.2"
-docplex = { git = "https://github.com/keriksson-rosenqvist/docplex.git", rev = "01ac8f1" }
+docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 
 [tool.poetry.group.licenses]
@@ -97,7 +97,7 @@ known_first_party = ["qat"]
 
 [tool.black]
 line-length = 92
-target-version = ["py38", "py39", "py310"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 addopts = [
