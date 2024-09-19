@@ -1,0 +1,21 @@
+qat.purr.backends.qblox package
+===============================
+
+.. automodule:: qat.purr.backends.qblox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.purr.backends.qblox.codegen
+   qat.purr.backends.qblox.config
+   qat.purr.backends.qblox.constants
+   qat.purr.backends.qblox.device
+   qat.purr.backends.qblox.ir
+   qat.purr.backends.qblox.live
+   qat.purr.backends.qblox.visualisation
