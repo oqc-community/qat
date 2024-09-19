@@ -253,6 +253,11 @@ class QbloxControlHardware(ControlHardware):
             raise ValueError("No resources allocated. Install packages first")
 
         results = {}
+
+        for module, allocations in self._resources.items():
+            for target, sequencer in allocations.items():
+                sequencer.sync_en(True)
+
         for module, allocations in self._resources.items():
             for target, sequencer in allocations.items():
                 sequencer.arm_sequencer()
@@ -285,7 +290,11 @@ class QbloxControlHardware(ControlHardware):
                         ) / sequencer.integration_length_acq()
 
                     sequencer.delete_acquisition_data(all=True)
-                    sequencer.sync_en(False)
+
+        for module, allocations in self._resources.items():
+            for target, sequencer in allocations.items():
+                sequencer.sync_en(False)
+
         return results
 
     def __getstate__(self) -> Dict:
