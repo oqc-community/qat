@@ -16,8 +16,11 @@ author = (
     "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>, "
     "Norbert Deak <ndeak@oxfordquantumcircuits.com>, "
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>, "
+    "Benjamin sach <bsach@oxfordquantumcircuits.com>, "
+    "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>, "
+    "Luke Causer <lcauser@oxfordquantumcircuits.com>"
 )
-release = version = "1.0.0"
+release = version = "2.1.0"
 add_module_names = False
 autoclass_content = "both"
 smv_remote_whitelist = None
