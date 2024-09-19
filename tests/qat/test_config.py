@@ -112,8 +112,8 @@ class TestConfigGeneral:
         [
             (64_000, does_not_raise()),
             (100_000, does_not_raise()),
-            (100_001, pytest.raises(ValueError)),
-            (1_000_000, pytest.raises(ValueError)),
+            (100_001, pytest.raises(ValueError, match="exceeds the maximum amount of")),
+            (1_000_000, pytest.raises(ValueError, match="exceeds the maximum amount of")),
             (0, does_not_raise()),
             (None, does_not_raise()),
         ],
