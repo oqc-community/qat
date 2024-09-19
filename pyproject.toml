@@ -123,7 +123,10 @@ filterwarnings = [
     # Qiskit IBM Experiment package using an old pkg_resources version
     'default:.*pkg_resources:DeprecationWarning:qiskit_ibm_experiment.client.session',
     # Lark using deprecated version on sre_parse and sre_constants
-    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils'
+    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
+    # DOcplex using deprecated escape sequence
+    'default:.*invalid escape sequence:SyntaxWarning::1092',
+    'default:.*invalid escape sequence:DeprecationWarning::1092',
 ]
 
 [tool.poetry.scripts]
