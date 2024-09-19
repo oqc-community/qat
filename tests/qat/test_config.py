@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from contextlib import nullcontext as does_not_raise
 from os.path import abspath, dirname, join
 from sys import __loader__
 
@@ -106,18 +107,22 @@ class TestConfigGeneral:
         assert first_conf.repeats == second_conf.repeats
         assert first_conf.repetition_period == second_conf.repetition_period
 
-    def test_config_repeats_limit(self):
+    @pytest.mark.parametrize(
+        "repeats, possible_error_throw",
+        [
+            (64_000, does_not_raise()),
+            (100_000, does_not_raise()),
+            (100_001, pytest.raises(ValueError)),
+            (1_000_000, pytest.raises(ValueError)),
+            (0, does_not_raise()),
+            (None, does_not_raise()),
+        ],
+    )
+    def test_config_repeats_limit(self, repeats, possible_error_throw):
         # This config is on the limit and should not throw an error.
-        conf = CompilerConfig(repeats=100000)
+        conf = CompilerConfig(repeats=repeats)
         hardware = QuantumHardwareModel()
-
-        # This config exceeds the allowed (total) amount of shots.
-        conf = CompilerConfig(repeats=100001)
-        hardware = QuantumHardwareModel()
-        with pytest.raises(
-            ValueError,
-            match="Number of shots \\(100001\\) exceeds the maximum amount of 100000.",
-        ):
+        with possible_error_throw:
             conf.validate(hardware)
 
     def test_config_metrics(self):
