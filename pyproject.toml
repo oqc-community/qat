@@ -14,6 +14,9 @@ authors = [
     "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>",
     "Norbert Deak <ndeak@oxfordquantumcircuits.com>",
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
+    "Benjamin sach <bsach@oxfordquantumcircuits.com>",
+    "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>",
+    "Luke Causer <lcauser@oxfordquantumcircuits.com>"
 ]
 packages = [
     { include = "qat", from = "src/" }
