@@ -255,6 +255,125 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def get_quantum_device(self, id_: str):
         return self.quantum_devices.get(id_, None)
 
+    def change_qubit_id(self, id_: Union[int, str, Qubit], new_id_: Union[int, str]):
+        # get the qubit id
+        if isinstance(id_, int):
+            id = f"Q{id_}"
+        elif isinstance(id_, Qubit):
+            id = id_.id
+        else:
+            id = id_
+        if not self.has_qubit(id):
+            raise ValueError(
+                f"Tried to change the ID for a qubit ({str(id)}) that doesn't exist."
+            )
+
+        # The new id
+        new_id = f"Q{new_id_}" if isinstance(new_id_, int) else new_id_
+        return self.change_quantum_device_id(id, new_id)
+
+    def change_resonator_id(
+        self, id_: Union[int, str, Resonator], new_id_: Union[int, str]
+    ):
+        # get the qubit id
+        if isinstance(id_, int):
+            id = f"R{id_}"
+        elif isinstance(id_, Resonator):
+            id = id_.id
+        else:
+            id = id_
+        if not self.has_qubit(id):
+            raise ValueError(
+                f"Tried to change the ID for a resonator ({str(id)}) that doesn't exist."
+            )
+
+        # The new id
+        new_id = f"R{new_id_}" if isinstance(new_id_, int) else new_id_
+        return self.change_quantum_device_id(id, new_id)
+
+    def change_quantum_device_id(self, id_: Union[str, QuantumDevice], new_id: str):
+        id = id_.id if isinstance(id_, QuantumDevice) else id_
+
+        # The new id
+        if new_id in self.quantum_devices:
+            raise ValueError(
+                f"The new ID {str(new_id)} is already assigned to a quantum device."
+            )
+
+        # update qubit
+        self.quantum_devices[new_id] = self.quantum_devices.pop(id)
+        self.quantum_devices[new_id].id = new_id
+
+        # update pulse channels
+        for device in self.quantum_devices.values():
+            # update the pulse channels in each device
+            # Make this cleaner...
+            old_ids = []
+            new_ids = []
+            pcs = device.pulse_channels
+            for pid, pchan in pcs.items():
+                if self.quantum_devices[new_id] in pchan.auxiliary_devices:
+                    old_full_id = pchan.pulse_channel.full_id()
+                    pchan.pulse_channel.id = device._create_pulse_channel_id(
+                        pchan.channel_type, pchan.auxiliary_devices
+                    )
+                    pchan.pulse_channel._delete_cached_full_id()
+                    old_ids.append(pid)
+                    new_ids.append(pchan.pulse_channel.id)
+                    self.pulse_channels[pchan.pulse_channel.full_id()] = (
+                        self.pulse_channels.pop(old_full_id)
+                    )
+            for i in range(len(old_ids)):
+                pcs[new_ids[i]] = pcs.pop(old_ids[i])
+
+            # if the qubit is coupled to another qubit, update the id
+            if isinstance(device, Qubit) and id in device.pulse_hw_zx_pi_4:
+                device.pulse_hw_zx_pi_4[new_id] = device.pulse_hw_zx_pi_4.pop(id)
+
+    def change_physical_channel_id(
+        self, id: Union[int, str, PhysicalChannel], new_id_: Union[int, str]
+    ):
+        # Verify channel exists
+        if isinstance(id, int):
+            id = f"CH{id}"
+        elif isinstance(id, PhysicalChannel):
+            id = id.id
+        if id not in self.physical_channels:
+            raise ValueError(
+                f"Tried to change the ID for a physical channel ({str(id)}) that doesn't exist."
+            )
+
+        # The new id
+        new_id = f"CH{new_id_}" if isinstance(new_id_, int) else new_id_
+        if new_id in self.physical_channels:
+            raise ValueError(
+                f"The new ID {str(new_id)} is already assigned to a physical channel."
+            )
+
+        # Update the channel in the hardware model
+        self.physical_channels[new_id] = self.physical_channels.pop(id)
+        chan = self.physical_channels[new_id]
+
+        # Update the full_ids of pulse channels
+        for device in self.quantum_devices.values():
+            old_ids = []
+            new_ids = []
+            pcs = device.pulse_channels
+            for pid, pchan in pcs.items():
+                if pchan.physical_channel == chan:
+                    old_full_id = pchan.pulse_channel.full_id()
+                    pchan.pulse_channel.id = device._create_pulse_channel_id(
+                        pchan.channel_type, pchan.auxiliary_devices
+                    )
+                    pchan.pulse_channel._delete_cached_full_id()
+                    old_ids.append(pid)
+                    new_ids.append(pchan.pulse_channel.id)
+                    self.pulse_channels[pchan.pulse_channel.full_id()] = (
+                        self.pulse_channels.pop(old_full_id)
+                    )
+            for i in range(len(old_ids)):
+                pcs[new_ids[i]] = pcs.pop(old_ids[i])
+
     def add_pulse_channel(self, *pulse_channels: PulseChannel):
         for pulse_channel in pulse_channels:
             existing_channel = self.pulse_channels.get(pulse_channel.full_id(), None)

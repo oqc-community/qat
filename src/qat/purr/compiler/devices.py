@@ -135,7 +135,7 @@ class QuantumComponent:
         self.id_ = value
 
     def full_id(self):
-        return self.id_
+        return self.cached_id
 
     @cached_property
     def cached_id(self):
