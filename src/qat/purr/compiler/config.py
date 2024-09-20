@@ -8,6 +8,7 @@ import sys
 from enum import Enum, Flag, IntEnum, auto
 from typing import List, Optional
 
+from qat import qatconfig
 from qat.purr.utils.serializer import json_dumps, json_loads
 
 
@@ -247,6 +248,12 @@ class CompilerConfig:
 
     def validate(self, hardware):
         from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+        # A single job cannot have more repeats/shots than the set limit.
+        if self.repeats and self.repeats > qatconfig.MAX_REPEATS_LIMIT:
+            raise ValueError(
+                f"Number of shots ({self.repeats}) exceeds the maximum amount of {qatconfig.MAX_REPEATS_LIMIT}."
+            )
 
         if (
             self.error_mitigation is not None

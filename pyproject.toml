@@ -2,7 +2,7 @@
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
-version = "2.0.3"
+version = "2.1.0"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 documentation = "https://oqc-community.github.io/qat"
@@ -14,6 +14,9 @@ authors = [
     "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>",
     "Norbert Deak <ndeak@oxfordquantumcircuits.com>",
     "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
+    "Benjamin Sach <bsach@oxfordquantumcircuits.com>",
+    "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>",
+    "Luke Causer <lcauser@oxfordquantumcircuits.com>"
 ]
 packages = [
     { include = "qat", from = "src/" }
@@ -41,6 +44,7 @@ regex = ">=2022.6.2"
 jsonpickle = ">=2.2.0"
 qblox-instruments = "^0.14.0"
 lark-parser = "^0.12.0"
+pydantic-settings = ">=2.5.2"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
@@ -50,7 +54,7 @@ pytest = "^8.3.2"
 pytest-cov = ">=2.10.1"
 autoflake = "^2.2.0"
 isort = "^5.13.2"
-docplex = { git = "https://github.com/keriksson-rosenqvist/docplex.git", rev = "01ac8f1" }
+docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 
 [tool.poetry.group.licenses]
@@ -94,7 +98,7 @@ known_first_party = ["qat"]
 
 [tool.black]
 line-length = 92
-target-version = ["py38", "py39", "py310"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -119,7 +123,10 @@ filterwarnings = [
     # Qiskit IBM Experiment package using an old pkg_resources version
     'default:.*pkg_resources:DeprecationWarning:qiskit_ibm_experiment.client.session',
     # Lark using deprecated version on sre_parse and sre_constants
-    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils'
+    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
+    # DOcplex using deprecated escape sequence
+    'default:.*invalid escape sequence:SyntaxWarning::1092',
+    'default:.*invalid escape sequence:DeprecationWarning::1092',
 ]
 
 [tool.poetry.scripts]
