@@ -123,10 +123,27 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id = str(id_)
+        self.id_ = str(id_)
+
+    @property
+    def id(self):
+        return self.id_
+
+    @id.setter
+    def id(self, value):
+        self._delete_cached_id()
+        self.id_ = value
 
     def full_id(self):
+        return self.id_
+
+    @cached_property
+    def cached_id(self):
         return self.id
+
+    def _delete_cached_id(self):
+        if hasattr(self, "cached_id"):
+            del self.cached_id
 
     def __repr__(self):
         return f"{self.full_id()}"
@@ -404,8 +421,6 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
-        # store the full id
-        self.hash_ = hash(self.full_id())
 
     @property
     def sample_time(self):
@@ -452,15 +467,18 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.physical_channel.pulse_channel_max_frequency
 
     def partial_id(self):
-        return self.id
-
-    def full_id(self):
-        # return self.physical_channel_id + "." + self.partial_id()
-        return self.full_id_
+        return self.id_
 
     @cached_property
-    def full_id_(self):
+    def cached_full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
+
+    def full_id(self):
+        return self.cached_full_id
+
+    def _delete_cached_full_id(self):
+        if hasattr(self, "cached_full_id"):
+            del self.cached_full_id
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
@@ -468,14 +486,8 @@ class PulseChannel(QuantumComponent, Calibratable):
 
         return self.full_id() == other.full_id()
 
-    @cached_property
-    def _hash(self):
-        return hash(self.full_id())
-
     def __hash__(self):
-        # return hash(self.full_id())
-        # return self.hash_
-        return self._hash
+        return hash(self.full_id())
 
 
 class FreqShiftPulseChannel(PulseChannel):
