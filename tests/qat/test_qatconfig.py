@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import pytest
+from pydantic import ValidationError
 
 
 # from qat import qatconfig
@@ -12,9 +13,9 @@ def qatconfig():
     yield qatconfig
 
 
-@pytest.mark.parametrize("invalid_argument", ["5", "invalid", {"key": 5}, 5.5])
+@pytest.mark.parametrize("invalid_argument", ["invalid", {"key": 5}, 5.5])
 def test_qatconfig_invalid_assignment(qatconfig, invalid_argument):
-    with pytest.raises(TypeError):
+    with pytest.raises(ValidationError):
         qatconfig.MAX_REPEATS_LIMIT = invalid_argument
 
 
