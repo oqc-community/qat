@@ -256,6 +256,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         return self.quantum_devices.get(id_, None)
 
     def change_qubit_id(self, id_: Union[int, str, Qubit], new_id_: Union[int, str]):
+        """
+        Change the ID of a qubit in the hardware model. Updates the IDs
+        of dependant pulse channels.
+        """
         # get the qubit id
         if isinstance(id_, int):
             id = f"Q{id_}"
@@ -275,6 +279,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def change_resonator_id(
         self, id_: Union[int, str, Resonator], new_id_: Union[int, str]
     ):
+        """
+        Change the ID of a resonator in the hardware model. Updates the IDs
+        of dependant pulse channels.
+        """
         # get the qubit id
         if isinstance(id_, int):
             id = f"R{id_}"
@@ -292,6 +300,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         return self.change_quantum_device_id(id, new_id)
 
     def change_quantum_device_id(self, id_: Union[str, QuantumDevice], new_id: str):
+        """
+        Change the ID of a quantum device in the hardware model. Updates the IDs
+        of dependant pulse channels.
+        """
         id = id_.id if isinstance(id_, QuantumDevice) else id_
 
         # The new id
@@ -333,6 +345,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def change_physical_channel_id(
         self, id: Union[int, str, PhysicalChannel], new_id_: Union[int, str]
     ):
+        """
+        Change the ID of a physical channel in the hardware model. Updates the IDs
+        of dependant pulse channels.
+        """
         # Verify channel exists
         if isinstance(id, int):
             id = f"CH{id}"
@@ -373,6 +389,18 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
                     )
             for i in range(len(old_ids)):
                 pcs[new_ids[i]] = pcs.pop(old_ids[i])
+
+    def delete_cache(self):
+        """
+        Delete the cached IDs for all devices and channels in the hardware model.
+        """
+        for device in self.quantum_devices.values():
+            device._delete_cached_id()
+        for chan in self.physical_channels.values():
+            chan._delete_cached_id()
+        for chan in self.pulse_channels.values():
+            chan._delete_cached_id()
+            chan._delete_cached_full_id()
 
     def add_pulse_channel(self, *pulse_channels: PulseChannel):
         for pulse_channel in pulse_channels:
