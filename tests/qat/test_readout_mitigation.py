@@ -305,6 +305,7 @@ class TestOnNoisySimulator:
             super().__init__(model, auto_plot, sim_qubit_dt)
             self.fidelity_r0 = {qubit.index: 1.0 for qubit in self.model.qubits}
             self.fidelity_r1 = {qubit.index: 1.0 for qubit in self.model.qubits}
+            self.error_mitigation = model.error_mitigation
 
         def _execute_on_hardware(
             self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None
