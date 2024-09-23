@@ -4,6 +4,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
 from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import CheckMap
@@ -17,7 +18,6 @@ from qat.purr.backends.echo import (
     generate_connectivity,
 )
 from qat.purr.compiler.builders import Axis, InstructionBuilder
-from qat.purr.compiler.config import ErrorMitigationConfig, ResultsFormatting
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import InstructionExecutionEngine

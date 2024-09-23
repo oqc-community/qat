@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from qiskit import QuantumCircuit, qasm2, transpile
-from qiskit.transpiler import TranspilerError
-
-from qat.purr.compiler.config import (
+from compiler_config.config import (
     MetricsType,
     OptimizationConfig,
     Qiskit,
@@ -11,6 +8,9 @@ from qat.purr.compiler.config import (
     Tket,
     TketOptimizations,
 )
+from qiskit import QuantumCircuit, qasm2, transpile
+from qiskit.transpiler import TranspilerError
+
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import MetricsMixin
 from qat.purr.integrations.tket import run_tket_optimizations

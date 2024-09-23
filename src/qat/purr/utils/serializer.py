@@ -71,7 +71,7 @@ class CustomJsonDecoder(JSONDecoder):
             old_paths = ["scc.compiler.config"]
             for old_path in old_paths:
                 if old_path in obj_type:
-                    obj_type = obj_type.replace(old_path, "qat.purr.compiler.config")
+                    obj_type = obj_type.replace(old_path, "compiler_config.config")
                     break
 
             typ = self.serializable_types.get(obj_type)

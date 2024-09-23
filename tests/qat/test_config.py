@@ -5,9 +5,7 @@ from os.path import abspath, dirname, join
 from sys import __loader__
 
 import pytest
-
-from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.compiler.config import (
+from compiler_config.config import (
     CompilerConfig,
     InlineResultsProcessing,
     MetricsType,
@@ -18,6 +16,8 @@ from qat.purr.compiler.config import (
     ResultsFormatting,
     TketOptimizations,
 )
+
+from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics

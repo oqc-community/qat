@@ -15,7 +15,6 @@ authors = [
 ]
 packages = [{include = "qat", from = "src/QAT"}]
 package_includes = [
-    "qat/purr/compiler/config.py",
     "qat/purr/utils/serializer.py",
 ]
 license = "BSD-3-Clause"

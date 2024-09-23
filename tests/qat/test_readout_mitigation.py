@@ -2,6 +2,11 @@ from random import random, seed
 
 import numpy as np
 import pytest
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+)
 from numpy import identity, isclose
 from numpy.random import rand
 from qiskit import QuantumCircuit, qasm2
@@ -11,11 +16,6 @@ from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     RealtimeChipSimEngine,
     get_default_RTCS_hardware,
-)
-from qat.purr.compiler.config import (
-    CompilerConfig,
-    ErrorMitigationConfig,
-    QuantumResultsFormat,
 )
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
