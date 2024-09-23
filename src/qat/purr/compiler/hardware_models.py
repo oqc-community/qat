@@ -14,6 +14,7 @@ from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
+    PulseChannelView,
     QuantumDevice,
     Qubit,
     QubitCoupling,
@@ -214,7 +215,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def has_qubit(self, id_: Union[int, str]):
         if isinstance(id_, int):
             id_ = f"Q{id_}"
-        return id_ in self.quantum_devices
+        return id_ in self.quantum_devices and isinstance(self.quantum_devices[id_], Qubit)
+
+    def has_resonator(self, id_: Union[int, str]):
+        if isinstance(id_, int):
+            id_ = f"R{id_}"
+        return id_ in self.quantum_devices and isinstance(
+            self.quantum_devices[id_], Resonator
+        )
 
     def get_qubit(self, id_: Union[int, str, Qubit]) -> Qubit:
         """
@@ -283,19 +291,17 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         Change the ID of a resonator in the hardware model. Updates the IDs
         of dependant pulse channels.
         """
-        # get the qubit id
         if isinstance(id_, int):
             id = f"R{id_}"
         elif isinstance(id_, Resonator):
             id = id_.id
         else:
             id = id_
-        if not self.has_qubit(id):
+        if not self.has_resonator(id):
             raise ValueError(
                 f"Tried to change the ID for a resonator ({str(id)}) that doesn't exist."
             )
 
-        # The new id
         new_id = f"R{new_id_}" if isinstance(new_id_, int) else new_id_
         return self.change_quantum_device_id(id, new_id)
 
@@ -324,15 +330,23 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             new_ids = []
             pcs = device.pulse_channels
             for pid, pchan in pcs.items():
-                if self.quantum_devices[new_id] in pchan.auxiliary_devices:
+                if (
+                    self.quantum_devices[new_id] in pchan.auxiliary_devices
+                    or device == self.quantum_devices[new_id]
+                ):
+                    # find the new partial id
                     old_full_id = pchan.pulse_channel.full_id()
                     pchan.pulse_channel.id = device._create_pulse_channel_id(
+                        pchan.channel_type, [device] + pchan.auxiliary_devices
+                    )
+                    key = device._create_pulse_channel_id(
                         pchan.channel_type, pchan.auxiliary_devices
                     )
-                    pchan.pulse_channel._delete_cached_full_id()
                     old_ids.append(pid)
-                    new_ids.append(pchan.pulse_channel.id)
-                    self.pulse_channels[pchan.pulse_channel.full_id()] = (
+                    new_ids.append(key)
+
+                    # update the pulse channel dict with the full id
+                    self.pulse_channels[pchan.pulse_channel.create_full_id()] = (
                         self.pulse_channels.pop(old_full_id)
                     )
             for i in range(len(old_ids)):
@@ -341,6 +355,8 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             # if the qubit is coupled to another qubit, update the id
             if isinstance(device, Qubit) and id in device.pulse_hw_zx_pi_4:
                 device.pulse_hw_zx_pi_4[new_id] = device.pulse_hw_zx_pi_4.pop(id)
+
+        self.delete_cache()
 
     def change_physical_channel_id(
         self, id: Union[int, str, PhysicalChannel], new_id_: Union[int, str]
@@ -369,26 +385,22 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         # Update the channel in the hardware model
         self.physical_channels[new_id] = self.physical_channels.pop(id)
         chan = self.physical_channels[new_id]
+        chan.id = new_id
 
         # Update the full_ids of pulse channels
         for device in self.quantum_devices.values():
-            old_ids = []
-            new_ids = []
             pcs = device.pulse_channels
-            for pid, pchan in pcs.items():
+            for _, pchan in pcs.items():
                 if pchan.physical_channel == chan:
-                    old_full_id = pchan.pulse_channel.full_id()
+                    # we only need to update self.physical_channels
+                    old_full_id = id + "." + pchan.partial_id()
                     pchan.pulse_channel.id = device._create_pulse_channel_id(
-                        pchan.channel_type, pchan.auxiliary_devices
+                        pchan.channel_type, [device] + pchan.auxiliary_devices
                     )
-                    pchan.pulse_channel._delete_cached_full_id()
-                    old_ids.append(pid)
-                    new_ids.append(pchan.pulse_channel.id)
-                    self.pulse_channels[pchan.pulse_channel.full_id()] = (
-                        self.pulse_channels.pop(old_full_id)
-                    )
-            for i in range(len(old_ids)):
-                pcs[new_ids[i]] = pcs.pop(old_ids[i])
+                    new_full_id = pchan.pulse_channel.create_full_id()
+                    self.pulse_channels[new_full_id] = self.pulse_channels.pop(old_full_id)
+
+        self.delete_cache()
 
     def delete_cache(self):
         """
@@ -396,10 +408,15 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         """
         for device in self.quantum_devices.values():
             device._delete_cached_id()
+            if isinstance(device, Qubit):
+                for pc in device.pulse_channels.values():
+                    if isinstance(pc, PulseChannelView):
+                        pc.pulse_channel._delete_cached_full_id()
+                    else:
+                        pc._delete_cached_full_id()
         for chan in self.physical_channels.values():
             chan._delete_cached_id()
         for chan in self.pulse_channels.values():
-            chan._delete_cached_id()
             chan._delete_cached_full_id()
 
     def add_pulse_channel(self, *pulse_channels: PulseChannel):

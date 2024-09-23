@@ -469,9 +469,12 @@ class PulseChannel(QuantumComponent, Calibratable):
     def partial_id(self):
         return self.id_
 
+    def create_full_id(self):
+        return self.physical_channel_id + "." + self.partial_id()
+
     @cached_property
     def cached_full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
+        return self.create_full_id()
 
     def full_id(self):
         return self.cached_full_id
