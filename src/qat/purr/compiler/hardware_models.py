@@ -325,7 +325,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         # update pulse channels
         for device in self.quantum_devices.values():
             # update the pulse channels in each device
-            # Make this cleaner...
             old_ids = []
             new_ids = []
             pcs = device.pulse_channels
