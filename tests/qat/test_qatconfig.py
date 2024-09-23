@@ -4,9 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from qat import qatconfig
-
-MAX_REPEATS_LIMIT = 100_000
-qatconfig.MAX_REPEATS_LIMIT = MAX_REPEATS_LIMIT
+from qat.purr.qatconfig import QatConfig
 
 
 @pytest.mark.parametrize("invalid_argument", ["invalid", {"key": 5}, 5.5])
@@ -25,6 +23,7 @@ def test_change_max_repeats_limit(repeats_limit):
 
 @pytest.mark.parametrize("repeats_limit", [None, 10_000, 16_874, 50_000, 100_000])
 def test_change_env_max_repeats_limit(monkeypatch, repeats_limit):
-    monkeypatch.setenv("QAT_MAX_REPEATS_LIMIT", str(repeats_limit))
-    # Default value cannot change if env variable changes after instantiation.
-    assert qatconfig.MAX_REPEATS_LIMIT == MAX_REPEATS_LIMIT
+    NEW_LIMIT = 15_321
+    monkeypatch.setenv("QAT_MAX_REPEATS_LIMIT", str(NEW_LIMIT))
+    newconfig = QatConfig()
+    assert newconfig.MAX_REPEATS_LIMIT == NEW_LIMIT
