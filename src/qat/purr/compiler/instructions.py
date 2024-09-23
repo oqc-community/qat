@@ -203,6 +203,11 @@ class Synchronize(QuantumInstruction):
         new_sync.add_channels(other_targets)
         return new_sync
 
+    def __iadd__(self, other):
+        other_targets = other.quantum_targets if isinstance(other, Synchronize) else other
+        self.add_channels(other_targets)
+        return self
+
     def __repr__(self):
         return f"sync {','.join(name.id for name in self.quantum_targets)}"
 
@@ -470,6 +475,11 @@ class PhaseReset(QuantumInstruction):
         new_reset = PhaseReset(self.quantum_targets)
         new_reset.add_channels(other_targets)
         return new_reset
+
+    def __iadd__(self, other):
+        other_targets = other.quantum_targets if isinstance(other, PhaseReset) else other
+        self.add_channels(other_targets)
+        return self
 
     def __repr__(self):
         return f"phase reset {','.join(name.id for name in self.quantum_targets)}"
