@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from contextlib import nullcontext as does_not_raise
 from os.path import abspath, dirname, join
 from sys import __loader__
 
@@ -18,7 +17,6 @@ from compiler_config.config import (
 )
 
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
@@ -106,32 +104,6 @@ class TestConfigGeneral:
 
         assert first_conf.repeats == second_conf.repeats
         assert first_conf.repetition_period == second_conf.repetition_period
-
-    @pytest.mark.parametrize(
-        "repeats, possible_error_throw",
-        [
-            (None, does_not_raise()),
-            (0, does_not_raise()),
-            (64_000, does_not_raise()),
-            (100_000, does_not_raise()),
-            (100_001, pytest.raises(ValueError, match="exceeds the maximum amount of")),
-            (1_000_000, pytest.raises(ValueError, match="exceeds the maximum amount of")),
-        ],
-        ids=[
-            "None repeats",
-            "zero repeats",
-            "64_000 repeats (within limit)",
-            "100_000 repeats (edge case)",
-            "100_001 repeats (limit exceeded)",
-            "1_000_000 repeats (limit exceeded)",
-        ],
-    )
-    def test_config_repeats_limit(self, repeats, possible_error_throw):
-        # This config is on the limit and should not throw an error.
-        conf = CompilerConfig(repeats=repeats)
-        hardware = QuantumHardwareModel()
-        with possible_error_throw:
-            conf.validate(hardware)
 
     def test_config_metrics(self):
         first_conf = CompilerConfig()

@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from dataclasses import asdict, dataclass, is_dataclass
 
-from qat.purr.utils import serializer
-from qat.purr.utils.serializer import json_dumps, json_loads
+from compiler_config import serialiser
+from compiler_config.serialiser import json_dumps, json_loads
 
 
 @dataclass
@@ -113,20 +113,20 @@ class TestCustomJSONEncoder:
 
 class TestGetType:
     def test_get_type_int(self):
-        assert int == serializer._get_type(str(type(34)))
+        assert int == serialiser._get_type(str(type(34)))
 
     def test_get_type_complex(self):
-        assert complex == serializer._get_type(str(type(complex(3, 4))))
+        assert complex == serialiser._get_type(str(type(complex(3, 4))))
 
     def test_get_type_custom_class(self):
-        assert FakeClass == serializer._get_type(str(type(FakeClass("something"))))
+        assert FakeClass == serialiser._get_type(str(type(FakeClass("something"))))
 
     class FakeNestedClass:
         def __init__(self, name: str):
             self.field1 = name
 
     def test_get_type_nested_custom_class(self):
-        assert TestGetType.FakeNestedClass == serializer._get_type(
+        assert TestGetType.FakeNestedClass == serialiser._get_type(
             str(type(TestGetType.FakeNestedClass("something")))
         )
 
