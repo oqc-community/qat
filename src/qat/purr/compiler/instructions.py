@@ -2,12 +2,11 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-import math
 import re
 from copy import deepcopy
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 from math import ceil
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
 
@@ -351,7 +350,9 @@ class Acquire(QuantumComponent, QuantumInstruction):
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     if not np.isclose(
-                        filter.duration, calculate_duration(self, return_samples=False), atol=1e-9
+                        filter.duration,
+                        calculate_duration(self, return_samples=False),
+                        atol=1e-9,
                     ):
                         raise ValueError(
                             f"Filter duration '{filter.duration}' must be equal to Acquire "

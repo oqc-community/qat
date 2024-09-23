@@ -46,7 +46,8 @@ from qat.purr.compiler.instructions import (
     Sweep,
     Synchronize,
     Variable,
-    Waveform, calculate_duration,
+    Waveform,
+    calculate_duration,
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
@@ -1162,6 +1163,3 @@ class SweepIterator:
             )
         else:
             results_array[self.current_iteration] = value
-
-
-
