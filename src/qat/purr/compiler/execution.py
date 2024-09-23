@@ -46,8 +46,7 @@ from qat.purr.compiler.instructions import (
     Sweep,
     Synchronize,
     Variable,
-    Waveform,
-    remove_floating_point,
+    Waveform, calculate_duration,
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
@@ -398,39 +397,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]:
         pass
 
-    def calculate_duration(self, instruction, return_samples: bool = True):
-        """
-        Calculates the duration of the instruction for this particular piece of
-        hardware.
-        """
-        pulse_targets = [
-            pulse
-            for pulse in instruction.quantum_targets
-            if isinstance(pulse, PulseChannel)
-        ]
-        if not any(pulse_targets):
-            return 0
-
-        # TODO: Allow for multiple pulse channel targets.
-        if len(pulse_targets) > 1 and not isinstance(instruction, PhaseReset):
-            get_default_logger().warning(
-                f"Attempted to calculate duration of {str(instruction)} that has "
-                "multiple target channels. We're arbitrarily using the duration of the "
-                "first channel to calculate instruction duration."
-            )
-
-        pc = pulse_targets[0].physical_channel
-        block_size = pc.block_size
-        block_time = pc.block_time
-
-        block_number = remove_floating_point(instruction.duration / block_time, 4)
-        if return_samples:
-            calc_sample = block_number * block_size
-        else:
-            calc_sample = block_number * block_time
-
-        return calc_sample
-
     def create_duration_timeline(self, instructions: List[QuantumInstruction]):
         """
         Builds a dictionary mapping channels to a list of instructions and at what
@@ -479,13 +445,13 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         instr = Delay(qtarget, delay_time)
                         position_data = PositionData(
                             sample_start,
-                            sample_start + self.calculate_duration(instr),
+                            sample_start + calculate_duration(instr),
                             instr,
                         )
                 else:
                     position_data = PositionData(
                         sample_start,
-                        sample_start + self.calculate_duration(instruction),
+                        sample_start + calculate_duration(instruction),
                         instruction,
                     )
 
@@ -1196,3 +1162,6 @@ class SweepIterator:
             )
         else:
             results_array[self.current_iteration] = value
+
+
+

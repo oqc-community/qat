@@ -180,7 +180,7 @@ class TestInstruction:
         hw = get_default_echo_hardware(1)
         measure_ch = hw.get_qubit(0).get_measure_channel()
         acquire_ch = hw.get_qubit(0).get_acquire_channel()
-        no = math.floor(round((acquire_width / measure_ch.sample_time)))
+        no = math.floor(round((acquire_width / measure_ch.sample_time), 4))
         samples = np.linspace(0, acquire_width, no, dtype=np.complex64)
         filter = CustomPulse(measure_ch, samples)
         acquire = Acquire(

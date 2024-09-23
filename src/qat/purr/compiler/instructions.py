@@ -7,11 +7,13 @@ import re
 from copy import deepcopy
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
+from math import ceil
 
 import numpy as np
 
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
+from qat.purr.utils.logger import get_default_logger
 
 if TYPE_CHECKING:
     pass
@@ -348,14 +350,12 @@ class Acquire(QuantumComponent, QuantumInstruction):
         if filter:
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
-                    dt = target.physical_channel.sample_time
-                    no_samples_from_time = remove_floating_point(self.time / dt)
                     if not np.isclose(
-                        filter.duration, dt * no_samples_from_time, atol=1e-12
+                        filter.duration, calculate_duration(self, return_samples=False), atol=1e-9
                     ):
                         raise ValueError(
                             f"Filter duration '{filter.duration}' must be equal to Acquire "
-                            f"duration '{dt * no_samples_from_time}' which was rounded."
+                            f"duration '{calculate_duration(self, return_samples=False)}'."
                         )
         return filter
 
@@ -626,10 +626,6 @@ def build_generated_name(existing_names=None, prefix=None):
     return variable_name
 
 
-def remove_floating_point(x):
-    return math.ceil(round(x, 4))
-
-
 class Variable:
     """
     States that this value is actually a variable that should be fetched instead.
@@ -691,3 +687,45 @@ class ResultsProcessing(Instruction):
 
     def __repr__(self):
         return f"{self.variable}: {str(self.results_processing.name)}"
+
+
+def remove_floating_point(x):
+    return ceil(round(x, 4))
+
+
+def calculate_duration(instruction, return_samples: bool = True):
+    """
+    Calculates the duration of the instruction for this particular piece of
+    hardware.
+    """
+    if isinstance(instruction, Acquire):
+        pulse_targets = [instruction.channel]
+    else:
+        pulse_targets = [
+            pulse
+            for pulse in instruction.quantum_targets
+            if isinstance(pulse, PulseChannel)
+        ]
+    if not any(pulse_targets):
+        return 0
+
+    # TODO: Allow for multiple pulse channel targets.
+    if len(pulse_targets) > 1 and not isinstance(instruction, PhaseReset):
+        get_default_logger().warning(
+            f"Attempted to calculate duration of {str(instruction)} that has "
+            "multiple target channels. We're arbitrarily using the duration of the "
+            "first channel to calculate instruction duration."
+        )
+
+    pc = pulse_targets[0].physical_channel
+    block_size = pc.block_size
+    block_time = pc.block_time
+
+    block_number = remove_floating_point(instruction.duration / block_time)
+
+    if return_samples:
+        calc_sample = block_number * block_size
+    else:
+        calc_sample = block_number * block_time
+
+    return calc_sample
