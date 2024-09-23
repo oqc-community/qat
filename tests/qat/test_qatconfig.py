@@ -7,7 +7,6 @@ from qat import qatconfig
 from qat.purr.qatconfig import QatConfig
 
 MAX_REPEATS_LIMIT = 100_000  # Default value for qatconfig.MAX_REPEATS_LIMIT.
-qatconfig.MAX_REPEATS_LIMIT = MAX_REPEATS_LIMIT
 
 
 @pytest.mark.parametrize(
