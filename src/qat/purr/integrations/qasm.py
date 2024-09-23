@@ -1738,19 +1738,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
             expr_list = True
             cal_def = qb_specific_cal_def_expr_list
 
-        if name in ("cnot", "CNOT"):
-            self._q3_patcher.add_cnot(qubits[0], qubits[1], self.builder)
-        elif name in ("u", "U"):
-            # TODO: Untested as not in grammar.
-            self._q3_patcher.add_unitary(
-                others[0], others[1], others[2], qubits, self.builder
-            )
-        elif name in ("ecr", "ECR"):
-            self._q3_patcher.add_ecr(qubits, self.builder)
-
         # Prioritize calibration definitions here if people override the base functions.
         # We also don't care about qubit scoping and restrictions.
-        elif cal_def is not None:
+        if cal_def is not None:
             # Implied 'barrier' between defcals. To make things simple just assume that
             # everything in the defcal focuses on the qubits coming in.
             self.builder.synchronize(qubits)
@@ -1806,6 +1796,15 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 name=ast.Identifier(name), qubits=qubits, arguments=others, modifiers=[]
             )
             self._q3_patcher.visit(node, self._current_context)
+        elif name in ("cnot", "CNOT"):
+            self._q3_patcher.add_cnot(qubits[0], qubits[1], self.builder)
+        elif name in ("u", "U"):
+            # TODO: Untested as not in grammar.
+            self._q3_patcher.add_unitary(
+                others[0], others[1], others[2], qubits, self.builder
+            )
+        elif name in ("ecr", "ECR"):
+            self._q3_patcher.add_ecr(qubits, self.builder)
         elif throw_on_missing:
             raise ValueError(
                 f"Can't find gate implementation for '{name}' with supplied arguments."
