@@ -102,7 +102,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         model: QuantumHardwareModel = None,
         startup_engine=True,
         max_instruction_len: int = 200000,
-        use_caching: bool = False,
     ):
         super().__init__(model, startup_engine)
         self.max_instruction_len = max_instruction_len
