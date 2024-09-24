@@ -554,11 +554,11 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def freeze(self, frozen: bool = True):
         self.frozen = frozen
-        for dict in [
+        for components in [
             self.quantum_devices,
             self.physical_channels,
             self.pulse_channels,
             self.basebands,
         ]:
-            for item in dict.values():
+            for item in components.values():
                 item.freeze(frozen)

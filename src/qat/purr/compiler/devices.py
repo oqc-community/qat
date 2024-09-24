@@ -135,7 +135,7 @@ class QuantumComponent:
         if not self.frozen:
             self.id_ = id_
         else:
-            raise RuntimeError(
+            raise ValueError(
                 "The id of quantum components cannot be changed when frozen=True."
             )
 
@@ -494,6 +494,9 @@ class PulseChannel(QuantumComponent, Calibratable):
         else:
             return self.physical_channel_id + "." + self.partial_id()
 
+    def create_full_id(self):
+        return self.physical_channel_id + "." + self.partial_id()
+
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
             return False
@@ -607,8 +610,9 @@ class QuantumDevice(QuantumComponent, Calibratable):
         id_: str,
         physical_channel: PhysicalChannel,
         measure_device: QuantumDevice = None,
+        frozen: bool = False,
     ):
-        super().__init__(id_)
+        super().__init__(id_, frozen)
         self.measure_device: QuantumDevice = measure_device
         self.pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]] = {}
         self.default_pulse_channel_type = ChannelType.measure
@@ -739,8 +743,9 @@ class Qubit(QuantumDevice):
         coupled_qubits: List[Qubit] = None,
         drive_amp: float = 1.0,
         id_=None,
+        frozen: bool = False,
     ):
-        super().__init__(id_ or f"Q{index}", physical_channel, resonator)
+        super().__init__(id_ or f"Q{index}", physical_channel, resonator, frozen)
         self.index = index
         self.coupled_qubits: List[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
