@@ -2,8 +2,8 @@ import abc
 from typing import Dict
 
 import numpy as np
+from compiler_config.config import ErrorMitigationConfig
 
-from qat.purr.compiler.config import ErrorMitigationConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 

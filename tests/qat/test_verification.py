@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 
 import pytest
+from compiler_config.config import CompilerConfig, Tket
 
 from qat.purr.backends.verification import (
     Lucy,
@@ -10,7 +11,6 @@ from qat.purr.backends.verification import (
     get_verification_model,
     verify_program,
 )
-from qat.purr.compiler.config import CompilerConfig, Tket
 from qat.qat import execute
 from tests.qat.qasm_utils import ProgramFileType, get_qasm2, get_test_file_path
 

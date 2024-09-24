@@ -9,8 +9,8 @@ from math import ceil
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
 
 import numpy as np
+from compiler_config.config import InlineResultsProcessing
 
-from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
 from qat.purr.utils.logger import get_default_logger
 
