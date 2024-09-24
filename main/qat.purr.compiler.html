@@ -87,7 +87,6 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
@@ -113,7 +112,6 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
@@ -290,119 +288,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache.delete_cache_folders"><code class="docutils literal notranslate"><span class="pre">QatCache.delete_cache_folders()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CalibrationArguments"><code class="docutils literal notranslate"><span class="pre">CalibrationArguments</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CalibrationArguments.from_dict"><code class="docutils literal notranslate"><span class="pre">CalibrationArguments.from_dict()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CalibrationArguments.from_json"><code class="docutils literal notranslate"><span class="pre">CalibrationArguments.from_json()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CalibrationArguments.to_json"><code class="docutils literal notranslate"><span class="pre">CalibrationArguments.to_json()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CompilerConfig"><code class="docutils literal notranslate"><span class="pre">CompilerConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CompilerConfig.create_from_json"><code class="docutils literal notranslate"><span class="pre">CompilerConfig.create_from_json()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CompilerConfig.from_json"><code class="docutils literal notranslate"><span class="pre">CompilerConfig.from_json()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CompilerConfig.to_json"><code class="docutils literal notranslate"><span class="pre">CompilerConfig.to_json()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.CompilerConfig.validate"><code class="docutils literal notranslate"><span class="pre">CompilerConfig.validate()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ErrorMitigationConfig"><code class="docutils literal notranslate"><span class="pre">ErrorMitigationConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ErrorMitigationConfig.Empty"><code class="docutils literal notranslate"><span class="pre">ErrorMitigationConfig.Empty</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ErrorMitigationConfig.LinearMitigation"><code class="docutils literal notranslate"><span class="pre">ErrorMitigationConfig.LinearMitigation</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ErrorMitigationConfig.MatrixMitigation"><code class="docutils literal notranslate"><span class="pre">ErrorMitigationConfig.MatrixMitigation</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ExperimentalFeatures"><code class="docutils literal notranslate"><span class="pre">ExperimentalFeatures</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ExperimentalFeatures.error_mitigation"><code class="docutils literal notranslate"><span class="pre">ExperimentalFeatures.error_mitigation</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.Binary"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing.Binary</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.Experiment"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing.Experiment</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.NumpyArrays"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing.NumpyArrays</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.Program"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing.Program</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.InlineResultsProcessing.Raw"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessing.Raw</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages"><code class="docutils literal notranslate"><span class="pre">Languages</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages.Empty"><code class="docutils literal notranslate"><span class="pre">Languages.Empty</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages.QIR"><code class="docutils literal notranslate"><span class="pre">Languages.QIR</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages.Qasm2"><code class="docutils literal notranslate"><span class="pre">Languages.Qasm2</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Languages.Qasm3"><code class="docutils literal notranslate"><span class="pre">Languages.Qasm3</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType"><code class="docutils literal notranslate"><span class="pre">MetricsType</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.Default"><code class="docutils literal notranslate"><span class="pre">MetricsType.Default</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.Empty"><code class="docutils literal notranslate"><span class="pre">MetricsType.Empty</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.OptimizedCircuit"><code class="docutils literal notranslate"><span class="pre">MetricsType.OptimizedCircuit</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.OptimizedInstructionCount"><code class="docutils literal notranslate"><span class="pre">MetricsType.OptimizedInstructionCount</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.is_composite"><code class="docutils literal notranslate"><span class="pre">MetricsType.is_composite()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.MetricsType.snake_case_name"><code class="docutils literal notranslate"><span class="pre">MetricsType.snake_case_name()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.OptimizationConfig"><code class="docutils literal notranslate"><span class="pre">OptimizationConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.OptimizationConfig.default"><code class="docutils literal notranslate"><span class="pre">OptimizationConfig.default()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.OptimizationConfig.disable"><code class="docutils literal notranslate"><span class="pre">OptimizationConfig.disable()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.OptimizationConfig.minimum"><code class="docutils literal notranslate"><span class="pre">OptimizationConfig.minimum()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QIROptimizations"><code class="docutils literal notranslate"><span class="pre">QIROptimizations</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Qasm2Optimizations"><code class="docutils literal notranslate"><span class="pre">Qasm2Optimizations</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Qasm3Optimizations"><code class="docutils literal notranslate"><span class="pre">Qasm3Optimizations</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QatOptimizations"><code class="docutils literal notranslate"><span class="pre">QatOptimizations</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QatOptimizations.Empty"><code class="docutils literal notranslate"><span class="pre">QatOptimizations.Empty</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Qiskit"><code class="docutils literal notranslate"><span class="pre">Qiskit</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Qiskit.default"><code class="docutils literal notranslate"><span class="pre">Qiskit.default()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QiskitOptimizations"><code class="docutils literal notranslate"><span class="pre">QiskitOptimizations</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QiskitOptimizations.Empty"><code class="docutils literal notranslate"><span class="pre">QiskitOptimizations.Empty</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat"><code class="docutils literal notranslate"><span class="pre">QuantumResultsFormat</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat.binary"><code class="docutils literal notranslate"><span class="pre">QuantumResultsFormat.binary()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat.binary_count"><code class="docutils literal notranslate"><span class="pre">QuantumResultsFormat.binary_count()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat.raw"><code class="docutils literal notranslate"><span class="pre">QuantumResultsFormat.raw()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.QuantumResultsFormat.squash_binary_result_arrays"><code class="docutils literal notranslate"><span class="pre">QuantumResultsFormat.squash_binary_result_arrays()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ResultsFormatting"><code class="docutils literal notranslate"><span class="pre">ResultsFormatting</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ResultsFormatting.BinaryCount"><code class="docutils literal notranslate"><span class="pre">ResultsFormatting.BinaryCount</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ResultsFormatting.DynamicStructureReturn"><code class="docutils literal notranslate"><span class="pre">ResultsFormatting.DynamicStructureReturn</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.ResultsFormatting.SquashBinaryResultArrays"><code class="docutils literal notranslate"><span class="pre">ResultsFormatting.SquashBinaryResultArrays</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Tket"><code class="docutils literal notranslate"><span class="pre">Tket</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Tket.default"><code class="docutils literal notranslate"><span class="pre">Tket.default()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Tket.disable"><code class="docutils literal notranslate"><span class="pre">Tket.disable()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.Tket.minimum"><code class="docutils literal notranslate"><span class="pre">Tket.minimum()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations"><code class="docutils literal notranslate"><span class="pre">TketOptimizations</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.CliffordSimp"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.CliffordSimp</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.ContextSimp"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.ContextSimp</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.DecomposeArbitrarilyControlledGates"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.DecomposeArbitrarilyControlledGates</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.DefaultMappingPass"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.DefaultMappingPass</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.DirectionalCXGates"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.DirectionalCXGates</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.Empty"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.Empty</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.FullPeepholeOptimise"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.FullPeepholeOptimise</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.GlobalisePhasedX"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.GlobalisePhasedX</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.KAKDecomposition"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.KAKDecomposition</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.One"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.One</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.PeepholeOptimise2Q"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.PeepholeOptimise2Q</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.RemoveBarriers"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.RemoveBarriers</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.RemoveDiscarded"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.RemoveDiscarded</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.RemoveRedundancies"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.RemoveRedundancies</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.SimplifyMeasured"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.SimplifyMeasured</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.ThreeQubitSquash"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.ThreeQubitSquash</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.TketOptimizations.Two"><code class="docutils literal notranslate"><span class="pre">TketOptimizations.Two</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.get_config"><code class="docutils literal notranslate"><span class="pre">get_config()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.get_optimizer_config"><code class="docutils literal notranslate"><span class="pre">get_optimizer_config()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.config.html#qat.purr.compiler.config.get_serializable_types"><code class="docutils literal notranslate"><span class="pre">get_serializable_types()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a><ul>

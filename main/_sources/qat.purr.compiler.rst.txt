@@ -23,7 +23,6 @@ Submodules
 
    qat.purr.compiler.builders
    qat.purr.compiler.caches
-   qat.purr.compiler.config
    qat.purr.compiler.devices
    qat.purr.compiler.emitter
    qat.purr.compiler.execution
