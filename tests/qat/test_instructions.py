@@ -23,7 +23,9 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import (
     Acquire,
+    AcquireMode,
     CustomPulse,
+    MeasureBlock,
     PostProcessType,
     Pulse,
     Sweep,
@@ -481,3 +483,93 @@ class TestInstructionSerialisation:
         deseri = InstructionBuilder.deserialize(seri)
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)
+
+
+class TestInstructionBlocks:
+    @pytest.mark.parametrize("mode", list(AcquireMode))
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_simple_measure_block(self, num_qubits, mode):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        mb = MeasureBlock(targets, mode)
+        assert isinstance(mb, MeasureBlock)
+        assert mb.quantum_targets == targets
+        assert mb._target_dict[targets[0].full_id()]["mode"] == mode
+        assert mb._entangled_qubits == set(targets)
+
+    @pytest.mark.parametrize("out_vars", [None, "c"])
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_measure_block_with_output_variables(self, num_qubits, out_vars):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        if isinstance(out_vars, str):
+            out_vars = [f"{out_vars}[{i}]" for i in range(num_qubits)]
+
+        mb = MeasureBlock(targets, AcquireMode.INTEGRATOR, output_variables=out_vars)
+        expected = out_vars or [None] * num_qubits
+        assert [val["output_variable"] for val in mb._target_dict.values()] == expected
+
+    @pytest.mark.parametrize("entangled_qubits", [None, 3])
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_measure_block_with_entanglement(self, num_qubits, entangled_qubits):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        if isinstance(entangled_qubits, int):
+            entangled_qubits = targets.copy().append(hw.get_qubit(entangled_qubits))
+
+        mb = MeasureBlock(
+            targets, AcquireMode.INTEGRATOR, entangled_qubits=entangled_qubits
+        )
+        assert mb.quantum_targets == targets
+        if entangled_qubits is None:
+            assert mb._entangled_qubits == set(targets)
+        else:
+            assert mb._entangled_qubits == set(entangled_qubits)
+
+    def test_add_to_measure_block(self):
+        hw = get_default_echo_hardware()
+        targets = [hw.qubits[0], hw.qubits[-1]]
+        modes = [AcquireMode.INTEGRATOR, AcquireMode.SCOPE]
+        out_vars = ["c[0]", "b[1]"]
+        entangled_qubits = hw.qubits[:2]
+        mb = MeasureBlock(
+            targets[0],
+            modes[0],
+            output_variables=out_vars[:1],
+            entangled_qubits=entangled_qubits,
+        )
+        assert mb.quantum_targets == hw.qubits[:1]
+        mb.add_measurements(targets[1], modes[1], output_variables=out_vars[1])
+        entangled_qubits.append(targets[1])
+        assert mb.quantum_targets == targets
+        assert [val["mode"] for val in mb._target_dict.values()] == modes
+        assert [val["output_variable"] for val in mb._target_dict.values()] == out_vars
+        assert mb._entangled_qubits == set(entangled_qubits)
+
+    def test_cannot_add_duplicate_to_measure_block(self):
+        hw = get_default_echo_hardware()
+        targets = [hw.qubits[0], hw.qubits[-1]]
+        out_vars = ["c[0]", "b[1]"]
+        mb = MeasureBlock(
+            targets,
+            AcquireMode.INTEGRATOR,
+            output_variables=out_vars,
+        )
+        assert mb.quantum_targets == targets
+        with pytest.raises(ValueError):
+            mb.add_measurements(targets[1], AcquireMode.INTEGRATOR)
+
+    def test_measure_block_duration(self):
+        hw = get_default_echo_hardware()
+        target = hw.qubits[0]
+        mb = MeasureBlock([], AcquireMode.RAW)
+        assert mb.duration == 0.0
+        mb.add_measurements(target, AcquireMode.INTEGRATOR)
+        acq = mb.get_acquires(target)[0]
+        assert mb.duration > 0
+        assert mb.duration == pytest.approx(acq.delay + acq.duration)
+        mb._duration = 1
+        assert mb.duration == 1
