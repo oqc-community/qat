@@ -123,7 +123,7 @@ class TransformPass(PassInfoMixin):
             analyses = args[0]
         else:
             analyses = PassResultSet()
-            args = tuple([analyses] + list(args))
+            args = (analyses,)
         self.do_run(ir, *args, **kwargs)
         return analyses
 
@@ -142,7 +142,7 @@ class ValidationPass(PassInfoMixin):
             analyses = args[0]
         else:
             analyses = PassResultSet()
-            args = tuple([analyses] + list(args))
+            args = (analyses,)
         self.do_run(ir, *args, **kwargs)
         return analyses
 
@@ -153,7 +153,7 @@ class ValidationPass(PassInfoMixin):
 
 class PassManager(PassInfoMixin):
     """
-    A base pass representing a sequential composite of passes, which can be themselves composites.
+    Represents a sequential composite of passes, which can be themselves composites.
     The pass manager acts as a pass itself. In doing so, it runs a sequence of passes over
     some unit of IR and aggregates results from them.
 
@@ -173,13 +173,14 @@ class PassManager(PassInfoMixin):
             analyses = args[0]
         else:
             analyses = PassResultSet()
-            args = tuple([analyses] + list(args))
+            args = (analyses,)
         for p in self.passes:
             p.run(ir, *args, **kwargs)
         return analyses
 
     def add(self, pass_obj):
         self.passes.append(PassModel(pass_obj))
+        return self
 
 
 class InvokerMixin(ABC):

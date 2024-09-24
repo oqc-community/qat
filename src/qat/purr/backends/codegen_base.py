@@ -9,13 +9,12 @@ class CodegenResultType(ResultType):
     ASSIGNS = "ASSIGNS"
     CFG = "CFG"
     CONTEXTS = "CONTEXTS"
-    PP_MAP = "OUTPUT_VAR_PP_VIEW"
-    RP_MAP = "OUTPUT_VAR_RP_VIEW"
+    PP_MAP = "PP_MAP"
+    RP_MAP = "RP_MAP"
     RETURN = "RETURN"
     SWEEPS = "SWEEPS"
     VARIABLE_BOUNDS = "VARIABLE_BOUNDS"
-    TARGET_VIEW = "TARGET_VIEW"
-    TIMELINE = "TIMELINE"
+    TARGET_MAP = "TARGET_MAP"
 
 
 class DfsTraversal:

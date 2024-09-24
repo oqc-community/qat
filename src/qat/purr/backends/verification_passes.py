@@ -1,6 +1,5 @@
 from qat.ir.pass_base import ValidationPass
-from qat.purr.backends.qblox.instructions import EndRepeat, EndSweep
-from qat.purr.compiler.instructions import Repeat, Return, Sweep
+from qat.purr.compiler.instructions import EndRepeat, EndSweep, Repeat, Return, Sweep
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -15,7 +14,6 @@ class ScopeSanitisationValidation(ValidationPass):
 
         stack = []
         for inst in builder.instructions:
-            # Scope stacks
             if isinstance(inst, (Sweep, Repeat)):
                 stack.append(inst)
             elif isinstance(inst, (EndSweep, EndRepeat)):
@@ -33,8 +31,7 @@ class ScopeSanitisationValidation(ValidationPass):
 class RepeatSanitisationValidation(ValidationPass):
     def do_run(self, builder, *args, **kwargs):
         """
-        Repeat and Sweep scopes are valid if they have a start and end delimiters and if the delimiters
-        are balanced.
+        Checks if the builder has a repeat instruction and warns if none exists.
         """
 
         repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
@@ -56,4 +53,4 @@ class ReturnSanitisationValidation(ValidationPass):
             raise ValueError("Found multiple return instructions")
 
 
-# TODO - bring in stuff in verification.py in here in the form of a pass (or a bunch of passes)
+# TODO - bring in stuff from verification.py in here in the form of a pass (or a bunch of passes)

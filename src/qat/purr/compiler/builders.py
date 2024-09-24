@@ -80,6 +80,7 @@ class InstructionBuilder:
 
     @instructions.setter
     def instructions(self, value):
+        # TODO - invoke a validation pass to make sure ALL instructions in value are of Instruction instance
         self._instructions = value
 
     @staticmethod

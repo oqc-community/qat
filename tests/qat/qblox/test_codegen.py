@@ -1,12 +1,26 @@
 import pytest
 
+from qat.ir.pass_base import InvokerMixin, PassManager
+from qat.purr.backends.analysis_passes import TriagePass
+from qat.purr.backends.optimisation_passes import (
+    RepeatSanitisation,
+    ReturnSanitisation,
+    ScopeSanitisation,
+    SweepDecomposition,
+)
 from qat.purr.backends.qblox.codegen import (
+    NewQbloxEmitter,
     QbloxEmitter,
     get_nco_phase_arguments,
     get_nco_set_frequency_arguments,
 )
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
+from qat.purr.backends.verification_passes import (
+    RepeatSanitisationValidation,
+    ReturnSanitisationValidation,
+    ScopeSanitisationValidation,
+)
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire, MeasurePulse, Pulse
@@ -286,3 +300,52 @@ class TestQbloxEmitter:
                 assert "play" in acquire_pkg.sequence.program
                 assert "set_awg_offs" not in acquire_pkg.sequence.program
                 assert "upd_param" not in acquire_pkg.sequence.program
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+class TestNewQbloxEmitter(InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        model = kwargs["model"]
+        pipeline = PassManager()
+        pipeline.add(SweepDecomposition())
+        pipeline.add(RepeatSanitisation(model))
+        pipeline.add(ScopeSanitisation())
+        pipeline.add(ReturnSanitisation())
+        pipeline.add(ScopeSanitisationValidation())
+        pipeline.add(ReturnSanitisationValidation())
+        pipeline.add(RepeatSanitisationValidation())
+        pipeline.add(TriagePass())
+        return pipeline
+
+    def test_emit_packages(self, model):
+        index = 0
+        builder = resonator_spect(model, [index])
+        qubit = model.get_qubit(index)
+        acquire_channel = qubit.get_acquire_channel()
+
+        model.create_runtime().run_pass_pipeline(builder)
+        analyses = self.run_pass_pipeline(builder, model=model)
+        packages = NewQbloxEmitter(analyses).emit_packages(builder)
+        assert len(packages) == 1
+        acquire_pkg = packages[0]
+        assert acquire_pkg.target == acquire_channel
+
+        measure_pulse = next(
+            (inst for inst in builder.instructions if isinstance(inst, MeasurePulse))
+        )
+        assert acquire_channel in measure_pulse.quantum_targets
+
+        assert acquire_pkg.sequence.acquisitions
+
+        assert f"freq{qubit.index}_0" in acquire_pkg.sequence.program
+
+        if measure_pulse.shape == PulseShapeType.SQUARE:
+            assert not acquire_pkg.sequence.waveforms
+            assert "play" not in acquire_pkg.sequence.program
+            assert "set_awg_offs" in acquire_pkg.sequence.program
+            assert "upd_param" in acquire_pkg.sequence.program
+        else:
+            assert acquire_pkg.sequence.waveforms
+            assert "play" in acquire_pkg.sequence.program
+            assert "set_awg_offs" not in acquire_pkg.sequence.program
+            assert "upd_param" not in acquire_pkg.sequence.program

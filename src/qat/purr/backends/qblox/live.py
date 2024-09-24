@@ -4,7 +4,7 @@ import numpy as np
 
 from qat.ir.pass_base import InvokerMixin, PassManager, PassResultSet
 from qat.purr.backends.analysis_passes import TriagePass
-from qat.purr.backends.codegen import CodegenResultType
+from qat.purr.backends.codegen_base import CodegenResultType
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.backends.optimisation_passes import (
@@ -13,8 +13,7 @@ from qat.purr.backends.optimisation_passes import (
     ScopeSanitisation,
     SweepDecomposition,
 )
-from qat.purr.backends.qblox.codegen import QbloxEmitter
-from qat.purr.backends.qblox.fast.codegen import FastQbloxEmitter
+from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.backends.verification_passes import (
     RepeatSanitisationValidation,
@@ -36,11 +35,13 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
         self._reverse_coercion()
 
     def create_engine(self, startup_engine: bool = True):
-        return FastQbloxLiveEngine(self, startup_engine)
+        return QbloxLiveEngineAdapter(self, startup_engine)
 
     def create_runtime(self, existing_engine=None):
-        engine = existing_engine or self.create_engine()
-        return NewQuantumRuntime(engine)
+        if existing_engine is None:
+            existing_engine = self.create_engine()
+
+        return NewQuantumRuntime(existing_engine)
 
     def _reverse_coercion(self):
         """
@@ -63,6 +64,9 @@ class QbloxLiveEngine(LiveDeviceEngine):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
         self.model.control_hardware.disconnect()
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        return super()._common_execute(builder.instructions, interrupt)
 
     def _execute_on_hardware(
         self, sweep_iterator: SweepIterator, package: QatFile, interrupt=NullInterrupt()
@@ -127,7 +131,23 @@ class QbloxLiveEngine(LiveDeviceEngine):
         return results
 
 
-class FastQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
+class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
+    def startup(self):
+        if self.model.control_hardware is None:
+            raise ValueError(f"Please add a control hardware first!")
+        self.model.control_hardware.connect()
+
+    def shutdown(self):
+        if self.model.control_hardware is None:
+            raise ValueError(f"Please add a control hardware first!")
+        self.model.control_hardware.disconnect()
+
+    def optimize(self, instructions):
+        pass
+
+    def validate(self, instructions: List[Instruction]):
+        pass
+
     def build_pass_pipeline(self, *args, **kwargs):
         pipeline = PassManager()
         pipeline.add(SweepDecomposition())
@@ -140,18 +160,12 @@ class FastQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         pipeline.add(TriagePass())
         return pipeline
 
-    def optimize(self, instructions):
-        pass
-
-    def validate(self, instructions: List[Instruction]):
-        pass
-
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
         self._model_exists()
 
         with log_duration("QPU returned results in {} seconds."):
             analyses = self.run_pass_pipeline(builder)
-            packages = FastQbloxEmitter(analyses).emit_packages(builder)
+            packages = NewQbloxEmitter(analyses).emit_packages(builder)
             self.model.control_hardware.set_data(packages)
             playback_results: Dict[str, np.ndarray] = (
                 self.model.control_hardware.start_playback(None, None)
@@ -174,10 +188,10 @@ class FastQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                 return switerator
 
             for t, acquires in acquire_map.items():
-                big_response = playback_results[t.physical_channel.id]
                 switerator = create_sweep_iterator()
-                sweep_splits = np.split(big_response, switerator.length)
                 for acq in acquires:
+                    big_response = playback_results[acq.output_variable]
+                    sweep_splits = np.split(big_response, switerator.length)
                     switerator.reset_iteration()
                     while not switerator.is_finished():
                         switerator.do_sweep(
@@ -268,3 +282,24 @@ class FastQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             assigned_results[assign.name] = recurse_arrays(assigned_results, assign.value)
 
         return {key: assigned_results[key] for key in ret_inst.variables}
+
+
+class QbloxLiveEngineAdapter(LiveDeviceEngine):
+
+    model: QbloxLiveHardwareModel
+
+    def __init__(
+        self,
+        model: QbloxLiveHardwareModel,
+        startup_engine: bool = True,
+        hw_acceleration=False,
+    ):
+        super().__init__(model, startup_engine)
+        self._legacy_engine = QbloxLiveEngine(model, False)
+        self._new_engine = NewQbloxLiveEngine(model, False)
+        self.hw_acceleration = hw_acceleration
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        if self.hw_acceleration:
+            return self._new_engine._common_execute(builder, interrupt)
+        return self._legacy_engine._common_execute(builder, interrupt)
