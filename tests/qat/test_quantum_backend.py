@@ -68,7 +68,7 @@ class FakeBaseQuantumExecution(LiveDeviceEngine):
                 for aq in aqs:
                     dt = aq.physical_channel.sample_time
                     start = round(aq.start + aq.delay / dt)
-                    response = self.buffers[increment][aq.physical_channel.full_id()][
+                    response = self.buffers[increment][aq.physical_channel.full_id][
                         start : start + aq.samples
                     ]
 

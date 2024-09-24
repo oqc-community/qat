@@ -684,7 +684,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def build_acquire_list(self, position_map: Dict[PulseChannel, List[PositionData]]):
         buffers = {}
         for pulse_channel, positions in position_map.items():
-            buffer = buffers.setdefault(pulse_channel.full_id(), [])
+            buffer = buffers.setdefault(pulse_channel.full_id, [])
             for pos in positions:
                 if isinstance(pos.instruction, Acquire):
                     if pos.instruction.filter is not None:
