@@ -5,16 +5,17 @@ from typing import List, Union
 import numpy as np
 
 from qat.ir.pass_base import AnalysisPass, PassResultSet
-from qat.purr.backends.codegen import CodegenResultType
+from qat.purr.backends.codegen_base import CodegenResultType
 from qat.purr.backends.graph import ControlFlowGraph
 from qat.purr.backends.qblox.constants import Constants
-from qat.purr.backends.qblox.instructions import EndRepeat, EndSweep
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
     DeviceUpdate,
+    EndRepeat,
+    EndSweep,
     PostProcessing,
     QuantumInstruction,
     Repeat,
@@ -31,7 +32,10 @@ class TriagePass(AnalysisPass):
         Builds a view of instructions per quantum targets AOT.
         Builds selections of instructions useful for subsequent analysis/transform passes,
         for code generation and post-playback steps.
+
+        This is equivalent to the duration timeline and the QatFile in legacy code.
         """
+
         targets = set()
         for inst in builder.instructions:
             if isinstance(inst, QuantumInstruction):
@@ -47,7 +51,7 @@ class TriagePass(AnalysisPass):
         sweeps = []
         returns = []
         assigns = []
-        target_view = defaultdict(list)
+        target_map = defaultdict(list)
         acquire_map = defaultdict(list)
         pp_map = defaultdict(list)
         rp_map = dict()
@@ -64,17 +68,17 @@ class TriagePass(AnalysisPass):
             if isinstance(inst, Assign):
                 assigns.append(inst)
 
-            # Instructions by target
+            # View instructions by target
             if isinstance(inst, QuantumInstruction):
                 for qt in inst.quantum_targets:
                     if isinstance(qt, Acquire):
                         for aqt in qt.quantum_targets:
-                            target_view[aqt].append(inst)
+                            target_map[aqt].append(inst)
                     else:
-                        target_view[qt].append(inst)
+                        target_map[qt].append(inst)
             else:
                 for t in targets:
-                    target_view[t].append(inst)
+                    target_map[t].append(inst)
 
             # Acquisition by target
             if isinstance(inst, Acquire):
@@ -83,7 +87,7 @@ class TriagePass(AnalysisPass):
 
             # Post-processing by output variable
             if isinstance(inst, PostProcessing):
-                pp_map[inst.acquire.output_variable].append(inst)
+                pp_map[inst.output_variable].append(inst)
 
             # Results-processing by output variable
             if isinstance(inst, ResultsProcessing):
@@ -107,12 +111,10 @@ class TriagePass(AnalysisPass):
                     hash(builder),
                     self.id(),
                     CodegenResultType.RETURN,
-                    returns[
-                        0
-                    ],  # See ReturnSanitisation and ReturnSanitisationValidation passes
+                    returns[0],
                 ),
                 (hash(builder), self.id(), CodegenResultType.ASSIGNS, assigns),
-                (hash(builder), self.id(), CodegenResultType.TARGET_VIEW, target_view),
+                (hash(builder), self.id(), CodegenResultType.TARGET_MAP, target_map),
                 (hash(builder), self.id(), CodegenResultType.ACQUIRE_MAP, acquire_map),
                 (hash(builder), self.id(), CodegenResultType.PP_MAP, pp_map),
                 (hash(builder), self.id(), CodegenResultType.RP_MAP, rp_map),
@@ -133,7 +135,11 @@ class VariableBoundsPass(AnalysisPass):
 
     @staticmethod
     def get_baseband_freq(target):
-        return target.frequency - VariableBoundsPass.get_if_freq(target)
+        if target.fixed_if:
+            bb_freq = target.frequency - target.baseband_if_frequency
+        else:
+            bb_freq = target.baseband_frequency
+        return bb_freq
 
     @staticmethod
     def extract_variable_bounds(value: Union[List, np.ndarray]):
@@ -155,8 +161,10 @@ class VariableBoundsPass(AnalysisPass):
         end = value[-1]
         count = len(value)
 
-        if count >= 2:
-            step = value[1] - value[0]
+        if count < 2:
+            return start, step, end, count
+
+        step = value[1] - value[0]
 
         if not np.isclose(step, (end - start) / (count - 1)):
             raise ValueError(f"Not a regularly partitioned space {value}")
@@ -170,8 +178,8 @@ class VariableBoundsPass(AnalysisPass):
         return round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG)
 
     @staticmethod
-    def freq_as_steps(if_freq: float) -> int:
-        steps = round(if_freq * Constants.NCO_FREQ_STEPS_PER_HZ)
+    def freq_as_steps(freq_hz: float) -> int:
+        steps = round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ)
 
         if (
             steps < -Constants.NCO_FREQ_LIMIT_STEPS
@@ -182,27 +190,27 @@ class VariableBoundsPass(AnalysisPass):
             )
             raise ValueError(
                 f"IF frequency must be in [-{min_max_frequency_in_hz:e}, {min_max_frequency_in_hz:e}] Hz. "
-                f"Got {if_freq:e} Hz"
+                f"Got {freq_hz:e} Hz"
             )
 
         return steps
 
     def run(self, builder: InstructionBuilder, *args, **kwargs):
-        analyses: PassResultSet = args[0]
-        target_view = analyses.get_result(CodegenResultType.TARGET_VIEW)
+        analyses: PassResultSet = args[0] if args else PassResultSet()
+        instructions_by_target = analyses.get_result(CodegenResultType.TARGET_MAP)
 
-        variable_bounds = {t: dict() for t in target_view}
-        materialised_bounds = {t: defaultdict(list) for t in target_view}
+        variable_bounds = {t: dict() for t in instructions_by_target}
+        materialised_bounds = {t: defaultdict(list) for t in instructions_by_target}
         for inst in builder.instructions:
             if isinstance(inst, Sweep):
                 name, value = next(iter(inst.variables.items()))
                 start, step, end, count = self.extract_variable_bounds(value)
-                for t in target_view:
+                for t in instructions_by_target:
                     variable_bounds[t][name] = (start, step, end, count)
             elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
                 if inst.value.name not in variable_bounds[inst.target]:
                     raise ValueError(
-                        f"Iterator variable {inst.value.name} referenced but no prior declaration found"
+                        f"Variable {inst.value.name} referenced but no prior declaration found"
                     )
                 bounds = variable_bounds[inst.target][inst.value.name]
                 if inst.attribute == "frequency":
@@ -220,10 +228,12 @@ class VariableBoundsPass(AnalysisPass):
                         f"Unsupported processing of attribute {inst.attribute}"
                     )
 
-        for t in target_view:
+        for t in instructions_by_target:
             for name, bounds in materialised_bounds[t].items():
                 if len(set(bounds)) != 1:
-                    raise ValueError(f"Inconsistent use of variable {name} for target {t}")
+                    raise ValueError(
+                        f"Found multiple different uses for variable {name} on target {t}"
+                    )
                 variable_bounds[t][name] = bounds[0]
 
         analyses.update(
@@ -253,6 +263,9 @@ class CFGPass(AnalysisPass):
     def _build_cfg(self, builder: InstructionBuilder, cfg: ControlFlowGraph):
         """
         Recursively (re)discovers (new) header nodes and flow information.
+
+        Supports Repeat, Sweep, EndRepeat, and EndSweep. More control flow and branching instructions
+        will follow in the future once these foundations sink in and get stabilised in the codebase
         """
 
         flow = [(e.src.head(), e.dest.head()) for e in cfg.edges]
@@ -333,11 +346,13 @@ class CtrlHwPass(AnalysisPass):
         pass
 
 
-class TimelinePass(AnalysisPass):
+class LifetimePass(AnalysisPass):
     """
     Performs analyses necessary for dynamic allocation of control hardware resources to logical channels.
     Loosely speaking, it aims at understanding when exactly instructions are invoked (with **full awareness**
     of control flow (especially loops)) and whether prior resources could be freed up.
+
+    See ideas around classical register allocation, interference graph, and graph coloring
     """
 
     def run(self, builder: InstructionBuilder, *args, **kwargs):

@@ -5,10 +5,10 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
 
 
-def resonator_spect(model, qubit_indices=None):
-    qubit_indices = qubit_indices or [0]
+def resonator_spect(model, qubit_indices=None, num_points=None):
+    qubit_indices = qubit_indices if qubit_indices is not None else [0]
+    num_points = num_points if num_points is not None else 10
     builder = get_builder(model)
-    num_points = 10
     freq_range = 50e6
     for index in qubit_indices:
         qubit = model.get_qubit(index)

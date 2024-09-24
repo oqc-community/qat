@@ -1,9 +1,16 @@
 import itertools
 
 from qat.ir.pass_base import TransformPass
-from qat.purr.backends.qblox.instructions import EndRepeat, EndSweep
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.instructions import Acquire, Repeat, Return, Sweep, SweepValue
+from qat.purr.compiler.instructions import (
+    Acquire,
+    EndRepeat,
+    EndSweep,
+    Repeat,
+    Return,
+    Sweep,
+    SweepValue,
+)
 from qat.purr.utils.algorithm import stable_partition
 
 
@@ -29,7 +36,6 @@ class ScopeSanitisation(TransformPass):
         """
         Bubbles up all sweeps and repeats to the beginning of the list.
         Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.
-        Collects targets AOT.
 
         Intended for legacy existing builders and the relative order of instructions guarantees backwards
         compatibility.

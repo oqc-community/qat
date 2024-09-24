@@ -5,21 +5,27 @@ import numpy as np
 import pytest
 
 from qat.purr.backends.analysis_passes import CFGPass, TriagePass, VariableBoundsPass
-from qat.purr.backends.codegen import CodegenResultType
+from qat.purr.backends.codegen_base import CodegenResultType
 from qat.purr.backends.optimisation_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
     SweepDecomposition,
 )
-from qat.purr.backends.qblox.fast.codegen import PreCodegenPass
-from qat.purr.backends.qblox.instructions import EndRepeat, EndSweep
+from qat.purr.backends.qblox.codegen import PreCodegenPass
 from qat.purr.backends.verification_passes import (
     ReturnSanitisationValidation,
     ScopeSanitisationValidation,
 )
-from qat.purr.compiler.instructions import DeviceUpdate, Repeat, Return, Sweep, Variable
+from qat.purr.compiler.instructions import (
+    DeviceUpdate,
+    EndRepeat,
+    EndSweep,
+    Repeat,
+    Return,
+    Sweep,
+    Variable,
+)
 from tests.qat.qblox.builder_nuggets import multidim_sweep, resonator_spect
-from tests.qat.qblox.utils import ClusterInfo
 
 
 @pytest.mark.parametrize(
@@ -35,12 +41,12 @@ def test_extract_sweep_bounds(value, bounds):
         assert VariableBoundsPass.extract_variable_bounds(value) == bounds
 
 
-@pytest.mark.parametrize("model", [ClusterInfo], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestPassPipeline:
     def test_triage_pass(self, model):
-        qubit_index = 0
-        qubit = model.get_qubit(qubit_index)
-        builder = resonator_spect(model, qubit_index)
+        index = 0
+        qubit = model.get_qubit(index)
+        builder = resonator_spect(model, [index])
 
         ReturnSanitisation().run(builder)
         ReturnSanitisationValidation().run(builder)
@@ -52,7 +58,7 @@ class TestPassPipeline:
             CodegenResultType.SWEEPS,
             CodegenResultType.RETURN,
             CodegenResultType.ASSIGNS,
-            CodegenResultType.TARGET_VIEW,
+            CodegenResultType.TARGET_MAP,
             CodegenResultType.ACQUIRE_MAP,
             CodegenResultType.PP_MAP,
             CodegenResultType.RP_MAP,
@@ -62,12 +68,12 @@ class TestPassPipeline:
             assert info.pass_id == triage_pass.id()
             assert info.result_type == type
 
-        target_view = analyses.get_result(CodegenResultType.TARGET_VIEW)
-        assert isinstance(target_view, Dict)
-        assert len(target_view) == 3
-        assert qubit.get_drive_channel() in target_view
-        assert qubit.get_measure_channel() in target_view
-        assert qubit.get_acquire_channel() in target_view
+        instructions_by_target = analyses.get_result(CodegenResultType.TARGET_MAP)
+        assert isinstance(instructions_by_target, Dict)
+        assert len(instructions_by_target) == 3
+        assert qubit.get_drive_channel() in instructions_by_target
+        assert qubit.get_measure_channel() in instructions_by_target
+        assert qubit.get_acquire_channel() in instructions_by_target
 
         acquire_map = analyses.get_result(CodegenResultType.ACQUIRE_MAP)
         assert isinstance(acquire_map, Dict)
@@ -130,7 +136,7 @@ class TestPassPipeline:
 
     def test_return_sanitisation_pass(self, model):
         qubit_index = 0
-        builder = resonator_spect(model, qubit_index)
+        builder = resonator_spect(model, [qubit_index])
 
         with pytest.raises(ValueError):
             ReturnSanitisationValidation().run(builder)
@@ -152,15 +158,16 @@ class TestPassPipeline:
         assert len(value.nodes) == 5
         assert len(value.edges) == 6
 
-    def test_var_bounds_pass(self, model):
-        builder = resonator_spect(model)
+    @pytest.mark.parametrize("num_points", [1, 10, 100])
+    def test_variable_bounds_pass(self, model, num_points):
+        builder = resonator_spect(model, num_points=num_points)
 
         ReturnSanitisation().run(builder)
         analyses = TriagePass().run(builder)
         VariableBoundsPass().run(builder, analyses)
-        target_view = analyses.get_result(CodegenResultType.TARGET_VIEW)
-        var_bounds = analyses.get_result(CodegenResultType.VARIABLE_BOUNDS)
-        assert var_bounds.keys() == target_view.keys()
+        instructions_by_target = analyses.get_result(CodegenResultType.TARGET_MAP)
+        variable_bounds = analyses.get_result(CodegenResultType.VARIABLE_BOUNDS)
+        assert variable_bounds.keys() == instructions_by_target.keys()
 
         device_updates = [
             inst
@@ -177,8 +184,8 @@ class TestPassPipeline:
             for inst in builder.instructions
             if isinstance(inst, Sweep)
         }
-        for t in target_view:
-            for name, bounds in var_bounds[t].items():
+        for t in instructions_by_target:
+            for name, bounds in variable_bounds[t].items():
                 du = next(
                     (
                         inst
@@ -197,7 +204,7 @@ class TestPassPipeline:
                         raw_bounds[name][3],
                     )
                 else:
-                    assert var_bounds[t][name] == raw_bounds[name]
+                    assert variable_bounds[t][name] == raw_bounds[name]
 
     def test_precodegen_pass(self, model):
         builder = resonator_spect(model)
@@ -206,7 +213,7 @@ class TestPassPipeline:
         analyses = TriagePass().run(builder)
         VariableBoundsPass().run(builder, analyses)
         PreCodegenPass().run(builder, analyses)
-        target_view = analyses.get_result(CodegenResultType.TARGET_VIEW)
+        target_view = analyses.get_result(CodegenResultType.TARGET_MAP)
         contexts = analyses.get_result(CodegenResultType.CONTEXTS)
         assert contexts.keys() == target_view.keys()
 

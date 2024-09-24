@@ -13,6 +13,7 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
+from qat.ir.pass_base import InvokerMixin, PassManager
 from qat.purr.compiler.builders import (
     FluidBuilderWrapper,
     InstructionBuilder,
