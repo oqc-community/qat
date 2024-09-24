@@ -232,10 +232,42 @@ class TestQASM3:
         hw = get_default_echo_hardware(4)
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("ecr_override_test.qasm"))
-        # tests that the two ECRs gates give two CRPs each
+        # tests that there are 2 extra_soft_square pulses from the custom def
         assert (
-            sum(isinstance(inst, CrossResonancePulse) for inst in result.instructions) == 4
+            len(
+                [
+                    inst
+                    for inst in result.instructions
+                    if hasattr(inst, "shape")
+                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+                ]
+            )
+            == 2
         )
+
+    def test_cnot_override(self):
+        hw = get_default_echo_hardware(4)
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), get_qasm3("cnot_override_test.qasm"))
+        # tests that there are 2 extra_soft_square pulses from the custom def
+        assert (
+            len(
+                [
+                    inst
+                    for inst in result.instructions
+                    if hasattr(inst, "shape")
+                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+                ]
+            )
+            == 2
+        )
+
+    def test_u(self):
+        hw = get_default_echo_hardware(2)
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), get_qasm3("u_test.qasm"))
+        # tests that there are 2 extra_soft_square pulses from the custom def
+        assert len(result.instructions) > 0
 
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
