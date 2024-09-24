@@ -1741,7 +1741,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # Prioritize calibration definitions here if people override the base functions.
         # We also don't care about qubit scoping and restrictions.
         if name in ("u", "U"):
-            # TODO: Untested as not in grammar.
             # u is not in openpulse grammar so cannot be overridden...
             self._q3_patcher.add_unitary(
                 others[0], others[1], others[2], qubits, self.builder
