@@ -268,15 +268,12 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         Delete the cached IDs for all devices and channels in the hardware model.
         """
         for device in self.quantum_devices.values():
-            device._delete_cached_id()
             if isinstance(device, Qubit):
                 for pc in device.pulse_channels.values():
                     if isinstance(pc, PulseChannelView):
                         pc.pulse_channel._delete_cached_full_id()
                     else:
                         pc._delete_cached_full_id()
-        for chan in self.physical_channels.values():
-            chan._delete_cached_id()
         for chan in self.pulse_channels.values():
             chan._delete_cached_full_id()
 

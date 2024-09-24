@@ -123,27 +123,10 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id_ = str(id_)
-
-    @property
-    def id(self):
-        return self.id_
-
-    @id.setter
-    def id(self, value):
-        self._delete_cached_id()
-        self.id_ = value
+        self.id = str(id_)
 
     def full_id(self):
-        return self.cached_id
-
-    @cached_property
-    def cached_id(self):
         return self.id
-
-    def _delete_cached_id(self):
-        if hasattr(self, "cached_id"):
-            del self.cached_id
 
     def __repr__(self):
         return f"{self.full_id()}"
@@ -467,21 +450,21 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.physical_channel.pulse_channel_max_frequency
 
     def partial_id(self):
-        return self.id_
+        return self.id
 
-    def create_full_id(self):
+    def _create_full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
 
     @cached_property
-    def cached_full_id(self):
-        return self.create_full_id()
+    def _cached_full_id(self):
+        return self._create_full_id()
 
     def full_id(self):
-        return self.cached_full_id
+        return self._cached_full_id
 
     def _delete_cached_full_id(self):
-        if hasattr(self, "cached_full_id"):
-            del self.cached_full_id
+        if hasattr(self, "_cached_full_id"):
+            del self._cached_full_id
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):

@@ -50,7 +50,7 @@ class TestCachedProperties:
                     new_ids.append(key)
 
                     # update the pulse channel dict with the full id
-                    hw.pulse_channels[pchan.pulse_channel.create_full_id()] = (
+                    hw.pulse_channels[pchan.pulse_channel._create_full_id()] = (
                         hw.pulse_channels.pop(old_full_id)
                     )
             for i in range(len(old_ids)):
@@ -94,7 +94,7 @@ class TestCachedProperties:
                     pchan.pulse_channel.id = device._create_pulse_channel_id(
                         pchan.channel_type, [device] + pchan.auxiliary_devices
                     )
-                    new_full_id = pchan.pulse_channel.create_full_id()
+                    new_full_id = pchan.pulse_channel._create_full_id()
                     hw.pulse_channels[new_full_id] = hw.pulse_channels.pop(old_full_id)
 
         hw.delete_cache()
