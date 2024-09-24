@@ -123,7 +123,15 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id = str(id_)
+        self.id_ = str(id_)
+
+    @property
+    def id(self):
+        return self.id_
+
+    @id.setter
+    def id(self, val):
+        self.id_ = val
 
     def full_id(self):
         return self.id
@@ -454,6 +462,15 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     def _create_full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
+
+    @property
+    def id(self):
+        return self.id_
+
+    @id.setter
+    def id(self, val):
+        self.id_ = val
+        self._delete_cached_full_id()
 
     @cached_property
     def _cached_full_id(self):

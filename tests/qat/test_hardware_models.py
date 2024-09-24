@@ -40,9 +40,12 @@ class TestCachedProperties:
                 ):
                     # find the new partial id
                     old_full_id = pchan.pulse_channel.full_id()
-                    pchan.pulse_channel.id = device._create_pulse_channel_id(
+                    hw.pulse_channels[old_full_id].id = device._create_pulse_channel_id(
                         pchan.channel_type, [device] + pchan.auxiliary_devices
                     )
+                    # pchan.pulse_channel.id = device._create_pulse_channel_id(
+                    #    pchan.channel_type, [device] + pchan.auxiliary_devices
+                    # )
                     key = device._create_pulse_channel_id(
                         pchan.channel_type, pchan.auxiliary_devices
                     )
@@ -60,7 +63,7 @@ class TestCachedProperties:
             if isinstance(device, Qubit) and id in device.pulse_hw_zx_pi_4:
                 device.pulse_hw_zx_pi_4[new_id] = device.pulse_hw_zx_pi_4.pop(id)
 
-        hw.delete_cache()
+        # hw.delete_cache()
 
     def change_physical_channel_id(self, hw: QuantumHardwareModel, id: str, new_id: str):
         """
@@ -97,7 +100,7 @@ class TestCachedProperties:
                     new_full_id = pchan.pulse_channel._create_full_id()
                     hw.pulse_channels[new_full_id] = hw.pulse_channels.pop(old_full_id)
 
-        hw.delete_cache()
+        # hw.delete_cache()
 
     def test_pulse_channel_cached_id(self):
         """
