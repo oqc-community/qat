@@ -266,7 +266,6 @@ class TestQASM3:
         hw = get_default_echo_hardware(2)
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("u_test.qasm"))
-        # tests that there are 2 extra_soft_square pulses from the custom def
         assert len(result.instructions) > 0
 
     def test_invalid_frames(self):
