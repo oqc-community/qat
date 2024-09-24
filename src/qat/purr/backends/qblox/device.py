@@ -253,47 +253,47 @@ class QbloxControlHardware(ControlHardware):
             raise ValueError("No resources allocated. Install packages first")
 
         results = {}
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(True)
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.arm_sequencer()
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.start_sequencer()
-
-        for module, allocations in self._resources.items():
-            if module.is_qrm_type:
+        try:
+            for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
-                    result_id = target.physical_channel.id
-                    if result_id in results:
-                        raise ValueError(
-                            "Two or more pulse channels on the same physical channel"
-                        )
-                    acquisitions = self._get_acquisitions(module, sequencer)
+                    sequencer.sync_en(True)
 
-                    if self.plot_acquisitions:
-                        plot_acquisitions(
-                            acquisitions,
-                            integration_length=sequencer.integration_length_acq(),
-                        )
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.arm_sequencer()
 
-                    for acq_name, acq in acquisitions.items():
-                        i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                        q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                        results[result_id] = (
-                            i + 1j * q
-                        ) / sequencer.integration_length_acq()
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.start_sequencer()
 
-                    sequencer.delete_acquisition_data(all=True)
+            for module, allocations in self._resources.items():
+                if module.is_qrm_type:
+                    for target, sequencer in allocations.items():
+                        result_id = target.physical_channel.id
+                        if result_id in results:
+                            raise ValueError(
+                                "Two or more pulse channels on the same physical channel"
+                            )
+                        acquisitions = self._get_acquisitions(module, sequencer)
 
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(False)
+                        if self.plot_acquisitions:
+                            plot_acquisitions(
+                                acquisitions,
+                                integration_length=sequencer.integration_length_acq(),
+                            )
+
+                        for acq_name, acq in acquisitions.items():
+                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
+                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
+                            results[result_id] = (
+                                i + 1j * q
+                            ) / sequencer.integration_length_acq()
+
+                        sequencer.delete_acquisition_data(all=True)
+        finally:
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.sync_en(False)
 
         return results
 
