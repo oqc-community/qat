@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
+from functools import cached_property
 from typing import Dict, List, Optional, Set, TypeVar, Union
 
 import jsonpickle
@@ -118,14 +119,44 @@ class QuantumComponent:
     Qubit or various channels for a simple example.
     """
 
-    def __init__(self, id_, *args, **kwargs):
+    def __init__(self, id_, frozen=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id = str(id_)
+        self.id_ = str(id_)
+        self.frozen = frozen
+
+    @property
+    def id(self):
+        return self.id_
+
+    @id.setter
+    def id(self, id_):
+        if not self.frozen:
+            self.id_ = id_
+        else:
+            raise RuntimeError(
+                "The id of quantum components cannot be changed when frozen=True."
+            )
+
+    @cached_property
+    def _full_id(self):
+        return self.id_
 
     def full_id(self):
-        return self.id
+        if self.frozen:
+            return self._full_id
+        else:
+            return self.id_
+
+    def freeze(self, freeze=True):
+        """
+        Freezing the component allows us to make use of cached properties.
+        """
+        self.frozen = freeze
+        if not freeze:
+            if hasattr(self, "_full_id"):
+                del self._full_id
 
     def __repr__(self):
         return f"{self.full_id()}"
@@ -315,8 +346,9 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         acquire_allowed: bool = False,
         pulse_channel_min_frequency: float = 0.0,
         pulse_channel_max_frequency: float = np.inf,
+        frozen: bool = False,
     ):
-        super().__init__(id_)
+        super().__init__(id_, frozen)
         self.sample_time: float = sample_time
         self.baseband: PhysicalBaseband = baseband
         self.block_size: int = block_size or 1
@@ -386,9 +418,10 @@ class PulseChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
+        frozen: bool = False,
         **kwargs,
     ):
-        super().__init__(id_, **kwargs)
+        super().__init__(id_, frozen, **kwargs)
         self.physical_channel: PhysicalChannel = physical_channel
 
         self.frequency: float = frequency
@@ -451,8 +484,15 @@ class PulseChannel(QuantumComponent, Calibratable):
     def partial_id(self):
         return self.id
 
-    def full_id(self):
+    @cached_property
+    def _full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
+
+    def full_id(self):
+        if self.frozen:
+            return self._full_id
+        else:
+            return self.physical_channel_id + "." + self.partial_id()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):

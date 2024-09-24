@@ -160,6 +160,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         repeat_count=1000,
         repetition_period=100e-6,
         error_mitigation: Optional[ErrorMitigation] = None,
+        frozen: bool = False,
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -172,6 +173,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.basebands: Dict[str, PhysicalBaseband] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
         self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
+        self.frozen = frozen
 
         # Construct last due to us overriding calibratables fields with properties.
         super().__init__(
@@ -549,3 +551,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             )
 
         self.__dict__.update(state)
+
+    def freeze(self, frozen: bool = True):
+        self.frozen = frozen
+        for dict in [
+            self.quantum_devices,
+            self.physical_channels,
+            self.pulse_channels,
+            self.basebands,
+        ]:
+            for item in dict.values():
+                item.freeze(frozen)
