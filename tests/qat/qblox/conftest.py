@@ -1,7 +1,7 @@
 import os
 import uuid
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 import pytest
 from qblox_instruments import Cluster, ClusterType
@@ -22,6 +22,9 @@ from qat.purr.backends.qblox.device import (
     QbloxPhysicalChannel,
 )
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 DUMMY_CONFIG = {
     1: ClusterType.CLUSTER_QCM,
@@ -176,15 +179,16 @@ def cluster_setup(request):
 
 @pytest.fixture()
 def model(request):
-    address = request.param
     name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-
-    if address is None:
-        cluster_setup = ClusterSetup(name=name, dummy_cfg=DUMMY_CONFIG)
+    if isinstance(request.param, Dict):
+        address = request.param.get("address", None)
+    elif isinstance(request.param, List) and len(request.param) > 0:
+        address = request.param[0]
     else:
-        cluster_setup = ClusterSetup(name=name, address=address)
+        address = request.param
 
     model = QbloxLiveHardwareModel()
+    cluster_setup = ClusterSetup(name=name, address=address, dummy_cfg=DUMMY_CONFIG)
     cluster_setup.configure(model)
     model.control_hardware.connect()
     yield model
