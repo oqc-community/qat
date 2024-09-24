@@ -228,6 +228,15 @@ class TestQASM3:
             == 2
         )
 
+    def test_ecr_override(self):
+        hw = get_default_echo_hardware(4)
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), get_qasm3("ecr_override_test.qasm"))
+        # tests that the two ECRs gates give two CRPs each
+        assert (
+            sum(isinstance(inst, CrossResonancePulse) for inst in result.instructions) == 4
+        )
+
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
         parser = Qasm3Parser()
