@@ -1738,13 +1738,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
             expr_list = True
             cal_def = qb_specific_cal_def_expr_list
 
-        # Prioritize calibration definitions here if people override the base functions.
-        # We also don't care about qubit scoping and restrictions.
         if name in ("u", "U"):
             # u is not in openpulse grammar so cannot be overridden...
             self._q3_patcher.add_unitary(
                 others[0], others[1], others[2], qubits, self.builder
             )
+
+        # Prioritize calibration definitions here if people override the base functions.
+        # We also don't care about qubit scoping and restrictions.
         elif cal_def is not None:
             # Implied 'barrier' between defcals. To make things simple just assume that
             # everything in the defcal focuses on the qubits coming in.
