@@ -6,7 +6,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class QatConfig(BaseSettings, validate_assignment=True):
     """
-    Full settings for a single job. All values are defaulted on initialization.
+    Full settings for a single job. Allows environment variables to be overridden by direct assignment.
+
+    >>> import os
+    >>> os.environ["QAT_MAX_REPEATS_LIMIT"] = "654321"
+    >>> QatConfig()
+    QatConfig(MAX_REPEATS_LIMIT=654321)
+    >>> QatConfig(MAX_REPEATS_LIMIT=123)
+    QatConfig(MAX_REPEATS_LIMIT=123)
+
+    >>> qatconfig = QatConfig()
+    >>> qatconfig.MAX_REPEATS_LIMIT = 16000
+    >>> qatconfig
+    QatConfig(MAX_REPEATS_LIMIT=16000)
     """
 
     model_config = SettingsConfigDict(env_prefix="QAT_")
@@ -15,3 +27,8 @@ class QatConfig(BaseSettings, validate_assignment=True):
 
 
 qatconfig = QatConfig()
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
