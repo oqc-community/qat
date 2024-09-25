@@ -1,4 +1,5 @@
 import pytest
+from compiler_config.config import Qasm2Optimizations
 from numpy import array, random
 from qiskit_aer.noise import (
     NoiseModel,
@@ -9,7 +10,6 @@ from qiskit_aer.noise import (
 
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute_qasm_with_metrics

@@ -6,11 +6,11 @@ from pathlib import Path
 from typing import Union
 
 import regex
+from compiler_config.config import CompilerConfig
 
 import qat.purr.compiler.experimental.frontends as experimental_frontends
 import qat.purr.compiler.frontends as core_frontends
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.frontends import LanguageFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import CompilationMetrics
