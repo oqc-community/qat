@@ -217,7 +217,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def has_qubit(self, id_: Union[int, str]):
         if isinstance(id_, int):
             id_ = f"Q{id_}"
-        return id_ in self.quantum_devices and isinstance(self.quantum_devices[id_], Qubit)
+        return id_ in self.quantum_devices
 
     def get_qubit(self, id_: Union[int, str, Qubit]) -> Qubit:
         """
