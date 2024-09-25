@@ -197,7 +197,8 @@ class TestInstruction:
             )
 
     @pytest.mark.parametrize(
-        "acquire_width", [-1e-6, 0],
+        "acquire_width",
+        [-1e-6, 0],
     )
     def test_acquire_filter_edge_cases(self, acquire_width):
         hw = get_default_echo_hardware(1)

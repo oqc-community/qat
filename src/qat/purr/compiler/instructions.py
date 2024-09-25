@@ -337,7 +337,8 @@ class Acquire(QuantumComponent, QuantumInstruction):
         delay=None,
         filter: Union[Pulse, CustomPulse] = None,
     ):
-        if time <= 0: raise ValueError(f"Acquire time {time} cannot be less than or equal to zero.")
+        if time <= 0:
+            raise ValueError(f"Acquire time {time} cannot be less than or equal to zero.")
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
         self.time: float = time or 1.0e-6
@@ -349,8 +350,11 @@ class Acquire(QuantumComponent, QuantumInstruction):
     def _check_filter(self, filter):
         if filter:
             filter_duration = filter.duration
-            if filter_duration <= 0: raise ValueError(f"Filter duration {filter_duration} "
-                                                      f"cannot be less than or equal to zero.")
+            if filter_duration <= 0:
+                raise ValueError(
+                    f"Filter duration {filter_duration} "
+                    f"cannot be less than or equal to zero."
+                )
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     instr_duration = calculate_duration(self, return_samples=False)
