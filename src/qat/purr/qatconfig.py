@@ -28,7 +28,7 @@ class QatConfig(BaseSettings, validate_assignment=True):
     Input should be a valid integer, got a number with a fractional part
     """
 
-    model_config = SettingsConfigDict(env_prefix="QAT_", cli_enforce_required=True)
+    model_config = SettingsConfigDict(env_prefix="QAT_")
     MAX_REPEATS_LIMIT: Union[None, int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
 
