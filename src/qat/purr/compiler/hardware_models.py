@@ -14,7 +14,6 @@ from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
-    PulseChannelView,
     QuantumDevice,
     Qubit,
     QubitCoupling,
@@ -220,13 +219,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             id_ = f"Q{id_}"
         return id_ in self.quantum_devices and isinstance(self.quantum_devices[id_], Qubit)
 
-    def has_resonator(self, id_: Union[int, str]):
-        if isinstance(id_, int):
-            id_ = f"R{id_}"
-        return id_ in self.quantum_devices and isinstance(
-            self.quantum_devices[id_], Resonator
-        )
-
     def get_qubit(self, id_: Union[int, str, Qubit]) -> Qubit:
         """
         Returns a qubit based on id/index. If the passed-in object is already a Qubit
@@ -265,20 +257,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def get_quantum_device(self, id_: str):
         return self.quantum_devices.get(id_, None)
-
-    def delete_cache(self):
-        """
-        Delete the cached IDs for all devices and channels in the hardware model.
-        """
-        for device in self.quantum_devices.values():
-            if isinstance(device, Qubit):
-                for pc in device.pulse_channels.values():
-                    if isinstance(pc, PulseChannelView):
-                        pc.pulse_channel._delete_cached_full_id()
-                    else:
-                        pc._delete_cached_full_id()
-        for chan in self.pulse_channels.values():
-            chan._delete_cached_full_id()
 
     def add_pulse_channel(self, *pulse_channels: PulseChannel):
         for pulse_channel in pulse_channels:
