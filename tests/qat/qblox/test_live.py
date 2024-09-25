@@ -16,7 +16,7 @@ class TestQbloxLiveEngine:
         engine = model.create_engine()
         q0 = model.get_qubit(0)
 
-        for amp in [0.5, 1.0]:
+        for amp in [0.1, 0.2, 0.3]:
             q0.pulse_measure["amp"] = amp
             builder = get_builder(model).measure(q0).repeat(10000)
             results, _ = execute_instructions(engine, builder.instructions)
