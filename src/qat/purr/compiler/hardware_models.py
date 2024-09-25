@@ -179,6 +179,9 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             shot_limit=shot_limit,
         )
 
+        # Reset the cache before...
+        PulseChannel._cached_full_id.cache_clear()
+
     def create_engine(self) -> InstructionExecutionEngine:
         from qat.purr.backends.echo import EchoEngine
 

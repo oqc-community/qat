@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
-from functools import cached_property
+from functools import lru_cache
 from typing import Dict, List, Optional, Set, TypeVar, Union
 
 import jsonpickle
@@ -131,6 +131,7 @@ class QuantumComponent:
 
     @id.setter
     def id(self, val):
+        PulseChannel._cached_full_id.cache_clear()
         self.id_ = val
 
     def full_id(self):
@@ -463,34 +464,21 @@ class PulseChannel(QuantumComponent, Calibratable):
     def _create_full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
 
-    @property
-    def id(self):
-        return self.id_
-
-    @id.setter
-    def id(self, val):
-        self.id_ = val
-        self._delete_cached_full_id()
-
-    @cached_property
+    @lru_cache
     def _cached_full_id(self):
         return self._create_full_id()
 
     def full_id(self):
-        return self._cached_full_id
-
-    def _delete_cached_full_id(self):
-        if hasattr(self, "_cached_full_id"):
-            del self._cached_full_id
+        return self._cached_full_id()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
+        return self.id == other.id
 
     def __hash__(self):
-        return hash(self.full_id())
+        return hash(self.id)
 
 
 class FreqShiftPulseChannel(PulseChannel):

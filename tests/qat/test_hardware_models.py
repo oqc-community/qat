@@ -43,9 +43,7 @@ class TestCachedProperties:
                     hw.pulse_channels[old_full_id].id = device._create_pulse_channel_id(
                         pchan.channel_type, [device] + pchan.auxiliary_devices
                     )
-                    # pchan.pulse_channel.id = device._create_pulse_channel_id(
-                    #    pchan.channel_type, [device] + pchan.auxiliary_devices
-                    # )
+
                     key = device._create_pulse_channel_id(
                         pchan.channel_type, pchan.auxiliary_devices
                     )
@@ -110,7 +108,7 @@ class TestCachedProperties:
         pid = list(hw.pulse_channels.keys())[0]
         pulse_channel = hw.pulse_channels[pid]
         pulse_channel.id = "test"
-        pulse_channel._delete_cached_full_id()
+        # pulse_channel._delete_cached_full_id()
         assert pulse_channel.full_id() == pulse_channel.physical_channel_id + ".test"
 
     def test_change_qubit_ids(self):
