@@ -196,6 +196,23 @@ class TestInstruction:
                 filter=filter,
             )
 
+    @pytest.mark.parametrize(
+        "acquire_width", [-1e-6, 0],
+    )
+    def test_acquire_filter_edge_cases(self, acquire_width):
+        hw = get_default_echo_hardware(1)
+        measure_ch = hw.get_qubit(0).get_measure_channel()
+        acquire_ch = hw.get_qubit(0).get_acquire_channel()
+
+        filter = Pulse(measure_ch, PulseShapeType.SQUARE, acquire_width)
+
+        with pytest.raises(ValueError):
+            Acquire(
+                acquire_ch,
+                time=acquire_width,
+                filter=filter,
+            )
+
 
 class TestSweep:
 
