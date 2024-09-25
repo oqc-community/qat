@@ -272,11 +272,6 @@ class QbloxControlHardware(ControlHardware):
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        result_id = target.physical_channel.id
-                        if result_id in results:
-                            raise ValueError(
-                                "Two or more pulse channels on the same physical channel"
-                            )
                         acquisitions = self._get_acquisitions(module, sequencer)
 
                         if self.plot_acquisitions:
@@ -288,7 +283,7 @@ class QbloxControlHardware(ControlHardware):
                         for acq_name, acq in acquisitions.items():
                             i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
                             q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                            results[result_id] = (
+                            results[acq_name] = (
                                 i + 1j * q
                             ) / sequencer.integration_length_acq()
         finally:

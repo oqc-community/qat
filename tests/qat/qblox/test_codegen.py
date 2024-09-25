@@ -119,10 +119,10 @@ class TestQbloxEmitter:
         assert len(channel.config.sequencers) > 0
         assert pkg.sequencer_config.square_weight_acq.integration_length == int(time * 1e9)
 
-    def test_resonator_spect(self, model):
-        qubit_index = 0
-        builder = resonator_spect(model, qubit_index)
-        qubit = model.get_qubit(qubit_index)
+    def test_resonator_spect_single_qubit(self, model):
+        index = 0
+        builder = resonator_spect(model, [index])
+        qubit = model.get_qubit(index)
         acquire_channel = qubit.get_acquire_channel()
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
@@ -148,6 +148,39 @@ class TestQbloxEmitter:
             assert "play" in acquire_pkg.sequence.program
             assert "set_awg_offs" not in acquire_pkg.sequence.program
             assert "upd_param" not in acquire_pkg.sequence.program
+
+    def test_resonator_spect_multi_qubits(self, model):
+        indices = [0, 1]
+        builder = resonator_spect(model, indices)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+        assert len(packages) == len(indices)
+
+        for i, index in enumerate(indices):
+            qubit = model.get_qubit(index)
+            acquire_channel = qubit.get_acquire_channel()
+            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            assert acquire_pkg.sequence.acquisitions
+
+            measure_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
+                )
+            )
+
+            if measure_pulse.shape == PulseShapeType.SQUARE:
+                assert not acquire_pkg.sequence.waveforms
+                assert "play" not in acquire_pkg.sequence.program
+                assert "set_awg_offs" in acquire_pkg.sequence.program
+                assert "upd_param" in acquire_pkg.sequence.program
+            else:
+                assert acquire_pkg.sequence.waveforms
+                assert "play" in acquire_pkg.sequence.program
+                assert "set_awg_offs" not in acquire_pkg.sequence.program
+                assert "upd_param" not in acquire_pkg.sequence.program
 
     def test_qubit_spect(self, model):
         qubit_index = 0
