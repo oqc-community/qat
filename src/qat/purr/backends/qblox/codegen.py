@@ -184,7 +184,7 @@ class QbloxContext:
         self._repeat_label = None
 
         self._duration: int = 0
-        self._timeline: np.ndarray = np.empty(0)
+        self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
         self._num_hw_avg = 1  # Technically disabled
         self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
@@ -314,6 +314,9 @@ class QbloxContext:
         return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
     def _wait_seconds(self, duration: float):
+        if duration <= 0:
+            return
+
         self._wait_nanoseconds(int(duration * 1e9))
 
     def _wait_nanoseconds(self, duration: int):
@@ -444,10 +447,14 @@ class QbloxContext:
         self.sequence_builder.nop()
 
     def delay(self, inst: Delay):
-        self._wait_seconds(inst.duration)
+        samples = int(calculate_duration(inst))
+        self._wait_nanoseconds(samples)
+
+        if samples <= 0:
+            return
+
         self._duration = self._duration + inst.duration
-        num_samples = int(calculate_duration(inst))
-        self._timeline = np.append(self._timeline, [0] * num_samples)
+        self._timeline = np.append(self._timeline, np.zeros(samples, dtype=self._timeline.dtype))
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         pulse = self._evaluate_waveform(waveform, target)
