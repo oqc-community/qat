@@ -5,12 +5,12 @@ from operator import mul
 
 import numpy as np
 import pytest
+from compiler_config.config import InlineResultsProcessing
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,

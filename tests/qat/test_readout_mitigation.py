@@ -2,6 +2,11 @@ from random import random, seed
 
 import numpy as np
 import pytest
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+)
 from numpy import identity, isclose
 from numpy.random import rand
 from qiskit import QuantumCircuit, qasm2
@@ -11,11 +16,6 @@ from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import (
     RealtimeChipSimEngine,
     get_default_RTCS_hardware,
-)
-from qat.purr.compiler.config import (
-    CompilerConfig,
-    ErrorMitigationConfig,
-    QuantumResultsFormat,
 )
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
@@ -305,6 +305,7 @@ class TestOnNoisySimulator:
             super().__init__(model, auto_plot, sim_qubit_dt)
             self.fidelity_r0 = {qubit.index: 1.0 for qubit in self.model.qubits}
             self.fidelity_r1 = {qubit.index: 1.0 for qubit in self.model.qubits}
+            self.error_mitigation = model.error_mitigation
 
         def _execute_on_hardware(
             self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None

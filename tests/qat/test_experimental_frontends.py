@@ -6,11 +6,11 @@ from typing import List
 from unittest.mock import create_autospec
 
 import pytest
+from compiler_config.config import CompilerConfig
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.experimental.frontends import QASMFrontend, QIRFrontend
 from qat.purr.compiler.instructions import SweepValue, Variable

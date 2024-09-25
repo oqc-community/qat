@@ -4,13 +4,13 @@ import time
 import uuid
 from typing import List
 
+from compiler_config.config import CompilerConfig
 from qiskit import QuantumCircuit, assemble, qasm2, transpile
 from qiskit.providers.basic_provider import BasicProviderJob, BasicSimulator
 from qiskit.result import Result
 from qiskit.result.models import ExperimentResult, ExperimentResultData
 
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.utils.logger import get_default_logger
 from qat.qat import execute_qasm
 

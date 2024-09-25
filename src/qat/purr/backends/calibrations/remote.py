@@ -2,7 +2,8 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from typing import Dict, Union
 
-from qat.purr.compiler.config import CalibrationArguments
+from compiler_config.config import CalibrationArguments
+
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.runtime import QuantumRuntime, RemoteCalibration, get_runtime
 
