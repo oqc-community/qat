@@ -19,9 +19,16 @@ class QatConfig(BaseSettings, validate_assignment=True):
     >>> qatconfig.MAX_REPEATS_LIMIT = 16000
     >>> qatconfig
     QatConfig(MAX_REPEATS_LIMIT=16000)
+
+    >>> QatConfig(MAX_REPEATS_LIMIT=100.5) # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    ...
+    pydantic_core._pydantic_core.ValidationError
+    ...
+    Input should be a valid integer, got a number with a fractional part
     """
 
-    model_config = SettingsConfigDict(env_prefix="QAT_")
+    model_config = SettingsConfigDict(env_prefix="QAT_", cli_enforce_required=True)
     MAX_REPEATS_LIMIT: Union[None, int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
 
