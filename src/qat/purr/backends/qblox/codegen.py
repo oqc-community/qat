@@ -540,7 +540,9 @@ class QbloxContext:
             cxt = contexts[target]
             delay_time = max_duration - cxt.duration
             cxt.delay(Delay(target, delay_time))
-            cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+            # TODO - For now, enable only logical time padding
+            # TODO - Enable when finer grained SYNC groups are supported
+            # cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
     def reset_phase(inst: PhaseReset, contexts: Dict):

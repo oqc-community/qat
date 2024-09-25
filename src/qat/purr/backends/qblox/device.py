@@ -257,9 +257,11 @@ class QbloxControlHardware(ControlHardware):
 
         results = {}
         try:
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.sync_en(True)
+            # TODO - For now, enable only logical time padding
+            # TODO - Enable when finer grained SYNC groups are supported
+            # for module, allocations in self._resources.items():
+            #     for target, sequencer in allocations.items():
+            #         sequencer.sync_en(True)
 
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -288,10 +290,13 @@ class QbloxControlHardware(ControlHardware):
                             ) / sequencer.integration_length_acq()
         finally:
             for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.sync_en(False)
+                # TODO - For now, enable only logical time padding
+                # TODO - Enable when finer grained SYNC groups are supported
+                # for target, sequencer in allocations.items():
+                #     sequencer.sync_en(False)
 
-                    if module.is_qrm_type:
+                if module.is_qrm_type:
+                    for target, sequencer in allocations.items():
                         self._delete_acquisitions(sequencer)
 
         return results
