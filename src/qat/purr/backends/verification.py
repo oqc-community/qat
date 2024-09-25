@@ -4,10 +4,11 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from compiler_config.config import CompilerConfig
+
 from qat.purr.backends.live import LiveHardwareModel, build_lucy_hardware
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction

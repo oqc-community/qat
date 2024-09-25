@@ -7,6 +7,7 @@ from numbers import Number
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
+from compiler_config.config import InlineResultsProcessing
 
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
@@ -18,7 +19,6 @@ from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
     software_post_process_mean,
 )
-from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     ChannelType,
     MaxPulseLength,

@@ -5,6 +5,7 @@ from os.path import dirname, join
 
 import numpy as np
 import pytest
+from compiler_config.config import CompilerConfig
 from scipy import fftpack
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -14,7 +15,6 @@ from qat.purr.backends.realtime_chip_simulator import (
     qutip_available,
 )
 from qat.purr.backends.utilities import get_axis_map
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,

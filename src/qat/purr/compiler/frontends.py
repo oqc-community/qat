@@ -6,11 +6,11 @@ import tempfile
 from typing import Tuple
 
 import regex
+from compiler_config.config import CompilerConfig, Languages, get_optimizer_config
 
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import CompilerConfig, Languages, get_optimizer_config
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import execute_instructions, get_builder, get_model

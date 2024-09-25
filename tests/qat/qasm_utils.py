@@ -3,9 +3,10 @@
 from enum import Enum, auto
 from os.path import abspath, dirname, join
 
+from compiler_config.config import Qasm2Optimizations
+
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser, qasm_from_file
