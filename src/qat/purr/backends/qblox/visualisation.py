@@ -17,6 +17,14 @@ def plot_packages(packages: List[QbloxPackage]):
     if max_length <= 0:
         return
 
+    # Padding short timelines with zeros
+    for pkg in packages:
+        length = len(pkg.timeline)
+        if length < max_length:
+            pkg.timeline = np.append(
+                pkg.timeline, np.zeros(max_length - length, dtype=pkg.timeline.dtype)
+            )
+
     t = np.linspace(0, max_length, max_length)
     fig, axes = plt.subplots(
         nrows=len(packages),
