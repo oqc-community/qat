@@ -74,7 +74,7 @@ class TestCalibrationSavingAndLoading:
         )
 
         for key, value in copied_echo.pulse_channels.items():
-            channel_key = key[:3]
+            channel_key = value.physical_channel_id
             original_channel = copied_echo.physical_channels[channel_key]
             assert id(value.physical_channel) == id(
                 original_channel
