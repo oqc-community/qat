@@ -119,21 +119,21 @@ class QuantumComponent:
     Qubit or various channels for a simple example.
     """
 
-    def __init__(self, id_, frozen=False, *args, **kwargs):
+    def __init__(self, id, frozen=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if id_ is None:
-            id_ = ""
-        self.id_ = str(id_)
-        self.frozen = frozen
+        if id is None:
+            id = ""
+        self._id = str(id)
+        self._frozen = frozen
 
     @property
     def id(self):
-        return self.id_
+        return self._id
 
     @id.setter
-    def id(self, id_):
-        if not self.frozen:
-            self.id_ = id_
+    def id(self, id):
+        if not self._frozen:
+            self._id = id
         else:
             raise ValueError(
                 "The id of quantum components cannot be changed when frozen=True."
@@ -141,19 +141,19 @@ class QuantumComponent:
 
     @cached_property
     def _full_id(self):
-        return self.id_
+        return self._id
 
     def full_id(self):
-        if self.frozen:
+        if self._frozen:
             return self._full_id
         else:
-            return self.id_
+            return self.id
 
     def freeze(self, freeze=True):
         """
         Freezing the component allows us to make use of cached properties.
         """
-        self.frozen = freeze
+        self._frozen = freeze
         if not freeze:
             if hasattr(self, "_full_id"):
                 del self._full_id
@@ -489,13 +489,10 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.physical_channel_id + "." + self.partial_id()
 
     def full_id(self):
-        if self.frozen:
+        if self._frozen:
             return self._full_id
         else:
             return self.physical_channel_id + "." + self.partial_id()
-
-    def create_full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):

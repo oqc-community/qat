@@ -12,6 +12,7 @@ class TestCachedProperties:
         )
         hw.freeze()
 
+        # generate cached full ids for testings
         for dev in hw.quantum_devices.values():
             dev.full_id()
             if isinstance(dev, Qubit):
@@ -70,9 +71,8 @@ class TestCachedProperties:
                     new_ids.append(key)
 
                     # update the pulse channel dict with the full id
-                    hw.pulse_channels[pchan.pulse_channel.create_full_id()] = (
-                        hw.pulse_channels.pop(old_full_id)
-                    )
+                    new_full_id = pchan.physical_channel_id + "." + pchan.partial_id()
+                    hw.pulse_channels[new_full_id] = hw.pulse_channels.pop(old_full_id)
             for i in range(len(old_ids)):
                 pcs[new_ids[i]] = pcs.pop(old_ids[i])
 
@@ -116,7 +116,7 @@ class TestCachedProperties:
                     pchan.pulse_channel.id = device._create_pulse_channel_id(
                         pchan.channel_type, [device] + pchan.auxiliary_devices
                     )
-                    new_full_id = pchan.pulse_channel.create_full_id()
+                    new_full_id = pchan.physical_channel_id + "." + pchan.partial_id()
                     hw.pulse_channels[new_full_id] = hw.pulse_channels.pop(old_full_id)
 
         # hw.delete_cache()
