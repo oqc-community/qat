@@ -256,42 +256,42 @@ class QbloxControlHardware(ControlHardware):
             raise ValueError("No resources allocated. Install packages first")
 
         results = {}
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(True)
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.arm_sequencer()
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.start_sequencer()
-
-        for module, allocations in self._resources.items():
-            if module.is_qrm_type:
+        try:
+            for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
-                    acquisitions = self._get_acquisitions(module, sequencer)
+                    sequencer.sync_en(True)
 
-                    if self.plot_acquisitions:
-                        plot_acquisitions(
-                            acquisitions,
-                            integration_length=sequencer.integration_length_acq(),
-                        )
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.arm_sequencer()
 
-                    for acq_name, acq in acquisitions.items():
-                        i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                        q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                        results[acq_name] = (
-                            i + 1j * q
-                        ) / sequencer.integration_length_acq()
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.start_sequencer()
 
-                    self._delete_acquisitions(sequencer)
+            for module, allocations in self._resources.items():
+                if module.is_qrm_type:
+                    for target, sequencer in allocations.items():
+                        acquisitions = self._get_acquisitions(module, sequencer)
 
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(False)
+                        if self.plot_acquisitions:
+                            plot_acquisitions(
+                                acquisitions,
+                                integration_length=sequencer.integration_length_acq(),
+                            )
+
+                        for acq_name, acq in acquisitions.items():
+                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
+                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
+                            results[acq_name] = (
+                                i + 1j * q
+                            ) / sequencer.integration_length_acq()
+
+                        self._delete_acquisitions(sequencer)
+        finally:
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.sync_en(False)
 
         return results
 
