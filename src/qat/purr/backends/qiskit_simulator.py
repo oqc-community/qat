@@ -59,16 +59,14 @@ class QiskitBuilder(InstructionBuilder):
         self.circuit = QuantumCircuit(qubit_count, qubit_count)
         self.shot_count = hardware_model.default_repeat_count
         self.bit_count = 0
-        self.bit_ordering = []
+        self.bit_ordering = {}
 
     def measure(self, target: Qubit, *args, **kwargs) -> "InstructionBuilder":
         self.circuit.measure(target.index, self.bit_count)
         # keep track of the ordering of measurements
-        self.bit_count = self.bit_count + 1
         if len(args) >= 2:
-            self.bit_ordering.append(args[1])
-        else:
-            self.bit_ordering.append(target.index)
+            self.bit_ordering[args[1]] = self.bit_count
+        self.bit_count = self.bit_count + 1
         return self
 
     def R(self, axis: Axis, target: Union[Qubit, PulseChannel], radii=None):
@@ -168,7 +166,7 @@ class QiskitBuilder(InstructionBuilder):
     def clear(self):
         self.circuit.clear()
         self.bit_count = 0
-        self.bit_ordering = []
+        self.bit_ordering = {}
 
     def merge_builder(self, other_builder: InstructionBuilder):
         """
@@ -282,7 +280,7 @@ class QiskitEngine(InstructionExecutionEngine):
             order = []
             for lbl in labels:
                 if str(lbl) in builder.bit_ordering:
-                    order.append(builder.bit_ordering.index(str(lbl)))
+                    order.append(builder.bit_ordering[str(lbl)])
                 else:
                     order.append(len(builder.bit_ordering) + ctr)
                     ctr += 1
