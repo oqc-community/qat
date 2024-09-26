@@ -163,11 +163,9 @@ def dummy_qblox_config():
         ),
         sequencers={
             0: SequencerConfig(
-                sync_en=True,
                 connection=ConnectionConfig(bulk_value=["out0"]),
             ),
             1: SequencerConfig(
-                sync_en=True,
                 connection=ConnectionConfig(bulk_value=["out0"]),
             ),
         },
@@ -177,11 +175,9 @@ def dummy_qblox_config():
         module=ModuleConfig(lo=LoConfig(out0_in0_en=True)),
         sequencers={
             0: SequencerConfig(
-                sync_en=True,
                 connection=ConnectionConfig(bulk_value=["out0", "in0"]),
             ),
             1: SequencerConfig(
-                sync_en=True,
                 connection=ConnectionConfig(bulk_value=["out0", "in0"]),
             ),
         },

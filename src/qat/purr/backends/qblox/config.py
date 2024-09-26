@@ -278,8 +278,6 @@ class QcmRfConfigHelper(QcmConfigHelper):
         self.configure_offset(module, config)
 
     def configure_sequencer(self, sequencer, config):
-        if config.sync_en:
-            sequencer.sync_en(config.sync_en)
         self.configure_connection(sequencer, config)
         self.configure_nco(sequencer, config)
         self.configure_awg(sequencer, config)
@@ -345,8 +343,6 @@ class QrmRfConfigHelper(QrmConfigHelper):
         self.configure_scope_acq(module, config)
 
     def configure_sequencer(self, sequencer, config):
-        if config.sync_en:
-            sequencer.sync_en(config.sync_en)
         self.configure_connection(sequencer, config)
         self.configure_nco(sequencer, config)
         self.configure_awg(sequencer, config)
