@@ -341,7 +341,9 @@ class Acquire(QuantumComponent, QuantumInstruction):
         super(QuantumComponent, self).__init__(channel)
         self.time: float = time or 1.0e-6
         if self.time < 0:
-            raise ValueError(f"Acquire time {self.time} cannot be less than or equal to zero.")
+            raise ValueError(
+                f"Acquire time {self.time} cannot be less than or equal to zero."
+            )
         self.mode: AcquireMode = mode or AcquireMode.RAW
         self.delay = delay
         self.output_variable = output_variable or self.generate_name(existing_names)
