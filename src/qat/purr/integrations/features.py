@@ -54,7 +54,7 @@ class Unit(Enum):
 
 # TODO: You don't want something lke this, just have two different objects for
 #   time/frequency.
-@dataclass
+@dataclass(frozen=True)
 class Quantity:
     amount: float
     unit: Unit
