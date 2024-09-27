@@ -39,7 +39,7 @@ class QatConfig(BaseSettings, validate_assignment=True):
         Args:
             compiler_config (CompilerConfig): _description_
         """
-        if compiler_config.repeats > self.MAX_REPEAT_LIMITS:
+        if compiler_config.repeats and (compiler_config.repeats > self.MAX_REPEATS_LIMIT):
             raise ValueError(
                 f"Number of shots {compiler_config.repeats} exceeds the maximum amount of {self.MAX_REPEATS_LIMIT}."
             )
