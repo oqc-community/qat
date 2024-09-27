@@ -1,5 +1,6 @@
 from typing import Union
 
+from compiler_config.config import CompilerConfig
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -32,10 +33,16 @@ class QatConfig(BaseSettings, validate_assignment=True):
     MAX_REPEATS_LIMIT: Union[None, int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
 
+    def validate(self, compiler_config: CompilerConfig):
+        """_summary_
+
+        Args:
+            compiler_config (CompilerConfig): _description_
+        """
+        if compiler_config.repeats > self.MAX_REPEAT_LIMITS:
+            raise ValueError(
+                f"Number of shots {compiler_config.repeats} exceeds the maximum amount of {self.MAX_REPEATS_LIMIT}."
+            )
+
 
 qatconfig = QatConfig()
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat import qatconfig
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -306,6 +307,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             # Rebuild repeat list if the hardware can't support the current setup.
             repeat_count = qat_file.repeat.repeat_count
+            if repeat_count > qatconfig.MAX_REPEAT_LIMITS:
+                raise ValueError(
+                    f"Number of shots {repeat_count} exceeds the maximum amount of {qatconfig.MAX_REPEATS_LIMIT}."
+                )
+
             if repeat_count > self.model.repeat_limit:
                 log.info(
                     f"Running {repeat_count} shots at once is "
