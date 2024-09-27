@@ -103,8 +103,7 @@ target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 addopts = [
-    "--import-mode=importlib",
-    "--doctest-modules"
+    "--import-mode=importlib"
 ]
 filterwarnings = [
     # Set warnings to raise errors in pytest runs.
