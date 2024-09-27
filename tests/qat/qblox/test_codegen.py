@@ -13,12 +13,11 @@ from qat.purr.compiler.instructions import Acquire, MeasurePulse, Pulse
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 from tests.qat.qblox.builder_nuggets import qubit_spect, resonator_spect
-from tests.qat.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxEmitter:
     def test_play_guassian(self, model):
         width = 100e-9

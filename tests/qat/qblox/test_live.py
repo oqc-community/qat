@@ -6,12 +6,11 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
 from tests.qat.qblox.builder_nuggets import qubit_spect, resonator_spect
-from tests.qat.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngine:
     def test_measure_amp_sweep(self, model):
         engine = model.create_engine()
