@@ -262,11 +262,50 @@ class TestQASM3:
             == 2
         )
 
-    def test_u(self):
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ["pi", "2*pi", "-pi/2", "-7*pi/2", "0", "pi/4"],
+            [np.pi, 2 * np.pi, -np.pi / 2, -7 * np.pi / 2, 0.0, np.pi / 4],
+            np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(6)),
+            [0.0, 0.0, 0.0, 0.0, "pi/2", 0.0],
+            ["2*pi", "-pi/2", 0.0, 0.0, "pi/2", "-2*pi"],
+        ],
+    )
+    def test_u_gate(self, params):
+        """
+        Tests the validty of the U gate with OpenPulse by checking that the
+        parsed circuit matches the same circuit created with teh cirucit builder.
+        """
         hw = get_default_echo_hardware(2)
+
+        # build the circuit from QASM
+        qasm = get_qasm3("u_gate.qasm")
+        for i in range(6):
+            qasm = qasm.replace(f"param{i}", str(params[i]))
         parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("u_test.qasm"))
-        assert len(result.instructions) > 0
+        result = parser.parse(get_builder(hw), qasm)
+        qasm_inst = result.instructions
+
+        # create the circuit using the circuit builder
+        builder = hw.create_builder()
+        params = [eval(str(param).replace("pi", "np.pi")) for param in params]
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        (
+            builder.Z(q1, params[2])
+            .Y(q1, params[0])
+            .Z(q1, params[1])
+            .Z(q2, params[5])
+            .Y(q2, params[3])
+            .Z(q2, params[4])
+        )
+        circ_inst = builder.instructions
+
+        # validate that the circuits match
+        assert len(qasm_inst) == len(circ_inst)
+        for i in range(len(qasm_inst)):
+            assert qasm_inst[i].__dict__ == circ_inst[i].__dict__
 
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
