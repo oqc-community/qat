@@ -78,7 +78,7 @@ class QbloxPhysicalChannel(PhysicalChannel):
         """Helper method to build a resonator with default channels."""
         kwargs.pop("fixed_if", None)
         reson = QbloxResonator(resonator_id, self)
-        reson.create_pulse_channel(ChannelType.macq, *args, fixed_if=True, **kwargs)
+        reson.create_pulse_channel(ChannelType.macq, *args, fixed_if=False, **kwargs)
         reson.default_pulse_channel_type = ChannelType.macq
         return reson
 
@@ -101,7 +101,7 @@ class QbloxPhysicalChannel(PhysicalChannel):
             ChannelType.drive,
             frequency=drive_freq,
             scale=channel_scale,
-            fixed_if=fixed_drive_if,
+            fixed_if=False,
         )
 
         qubit.create_pulse_channel(
