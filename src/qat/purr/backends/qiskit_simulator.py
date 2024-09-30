@@ -59,9 +59,13 @@ class QiskitBuilder(InstructionBuilder):
         self.circuit = QuantumCircuit(qubit_count, qubit_count)
         self.shot_count = hardware_model.default_repeat_count
         self.bit_count = 0
+        self.bit_ordering = {}
 
     def measure(self, target: Qubit, *args, **kwargs) -> "InstructionBuilder":
         self.circuit.measure(target.index, self.bit_count)
+        # keep track of the ordering of measurements
+        if len(args) >= 2:
+            self.bit_ordering[args[1]] = self.bit_count
         self.bit_count = self.bit_count + 1
         return self
 
@@ -162,6 +166,7 @@ class QiskitBuilder(InstructionBuilder):
     def clear(self):
         self.circuit.clear()
         self.bit_count = 0
+        self.bit_ordering = {}
 
     def merge_builder(self, other_builder: InstructionBuilder):
         """
@@ -170,6 +175,7 @@ class QiskitBuilder(InstructionBuilder):
         """
         self.circuit.compose(other_builder.circuit, inplace=True)
         self.bit_count = other_builder.bit_count
+        self.bit_ordering = other_builder.bit_ordering
 
         return super().merge_builder(other_builder)
 
@@ -253,11 +259,7 @@ class QiskitEngine(InstructionExecutionEngine):
         except QiskitError as e:
             raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
 
-        removals = self.model.qubit_count - builder.bit_count
-
-        # Because qiskit needs all values up-front we just provide a maximal classical register then trim off
-        # the values we aren't going to use.
-        trimmed = {key[removals:]: value for key, value in distribution.items()}
+        # return the measurements in the correct order
         assigns = {}
         returns = []
         for inst in builder.instructions:
@@ -267,7 +269,31 @@ class QiskitEngine(InstructionExecutionEngine):
                 returns.extend(inst.variables)
         if len(assigns) > 1:
             log.warning("Qasm Simulator does not support multiple assignment.")
-        return {key: trimmed for key in returns} if returns else trimmed
+        if returns:
+            # trim the qiskit returns to the classical register
+            labels = assigns[returns[0]]
+            removals = self.model.qubit_count - len(labels)
+            trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
+
+            # find the reordering
+            ctr = 0
+            order = []
+            for lbl in labels:
+                if str(lbl) in builder.bit_ordering:
+                    order.append(builder.bit_ordering[str(lbl)])
+                else:
+                    order.append(len(builder.bit_ordering) + ctr)
+                    ctr += 1
+            trimmed = {
+                ("".join([key[idx] for idx in order])): value
+                for key, value in trimmed.items()
+            }
+            return {key: trimmed for key in returns}
+        else:
+            # trim the qiskit returns to the number of measurements
+            removals = self.model.qubit_count - builder.bit_count
+            trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
+            return trimmed
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
