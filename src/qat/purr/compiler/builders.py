@@ -803,7 +803,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 phys = acq.channel.physical_channel
                 resonator = next(
                     dev
-                    for dev in self.model.get_devices_from_physical_channel(phys.id)
+                    for dev in self.model.get_devices_from_physical_channel(phys)
                     if isinstance(dev, Resonator)
                 )
                 pulse = resonator.get_measure_channel()
