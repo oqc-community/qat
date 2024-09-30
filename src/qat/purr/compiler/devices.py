@@ -6,6 +6,7 @@ import os
 import sys
 from enum import Enum, auto
 from typing import Dict, List, Optional, Set, TypeVar, Union
+from uuid import uuid4
 
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
@@ -127,8 +128,15 @@ class QuantumComponent:
     def full_id(self):
         return self.id
 
+    # @cached_property
+    def _uuid(self):
+        return uuid4()
+
     def __repr__(self):
         return f"{self.full_id()}"
+
+    def __hash__(self):
+        return hash(self._uuid)
 
 
 class Calibratable:
@@ -458,10 +466,11 @@ class PulseChannel(QuantumComponent, Calibratable):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
+        return self._uuid == other._uuid
+        # return self.full_id() == other.full_id()
 
     def __hash__(self):
-        return hash(self.full_id())
+        return hash(self._uuid)
 
 
 class FreqShiftPulseChannel(PulseChannel):

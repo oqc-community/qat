@@ -293,8 +293,8 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return pulse_channels
 
-    def get_devices_from_pulse_channel(self, id_: str):
-        pulse_channel = self.get_pulse_channel_from_id(id_)
+    def get_devices_from_pulse_channel(self, id_: Union[str, PulseChannel]):
+        pulse_channel = self.get_pulse_channel_from_id(id_) if isinstance(id_, str) else id_
         devices = [
             device
             for device in self.quantum_devices.values()
