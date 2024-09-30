@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -57,13 +57,12 @@ class PulseChannel(QuantumComponent, validate_assignment=True):
     def check_frequency(self):
         min_frequency = self.physical_channel.pulse_channel_min_frequency
         max_frequency = self.physical_channel.pulse_channel_max_frequency
-        full_id = self.id_
 
         if self.frequency < min_frequency or self.frequency > max_frequency:
             raise ValueError(
                 f"Pulse channel frequency '{self.frequency}' must be between the bounds "
                 f"({min_frequency}, {max_frequency}) on physical "
-                f"channel with id {full_id}."
+                f"channel with id {self.id}."
             )
         return self
 
@@ -147,7 +146,7 @@ class PulseChannelView(PulseChannel):
 class QuantumDevice(QuantumComponent, validate_assignment=True):
     measure_device: Union["QuantumDevice", None] = None
     default_pulse_channel_type: Literal[ChannelType.measure] = ChannelType.measure
-    # pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]]
+    pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]]
     physical_channel: PhysicalChannel
 
 
