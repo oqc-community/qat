@@ -148,16 +148,6 @@ class QbloxControlHardware(ControlHardware):
                 sequencer: Sequencer = module.sequencers[next(iter(available))]
                 allocations[target] = sequencer
 
-    def _get_acquisitions(self, module: Module, sequencer: Sequencer):
-        module.get_sequencer_status(sequencer.seq_idx, timeout=1)
-        module.get_acquisition_status(sequencer.seq_idx, timeout=1)
-
-        acquisitions = module.get_acquisitions(sequencer.seq_idx)
-        for acq_name in acquisitions:
-            module.store_scope_acquisition(sequencer.seq_idx, acq_name)
-
-        return module.get_acquisitions(sequencer.seq_idx)
-
     def _delete_acquisitions(self, sequencer):
         sequencer.delete_acquisition_data(all=True)
 
@@ -281,20 +271,23 @@ class QbloxControlHardware(ControlHardware):
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        acquisitions = self._get_acquisitions(module, sequencer)
-
-                        if self.plot_acquisitions:
-                            plot_acquisitions(
-                                acquisitions,
-                                integration_length=sequencer.integration_length_acq(),
-                            )
+                        sequencer.get_acquisition_status(timeout=1)
+                        acquisitions = sequencer.get_acquisitions()
 
                         for acq_name, acq in acquisitions.items():
+                            sequencer.store_scope_acquisition(acq_name)
+
                             i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
                             q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
                             results[acq_name] = (
                                 i + 1j * q
                             ) / sequencer.integration_length_acq()
+
+                        if self.plot_acquisitions:
+                            plot_acquisitions(
+                                sequencer.get_acquisitions(),  # (re)fetch after store
+                                integration_length=sequencer.integration_length_acq(),
+                            )
 
                         self._delete_acquisitions(sequencer)
         finally:
