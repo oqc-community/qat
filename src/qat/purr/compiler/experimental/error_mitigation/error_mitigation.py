@@ -7,5 +7,5 @@ from qat.purr.compiler.experimental.error_mitigation.readout_mitigation import (
 )
 
 
-class ErrorMitigation(BaseModel):
+class ErrorMitigation(BaseModel, validate_assignment=True):
     readout_mitigation: Optional[ReadoutMitigation] = None

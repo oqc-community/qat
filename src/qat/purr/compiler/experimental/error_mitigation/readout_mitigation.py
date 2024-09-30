@@ -29,5 +29,5 @@ class ReadoutMitigation(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
 
     linear: Dict[str, Dict[str, float]] = None
-    matrix: np.array = None
+    matrix: np.ndarray[float] | None = None
     m3: bool = False

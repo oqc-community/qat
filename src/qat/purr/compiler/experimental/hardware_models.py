@@ -1,12 +1,14 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 from pydantic import BaseModel
 
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.experimental.devices import QubitCoupling
 from qat.purr.compiler.instructions import AcquireMode
 
 if TYPE_CHECKING:
     from qat.purr.compiler.execution import InstructionExecutionEngine
+    from qat.purr.compiler.experimental.error_mitigation import ErrorMitigation
     from qat.purr.compiler.runtime import QuantumRuntime
 
 
@@ -39,4 +41,9 @@ class QuantumHardwareModel(HardwareModel):
     default_repeat_count: int = 1000
     default_repetition_period: float = 100e-6
 
-    error_mitigation: None = None
+    quantum_devices: Dict[str, PydQuantumDevice] = {}
+    pulse_channels: Dict[str, PydPulseChannel] = {}
+    physical_channels: Dict[str, PydPhysicalChannel] = {}
+    basebands: Dict[str, PydPhysicalBaseband] = {}
+    qubit_direction_couplings: List[QubitCoupling] = []
+    error_mitigation: ErrorMitigation | None = None
