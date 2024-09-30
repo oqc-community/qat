@@ -537,7 +537,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         results = []
         for target in inst.quantum_targets:
             if isinstance(target, PulseChannel):
-                devices = self.model.get_devices_from_pulse_channel(target.full_id())
+                devices = self.model.get_devices_from_pulse_channel(target)
                 for device in devices:
                     if isinstance(device, Resonator):
                         for qubit in self.model.qubits:
@@ -781,7 +781,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 phys = acq.channel.physical_channel
                 resonator = next(
                     dev
-                    for dev in self.model.get_devices_from_physical_channel(phys.id)
+                    for dev in self.model.get_devices_from_physical_channel(phys)
                     if isinstance(dev, Resonator)
                 )
                 pulse = resonator.get_measure_channel()
