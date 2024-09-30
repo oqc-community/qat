@@ -198,6 +198,15 @@ class QbloxControlHardware(ControlHardware):
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
+
+            # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
+            # TODO - This is a temporary workaround until Qblox fixes the issue
+            for slot_idx, module in self._driver.get_connected_modules().items():
+                log.info(f"Resetting sequencer connections for module {slot_idx}")
+                module.disconnect_outputs()
+                if module.is_qrm_type:
+                    module.disconnect_inputs()
+
         log.info(self._driver.get_system_status())
         self.is_connected = True
 
@@ -292,6 +301,10 @@ class QbloxControlHardware(ControlHardware):
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
                     sequencer.sync_en(False)
+
+                module.disconnect_outputs()
+                if module.is_qrm_type:
+                    module.disconnect_inputs()
 
         return results
 
