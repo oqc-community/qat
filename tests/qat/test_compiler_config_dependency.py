@@ -9,7 +9,7 @@ from qat.purr.backends.echo import get_default_echo_hardware
 from qat.qat import execute_with_metrics
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
 
-SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
+SUPPORTED_CONFIG_VERSIONS = ["v02", "v1", "v2"]
 
 
 def _get_json_path(file_name):
