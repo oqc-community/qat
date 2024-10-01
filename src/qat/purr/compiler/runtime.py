@@ -13,6 +13,7 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
+from qat import qatconfig
 from qat.purr.compiler.builders import (
     FluidBuilderWrapper,
     InstructionBuilder,
@@ -329,6 +330,7 @@ def execute_instructions(
 ):
     if config is None:
         config = CompilerConfig()
+    qatconfig.validate(config)
     config.validate(hardware)
 
     active_runtime = get_runtime(hardware)
