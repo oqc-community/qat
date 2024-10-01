@@ -129,15 +129,8 @@ class QuantumComponent:
     def full_id(self):
         return self.id
 
-    @cached_property
-    def _uuid(self):
-        return uuid4()
-
     def __repr__(self):
         return f"{self.full_id()}"
-
-    def __hash__(self):
-        return hash(self._uuid)
 
 
 class Calibratable:
@@ -462,6 +455,10 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     def full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
+
+    @cached_property
+    def _uuid(self):
+        return uuid4()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
