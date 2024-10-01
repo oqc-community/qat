@@ -10,6 +10,9 @@ from qat.purr.compiler.experimental.devices import (
     QuantumDevice,
     QubitCoupling,
 )
+from qat.purr.compiler.hardware_models import (
+    QuantumHardwareModel as LegacyQuantumHardwareModel,
+)
 from qat.purr.compiler.instructions import AcquireMode
 
 if TYPE_CHECKING:
@@ -55,3 +58,18 @@ class QuantumHardwareModel(HardwareModel):
     basebands: Dict[str, PhysicalBaseband] = Field(allow_mutation=False, default=dict())
     qubit_direction_couplings: List[QubitCoupling] = Field(allow_mutation=False, default=[])
     error_mitigation: ErrorMitigation | None = None
+
+
+class QuantumHardwareModelBuilder(LegacyQuantumHardwareModel):
+    def build_pydantic(self) -> QuantumHardwareModel:
+        return QuantumHardwareModel(
+            default_acquire_mode=self.default_acquire_mode,
+            default_repeat_count=self.default_repeat_count,
+            default_repetition_period=self.default_repetition_period,
+            quantum_devices=self.quantum_devices,
+            pulse_channels=self.pulse_channels,
+            physical_channels=self.physical_channels,
+            basebands=self.basebands,
+            qubit_direction_couplings=self.qubit_direction_couplings,
+            error_mitigation=self.error_mitigation,
+        )
