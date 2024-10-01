@@ -15,3 +15,4 @@ Submodules
    qat.purr.utils.benchmarking
    qat.purr.utils.logger
    qat.purr.utils.logging_utils
+   qat.purr.utils.serializer
