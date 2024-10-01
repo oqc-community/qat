@@ -1,40 +1,33 @@
 import os
-import unittest
 
-from qat.purr.backends.live import LiveHardwareModel
+import pytest
+
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.utils.logger import load_object_from_log_folder, save_object_to_log_folder
-from tests.qat.qblox.utils import setup_qblox_hardware_model
 
 
-class TestHardwareModelLifecycle(unittest.TestCase):
-    def setUp(self) -> None:
-        self.calibration_filename = f"{self._testMethodName}.json"
+@pytest.mark.parametrize("cluster_setup", [None], indirect=True)
+class TestHardwareModelLifecycle:
 
-    def tearDown(self) -> None:
-        if os.path.exists(self.calibration_filename):
-            os.remove(self.calibration_filename)
-
-    def test_save_calibration(self):
-        model = LiveHardwareModel()
-        setup_qblox_hardware_model(model)
+    def test_save_calibration(self, cluster_setup, calibration_filename):
+        model = QbloxLiveHardwareModel()
+        cluster_setup.configure(model)
 
         saved_path = save_object_to_log_folder(
-            model.get_calibration(), self.calibration_filename
+            model.get_calibration(), calibration_filename
         )
         assert os.path.exists(saved_path)
 
-    def test_load_calibration(self):
-        model = LiveHardwareModel()
-        setup_qblox_hardware_model(model)
+    def test_load_calibration(self, cluster_setup, calibration_filename):
+        model = QbloxLiveHardwareModel()
+        cluster_setup.configure(model)
 
         original_calibration = model.get_calibration()
-        saved_path = save_object_to_log_folder(
-            original_calibration, self.calibration_filename
-        )
+        saved_path = save_object_to_log_folder(original_calibration, calibration_filename)
         assert os.path.exists(saved_path)
 
-        loaded_calibration = load_object_from_log_folder(self.calibration_filename)
+        loaded_calibration = load_object_from_log_folder(calibration_filename)
         assert original_calibration == loaded_calibration
         model.load_calibration(loaded_calibration)
         assert original_calibration == model.get_calibration()
@@ -63,14 +56,13 @@ class TestHardwareModelLifecycle(unittest.TestCase):
         before_frequency_0 = self._get_qb_freq(before, 0)
         assert not qubit0.is_calibrated
         assert after_frequency_0 == before_frequency_0
-        # self._get_qb_freq(after_again)
 
         before_frequency_1 = self._get_qb_freq(before, 1)
         after_frequency_1 = self._get_qb_freq(after, 1)
         assert qubit1.is_calibrated
         assert before_frequency_1 + 100 == after_frequency_1
 
-    def test_qblox_calibration(self):
-        qblox_model = LiveHardwareModel()
-        setup_qblox_hardware_model(qblox_model)
-        self._run_calibration_tests(qblox_model)
+    def test_qblox_calibration(self, cluster_setup):
+        model = QbloxLiveHardwareModel()
+        cluster_setup.configure(model)
+        self._run_calibration_tests(model)

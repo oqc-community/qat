@@ -5,18 +5,18 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
-from tests.qat.qblox.utils import ClusterInfo
+from tests.qat.qblox.builder_nuggets import qubit_spect, resonator_spect
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngine:
     def test_measure_amp_sweep(self, model):
         engine = model.create_engine()
         q0 = model.get_qubit(0)
 
-        for amp in [0.5, 1.0]:
+        for amp in [0.1, 0.2, 0.3]:
             q0.pulse_measure["amp"] = amp
             builder = get_builder(model).measure(q0).repeat(10000)
             results, _ = execute_instructions(engine, builder.instructions)
@@ -199,6 +199,20 @@ class TestQbloxLiveEngine:
             .pulse(drive_channel2, PulseShapeType.SQUARE, width=100e-9, amp=amp)
             .measure_scope_mode(qubit)
         )
+
+        results, _ = execute_instructions(engine, builder.instructions)
+        assert results is not None
+
+    def test_resonator_spect(self, model):
+        engine = model.create_engine()
+        builder = resonator_spect(model, [0, 1])
+
+        results, _ = execute_instructions(engine, builder.instructions)
+        assert results is not None
+
+    def test_qubit_spect(self, model):
+        engine = model.create_engine()
+        builder = qubit_spect(model, [0, 1])
 
         results, _ = execute_instructions(engine, builder.instructions)
         assert results is not None

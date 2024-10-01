@@ -87,7 +87,7 @@ class QbloxLiveEngine(LiveDeviceEngine):
                         "Multiple acquisitions are not supported on the same channel in one sweep step"
                     )
                 for aq in aqs:
-                    response = playback_results[aq.physical_channel.id]
+                    response = playback_results[aq.output_variable]
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(

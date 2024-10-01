@@ -7,7 +7,7 @@ from typing import Dict, List
 
 import numpy as np
 import regex
-from qblox_instruments import Cluster, DummyScopeAcquisitionData
+from qblox_instruments import Cluster, DummyBinnedAcquisitionData, DummyScopeAcquisitionData
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
@@ -78,7 +78,7 @@ class QbloxPhysicalChannel(PhysicalChannel):
         """Helper method to build a resonator with default channels."""
         kwargs.pop("fixed_if", None)
         reson = QbloxResonator(resonator_id, self)
-        reson.create_pulse_channel(ChannelType.macq, *args, fixed_if=True, **kwargs)
+        reson.create_pulse_channel(ChannelType.macq, *args, fixed_if=False, **kwargs)
         reson.default_pulse_channel_type = ChannelType.macq
         return reson
 
@@ -101,7 +101,7 @@ class QbloxPhysicalChannel(PhysicalChannel):
             ChannelType.drive,
             frequency=drive_freq,
             scale=channel_scale,
-            fixed_if=fixed_drive_if,
+            fixed_if=False,
         )
 
         qubit.create_pulse_channel(
@@ -148,15 +148,8 @@ class QbloxControlHardware(ControlHardware):
                 sequencer: Sequencer = module.sequencers[next(iter(available))]
                 allocations[target] = sequencer
 
-    def _get_acquisitions(self, module: Module, sequencer: Sequencer):
-        module.get_sequencer_status(sequencer.seq_idx, timeout=1)
-        module.get_acquisition_status(sequencer.seq_idx, timeout=1)
-
-        acquisitions = module.get_acquisitions(sequencer.seq_idx)
-        for acq_name in acquisitions:
-            module.store_scope_acquisition(sequencer.seq_idx, acq_name)
-
-        return module.get_acquisitions(sequencer.seq_idx)
+    def _delete_acquisitions(self, sequencer):
+        sequencer.delete_acquisition_data(all=True)
 
     def _prepare_config(self, package: QbloxPackage, sequencer: Sequencer):
         if package.target.fixed_if:  # NCO freq constant
@@ -195,6 +188,15 @@ class QbloxControlHardware(ControlHardware):
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
+
+            # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
+            # TODO - This is a temporary workaround until Qblox fixes the issue
+            for slot_idx, module in self._driver.get_connected_modules().items():
+                log.info(f"Resetting sequencer connections for module {slot_idx}")
+                module.disconnect_outputs()
+                if module.is_qrm_type:
+                    module.disconnect_inputs()
+
         log.info(self._driver.get_system_status())
         self.is_connected = True
 
@@ -253,47 +255,49 @@ class QbloxControlHardware(ControlHardware):
             raise ValueError("No resources allocated. Install packages first")
 
         results = {}
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(True)
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.arm_sequencer()
-
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.start_sequencer()
-
-        for module, allocations in self._resources.items():
-            if module.is_qrm_type:
+        try:
+            for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
-                    result_id = target.physical_channel.id
-                    if result_id in results:
-                        raise ValueError(
-                            "Two or more pulse channels on the same physical channel"
-                        )
-                    acquisitions = self._get_acquisitions(module, sequencer)
+                    sequencer.sync_en(True)
 
-                    if self.plot_acquisitions:
-                        plot_acquisitions(
-                            acquisitions,
-                            integration_length=sequencer.integration_length_acq(),
-                        )
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.arm_sequencer()
 
-                    for acq_name, acq in acquisitions.items():
-                        i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                        q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                        results[result_id] = (
-                            i + 1j * q
-                        ) / sequencer.integration_length_acq()
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.start_sequencer()
 
-                    sequencer.delete_acquisition_data(all=True)
+            for module, allocations in self._resources.items():
+                if module.is_qrm_type:
+                    for target, sequencer in allocations.items():
+                        sequencer.get_acquisition_status(timeout=1)
+                        acquisitions = sequencer.get_acquisitions()
 
-        for module, allocations in self._resources.items():
-            for target, sequencer in allocations.items():
-                sequencer.sync_en(False)
+                        for acq_name, acq in acquisitions.items():
+                            sequencer.store_scope_acquisition(acq_name)
+
+                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
+                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
+                            results[acq_name] = (
+                                i + 1j * q
+                            ) / sequencer.integration_length_acq()
+
+                        if self.plot_acquisitions:
+                            plot_acquisitions(
+                                sequencer.get_acquisitions(),  # (re)fetch after store
+                                integration_length=sequencer.integration_length_acq(),
+                            )
+
+                        self._delete_acquisitions(sequencer)
+        finally:
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.sync_en(False)
+
+                module.disconnect_outputs()
+                if module.is_qrm_type:
+                    module.disconnect_inputs()
 
         return results
 
@@ -338,11 +342,31 @@ class DummyQbloxControlHardware(QbloxControlHardware):
             sequencer=sequencer.seq_idx, data=dummy_scope_acquisition_data
         )
 
-    def set_data(self, qblox_packages: List[QbloxPackage]):
-        self._resources.clear()
-        self.allocate_resources(qblox_packages)
-        for package in qblox_packages:
-            module, sequencer = self.install(package)
+    def _setup_dummy_binned_acq_data(
+        self, module, sequencer: Sequencer, sequence: Sequence
+    ):
+        for name, acquisition in sequence.acquisitions.items():
+            dummy_data = (np.random.random(), np.random.random())
+            dummy_binned_acquisition_data = [
+                DummyBinnedAcquisitionData(data=dummy_data, thres=1, avg_cnt=1)
+            ] * acquisition["num_bins"]
+            module.set_dummy_binned_acquisition_data(
+                sequencer=sequencer.seq_idx,
+                acq_index_name=name,
+                data=dummy_binned_acquisition_data,
+            )
 
+    def _delete_acquisitions(self, sequencer):
+        sequencer.delete_dummy_scope_acquisition_data()
+        sequencer.delete_dummy_binned_acquisition_data()
+
+    def set_data(self, qblox_packages: List[QbloxPackage]):
+        super().set_data(qblox_packages)
+
+        # Stage Scope and Acquisition data
+        for module, allocations in self._resources.items():
             if module.is_qrm_type:
-                self._setup_dummy_scope_acq_data(module, sequencer, package.sequence)
+                for target, sequencer in allocations.items():
+                    package = next((pkg for pkg in qblox_packages if pkg.target == target))
+                    self._setup_dummy_scope_acq_data(module, sequencer, package.sequence)
+                    self._setup_dummy_binned_acq_data(module, sequencer, package.sequence)
