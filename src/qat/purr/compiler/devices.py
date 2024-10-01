@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
+from functools import cached_property
 from typing import Dict, List, Optional, Set, TypeVar, Union
 from uuid import uuid4
 
@@ -128,7 +129,7 @@ class QuantumComponent:
     def full_id(self):
         return self.id
 
-    # @cached_property
+    @cached_property
     def _uuid(self):
         return uuid4()
 
