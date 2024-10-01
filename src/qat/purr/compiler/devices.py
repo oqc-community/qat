@@ -468,7 +468,6 @@ class PulseChannel(QuantumComponent, Calibratable):
             return False
 
         return self._uuid == other._uuid
-        # return self.full_id() == other.full_id()
 
     def __hash__(self):
         return hash(self._uuid)
