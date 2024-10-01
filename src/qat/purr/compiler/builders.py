@@ -184,7 +184,7 @@ class InstructionBuilder:
         index: int,
     ):
         """
-        Adds an instruction to this builder. All methods should use this instead of
+        Inserts an instruction into this builder. All methods should use this instead of
         accessing the instructions list directly as it deals with nested builders and
         merging.
         """

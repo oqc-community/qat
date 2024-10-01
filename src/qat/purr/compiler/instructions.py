@@ -755,6 +755,11 @@ def calculate_duration(instruction, return_samples: bool = True):
 
 
 class InstructionBlock:
+    """An Instruction grouping type. Allows working with blocks of Instructions as a
+    unit."""
+
+    instructions: List[Instruction]
+
     def _validate_targets(self, targets, valid_types):
         if targets is None:
             targets = []
@@ -770,12 +775,16 @@ class InstructionBlock:
 
 
 class QuantumInstructionBlock(InstructionBlock):
+    """Allows working with blocks of QuantumInstructions as a unit."""
+
     quantum_targets: List[QuantumComponent]
     instructions: List[QuantumInstruction]
     duration: float
 
 
 class MeasureBlock(QuantumInstructionBlock):
+    """Groups multiple qubit measurements together."""
+
     def __init__(
         self,
         targets: Union[Qubit, List[Qubit]],
@@ -851,7 +860,7 @@ class MeasureBlock(QuantumInstructionBlock):
         return f"Measure {', '.join(target_strings)}"
 
     @property
-    def instructions(self):
+    def instructions(self) -> List[QuantumInstruction]:
         instructions = [Synchronize(list(self._entangled_qubits))]
         for _, values in self._target_dict.items():
             instructions.extend([values["measure"], values["acquire"]])
