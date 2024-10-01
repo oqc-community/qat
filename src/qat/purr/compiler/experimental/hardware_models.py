@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.experimental.devices import (
@@ -47,9 +47,11 @@ class QuantumHardwareModel(HardwareModel):
     default_repeat_count: int = 1000
     default_repetition_period: float = 100e-6
 
-    quantum_devices: Dict[str, QuantumDevice] = {}
-    pulse_channels: Dict[str, PulseChannel] = {}
-    physical_channels: Dict[str, PhysicalChannel] = {}
-    basebands: Dict[str, PhysicalBaseband] = {}
-    qubit_direction_couplings: List[QubitCoupling] = []
+    quantum_devices: Dict[str, QuantumDevice] = Field(allow_mutation=False, default=dict())
+    pulse_channels: Dict[str, PulseChannel] = Field(allow_mutation=False, default=dict())
+    physical_channels: Dict[str, PhysicalChannel] = Field(
+        allow_mutation=False, default=dict()
+    )
+    basebands: Dict[str, PhysicalBaseband] = Field(allow_mutation=False, default=dict())
+    qubit_direction_couplings: List[QubitCoupling] = Field(allow_mutation=False, default=[])
     error_mitigation: ErrorMitigation | None = None
