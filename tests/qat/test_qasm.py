@@ -8,6 +8,14 @@ from typing import List
 import networkx as nx
 import numpy as np
 import pytest
+from compiler_config.config import (
+    CompilerConfig,
+    MetricsType,
+    Qasm2Optimizations,
+    Qasm3Optimizations,
+    QuantumResultsFormat,
+    TketOptimizations,
+)
 from docplex.mp.model import Model
 from pytket.qasm import circuit_from_qasm_str
 from qiskit import QuantumCircuit
@@ -37,14 +45,6 @@ from qat.purr.backends.realtime_chip_simulator import (
     qutip_available,
 )
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
-from qat.purr.compiler.config import (
-    CompilerConfig,
-    MetricsType,
-    Qasm2Optimizations,
-    Qasm3Optimizations,
-    QuantumResultsFormat,
-    TketOptimizations,
-)
 from qat.purr.compiler.devices import ChannelType, PulseShapeType, QubitCoupling
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.hardware_models import get_cl2qu_index_mapping

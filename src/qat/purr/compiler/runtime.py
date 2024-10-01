@@ -5,18 +5,18 @@ from numbers import Number
 from typing import List, Optional, TypeVar, Union
 
 import numpy
-
-from qat.purr.compiler.builders import (
-    FluidBuilderWrapper,
-    InstructionBuilder,
-    QuantumInstructionBuilder,
-)
-from qat.purr.compiler.config import (
+from compiler_config.config import (
     CalibrationArguments,
     CompilerConfig,
     ErrorMitigationConfig,
     MetricsType,
     ResultsFormatting,
+)
+
+from qat.purr.compiler.builders import (
+    FluidBuilderWrapper,
+    InstructionBuilder,
+    QuantumInstructionBuilder,
 )
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import (

@@ -8,8 +8,8 @@ from typing import List, Set, Union
 
 import jsonpickle
 import numpy as np
+from compiler_config.config import InlineResultsProcessing
 
-from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     ChannelType,
     CyclicRefPickler,

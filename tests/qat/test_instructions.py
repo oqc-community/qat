@@ -1,16 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import math
 from functools import reduce
 from operator import mul
 
 import numpy as np
 import pytest
+from compiler_config.config import InlineResultsProcessing
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing
 from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
@@ -171,23 +172,45 @@ class TestInstruction:
             qubit2: {qubit0, qubit1, qubit2},
         }
 
-    def test_acquire_filter(self):
+    @pytest.mark.parametrize(
+        "acquire_width",
+        np.linspace(1e-6, 6e-6, 10),
+    )
+    def test_acquire_filter(self, acquire_width):
         hw = get_default_echo_hardware(1)
         measure_ch = hw.get_qubit(0).get_measure_channel()
         acquire_ch = hw.get_qubit(0).get_acquire_channel()
-        width = 1e-6
-        samples = np.linspace(0, width, int(width // 1e-9), dtype=np.complex64)
+        no = math.floor(round((acquire_width / measure_ch.sample_time), 4))
+        samples = np.linspace(0, acquire_width, no, dtype=np.complex64)
         filter = CustomPulse(measure_ch, samples)
         acquire = Acquire(
             acquire_ch,
-            time=width,
+            time=acquire_width,
             filter=filter,
         )
         assert all(samples == acquire.filter.samples)
         with pytest.raises(ValueError):
             Acquire(
                 acquire_ch,
-                time=0.8e-6,
+                time=acquire_width + 0.5e-6,
+                filter=filter,
+            )
+
+    @pytest.mark.parametrize(
+        "acquire_width",
+        [-1e-6, 0],
+    )
+    def test_acquire_filter_edge_cases(self, acquire_width):
+        hw = get_default_echo_hardware(1)
+        measure_ch = hw.get_qubit(0).get_measure_channel()
+        acquire_ch = hw.get_qubit(0).get_acquire_channel()
+
+        filter = Pulse(measure_ch, PulseShapeType.SQUARE, acquire_width)
+
+        with pytest.raises(ValueError):
+            Acquire(
+                acquire_ch,
+                time=acquire_width,
                 filter=filter,
             )
 

@@ -4,6 +4,7 @@ from copy import deepcopy
 from numbers import Number
 from typing import List
 
+from compiler_config.config import TketOptimizations
 from pytket import Bit, Circuit, Qubit
 from pytket._tket.architecture import Architecture, RingArch
 from pytket._tket.circuit import CustomGateDef
@@ -38,7 +39,6 @@ from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedEr
 from qiskit.circuit.library import CXGate, UGate
 from sympy import pi, sympify
 
-from qat.purr.compiler.config import TketOptimizations
 from qat.purr.compiler.execution import QuantumHardwareModel
 from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
 from qat.purr.utils.logger import get_default_logger

@@ -1,7 +1,8 @@
+from compiler_config.config import CompilerConfig
+
 import qat.purr.compiler.frontends as core_frontends
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.backends.qiskit_simulator import QiskitEngine, QiskitHardwareModel
-from qat.purr.compiler.config import CompilerConfig
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.runtime import (
     _execute_instructions_with_interrupt,
