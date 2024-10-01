@@ -13,12 +13,11 @@ from qat.purr.compiler.instructions import Acquire, MeasurePulse, Pulse
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 from tests.qat.qblox.builder_nuggets import qubit_spect, resonator_spect
-from tests.qat.qblox.utils import ClusterInfo
 
 log = get_default_logger()
 
 
-@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxEmitter:
     def test_play_guassian(self, model):
         width = 100e-9
@@ -119,10 +118,10 @@ class TestQbloxEmitter:
         assert len(channel.config.sequencers) > 0
         assert pkg.sequencer_config.square_weight_acq.integration_length == int(time * 1e9)
 
-    def test_resonator_spect(self, model):
-        qubit_index = 0
-        builder = resonator_spect(model, qubit_index)
-        qubit = model.get_qubit(qubit_index)
+    def test_single_resonator_spect(self, model):
+        index = 0
+        builder = resonator_spect(model, [index])
+        qubit = model.get_qubit(index)
         acquire_channel = qubit.get_acquire_channel()
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
@@ -149,9 +148,42 @@ class TestQbloxEmitter:
             assert "set_awg_offs" not in acquire_pkg.sequence.program
             assert "upd_param" not in acquire_pkg.sequence.program
 
-    def test_qubit_spect(self, model):
+    def test_multi_resonator_spect(self, model):
+        indices = [0, 1]
+        builder = resonator_spect(model, indices)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+        assert len(packages) == len(indices)
+
+        for i, index in enumerate(indices):
+            qubit = model.get_qubit(index)
+            acquire_channel = qubit.get_acquire_channel()
+            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            assert acquire_pkg.sequence.acquisitions
+
+            measure_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
+                )
+            )
+
+            if measure_pulse.shape == PulseShapeType.SQUARE:
+                assert not acquire_pkg.sequence.waveforms
+                assert "play" not in acquire_pkg.sequence.program
+                assert "set_awg_offs" in acquire_pkg.sequence.program
+                assert "upd_param" in acquire_pkg.sequence.program
+            else:
+                assert acquire_pkg.sequence.waveforms
+                assert "play" in acquire_pkg.sequence.program
+                assert "set_awg_offs" not in acquire_pkg.sequence.program
+                assert "upd_param" not in acquire_pkg.sequence.program
+
+    def test_single_qubit_spect(self, model):
         qubit_index = 0
-        builder = qubit_spect(model, qubit_index)
+        builder = qubit_spect(model, [qubit_index])
         qubit = model.get_qubit(qubit_index)
         drive_channel = qubit.get_drive_channel()
         acquire_channel = qubit.get_acquire_channel()
@@ -199,3 +231,58 @@ class TestQbloxEmitter:
             assert "play" in acquire_pkg.sequence.program
             assert "set_awg_offs" not in acquire_pkg.sequence.program
             assert "upd_param" not in acquire_pkg.sequence.program
+
+    def test_multi_qubit_spect(self, model):
+        indices = [0, 1]
+        builder = qubit_spect(model, indices)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+        assert len(packages) == 2 * len(indices)
+
+        for i, index in enumerate(indices):
+            qubit = model.get_qubit(index)
+
+            # Drive
+            drive_channel = qubit.get_drive_channel()
+            drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
+            drive_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
+                )
+            )
+            if drive_pulse.shape == PulseShapeType.SQUARE:
+                assert not drive_pkg.sequence.waveforms
+                assert "play" not in drive_pkg.sequence.program
+                assert "set_awg_offs" in drive_pkg.sequence.program
+                assert "upd_param" in drive_pkg.sequence.program
+            else:
+                assert drive_pkg.sequence.waveforms
+                assert "play" in drive_pkg.sequence.program
+                assert "set_awg_offs" not in drive_pkg.sequence.program
+                assert "upd_param" not in drive_pkg.sequence.program
+
+            # Readout
+            acquire_channel = qubit.get_acquire_channel()
+            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            assert acquire_pkg.sequence.acquisitions
+            measure_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
+                )
+            )
+
+            if measure_pulse.shape == PulseShapeType.SQUARE:
+                assert not acquire_pkg.sequence.waveforms
+                assert "play" not in acquire_pkg.sequence.program
+                assert "set_awg_offs" in acquire_pkg.sequence.program
+                assert "upd_param" in acquire_pkg.sequence.program
+            else:
+                assert acquire_pkg.sequence.waveforms
+                assert "play" in acquire_pkg.sequence.program
+                assert "set_awg_offs" not in acquire_pkg.sequence.program
+                assert "upd_param" not in acquire_pkg.sequence.program
