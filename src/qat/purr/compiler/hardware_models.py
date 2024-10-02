@@ -314,7 +314,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self, physical_channel: Union[str, PhysicalChannel]
     ):
         if isinstance(physical_channel, str):
-            physical_channel = self.get_physical_channel(physical_channel)
+            physical_channel = self.physical_channels.get(physical_channel, None)
         devices = [
             device
             for device in self.quantum_devices.values()
