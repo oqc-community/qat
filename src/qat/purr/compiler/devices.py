@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
-from functools import cached_property
+from functools import lru_cache
 from typing import Dict, List, Optional, Set, TypeVar, Union
 from uuid import uuid4
 
@@ -124,7 +124,15 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id = str(id_)
+        self._id = str(id_)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, val):
+        self.id = val
 
     def full_id(self):
         return self.id
@@ -377,6 +385,12 @@ class PhysicalBaseband(QuantumComponent, Calibratable):
         self.if_frequency: Optional[float] = if_frequency
 
 
+# Keep an association between UUIDs and full IDs
+@lru_cache
+def _get_uuid(_: str):
+    return uuid4()
+
+
 class PulseChannel(QuantumComponent, Calibratable):
     """Models a pulse channel on a particular device."""
 
@@ -398,6 +412,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         self.scale: complex = scale
 
         self.fixed_if: bool = fixed_if
+        self._create_hash()
 
         if frequency < self.min_frequency or frequency > self.max_frequency:
             raise ValueError(
@@ -405,6 +420,18 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, val):
+        self._id = val
+        self._create_hash()
+
+    def _create_hash(self):
+        self._hash = hash(_get_uuid(self.full_id()))
 
     @property
     def sample_time(self):
@@ -456,18 +483,18 @@ class PulseChannel(QuantumComponent, Calibratable):
     def full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
 
-    @cached_property
-    def _uuid(self):
+    @lru_cache
+    def _uuid(full_id):
         return uuid4()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self._uuid == other._uuid
+        return self._hash == other._hash
 
     def __hash__(self):
-        return hash(self._uuid)
+        return self._hash
 
 
 class FreqShiftPulseChannel(PulseChannel):
