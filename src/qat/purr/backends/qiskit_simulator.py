@@ -211,8 +211,49 @@ def verify_placement(coupling_map, circuit):
 
 
 class QiskitEngine(InstructionExecutionEngine):
-    def __init__(self, hardware_model: QiskitHardwareModel = None):
+    def __init__(self, hardware_model: QiskitHardwareModel = None, **kwargs):
         super().__init__(hardware_model)
+        self.qiskit_config = kwargs
+
+    def _create_simulator(self, builder):
+        # Determine which simulator to use
+        method = self.qiskit_config.get("method", None)
+        qiskit_config = {"method": method}
+        print(method)
+        if method == None:
+            method = (
+                "statevector" if self.model.qubit_count >= 16 else "matrix_product_state"
+            )
+        if method == "statevector":
+            pass
+        elif method == "matrix_product_state":
+            qiskit_config["matrix_product_state_max_bond_dimension"] = (
+                self.qiskit_config.get("bond_dimension", 32)
+            )
+            qiskit_config["matrix_product_state_truncation_threshold"] = (
+                self.qiskit_config.get("truncation_threshold", 1e-12)
+            )
+        else:
+            raise ValueError(
+                f"Method '{method}' is not currently supported using the Qiskit Backend."
+                f" Currently supported methods are 'statevector' and 'matrix_product_state'."
+            )
+
+        # With no coupling map the backend defaults to create couplings for qubit count, which
+        # defaults to 30 for StateVector and 63 for MPS. So we change that.
+        aer_config = AerBackendConfiguration.from_dict(
+            AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
+        )
+        aer_config.n_qubits = self.model.qubit_count
+        qasm_sim = AerSimulator(
+            aer_config,
+            noise_model=builder.model.noise_model,
+            method="matrix_product_state",
+            matrix_product_state_truncation_threshold=1e-12,
+            matrix_product_state_max_bond_dimension=2,
+        )
+
+        return qasm_sim
 
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
@@ -243,11 +284,15 @@ class QiskitEngine(InstructionExecutionEngine):
         aer_config.n_qubits = self.model.qubit_count
         qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
 
+        # qasm_sim = self._create_simulator(builder)
+
         try:
             job = qasm_sim.run(
                 transpile(circuit, qasm_sim, coupling_map=coupling_map),
                 shots=builder.shot_count,
             )
+            print(job.result().results[0].metadata["method"])
+            # print(job.result().results[0].metadata['matrix_product_state_max_bond_dimension'])
             results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
