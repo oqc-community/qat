@@ -545,7 +545,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                                 results.append(qubit)
                     else:
                         results.append(device)
-                        results.extend(device.get_auxiliary_devices(target))
+                        results.extend(target.auxiliary_devices)
 
             else:
                 results.append(target)
