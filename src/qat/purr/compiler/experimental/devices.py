@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -16,7 +16,7 @@ class QuantumComponent(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True)
 
-    id: str | None = ""
+    id: Optional[str] = ""
 
     @field_validator("id")
     def set_id(cls, id):
@@ -26,7 +26,7 @@ class QuantumComponent(BaseModel):
         return self.id
 
     def __repr__(self):
-        return self.id
+        return self.full_id()
 
 
 class PhysicalBaseband(QuantumComponent):
@@ -37,7 +37,7 @@ class PhysicalBaseband(QuantumComponent):
 class PhysicalChannel(QuantumComponent):
     sample_time: float
     baseband: PhysicalBaseband
-    block_size: int | None = Field(ge=1, default=1)
+    block_size: Optional[int] = Field(ge=1, default=1)
     phase_offset: float = 0.0
     imbalance: float = 1.0
 
@@ -49,12 +49,59 @@ class PhysicalChannel(QuantumComponent):
     def set_block_size(cls, block_size):
         return block_size or 1
 
+    @property
+    def block_time(self):
+        return self.block_size * self.sample_time
+
+    @property
+    def baseband_frequency(self):
+        return self.baseband.frequency
+
+    @property
+    def baseband_if_frequency(self):
+        return self.baseband.if_frequency
+
+    def create_pulse_channel(
+        self,
+        id_: str,
+        frequency: float = 0.0,
+        bias: complex = 0.0 + 0.0j,
+        scale: complex = 1.0 + 0.0j,
+        fixed_if: bool = False,
+    ):
+        return PulseChannel(
+            id=id_,
+            physical_channel=self,
+            frequency=frequency,
+            bias=bias,
+            scale=scale,
+            fixed_if=fixed_if,
+        )
+
+    def create_freq_shift_pulse_channel(
+        self,
+        id_: str,
+        frequency: float = 0.0,
+        bias: complex = 0.0 + 0.0j,
+        scale: complex = 1.0 + 0.0j,
+        amp: float = 0.0,
+        fixed_if: bool = False,
+        active: bool = True,
+    ):
+        pulse_channel = FreqShiftPulseChannel(
+            id_, self, frequency, bias, scale, amp, active, fixed_if
+        )
+
+        return pulse_channel
+
 
 class PulseChannel(QuantumComponent):
     """Models a pulse channel on a particular device."""
 
-    channel_type: ChannelType | None = None
-    auxiliary_devices: List[QuantumDevice] = None
+    channel_type: Optional[Literal[ChannelType.measure]] = Field(
+        allow_mutation=False, default=None
+    )
+    auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
 
     physical_channel: PhysicalChannel
 
@@ -79,7 +126,12 @@ class PulseChannel(QuantumComponent):
 
     @field_validator("auxiliary_devices")
     def check_auxiliary_devices(cls, auxiliary_devices):
-        return auxiliary_devices or []
+        auxiliary_devices = auxiliary_devices or []
+
+        if not isinstance(auxiliary_devices, List):
+            return [auxiliary_devices]
+        else:
+            return auxiliary_devices
 
     @property
     def sample_time(self):
@@ -125,11 +177,8 @@ class PulseChannel(QuantumComponent):
     def max_frequency(self):
         return self.physical_channel.pulse_channel_max_frequency
 
-    def partial_id(self):
-        return self.id
-
     def full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
+        return self.physical_channel_id + "." + self.id
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
@@ -141,16 +190,53 @@ class PulseChannel(QuantumComponent):
         return hash(self.full_id())
 
 
+class FreqShiftPulseChannel(PulseChannel):
+    amp: float = 0.0
+    active: bool = False
+
+
 class QuantumDevice(QuantumComponent):
     pulse_channels: Dict[str, PulseChannel]
     physical_channel: PhysicalChannel
-    measure_device: Union[QuantumDevice, None] = None
+    measure_device: Optional[QuantumDevice] = None
     default_pulse_channel_type: Literal[ChannelType.measure] = ChannelType.measure
+
+    MULTI_DEVICE_CHANNEL_TYPES: Tuple[Literal[ChannelType.cross_resonance]] = Field(
+        (
+            ChannelType.cross_resonance,
+            ChannelType.cross_resonance_cancellation,
+        ),
+        const=True,
+    )
+
+    @model_validator(mode="after")
+    def check_pulse_channels(self):
+        invalid_pulse_channels = [
+            pulse_channel
+            for pulse_channel in self.pulse_channels.values()
+            if pulse_channel.physical_channel != self.physical_channel
+        ]
+
+        if any(invalid_pulse_channels):
+            error_pulse_channels_str = ",".join(
+                [str(pulse_channel) for pulse_channel in invalid_pulse_channels]
+            )
+            error_physical_channels_str = ",".join(
+                [
+                    str(pulse_channel.physical_channel)
+                    for pulse_channel in invalid_pulse_channels
+                ]
+            )
+            raise ValueError(
+                "Pulse channel has a physical channel and this must be equal to"
+                f"the device physical channel. Device {self} has physical channel {self.physical_channel} "
+                f"while pulse channels {error_pulse_channels_str} have associated physical channels {error_physical_channels_str}."
+            )
 
     def add_pulse_channel(
         self,
         pulse_channel: PulseChannel,
-        channel_type: ChannelType | None = None,
+        channel_type: Optional[ChannelType] = None,
         auxiliary_devices: List[QuantumDevice] = [],
     ):
         if pulse_channel.physical_channel != self.physical_channel:
@@ -198,20 +284,12 @@ class QuantumDevice(QuantumComponent):
     def _create_pulse_channel_id(
         self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
     ):
-        if (
-            channel_type in self.multi_device_pulse_channel_types
-            and len(auxiliary_devices) == 0
-        ):
+        if channel_type in self.MULTI_DEVICE_CHANNEL_TYPES and len(auxiliary_devices) == 0:
             raise ValueError(
-                f"Channel type {channel_type.name} requires at least one "
-                "auxillary_device"
+                f"Channel type {channel_type.name} requires at least one auxillary_device."
             )
-        return ".".join(
-            [str(x.full_id()) for x in (auxiliary_devices)] + [channel_type.name]
-        )
 
-    def get_auxiliary_devices(self, pulse_channel: PulseChannel):
-        return pulse_channel.auxiliary_devices
+        return ".".join([x.full_id() for x in auxiliary_devices] + [channel_type.name])
 
     def get_pulse_channel(
         self,
@@ -253,7 +331,7 @@ class Qubit(QuantumDevice):
 
     index: int
     resonator: Resonator
-    coupled_qubits: List[Qubit] | None = []
+    coupled_qubits: Optional[List[Qubit]] = []
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
 
@@ -337,7 +415,7 @@ class Qubit(QuantumDevice):
     def get_second_state_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.second_state)
 
-    def get_all_channels(self):
+    def get_all_channels(self) -> List[PulseChannel]:
         """
         Returns all channels associated with this qubit, including resonator channel and
         other auxiliary devices that act as if they are on this object.
@@ -349,7 +427,9 @@ class Qubit(QuantumDevice):
         ]
 
 
-class QubitCoupling(BaseModel, validate_assignment=True):
+class QubitCoupling(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     direction: tuple = Field(min_length=2, max_length=2)
     quality: float = Field(ge=0.0, le=1.0)
 
