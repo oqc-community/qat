@@ -248,7 +248,6 @@ class TestQiskitBackend:
         b.merge_builder(a)
         assert len(b.circuit.data) == 1
 
-        
     @pytest.mark.parametrize("index", [0, 1])
     def test_bitstring_ordering(self, index):
         qubit_count = 2
@@ -375,7 +374,7 @@ class TestQiskitBackend:
         bitstring1 = "11"
         assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
 
-        @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
+    @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
     def test_mps_backend(self, qubit_count):
         # Tests the MPS backend
         hw = get_default_qiskit_hardware(qubit_count)
