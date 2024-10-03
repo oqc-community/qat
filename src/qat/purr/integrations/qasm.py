@@ -10,6 +10,7 @@ from os.path import dirname, join
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
+from compiler_config.config import InlineResultsProcessing, Languages
 from lark import Lark, Token, Tree, UnexpectedCharacters
 from lark.visitors import Interpreter
 from numpy import append, array, exp, linspace
@@ -33,7 +34,6 @@ from qiskit.qasm2 import CustomInstruction
 
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.config import InlineResultsProcessing, Languages
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, Qubit
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (

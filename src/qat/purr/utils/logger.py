@@ -11,9 +11,8 @@ from logging.config import dictConfig
 from pathlib import Path
 from typing import IO, List, Union
 
+from compiler_config.serialiser import json_dump, json_load
 from numpy import savetxt
-
-from qat.purr.utils.serializer import json_dump, json_load
 
 # Formatted to "[INFO] 2020-08-25 19:54:28,216 (module_name.function_name:line_number) - message"
 default_logger_format = "[%(levelname)s] %(asctime)s - %(name)s - (%(module)s.%(funcName)s:%(lineno)d) - %(message)s"
