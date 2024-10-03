@@ -60,6 +60,7 @@ class QatMPSConfig(BaseSettings):
     MAX_BOND_DIMENSION: int = 128
     TRUNCATION: float = 1e-12
 
+
 qatmpsconfig = QatMPSConfig()
 
 

@@ -341,7 +341,7 @@ class QiskitEngine(InstructionExecutionEngine):
             # trim the qiskit returns to the number of measurements
             removals = self.model.qubit_count - builder.bit_count
             counts = {key[removals:][::-1]: value for key, value in distribution.items()}
-          
+
         return (counts, results.results[0].metadata) if self.return_metadata else counts
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
