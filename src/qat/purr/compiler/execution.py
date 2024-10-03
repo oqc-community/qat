@@ -266,10 +266,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         )
                     )
                     if np.max(values) > MaxPulseLength:
-                        raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {values} s"
-                        )
+                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+                            raise ValueError(
+                                f"Max Waveform width is {MaxPulseLength} s "
+                                f"given: {values} s"
+                            )
 
     def _generate_repeat_batches(self, repeats):
         """
