@@ -221,29 +221,22 @@ class QiskitEngine(InstructionExecutionEngine):
     def __init__(self, hardware_model: QiskitHardwareModel = None, **kwargs):
         super().__init__(hardware_model)
         self.return_metadata = kwargs.pop("return_metadata", False)
-
-        # config for the backend of AerSimulator: make sure QAT MPS defaults are used.
-        config = {}
-        config["method"] = kwargs.pop("method", "automatic")
-        if config["method"] == "matrix_product_state":
-            config["matrix_product_state_max_bond_dimension"] = kwargs.pop(
-                "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
-            )
-            config["matrix_product_state_truncation_threshold"] = kwargs.pop(
-                "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
-            )
-        config.update(kwargs)
-        self.qiskit_config = config
+        self.create_config(**kwargs)
 
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
-    def default_mps_config(self):
-        return {
-            "method": "matrix_product_state",
-            "matrix_product_state_max_bond_dimension": qatmpsconfig.MAX_BOND_DIMENSION,
-            "matrix_product_state_truncation_threshold": qatmpsconfig.TRUNCATION,
-        }
+    def create_config(self, **kwargs):
+        config = {"method": kwargs.pop("method", "automatic")}
+        # set mps defaults if non are given
+        config["matrix_product_state_max_bond_dimension"] = kwargs.pop(
+            "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
+        )
+        config["matrix_product_state_truncation_threshold"] = kwargs.pop(
+            "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
+        )
+        config.update(kwargs)
+        self.qiskit_config = config
 
     def execute(self, builder: QiskitBuilder) -> Dict[str, Any]:
         if not isinstance(builder, QiskitBuilder):
@@ -292,10 +285,11 @@ class QiskitEngine(InstructionExecutionEngine):
                     f"Automatic statevector simulation in QiskitEngine failed with {results.status}.\n"
                     "Trying again with MPS simulator."
                 )
+                self.qiskit_config.update({"method": "matrix_product_state"})
                 qasm_sim = AerSimulator(
                     aer_config,
                     noise_model=builder.model.noise_model,
-                    **self.default_mps_config(),
+                    **self.qiskit_config,
                 )
                 job = qasm_sim.run(
                     transpile(circuit, qasm_sim, coupling_map=coupling_map),
