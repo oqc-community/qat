@@ -1,7 +1,11 @@
 from typing import Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 class QatConfig(BaseSettings, validate_assignment=True):
@@ -31,6 +35,16 @@ class QatConfig(BaseSettings, validate_assignment=True):
     model_config = SettingsConfigDict(env_prefix="QAT_")
     MAX_REPEATS_LIMIT: Union[None, int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
+    DISABLE_PULSE_DURATION_LIMITS: bool = False
+    """Flag to disable the lower and upper pulse duration limits. 
+    Only needs to be set to True for calibration purposes."""
+
+    @field_validator("DISABLE_PULSE_DURATION_LIMITS")
+    def check_disable_pulse_duration_limits(cls, DISABLE_PULSE_DURATION_LIMITS):
+        if DISABLE_PULSE_DURATION_LIMITS:
+            log.warning(
+                "Disabled check for pulse duration limits, which should ideally only be used for calibration purposes."
+            )
 
 
 qatconfig = QatConfig()
