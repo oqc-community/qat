@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat import qatconfig
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -244,10 +245,14 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
-                    raise ValueError(
-                        f"Max Waveform width is {MaxPulseLength} s "
-                        f"given: {inst.duration} s"
-                    )
+                    if (
+                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
+                    ):  # Do not throw error if we specifically disabled the limit checks.
+                        # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
+                        raise ValueError(
+                            f"Max Waveform width is {MaxPulseLength} s "
+                            f"given: {inst.duration} s"
+                        )
                 elif isinstance(duration, Variable):
                     values = next(
                         iter(
