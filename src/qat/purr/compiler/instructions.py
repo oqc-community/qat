@@ -244,7 +244,8 @@ class CustomPulse(Waveform):
 
     @property
     def duration(self):
-        return len(self.samples) * self.channel.sample_time
+        decimal_place = int(f'{self.channel.sample_time:e}'.split('e')[-1]) * -1
+        return round(len(self.samples) * self.channel.sample_time, decimal_place)
 
     def __repr__(self):
         id_ = self.channel.full_id()
