@@ -47,10 +47,6 @@ class QatConfig(BaseSettings):
             )
         return DISABLE_PULSE_DURATION_LIMITS
 
-    @field_validator("MAX_REPEATS_LIMIT")
-    def check_max_repeats_limit(cls, MAX_REPEATS_LIMIT):
-        return MAX_REPEATS_LIMIT or 100_000
-
 
 qatconfig = QatConfig()
 

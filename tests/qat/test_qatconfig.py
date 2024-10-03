@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from qat import qatconfig
 from qat.purr.qatconfig import QatConfig
+from qat.purr.utils.logger import LoggerLevel
 
 MAX_REPEATS_LIMIT = 100_000  # Default value for qatconfig.MAX_REPEATS_LIMIT.
 
@@ -45,11 +46,18 @@ def test_change_max_repeats_limit(repeats_limit):
 
 @pytest.mark.parametrize("disable_pulse_duration_limits", [False, True])
 def test_change_disable_pulse_duration_limits(disable_pulse_duration_limits):
-    print(disable_pulse_duration_limits)
     qatconfig.__init__()  # Reload settings.
     # Test direct change of repeats limit.
     qatconfig.DISABLE_PULSE_DURATION_LIMITS = disable_pulse_duration_limits
     assert qatconfig.DISABLE_PULSE_DURATION_LIMITS == disable_pulse_duration_limits
+
+
+def test_disable_pulse_duration_limits_throws_warning(caplog):
+    qatconfig.__init__()  # Reload settings.
+    # Capture if warnings are sent to logger.
+    with caplog.at_level(LoggerLevel.WARNING.value):
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
+        assert "Disabled check for pulse duration limits" in caplog.text
 
 
 @pytest.mark.parametrize("repeats_limit", [10_000, 16_874, 50_000, 100_000])
