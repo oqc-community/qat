@@ -12,6 +12,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.config import Qasm2Optimizations
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
+from qat.purr.qatconfig import qatmpsconfig
 from tests.qat.qasm_utils import get_qasm2
 
 
@@ -245,3 +246,80 @@ class TestQiskitBackend:
         assert len(b.circuit.data) == 0
         b.merge_builder(a)
         assert len(b.circuit.data) == 1
+
+    @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
+    def test_mps_backend(self, qubit_count):
+        # Tests the MPS backend
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.X(hw.get_qubit(0), 0.5)
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine(method="matrix_product_state", return_metadata=True)
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "matrix_product_state"
+        assert (
+            metadata["matrix_product_state_max_bond_dimension"]
+            == qatmpsconfig.MAX_BOND_DIMENSION
+        )
+        assert (
+            metadata["matrix_product_state_truncation_threshold"] == qatmpsconfig.TRUNCATION
+        )
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+
+    @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
+    def test_automatic_stabilizer_backend(self, qubit_count):
+        # Tests that automatic settings choose a stabiliser backend when all gates
+        # are cliffords
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.had(hw.get_qubit(0))
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine(return_metadata=True)
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "stabilizer"
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+
+    def test_automatic_statevector_backend(self):
+        # Tests that for a circuit with non-clifford gates and a small qubit count,
+        # the method will default to state vector.
+        hw = get_default_qiskit_hardware(2)
+        circ = (
+            hw.create_builder()
+            .X(hw.get_qubit(0), 0.5)
+            .cnot(hw.get_qubit(0), hw.get_qubit(1))
+            .measure(hw.get_qubit(0))
+            .measure(hw.get_qubit(1))
+        )
+        engine = hw.create_engine(return_metadata=True)
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "statevector"
+        assert counts["00"] + counts["11"] == 1000
+
+    def test_automatic_mps_backend(self):
+        # Tests that for a circuit with non-clifford gates and a large qubit count,
+        # the method will default to MPS after failing with statevector.
+        qubit_count = 52
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.X(hw.get_qubit(0), 0.5)
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine(return_metadata=True)
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "matrix_product_state"
+        assert (
+            metadata["matrix_product_state_max_bond_dimension"]
+            == qatmpsconfig.MAX_BOND_DIMENSION
+        )
+        assert (
+            metadata["matrix_product_state_truncation_threshold"] == qatmpsconfig.TRUNCATION
+        )
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000

@@ -24,6 +24,7 @@ from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Assign, Instruction, Return, is_generated_name
 from qat.purr.compiler.runtime import QuantumRuntime
+from qat.purr.qatconfig import qatmpsconfig
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -188,8 +189,8 @@ class QiskitHardwareModel(QuantumHardwareModel):
     def create_builder(self) -> InstructionBuilder:
         return QiskitBuilder(hardware_model=self, qubit_count=self.qubit_count)
 
-    def create_engine(self) -> InstructionExecutionEngine:
-        return QiskitEngine(hardware_model=self)
+    def create_engine(self, **kwargs) -> InstructionExecutionEngine:
+        return QiskitEngine(hardware_model=self, **kwargs)
 
 
 def verify_placement(coupling_map, circuit):
@@ -213,50 +214,30 @@ def verify_placement(coupling_map, circuit):
 class QiskitEngine(InstructionExecutionEngine):
     def __init__(self, hardware_model: QiskitHardwareModel = None, **kwargs):
         super().__init__(hardware_model)
-        self.qiskit_config = kwargs
+        self.return_metadata = kwargs.pop("return_metadata", False)
 
-    def _create_simulator(self, builder):
-        # Determine which simulator to use
-        method = self.qiskit_config.get("method", None)
-        qiskit_config = {"method": method}
-        print(method)
-        if method == None:
-            method = (
-                "statevector" if self.model.qubit_count >= 16 else "matrix_product_state"
+        # config for the backend of AerSimulator: make sure QAT MPS defaults are used.
+        config = {}
+        config["method"] = kwargs.pop("method", "automatic")
+        if config["method"] == "matrix_product_state":
+            config["matrix_product_state_max_bond_dimension"] = kwargs.pop(
+                "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
             )
-        if method == "statevector":
-            pass
-        elif method == "matrix_product_state":
-            qiskit_config["matrix_product_state_max_bond_dimension"] = (
-                self.qiskit_config.get("bond_dimension", 32)
+            config["matrix_product_state_truncation_threshold"] = kwargs.pop(
+                "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
             )
-            qiskit_config["matrix_product_state_truncation_threshold"] = (
-                self.qiskit_config.get("truncation_threshold", 1e-12)
-            )
-        else:
-            raise ValueError(
-                f"Method '{method}' is not currently supported using the Qiskit Backend."
-                f" Currently supported methods are 'statevector' and 'matrix_product_state'."
-            )
-
-        # With no coupling map the backend defaults to create couplings for qubit count, which
-        # defaults to 30 for StateVector and 63 for MPS. So we change that.
-        aer_config = AerBackendConfiguration.from_dict(
-            AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
-        )
-        aer_config.n_qubits = self.model.qubit_count
-        qasm_sim = AerSimulator(
-            aer_config,
-            noise_model=builder.model.noise_model,
-            method="matrix_product_state",
-            matrix_product_state_truncation_threshold=1e-12,
-            matrix_product_state_max_bond_dimension=2,
-        )
-
-        return qasm_sim
+        config.update(kwargs)
+        self.qiskit_config = config
 
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
+
+    def default_mps_config(self):
+        return {
+            "method": "matrix_product_state",
+            "matrix_product_state_max_bond_dimension": qatmpsconfig.MAX_BOND_DIMENSION,
+            "matrix_product_state_truncation_threshold": qatmpsconfig.TRUNCATION,
+        }
 
     def execute(self, builder: QiskitBuilder) -> Dict[str, Any]:
         if not isinstance(builder, QiskitBuilder):
@@ -282,18 +263,39 @@ class QiskitEngine(InstructionExecutionEngine):
             AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
         )
         aer_config.n_qubits = self.model.qubit_count
-        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
-
-        # qasm_sim = self._create_simulator(builder)
+        qasm_sim = AerSimulator(
+            aer_config, noise_model=builder.model.noise_model, **self.qiskit_config
+        )
 
         try:
             job = qasm_sim.run(
                 transpile(circuit, qasm_sim, coupling_map=coupling_map),
                 shots=builder.shot_count,
             )
-            print(job.result().results[0].metadata["method"])
-            # print(job.result().results[0].metadata['matrix_product_state_max_bond_dimension'])
             results = job.result()
+
+            # The job can fail if it runs into e.g. memory issues using the statevector
+            # simulator. In this case, and if no method is provided, try again using an
+            # MPS backend.
+            if (
+                not getattr(results, "success", False)
+                and results.results[0].metadata["method"] == "statevector"
+                and self.qiskit_config.get("method", "automatic") == "automatic"
+            ):
+                log.info(
+                    f"Automatic statevector simulation in QiskitEngine failed with {results.status}.\n"
+                    "Trying again with MPS simulator."
+                )
+                qasm_sim = AerSimulator(
+                    aer_config,
+                    noise_model=builder.model.noise_model,
+                    **self.default_mps_config(),
+                )
+                job = qasm_sim.run(
+                    transpile(circuit, qasm_sim, coupling_map=coupling_map),
+                    shots=builder.shot_count,
+                )
+                results = job.result()
             distribution = results.get_counts(circuit)
         except QiskitError as e:
             raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
@@ -312,7 +314,9 @@ class QiskitEngine(InstructionExecutionEngine):
                 returns.extend(inst.variables)
         if len(assigns) > 1:
             log.warning("Qasm Simulator does not support multiple assignment.")
-        return {key: trimmed for key in returns} if returns else trimmed
+
+        counts = {key: trimmed for key in returns} if returns else trimmed
+        return (counts, results.results[0].metadata) if self.return_metadata else counts
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
