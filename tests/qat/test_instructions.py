@@ -157,6 +157,29 @@ class TestInstruction:
         with pytest.raises(ValueError):
             qie.validate(invalid_pulse)
 
+    def test_instruction_limit_variable_ignored_by_flag(self):
+        hw = get_default_echo_hardware()
+        qubit = hw.qubits[0]
+        qie = EchoEngine(model=hw)
+
+        widths = [i * MaxPulseLength for i in np.arange(0.5, 2.01, 0.5)]
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("width", widths))
+            .pulse(
+                qubit.get_drive_channel(),
+                width=Variable("width"),
+                shape=PulseShapeType.SQUARE,
+            )
+        )
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
+        qie.validate(builder.instructions)
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = False
+        with pytest.raises(ValueError):
+            qie.validate(builder.instructions)
+
     def test_no_entanglement(self):
         hw = get_default_echo_hardware(2)
         builder = get_builder(hw)
