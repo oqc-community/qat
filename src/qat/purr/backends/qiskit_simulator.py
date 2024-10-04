@@ -233,10 +233,8 @@ def verify_placement(coupling_map, circuit):
 
 
 class QiskitEngine(InstructionExecutionEngine):
-    def __init__(self, hardware_model: QiskitHardwareModel = None, **kwargs):
+    def __init__(self, hardware_model: QiskitHardwareModel = None):
         super().__init__(hardware_model)
-        self.return_metadata = kwargs.pop("return_metadata", False)
-        self.create_config(**kwargs)
 
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
