@@ -549,3 +549,18 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             )
 
         self.__dict__.update(state)
+
+    def build_pydantic(self):
+        from qat.purr.compiler.experimental.hardware_models import QuantumHardwareModel
+
+        return QuantumHardwareModel(
+            default_acquire_mode=self.default_acquire_mode,
+            default_repeat_count=self.default_repeat_count,
+            default_repetition_period=self.default_repetition_period,
+            quantum_devices=self.quantum_devices,
+            pulse_channels=self.pulse_channels,
+            physical_channels=self.physical_channels,
+            basebands=self.basebands,
+            qubit_direction_couplings=self.qubit_direction_couplings,
+            error_mitigation=self.error_mitigation,
+        )
