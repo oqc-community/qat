@@ -113,12 +113,12 @@ class QuantumHardwareModelBuilder:
 
     def add_physical_baseband(self, **kwargs):
         self.hardware_model.add_hardware_component(
-            "physical_basebands", PhysicalBaseband(kwargs)
+            "physical_basebands", PhysicalBaseband(**kwargs)
         )
 
     def add_physical_channel(self, **kwargs):
         self.hardware_model.add_hardware_component(
-            "physical_channels", PhysicalChannel(kwargs)
+            "physical_channels", PhysicalChannel(**kwargs)
         )
 
     def add_qubit(self, drive_frequency: float, **kwargs):
@@ -140,7 +140,7 @@ class QuantumHardwareModelBuilder:
         pc_acquire_id = ChannelType.acquire.name
 
         resonator = Resonator(
-            kwargs, pulse_channels={pc_measure_id: pc_measure, pc_acquire_id: pc_acquire}
+            pulse_channels={pc_measure_id: pc_measure, pc_acquire_id: pc_acquire}, **kwargs
         )
         self.hardware_model.add_hardware_component("quantum_devices", resonator)
 
