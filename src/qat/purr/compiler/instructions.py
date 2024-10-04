@@ -296,7 +296,9 @@ class Pulse(Waveform):
 
     @property
     def duration(self):
-        return self.width
+        # return self.width
+        decimal_place = int(f'{self.channel.sample_time:e}'.split('e')[-1]) * -1
+        return round(self.width, decimal_place)
 
     def __repr__(self):
         return (
