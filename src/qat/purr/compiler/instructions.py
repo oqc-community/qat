@@ -364,7 +364,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
                     acquire_duration = calculate_duration(self, return_samples=False)
-                    acquire_samples = self.number_samples
+                    acquire_samples = self.number_samples()
                     if not np.isclose(
                         filter_duration,
                         acquire_duration,
