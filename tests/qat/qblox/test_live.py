@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from qat.purr.backends.qblox.live import QbloxLiveEngineAdapter, QbloxLiveEngine, NewQbloxLiveEngine
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
@@ -221,8 +222,14 @@ class TestQbloxLiveEngine:
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-class TestNewQbloxLiveEngine:
-    def test_execute_resonator_spect(self, model):
+class TestQbloxLiveEngineAdapter:
+    def test_resonator_spect(self, model):
+        runtime = model.create_runtime()
         builder = resonator_spect(model)
-        results = model.create_runtime().execute(builder)
+        assert isinstance(runtime.engine, QbloxLiveEngineAdapter)
+        assert isinstance(runtime.engine._legacy_engine, QbloxLiveEngine)
+        assert isinstance(runtime.engine._new_engine, NewQbloxLiveEngine)
+
+        runtime.engine.hw_acceleration = True
+        results = runtime.execute(builder)
         assert results is not None
