@@ -333,7 +333,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         channel: "PulseChannel",
         time: float = None,
         mode: AcquireMode = None,
-        output_variable=None,
+        output_variable = None,
         existing_names: Set[str] = None,
         delay=None,
         filter: Union[Pulse, CustomPulse] = None,
@@ -353,6 +353,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
     def _check_filter(self, filter):
         if filter:
             filter_duration = filter.duration
+            filter_samples = len(filter.samples)
             if filter_duration < 0:
                 raise ValueError(
                     f"Filter duration {filter_duration} "
@@ -360,16 +361,18 @@ class Acquire(QuantumComponent, QuantumInstruction):
                 )
             for target in self.quantum_targets:
                 if isinstance(target, PulseChannel):
-                    instr_duration = calculate_duration(self, return_samples=False)
+                    acquire_duration = calculate_duration(self, return_samples=False)
+                    acquire_samples = self.number_samples
                     if not np.isclose(
                         filter_duration,
-                        instr_duration,
+                        acquire_duration,
                         atol=1e-9,
                     ):
                         raise ValueError(
                             f"Filter duration '{filter_duration}' must be equal to Acquire "
-                            f"duration '{instr_duration}'."
+                            f"duration '{acquire_duration}'."
                         )
+                    print(f"Acquire samples {acquire_samples} and filter samples {filter_samples}")
         return filter
 
     def generate_name(self, existing_names=None):
@@ -378,6 +381,10 @@ class Acquire(QuantumComponent, QuantumInstruction):
     @property
     def duration(self):
         return self.time
+
+    def number_samples(self):
+        decimal_place = int(f'{self.channel.block_time:e}'.split('e')[-1]) * -1
+        return int(round(self.duration / self.channel.block_time, decimal_place))
 
     @property
     def channel(self) -> "PulseChannel":
