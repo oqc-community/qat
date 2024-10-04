@@ -1,5 +1,7 @@
 import uuid
+from dataclasses import dataclass
 
+import numpy as np
 import pytest
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -19,7 +21,7 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
-from tests.qat.qblox.utils import DUMMY_CONFIG, ClusterInfo, MixerTestValues
+from tests.qat.qblox.conftest import DUMMY_CONFIG
 
 
 class TestQbloxConfigMixin:
@@ -68,7 +70,7 @@ class TestQbloxConfigMixin:
         seq_config.mixer.phase_offset = phase_offset
 
 
-@pytest.mark.parametrize("model", [ClusterInfo()], indirect=True)
+@pytest.mark.parametrize("model", [None], indirect=True)
 class TestSequencerConfig(TestQbloxConfigMixin):
     def test_lo_and_nco_freq(self, model):
         width = 100e-9
@@ -125,6 +127,25 @@ class TestSequencerConfig(TestQbloxConfigMixin):
         assert sequencer.nco_freq() == nco_freq
         if module.out0_in0_lo_en():
             assert module.out0_in0_lo_freq() == lo_freq
+
+
+@dataclass
+class MixerTestValues:
+    num_points = 2  # Low value for testing to reduce the size of the cartesian products
+
+    # Module values
+    qcm_i_offsets = np.linspace(-2.5, 2.5, num_points)  # I offsets (Volt)
+    qcm_q_offsets = np.linspace(-2.5, 2.5, num_points)  # Q offsets (Volt)
+    qcm_rf_i_offsets = np.linspace(-84, 73, num_points)  # I offsets (mVolt)
+    qcm_rf_q_offsets = np.linspace(-84, 73, num_points)  # Q offsets (mVolt)
+    qrm_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
+    qrm_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
+    qrm_rf_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
+    qrm_rf_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
+
+    # Sequencer values
+    phase_offsets = np.linspace(-45, 45, num_points)  # Phase offsets (Degree)
+    gain_ratios = np.linspace(0.5, 2, num_points)  # Gain ratios
 
 
 class TestMixerConfig(TestQbloxConfigMixin):

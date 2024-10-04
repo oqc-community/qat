@@ -184,7 +184,7 @@ class QbloxContext:
         self._repeat_label = None
 
         self._duration: int = 0
-        self._timeline: np.ndarray = np.empty(0)
+        self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
         self._num_hw_avg = 1  # Technically disabled
         self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
@@ -262,6 +262,8 @@ class QbloxContext:
         self.sequence_builder.nop()
         self.sequence_builder.label(self._repeat_label)
         self.sequence_builder.reset_ph()
+        self.sequence_builder.upd_param(Constants.GRID_TIME)
+        self.sequence_builder.wait_sync(Constants.GRID_TIME)
 
         return self
 
@@ -314,6 +316,9 @@ class QbloxContext:
         return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
     def _wait_seconds(self, duration: float):
+        if duration <= 0:
+            return
+
         self._wait_nanoseconds(int(duration * 1e9))
 
     def _wait_nanoseconds(self, duration: int):
@@ -445,6 +450,10 @@ class QbloxContext:
 
     def delay(self, inst: Delay):
         self._wait_seconds(inst.duration)
+
+        if inst.duration <= 0:
+            return
+
         self._duration = self._duration + inst.duration
         num_samples = int(calculate_duration(inst))
         self._timeline = np.append(self._timeline, [0] * num_samples)
@@ -533,7 +542,9 @@ class QbloxContext:
             cxt = contexts[target]
             delay_time = max_duration - cxt.duration
             cxt.delay(Delay(target, delay_time))
-            cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+            # TODO - For now, enable only logical time padding
+            # TODO - Enable when finer grained SYNC groups are supported
+            # cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
     def reset_phase(inst: PhaseReset, contexts: Dict):
