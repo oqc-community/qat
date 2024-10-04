@@ -6,6 +6,9 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 class QuantumComponent(BaseModel):
@@ -233,64 +236,6 @@ class QuantumDevice(QuantumComponent):
                 f"while pulse channels {error_pulse_channels_str} have associated physical channels {error_physical_channels_str}."
             )
 
-    def add_pulse_channel(
-        self,
-        pulse_channel: PulseChannel,
-        channel_type: Optional[ChannelType] = None,
-        auxiliary_devices: List[QuantumDevice] = [],
-    ):
-        if pulse_channel.physical_channel != self.physical_channel:
-            raise ValueError(
-                "Pulse channel has a physical channel and this must be equal to"
-                f"the device physical channel. Device {self} has physical channel {self.physical_channel} "
-                f"while pulse channel has physical channel {pulse_channel.physical_channel}."
-            )
-
-        id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
-        if id_ in self.pulse_channels:
-            raise KeyError(f"Pulse channel with id '{id_}' already exists.")
-
-        self.pulse_channels[id_] = PulseChannel(
-            pulse_channel, channel_type, auxiliary_devices
-        )
-
-    def create_pulse_channel(
-        self,
-        channel_type: ChannelType,
-        frequency=0.0,
-        bias=0.0 + 0.0j,
-        scale=1.0 + 0.0j,
-        amp=0.0,
-        active: bool = True,
-        fixed_if: bool = False,
-        auxiliary_devices: List["QuantumDevice"] = None,
-        id_: str = None,
-    ):
-        auxiliary_devices = auxiliary_devices or []
-        id_ = id_ or self._create_pulse_channel_id(channel_type, [self] + auxiliary_devices)
-
-        if channel_type == ChannelType.freq_shift:
-            pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(
-                id_, frequency, bias, scale, amp, active, fixed_if
-            )
-        else:
-            pulse_channel = self.physical_channel.create_pulse_channel(
-                id_, frequency, bias, scale, fixed_if
-            )
-        self.add_pulse_channel(pulse_channel, channel_type, auxiliary_devices)
-
-        return pulse_channel
-
-    def _create_pulse_channel_id(
-        self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
-    ):
-        if channel_type in self.MULTI_DEVICE_CHANNEL_TYPES and len(auxiliary_devices) == 0:
-            raise ValueError(
-                f"Channel type {channel_type.name} requires at least one auxillary_device."
-            )
-
-        return ".".join([x.full_id() for x in auxiliary_devices] + [channel_type.name])
-
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
@@ -379,6 +324,8 @@ class Qubit(QuantumDevice):
 
         if qubit not in self.coupled_qubits:
             self.coupled_qubits.append(qubit)
+        else:
+            log.warning(f"Qubits {self} and {qubit} are already coupled.")
 
         if qubit.full_id() not in self.pulse_hw_zx_pi_4:
             self.pulse_hw_zx_pi_4[qubit.full_id()] = {
