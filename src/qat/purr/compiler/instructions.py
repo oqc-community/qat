@@ -279,7 +279,7 @@ class Pulse(Waveform):
     ):
         super().__init__(quantum_target)
         self.shape = shape
-        self.width = width
+        self.width = self. _duration(width)
         self.amp = amp
         self.phase = phase
         self.drag = drag
@@ -295,7 +295,7 @@ class Pulse(Waveform):
         self.ignore_channel_scale = ignore_channel_scale
 
     @property
-    def duration(self):
+    def _duration(self):
         # return self.width
         decimal_place = int(f'{self.channel.sample_time:e}'.split('e')[-1]) * -1
         return round(self.width, decimal_place)
