@@ -265,7 +265,8 @@ class QiskitEngine(InstructionExecutionEngine):
     def execute(self, builder: QiskitBuilder, return_metadata: bool = False, **kwargs):
         """
         Execute a circuit using Qiskit's AerSimulator as a backend. Options for
-        the simulator can be given as key word arguments.
+        the simulator can be given as key word arguments, see:
+        https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
 
         Returns the measurements as a dict of bitstrings and associated counts.
         If `return_metadata = true`, the metadata for the backend simulator is also
@@ -428,7 +429,8 @@ class QiskitRuntime(QuantumRuntime):
     ):
         """
         Execute a circuit using Qiskit's AerSimulator as a backend. Options for
-        the simulator can be given as key word arguments.
+        the simulator can be given as key word arguments, see:
+        https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
 
         Returns the measurements as a dict of bitstrings and associated counts.
         If `return_metadata = true`, the metadata for the backend simulator is also
