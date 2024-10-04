@@ -211,32 +211,18 @@ class TestQASM3:
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
         assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
 
-    def test_cx_override(self):
-        hw = get_default_echo_hardware()
-        parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("cx_override_test.qasm"))
-        # assert that there are 2 extra_soft_square pulses, coming from custom def
-        assert (
-            len(
-                [
-                    inst
-                    for inst in result.instructions
-                    if hasattr(inst, "shape")
-                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
-                ]
-            )
-            == 2
-        )
-
-    def test_ecr_override(self):
-        """
-        Tests overriding an ECR using openpulse: checks the overridden ECR
-        yields the correct pulses, and that the unchanged ECRs are the same
-        as those created by the circuit builder.
-        """
+    # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
+    # not support cX.
+    @pytest.mark.parametrize(
+        "test, gate", [("cx", "cnot"), ("cnot", "cnot"), ("ecr", "ECR")]
+    )
+    def test_override(self, test, gate):
+        # Tests overriding gates using openpulse: checks the overridden gate
+        # yields the correct pulses, and that the unchanged gates are the same
+        # as those created by the circuit builder.
         hw = get_default_echo_hardware(4)
         parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("ecr_override_test.qasm"))
+        result = parser.parse(get_builder(hw), get_qasm3(f"{test}_override_test.qasm"))
         qasm_inst = result.instructions
         qasm_inst_names = [str(inst) for inst in qasm_inst]
 
@@ -253,52 +239,15 @@ class TestQASM3:
 
         # test the ecrs on (0, 1) and (2, 3) are unchanged by the override
         circuit = hw.create_builder()
-        circuit.ECR(hw.get_qubit(0), hw.get_qubit(1))
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(0), hw.get_qubit(1))
         circ_inst = circuit.instructions
         circ_inst_names = [str(inst) for inst in circ_inst]
         assert qasm_inst_names[0 : len(circ_inst_names)] == circ_inst_names
 
         circuit = hw.create_builder()
-        circuit.ECR(hw.get_qubit(2), hw.get_qubit(3))
-        circ_inst = circuit.instructions
-        circ_inst_names = [str(inst) for inst in circ_inst]
-        assert (
-            qasm_inst_names[len(qasm_inst_names) - len(circ_inst_names) :]
-            == circ_inst_names
-        )
-
-    def test_cnot_override(self):
-        """
-        Tests overriding a CNOT using openpulse: checks the overridden CNOT
-        yields the correct pulses, and that the unchanged CNOTS are the same
-        as those created by the circuit builder.
-        """
-        hw = get_default_echo_hardware(4)
-        parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("cnot_override_test.qasm"))
-        qasm_inst = result.instructions
-        qasm_inst_names = [str(inst) for inst in qasm_inst]
-
-        # test the extra_soft_square pulses are as expected
-        ess_pulses = [
-            inst
-            for inst in qasm_inst
-            if hasattr(inst, "shape") and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
-        ]
-        assert len(ess_pulses) == 2
-        assert all([len(inst.quantum_targets) == 1 for inst in ess_pulses])
-        assert ess_pulses[0].quantum_targets[0].partial_id() == "q1_frame"
-        assert ess_pulses[1].quantum_targets[0].partial_id() == "q2_frame"
-
-        # test the cnots on (0, 1) and (2, 3) are unchanged by the override
-        circuit = hw.create_builder()
-        circuit.cnot(hw.get_qubit(0), hw.get_qubit(1))
-        circ_inst = circuit.instructions
-        circ_inst_names = [str(inst) for inst in circ_inst]
-        assert qasm_inst_names[0 : len(circ_inst_names)] == circ_inst_names
-
-        circuit = hw.create_builder()
-        circuit.cnot(hw.get_qubit(2), hw.get_qubit(3))
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(2), hw.get_qubit(3))
         circ_inst = circuit.instructions
         circ_inst_names = [str(inst) for inst in circ_inst]
         assert (
