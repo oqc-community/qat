@@ -666,7 +666,6 @@ class NewQbloxContext:
         register = self.reg_mgr.allocate()
         label = self.lbl_mgr.generate(label)
         self.sequence_builder.move(iter_count, register)
-        self.sequence_builder.nop()
         self.sequence_builder.label(label)
         yield register
         self.sequence_builder.loop(register, label)
@@ -988,6 +987,7 @@ class NewQbloxContext:
 
         if du_inst.attribute == "frequency":
             self.sequence_builder.set_freq(value)
+            self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             raise NotImplementedError(
                 f"Unsupported processing of attribute {du_inst.attribute}"
@@ -1000,7 +1000,6 @@ class NewQbloxContext:
             label = context.attr_mgr.get_attribute(inst, "label")
 
             context.sequence_builder.move(0, register)
-            context.sequence_builder.nop()
             context.sequence_builder.label(label)
             context.sequence_builder.reset_ph()
             context.sequence_builder.upd_param(Constants.GRID_TIME)
@@ -1013,7 +1012,6 @@ class NewQbloxContext:
 
             context._wait_seconds(inst.repetition_period)
             context.sequence_builder.add(register, 1, register)
-            context.sequence_builder.nop()
             context.sequence_builder.jlt(register, inst.repeat_count, label)
 
     @staticmethod
@@ -1025,7 +1023,6 @@ class NewQbloxContext:
             start, _, _, _ = context.attr_mgr.get_attribute(name, "bounds")
 
             context.sequence_builder.move(start, register)
-            context.sequence_builder.nop()
             context.sequence_builder.label(label)
 
     @staticmethod
@@ -1037,7 +1034,6 @@ class NewQbloxContext:
             start, step, end, count = context.attr_mgr.get_attribute(name, "bounds")
 
             context.sequence_builder.add(register, step, register)
-            context.sequence_builder.nop()
             context.sequence_builder.jlt(register, end, label)
 
     @staticmethod
@@ -1072,7 +1068,6 @@ class PreCodegenPass(AnalysisPass):
                     register = context.reg_mgr.allocate()
                     context.attr_mgr.set_attribute(name, "register", register)
                     context.sequence_builder.move(0, register)
-                    context.sequence_builder.nop()
 
                     label = context.lbl_mgr.generate(name)
                     context.attr_mgr.set_attribute(name, "label", label)
@@ -1084,7 +1079,6 @@ class PreCodegenPass(AnalysisPass):
                     register = context.reg_mgr.allocate()
                     context.attr_mgr.set_attribute(inst, "register", register)
                     context.sequence_builder.move(0, register)
-                    context.sequence_builder.nop()
 
                     label = context.lbl_mgr.generate("repeat")
                     context.attr_mgr.set_attribute(inst, "label", label)
@@ -1093,7 +1087,6 @@ class PreCodegenPass(AnalysisPass):
                     context = contexts[target]
                     register = context.reg_mgr.allocate()
                     context.sequence_builder.move(0, register)
-                    context.sequence_builder.nop()
                     context.attr_mgr.set_attribute(inst, "register", register)
 
         analyses.update(
@@ -1188,9 +1181,10 @@ class QbloxCFGWalker(DfsTraversal):
                 NewQbloxContext.exit_sweep(inst, self.contexts)
 
     def walk(self):
+        # TODO - run as visit to the entry block
+        NewQbloxContext.prologue(self.contexts)
         self.run(self.cfg)
-
-        # TODO - run as visit to the entry/exit block
+        # TODO - run as visit to the exit block
         NewQbloxContext.epilogue(self.contexts)
 
         # Remove empty contexts
