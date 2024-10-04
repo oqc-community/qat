@@ -240,14 +240,16 @@ class QiskitEngine(InstructionExecutionEngine):
         pass
 
     def create_config(self, options={}) -> Dict[str, Any]:
-        config = {"method": options.pop("method", "automatic")}
-        # set mps defaults if non are given
-        config["matrix_product_state_max_bond_dimension"] = options.pop(
-            "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
-        )
-        config["matrix_product_state_truncation_threshold"] = options.pop(
-            "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
-        )
+        # set default mps options if none are given...
+        config = {
+            "method": options.pop("method", "automatic"),
+            "matrix_product_state_max_bond_dimension": options.pop(
+                "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
+            ),
+            "matrix_product_state_truncation_threshold": options.pop(
+                "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
+            ),
+        }
         config.update(options)
         return config
 
