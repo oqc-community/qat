@@ -368,11 +368,11 @@ class Acquire(QuantumComponent, QuantumInstruction):
                         acquire_duration,
                         atol=1e-9,
                     ):
+                        print(f"Acquire samples {acquire_samples} and filter samples {filter_samples}")
                         raise ValueError(
                             f"Filter duration '{filter_duration}' must be equal to Acquire "
                             f"duration '{acquire_duration}'."
                         )
-                    print(f"Acquire samples {acquire_samples} and filter samples {filter_samples}")
         return filter
 
     def generate_name(self, existing_names=None):
