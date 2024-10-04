@@ -451,3 +451,20 @@ class TestQiskitBackend:
             metadata["matrix_product_state_truncation_threshold"] == qatmpsconfig.TRUNCATION
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+
+    def test_runtime_mps_backend(self):
+        # Tests the options when executing using the run time work as intended
+        hw = get_default_qiskit_hardware(2)
+        circ = (
+            hw.create_builder()
+            .X(hw.get_qubit(0), 0.5)
+            .cnot(hw.get_qubit(0), hw.get_qubit(1))
+            .measure(hw.get_qubit(0))
+            .measure(hw.get_qubit(1))
+        )
+        runtime = hw.create_runtime()
+        counts, metadata = runtime.execute(
+            circ, return_metadata=True, method="matrix_product_state"
+        )
+        assert metadata["method"] == "matrix_product_state"
+        assert counts["00"] + counts["11"] == 1000

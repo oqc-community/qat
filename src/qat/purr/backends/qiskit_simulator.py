@@ -411,20 +411,22 @@ class QiskitRuntime(QuantumRuntime):
     ):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
-
+        return_metadata = kwargs.pop("return_metadata", False)
         # TODO - add error_mitigation for Qasm sim
-        results = self.engine.execute(builder, **kwargs)
+        results = self.engine.execute(builder, **kwargs, return_metadata=return_metadata)
         results = self._apply_error_mitigation(
             results, builder.instructions, error_mitigation
         )
+        if return_metadata:
+            (results, metadata) = results
 
         if all([is_generated_name(k) for k in results.keys()]):
             if len(results) == 1:
-                return list(results.values())[0]
+                results = list(results.values())[0]
             else:
                 squashed_results = list(results.values())
                 if all(isinstance(val, np.ndarray) for val in squashed_results):
-                    return np.array(squashed_results)
-                return squashed_results
-        else:
-            return results
+                    results = np.array(squashed_results)
+                else:
+                    results = squashed_results
+        return (results, metadata) if return_metadata else results
