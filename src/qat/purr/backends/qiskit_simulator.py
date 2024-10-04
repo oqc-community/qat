@@ -407,12 +407,13 @@ class QiskitRuntime(QuantumRuntime):
         results_format: ResultsFormatting = None,
         repeats: int = None,
         error_mitigation: ErrorMitigationConfig = None,
+        **kwargs,
     ):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
 
         # TODO - add error_mitigation for Qasm sim
-        results = self.engine.execute(builder)
+        results = self.engine.execute(builder, **kwargs)
         results = self._apply_error_mitigation(
             results, builder.instructions, error_mitigation
         )
