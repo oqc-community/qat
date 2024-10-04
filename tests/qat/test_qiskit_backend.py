@@ -8,11 +8,10 @@ from qiskit_aer.noise import (
     thermal_relaxation_error,
 )
 
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware, qatmpsconfig
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
-from qat.purr.qatconfig import qatmpsconfig
 from qat.qat import execute_qasm_with_metrics
 from tests.qat.qasm_utils import get_qasm2
 
@@ -384,8 +383,10 @@ class TestQiskitBackend:
             circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
         for i in range(qubit_count):
             circ.measure(hw.get_qubit(i))
-        engine = hw.create_engine(method="matrix_product_state", return_metadata=True)
-        counts, metadata = engine.execute(circ)
+        engine = hw.create_engine()
+        counts, metadata = engine.execute(
+            circ, method="matrix_product_state", return_metadata=True
+        )
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
@@ -407,8 +408,8 @@ class TestQiskitBackend:
             circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
         for i in range(qubit_count):
             circ.measure(hw.get_qubit(i))
-        engine = hw.create_engine(return_metadata=True)
-        counts, metadata = engine.execute(circ)
+        engine = hw.create_engine()
+        counts, metadata = engine.execute(circ, return_metadata=True)
         assert metadata["method"] == "stabilizer"
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
 
@@ -423,8 +424,8 @@ class TestQiskitBackend:
             .measure(hw.get_qubit(0))
             .measure(hw.get_qubit(1))
         )
-        engine = hw.create_engine(return_metadata=True)
-        counts, metadata = engine.execute(circ)
+        engine = hw.create_engine()
+        counts, metadata = engine.execute(circ, return_metadata=True)
         assert metadata["method"] == "statevector"
         assert counts["00"] + counts["11"] == 1000
 
@@ -439,8 +440,8 @@ class TestQiskitBackend:
             circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
         for i in range(qubit_count):
             circ.measure(hw.get_qubit(i))
-        engine = hw.create_engine(return_metadata=True)
-        counts, metadata = engine.execute(circ)
+        engine = hw.create_engine()
+        counts, metadata = engine.execute(circ, return_metadata=True)
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]

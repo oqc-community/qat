@@ -50,20 +50,6 @@ class QatConfig(BaseSettings):
 
 qatconfig = QatConfig()
 
-
-class QatMPSConfig(BaseSettings):
-    """
-    The default settings for using the MPS backend in the Qiskit Simulator.
-    """
-
-    model_config = SettingsConfigDict(env_previx="QAT_MPS_")
-    MAX_BOND_DIMENSION: int = 128
-    TRUNCATION: float = 1e-12
-
-
-qatmpsconfig = QatMPSConfig()
-
-
 if __name__ == "__main__":
     import doctest
 

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import CheckMap
@@ -24,10 +25,24 @@ from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Assign, Instruction, Return, is_generated_name
 from qat.purr.compiler.runtime import QuantumRuntime
-from qat.purr.qatconfig import qatmpsconfig
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+class QatMPSConfig(BaseSettings):
+    """
+    The default settings for using the MPS backend in the Qiskit Simulator.
+    """
+
+    model_config = SettingsConfigDict(env_previx="QAT_MPS_")
+    MAX_BOND_DIMENSION: int = 128
+    """Default maximum bond dimension for MPS simulations."""
+    TRUNCATION: float = 1e-12
+    """The error threshold for dynamically truncating the bond dimension of MPS."""
+
+
+qatmpsconfig = QatMPSConfig()
 
 
 def get_default_qiskit_hardware(
@@ -195,8 +210,8 @@ class QiskitHardwareModel(QuantumHardwareModel):
     def create_builder(self) -> InstructionBuilder:
         return QiskitBuilder(hardware_model=self, qubit_count=self.qubit_count)
 
-    def create_engine(self, **kwargs) -> InstructionExecutionEngine:
-        return QiskitEngine(hardware_model=self, **kwargs)
+    def create_engine(self) -> InstructionExecutionEngine:
+        return QiskitEngine(hardware_model=self)
 
 
 def verify_placement(coupling_map, circuit):
@@ -226,19 +241,20 @@ class QiskitEngine(InstructionExecutionEngine):
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
-    def create_config(self, **kwargs):
-        config = {"method": kwargs.pop("method", "automatic")}
+    def create_config(self, options={}) -> Dict[str, Any]:
+        config = {"method": options.pop("method", "automatic")}
         # set mps defaults if non are given
-        config["matrix_product_state_max_bond_dimension"] = kwargs.pop(
+        config["matrix_product_state_max_bond_dimension"] = options.pop(
             "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
         )
-        config["matrix_product_state_truncation_threshold"] = kwargs.pop(
+        config["matrix_product_state_truncation_threshold"] = options.pop(
             "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
         )
-        config.update(kwargs)
-        self.qiskit_config = config
+        config.update(options)
+        return config
 
-    def execute(self, builder: QiskitBuilder) -> Dict[str, Any]:
+    def execute(self, builder: QiskitBuilder, **kwargs):
+        return_metadata = kwargs.pop("return_metadata", False)
         if not isinstance(builder, QiskitBuilder):
             raise ValueError(
                 "Contravariance is not possible with QiskitEngine. "
@@ -262,9 +278,11 @@ class QiskitEngine(InstructionExecutionEngine):
             AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
         )
         aer_config.n_qubits = self.model.qubit_count
-        qasm_sim = AerSimulator(
-            aer_config, noise_model=builder.model.noise_model, **self.qiskit_config
-        )
+
+        # AerSimulator can call a range of backends. We allow these to be choosen, along with
+        # any relevant arguments.
+        config = self.create_config(kwargs)
+        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model, **config)
 
         try:
             job = qasm_sim.run(
@@ -279,17 +297,15 @@ class QiskitEngine(InstructionExecutionEngine):
             if (
                 not getattr(results, "success", False)
                 and results.results[0].metadata["method"] == "statevector"
-                and self.qiskit_config.get("method", "automatic") == "automatic"
+                and config.get("method", "automatic") == "automatic"
             ):
                 log.info(
                     f"Automatic statevector simulation in QiskitEngine failed with {results.status}.\n"
                     "Trying again with MPS simulator."
                 )
-                self.qiskit_config.update({"method": "matrix_product_state"})
+                config.update({"method": "matrix_product_state"})
                 qasm_sim = AerSimulator(
-                    aer_config,
-                    noise_model=builder.model.noise_model,
-                    **self.qiskit_config,
+                    aer_config, noise_model=builder.model.noise_model, **config
                 )
                 job = qasm_sim.run(
                     transpile(circuit, qasm_sim, coupling_map=coupling_map),
@@ -336,7 +352,7 @@ class QiskitEngine(InstructionExecutionEngine):
             removals = self.model.qubit_count - builder.bit_count
             counts = {key[removals:][::-1]: value for key, value in distribution.items()}
 
-        return (counts, results.results[0].metadata) if self.return_metadata else counts
+        return (counts, results.results[0].metadata) if return_metadata else counts
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
