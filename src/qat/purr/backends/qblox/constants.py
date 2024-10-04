@@ -8,6 +8,10 @@ class Constants:
     assembler is 2**16-1, but this is the largest that is a multiple of 4 ns."""
     REGISTER_SIZE = pow(2, 32) - 1
     """Size of registers in Q1ASM programs."""
+    NCO_MIN_FREQ = -500e6
+    """Minimum NCO frequency"""
+    NCO_MAX_FREQ = 500e6
+    """Maximum NCO frequency"""
     NCO_PHASE_STEPS_PER_DEG = 1e9 / 360
     """The number of steps per degree for NCO phase instructions arguments."""
     NCO_FREQ_STEPS_PER_HZ = 4.0
