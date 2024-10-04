@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -65,6 +65,25 @@ class QuantumHardwareModel(HardwareModel):
     qubit_direction_couplings: List[QubitCoupling] = Field(allow_mutation=False, default=[])
     error_mitigation: ErrorMitigation | None = None
 
+    @property
+    def number_of_qubits(self):
+        return len(self.qubit_devices)
+
+    @property
+    def qubit_devices(self):
+        return [qd for qd in self.quantum_devices if isinstance(qd, Qubit)]
+
+    def get_qubit_with_index(self, i: int):
+        for qd in self.quantum_devices.values():
+            if isinstance(qd, Qubit) and qd.index == i:
+                return qd
+
+        raise KeyError(f"Qubit with index {i} does not exist.")
+
+    @property
+    def resonator_devices(self):
+        return [qd for qd in self.quantum_devices if isinstance(qd, Resonator)]
+
     def add_hardware_component(
         self,
         name: str,
@@ -102,21 +121,86 @@ class QuantumHardwareModelBuilder:
             "physical_channels", PhysicalChannel(kwargs)
         )
 
-    def add_qubit(self, frequency: float, **kwargs):
-        pc_drive = PulseChannel(channel_type=ChannelType.drive, frequency=frequency)
+    def add_qubit(self, drive_frequency: float, **kwargs):
+        pc_drive = PulseChannel(channel_type=ChannelType.drive, frequency=drive_frequency)
         pc_drive_id = ChannelType.drive.name
 
         qubit = Qubit(kwargs, pulse_channels={pc_drive_id: pc_drive})
         self.hardware_model.add_hardware_component("quantum_devices", qubit)
 
-    def add_resonator(self, frequency: float, **kwargs):
-        pc_measure = PulseChannel(channel_type=ChannelType.measure, frequency=frequency)
+    def add_resonator(self, meas_acq_frequency: float, **kwargs):
+        pc_measure = PulseChannel(
+            channel_type=ChannelType.measure, frequency=meas_acq_frequency
+        )
         pc_measure_id = ChannelType.measure.name
 
-        pc_acquire = PulseChannel(channel_type=ChannelType.acquire, frequency=frequency)
+        pc_acquire = PulseChannel(
+            channel_type=ChannelType.acquire, frequency=meas_acq_frequency
+        )
         pc_acquire_id = ChannelType.acquire.name
 
         resonator = Resonator(
             kwargs, pulse_channels={pc_measure_id: pc_measure, pc_acquire_id: pc_acquire}
         )
         self.hardware_model.add_hardware_component("quantum_devices", resonator)
+
+    def add_cross_resonance_pulse_channels(
+        self,
+        cross_res_frequency: float,
+        cross_res_canc_frequency: float,
+        cross_res_scale: float = 50.0,
+        cross_res_canc_scale: float = 0.0,
+        connectivity: List[Tuple[int, int]] = None,
+    ):
+
+        if connectivity is None:
+            # Create a ring architecture where each qubit i is connected to qubits i-1 and i+1.
+            n_qubits = self.hardware_model.number_of_qubits
+            connectivity = [(i, i % n_qubits + 1) for i in range(1, n_qubits + 1)]
+
+        qubits_by_index = {
+            qubit.index: qubit for qubit in self.hardware_model.qubit_devices
+        }
+        for left_index, right_index in connectivity:
+            left_qubit = qubits_by_index[left_index]
+            right_qubit = qubits_by_index[right_index]
+
+            self.hardware_model.get_qubit_with_index(left_qubit).add_pulse_channel(
+                PulseChannel(
+                    channel_type=ChannelType.cross_resonance,
+                    auxiliary_devices=[right_qubit],
+                    frequency=cross_res_frequency,
+                    scale=cross_res_scale,
+                )
+            )
+            self.hardware_model.get_qubit_with_index(right_qubit).add_pulse_channel(
+                PulseChannel(
+                    channel_type=ChannelType.cross_resonance,
+                    auxiliary_devices=[left_qubit],
+                    frequency=cross_res_frequency,
+                    scale=cross_res_scale,
+                )
+            )
+            self.hardware_model.get_qubit_with_index(left_qubit).add_pulse_channel(
+                PulseChannel(
+                    channel_type=ChannelType.cross_resonance_cancellation,
+                    auxiliary_devices=[right_qubit],
+                    frequency=cross_res_canc_frequency,
+                    scale=cross_res_canc_scale,
+                )
+            )
+            self.hardware_model.get_qubit_with_index(right_qubit).add_pulse_channel(
+                PulseChannel(
+                    channel_type=ChannelType.cross_resonance_cancellation,
+                    auxiliary_devices=[left_qubit],
+                    frequency=cross_res_canc_frequency,
+                    scale=cross_res_canc_scale,
+                )
+            )
+
+            self.hardware_model.get_qubit_with_index(left_qubit).add_coupled_qubit(
+                right_qubit
+            )
+            self.hardware_model.get_qubit_with_index(right_qubit).add_coupled_qubit(
+                left_qubit
+            )
