@@ -445,11 +445,10 @@ class TestBaseQuantum:
             .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
             .measure_scope_mode(qubit)
         )
+
         engine = get_test_execution_engine(hw)
-        try:
-            pytest.raises(ValueError, execute_instructions(engine, builder))
-        except ValueError:
-            pass
+        with pytest.raises(ValueError):
+            execute_instructions(engine, builder)
 
         time = np.linspace(0.0, 100e-6, nb_points)
         builder = (
