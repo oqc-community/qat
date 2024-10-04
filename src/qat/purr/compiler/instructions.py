@@ -382,7 +382,9 @@ class Acquire(QuantumComponent, QuantumInstruction):
 
     @property
     def duration(self):
-        return self.time
+        # return self.time
+        decimal_place = int(f'{self.channel.block_time:e}'.split('e')[-1]) * -1
+        return round(self.time / self.channel.block_time, decimal_place)
 
     def number_samples(self):
         decimal_place = int(f'{self.channel.block_time:e}'.split('e')[-1]) * -1
