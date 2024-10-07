@@ -211,22 +211,94 @@ class TestQASM3:
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
         assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
 
-    def test_cx_override(self):
-        hw = get_default_echo_hardware()
+    # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
+    # not support cX.
+    @pytest.mark.parametrize(
+        "test, gate", [("cx", "cnot"), ("cnot", "cnot"), ("ecr", "ECR")]
+    )
+    def test_override(self, test, gate):
+        # Tests overriding gates using openpulse: checks the overridden gate
+        # yields the correct pulses, and that the unchanged gates are the same
+        # as those created by the circuit builder.
+        hw = get_default_echo_hardware(4)
         parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("cx_override_test.qasm"))
-        # assert that there are 2 extra_soft_square pulses, coming from custom def
+        result = parser.parse(get_builder(hw), get_qasm3(f"{test}_override_test.qasm"))
+        qasm_inst = result.instructions
+        qasm_inst_names = [str(inst) for inst in qasm_inst]
+
+        # test the extra_soft_square pulses are as expected
+        ess_pulses = [
+            inst
+            for inst in qasm_inst
+            if hasattr(inst, "shape") and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+        ]
+        assert len(ess_pulses) == 2
+        assert all([len(inst.quantum_targets) == 1 for inst in ess_pulses])
+        assert ess_pulses[0].quantum_targets[0].partial_id() == "q1_frame"
+        assert ess_pulses[1].quantum_targets[0].partial_id() == "q2_frame"
+
+        # test the ecrs on (0, 1) and (2, 3) are unchanged by the override
+        circuit = hw.create_builder()
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(0), hw.get_qubit(1))
+        circ_inst = circuit.instructions
+        circ_inst_names = [str(inst) for inst in circ_inst]
+        assert qasm_inst_names[0 : len(circ_inst_names)] == circ_inst_names
+
+        circuit = hw.create_builder()
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(2), hw.get_qubit(3))
+        circ_inst = circuit.instructions
+        circ_inst_names = [str(inst) for inst in circ_inst]
         assert (
-            len(
-                [
-                    inst
-                    for inst in result.instructions
-                    if hasattr(inst, "shape")
-                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
-                ]
-            )
-            == 2
+            qasm_inst_names[len(qasm_inst_names) - len(circ_inst_names) :]
+            == circ_inst_names
         )
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ["pi", "2*pi", "-pi/2", "-7*pi/2", "0", "pi/4"],
+            [np.pi, 2 * np.pi, -np.pi / 2, -7 * np.pi / 2, 0.0, np.pi / 4],
+            np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(6)),
+            [0.0, 0.0, 0.0, 0.0, "pi/2", 0.0],
+            ["2*pi", "-pi/2", 0.0, 0.0, "pi/2", "-2*pi"],
+        ],
+    )
+    def test_u_gate(self, params):
+        """
+        Tests the validty of the U gate with OpenPulse by checking that the
+        parsed circuit matches the same circuit created with the circuit builder.
+        """
+        hw = get_default_echo_hardware(2)
+
+        # build the circuit from QASM
+        qasm = get_qasm3("u_gate.qasm")
+        for i in range(6):
+            qasm = qasm.replace(f"param{i}", str(params[i]))
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), qasm)
+        qasm_inst = result.instructions
+
+        # create the circuit using the circuit builder
+        builder = hw.create_builder()
+        params = [eval(str(param).replace("pi", "np.pi")) for param in params]
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        (
+            builder.Z(q1, params[2])
+            .Y(q1, params[0])
+            .Z(q1, params[1])
+            .Z(q2, params[5])
+            .Y(q2, params[3])
+            .Z(q2, params[4])
+        )
+        circ_inst = builder.instructions
+
+        # validate that the circuits match
+        assert len(qasm_inst) == len(circ_inst)
+        for i in range(len(qasm_inst)):
+            assert str(qasm_inst[i]) == str(circ_inst[i])
 
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
