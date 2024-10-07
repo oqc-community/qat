@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.experimental.devices import (
@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 
 class HardwareModel(BaseModel):
     """
-    Base class for all hardware models. Every model should return the builder class that
-    should be used to build circuits/pulses for its particular back-end.
+    Base class for all hardware models. Every model should return the builder class
+    that should be used to build circuits/pulses for its particular back-end.
     """
 
     repeat_limit: int | None = None
@@ -44,8 +44,8 @@ class HardwareModel(BaseModel):
 
 class QuantumHardwareModel(HardwareModel):
     """
-    Object modelling our superconducting hardware. Holds up-to-date information about a
-    current piece of hardware, whether simulated or physical machine.
+    Object modelling our superconducting hardware. Holds up-to-date information
+    about a current piece of hardware, whether simulated or physical machine.
     """
 
     model_config = ConfigDict(validate_assignment=True)
@@ -65,6 +65,13 @@ class QuantumHardwareModel(HardwareModel):
     qubit_direction_couplings: List[QubitCoupling] = Field(allow_mutation=False, default=[])
     error_mitigation: ErrorMitigation | None = None
 
+    @field_validator
+    def check_default_repeat_count(self):
+        if self.repeat_limit and self.default_repeat_count > self.repeat_limit:
+            raise ValueError(
+                f"Default repeat count {self.default_repeat_count} cannot be larger than the repeat limit {self.repeat_limit}."
+            )
+
     @property
     def number_of_qubits(self):
         return len(self.qubit_devices)
@@ -73,16 +80,16 @@ class QuantumHardwareModel(HardwareModel):
     def qubit_devices(self):
         return [qd for qd in self.quantum_devices if isinstance(qd, Qubit)]
 
+    @property
+    def resonator_devices(self):
+        return [qd for qd in self.quantum_devices if isinstance(qd, Resonator)]
+
     def get_qubit_with_index(self, i: int):
         for qd in self.quantum_devices.values():
             if isinstance(qd, Qubit) and qd.index == i:
                 return qd
 
         raise KeyError(f"Qubit with index {i} does not exist.")
-
-    @property
-    def resonator_devices(self):
-        return [qd for qd in self.quantum_devices if isinstance(qd, Resonator)]
 
     def add_hardware_component(
         self,
@@ -111,6 +118,17 @@ class QuantumHardwareModelBuilder:
     def __init__(self):
         self.hardware_model = QuantumHardwareModel()
 
+    @property
+    def hardware_model(self):
+        return self.hardware_model
+
+    @hardware_model.setter
+    def hardware_model(self, other):
+        raise AttributeError(
+            f"Cannot set hardware_model attribute to {other}."
+            "Please use the builder to build the hardware model."
+        )
+
     def add_physical_baseband(self, **kwargs):
         self.hardware_model.add_hardware_component(
             "physical_basebands", PhysicalBaseband(**kwargs)
@@ -132,15 +150,16 @@ class QuantumHardwareModelBuilder:
         pc_measure = PulseChannel(
             channel_type=ChannelType.measure, frequency=meas_acq_frequency
         )
-        pc_measure_id = ChannelType.measure.name
-
         pc_acquire = PulseChannel(
             channel_type=ChannelType.acquire, frequency=meas_acq_frequency
         )
-        pc_acquire_id = ChannelType.acquire.name
 
         resonator = Resonator(
-            pulse_channels={pc_measure_id: pc_measure, pc_acquire_id: pc_acquire}, **kwargs
+            pulse_channels={
+                ChannelType.measure.name: pc_measure,
+                ChannelType.acquire.name: pc_acquire,
+            },
+            **kwargs,
         )
         self.hardware_model.add_hardware_component("quantum_devices", resonator)
 
