@@ -634,10 +634,8 @@ class TestBaseQuantum:
         assert generated_batches == expected_batches
 
     def test_duration_timeline_times(self):
-        """
-        Tests that the creation of a duration timeline with a two-qubit circuit
-        gives a timeline where each pulse is concurrent.
-        """
+        # Tests that the creation of a duration timeline with a two-qubit circuit
+        # gives a timeline where each pulse is concurrent.
 
         # Create the hardware model and engine
         hw = get_test_model()
@@ -664,9 +662,7 @@ class TestBaseQuantum:
                 end = pos.end
 
     def test_duration_timeline_sync(self):
-        """
-        Tests that a redundant sync has no effect on the circuit.
-        """
+        # Tests that a redundant sync has no effect on the circuit.
 
         # Create the hardware model and engine
         hw = get_test_model()
@@ -722,10 +718,8 @@ class TestBaseQuantum:
             assert ends1 == ends2
 
     def test_duration_timeline_compare(self):
-        """
-        Tests that the duration of individual circuit elements matches that
-        of the full circuit.
-        """
+        # Tests that the duration of individual circuit elements matches that
+        # of the full circuit.
 
         # Create the hardware model and engine
         hw = get_test_model()
@@ -763,10 +757,8 @@ class TestBaseQuantum:
         assert max(ts[0], ts[1]) + ts[2] + max(ts[3], ts[4]) == maxtime
 
     def test_duration_timeline_compare_sync(self):
-        """
-        Tests that the duration of individual circuit elements matches that
-        of the full circuit when syncs are used.
-        """
+        # Tests that the duration of individual circuit elements matches that
+        # of the full circuit when syncs are used.
 
         # Create the hardware model and engine
         hw = get_test_model()
