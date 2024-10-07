@@ -826,14 +826,16 @@ class MeasureBlock(QuantumInstructionBlock):
             meas, acq = self._generate_measure_acquire(
                 target, mode, output_variable, existing_names
             )
-            self._duration = max(self._duration, meas.duration, acq.delay + acq.duration)
+            duration = max(meas.duration, acq.delay + acq.duration)
             self._target_dict[target.full_id()] = {
                 "target": target,
                 "mode": mode,
                 "output_variable": output_variable,
                 "measure": meas,
                 "acquire": acq,
+                "duration": duration,
             }
+            self._duration = max(self._duration, duration)
         self._entangled_qubits.update(
             self._validate_targets(entangled_qubits, (Qubit))
             if entangled_qubits is not None

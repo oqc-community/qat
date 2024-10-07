@@ -581,6 +581,20 @@ class QuantumInstructionBuilder(InstructionBuilder):
             PhaseReset(entangled_qubits),
         ], acquire_instruction
 
+    def _generate_measure_block(
+        self,
+        qubit: Qubit,
+        mode: AcquireMode,
+        entangled_qubits: List[Qubit],
+        output_variable: str = None,
+    ):
+        measure_block = MeasureBlock(
+            qubit, mode, output_variable, entangled_qubits, self.existing_names
+        )
+        acquire_instruction = measure_block.get_acquires(qubit)[0]
+
+        return measure_block, acquire_instruction
+
     def _find_previous_measurement_block(
         self,
         mblock_types: List[Instruction] = [Acquire, MeasurePulse],
@@ -696,11 +710,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
             acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
         else:
-            measure_block = MeasureBlock(
-                qubit, mode, output_variable, entangled_qubits, self.existing_names
+            new_measure_block, acquire_instruction = self._generate_measure_block(
+                qubit, mode, entangled_qubits, output_variable
             )
-            self.add(measure_block)
-            acquire_instruction = measure_block.get_acquires(qubit)[0]
+            self.add(new_measure_block)
 
         return FluidBuilderWrapper(self, acquire_instruction)
 
