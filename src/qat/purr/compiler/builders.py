@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import itertools
 import math
+import warnings
 from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
@@ -49,6 +50,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.utils.logger import get_default_logger
 
+warnings.simplefilter("always", DeprecationWarning)
 log = get_default_logger()
 
 
@@ -697,6 +699,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
         previous_measure_block = self._find_previous_measurement_block()
 
         if isinstance(previous_measure_block, list):
+            warnings.warn(
+                "Use of legacy measurement block recognition is deprecated. "
+                "Please use the 'MeasureBlock' type instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             new_measure_block, acquire_instruction = self._generate_legacy_measure_block(
                 qubit, mode, entangled_qubits, output_variable
             )
