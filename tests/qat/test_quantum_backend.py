@@ -29,7 +29,7 @@ from qat.purr.compiler.devices import (
 )
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
+from qat.purr.compiler.instructions import Delay, PhaseShift, SweepValue, Variable
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute
@@ -631,3 +631,166 @@ class TestBaseQuantum:
         engine = get_test_execution_engine(hw)
         generated_batches = engine._generate_repeat_batches(repeat_count)
         assert generated_batches == expected_batches
+
+    def test_duration_timeline_times(self):
+        # Tests that the creation of a duration timeline with a two-qubit circuit
+        # gives a timeline where each pulse is concurrent.
+
+        # Create the hardware model and engine
+        hw = get_test_model()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        engine = get_test_execution_engine(hw)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Check the times match up
+        for _, val in res1.items():
+            end = 0
+            for pos in val:
+                assert end == pos.start
+                end = pos.end
+
+    def test_duration_timeline_sync(self):
+        # Tests that a redundant sync has no effect on the circuit.
+
+        # Create the hardware model and engine
+        hw = get_test_model()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        engine = get_test_execution_engine(hw)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Build the same circuit with an unnecessary sync & check the times match up
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .synchronize([q1, q2])
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res2 = engine.create_duration_timeline(builder.instructions)
+
+        for key in res1.keys():
+            starts1 = [
+                inst.start
+                for inst in res1[key]
+                if (not isinstance(inst.instruction, Delay) and inst.start != inst.end)
+            ]
+            starts2 = [
+                inst.start
+                for inst in res2[key]
+                if (not isinstance(inst.instruction, Delay) and inst.start != inst.end)
+            ]
+            ends1 = [
+                inst.start
+                for inst in res1[key]
+                if (not isinstance(inst.instruction, Delay) and inst.start != inst.end)
+            ]
+            ends2 = [
+                inst.start
+                for inst in res2[key]
+                if (not isinstance(inst.instruction, Delay) and inst.start != inst.end)
+            ]
+            assert starts1 == starts2
+            assert ends1 == ends2
+
+    def test_duration_timeline_compare(self):
+        # Tests that the duration of individual circuit elements matches that
+        # of the full circuit.
+
+        # Create the hardware model and engine
+        hw = get_test_model()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        engine = get_test_execution_engine(hw)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Check the circuit executes in an expected time
+        circs = [
+            get_builder(hw).X(q1, np.pi / 2.0),
+            get_builder(hw).X(q2, np.pi),
+            get_builder(hw).cnot(q1, q2),
+            get_builder(hw).measure_mean_z(q1),
+            get_builder(hw).measure_mean_z(q2),
+        ]
+
+        def exec_time(engine, circ):
+            res = engine.create_duration_timeline(circ.instructions)
+            times = [val[-1].end for val in res.values()]
+            return max(times)
+
+        ts = [exec_time(engine, circ) for circ in circs]
+        maxtime = max([chan[-1].end for chan in res1.values()])
+        assert max(ts[0], ts[1]) + ts[2] + max(ts[3], ts[4]) == maxtime
+
+    def test_duration_timeline_compare_sync(self):
+        # Tests that the duration of individual circuit elements matches that
+        # of the full circuit when syncs are used.
+
+        # Create the hardware model and engine
+        hw = get_test_model()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        engine = get_test_execution_engine(hw)
+
+        # Check that synchronize gives the expected times
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .synchronize([q1, q2])
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Check the circuit executes in an expected time
+        circs = [
+            get_builder(hw).X(q1, np.pi / 2.0),
+            get_builder(hw).X(q2, np.pi),
+            get_builder(hw).cnot(q1, q2),
+            get_builder(hw).measure_mean_z(q1),
+            get_builder(hw).measure_mean_z(q2),
+        ]
+
+        def exec_time(engine, circ):
+            res = engine.create_duration_timeline(circ.instructions)
+            times = [val[-1].end for val in res.values()]
+            return max(times)
+
+        ts = [exec_time(engine, circ) for circ in circs]
+        maxtime = max([chan[-1].end for chan in res1.values()])
+        assert ts[0] + ts[1] + ts[2] + max(ts[3], ts[4]) == maxtime
