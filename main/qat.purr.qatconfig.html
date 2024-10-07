@@ -168,15 +168,15 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;QAT_MAX_REPEATS_LIMIT&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;654321&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">QatConfig</span><span class="p">()</span>
-<span class="go">QatConfig(MAX_REPEATS_LIMIT=654321)</span>
+<span class="go">QatConfig(MAX_REPEATS_LIMIT=654321, DISABLE_PULSE_DURATION_LIMITS=False)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">QatConfig</span><span class="p">(</span><span class="n">MAX_REPEATS_LIMIT</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-<span class="go">QatConfig(MAX_REPEATS_LIMIT=123)</span>
+<span class="go">QatConfig(MAX_REPEATS_LIMIT=123, DISABLE_PULSE_DURATION_LIMITS=False)</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qatconfig</span> <span class="o">=</span> <span class="n">QatConfig</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qatconfig</span><span class="o">.</span><span class="n">MAX_REPEATS_LIMIT</span> <span class="o">=</span> <span class="mi">16000</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qatconfig</span>
-<span class="go">QatConfig(MAX_REPEATS_LIMIT=16000)</span>
+<span class="go">QatConfig(MAX_REPEATS_LIMIT=16000, DISABLE_PULSE_DURATION_LIMITS=False)</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">QatConfig</span><span class="p">(</span><span class="n">MAX_REPEATS_LIMIT</span><span class="o">=</span><span class="mf">100.5</span><span class="p">)</span> 
