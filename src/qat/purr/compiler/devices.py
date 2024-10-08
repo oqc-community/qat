@@ -405,7 +405,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
-        self.physical_channel: PhysicalChannel = physical_channel
+        self._physical_channel: PhysicalChannel = physical_channel
 
         self.frequency: float = frequency
         self.bias: complex = bias
@@ -428,6 +428,15 @@ class PulseChannel(QuantumComponent, Calibratable):
     @id.setter
     def id(self, val):
         self._id = val
+        self._create_hash()
+
+    @property
+    def physical_channel(self):
+        return self._physical_channel
+
+    @physical_channel.setter
+    def physical_channel(self, channel: PhysicalChannel):
+        self._physical_channel = channel
         self._create_hash()
 
     def _create_hash(self):
