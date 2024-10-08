@@ -589,6 +589,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         mode: AcquireMode,
         entangled_qubits: List[Qubit],
         output_variable: str = None,
+        **kwargs,
     ):
         measure_block = MeasureBlock(
             qubit, mode, output_variable, entangled_qubits, self.existing_names
@@ -678,6 +679,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         qubit: Qubit,
         axis: ProcessAxis = None,
         output_variable: str = None,
+        **kwargs,
     ) -> "QuantumInstructionBuilder":
         """
         Adds a measure instruction. Important note: this only adds the instruction, not
@@ -719,7 +721,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
         else:
             new_measure_block, acquire_instruction = self._generate_measure_block(
-                qubit, mode, entangled_qubits, output_variable
+                qubit, mode, entangled_qubits, output_variable, **kwargs
             )
             self.add(new_measure_block)
 
