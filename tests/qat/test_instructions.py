@@ -573,3 +573,30 @@ class TestInstructionBlocks:
         assert mb.duration == pytest.approx(acq.delay + acq.duration)
         mb._duration = 1
         assert mb.duration == 1
+
+    def test_sequential_measure_block_from_builder(self):
+        """Test that measurements can be added in sequence."""
+        hw = get_default_echo_hardware()
+        builder = get_builder(hw)
+        assert len(builder._instructions) == 0
+        builder.measure(hw.get_qubit(0))
+        # Adding a non-post-processing Quantum instruction between measurements forces
+        # sequential measure blocks.
+        builder.synchronize(hw.qubits)
+        builder.measure(hw.get_qubit(2))
+        assert len(builder._instructions) == 3
+        assert builder._instructions[0].quantum_targets == [hw.get_qubit(0)]
+        assert builder._instructions[-1].quantum_targets == [hw.get_qubit(2)]
+
+    def test_fused_measure_block_from_builder(self):
+        """Test that measurements can be fused together."""
+        hw = get_default_echo_hardware()
+        builder = get_builder(hw)
+        assert len(builder._instructions) == 0
+        builder.measure(hw.get_qubit(0))
+        builder.measure(hw.get_qubit(2))
+        assert len(builder._instructions) == 1
+        assert builder._instructions[0].quantum_targets == [
+            hw.get_qubit(0),
+            hw.get_qubit(2),
+        ]
