@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.purr.backends.realtime_chip_simulator module &mdash; QAT 2.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.purr.backends.utilities module" href="qat.purr.backends.utilities.html" />
+    <link rel="prev" title="qat.purr.backends.qiskit_simulator module" href="qat.purr.backends.qiskit_simulator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.2.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.backends.html">qat.purr.backends package</a></li>
+      <li class="breadcrumb-item active">qat.purr.backends.realtime_chip_simulator module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.purr.backends.realtime_chip_simulator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.purr.backends.realtime_chip_simulator">
+<span id="qat-purr-backends-realtime-chip-simulator-module"></span><h1>qat.purr.backends.realtime_chip_simulator module<a class="headerlink" href="#module-qat.purr.backends.realtime_chip_simulator" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.ControlType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ControlType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.ControlType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.ControlType.MEASURE">
+<span class="sig-name descname"><span class="pre">MEASURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'measure'</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.ControlType.MEASURE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.ControlType.RESET">
+<span class="sig-name descname"><span class="pre">RESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reset'</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.ControlType.RESET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.CouplingType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CouplingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.CouplingType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.CouplingType.CrossKerr">
+<span class="sig-name descname"><span class="pre">CrossKerr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.CouplingType.CrossKerr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.CouplingType.Exchange">
+<span class="sig-name descname"><span class="pre">Exchange</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.CouplingType.Exchange" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.MeasurementStatistics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasurementStatistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubits_measured</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.build_tree">
+<span class="sig-name descname"><span class="pre">build_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_ops</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_sections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.build_tree" title="Link to this definition"></a></dt>
+<dd><p>Simulate the dynamics of initial condition using the section of the Hamiltonian
+specified by the level. Perform a measurement on the specified qubits in the
+Hamiltonian section and for each result calculate the probability of it occuring
+and the resultant state. For each result perform a new simulation with the next
+Hamiltonian section to create a branching structure of all possible outcomes for
+a given initial condition and Hamiltonian sections dictionary. Continue until
+all Hamiltonian sections have been simulated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.extract_branch_trajectory">
+<span class="sig-name descname"><span class="pre">extract_branch_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.extract_branch_trajectory" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.extract_outcome_probabilities">
+<span class="sig-name descname"><span class="pre">extract_outcome_probabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.extract_outcome_probabilities" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.get_branch_nodes">
+<span class="sig-name descname"><span class="pre">get_branch_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.get_branch_nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.OperatorInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperatorInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.OperatorInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.OperatorInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.OperatorInfo.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.OperatorInfo.operator">
+<span class="sig-name descname"><span class="pre">operator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Qobj</span></code></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.OperatorInfo.operator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id">
+<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSCoupling">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RTCSCoupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_one</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_two</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupling_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSCoupling" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumComponent" title="qat.purr.compiler.devices.QuantumComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumComponent</span></code></a>, <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable" title="qat.purr.compiler.devices.Calibratable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibratable</span></code></a></p>
+<p>Resonators/Qubits are coupled in a very particular way in this model. This object
+holds information about those couplings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSCoupling.targets">
+<span class="sig-name descname"><span class="pre">targets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSCoupling.targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSQubit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RTCSQubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anharmonicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absorb_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dephase_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotating_frame_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSQubit" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit" title="qat.purr.compiler.devices.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></p>
+<p>Subclass to allow simulation-specific modelling of a qubit.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSQubit.N">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">N</span></span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSQubit.N" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rotating_frame_frequency</span></span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RTCSResonator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RTCSResonator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RTCSResonator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator" title="qat.purr.compiler.devices.Resonator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Resonator</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RealtimeChipSimEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_qubit_dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5e-11</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine" title="qat.purr.compiler.execution.QuantumExecutionEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumExecutionEngine</span></code></a></p>
+<p>Simulation that is built to be as close to our hardware as possible to allow for
+developers, quantum engineers and the fabrication team to be able to run simulations
+and be confident that the results are close to reality.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.build_simulator_resets">
+<span class="sig-name descname"><span class="pre">build_simulator_resets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_map</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.build_simulator_resets" title="Link to this definition"></a></dt>
+<dd><p>Qubit resets are handled in a unqiue way for the simulator so require their own
+function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.get_branches">
+<span class="sig-name descname"><span class="pre">get_branches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.get_branches" title="Link to this definition"></a></dt>
+<dd><p>Return the branch ids along with the measurements associated with them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">{branch_id:</span> <span class="pre">[branch_probability,</span> <span class="pre">{qubit:</span> <span class="pre">[resets_and_measurement_outcomes]}]}</span></code></p>
+<blockquote>
+<div><p>Where:</p>
+<ul class="simple">
+<li><p>branch_id: id to call when plotting specific branches</p></li>
+<li><p>branch_probability: probability branch occured</p></li>
+<li><p>qubit: qubit number</p></li>
+<li><p>resets_and_measurement_outcomes: the outcome of measurements for this branch
+in order. Also includes when a reset occured.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary mapping branch ids to their associated measurements.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.get_tensor">
+<span class="sig-name descname"><span class="pre">get_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.get_tensor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel" title="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">RealtimeSimHardwareModel</span></code></a></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.optimize" title="Link to this definition"></a></dt>
+<dd><p>Runs optimization passes specific to this hardware.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics">
+<span class="sig-name descname"><span class="pre">plot_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics" title="Link to this definition"></a></dt>
+<dd><p>Plot the dynamics of operator expectation values for a simulation run on this
+hardware. By default the pauli operators will be plot for each qubit but custom
+operators can be specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.operator_info"></span><strong>operator_info</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.operator_info">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.OperatorInfo" title="qat.purr.backends.realtime_chip_simulator.OperatorInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorInfo</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]]</span>) – Use the OperatorInfo object to specify an operator to
+plot, the id of the qubit the operator should act on and the name of the
+operator. Alternatively qubit indices (int) can be specified in which case
+the Pauli x, y and z expectations will be plotted for these qubits. If None
+then the Pauli operators for every qubit will be plotted. Defaults to None.</p></li>
+<li><p><span class="target" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.branches"></span><strong>branches</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.branches">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) – Specify a list of indices for the branches you wish to plot.
+This is only really relevent if the circuit includes mid-circuit
+measurements, in which case there will be a different trajectory for each
+possible measurement outcome. If None then the first trajectory will be
+plotted which is identical to all other trajectories for circuits without
+mid-circuit measurements. Defaults to None.</p></li>
+<li><p><span class="target" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.step"></span><strong>step</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.step">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The step length between expectation calculations along the
+trajectory. 1 gives the highest resolution but takes longer to calculate.
+Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses">
+<span class="sig-name descname"><span class="pre">plot_pulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses" title="Link to this definition"></a></dt>
+<dd><p>Plot pulses used to drive the system. Pulses are shown before being transformed
+by the baseband frequnecy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses.params.channels"></span><strong>channels</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses.params.channels">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</span>) – List of channel ids to plot. If None then all channels are plotted.
+Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.process_reset">
+<span class="sig-name descname"><span class="pre">process_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.process_reset" title="Link to this definition"></a></dt>
+<dd><p>When the superclass process_reset is implemented, it should remain empty for the
+simulator.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RealtimeSimHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shot_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_mitigation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.add_couplings">
+<span class="sig-name descname"><span class="pre">add_couplings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.add_couplings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.couplings">
+<span class="sig-name descname"><span class="pre">couplings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.RTCSCoupling" title="qat.purr.backends.realtime_chip_simulator.RTCSCoupling"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTCSCoupling</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.couplings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.create_engine">
+<span class="sig-name descname"><span class="pre">create_engine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.create_engine" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_time=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drive_hamiltonian=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section.control_type">
+<span class="sig-name descname"><span class="pre">control_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.ControlType" title="qat.purr.backends.realtime_chip_simulator.ControlType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlType</span></code></a></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section.control_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section.drive_hamiltonian">
+<span class="sig-name descname"><span class="pre">drive_hamiltonian</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Qobj</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section.drive_hamiltonian" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section.indices">
+<span class="sig-name descname"><span class="pre">indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section.indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section.qubits">
+<span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section.qubits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.Section.simulation_time">
+<span class="sig-name descname"><span class="pre">simulation_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.Section.simulation_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.add_qubit_coupling">
+<span class="sig-name descname"><span class="pre">add_qubit_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.add_qubit_coupling" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.add_qubit_stack">
+<span class="sig-name descname"><span class="pre">add_qubit_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anharmonicity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.add_qubit_stack" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.apply_setup_to_hardware">
+<span class="sig-name descname"><span class="pre">apply_setup_to_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotating_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.apply_setup_to_hardware" title="Link to this definition"></a></dt>
+<dd><p>Apply the default real-time chip sim hardware setup to the passed-in hardware.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.create_subplots">
+<span class="sig-name descname"><span class="pre">create_subplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.create_subplots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.get_default_RTCS_hardware">
+<span class="sig-name descname"><span class="pre">get_default_RTCS_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotating_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.get_default_RTCS_hardware" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.get_resonator_response_segments">
+<span class="sig-name descname"><span class="pre">get_resonator_response_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.get_resonator_response_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.get_resonator_response_signal_segment">
+<span class="sig-name descname"><span class="pre">get_resonator_response_signal_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resonator_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator_dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo_freq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.get_resonator_response_signal_segment" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.get_resonator_response_splicing_indices">
+<span class="sig-name descname"><span class="pre">get_resonator_response_splicing_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer_segments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.get_resonator_response_splicing_indices" title="Link to this definition"></a></dt>
+<dd><p>Take the buffer segments and parse them to find where the qubit buffer needs to be
+split in order to perform mid-circuit measurements.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.get_simple_resonator_response">
+<span class="sig-name descname"><span class="pre">get_simple_resonator_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator_dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator_iq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo_freq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.get_simple_resonator_response" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.random">
+<span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">x</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">interval</span> <span class="pre">[0,</span> <span class="pre">1).</span></span></span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.spline_time">
+<span class="sig-name descname"><span class="pre">spline_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.spline_time" title="Link to this definition"></a></dt>
+<dd><p>Perform a cubic spline on the buffer to make the number of points the same as the
+number of points in the simulation time</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.tukey_window">
+<span class="sig-name descname"><span class="pre">tukey_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.tukey_window" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.purr.backends.qiskit_simulator.html" class="btn btn-neutral float-left" title="qat.purr.backends.qiskit_simulator module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.backends.utilities.html" class="btn btn-neutral float-right" title="qat.purr.backends.utilities module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.2.0
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.purr.backends.realtime_chip_simulator.html">2.2.0</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
