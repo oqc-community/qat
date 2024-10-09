@@ -143,10 +143,15 @@ class InstructionBuilder:
 
             inst.name = new_name
 
-    def merge_builder(self, other_builder: "InstructionBuilder", index: int = None):
+    def merge_builder(self, other_builder: "InstructionBuilder", index: int = None) -> int:
         """
         Merge this builder into the current instance. Checks for label name clashes and
         resolves them if any are found.
+
+        :param index: index of self at which to insert the instructions of `other_builder`.
+        :type index: int
+        :returns: the next index to use for additional inserts.
+        :rtype: int
         """
         name_clashes = other_builder.existing_names.intersection(self.existing_names)
         self.existing_names.update(other_builder.existing_names)
@@ -186,9 +191,9 @@ class InstructionBuilder:
         index: int,
     ):
         """
-        Inserts an instruction into this builder. All methods should use this instead of
-        accessing the instructions list directly as it deals with nested builders and
-        merging.
+        Inserts one or more instruction(s) into this builder, starting at index. All methods
+        should use this instead of accessing the instructions list directly as it deals with
+        nested builders and merging.
         """
         if components is None:
             return self
