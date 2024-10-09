@@ -472,11 +472,16 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         current_duration + position_data.instruction.duration
                     )
 
-        # Strip timelines that only hold delays, since that just means nothing is
+        # Strip timelines that only hold delays and phase resets, since that just means nothing is
         # happening on this channel.
-        for key, timeline in dict(results).items():
-            if all(isinstance(pos_data.instruction, Delay) for pos_data in timeline):
-                del results[key]
+        results = {
+            key: timeline
+            for key, timeline in dict(results).items()
+            if not all(
+                isinstance(pos_data.instruction, (Delay, PhaseReset, PhaseShift))
+                for pos_data in timeline
+            )
+        }
 
         if final_positions := [
             final_position[-1].end for final_position in list(results.values())
