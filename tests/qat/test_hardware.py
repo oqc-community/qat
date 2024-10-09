@@ -2,7 +2,6 @@ import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.compiler.devices import _get_uuid
 
 
 @pytest.mark.parametrize("hw", [get_default_echo_hardware, get_default_RTCS_hardware])
@@ -20,25 +19,14 @@ class TestCachedId:
     def test_swap_partial_ids(self, hw):
         # Tests that swapping two pulse channel IDs keeps the association
         # between UUIDs and full IDs.
-        # _get_uuid.cache_clear()
         model = hw()
-        print(_get_uuid.cache_info())
         keys = list(model.pulse_channels.keys())
         pc1 = model.pulse_channels[keys[0]]
         pc2 = model.pulse_channels[keys[1]]
-        print(_get_uuid(pc1.full_id()))
-        print(_get_uuid(pc2.full_id()))
-        print(hash(_get_uuid(pc1.full_id())))
-        print(hash(_get_uuid(pc2.full_id())))
         hashs_before = [hash(pc1), hash(pc2)]
-        print(hashs_before)
         old_id = pc1.id
         pc1.id = pc2.id
         pc2.id = old_id
-        print(_get_uuid(pc1.full_id()))
-        print(_get_uuid(pc2.full_id()))
-        print(hash(_get_uuid(pc1.full_id())))
-        print(hash(_get_uuid(pc2.full_id())))
         hashs_after = [hash(pc2), hash(pc1)]
         assert hashs_before == hashs_after
 
