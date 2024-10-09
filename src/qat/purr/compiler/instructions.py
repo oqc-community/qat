@@ -122,6 +122,14 @@ class Repeat(Instruction):
         return f"repeat {self.repeat_count},{self.repetition_period}"
 
 
+class EndRepeat(Instruction):
+    """
+    Basic scoping. Marks the end of the most recent repeat
+    """
+
+    pass
+
+
 class PhaseShift(QuantumInstruction):
     def __init__(self, channel: "PulseChannel", phase: float):
         super().__init__(channel)
@@ -524,7 +532,7 @@ class DeviceUpdate(QuantumInstruction):
     """
 
     def __init__(self, target: QuantumComponent, attribute: str, value):
-        super().__init__()
+        super().__init__(target)
         self.target = target
         self.attribute = attribute
         self.value = value
@@ -566,6 +574,14 @@ class Sweep(Instruction):
     def __repr__(self):
         args = ",".join(key + "=" + str(value) for key, value in self.variables.items())
         return f"sweep {args}"
+
+
+class EndSweep(Instruction):
+    """
+    Basic scoping. Marks the end of the most recent sweep
+    """
+
+    pass
 
 
 class Jump(Instruction):

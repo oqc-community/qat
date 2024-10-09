@@ -12,7 +12,7 @@ log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-class TestDummyQbloxControlHardware:
+class TestQbloxControlHardware:
     def test_instruction_execution(self, model):
         amp = 1
         rise = 1.0 / 3.0

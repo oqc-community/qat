@@ -88,6 +88,11 @@ class InstructionBuilder:
                 flat_list.append(inst)
         return flat_list
 
+    @instructions.setter
+    def instructions(self, value):
+        # TODO - invoke a validation pass to make sure ALL instructions in value are of Instruction instance
+        self._instructions = value
+
     @staticmethod
     def deserialize(blob) -> "InstructionBuilder":
         builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
