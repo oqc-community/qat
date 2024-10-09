@@ -386,7 +386,7 @@ class PhysicalBaseband(QuantumComponent, Calibratable):
 
 
 # Keep an association between UUIDs and full IDs
-@lru_cache
+@lru_cache(maxsize=1000)
 def _get_uuid(_: str):
     return uuid4()
 
@@ -491,10 +491,6 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     def full_id(self):
         return self.physical_channel_id + "." + self.partial_id()
-
-    @lru_cache
-    def _uuid(full_id):
-        return uuid4()
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
