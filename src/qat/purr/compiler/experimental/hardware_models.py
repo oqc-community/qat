@@ -124,7 +124,11 @@ class QuantumHardwareModelBuilder:
 
     def add_qubit(self, frequency, **kwargs):
         if "pulse_channels" not in kwargs:
-            pc_drive = PulseChannel(channel_type=ChannelType.drive, frequency=frequency)
+            pc_drive = PulseChannel(
+                channel_type=ChannelType.drive,
+                frequency=frequency,
+                physical_channel=kwargs["physical_channel"],
+            )
             pc_drive_id = ChannelType.drive.name
             kwargs["pulse_channels"] = {pc_drive_id: pc_drive}
 
@@ -135,8 +139,16 @@ class QuantumHardwareModelBuilder:
 
     def add_resonator(self, frequency, **kwargs):
         if "pulse_channels" not in kwargs:
-            pc_measure = PulseChannel(channel_type=ChannelType.measure, frequency=frequency)
-            pc_acquire = PulseChannel(channel_type=ChannelType.acquire, frequency=frequency)
+            pc_measure = PulseChannel(
+                channel_type=ChannelType.measure,
+                frequency=frequency,
+                physical_channel=kwargs["physical_channel"],
+            )
+            pc_acquire = PulseChannel(
+                channel_type=ChannelType.acquire,
+                frequency=frequency,
+                physical_channel=kwargs["physical_channel"],
+            )
             kwargs["pulse_channels"] = {
                 ChannelType.measure.name: pc_measure,
                 ChannelType.acquire.name: pc_acquire,
