@@ -11,9 +11,9 @@ class TestCachedId:
         # hashes.
         model = hw()
         for key, target in model.pulse_channels.items():
-            hash_val = target.__hash__()
+            hash_val = hash(target)
             target.id = f"new_id_{key}"
-            new_hash_val = target.__hash__()
+            new_hash_val = hash(target)
             assert hash_val != new_hash_val
 
     def test_swap_partial_ids(self, hw):
@@ -35,9 +35,9 @@ class TestCachedId:
         model = hw()
         pulse_channel_0 = model.get_qubit(0).get_drive_channel()
         pulse_channel_1 = model.get_qubit(1).get_drive_channel()
-        hashs_before = [pulse_channel_0.__hash__(), pulse_channel_1.__hash__()]
+        hashs_before = [hash(pulse_channel_0), hash(pulse_channel_1)]
         tmp = pulse_channel_1.physical_channel
         pulse_channel_1.physical_channel = pulse_channel_0.physical_channel
         pulse_channel_0.physical_channel = tmp
-        hashs_after = [pulse_channel_0.__hash__(), pulse_channel_1.__hash__()]
+        hashs_after = [hash(pulse_channel_0), hash(pulse_channel_1)]
         assert hashs_before != hashs_after
