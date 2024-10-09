@@ -363,6 +363,14 @@ merging.</p>
 <span class="sig-name descname"><span class="pre">had</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.had" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.insert" title="Link to this definition"></a></dt>
+<dd><p>Inserts one or more instruction(s) into this builder, starting at index. All methods
+should use this instead of accessing the instructions list directly as it deals with
+nested builders and merging.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.instructions">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.instructions" title="Link to this definition"></a></dt>
@@ -405,9 +413,20 @@ merging.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.merge_builder">
-<span class="sig-name descname"><span class="pre">merge_builder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.merge_builder" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">merge_builder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.merge_builder" title="Link to this definition"></a></dt>
 <dd><p>Merge this builder into the current instance. Checks for label name clashes and
 resolves them if any are found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.compiler.builders.InstructionBuilder.merge_builder.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.purr.compiler.builders.InstructionBuilder.merge_builder.params.index">¶</a> (<em>int</em>) – index of self at which to insert the instructions of <cite>other_builder</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the next index to use for additional inserts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -532,7 +551,7 @@ This could be supported pretty easily, but not required right now.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.QuantumInstructionBuilder.measure">
-<span class="sig-name descname"><span class="pre">measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder.measure" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder.measure" title="Link to this definition"></a></dt>
 <dd><p>Adds a measure instruction. Important note: this only adds the instruction, not
 any post-processing instructions as well. If you’re wanting to perform generic
 common operations use the more specific measurement types, as they add all the

@@ -328,6 +328,19 @@ execution.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.InstructionBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBlock</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.InstructionBlock" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An Instruction grouping type. Allows working with blocks of Instructions as a
+unit.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.InstructionBlock.instructions">
+<span class="sig-name descname"><span class="pre">instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.InstructionBlock.instructions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Jump">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.Jump" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
@@ -362,6 +375,38 @@ execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.LessThan">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LessThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.LessThan" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.BinaryOperator" title="qat.purr.compiler.instructions.BinaryOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasureBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entangled_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">existing_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstructionBlock" title="qat.purr.compiler.instructions.QuantumInstructionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBlock</span></code></a></p>
+<p>Groups multiple qubit measurements together.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock.add_measurements">
+<span class="sig-name descname"><span class="pre">add_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entangled_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">existing_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock.add_measurements" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock.get_acquires">
+<span class="sig-name descname"><span class="pre">get_acquires</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock.get_acquires" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock.instructions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><span class="pre">QuantumInstruction</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock.instructions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.MeasureBlock.quantum_targets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quantum_targets</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.MeasureBlock.quantum_targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -488,6 +533,28 @@ another form of component.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstruction.duration">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstruction.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstructionBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBlock</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstructionBlock" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.InstructionBlock" title="qat.purr.compiler.instructions.InstructionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBlock</span></code></a></p>
+<p>Allows working with blocks of QuantumInstructions as a unit.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstructionBlock.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstructionBlock.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">
+<span class="sig-name descname"><span class="pre">instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstructionBlock.quantum_targets">
+<span class="sig-name descname"><span class="pre">quantum_targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumComponent" title="qat.purr.compiler.devices.QuantumComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumComponent</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstructionBlock.quantum_targets" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

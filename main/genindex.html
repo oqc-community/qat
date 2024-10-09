@@ -276,6 +276,8 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_measure">add_measure() (Qasm3ParserBase method)</a>
 </li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.add_measurements">add_measurements() (MeasureBlock method)</a>
+</li>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.add_meta">add_meta() (QatFile method)</a>
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveHardwareModel.add_physical_baseband">add_physical_baseband() (LiveHardwareModel method)</a>
@@ -876,10 +878,10 @@
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors">DeviceInjectors (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DeviceUpdate">DeviceUpdate (class in qat.purr.compiler.instructions)</a>
@@ -921,11 +923,15 @@
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay.duration">(Delay property)</a>
 </li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.duration">(MeasureBlock property)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse.duration">(Pulse property)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.duration">(QbloxContext property)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction.duration">(QuantumInstruction property)</a>
+</li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.duration">(QuantumInstructionBlock attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1192,6 +1198,8 @@
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator.get_acquire_channel">(Resonator method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.get_acquires">get_acquires() (MeasureBlock method)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_all_channels">get_all_channels() (Qubit method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_auxiliary_devices">get_auxiliary_devices() (QuantumDevice method)</a>
@@ -1412,6 +1420,8 @@
       </ul></li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.include">include() (Qasm3Parser method)</a>
 </li>
+      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.merge_builder.params.index">index (qat.purr.compiler.builders.InstructionBuilder.merge_builder parameter)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.IndexAccessor">IndexAccessor (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.indices">indices (Section attribute)</a>
@@ -1432,11 +1442,13 @@
       </ul></li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.inject_name">inject_name() (in module qat.purr.backends.verification)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata">InjectionMetadata (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.TtlAcqConfig.input_select">input_select (TtlAcqConfig attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.insert">insert() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.insert_result_at_sweep_position">insert_result_at_sweep_position() (SweepIterator method)</a>
 </li>
@@ -1450,16 +1462,24 @@
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.instruction">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock">InstructionBlock (class in qat.purr.compiler.instructions)</a>
+</li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder">InstructionBuilder (class in qat.purr.compiler.builders)</a>
 </li>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.InstructionEmitter">InstructionEmitter (class in qat.purr.compiler.emitter)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine">InstructionExecutionEngine (class in qat.purr.compiler.execution)</a>
 </li>
-      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions">instructions (InstructionBuilder property)</a>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions">(InstructionBuilder property)</a>
+</li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.instructions">(MeasureBlock property)</a>
+</li>
         <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.instructions">(QatFile property)</a>
+</li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument">Instrument (class in qat.purr.backends.live_devices)</a>
@@ -1724,6 +1744,8 @@
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_z">(QuantumInstructionBuilder method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock">MeasureBlock (class in qat.purr.compiler.instructions)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics">MeasurementStatistics (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasurePulse">MeasurePulse (class in qat.purr.compiler.instructions)</a>
@@ -2596,8 +2618,6 @@
         <li><a href="qat.purr.compiler.optimisers.html#module-qat.purr.compiler.optimisers">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.runtime
 
@@ -2605,6 +2625,8 @@
         <li><a href="qat.purr.compiler.runtime.html#module-qat.purr.compiler.runtime">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.waveforms
 
@@ -2775,9 +2797,13 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_reset">quantum_reset() (Qasm3Parser method)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.quantum_targets">quantum_targets (PhaseReset attribute)</a>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.quantum_targets">quantum_targets (MeasureBlock property)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.quantum_targets">(PhaseReset attribute)</a>
+</li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.quantum_targets">(QuantumInstructionBlock attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Synchronize.quantum_targets">(Synchronize attribute)</a>
 </li>
       </ul></li>
@@ -2792,6 +2818,8 @@
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel">QuantumHardwareModel (class in qat.purr.compiler.hardware_models)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction">QuantumInstruction (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock">QuantumInstructionBlock (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder">QuantumInstructionBuilder (class in qat.purr.compiler.builders)</a>
 </li>
