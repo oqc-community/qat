@@ -203,6 +203,11 @@ class Synchronize(QuantumInstruction):
         new_sync.add_channels(other_targets)
         return new_sync
 
+    def __iadd__(self, other):
+        other_targets = other.quantum_targets if isinstance(other, Synchronize) else other
+        self.add_channels(other_targets)
+        return self
+
     def __repr__(self):
         return f"sync {','.join(name.id for name in self.quantum_targets)}"
 
@@ -395,7 +400,7 @@ class PostProcessing(QuantumInstruction):
     """
 
     def __init__(self, acquire: Acquire, process, axes=None, args=None):
-        super().__init__(acquire)
+        super().__init__()
         if axes is not None and not isinstance(axes, List):
             axes = [axes]
 
@@ -407,10 +412,11 @@ class PostProcessing(QuantumInstruction):
         self.axes: List[ProcessAxis] = axes or []
         self.output_variable = acquire.output_variable
         self.result_needed = False
+        self._acquire = acquire
 
     @property
     def acquire(self) -> Acquire:
-        return self.quantum_targets[0]
+        return self._acquire
 
     def __repr__(self):
         axis = ",".join([axi.value for axi in self.axes])
@@ -470,6 +476,11 @@ class PhaseReset(QuantumInstruction):
         new_reset = PhaseReset(self.quantum_targets)
         new_reset.add_channels(other_targets)
         return new_reset
+
+    def __iadd__(self, other):
+        other_targets = other.quantum_targets if isinstance(other, PhaseReset) else other
+        self.add_channels(other_targets)
+        return self
 
     def __repr__(self):
         return f"phase reset {','.join(name.id for name in self.quantum_targets)}"
@@ -741,3 +752,155 @@ def calculate_duration(instruction, return_samples: bool = True):
         calc_sample = block_number * block_time
 
     return calc_sample
+
+
+class InstructionBlock:
+    """An Instruction grouping type. Allows working with blocks of Instructions as a
+    unit."""
+
+    instructions: List[Instruction]
+
+    def _validate_types(self, items, valid_types, label="targets"):
+        if items is None:
+            items = []
+        elif not isinstance(items, List):
+            items = [items]
+
+        invalid_items = [item for item in items if not isinstance(item, valid_types)]
+        if any(invalid_items):
+            invalid_items_str = ",".join([str(item) for item in invalid_items])
+            raise ValueError(f"Invalid {label} for {type(self)}: {invalid_items_str}")
+
+        return items
+
+
+class QuantumInstructionBlock(InstructionBlock):
+    """Allows working with blocks of QuantumInstructions as a unit."""
+
+    quantum_targets: List[QuantumComponent]
+    instructions: List[QuantumInstruction]
+    duration: float
+
+
+class MeasureBlock(QuantumInstructionBlock):
+    """Groups multiple qubit measurements together."""
+
+    def __init__(
+        self,
+        targets: Union[Qubit, List[Qubit]],
+        mode: AcquireMode,
+        output_variables: Union[str, List[str]] = None,
+        entangled_qubits: List[Qubit] = None,
+        existing_names: Set[str] = None,
+    ):
+        self._target_dict = {}
+        self._entangled_qubits = set()
+        self._existing_names = existing_names
+        self._duration = 0.0
+        self.add_measurements(targets, mode, output_variables, entangled_qubits)
+
+    def add_measurements(
+        self,
+        targets: Union[Qubit, List[Qubit]],
+        mode: AcquireMode,
+        output_variables: Union[str, List[str]] = None,
+        entangled_qubits: List[Qubit] = None,
+        existing_names: Set[str] = None,
+    ):
+        targets = self._validate_types(targets, (Qubit))
+        if len((duplicates := [t for t in targets if t in self.quantum_targets])) > 0:
+            raise ValueError(
+                "Target can only be measured once in a 'MeasureBlock'. "
+                f"Duplicates: {duplicates}"
+            )
+        if not isinstance(output_variables, list):
+            output_variables = [] if output_variables is None else [output_variables]
+        if (num_out_vars := len(output_variables)) == 0:
+            output_variables = [None] * len(targets)
+        elif num_out_vars != len(targets):
+            raise ValueError(
+                f"Unsupported number of `output_variables`: {num_out_vars}, "
+                f"must be `None` or match numer of targets: {len(targets)}."
+            )
+        for target, output_variable in zip(targets, output_variables):
+            meas, acq = self._generate_measure_acquire(
+                target, mode, output_variable, existing_names
+            )
+            duration = max(meas.duration, acq.delay + acq.duration)
+            self._target_dict[target.full_id()] = {
+                "target": target,
+                "mode": mode,
+                "output_variable": output_variable,
+                "measure": meas,
+                "acquire": acq,
+                "duration": duration,
+            }
+            self._duration = max(self._duration, duration)
+        self._entangled_qubits.update(
+            self._validate_types(entangled_qubits, (Qubit))
+            if entangled_qubits is not None
+            else targets
+        )
+
+    @property
+    def quantum_targets(self):
+        return [v["target"] for v in self._target_dict.values()]
+
+    def get_acquires(self, targets: Union[Qubit, List[Qubit]]):
+        if not isinstance(targets, list):
+            targets = [targets]
+        return [self._target_dict[qt.full_id()]["acquire"] for qt in targets]
+
+    def __repr__(self):
+        target_strings = []
+        for q, d in self._target_dict.items():
+            out_var = (
+                f"->{d['output_variable']}" if d["output_variable"] is not None else ""
+            )
+            mode = f":{d['mode'].value}" if d["mode"] is not None else ""
+            target_strings.append(f"{q}{mode}{out_var}")
+        return f"Measure {', '.join(target_strings)}"
+
+    @property
+    def instructions(self) -> List[QuantumInstruction]:
+        instructions = [Synchronize(list(self._entangled_qubits))]
+        for _, values in self._target_dict.items():
+            instructions.extend([values["measure"], values["acquire"]])
+        instructions.extend(
+            [Synchronize(self.quantum_targets), PhaseReset(list(self._entangled_qubits))]
+        )
+        return instructions
+
+    @property
+    def duration(self):
+        return self._duration
+
+    def _generate_measure_acquire(self, qubit, mode, output_variable, existing_names):
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+        existing_names = existing_names or self._existing_names
+        weights = (
+            qubit.measure_acquire.get("weights", None)
+            if qubit.measure_acquire.get("use_weights", False)
+            else None
+        )
+
+        measure_instruction = MeasurePulse(measure_channel, **qubit.pulse_measure)
+        acquire_instruction = Acquire(
+            acquire_channel,
+            (
+                qubit.pulse_measure["width"]
+                if qubit.measure_acquire["sync"]
+                else qubit.measure_acquire["width"]
+            ),
+            mode,
+            output_variable,
+            existing_names,
+            qubit.measure_acquire["delay"],
+            weights,
+        )
+
+        return [
+            measure_instruction,
+            acquire_instruction,
+        ]
