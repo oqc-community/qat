@@ -148,9 +148,7 @@ class PulseChannel(QuantumComponent):
     scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
 
-    channel_type: Optional[Literal[ChannelType.measure]] = Field(
-        allow_mutation=False, default=None
-    )
+    channel_type: Optional[ChannelType] = Field(allow_mutation=False, default=None)
     auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
 
     @model_validator(mode="after")
@@ -253,7 +251,7 @@ class QuantumDevice(QuantumComponent):
     pulse_channels: Dict[str, PulseChannel]
     physical_channel: PhysicalChannel
     measure_device: Optional[QuantumDevice] = None
-    default_pulse_channel_type: Literal[ChannelType.measure] = ChannelType.measure
+    default_pulse_channel_type: ChannelType = ChannelType.measure
 
     MULTI_DEVICE_CHANNEL_TYPES: Tuple[Literal[ChannelType.cross_resonance]] = Field(
         (
@@ -287,6 +285,8 @@ class QuantumDevice(QuantumComponent):
                 f"while pulse channels {error_pulse_channels_str} have associated physical channels {error_physical_channels_str}."
             )
 
+        return self
+
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
@@ -313,7 +313,7 @@ class QuantumDevice(QuantumComponent):
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    measure_device: None
+    measure_device: None = None
 
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.measure)
