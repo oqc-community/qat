@@ -9,6 +9,11 @@ logs/
 calibration_results/
 .coverage
 
+# Temp files
+**/*.tmp
+**/*.temp
+**/tmp.*
+
 # Docs
 docs/build/*
 docs/source/*
