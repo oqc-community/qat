@@ -95,7 +95,17 @@ class SequenceBuilder:
             ),
         )
 
-    def add_waveform(self, name: str, index: int, data: np.ndarray):
+    def lookup_waveform_by_data(self, data: np.ndarray):
+        return next(
+            (
+                wf["index"]
+                for wf in self.waveforms.values()
+                if (np.array(wf["data"]) == data).all()
+            ),
+            None,
+        )
+
+    def add_waveform(self, name: str, index: int, data: List[float]):
         if name in self.waveforms:
             raise ValueError(f"A waveform named {name} already exists")
         self.waveforms[name] = {"index": index, "data": data}
