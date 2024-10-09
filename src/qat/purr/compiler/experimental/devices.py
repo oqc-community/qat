@@ -15,6 +15,9 @@ class QuantumComponent(BaseModel):
     """
     Base class for any logical object which can act as a target of a quantum action
     - a Qubit or various channels for a simple example.
+
+    Attributes:
+        id: The string representation of the quantum component.
     """
 
     model_config = ConfigDict(validate_assignment=True)
@@ -33,11 +36,35 @@ class QuantumComponent(BaseModel):
 
 
 class PhysicalBaseband(QuantumComponent):
+    """
+    Models the Local Oscillator (LO) used with a mixer to change the
+    frequency of a carrier signal.
+
+    Attributes:
+        frequency: The frequency of the carrier wave.
+        if_frequency: The intermediate frequency (IF) resulting from
+                      mixing the baseband with a carrier signal.
+    """
+
     frequency: float = Field(ge=0.0)
     if_frequency: Optional[float] = Field(ge=0.0, default=250e6)
 
 
 class PhysicalChannel(QuantumComponent):
+    """
+    Models a physical channel that can carry one or multiple pulses.
+
+    Attributes:
+        sample_time: The rate at which the channel samples the pulse.
+        baseband: The physical baseband used to ???
+        block_size: The number of samples within a block ???
+        phase_offsett: Mean value of the signal, quantifies offset relative to zero mean.
+        imbalance: The IQ imbalance caused by demodulation of the pulse.
+        acquire_allowed: If the physical channel allows acquire pulses.
+        pulse_channel_min_frequency: Min frequency of a pulse.
+        pulse_channel_max_frequency: Max frequency of a pulse.
+    """
+
     sample_time: float
     baseband: PhysicalBaseband
     block_size: Optional[int] = Field(ge=1, default=1)
@@ -99,20 +126,30 @@ class PhysicalChannel(QuantumComponent):
 
 
 class PulseChannel(QuantumComponent):
-    """Models a pulse channel on a particular device."""
+    """
+    Models a pulse channel on a particular device.
+
+    Attributes:
+        frequency: Frequency of the pulse.
+        bias: ???
+        scale: ???
+        fixed_if: ???
+        channel_type: Type of the pulse.
+        auxiliary_devices: Any extra devices this PulseChannel could be affecting except
+                           the current one. For example in cross resonance pulses.
+        physical_channel: Physical channel that carries the pulse.
+    """
+
+    frequency: float = Field(ge=0.0, default=0.0)
+    bias: complex = 0.0 + 0.0j
+    scale: complex = 1.0 + 0.0j
+    fixed_if: bool = False
 
     channel_type: Optional[Literal[ChannelType.measure]] = Field(
         allow_mutation=False, default=None
     )
     auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
-
     physical_channel: PhysicalChannel
-
-    frequency: float = Field(ge=0.0, default=0.0)
-    bias: complex = 0.0 + 0.0j
-    scale: complex = 1.0 + 0.0j
-
-    fixed_if: bool = False
 
     @model_validator(mode="after")
     def check_frequency(self):
@@ -199,6 +236,18 @@ class FreqShiftPulseChannel(PulseChannel):
 
 
 class QuantumDevice(QuantumComponent):
+    """
+    A physical device whose main form of operation involves pulse channels.
+
+    Attributes:
+        pulse_channels: Pulse channels with their ids as keys.
+        physical_channel: Physical channel associated with the pulse channels.
+                          Note that this physical channel must be equal to the
+                          physical channel associated with the pulse channels.
+        measure_device: A quantum device used to measure the state of this device.
+        default_pulse_channel_type: Default type of pulse for the quantum device.
+    """
+
     pulse_channels: Dict[str, PulseChannel]
     physical_channel: PhysicalChannel
     measure_device: Optional[QuantumDevice] = None
@@ -262,6 +311,8 @@ class QuantumDevice(QuantumComponent):
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
+    measure_device: None
+
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.measure)
 
@@ -271,7 +322,22 @@ class Resonator(QuantumDevice):
 
 class Qubit(QuantumDevice):
     """
-    Class modelling our superconducting qubit and holds all information relating to them.
+    Models a superconducting qubit on a chip, and holds all information relating to it.
+
+    Attributes:
+        index: The index of the qubit on the chip.
+        resonator: The resonator coupled to the qubit.
+        coupled_qubits: The qubits connected to this qubit in the QPU architecture.
+        drive_amp: Amplitude for the pulse controlling the |0> -> |1> transition of the qubit.
+        default_pulse_channel_type: Default type of pulse for the qubit.
+
+        mean_z_map_args: The state of the qubit is determined through mapping the acquired readout
+                         voltage (I + jQ) onto the line in the complex plane that maximally separates
+                         them by applying a rotation vector z-map [A, B]. This variable determines the
+                         mean value of the parameters A and B.
+        discriminator: The threshold value along the separation that distinguishes the two states.
+        pulse_hw_zx_pi_4: A 2-qubit $Z \times X$ (maximally entangling) gate.
+        pulse_hw_x_pi_2: A single-qubit X gate.
     """
 
     index: int
@@ -279,6 +345,8 @@ class Qubit(QuantumDevice):
     coupled_qubits: Optional[List[Qubit]] = []
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
+
+    measure_device: Resonator
 
     mean_z_map_args: List[float] = Field(min_length=2, max_length=2, default=[1.0, 0.0])
     discriminator: List[float] = Field(min_length=1, max_length=1, default=[0.0])
@@ -375,6 +443,13 @@ class Qubit(QuantumDevice):
 
 
 class QubitCoupling(BaseModel):
+    """The coupling between two qubits.
+
+    Attributes:
+        direction: The indices of the coupled qubits.
+        quality: The quality-level of the coupling.
+    """
+
     model_config = ConfigDict(validate_assignment=True)
 
     direction: tuple = Field(min_length=2, max_length=2)
