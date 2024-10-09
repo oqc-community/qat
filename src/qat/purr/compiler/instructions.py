@@ -760,18 +760,18 @@ class InstructionBlock:
 
     instructions: List[Instruction]
 
-    def _validate_targets(self, targets, valid_types):
-        if targets is None:
-            targets = []
-        elif not isinstance(targets, List):
-            targets = [targets]
+    def _validate_types(self, items, valid_types, label="targets"):
+        if items is None:
+            items = []
+        elif not isinstance(items, List):
+            items = [items]
 
-        invalid_targets = [val for val in targets if not isinstance(val, valid_types)]
-        if any(invalid_targets):
-            invalid_targets_str = ",".join([str(val) for val in invalid_targets])
-            raise ValueError(f"Invalid targets for {type(self)}: {invalid_targets_str}")
+        invalid_items = [item for item in items if not isinstance(item, valid_types)]
+        if any(invalid_items):
+            invalid_items_str = ",".join([str(item) for item in invalid_items])
+            raise ValueError(f"Invalid {label} for {type(self)}: {invalid_items_str}")
 
-        return targets
+        return items
 
 
 class QuantumInstructionBlock(InstructionBlock):
@@ -807,7 +807,7 @@ class MeasureBlock(QuantumInstructionBlock):
         entangled_qubits: List[Qubit] = None,
         existing_names: Set[str] = None,
     ):
-        targets = self._validate_targets(targets, (Qubit))
+        targets = self._validate_types(targets, (Qubit))
         if len((duplicates := [t for t in targets if t in self.quantum_targets])) > 0:
             raise ValueError(
                 "Target can only be measured once in a 'MeasureBlock'. "
@@ -837,7 +837,7 @@ class MeasureBlock(QuantumInstructionBlock):
             }
             self._duration = max(self._duration, duration)
         self._entangled_qubits.update(
-            self._validate_targets(entangled_qubits, (Qubit))
+            self._validate_types(entangled_qubits, (Qubit))
             if entangled_qubits is not None
             else targets
         )
