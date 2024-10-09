@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
 
 log = get_default_logger()
 
 
-class QuantumComponent(BaseModel):
+class QuantumComponent(WarnOnExtraFieldsModel):
     """
     Base class for any logical object which can act as a target of a quantum action
     - a Qubit or various channels for a simple example.
@@ -32,7 +33,7 @@ class QuantumComponent(BaseModel):
         return self.id
 
     def __repr__(self):
-        return self.full_id()
+        return f"{type(self).__name__}({self.full_id()})"
 
 
 class PhysicalBaseband(QuantumComponent):
@@ -130,6 +131,7 @@ class PulseChannel(QuantumComponent):
     Models a pulse channel on a particular device.
 
     Attributes:
+        physical_channel: Physical channel that carries the pulse.
         frequency: Frequency of the pulse.
         bias: ???
         scale: ???
@@ -137,8 +139,9 @@ class PulseChannel(QuantumComponent):
         channel_type: Type of the pulse.
         auxiliary_devices: Any extra devices this PulseChannel could be affecting except
                            the current one. For example in cross resonance pulses.
-        physical_channel: Physical channel that carries the pulse.
     """
+
+    physical_channel: PhysicalChannel
 
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j
@@ -149,7 +152,6 @@ class PulseChannel(QuantumComponent):
         allow_mutation=False, default=None
     )
     auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
-    physical_channel: PhysicalChannel
 
     @model_validator(mode="after")
     def check_frequency(self):
@@ -258,7 +260,7 @@ class QuantumDevice(QuantumComponent):
             ChannelType.cross_resonance,
             ChannelType.cross_resonance_cancellation,
         ),
-        const=True,
+        frozen=True,
     )
 
     @model_validator(mode="after")
@@ -340,7 +342,7 @@ class Qubit(QuantumDevice):
         pulse_hw_x_pi_2: A single-qubit X gate.
     """
 
-    index: int
+    index: int = Field(ge=1)
     resonator: Resonator
     coupled_qubits: Optional[List[Qubit]] = []
     drive_amp: float = 1.0
@@ -442,7 +444,7 @@ class Qubit(QuantumDevice):
         ]
 
 
-class QubitCoupling(BaseModel):
+class QubitCoupling(WarnOnExtraFieldsModel):
     """The coupling between two qubits.
 
     Attributes:
