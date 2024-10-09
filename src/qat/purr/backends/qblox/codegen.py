@@ -389,25 +389,34 @@ class QbloxContext:
 
         return pulse
 
-    def _register_waveform(self, measure, target, data):
-        num_samples = data.size
-        if 2 * num_samples > self._wf_memory:  # for both I and Q
-            raise ValueError(
-                f"No more waveform memory left for pulse {measure} on channel {target}"
+    def _register_signal(self, waveform, target, data, name):
+        index = self.sequence_builder.lookup_waveform_by_data(data)
+        if index is not None:
+            log.debug(
+                f"Reusing signal {name} at index {index} for pulse {waveform} on channel {target}"
             )
+        elif data.size > self._wf_memory:
+            raise ValueError(
+                f"No more waveform memory left for signal {name} of pulse {waveform} on channel {target}"
+            )
+        else:
+            wf_hash = hash(waveform)
+            wf_name = type(waveform).__name__
+            if isinstance(waveform, Pulse):
+                wf_name = waveform.shape.name
 
-        name = type(measure).__name__
-        if isinstance(measure, Pulse):
-            name = measure.shape.name
+            index = self._wf_index
+            self.sequence_builder.add_waveform(
+                f"{wf_name}_{wf_hash}_{name}", index, data.tolist()
+            )
+            self._wf_memory = self._wf_memory - data.size
+            self._wf_index = self._wf_index + 1
 
-        index = len(self.sequence_builder.waveforms)
-        i_index, q_index = self._wf_index, self._wf_index + 1
-        self.sequence_builder.add_waveform(f"{name}_{index}_I", i_index, data.real.tolist())
-        self.sequence_builder.add_waveform(f"{name}_{index}_Q", q_index, data.imag.tolist())
+        return index
 
-        self._wf_memory = self._wf_memory - data.size
-        self._wf_index = self._wf_index + 2
-
+    def _register_waveform(self, waveform, target, data):
+        i_index = self._register_signal(waveform, target, data.real, "I")
+        q_index = self._register_signal(waveform, target, data.imag, "Q")
         return i_index, q_index
 
     def _register_acquisition(self, acquire: Acquire):
