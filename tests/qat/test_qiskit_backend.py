@@ -8,7 +8,8 @@ from qiskit_aer.noise import (
     thermal_relaxation_error,
 )
 
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware, qatmpsconfig
+from qat import qatconfig
+from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
@@ -390,10 +391,11 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatmpsconfig.MAX_BOND_DIMENSION
+            == qatconfig.MPS.MAX_BOND_DIMENSION
         )
         assert (
-            metadata["matrix_product_state_truncation_threshold"] == qatmpsconfig.TRUNCATION
+            metadata["matrix_product_state_truncation_threshold"]
+            == qatconfig.MPS.TRUNCATION
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
 
@@ -445,10 +447,11 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatmpsconfig.MAX_BOND_DIMENSION
+            == qatconfig.MPS.MAX_BOND_DIMENSION
         )
         assert (
-            metadata["matrix_product_state_truncation_threshold"] == qatmpsconfig.TRUNCATION
+            metadata["matrix_product_state_truncation_threshold"]
+            == qatconfig.MPS.TRUNCATION
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
 

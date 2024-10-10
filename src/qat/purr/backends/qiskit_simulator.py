@@ -5,13 +5,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import CheckMap
 from qiskit_aer import AerSimulator
 from qiskit_aer.backends.backendconfiguration import AerBackendConfiguration
 
+from qat import qatconfig
 from qat.purr.backends.echo import (
     Connectivity,
     add_direction_couplings_to_hardware,
@@ -30,21 +30,6 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class QatMPSConfig(BaseSettings):
-    """
-    The default settings for using the MPS backend in the Qiskit Simulator.
-    """
-
-    model_config = SettingsConfigDict(env_previx="QAT_MPS_")
-    MAX_BOND_DIMENSION: int = 128
-    """Default maximum bond dimension for MPS simulations."""
-    TRUNCATION: float = 1e-12
-    """The error threshold for dynamically truncating the bond dimension of MPS."""
-
-
-qatmpsconfig = QatMPSConfig()
-
-
 def get_default_qiskit_hardware(
     qubit_count=20,
     noise_model=None,
@@ -55,7 +40,7 @@ def get_default_qiskit_hardware(
     Creates a hardware model compatible with the Qiskit simulator.
 
     If `strict_placement=True`, circuits can only be executed when circuit
-    intructions can be mapped dirrectly onto the coupling map.
+    intructions can be mapped directly onto the coupling map.
     """
     model = QiskitHardwareModel(qubit_count, noise_model)
     model.strict_placement = strict_placement
@@ -253,10 +238,11 @@ class QiskitEngine(InstructionExecutionEngine):
         config = {
             "method": options.pop("method", "automatic"),
             "matrix_product_state_max_bond_dimension": options.pop(
-                "matrix_product_state_max_bond_dimension", qatmpsconfig.MAX_BOND_DIMENSION
+                "matrix_product_state_max_bond_dimension",
+                qatconfig.MPS.MAX_BOND_DIMENSION,
             ),
             "matrix_product_state_truncation_threshold": options.pop(
-                "matrix_product_state_truncation_threshold", qatmpsconfig.TRUNCATION
+                "matrix_product_state_truncation_threshold", qatconfig.MPS.TRUNCATION
             ),
         }
         config.update(options)

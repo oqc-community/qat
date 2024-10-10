@@ -70,3 +70,17 @@ def test_change_env_variables(monkeypatch, repeats_limit):
     assert (
         qatconfig.MAX_REPEATS_LIMIT == MAX_REPEATS_LIMIT
     )  # Existing instances should not have the updated env variable.
+
+
+class TestMpsConfig:
+    @pytest.mark.parametrize("val", [0, -10, 1.5])
+    def test_invalid_bond_dimension(self, val):
+        qatmpsconfig = QatConfig().MPS
+        with pytest.raises(ValidationError):
+            qatmpsconfig.MAX_BOND_DIMENSION = val
+
+    @pytest.mark.parametrize("val", [10, -1e-12])
+    def test_invalid_cutoff(self, val):
+        qatmpsconfig = QatConfig().MPS
+        with pytest.raises(ValidationError):
+            qatmpsconfig.TRUNCATION = val
