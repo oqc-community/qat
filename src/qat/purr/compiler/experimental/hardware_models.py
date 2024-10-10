@@ -34,6 +34,8 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
     default_repeat_count: int = 1000
     default_repetition_period: float = 100e-6
     repeat_limit: int | None = None
+    min_pulse_length: float = Field(ge=0.0, default=1e-09)  # default value in seconds
+    max_pulse_length: float = Field(gt=0.0, default=1e-03)  # default value in seconds
 
     quantum_devices: Dict[str, QuantumDevice] = Field(allow_mutation=False, default=dict())
     pulse_channels: Dict[str, PulseChannel] = Field(allow_mutation=False, default=dict())
@@ -53,6 +55,11 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
                 f"Default repeat count {self.default_repeat_count} cannot be larger than the repeat limit {self.repeat_limit}."
             )
         return self
+
+    @model_validator(mode="after")
+    def check_pulse_limits(self):
+        if self.min_pulse_length > self.max_pulse_length:
+            raise ValueError(f"Min pulse length cannot be larger than max pulse length.")
 
     @property
     def number_of_qubits(self):

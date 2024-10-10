@@ -181,32 +181,32 @@ class QuantumInstructionExecutionEngine(InstructionExecutionEngine):
                 )
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
-                if isinstance(duration, Number) and duration > MaxPulseLength:
-                    if (
-                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
-                    ):  # Do not throw error if we specifically disabled the limit checks.
-                        # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
-                        # which is specific to each hardware model and can be stored as a member variables there.
-                        raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {inst.duration} s"
-                        )
-                elif isinstance(duration, Variable):
-                    values = next(
-                        iter(
-                            [
-                                sw.variables[duration.name]
-                                for sw in instructions
-                                if isinstance(sw, Sweep)
-                                and duration.name in sw.variables.keys()
-                            ]
-                        )
-                    )
-                    if np.max(values) > MaxPulseLength:
-                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+
+                if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+                    min_pulse_duration = self.model.min_pulse_length
+                    max_pulse_duration = self.model.max_pulse_length
+                    if isinstance(duration, Number):
+                        if duration < min_pulse_duration or duration > max_pulse_duration:
                             raise ValueError(
-                                f"Max Waveform width is {MaxPulseLength} s "
-                                f"given: {values} s"
+                                f"Waveform duration {inst.duration} s is not within the limits {[min_pulse_duration, max_pulse_duration]}."
+                            )
+                    elif isinstance(duration, Variable):
+                        values = next(
+                            iter(
+                                [
+                                    sw.variables[duration.name]
+                                    for sw in instructions
+                                    if isinstance(sw, Sweep)
+                                    and duration.name in sw.variables.keys()
+                                ]
+                            )
+                        )
+                        if (
+                            np.min(values) < min_pulse_duration
+                            or np.max(values) > max_pulse_duration
+                        ):
+                            raise ValueError(
+                                f"Waveform durations {values} s are not within the limits {[min_pulse_duration, max_pulse_duration]}."
                             )
 
 
