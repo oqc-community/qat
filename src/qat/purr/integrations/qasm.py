@@ -34,7 +34,13 @@ from qiskit.qasm2 import CustomInstruction
 
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, Qubit
+from qat.purr.compiler.devices import (
+    ChannelType,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    Resonator,
+)
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -1979,12 +1985,36 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # these post processing operations are removed for executions on live hardware.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
+
+        # Determine the delay for the channel
+        delay = 0.0
+        if pulse_channel.channel_type == ChannelType.acquire:
+            # TODO: remove full id when previous PR is merged
+            devices = [
+                dev
+                for dev in self.builder.model.get_devices_from_pulse_channel(
+                    pulse_channel.full_id()
+                )
+                if isinstance(dev, Resonator)
+            ]
+            if len([isinstance(dev, Resonator) for dev in devices]) == 1:
+                for dev in self.builder.model.quantum_devices.values():
+                    if isinstance(dev, Qubit) and dev.measure_device == devices[0]:
+                        delay = dev.measure_acquire["delay"]
+                        break
+            else:
+                log(
+                    f"The acquire channel {pulse_channel.full_id()} is not assigned to a single resonator: "
+                    "setting the delay to 0.0."
+                )
+
         acquire = Acquire(
             channel=pulse_channel,
             time=time,
             mode=AcquireMode.INTEGRATOR,
             output_variable=output_variable,
             filter=filter,
+            delay=delay,
         )
         self.builder.add(acquire)
         self.builder.post_processing(
@@ -2105,6 +2135,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
                 args=mean_z_map_args,
             )
+            print(InlineResultsProcessing.Program)
             self.builder.results_processing(variable.name, InlineResultsProcessing.Program)
 
             self._attempt_declaration(variable)

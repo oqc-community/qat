@@ -1,10 +1,11 @@
 from compiler_config.config import CompilerConfig, QuantumResultsFormat
 
-from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend
+from qat.purr.compiler.instructions import Acquire
 
-hw = get_default_echo_hardware(3)
+# hw = get_default_echo_hardware(3)
 hw = get_default_RTCS_hardware(repeats=10)
 
 
@@ -41,4 +42,20 @@ parser = QASMFrontend()
 builder, metrics = parser.parse(program, hw)
 # print(builder.instructions)
 print("\n".join([str(inst) for inst in builder.instructions]))
-print(builder.instructions[-1].results_processing)
+
+for inst in builder.instructions:
+    if isinstance(inst, Acquire):
+        print(inst.delay)
+
+qatfile = InstructionEmitter().emit(builder.instructions, hw)
+print("--")
+print("\n".join([str(inst) for inst in qatfile.instructions]))
+print("--")
+print(qatfile.meta_instructions)
+
+runtime = hw.create_runtime()
+
+# print("--")
+# results, metrics = execute_instructions(hw, builder)
+# print(results)
+# print(metrics.optimized_circuit)
