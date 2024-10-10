@@ -148,6 +148,8 @@ class QbloxControlHardware(ControlHardware):
                 sequencer: Sequencer = module.sequencers[next(iter(available))]
                 allocations[target] = sequencer
 
+        return self._resources
+
     def _delete_acquisitions(self, sequencer):
         sequencer.delete_acquisition_data(all=True)
 
@@ -210,14 +212,13 @@ class QbloxControlHardware(ControlHardware):
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
 
-    def install(self, package: QbloxPackage):
-        module, sequencer = next(
-            (
-                (m, t2s[package.target])
-                for m, t2s in self._resources.items()
-                if m.slot_idx == package.target.physical_channel.slot_idx
-            )
-        )
+    def install(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
+        """
+        Installs and configures the package on the given (module, sequencer) resource.
+        Nominally follows resource allocation, but also serves for adhoc package installations
+        that aren't necessarily tied to any automatic resource allocation.
+        """
+
         log.debug(f"Configuring module {module}, sequencer {sequencer}")
         config = self._prepare_config(package, sequencer)
         if module.is_qcm_type:
@@ -243,12 +244,19 @@ class QbloxControlHardware(ControlHardware):
         if self.plot_packages:
             plot_packages(qblox_packages)
         for package in qblox_packages:
-            module, sequencer = self.install(package)
+            module, sequencer = next(
+                (
+                    (m, t2s[package.target])
+                    for m, t2s in self._resources.items()
+                    if m.slot_idx == package.target.physical_channel.slot_idx
+                )
+            )
             if self.dump_sequence:
                 filename = f"schedules/target_{package.target.id}_module_{module.slot_idx}_sequencer_{sequencer.seq_idx}_@_{datetime.utcnow().strftime('%m-%d-%Y_%H%M%S')}.json"
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
                 with open(filename, "w") as f:
                     f.write(json.dumps(asdict(package.sequence)))
+            self.install(package, module, sequencer)
 
     def start_playback(self, repetitions: int, repetition_time: float):
         if not any(self._resources):
