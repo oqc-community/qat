@@ -643,6 +643,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
             mblock_types + optional_block_types
         )
+
         if full_measure_block and len(pre_syncs) >= 2 and len(pre_phase_resets) >= 1:
             return previous_measure_block
         return None
@@ -678,6 +679,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
         else:
             self.add(new_measure_block)
+
+        # Move all post-processing until after our newly-shifted syncronize block.
+        # Order matters here.
+        for pp in [
+            val
+            for val in reversed(previous_measure_block)
+            if isinstance(val, PostProcessing)
+        ]:
+            self._instructions.remove(pp)
+            self.add(pp)
 
     def measure(
         self,
