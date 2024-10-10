@@ -1988,7 +1988,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         # Determine the delay for the channel
         delay = 0.0
-        print(pulse_channel)
         if pulse_channel.channel_type == ChannelType.acquire:
             # TODO: remove full id when previous PR is merged
             devices = [
@@ -1998,7 +1997,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
                 if isinstance(dev, Resonator)
             ]
-            if len([isinstance(dev, Resonator) for dev in devices]) == 1:
+            if len(devices) == 1:
                 for dev in self.builder.model.quantum_devices.values():
                     if isinstance(dev, Qubit) and dev.measure_device == devices[0]:
                         delay = dev.measure_acquire["delay"]
