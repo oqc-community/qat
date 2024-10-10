@@ -1988,6 +1988,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         # Determine the delay for the channel
         delay = 0.0
+        print(pulse_channel)
         if pulse_channel.channel_type == ChannelType.acquire:
             # TODO: remove full id when previous PR is merged
             devices = [
