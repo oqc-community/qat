@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import itertools
 import math
+import warnings
 from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
@@ -30,6 +31,7 @@ from qat.purr.compiler.instructions import (
     Instruction,
     Jump,
     Label,
+    MeasureBlock,
     MeasurePulse,
     PhaseReset,
     PhaseShift,
@@ -38,6 +40,7 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
     Pulse,
     QuantumInstruction,
+    QuantumInstructionBlock,
     Repeat,
     Reset,
     ResultsProcessing,
@@ -47,6 +50,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.utils.logger import get_default_logger
 
+warnings.simplefilter("always", DeprecationWarning)
 log = get_default_logger()
 
 
@@ -76,7 +80,13 @@ class InstructionBuilder:
 
     @property
     def instructions(self):
-        return list(self._instructions)
+        flat_list = []
+        for inst in self._instructions:
+            if isinstance(inst, QuantumInstructionBlock):
+                flat_list.extend(inst.instructions)
+            else:
+                flat_list.append(inst)
+        return flat_list
 
     @staticmethod
     def deserialize(blob) -> "InstructionBuilder":
@@ -133,10 +143,15 @@ class InstructionBuilder:
 
             inst.name = new_name
 
-    def merge_builder(self, other_builder: "InstructionBuilder"):
+    def merge_builder(self, other_builder: "InstructionBuilder", index: int = None) -> int:
         """
         Merge this builder into the current instance. Checks for label name clashes and
         resolves them if any are found.
+
+        :param index: index of self at which to insert the instructions of `other_builder`.
+        :type index: int
+        :returns: the next index to use for additional inserts.
+        :rtype: int
         """
         name_clashes = other_builder.existing_names.intersection(self.existing_names)
         self.existing_names.update(other_builder.existing_names)
@@ -147,7 +162,9 @@ class InstructionBuilder:
             )
             other_builder._fix_clashing_label_names(name_clashes, self.existing_names)
 
-        self.add(other_builder._instructions)
+        index = index or len(self._instructions)
+        self.insert(other_builder._instructions, index)
+        return index + len(other_builder._instructions)
 
     def add(
         self,
@@ -162,32 +179,45 @@ class InstructionBuilder:
         accessing the instructions list directly as it deals with nested builders and
         merging.
         """
+        return self.insert(components, len(self._instructions))
+
+    def insert(
+        self,
+        components: Union[
+            "InstructionBuilder",
+            Instruction,
+            List[Union["InstructionBuilder", Instruction]],
+        ],
+        index: int,
+    ):
+        """
+        Inserts one or more instruction(s) into this builder, starting at index. All methods
+        should use this instead of accessing the instructions list directly as it deals with
+        nested builders and merging.
+        """
         if components is None:
             return self
 
         if not isinstance(components, List):
             components = [components]
 
-        inst_list = []
         for component in components:
             if isinstance(component, InstructionBuilder):
-                self.merge_builder(component)
+                index = self.merge_builder(component)
             else:
-                inst_list.append(component)
-
-        for inst in inst_list:
-            # Naive entanglement checker for syncronization.
-            if isinstance(inst, CrossResonancePulse):
-                ent_qubits = self._get_entangled_qubits(inst)
-                for qubit in ent_qubits:
-                    self._entanglement_map[qubit].update(ent_qubits)
-                for qubit in self.model.qubits:
-                    # entanglement is transitive, if A<>B and B<>C then C<>A
-                    tmp = set()
-                    for entangled in self._entanglement_map[qubit]:
-                        tmp.update(self._entanglement_map[entangled])
-                    self._entanglement_map[qubit].update(tmp)
-            self._instructions.append(inst)
+                # Naive entanglement checker for syncronization.
+                if isinstance(component, CrossResonancePulse):
+                    ent_qubits = self._get_entangled_qubits(component)
+                    for qubit in ent_qubits:
+                        self._entanglement_map[qubit].update(ent_qubits)
+                    for qubit in self.model.qubits:
+                        # entanglement is transitive, if A<>B and B<>C then C<>A
+                        tmp = set()
+                        for entangled in self._entanglement_map[qubit]:
+                            tmp.update(self._entanglement_map[entangled])
+                        self._entanglement_map[qubit].update(tmp)
+                self._instructions.insert(index, component)
+                index += 1
         return self
 
     def _get_entangled_qubits(self, inst):
@@ -518,8 +548,143 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return results
 
+    def _generate_legacy_measure_block(
+        self,
+        qubit: Qubit,
+        mode: AcquireMode,
+        entangled_qubits: List[Qubit],
+        output_variable: str = None,
+    ):
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+        weights = (
+            qubit.measure_acquire.get("weights", None)
+            if qubit.measure_acquire.get("use_weights", False)
+            else None
+        )
+        # Naive entanglement checker to assure all entangled qubits are sync before a
+        # measurement is done on any of them.
+
+        measure_instruction = MeasurePulse(measure_channel, **qubit.pulse_measure)
+        acquire_instruction = Acquire(
+            acquire_channel,
+            (
+                qubit.pulse_measure["width"]
+                if qubit.measure_acquire["sync"]
+                else qubit.measure_acquire["width"]
+            ),
+            mode,
+            output_variable,
+            self.existing_names,
+            qubit.measure_acquire["delay"],
+            weights,
+        )
+
+        return [
+            Synchronize(entangled_qubits),
+            measure_instruction,
+            acquire_instruction,
+            Synchronize(qubit),
+            PhaseReset(entangled_qubits),
+        ], acquire_instruction
+
+    def _generate_measure_block(
+        self,
+        qubit: Qubit,
+        mode: AcquireMode,
+        entangled_qubits: List[Qubit],
+        output_variable: str = None,
+        **kwargs,
+    ):
+        measure_block = MeasureBlock(
+            qubit, mode, output_variable, entangled_qubits, self.existing_names
+        )
+        acquire_instruction = measure_block.get_acquires(qubit)[0]
+
+        return measure_block, acquire_instruction
+
+    def _find_previous_measurement_block(
+        self,
+        mblock_types: List[Instruction] = [Acquire, MeasurePulse],
+        optional_block_types: List[Instruction] = [Synchronize, PhaseReset],
+    ):
+        # List of node types that a measurement can be made up of.
+        mblock_types_cycle = itertools.cycle(mblock_types)
+
+        # Look at the instructions immediately before this measure, and try to find a
+        # set of instructions that look exactly like a measure selection. It's a little
+        # bit loose with matching, but if it sees a measure followed by an acquire,
+        # surrounded by syncs and post-processing, it'll accept that block as a
+        # 'measurement'.
+        current_type = next(mblock_types_cycle)
+        previous_measure_block = []
+        instructions = reversed(self._instructions)
+
+        for inst in instructions:
+            if not isinstance(
+                inst, QuantumInstruction | QuantumInstructionBlock
+            ) or isinstance(inst, PostProcessing):
+                continue
+
+            if isinstance(inst, MeasureBlock) and len(previous_measure_block) == 0:
+                return inst
+
+            if not isinstance(inst, (*optional_block_types, current_type)):
+                current_type = next(mblock_types_cycle)
+                if not isinstance(inst, (*optional_block_types, current_type)):
+                    break
+
+            previous_measure_block.insert(0, inst)
+
+        pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
+        pre_phase_resets = [
+            val for val in previous_measure_block if isinstance(val, PhaseReset)
+        ]
+        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
+            mblock_types + optional_block_types
+        )
+        if full_measure_block and len(pre_syncs) >= 2 and len(pre_phase_resets) >= 1:
+            return previous_measure_block
+        return None
+
+    def _join_legacy_measure_blocks(self, previous_measure_block, new_measure_block):
+        # If we detect a full measure block before us, merge it together if we're
+        # entangled and/or can do it validly.
+        pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
+        new_syncs = [val for val in new_measure_block if isinstance(val, Synchronize)]
+        pre_phase_resets = [
+            val for val in previous_measure_block if isinstance(val, PhaseReset)
+        ]
+        new_phase_resets = [val for val in new_measure_block if isinstance(val, PhaseReset)]
+        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
+            [val.__class__ for val in new_measure_block]
+        )
+        if full_measure_block and len(pre_syncs) >= 2 and len(pre_phase_resets) >= 1:
+            # Merge the first and last sync with the new.
+            pre_syncs[0] += new_syncs[0]
+            pre_syncs[-1] += new_syncs[-1]
+
+            # reset all qubits
+            pre_phase_resets[-1] += new_phase_resets[-1]
+
+            # Add in our current changes.
+            self.insert(
+                [
+                    val
+                    for val in new_measure_block
+                    if isinstance(val, (MeasurePulse, Acquire))
+                ],
+                index=self._instructions.index(pre_syncs[-1]),
+            )
+        else:
+            self.add(new_measure_block)
+
     def measure(
-        self, qubit: Qubit, axis: ProcessAxis = None, output_variable: str = None
+        self,
+        qubit: Qubit,
+        axis: ProcessAxis = None,
+        output_variable: str = None,
+        **kwargs,
     ) -> "QuantumInstructionBuilder":
         """
         Adds a measure instruction. Important note: this only adds the instruction, not
@@ -537,105 +702,33 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             raise ValueError(f"Wrong measure axis '{str(axis)}'!")
 
-        # Naive entanglement checker to assure all entangled qubits are sync before a
-        # measurement is done on any of them.
         entangled_qubits = list(self._entanglement_map.get(qubit, []))
+        previous_measure_block = self._find_previous_measurement_block()
 
-        # List of node types that a measurement can be made up of.
-        mblock_types = [Acquire, MeasurePulse]
-        mblock_types_cycle = itertools.cycle(mblock_types)
-        optional_block_types = [PostProcessing, Synchronize, PhaseReset]
-
-        # Look at the instructions immediately before this measure, and try to find a
-        # set of instructions that look exactly like a measure selection. It's a little
-        # bit loose with matching, but if it sees a measure followed by an acquire,
-        # surrounded by syncs and post-processing, it'll accept that block as a
-        # 'measurement'.
-        current_type = next(mblock_types_cycle)
-        previous_measure_block = []
-        for inst in reversed(self._instructions):
-            # We skip classic instructions since they have no relevance.
-            if not isinstance(inst, QuantumInstruction):
-                continue
-
-            if not isinstance(inst, (*optional_block_types, current_type)):
-                current_type = next(mblock_types_cycle)
-                if not isinstance(inst, (*optional_block_types, current_type)):
-                    break
-
-            previous_measure_block.append(inst)
-
-        measure_channel = qubit.get_measure_channel()
-        acquire_channel = qubit.get_acquire_channel()
-        weights = (
-            qubit.measure_acquire.get("weights", None)
-            if qubit.measure_acquire.get("use_weights", False)
-            else None
-        )
-        acquire_instruction = Acquire(
-            acquire_channel,
-            (
-                qubit.pulse_measure["width"]
-                if qubit.measure_acquire["sync"]
-                else qubit.measure_acquire["width"]
-            ),
-            mode,
-            output_variable,
-            self.existing_names,
-            qubit.measure_acquire["delay"],
-            weights,
-        )
-
-        # If we detect a full measure block before us, merge it together if we're
-        # entangled and/or can do it validly.
-        syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
-        phase_resets = [
-            val for val in previous_measure_block if isinstance(val, PhaseReset)
-        ]
-        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
-            mblock_types + optional_block_types
-        )
-        if full_measure_block and len(syncs) >= 2 and len(phase_resets) >= 1:
-            # Find the pre-measure sync in the preceeding measure block and merge our
-            # values into it.
-            syncs[-1].add_channels(entangled_qubits)
-
-            # Find the post-measure sync, merge with ours, then remove it.
-            final_syncronize = syncs[0] + qubit
-            self._instructions.remove(syncs[0])
-            # reset all qubits
-            final_phase_reset = phase_resets[0] + entangled_qubits
-            self._instructions.remove(phase_resets[0])
-
-            # Add in our current changes.
-            self.add(
-                [
-                    MeasurePulse(measure_channel, **qubit.pulse_measure),
-                    acquire_instruction,
-                    final_syncronize,
-                    final_phase_reset,
-                ]
+        if isinstance(previous_measure_block, list):
+            warnings.warn(
+                "Use of legacy measurement block recognition is deprecated. "
+                "Please use the 'MeasureBlock' type instead.",
+                DeprecationWarning,
+                stacklevel=2,
             )
-
-            # Move all post-processing until after our newly-shifted syncronize block.
-            # Order matters here.
-            for pp in [
-                val
-                for val in reversed(previous_measure_block)
-                if isinstance(val, PostProcessing)
-            ]:
-                self._instructions.remove(pp)
-                self.add(pp)
+            new_measure_block, acquire_instruction = self._generate_legacy_measure_block(
+                qubit, mode, entangled_qubits, output_variable
+            )
+            self._join_legacy_measure_blocks(previous_measure_block, new_measure_block)
+        elif (
+            isinstance(previous_measure_block, MeasureBlock)
+            and qubit not in previous_measure_block.quantum_targets
+        ):
+            previous_measure_block.add_measurements(
+                qubit, mode, output_variable, entangled_qubits, self.existing_names
+            )
+            acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
         else:
-            self.add(
-                [
-                    Synchronize(entangled_qubits),
-                    MeasurePulse(measure_channel, **qubit.pulse_measure),
-                    acquire_instruction,
-                    Synchronize(qubit),
-                    PhaseReset(entangled_qubits),
-                ]
+            new_measure_block, acquire_instruction = self._generate_measure_block(
+                qubit, mode, entangled_qubits, output_variable, **kwargs
             )
+            self.add(new_measure_block)
 
         return FluidBuilderWrapper(self, acquire_instruction)
 
