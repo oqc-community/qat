@@ -105,20 +105,20 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
 
 class QuantumHardwareModelBuilder:
     def __init__(self):
-        self.hardware_model = QuantumHardwareModel()
+        self.model = QuantumHardwareModel()
 
     def add_physical_baseband(self, **kwargs):
-        self.hardware_model = self.hardware_model.add_hardware_component(
+        self.model = self.model.add_hardware_component(
             "physical_basebands", PhysicalBaseband(**kwargs)
         )
 
     def add_physical_channel(self, **kwargs):
-        self.hardware_model = self.hardware_model.add_hardware_component(
+        self.model = self.model.add_hardware_component(
             "physical_channels", PhysicalChannel(**kwargs)
         )
 
     def add_pulse_channel(self, **kwargs):
-        self.hardware_model = self.hardware_model.add_hardware_component(
+        self.model = self.model.add_hardware_component(
             "pulse_channels", PulseChannel(**kwargs)
         )
 
@@ -133,9 +133,7 @@ class QuantumHardwareModelBuilder:
             kwargs["pulse_channels"] = {pc_drive_id: pc_drive}
 
         qubit = Qubit(**kwargs)
-        self.hardware_model = self.hardware_model.add_hardware_component(
-            "quantum_devices", qubit
-        )
+        self.model = self.model.add_hardware_component("quantum_devices", qubit)
 
     def add_resonator(self, frequency, **kwargs):
         if "pulse_channels" not in kwargs:
@@ -155,9 +153,7 @@ class QuantumHardwareModelBuilder:
             }
 
         resonator = Resonator(**kwargs)
-        self.hardware_model = self.hardware_model.add_hardware_component(
-            "quantum_devices", resonator
-        )
+        self.model = self.model.add_hardware_component("quantum_devices", resonator)
 
     def add_cross_resonance_pulse_channels(
         self,
@@ -170,13 +166,11 @@ class QuantumHardwareModelBuilder:
 
         if connectivity is None:
             # Create a ring architecture where each qubit i is connected to qubits i-1 and i+1.
-            n_qubits = self.hardware_model.number_of_qubits
+            n_qubits = self.model.number_of_qubits
             connectivity = [(i, i % n_qubits + 1) for i in range(1, n_qubits + 1)]
 
         def couple_qubits(qubit1, qubit2):
-            self.hardware_model = self.hardware_model.get_qubit_with_index(
-                qubit1
-            ).add_hardware_component(
+            self.model = self.model.get_qubit_with_index(qubit1).add_hardware_component(
                 "pulse_channels",
                 PulseChannel(
                     channel_type=ChannelType.cross_resonance,
@@ -185,9 +179,7 @@ class QuantumHardwareModelBuilder:
                     scale=cross_res_scale,
                 ),
             )
-            self.hardware_model = self.hardware_model.get_qubit_with_index(
-                qubit1
-            ).add_hardware_component(
+            self.model = self.model.get_qubit_with_index(qubit1).add_hardware_component(
                 "pulse_channels",
                 PulseChannel(
                     channel_type=ChannelType.cross_resonance_cancellation,
@@ -197,11 +189,9 @@ class QuantumHardwareModelBuilder:
                 ),
             )
 
-            self.hardware_model.get_qubit_with_index(qubit1).add_coupled_qubit(qubit2)
+            self.model.get_qubit_with_index(qubit1).add_coupled_qubit(qubit2)
 
-        qubits_by_index = {
-            qubit.index: qubit for qubit in self.hardware_model.qubit_devices
-        }
+        qubits_by_index = {qubit.index: qubit for qubit in self.model.qubit_devices}
         for index1, index2 in connectivity:
             qubit1 = qubits_by_index[index1]
             qubit2 = qubits_by_index[index2]

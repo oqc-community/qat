@@ -59,7 +59,7 @@ class PhysicalChannel(QuantumComponent):
         sample_time: The rate at which the channel samples the pulse.
         baseband: The physical baseband used to ???
         block_size: The number of samples within a block ???
-        phase_offsett: Mean value of the signal, quantifies offset relative to zero mean.
+        phase_iq_offset: Shift of the signal in time.
         imbalance: The IQ imbalance caused by demodulation of the pulse.
         acquire_allowed: If the physical channel allows acquire pulses.
         pulse_channel_min_frequency: Min frequency of a pulse.
@@ -69,7 +69,7 @@ class PhysicalChannel(QuantumComponent):
     sample_time: float
     baseband: PhysicalBaseband
     block_size: Optional[int] = Field(ge=1, default=1)
-    phase_offset: float = 0.0
+    phase_iq_offset: float = 0.0
     imbalance: float = 1.0
 
     acquire_allowed: bool = False
@@ -133,8 +133,8 @@ class PulseChannel(QuantumComponent):
     Attributes:
         physical_channel: Physical channel that carries the pulse.
         frequency: Frequency of the pulse.
-        bias: ???
-        scale: ???
+        bias: Mean value of the signal, quantifies offset relative to zero mean.
+        scale: Multiplies the amplitude of the pulse.
         fixed_if: ???
         channel_type: Type of the pulse.
         auxiliary_devices: Any extra devices this PulseChannel could be affecting except
