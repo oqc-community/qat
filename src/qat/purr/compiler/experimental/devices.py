@@ -42,9 +42,9 @@ class PhysicalBaseband(QuantumComponent):
     frequency of a carrier signal.
 
     Attributes:
-        frequency: The frequency of the carrier wave.
+        frequency: The frequency of the LO.
         if_frequency: The intermediate frequency (IF) resulting from
-                      mixing the baseband with a carrier signal.
+                      mixing the baseband with the carrier signal.
     """
 
     frequency: float = Field(ge=0.0)
@@ -56,25 +56,27 @@ class PhysicalChannel(QuantumComponent):
     Models a physical channel that can carry one or multiple pulses.
 
     Attributes:
-        sample_time: The rate at which the channel samples the pulse.
-        baseband: The physical baseband used to ???
+        sample_time: The rate at which the pulse is sampled.
+        baseband: The physical baseband.
         block_size: The number of samples within a block ???
-        phase_iq_offset: Shift of the signal in time.
-        imbalance: The IQ imbalance caused by demodulation of the pulse.
+        phase_iq_offset: Deviation of the phase difference of the I
+                         and Q components from 90° due to imperfections
+                         in the mixing of the LO and unmodulated signal.
+        bias: The bias in voltages V_I / V_Q for the I and Q components.
         acquire_allowed: If the physical channel allows acquire pulses.
-        pulse_channel_min_frequency: Min frequency of a pulse.
-        pulse_channel_max_frequency: Max frequency of a pulse.
+        min_frequency: Min frequency allowed in this physical channel.
+        max_frequency: Max frequency allowed in this physical channel.
     """
 
-    sample_time: float
+    sample_time: float = Field(ge=0.0)
     baseband: PhysicalBaseband
     block_size: Optional[int] = Field(ge=1, default=1)
     phase_iq_offset: float = 0.0
-    imbalance: float = 1.0
+    bias: float = 1.0
 
     acquire_allowed: bool = False
-    pulse_channel_min_frequency: float = Field(ge=0.0, default=0.0)
-    pulse_channel_max_frequency: float = np.inf
+    min_frequency: float = Field(ge=0.0, default=0.0)
+    max_frequency: float = np.inf
 
     @field_validator("block_size")
     def set_block_size(cls, block_size):
@@ -134,15 +136,14 @@ class PulseChannel(QuantumComponent):
         physical_channel: Physical channel that carries the pulse.
         frequency: Frequency of the pulse.
         bias: Mean value of the signal, quantifies offset relative to zero mean.
-        scale: Multiplies the amplitude of the pulse.
-        fixed_if: ???
+        scale: Scale factor for mapping the voltage of the pulse to frequencies.
+        fixed_if: Flag which determines if the intermediate frequency is fixed.
         channel_type: Type of the pulse.
         auxiliary_devices: Any extra devices this PulseChannel could be affecting except
                            the current one. For example in cross resonance pulses.
     """
 
     physical_channel: PhysicalChannel
-
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j
     scale: complex = 1.0 + 0.0j
@@ -153,14 +154,13 @@ class PulseChannel(QuantumComponent):
 
     @model_validator(mode="after")
     def check_frequency(self):
-        min_frequency = self.physical_channel.pulse_channel_min_frequency
-        max_frequency = self.physical_channel.pulse_channel_max_frequency
+        min_frequency = self.physical_channel.min_frequency
+        max_frequency = self.physical_channel.max_frequency
 
         if self.frequency < min_frequency or self.frequency > max_frequency:
             raise ValueError(
                 f"Pulse channel frequency '{self.frequency}' must be between the bounds "
-                f"({min_frequency}, {max_frequency}) on physical "
-                f"channel with id {self.id}."
+                f"({min_frequency}, {max_frequency}) on physical channel with id {self.id}."
             )
         return self
 
@@ -343,12 +343,11 @@ class Qubit(QuantumDevice):
     """
 
     index: int = Field(ge=1)
-    resonator: Resonator
     coupled_qubits: Optional[List[Qubit]] = []
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
 
-    measure_device: Resonator
+    measure_device: Resonator = None
 
     mean_z_map_args: List[float] = Field(min_length=2, max_length=2, default=[1.0, 0.0])
     discriminator: List[float] = Field(min_length=1, max_length=1, default=[0.0])
