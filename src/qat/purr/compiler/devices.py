@@ -5,9 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
-from functools import lru_cache
 from typing import Dict, List, Optional, Set, TypeVar, Union
-from uuid import uuid4
 
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
@@ -385,12 +383,6 @@ class PhysicalBaseband(QuantumComponent, Calibratable):
         self.if_frequency: Optional[float] = if_frequency
 
 
-# Keep an association between UUIDs and full IDs
-@lru_cache(maxsize=1000)
-def _get_uuid(_: str):
-    return uuid4()
-
-
 class PulseChannel(QuantumComponent, Calibratable):
     """Models a pulse channel on a particular device."""
 
@@ -412,7 +404,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         self.scale: complex = scale
 
         self.fixed_if: bool = fixed_if
-        self._create_hash()
+        self._update_hash()
 
         if frequency < self.min_frequency or frequency > self.max_frequency:
             raise ValueError(
@@ -428,7 +420,7 @@ class PulseChannel(QuantumComponent, Calibratable):
     @id.setter
     def id(self, val):
         self._id = val
-        self._create_hash()
+        self._update_hash()
 
     @property
     def physical_channel(self):
@@ -437,10 +429,10 @@ class PulseChannel(QuantumComponent, Calibratable):
     @physical_channel.setter
     def physical_channel(self, channel: PhysicalChannel):
         self._physical_channel = channel
-        self._create_hash()
+        self._update_hash()
 
-    def _create_hash(self):
-        self._hash = hash(_get_uuid(self.full_id()))
+    def _update_hash(self):
+        self._hash = hash(self.full_id())
 
     @property
     def sample_time(self):
