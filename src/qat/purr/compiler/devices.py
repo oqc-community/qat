@@ -122,7 +122,15 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self.id = str(id_)
+        self._id = str(id_)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, val):
+        self.id = val
 
     def full_id(self):
         return self.id
@@ -389,13 +397,14 @@ class PulseChannel(QuantumComponent, Calibratable):
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
-        self.physical_channel: PhysicalChannel = physical_channel
+        self._physical_channel: PhysicalChannel = physical_channel
 
         self.frequency: float = frequency
         self.bias: complex = bias
         self.scale: complex = scale
 
         self.fixed_if: bool = fixed_if
+        self._update_hash()
 
         if frequency < self.min_frequency or frequency > self.max_frequency:
             raise ValueError(
@@ -403,6 +412,27 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, val):
+        self._id = val
+        self._update_hash()
+
+    @property
+    def physical_channel(self):
+        return self._physical_channel
+
+    @physical_channel.setter
+    def physical_channel(self, channel: PhysicalChannel):
+        self._physical_channel = channel
+        self._update_hash()
+
+    def _update_hash(self):
+        self._hash = hash(self.full_id())
 
     @property
     def sample_time(self):
@@ -458,10 +488,10 @@ class PulseChannel(QuantumComponent, Calibratable):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
+        return self._hash == other._hash
 
     def __hash__(self):
-        return hash(self.full_id())
+        return self._hash
 
 
 class FreqShiftPulseChannel(PulseChannel):
