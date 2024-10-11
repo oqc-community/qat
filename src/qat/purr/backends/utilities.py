@@ -7,7 +7,7 @@ from typing import Dict, List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 from mpmath import cosh
-from numpy import append, cos, pi, sin
+from numpy import cos, pi, sin
 from scipy.special import erf
 
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
@@ -159,27 +159,23 @@ class GaussianZeroEdgeFunction(ComplexFunction):
         return coef * (gauss - zae_chunk)
 
 
-class GaussianSquare(ComplexFunction):
-    def __init__(self, width, square_width):
-        self.width = width
+class GaussianSquareFunction(NumericFunction):
+    """
+    A square pulse with a Gaussian rise and fall at the edges.
+    """
+
+    def __init__(self, square_width, std_dev):
         self.square_width = square_width
+        self.std_dev = std_dev
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        gauss = np.exp(-0.5 * (x / self.width) ** 2)
-        square = np.ones(shape=x.shape, dtype=self._dtype)
-        square_slots = int(self.square_width * self.dt)
-        if square_slots > len(x):
-            raise ValueError(
-                f"The length of the square portion [[{self.square_width}]] cannot "
-                f"exceed the total pulse length [[{len(x)*self.dt}]] in a square "
-                "guassian."
-            )
-        gaus_len = int((len(x) - square_slots) / 2)
-        first_chunk = gauss[0:gaus_len]
-        second_chunk = square[0:square_slots]
-        final_chunk = gauss[gaus_len + square_slots :]
-        return append(first_chunk, second_chunk, final_chunk)
+        y = np.ones(shape=x.shape, dtype=self._dtype)
+        x_rise = x[x < -self.square_width / 2] + self.square_width / 2
+        x_fall = x[x > self.square_width / 2] - self.square_width / 2
+        y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev) ** 2)
+        y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev) ** 2)
+        return y
 
 
 class DragGaussianFunction(ComplexFunction):
