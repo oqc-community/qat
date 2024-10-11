@@ -388,7 +388,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
         elif data.shape == PulseShapeType.COS:
             num_func = Cos(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.GAUSSIAN_SQUARE:
-            num_func = GaussianSquare(data.std_dev, data.square_width)
+            num_func = GaussianSquareFunction(data.std_dev, data.square_width)
         else:
             raise ValueError(f"'{str(data.shape)}' is an unknown pulse shape.")
 

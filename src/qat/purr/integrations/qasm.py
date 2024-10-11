@@ -1584,7 +1584,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
             _validate_waveform_args(
                 width=width, amp=amp, square_width=square_width, std_dev=std_dev
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN_SQUARE,
+                width=width,
+                std_dev=std_dev,
+                amp=amp,
+                square_width=square_width,
+            )
 
         elif intrinsic_name == "sine":
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
