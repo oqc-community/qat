@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from decimal import ROUND_DOWN, Decimal
 from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
@@ -19,8 +18,7 @@ log = get_default_logger()
 
 class InstructionExecutionEngine(WarnOnExtraFieldsModel, ABC):
     """
-    Engine that can optimise, validate and execute instructions
-    on a hardware model.
+    Base class for an engine that can execute instructions.
 
     Attributes:
         model: The hardware model.
@@ -34,28 +32,12 @@ class InstructionExecutionEngine(WarnOnExtraFieldsModel, ABC):
     def execute(self, instructions: List[Instruction]) -> Dict[str, Any]: ...
 
 
-class QuantumInstructionExecutionEngine(InstructionExecutionEngine):
-    startup_engine: bool = True
+class QuantumExecutionEngine(InstructionExecutionEngine):
+    """
+    Engine that can execute instructions on a quantum hardware model.
+    """
 
-    def _generate_repeat_batches(self, repeats: int) -> List[int]:
-        """
-        Batches together executions if we have more than the amount the hardware can
-        handle at once. A repeat limit of -1 disables this functionality and just runs
-        everything at once.
-        """
-        batch_limit = self.model.repeat_limit
-        if batch_limit == -1:
-            return [repeats]
-
-        list_expansion_ratio = int(
-            (Decimal(repeats) / Decimal(batch_limit)).to_integral_value(ROUND_DOWN)
-        )
-        remainder = repeats % batch_limit
-        batches = [batch_limit] * list_expansion_ratio
-        if remainder > 0:
-            batches.append(remainder)
-
-        return batches
+    max_instruction_len: int = Field(ge=1, default=200_000)
 
     def execute(self, instructions: QatFile):
         """Executes this qat file against this current hardware."""
