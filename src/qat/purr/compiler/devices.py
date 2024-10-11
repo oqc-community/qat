@@ -122,15 +122,7 @@ class QuantumComponent:
         super().__init__(*args, **kwargs)
         if id_ is None:
             id_ = ""
-        self._id = str(id_)
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, val):
-        self.id = val
+        self.id = str(id_)
 
     def full_id(self):
         return self.id
@@ -397,7 +389,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
-        self._physical_channel: PhysicalChannel = physical_channel
+        self.physical_channel = physical_channel
 
         self.frequency: float = frequency
         self.bias: complex = bias
@@ -420,7 +412,8 @@ class PulseChannel(QuantumComponent, Calibratable):
     @id.setter
     def id(self, val):
         self._id = val
-        self._update_hash()
+        if hasattr(self, "_physical_channel"):
+            self._update_hash()
 
     @property
     def physical_channel(self):
@@ -429,7 +422,8 @@ class PulseChannel(QuantumComponent, Calibratable):
     @physical_channel.setter
     def physical_channel(self, channel: PhysicalChannel):
         self._physical_channel = channel
-        self._update_hash()
+        if hasattr(self, "_id"):
+            self._update_hash()
 
     def _update_hash(self):
         self._hash = hash(self.full_id())
@@ -582,6 +576,9 @@ class PulseChannelView(PulseChannel):
         if key in self._pulse_channel_attributes:
             return setattr(self.pulse_channel, key, value)
         return super().__setattr__(key, value)
+
+    def __hash__(self):
+        return self.pulse_channel.__hash__()
 
 
 class QuantumDevice(QuantumComponent, Calibratable):

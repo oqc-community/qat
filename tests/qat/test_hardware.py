@@ -2,11 +2,42 @@ import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+from qat.purr.compiler.devices import Calibratable, PulseChannelView
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from tests.qat.utils import get_jagged_echo_hardware
 
 
+def deserialize_hw_model():
+    # Loads in an old HW model without cached properties in physical channels
+    return Calibratable().load_calibration_from_file(
+        "tests/qat/files/serialization/echo.json"
+    )
+
+
+def test_deserialization():
+    # Checks that an old HW model serializes correctly
+    model = deserialize_hw_model()
+    assert isinstance(model, QuantumHardwareModel)
+    for pc in model.pulse_channels.values():
+        # A view of a pulse channel cannot "see" private members of a pulse channel
+        # when deserialized due to that attribute not being saved previously.
+        # Shouldn't be a problem since in practice one shouldn't try to access
+        # _id and _physical_channel directly
+        if isinstance(pc, PulseChannelView):
+            pc = pc.pulse_channel
+        assert pc._id == pc.id
+        assert pc._physical_channel == pc.physical_channel
+        assert pc._hash == hash(pc)
+
+
 @pytest.mark.parametrize(
-    "hw", [get_default_echo_hardware, get_default_RTCS_hardware, get_jagged_echo_hardware]
+    "hw",
+    [
+        get_default_echo_hardware,
+        get_default_RTCS_hardware,
+        get_jagged_echo_hardware,
+        deserialize_hw_model,
+    ],
 )
 class TestCachedId:
     def test_new_partial_ids(self, hw):
