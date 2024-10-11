@@ -6,6 +6,7 @@ from typing import Any, List, Set
 
 from qat.purr.compiler.instructions import (
     Acquire,
+    Instruction,
     PostProcessing,
     QuantumInstruction,
     Repeat,
@@ -104,7 +105,7 @@ class InstructionEmitter:
     simulates what our instruction set might look like.
     """
 
-    def emit(self, instructions, hardware):
+    def emit(self, instructions: List[Instruction], hardware):
         qatf = QatFile()
 
         for inst in instructions:
