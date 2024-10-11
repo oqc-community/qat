@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from qat.purr.backends.qblox.codegen import (
@@ -23,16 +24,16 @@ class TestQbloxEmitter:
         width = 100e-9
         rise = 1.0 / 5.0
         drive_channel = model.get_qubit(0).get_drive_channel()
-        builder = get_builder(model).pulse(
-            drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise
-        )
+        gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise)
+        builder = get_builder(model).add(gaussian)
+
         qat_file = InstructionEmitter().emit(builder.instructions, model)
         packages = QbloxEmitter().emit(qat_file)
         assert len(packages) == 1
         pkg = packages[0]
         assert pkg.target == drive_channel
-        assert "GAUSSIAN_0_I" in pkg.sequence.waveforms
-        assert "GAUSSIAN_0_Q" in pkg.sequence.waveforms
+        assert f"GAUSSIAN_{hash(gaussian)}_I" in pkg.sequence.waveforms
+        assert f"GAUSSIAN_{hash(gaussian)}_Q" in pkg.sequence.waveforms
         assert "play 0,1,100" in pkg.sequence.program
 
     def test_play_square(self, model):
@@ -117,6 +118,34 @@ class TestQbloxEmitter:
         assert isinstance(channel.baseband, QbloxPhysicalBaseband)
         assert len(channel.config.sequencers) > 0
         assert pkg.sequencer_config.square_weight_acq.integration_length == int(time * 1e9)
+
+    @pytest.mark.parametrize(
+        "width_seconds",
+        [
+            np.full(30, 5e-6),
+            np.full(50, 8e-6),
+            np.full(20, (Constants.MAX_SAMPLE_SIZE_WAVEFORMS / 2) * 1e-9),  # 8.192e-6
+            np.full(20, 10e-6),
+        ],
+    )
+    def test_waveform_caching(self, model, width_seconds):
+        rise = 1.0 / 5.0
+        drive_channel = model.get_qubit(0).get_drive_channel()
+        builder = get_builder(model)
+
+        width_samples = width_seconds * 1e9
+        assert 2 * int(np.sum(width_samples)) > Constants.MAX_SAMPLE_SIZE_WAVEFORMS
+
+        for val in width_seconds:
+            builder.pulse(drive_channel, PulseShapeType.GAUSSIAN, width=val, rise=rise)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+
+        if (width_seconds > (Constants.MAX_SAMPLE_SIZE_WAVEFORMS / 2) * 1e-9).any():
+            with pytest.raises(ValueError):
+                QbloxEmitter().emit(qat_file)
+        else:
+            packages = QbloxEmitter().emit(qat_file)
+            assert len(packages) == 1
 
     def test_single_resonator_spect(self, model):
         index = 0

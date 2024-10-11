@@ -27,9 +27,15 @@ from qat.purr.compiler.devices import (
     build_qubit,
     build_resonator,
 )
-from qat.purr.compiler.emitter import QatFile
+from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
+from qat.purr.compiler.instructions import (
+    Delay,
+    PhaseReset,
+    PhaseShift,
+    SweepValue,
+    Variable,
+)
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute
@@ -631,3 +637,43 @@ class TestBaseQuantum:
         engine = get_test_execution_engine(hw)
         generated_batches = engine._generate_repeat_batches(repeat_count)
         assert generated_batches == expected_batches
+
+    def test_empty_channels_removed(self):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+
+        builder = (
+            get_builder(hw).X(qubit, np.pi / 2.0).measure_mean_z(qubit).synchronize(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        qat_file = InstructionEmitter().emit(builder.instructions, hw)
+
+        channels_with_pulses = [
+            qubit.get_drive_channel(),
+            qubit.get_measure_channel(),
+            qubit.get_acquire_channel(),
+        ]
+        channels_removed = [
+            qubit.get_second_state_channel(),
+            qubit.get_cross_resonance_channel(hw.get_qubit(1)),
+            qubit.get_cross_resonance_cancellation_channel(hw.get_qubit(1)),
+        ]
+
+        # Check if empty channels are in QAT file
+        sync_instr = qat_file.instructions[-1]
+        for ch in channels_removed:
+            assert ch in sync_instr.quantum_targets
+
+        position_map = engine.create_duration_timeline(qat_file.instructions)
+
+        for ch in channels_with_pulses:
+            assert ch in position_map.keys()
+        for ch in channels_removed:
+            assert ch not in position_map.keys()
+        for ch, positions in position_map.items():
+            assert not all(
+                [
+                    isinstance(p.instruction, (Delay, PhaseShift, PhaseReset))
+                    for p in positions
+                ]
+            )
