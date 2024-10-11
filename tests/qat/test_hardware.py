@@ -2,9 +2,12 @@ import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+from tests.qat.utils import get_jagged_echo_hardware
 
 
-@pytest.mark.parametrize("hw", [get_default_echo_hardware, get_default_RTCS_hardware])
+@pytest.mark.parametrize(
+    "hw", [get_default_echo_hardware, get_default_RTCS_hardware, get_jagged_echo_hardware]
+)
 class TestCachedId:
     def test_new_partial_ids(self, hw):
         # Tests that changing the IDs of pulse channels generates new
@@ -18,7 +21,7 @@ class TestCachedId:
 
     def test_swap_partial_ids(self, hw):
         # Tests that swapping two pulse channel IDs keeps the association
-        # between UUIDs and full IDs.
+        # between hashes and full IDs.
         model = hw()
         keys = list(model.pulse_channels.keys())
         pc1 = model.pulse_channels[keys[0]]
@@ -33,8 +36,9 @@ class TestCachedId:
     def test_change_physical_channels(self, hw):
         # Tests that changing physical channels generates a new hash
         model = hw()
-        pulse_channel_0 = model.get_qubit(0).get_drive_channel()
-        pulse_channel_1 = model.get_qubit(1).get_drive_channel()
+        qubits = model.qubits
+        pulse_channel_0 = qubits[0].get_drive_channel()
+        pulse_channel_1 = qubits[1].get_drive_channel()
         hashs_before = [hash(pulse_channel_0), hash(pulse_channel_1)]
         tmp = pulse_channel_1.physical_channel
         pulse_channel_1.physical_channel = pulse_channel_0.physical_channel
