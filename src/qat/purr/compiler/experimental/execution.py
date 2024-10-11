@@ -1,31 +1,20 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from numbers import Number
-from typing import Any, Dict, Iterable, List
+from decimal import ROUND_DOWN, Decimal
+from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
-from compiler_config.config import InlineResultsProcessing
 from pydantic import Field
 
-from qat import qatconfig
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.experimental.devices import PulseChannel
 from qat.purr.compiler.experimental.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import (
-    Acquire,
-    Assign,
-    CustomPulse,
-    IndexAccessor,
-    Instruction,
-    PhaseReset,
-    PhaseShift,
-    Pulse,
-    ResultsProcessing,
-    Sweep,
-    Variable,
-)
+from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
+from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+
+log = get_default_logger()
 
 
 class InstructionExecutionEngine(WarnOnExtraFieldsModel, ABC):
@@ -44,170 +33,53 @@ class InstructionExecutionEngine(WarnOnExtraFieldsModel, ABC):
     @abstractmethod
     def execute(self, instructions: List[Instruction]) -> Dict[str, Any]: ...
 
-    @abstractmethod
-    def optimize(self, instructions: List[Instruction]) -> List[Instruction]: ...
-
-    def validate(self, instructions: List[Instruction]):
-        if (instruction_length := len(instructions)) > self.max_instruction_len:
-            raise ValueError(
-                f"Program with {instruction_length} instructions too large to be run in a single block on current hardware."
-            )
-
 
 class QuantumInstructionExecutionEngine(InstructionExecutionEngine):
     startup_engine: bool = True
 
-    def _process_assigns(self, results, qfile: QatFile):
+    def _generate_repeat_batches(self, repeats: int) -> List[int]:
         """
-        As assigns are classical instructions they are not processed as a part of the
-        quantum execution (right now).
-        Read through the results dictionary and perform the assigns directly, return the
-        results.
+        Batches together executions if we have more than the amount the hardware can
+        handle at once. A repeat limit of -1 disables this functionality and just runs
+        everything at once.
         """
+        batch_limit = self.model.repeat_limit
+        if batch_limit == -1:
+            return [repeats]
 
-        def recurse_arrays(results_map, value):
-            """Recurse through assignment lists and fetch values in sequence."""
-            if isinstance(value, List):
-                return [recurse_arrays(results_map, val) for val in value]
-            elif isinstance(value, Variable):
-                if value.name not in results_map:
-                    raise ValueError(
-                        f"Attempt to assign variable that doesn't exist {value.name}."
-                    )
+        list_expansion_ratio = int(
+            (Decimal(repeats) / Decimal(batch_limit)).to_integral_value(ROUND_DOWN)
+        )
+        remainder = repeats % batch_limit
+        batches = [batch_limit] * list_expansion_ratio
+        if remainder > 0:
+            batches.append(remainder)
 
-                if isinstance(value, IndexAccessor):
-                    return results_map[value.name][value.index]
-                else:
-                    return results_map[value.name]
-            else:
-                return value
+        return batches
 
-        assigns = dict(results)
-        for assign in qfile.meta_instructions:
-            if not isinstance(assign, Assign):
-                continue
+    def execute(self, instructions: QatFile):
+        """Executes this qat file against this current hardware."""
+        return self._common_execute(instructions)
 
-            assigns[assign.name] = recurse_arrays(assigns, assign.value)
+    ### !!! This method is probably going to be refactored according to the new pass manager feature.
+    def _common_execute(
+        self, instructions: List[Instruction], interrupt: Interrupt = NullInterrupt()
+    ):
+        """Executes this qat file against this current hardware."""
+        pass
 
-        return {key: assigns[key] for key in qfile.return_.variables}
+    @abstractmethod
+    def _execute_on_hardware(
+        self, sweep_iterator, package: QatFile, interrupt: Interrupt = NullInterrupt()
+    ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]: ...
 
-    def _process_results(self, results: Dict, qfile: QatFile):
+    def _execute_with_interrupt(
+        self, instructions: QatFile, interrupt: Interrupt = NullInterrupt()
+    ):
+        """Executes this qat file against this current hardware.
+        Execution allows for interrupts triggered by events.
         """
-        Process any software-driven results transformation, such as taking a raw
-        waveform result and turning it into a bit, or something else.
-        """
-        results_processing = {
-            val.variable: val
-            for val in qfile.meta_instructions
-            if isinstance(val, ResultsProcessing)
-        }
-
-        missing_results = {
-            val.output_variable
-            for val in qfile.instructions
-            if isinstance(val, Acquire) and val.output_variable not in results_processing
-        }
-
-        # For any acquires that are raw, assume they're experiment results.
-        for missing_var in missing_results:
-            results_processing[missing_var] = ResultsProcessing(
-                missing_var, InlineResultsProcessing.Experiment
-            )
-
-        for inst in results_processing.values():
-            if target_values := results.get(inst.variable, None) is None:
-                raise ValueError(f"Variable {inst.variable} not found in results output.")
-
-            if (
-                InlineResultsProcessing.Raw in inst.results_processing
-                and InlineResultsProcessing.Binary in inst.results_processing
-            ):
-                raise ValueError(
-                    f"Raw and Binary processing attempted to be applied "
-                    f"to {inst.variable}. Only one should be selected."
-                )
-
-            # Strip numpy arrays if we're set to do so.
-            if InlineResultsProcessing.NumpyArrays not in inst.results_processing:
-                target_values = _numpy_array_to_list(target_values)
-
-            # Transform to various formats if required.
-            if InlineResultsProcessing.Binary in inst.results_processing:
-                target_values = _binary_average(target_values)
-
-            results[inst.variable] = target_values
-
-        return results
-
-    def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
-        """Runs optimization passes specific to this hardware."""
-        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
-        optimized_instructions: List[Instruction] = []
-        for instruction in instructions:
-            if isinstance(instruction, PhaseShift) and isinstance(
-                instruction.phase, Number
-            ):
-                if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
-                    accum_phaseshift.phase += instruction.phase
-                else:
-                    accum_phaseshifts[instruction.channel] = PhaseShift(
-                        instruction.channel, instruction.phase
-                    )
-            elif isinstance(instruction, (Pulse, CustomPulse)):
-                quantum_targets = getattr(instruction, "quantum_targets", [])
-                if not isinstance(quantum_targets, List):
-                    quantum_targets = [quantum_targets]
-                for quantum_target in quantum_targets:
-                    if quantum_target in accum_phaseshifts:
-                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
-                optimized_instructions.append(instruction)
-            elif isinstance(instruction, PhaseReset):
-                for channel in instruction.quantum_targets:
-                    accum_phaseshifts.pop(channel, None)
-                optimized_instructions.append(instruction)
-            else:
-                optimized_instructions.append(instruction)
-        return optimized_instructions
-
-    def validate(self, instructions: List[Instruction]):
-        """Validates this graph for execution on the current hardware."""
-        super.validate(instructions)
-
-        for inst in instructions:
-            if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
-                raise ValueError(
-                    f"Cannot perform an acquire on the physical channel with id "
-                    f"{inst.channel.physical_channel}."
-                )
-            if isinstance(inst, (Pulse, CustomPulse)):
-                duration = inst.duration
-
-                if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
-                    min_pulse_duration = self.model.min_pulse_length
-                    max_pulse_duration = self.model.max_pulse_length
-                    if isinstance(duration, Number):
-                        if duration < min_pulse_duration or duration > max_pulse_duration:
-                            raise ValueError(
-                                f"Waveform duration {inst.duration} s is not within the limits {[min_pulse_duration, max_pulse_duration]}."
-                            )
-                    elif isinstance(duration, Variable):
-                        values = next(
-                            iter(
-                                [
-                                    sw.variables[duration.name]
-                                    for sw in instructions
-                                    if isinstance(sw, Sweep)
-                                    and duration.name in sw.variables.keys()
-                                ]
-                            )
-                        )
-                        if (
-                            np.min(values) < min_pulse_duration
-                            or np.max(values) > max_pulse_duration
-                        ):
-                            raise ValueError(
-                                f"Waveform durations {values} s are not within the limits {[min_pulse_duration, max_pulse_duration]}."
-                            )
+        return self._common_execute(instructions, interrupt)
 
 
 def _complex_to_binary(number: complex):
