@@ -1556,6 +1556,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 width=width,
                 amp=amp,
                 std_dev=std_dev,
+                zero_at_edges=0,
             )
 
         elif intrinsic_name == "gaussian_zero_edge":
