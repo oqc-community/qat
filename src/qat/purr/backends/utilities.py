@@ -144,6 +144,10 @@ class GaussianFunction(ComplexFunction):
 
 
 class GaussianZeroEdgeFunction(ComplexFunction):
+    """
+    A Gaussian pulse that is normalized to be zero at the edges.
+    """
+
     def __init__(self, std_dev, width, zero_at_edges):
         self.std_dev = std_dev
         self.width = width
@@ -152,7 +156,7 @@ class GaussianZeroEdgeFunction(ComplexFunction):
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
         zae_chunk = self.zero_at_edges * (
-            np.exp(-0.5 * (self.width / 2 * self.std_dev) ** 2)
+            np.exp(-0.5 * ((self.width / 2) / self.std_dev) ** 2)
         )
         coef = 1 / (1 - zae_chunk)
         gauss = np.exp(-0.5 * (x / self.std_dev) ** 2)
@@ -164,17 +168,20 @@ class GaussianSquareFunction(NumericFunction):
     A square pulse with a Gaussian rise and fall at the edges.
     """
 
-    def __init__(self, square_width, std_dev):
+    def __init__(self, square_width: float, std_dev: float, zero_at_edges: int):
         self.square_width = square_width
         self.std_dev = std_dev
+        self.zero_at_edges = zero_at_edges
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
         y = np.ones(shape=x.shape, dtype=self._dtype)
-        x_rise = x[x < -self.square_width / 2] + self.square_width / 2
-        x_fall = x[x > self.square_width / 2] - self.square_width / 2
+        x_rise = x[x < -self.square_width / 2] + (self.square_width / 2)
+        x_fall = x[x > self.square_width / 2] - (self.square_width / 2)
         y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev) ** 2)
         y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev) ** 2)
+        if self.zero_at_edges != 0:
+            y = (y - y[0]) / (1 - y[0])
         return y
 
 
@@ -388,7 +395,9 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
         elif data.shape == PulseShapeType.COS:
             num_func = Cos(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.GAUSSIAN_SQUARE:
-            num_func = GaussianSquareFunction(data.std_dev, data.square_width)
+            num_func = GaussianSquareFunction(
+                data.square_width, data.std_dev, data.zero_at_edges
+            )
         else:
             raise ValueError(f"'{str(data.shape)}' is an unknown pulse shape.")
 
