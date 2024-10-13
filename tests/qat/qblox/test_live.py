@@ -1,6 +1,11 @@
 import numpy as np
 import pytest
 
+from qat.purr.backends.qblox.live import (
+    NewQbloxLiveEngine,
+    QbloxLiveEngine,
+    QbloxLiveEngineAdapter,
+)
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
@@ -20,7 +25,7 @@ class TestQbloxLiveEngine:
         for amp in [0.1, 0.2, 0.3]:
             q0.pulse_measure["amp"] = amp
             builder = get_builder(model).measure(q0).repeat(10000)
-            results, _ = execute_instructions(engine, builder.instructions)
+            results, _ = execute_instructions(engine, builder)
             assert results is not None
 
     def test_measure_freq_sweep(self, model):
@@ -39,7 +44,7 @@ class TestQbloxLiveEngine:
             .device_assign(q0.get_acquire_channel(), "frequency", Variable("frequency"))
             .repeat(1000)
         )
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_instruction_execution(self, model):
@@ -60,7 +65,7 @@ class TestQbloxLiveEngine:
             .frequency_shift(drive_channel, frequency)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_one_channel(self, model):
@@ -85,7 +90,7 @@ class TestQbloxLiveEngine:
             .delay(drive_channel, 100e-9)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_two_channels(self, model):
@@ -120,7 +125,7 @@ class TestQbloxLiveEngine:
             )
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_sync_two_channel(self, model):
@@ -155,7 +160,7 @@ class TestQbloxLiveEngine:
             )
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_play_very_long_pulse(self, model):
@@ -168,7 +173,7 @@ class TestQbloxLiveEngine:
         )
 
         with pytest.raises(ValueError):
-            results, _ = execute_instructions(engine, builder.instructions)
+            results, _ = execute_instructions(engine, builder)
 
     def test_bare_measure(self, model):
         engine = model.create_engine()
@@ -178,13 +183,15 @@ class TestQbloxLiveEngine:
         qubit = q0
         qubit.pulse_measure["amp"] = amp
         drive_channel2 = qubit.get_drive_channel()
-        builder = (
+
+        # FluidBuilderWrapper nightmares
+        builder, _ = (
             get_builder(model)
             .pulse(drive_channel2, PulseShapeType.SQUARE, width=100e-9, amp=amp)
             .measure(qubit)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_measure_scope_mode(self, model):
@@ -201,19 +208,33 @@ class TestQbloxLiveEngine:
             .measure_scope_mode(qubit)
         )
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_resonator_spect(self, model):
         engine = model.create_engine()
         builder = resonator_spect(model, [0, 1])
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
         assert results is not None
 
     def test_qubit_spect(self, model):
         engine = model.create_engine()
         builder = qubit_spect(model, [0, 1])
 
-        results, _ = execute_instructions(engine, builder.instructions)
+        results, _ = execute_instructions(engine, builder)
+        assert results is not None
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+class TestQbloxLiveEngineAdapter:
+    def test_resonator_spect(self, model):
+        runtime = model.create_runtime()
+        assert isinstance(runtime.engine, QbloxLiveEngineAdapter)
+        assert isinstance(runtime.engine._legacy_engine, QbloxLiveEngine)
+        assert isinstance(runtime.engine._new_engine, NewQbloxLiveEngine)
+
+        runtime.engine.enable_hax = True
+        builder = resonator_spect(model)
+        results = runtime.execute(builder)
         assert results is not None
