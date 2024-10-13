@@ -1581,9 +1581,16 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == "gaussian_square":
-            amp, width, square_width, std_dev = _validate_arg_length(tree.children[4], 4)
+            amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
+                tree.children[4], 4, 5
+            )
+            zero_at_edges = 0 if not zero_at_edges else 1
             _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
+                width=width,
+                amp=amp,
+                square_width=square_width,
+                std_dev=std_dev,
+                zero_at_edges=zero_at_edges,
             )
             waveform = UntargetedPulse(
                 Pulse,
@@ -1592,6 +1599,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 std_dev=std_dev,
                 amp=amp,
                 square_width=square_width,
+                zero_at_edges=zero_at_edges,
             )
 
         elif intrinsic_name == "sine":
