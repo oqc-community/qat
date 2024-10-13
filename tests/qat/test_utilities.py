@@ -84,8 +84,8 @@ def test_gaussian_function_first_derivative():
 )
 def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
     x = np.linspace(-width / 2, width / 2, 101)
-    gaussian_square = GaussianZeroEdgeFunction(std_dev, width, zero_at_edges)
-    y = gaussian_square.eval(x)
+    gaussian_zero = GaussianZeroEdgeFunction(std_dev, width, zero_at_edges)
+    y = gaussian_zero.eval(x)
 
     assert np.isclose(max(y), 1.0)
     assert np.isclose(x[np.argmax(y)], 0.0)
