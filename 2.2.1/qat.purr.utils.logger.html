@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.purr.utils.logger module &mdash; QAT 2.2.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.purr.utils.logging_utils module" href="qat.purr.utils.logging_utils.html" />
+    <link rel="prev" title="qat.purr.utils.benchmarking module" href="qat.purr.utils.benchmarking.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.utils.html">qat.purr.utils package</a></li>
+      <li class="breadcrumb-item active">qat.purr.utils.logger module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.purr.utils.logger.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.purr.utils.logger">
+<span id="qat-purr-utils-logger-module"></span><h1>qat.purr.utils.logger module<a class="headerlink" href="#module-qat.purr.utils.logger" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BasicLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></p>
+<p>The basic logger class that should be used. Upon setup, this is provided to the
+built-in logging by calling <code class="docutils literal notranslate"><span class="pre">logging.setLoggerClass</span></code>. This way, every new logger
+created will be of this class. This allows us to define custom fields and functions
+that we want to use with our loggers. This class should not be instantiated
+separately, only call <code class="docutils literal notranslate"><span class="pre">logging.getLogger(&quot;qat.purr.some_name&quot;)</span></code>, and this will return
+an instance of <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger" title="qat.purr.utils.logger.BasicLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasicLogger</span></code></a>.</p>
+<p>Initialize the logger with a name and an optional level.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.close" title="Link to this definition"></a></dt>
+<dd><p>Closes this logger, cleans up the file handles and appropriate folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.code">
+<span class="sig-name descname"><span class="pre">code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.code" title="Link to this definition"></a></dt>
+<dd><p>Outputs a section of executable code (used for Jupyter files). This logging
+function is PuRR specific.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.utils.logger.BasicLogger.code.params.source"></span><strong>source</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.code.params.source">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of code lines as strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.logs_path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logs_path</span></span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.logs_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.makeRecord">
+<span class="sig-name descname"><span class="pre">makeRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lno</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sinfo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.makeRecord" title="Link to this definition"></a></dt>
+<dd><p>Override that allows us to override record values via the extras dictionary.
+Initially built to allow for printing out messages that look like they come from
+different places in the source code than where the logger was called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.output" title="Link to this definition"></a></dt>
+<dd><p>Displays the result of some experiment or computation. This logging function is
+PuRR specific.</p>
+<p>The output depends on the <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.cell_type" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> parameter:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">table</span></code> - it creates a table in markdown syntax. The data needs to be a list
+of lists of strings, where the first list will be the header of the table, and
+then each list represents a row.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fit</span></code> - it displays the Fit function in LaTeX syntax. It also requires the
+<a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.fit_type" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">fit_type</span></code></a> parameter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_section</span></code> - creates a new section in markdown syntax. The title will be
+the string provided by <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.data" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">data</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.output.params.data"></span><strong>data</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.data">¶</a> – The data to output based on the rest of the parameters.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.output.params.cell_type"></span><strong>cell_type</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.cell_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – It can have multiple values: <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">fit</span></code>,
+<code class="docutils literal notranslate"><span class="pre">new_section</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.output.params.fit_type"></span><strong>fit_type</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.fit_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Required when <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.cell_type" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is <code class="docutils literal notranslate"><span class="pre">fit</span></code>. It can be one
+of the following types: <code class="docutils literal notranslate"><span class="pre">SINUSOID</span></code>, <code class="docutils literal notranslate"><span class="pre">SINUSOID_EXPONENTIAL</span></code>,
+<code class="docutils literal notranslate"><span class="pre">POLYNOMIAL</span></code>, <code class="docutils literal notranslate"><span class="pre">EXPONENTIAL</span></code>, <code class="docutils literal notranslate"><span class="pre">LORENTZIAN</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.output.params.msg"></span><strong>msg</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.msg">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Message to insert in front of the table if <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.cell_type" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is
+<code class="docutils literal notranslate"><span class="pre">table</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.output.params.section_level"></span><strong>section_level</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.section_level">¶</a> – The level of the new section in markdown, if
+<a class="reference internal" href="#qat.purr.utils.logger.BasicLogger.output.params.cell_type" title="qat.purr.utils.logger.BasicLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is <code class="docutils literal notranslate"><span class="pre">new_section</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.record_override_key">
+<span class="sig-name descname"><span class="pre">record_override_key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'$_enable_record_override'</span></em><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.record_override_key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.BasicLogger.save_object">
+<span class="sig-name descname"><span class="pre">save_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_arr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.BasicLogger.save_object" title="Link to this definition"></a></dt>
+<dd><p>Serializes the specified object. This logging function is PuRR specific.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.save_object.params.obj"></span><strong>obj</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.save_object.params.obj">¶</a> – The object to be serialized.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.BasicLogger.save_object.params.name"></span><strong>name</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.BasicLogger.save_object.params.name">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – A name must be also provided, which will be used as the file name
+and in case of Jupyter loggers, also as the name of the variable
+which will contain the loaded object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompositeLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loggers_or_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.utils.logger.BasicLogger" title="qat.purr.utils.logger.BasicLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasicLogger</span></code></a></p>
+<p>The default logger class of PuRR. It is intended to store all the loggers in a list,
+and when logging, the functions from here should be called, which iterate through
+the list and apply the logging to each logger separately. This way, only one
+function needs to be called when logging, and it is ensured, that all the enabled
+loggers will log the message.</p>
+<p>Creates the list of loggers on which the logging functions will iterate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.params.logger_names"></span><strong>logger_names</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.params.logger_names">¶</a> – List of loggers by their names
+(e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;qat.purr.json&quot;,</span> <span class="pre">&quot;qat.purr.file&quot;]</span></code>) or actual logger instances.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.add_loggers">
+<span class="sig-name descname"><span class="pre">add_loggers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loggers_or_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.add_loggers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.close" title="Link to this definition"></a></dt>
+<dd><p>Closes this logger, cleans up the file handles and appropriate folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.code">
+<span class="sig-name descname"><span class="pre">code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.code" title="Link to this definition"></a></dt>
+<dd><p>Outputs a section of executable code (used for Jupyter files). This logging
+function is PuRR specific.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.code.params.source"></span><strong>source</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.code.params.source">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of code lines as strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.critical">
+<span class="sig-name descname"><span class="pre">critical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.critical" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with severity ‘CRITICAL’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.critical(“Houston, we have a %s”, “major disaster”, exc_info=1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.debug" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with severity ‘DEBUG’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.debug(“Houston, we have a %s”, “thorny problem”, exc_info=1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.error" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with severity ‘ERROR’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.error(“Houston, we have a %s”, “major problem”, exc_info=1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.exception">
+<span class="sig-name descname"><span class="pre">exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.exception" title="Link to this definition"></a></dt>
+<dd><p>Convenience method for logging an ERROR with exception information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.info">
+<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.info" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with severity ‘INFO’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.info(“Houston, we have a %s”, “interesting problem”, exc_info=1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.log" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with the integer severity ‘level’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.log(level, “We have a %s”, “mysterious problem”, exc_info=1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.output" title="Link to this definition"></a></dt>
+<dd><p>Displays the result of some experiment or computation. This logging function is
+PuRR specific.</p>
+<p>The output depends on the <a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.cell_type" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> parameter:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">table</span></code> - it creates a table in markdown syntax. The data needs to be a list
+of lists of strings, where the first list will be the header of the table, and
+then each list represents a row.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fit</span></code> - it displays the Fit function in LaTeX syntax. It also requires the
+<a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.fit_type" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">fit_type</span></code></a> parameter</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_section</span></code> - creates a new section in markdown syntax. The title will be
+the string provided by <a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.data" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">data</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.output.params.data"></span><strong>data</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.data">¶</a> – The data to output based on the rest of the parameters.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.output.params.cell_type"></span><strong>cell_type</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.cell_type">¶</a> – It can have multiple values: <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">fit</span></code>,
+<code class="docutils literal notranslate"><span class="pre">new_section</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.output.params.fit_type"></span><strong>fit_type</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.fit_type">¶</a> – Required when <a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.cell_type" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is <code class="docutils literal notranslate"><span class="pre">fit</span></code>. It can be one
+of the following types: <code class="docutils literal notranslate"><span class="pre">SINUSOID</span></code>, <code class="docutils literal notranslate"><span class="pre">SINUSOID_EXPONENTIAL</span></code>,
+<code class="docutils literal notranslate"><span class="pre">POLYNOMIAL</span></code>, <code class="docutils literal notranslate"><span class="pre">EXPONENTIAL</span></code>, <code class="docutils literal notranslate"><span class="pre">LORENTZIAN</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.output.params.msg"></span><strong>msg</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.msg">¶</a> – Message to insert in front of the table if <a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.cell_type" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is
+<code class="docutils literal notranslate"><span class="pre">table</span></code></p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.CompositeLogger.output.params.section_level"></span><strong>section_level</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.section_level">¶</a> – The level of the new section in markdown, if
+<a class="reference internal" href="#qat.purr.utils.logger.CompositeLogger.output.params.cell_type" title="qat.purr.utils.logger.CompositeLogger.output"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">cell_type</span></code></a> is <code class="docutils literal notranslate"><span class="pre">new_section</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.save_object">
+<span class="sig-name descname"><span class="pre">save_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_arr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.save_object" title="Link to this definition"></a></dt>
+<dd><p>Iterates through the list of loggers and calls the corresponding save_object
+implementations for each of them. This is the method that should be called from
+the code.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.CompositeLogger.warning">
+<span class="sig-name descname"><span class="pre">warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.CompositeLogger.warning" title="Link to this definition"></a></dt>
+<dd><p>Log ‘msg % args’ with severity ‘WARNING’.</p>
+<p>To pass exception information, use the keyword argument exc_info with
+a true value, e.g.</p>
+<p>logger.warning(“Houston, we have a %s”, “bit of a problem”, exc_info=1)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.ConsoleLoggerHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConsoleLoggerHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.ConsoleLoggerHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StreamHandler</span></code></p>
+<p>Basic console handler for the logger. It defaults to stdout.</p>
+<p>Initialize the handler.</p>
+<p>If stream is not specified, sys.stderr is used.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.FileLoggerHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FileLoggerHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.FileLoggerHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FileHandler</span></code></p>
+<p>Basic file handler for the logger. A file path must be provided. The log file is
+created with a delay, so the stream is None until the first emit. This also allows
+to write some initial stuff to the log file when creating it.</p>
+<p>Open the specified file and use it as the stream for logging.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.FileLoggerHandler.create_initial_file">
+<span class="sig-name descname"><span class="pre">create_initial_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.FileLoggerHandler.create_initial_file" title="Link to this definition"></a></dt>
+<dd><p>Implement this method in the derived class to insert some initial text in the
+log file. Use emit and flush while writing directly to the stream.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.FileLoggerHandler.emit">
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.FileLoggerHandler.emit" title="Link to this definition"></a></dt>
+<dd><p>Emit a record.</p>
+<p>If the stream was not opened because ‘delay’ was specified in the
+constructor, open it before calling the superclass’s emit.</p>
+<p>If stream is not open, current mode is ‘w’ and <cite>_closed=True</cite>, record
+will not be emitted (see Issue #42378).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.JsonHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JsonHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.JsonHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.utils.logger.FileLoggerHandler" title="qat.purr.utils.logger.FileLoggerHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileLoggerHandler</span></code></a></p>
+<p>The JSON file handler needed for logging in JSON format. In
+<code class="xref py py-class docutils literal notranslate"><span class="pre">logging.FileHandler</span></code>, at each time something is written to the file, the
+emit function is called. By overriding the method, the JSON format can be ensured at
+each writing.</p>
+<p>Open the specified file and use it as the stream for logging.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.JsonHandler.create_initial_file">
+<span class="sig-name descname"><span class="pre">create_initial_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.JsonHandler.create_initial_file" title="Link to this definition"></a></dt>
+<dd><p>Implement this method in the derived class to insert some initial text in the
+log file. Use emit and flush while writing directly to the stream.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.JsonHandler.emit">
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.JsonHandler.emit" title="Link to this definition"></a></dt>
+<dd><p>Emit a record.</p>
+<p>If the stream was not opened because ‘delay’ was specified in the
+constructor, open it before calling the superclass’s emit.</p>
+<p>If stream is not open, current mode is ‘w’ and <cite>_closed=True</cite>, record
+will not be emitted (see Issue #42378).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.JsonLoggerHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JsonLoggerHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.JsonLoggerHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.utils.logger.JsonHandler" title="qat.purr.utils.logger.JsonHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">JsonHandler</span></code></a></p>
+<p>The basic JSON file handler logger. It is intended to generate the same output as
+<a class="reference internal" href="#qat.purr.utils.logger.FileLoggerHandler" title="qat.purr.utils.logger.FileLoggerHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileLoggerHandler</span></code></a>, but in JSON format.</p>
+<p>Open the specified file and use it as the stream for logging.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.JsonLoggerHandler.create_initial_file">
+<span class="sig-name descname"><span class="pre">create_initial_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.JsonLoggerHandler.create_initial_file" title="Link to this definition"></a></dt>
+<dd><p>Implement this method in the derived class to insert some initial text in the
+log file. Use emit and flush while writing directly to the stream.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.KeywordFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KeywordFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.KeywordFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<p>A customized keyword filter that can be added to a log handler or a logger. Filters
+all the log messages, and if the message content contains the keyword, the log will
+not be printed.</p>
+<p>Initialize a filter.</p>
+<p>Initialize with the name of the logger which, together with its
+children, will have its events allowed through the filter. If no
+name is specified, allow every event.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.KeywordFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.KeywordFilter.filter" title="Link to this definition"></a></dt>
+<dd><p>Determine if the specified record is to be logged.</p>
+<p>Returns True if the record should be logged, or False otherwise.
+If deemed appropriate, the record may be modified in-place.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LevelFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LevelFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LevelFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<p>Filter out the debug messages from the Jupyter logs. This is needed because the
+specialized logging functions, like code or output have smaller level than the
+DEBUG logging level (so that other than Jupyter handlers don’t process them).</p>
+<p>Initialize a filter.</p>
+<p>Initialize with the name of the logger which, together with its
+children, will have its events allowed through the filter. If no
+name is specified, allow every event.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LevelFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LevelFilter.filter" title="Link to this definition"></a></dt>
+<dd><p>Determine if the specified record is to be logged.</p>
+<p>Returns True if the record should be logged, or False otherwise.
+If deemed appropriate, the record may be modified in-place.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LogFolder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LogFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_folder_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labber_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LogFolder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>It is the main log folder in which all the log files are saved. It can be configured
+multiple ways, like the base folder path, which can be a specified path of the disk
+or <code class="docutils literal notranslate"><span class="pre">None</span></code> to save the logs in the system temporary folder. The
+<a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.labber_style" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">labber_style</span></code></a> specifies whether to create a Labber-style folder hierarchy
+for the logs or not. If not, depending on the <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.folder_name" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">folder_name</span></code></a> parameter, it
+will either create random folders for each run, or if <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.folder_name" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">folder_name</span></code></a> is not
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, it will create a sub-folder specified by <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.folder_name" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">folder_name</span></code></a>. Also, a
+<a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.prefix" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">prefix</span></code></a> and <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.suffix" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">suffix</span></code></a> can be specified to append the created log
+folder (if <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.labber_style" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">labber_style</span></code></a> is not True).</p>
+<p>The constructor for the LogFolder. It can be configured by the parameters. If
+the parameters are not provided, the default variables are used from the front
+of the file (which can be also set by importing a configuration).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.base_folder_path"></span><strong>base_folder_path</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.base_folder_path">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Specifies the base directory, where the new log folder
+will be created. If it is <code class="docutils literal notranslate"><span class="pre">None</span></code>, then it is set to the default value
+<code class="docutils literal notranslate"><span class="pre">default_logger_base_directory</span></code>, which is set by the imported
+configuration file, otherwise it is defined at the top of this module. If
+the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, the log folder will be created in the
+system’s TMP folder.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.labber_style"></span><strong>labber_style</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.labber_style">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – If it is true, it will create a labber hierarchy log
+folder.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.cleanup"></span><strong>cleanup</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.cleanup">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – If it is true, it will remove the log folder together with the
+logs at the end of execution.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.folder_name"></span><strong>folder_name</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.folder_name">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – If <a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.labber_style" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">labber_style</span></code></a> is false, then
+<a class="reference internal" href="#qat.purr.utils.logger.LogFolder.params.folder_name" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">folder_name</span></code></a> will be the name of the new log folder instead of
+generating a random one.</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.prefix"></span><strong>prefix</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.prefix">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – It appends to the front of the generated folder name</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.LogFolder.params.suffix"></span><strong>suffix</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.LogFolder.params.suffix">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – It appends to the end of the generated folder name</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LogFolder.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LogFolder.close" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LogFolder.create_sub_folder_labber_style">
+<span class="sig-name descname"><span class="pre">create_sub_folder_labber_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LogFolder.create_sub_folder_labber_style" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LogFolder.get_log_file_path">
+<span class="sig-name descname"><span class="pre">get_log_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">over_write</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LogFolder.get_log_file_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LogFolder.get_main_folder_path_labber_style">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_main_folder_path_labber_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LogFolder.get_main_folder_path_labber_style" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoggerLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.CODE">
+<span class="sig-name descname"><span class="pre">CODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.CODE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.CRITICAL">
+<span class="sig-name descname"><span class="pre">CRITICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.CRITICAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.DEBUG">
+<span class="sig-name descname"><span class="pre">DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.DEBUG" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.INFO">
+<span class="sig-name descname"><span class="pre">INFO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.INFO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.NOTSET">
+<span class="sig-name descname"><span class="pre">NOTSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.NOTSET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.OUTPUT">
+<span class="sig-name descname"><span class="pre">OUTPUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.OUTPUT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.LoggerLevel.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#qat.purr.utils.logger.LoggerLevel.WARNING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.ModuleFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModuleFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.ModuleFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<p>A customized module filter that can be added to a log handler or a logger. Filters
+all the log messages, and if the log was produced by a module with the specified
+module name, the log will not pass.</p>
+<p>Initialize a filter.</p>
+<p>Initialize with the name of the logger which, together with its
+children, will have its events allowed through the filter. If no
+name is specified, allow every event.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.ModuleFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.ModuleFilter.filter" title="Link to this definition"></a></dt>
+<dd><p>Determine if the specified record is to be logged.</p>
+<p>Returns True if the record should be logged, or False otherwise.
+If deemed appropriate, the record may be modified in-place.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.close_logger">
+<span class="sig-name descname"><span class="pre">close_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.close_logger" title="Link to this definition"></a></dt>
+<dd><p>This method is executed upon exit, and it closes all the file handlers from the
+default loggers.</p>
+<p>This allows to remove the log folder after the execution is finished. This is needed
+because otherwise, the handlers would be closed after everything else, after the log
+folder is being removed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.get_default_logger">
+<span class="sig-name descname"><span class="pre">get_default_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.get_default_logger" title="Link to this definition"></a></dt>
+<dd><p>Initializes the global logger or fetches one if it already exists.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.get_logger_config">
+<span class="sig-name descname"><span class="pre">get_logger_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.get_logger_config" title="Link to this definition"></a></dt>
+<dd><p>It imports the logger configuration from the provided JSON file. If this is not
+provided, then the current directory is searched for a logger_settings.json
+configuration file. If not found, then the default JSON file is read from
+qat/purr/logger_settings.json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.get_logger_config.params.config_file"></span><strong>config_file</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.get_logger_config.params.config_file">¶</a> – The path to the JSON file on the disk containing the logger
+configuration</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.get_logger_config.params.log_folder"></span><strong>log_folder</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.get_logger_config.params.log_folder">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#qat.purr.utils.logger.LogFolder" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogFolder</span></code></a>]</span>) – The log folder to be used instead of the one specified in the
+configuration file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DefaultLogger instance configured with the names of the imported loggers</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.import_logger_configuration">
+<span class="sig-name descname"><span class="pre">import_logger_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.import_logger_configuration" title="Link to this definition"></a></dt>
+<dd><p>It imports the configuration of the loggers from a JSON data structure. This must be
+in the format described by <a class="reference external" href="https://docs.python.org/3/library/logging.config.html">logging.config</a> built-in module.</p>
+<p>It can also contain some additional settings:</p>
+<ul class="simple">
+<li><dl class="field-list simple">
+<dt class="field-odd">default_logger_directory<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This is where a new log folder will be created for each
+execution. If it is set to None the system’s temp folder is used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">default_logger_cleanup<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Specifies whether the log folders should be removed after
+execution or not.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">default_logger_labber_style<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If this is true, it will create a log folder
+hierarchy in labber style at the specified <strong>default_logger_directory</strong></p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The logger list in the config file may also contain some additional settings:</p>
+<ul class="simple">
+<li><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If this is specified, then the logger is of a custom class, not included
+in the built-in logging package. Similar to how the handlers are defined by the
+‘()’ key if they are custom handlers.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">active<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If this is false, than the corresponding logger will not be imported.
+It’s an easier way not to include a logger than to remove it from the config
+file, because then if the logger will be needed sometime, it doesn’t require to
+re-write the config file, just change <strong>active</strong> from false to true.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The configuration may also contain the starting log folder settings
+(<a class="reference internal" href="#qat.purr.utils.logger.import_logger_configuration.params.log_folder" title="qat.purr.utils.logger.import_logger_configuration"><code class="xref py py-paramref docutils literal notranslate"><span class="pre">log_folder</span></code></a>). Each time the logging configuration is imported, the log
+folder will be set up as it is specified. If this is not provided in the JSON
+structure, than the created log folder will use the default settings (which can also
+be specified in the configuration, as described above).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.utils.logger.import_logger_configuration.params.logger_config"></span><strong>logger_config</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.import_logger_configuration.params.logger_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – The JSON data structure from the logger_settings.json
+configuration</p></li>
+<li><p><span class="target" id="qat.purr.utils.logger.import_logger_configuration.params.log_folder"></span><strong>log_folder</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.import_logger_configuration.params.log_folder">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#qat.purr.utils.logger.LogFolder" title="qat.purr.utils.logger.LogFolder"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogFolder</span></code></a>]</span>) – The log folder to be used instead of the one specified in the
+configuration file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of the imported loggers. They are already loaded and configured.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.load_object_from_log_folder">
+<span class="sig-name descname"><span class="pre">load_object_from_log_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.load_object_from_log_folder" title="Link to this definition"></a></dt>
+<dd><p>Loads and deserializes an object from its JSON representation from the disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.purr.utils.logger.load_object_from_log_folder.params.file_path"></span><strong>file_path</strong><a class="paramlink headerlink reference internal" href="#qat.purr.utils.logger.load_object_from_log_folder.params.file_path">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The JSON file on the disk</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded object after deserialization</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.utils.logger.save_object_to_log_folder">
+<span class="sig-name descname"><span class="pre">save_object_to_log_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_folder_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.utils.logger.save_object_to_log_folder" title="Link to this definition"></a></dt>
+<dd><p>Serializes the specified object.</p>
+</dd></dl>
+
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.purr.utils.benchmarking.html" class="btn btn-neutral float-left" title="qat.purr.utils.benchmarking module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.utils.logging_utils.html" class="btn btn-neutral float-right" title="qat.purr.utils.logging_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.2.1
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.purr.utils.logger.html">2.2.1</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
