@@ -40,7 +40,7 @@ class Instrument(WarnOnExtraFieldsModel):
 
 class InstrumentConnectionManager(WarnOnExtraFieldsModel):
     """
-    Manages the connection and disconnection of an instrument to a live instrument with a unique address.
+    Interface to implement the connection and disconnection of an instrument to a unique address.
 
     Args:
         instruments: The instruments that can be connected or disconnected.
@@ -84,8 +84,6 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
                         f"{instrument.address} ID: {instrument.id}\n{str(e)}"
                     )
                 connected.append(False)
-            else:
-                connected.append(True)
 
         return all(connected)
 

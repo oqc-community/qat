@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -153,6 +153,16 @@ class PulseChannel(QuantumComponent):
     auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
 
     @model_validator(mode="after")
+    def check_channel_type(self):
+        if (
+            self.channel_type in MULTI_DEVICE_CHANNEL_TYPES
+            and len(self.auxiliary_devices) == 0
+        ):
+            raise ValueError(
+                f"Channel type {self.channel_type.name} requires at least one auxillary_device."
+            )
+
+    @model_validator(mode="after")
     def check_frequency(self):
         min_frequency = self.physical_channel.min_frequency
         max_frequency = self.physical_channel.max_frequency
@@ -252,14 +262,6 @@ class QuantumDevice(QuantumComponent):
     physical_channel: PhysicalChannel
     measure_device: Optional[QuantumDevice] = None
     default_pulse_channel_type: ChannelType = ChannelType.measure
-
-    MULTI_DEVICE_CHANNEL_TYPES: Tuple[Literal[ChannelType.cross_resonance]] = Field(
-        (
-            ChannelType.cross_resonance,
-            ChannelType.cross_resonance_cancellation,
-        ),
-        frozen=True,
-    )
 
     @model_validator(mode="after")
     def check_pulse_channels(self):
@@ -458,3 +460,9 @@ class QubitCoupling(WarnOnExtraFieldsModel):
 
     def __repr__(self):
         return f"{str(self.direction)} @{self.quality}"
+
+
+MULTI_DEVICE_CHANNEL_TYPES = (
+    ChannelType.cross_resonance,
+    ChannelType.cross_resonance_cancellation,
+)
