@@ -36,7 +36,7 @@ from qiskit_optimization.applications import Maxcut, Tsp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_docplex_mp
 
-import qat.purr.compiler.experimental.frontends as experimental_frontends
+import qat.frontend.frontends as experimental_frontends
 import qat.purr.compiler.frontends as core_frontends
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
