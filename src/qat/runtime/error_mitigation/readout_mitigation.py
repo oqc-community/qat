@@ -28,7 +28,7 @@ class ReadoutMitigation(WarnOnExtraFieldsModel):
         of available or not. For more info https://github.com/Qiskit-Partners/mthree.
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     linear: Dict[str, Dict[str, float]] = None
     matrix: np.ndarray[float] | None = None

@@ -6,12 +6,13 @@ from typing import Any, Dict, Iterable, List, Union
 import numpy as np
 from pydantic import Field
 
+from qat.ir.model import QuantumHardwareModel
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.experimental.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+from qat.runtime.live_devices import ControlHardware, Instrument
 
 log = get_default_logger()
 
@@ -62,6 +63,31 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         Execution allows for interrupts triggered by events.
         """
         return self._common_execute(instructions, interrupt)
+
+
+class LiveDeviceEngine(QuantumExecutionEngine):
+    """
+    Backend that hooks up the logical hardware model to our QPU's, currently hardcoded to particular fridges.
+    This will only work when run on a machine physically connected to a QPU.
+    """
+
+    startup_engine: bool = True
+    control_hardware: ControlHardware | None = None
+    instruments: Dict[str, Instrument] | None = None
+
+    def __init__(self, **data):
+        super.__init__(**data)
+        if self.startup_engine:
+            self.startup()
+
+    def startup(self):
+        pass
+
+    def shutdown(self):
+        pass
+
+    def execute(self):
+        pass
 
 
 def _complex_to_binary(number: complex):
