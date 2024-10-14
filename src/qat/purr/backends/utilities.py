@@ -145,10 +145,10 @@ class GaussianFunction(ComplexFunction):
 
 class GaussianZeroEdgeFunction(ComplexFunction):
     """
-    A Gaussian pulse that is normalized to be zero at the edges.
+    A Gaussian pulse that can be normalized to be zero at the edges.
     """
 
-    def __init__(self, std_dev, width, zero_at_edges):
+    def __init__(self, std_dev: float, width: float, zero_at_edges: bool):
         self.std_dev = std_dev
         self.width = width
         self.zero_at_edges = zero_at_edges
@@ -169,7 +169,7 @@ class GaussianSquareFunction(NumericFunction):
     A square pulse with a Gaussian rise and fall at the edges.
     """
 
-    def __init__(self, square_width, std_dev, zero_at_edges):
+    def __init__(self, square_width: float, std_dev: float, zero_at_edges: bool):
         self.square_width = square_width
         self.std_dev = std_dev
         self.zero_at_edges = zero_at_edges
