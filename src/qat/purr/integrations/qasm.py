@@ -1561,7 +1561,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         elif intrinsic_name == "gaussian_zero_edge":
             amp, width, std_dev, zero_at_edges = _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            zero_at_edges = bool(zero_at_edges)
             _validate_waveform_args(
                 width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
             )
@@ -1584,7 +1584,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
                 tree.children[4], 4, 5
             )
-            zero_at_edges = 0 if not zero_at_edges else 1
+            zero_at_edges = bool(zero_at_edges)
             _validate_waveform_args(
                 width=width,
                 amp=amp,

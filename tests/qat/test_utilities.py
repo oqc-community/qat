@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from itertools import product
+
 import numpy as np
 import pytest
 
@@ -75,12 +77,7 @@ def test_gaussian_function_first_derivative():
 
 @pytest.mark.parametrize(
     ["width", "std_dev", "zero_at_edges"],
-    [
-        (width, std_dev, zero_at_edges)
-        for width in [0.5, 1.0, 1.5]
-        for std_dev in [0.05, 0.1, 1.0]
-        for zero_at_edges in [0, 1]
-    ],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
 )
 def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
     x = np.linspace(-width / 2, width / 2, 101)
@@ -97,12 +94,7 @@ def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
 
 @pytest.mark.parametrize(
     ["width", "std_dev", "zero_at_edges"],
-    [
-        (width, std_dev, zero_at_edges)
-        for width in [0.5, 1.0, 1.5]
-        for std_dev in [0.05, 0.1, 1.0]
-        for zero_at_edges in [0, 1]
-    ],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
 )
 def test_gaussian_square(width, std_dev, zero_at_edges):
     x = np.linspace(-2.0, 2.0, 101)

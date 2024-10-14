@@ -155,12 +155,13 @@ class GaussianZeroEdgeFunction(ComplexFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        zae_chunk = self.zero_at_edges * (
-            np.exp(-0.5 * ((self.width / 2) / self.std_dev) ** 2)
-        )
-        coef = 1 / (1 - zae_chunk)
         gauss = np.exp(-0.5 * (x / self.std_dev) ** 2)
-        return coef * (gauss - zae_chunk)
+        if self.zero_at_edges:
+            zae_chunk = self.zero_at_edges * (
+                np.exp(-0.5 * ((self.width / 2) / self.std_dev) ** 2)
+            )
+            gauss = (gauss - zae_chunk) / (1 - zae_chunk)
+        return gauss
 
 
 class GaussianSquareFunction(NumericFunction):
@@ -168,7 +169,7 @@ class GaussianSquareFunction(NumericFunction):
     A square pulse with a Gaussian rise and fall at the edges.
     """
 
-    def __init__(self, square_width: float, std_dev: float, zero_at_edges: int):
+    def __init__(self, square_width, std_dev, zero_at_edges):
         self.square_width = square_width
         self.std_dev = std_dev
         self.zero_at_edges = zero_at_edges
@@ -180,7 +181,7 @@ class GaussianSquareFunction(NumericFunction):
         x_fall = x[x > self.square_width / 2] - (self.square_width / 2)
         y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev) ** 2)
         y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev) ** 2)
-        if self.zero_at_edges != 0:
+        if self.zero_at_edges:
             y = (y - y[0]) / (1 - y[0])
         return y
 
