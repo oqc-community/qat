@@ -6,7 +6,7 @@ log = get_default_logger()
 
 
 class WarnOnExtraFieldsModel(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
     @model_validator(mode="before")
     @classmethod

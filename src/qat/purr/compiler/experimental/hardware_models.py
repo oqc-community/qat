@@ -60,22 +60,29 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
     def check_pulse_limits(self):
         if self.min_pulse_length > self.max_pulse_length:
             raise ValueError(f"Min pulse length cannot be larger than max pulse length.")
+        return self
 
     @property
     def number_of_qubits(self):
         return len(self.qubit_devices)
 
     @property
-    def qubit_devices(self):
-        return [qd for qd in self.quantum_devices if isinstance(qd, Qubit)]
+    def qubits(self):
+        return [
+            qd for qd in self.quantum_devices if isinstance(self.quantum_devices[qd], Qubit)
+        ]
 
     @property
     def number_of_resonators(self):
         return len(self.resonator_devices)
 
     @property
-    def resonator_devices(self):
-        return [qd for qd in self.quantum_devices if isinstance(qd, Resonator)]
+    def resonators(self):
+        return [
+            qd
+            for qd in self.quantum_devices
+            if isinstance(self.quantum_devices[qd], Resonator)
+        ]
 
     def get_qubit_with_index(self, i: int):
         for qd in self.qubit_devices:
