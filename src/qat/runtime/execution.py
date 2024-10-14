@@ -12,7 +12,7 @@ from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
-from qat.runtime.live_devices import ControlHardware, Instrument
+from qat.runtime.live_devices import ControlHardware, InstrumentConnectionManager
 
 log = get_default_logger()
 
@@ -71,9 +71,9 @@ class LiveDeviceEngine(QuantumExecutionEngine):
     This will only work when run on a machine physically connected to a QPU.
     """
 
+    instruments: InstrumentConnectionManager
     startup_engine: bool = True
     control_hardware: ControlHardware | None = None
-    instruments: Dict[str, Instrument] | None = {}
 
     def __init__(self, **data):
         super.__init__(**data)
@@ -81,27 +81,12 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             self.startup()
 
     def startup(self):
-        for instr in self.instruments:
-            log.info(f"{type(instr)} with ID {instr.id} connected.")
-            instr.is_connected = True
-
-        connected = [instr.is_connected for instr in self.instruments]
-        return all(connected)
+        connected = self.instruments.connect()
+        return connected
 
     def shutdown(self):
-        for instr in self.instruments:
-            try:
-                instr.driver.close()
-                instr.driver = None
-                instr.is_connected = False
-                log.info(f"{type(instr)} with ID {instr.id} disconnected.")
-            except BaseException as e:
-                log.warning(
-                    f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
-                )
-
-        disconnected = [not instr.is_connected for instr in self.instruments]
-        return all(disconnected)
+        connected = self.instruments.disconnect()
+        return connected
 
     def execute(self):
         pass
