@@ -73,7 +73,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
     startup_engine: bool = True
     control_hardware: ControlHardware | None = None
-    instruments: Dict[str, Instrument] | None = None
+    instruments: Dict[str, Instrument] | None = {}
 
     def __init__(self, **data):
         super.__init__(**data)
@@ -81,10 +81,27 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             self.startup()
 
     def startup(self):
-        pass
+        for instr in self.instruments:
+            log.info(f"{type(instr)} with ID {instr.id} connected.")
+            instr.is_connected = True
+
+        connected = [instr.is_connected for instr in self.instruments]
+        return all(connected)
 
     def shutdown(self):
-        pass
+        for instr in self.instruments:
+            try:
+                instr.driver.close()
+                instr.driver = None
+                instr.is_connected = False
+                log.info(f"{type(instr)} with ID {instr.id} disconnected.")
+            except BaseException as e:
+                log.warning(
+                    f"Failed to close instrument at: {self.address} ID: {self.id}\n{str(e)}"
+                )
+
+        disconnected = [not instr.is_connected for instr in self.instruments]
+        return all(disconnected)
 
     def execute(self):
         pass

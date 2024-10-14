@@ -1,14 +1,93 @@
 from __future__ import annotations
 
-from typing import Dict
+from abc import abstractmethod
+from typing import Any, Dict
 
 from pydantic import model_validator
 
-from qat.purr.compiler.experimental.devices import PhysicalBaseband, PhysicalChannel
+from qat.ir.devices import PhysicalBaseband, PhysicalChannel
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
 
 log = get_default_logger()
+
+
+class Instrument(WarnOnExtraFieldsModel):
+    """
+    A dataclass for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
+    To avoid saving driver specific data in the calibration files, the actual drivers should be a property of
+    this object, so the calibration will skip it.
+    """
+
+    address: str
+    id: str | None = None
+    is_connected: bool = False
+    _driver: Any | None
+
+    @model_validator(mode="after")
+    def check_id(self):
+        if self.id is None:
+            self.id = self.address
+        return self
+
+    @property
+    def driver(self):
+        return self._driver
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id}, address={self.address})"
+
+
+class InstrumentConnectionManager(WarnOnExtraFieldsModel):
+    """
+    Manages the connection and disconnection of an instrument to a live instrument with a unique address.
+
+    Args:
+        instruments: The instruments that can be connected or disconnected.
+        is_connected: Flag determining whether the instruments are connected.
+    """
+
+    instruments: Dict[str, Instrument]
+
+    def connect(self):
+        if len(self.instruments) == 0:
+            raise IndexError(
+                "No instruments to be connected. Please add instruments to"
+                "the instrument connection manager."
+            )
+
+        for instrument in self.instruments:
+            log.info(f"{type(instrument).__name__} with ID {instrument.id} connected.")
+            instrument.is_connected = True
+
+        connected = [instrument.is_connected for instrument in self.instruments]
+        return all(connected)
+
+    def disconnect(self):
+        if len(self.instruments) == 0:
+            raise IndexError(
+                "No instruments to be disconnected. Please add instruments to"
+                "the instrument connection manager."
+            )
+
+        connected = []
+        for instrument in self.instruments:
+            if instrument.driver is not None:
+                try:
+                    instrument.driver.close()
+                    instrument.driver = None
+                    instrument.is_connected = False
+                    log.info(f"{type(instrument).__name__} with ID {self.id} disconnected.")
+                except BaseException as e:
+                    log.warning(
+                        f"Failed to close instrument {type(instrument).__name__} at: "
+                        f"{instrument.address} ID: {instrument.id}\n{str(e)}"
+                    )
+                connected.append(False)
+            else:
+                connected.append(True)
+
+        return all(connected)
 
 
 class DCBiasChannel(WarnOnExtraFieldsModel):
@@ -44,6 +123,13 @@ class LivePhysicalBaseband(PhysicalBaseband):
     channel_idx: int | None = None
     instrument: Instrument | None = None
 
+    @property
+    def instrument_id(self):
+        if self.instrument:
+            return self.instrument.id
+        else:
+            return None
+
 
 class ControlHardwareChannel(PhysicalChannel):
     """
@@ -51,30 +137,17 @@ class ControlHardwareChannel(PhysicalChannel):
     This (and derived) object should contain hardware specific information.
     """
 
-    hardware_id: str
+    channel_idx: int
     dcbiaschannel_pair: Dict[str, DCBiasChannel]
     switch_ch: Instrument | None = None
 
-
-class Instrument(WarnOnExtraFieldsModel):
-    """
-    An interface for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
-    To avoid saving driver specific data in the calibration files, the actual drivers should be a property of
-    this object, so the calibration will skip it.
-    """
-
-    address: str
-    id: str | None = None
-    is_connected: bool = False
-
     @model_validator(mode="after")
     def check_id(self):
-        if self.id is None:
-            self.id = self.address
-        return self
-
-    def __str__(self):
-        return f"{self.__class__.__name__}(id={self.id}, address={self.address})"
+        if str(self.channel_idx + 1) not in self.id:
+            raise ValueError(
+                f"The channel index of the control hardware channel {self.channel_idx} should"
+                f"be in agreement with the id of the control hardware channel {self.id}."
+            )
 
 
 class ControlHardware(Instrument):
@@ -86,7 +159,10 @@ class ControlHardware(Instrument):
                 self.channels[pc.id] = pc
             else:
                 log.warning(
-                    f"Physical channel {str(physical_channel)} already in channels of {str(self)}."
+                    f"Physical channel {str(physical_channel)} already in {str(self)}."
                 )
 
         return physical_channel
+
+    @abstractmethod
+    def start_playback(self): ...
