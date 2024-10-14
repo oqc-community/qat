@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat import qatconfig
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -244,10 +245,15 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
-                    raise ValueError(
-                        f"Max Waveform width is {MaxPulseLength} s "
-                        f"given: {inst.duration} s"
-                    )
+                    if (
+                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
+                    ):  # Do not throw error if we specifically disabled the limit checks.
+                        # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
+                        # which is specific to each hardware model and can be stored as a member variables there.
+                        raise ValueError(
+                            f"Max Waveform width is {MaxPulseLength} s "
+                            f"given: {inst.duration} s"
+                        )
                 elif isinstance(duration, Variable):
                     values = next(
                         iter(
@@ -260,10 +266,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         )
                     )
                     if np.max(values) > MaxPulseLength:
-                        raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {values} s"
-                        )
+                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+                            raise ValueError(
+                                f"Max Waveform width is {MaxPulseLength} s "
+                                f"given: {values} s"
+                            )
 
     def _generate_repeat_batches(self, repeats):
         """
@@ -465,11 +472,16 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         current_duration + position_data.instruction.duration
                     )
 
-        # Strip timelines that only hold delays, since that just means nothing is
+        # Strip timelines that only hold delays and phase resets, since that just means nothing is
         # happening on this channel.
-        for key, timeline in dict(results).items():
-            if all(isinstance(pos_data.instruction, Delay) for pos_data in timeline):
-                del results[key]
+        results = {
+            key: timeline
+            for key, timeline in dict(results).items()
+            if not all(
+                isinstance(pos_data.instruction, (Delay, PhaseReset, PhaseShift))
+                for pos_data in timeline
+            )
+        }
 
         if final_positions := [
             final_position[-1].end for final_position in list(results.values())

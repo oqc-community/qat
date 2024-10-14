@@ -38,25 +38,27 @@ def test_default_repeats_limit(monkeypatch):
 
 @pytest.mark.parametrize("repeats_limit", [None, 10_000, 16_874, 50_000, 100_000])
 def test_change_max_repeats_limit(repeats_limit):
-    qatconfig.__init__()  # Reload settings.
     # Test direct change of repeats limit.
     qatconfig.MAX_REPEATS_LIMIT = repeats_limit
     assert qatconfig.MAX_REPEATS_LIMIT == repeats_limit
 
+    qatconfig.__init__()  # Reload settings to default.
 
-@pytest.mark.parametrize("disable_pulse_duration_limits", [False, True])
+
+@pytest.mark.parametrize("disable_pulse_duration_limits", [True, False])
 def test_change_disable_pulse_duration_limits(disable_pulse_duration_limits):
-    qatconfig.__init__()  # Reload settings.
     # Test direct change of repeats limit.
     qatconfig.DISABLE_PULSE_DURATION_LIMITS = disable_pulse_duration_limits
     assert qatconfig.DISABLE_PULSE_DURATION_LIMITS == disable_pulse_duration_limits
 
+    qatconfig.__init__()  # Reload settings to default.
+
 
 def test_disable_pulse_duration_limits_throws_warning(caplog):
-    qatconfig.__init__()  # Reload settings.
+    newconfig = QatConfig()
     # Capture if warnings are sent to logger.
     with caplog.at_level(LoggerLevel.WARNING.value):
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
+        newconfig.DISABLE_PULSE_DURATION_LIMITS = True
         assert "Disabled check for pulse duration limits" in caplog.text
 
 
