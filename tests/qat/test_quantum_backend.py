@@ -30,9 +30,13 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
+    Acquire,
     Delay,
+    DrivePulse,
+    MeasurePulse,
     PhaseReset,
     PhaseShift,
+    PostProcessing,
     SweepValue,
     Variable,
 )
@@ -677,3 +681,37 @@ class TestBaseQuantum:
                     for p in positions
                 ]
             )
+
+    def test_create_duration_timeline_mapping(self):
+        """Test that instructions are correctly mapped to expected channels."""
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+
+        builder = (
+            get_builder(hw).X(qubit, np.pi / 2.0).measure_mean_z(qubit).synchronize(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        qat_file = InstructionEmitter().emit(builder.instructions, hw)
+
+        position_map = engine.create_duration_timeline(qat_file.instructions)
+
+        drive_data = position_map[qubit.get_drive_channel()]
+        measure_data = position_map[qubit.get_measure_channel()]
+        acquire_data = position_map[qubit.get_acquire_channel()]
+
+        assert [type(pos.instruction) for pos in drive_data] == [
+            DrivePulse,
+            Delay,
+            PhaseReset,
+        ]
+        assert [type(pos.instruction) for pos in measure_data] == [
+            Delay,
+            MeasurePulse,
+            PhaseReset,
+        ]
+        assert [type(pos.instruction) for pos in acquire_data] == [
+            Delay,
+            Acquire,
+            PhaseReset,
+            *[PostProcessing] * 4,
+        ]

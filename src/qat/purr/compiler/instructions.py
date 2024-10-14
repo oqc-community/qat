@@ -400,7 +400,7 @@ class PostProcessing(QuantumInstruction):
     """
 
     def __init__(self, acquire: Acquire, process, axes=None, args=None):
-        super().__init__()
+        super().__init__(acquire)
         if axes is not None and not isinstance(axes, List):
             axes = [axes]
 
@@ -412,11 +412,10 @@ class PostProcessing(QuantumInstruction):
         self.axes: List[ProcessAxis] = axes or []
         self.output_variable = acquire.output_variable
         self.result_needed = False
-        self._acquire = acquire
 
     @property
     def acquire(self) -> Acquire:
-        return self._acquire
+        return self.quantum_targets[0]
 
     def __repr__(self):
         axis = ",".join([axi.value for axi in self.axes])

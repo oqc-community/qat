@@ -182,6 +182,18 @@ class QbloxControlHardware(ControlHardware):
 
         return qblox_config
 
+    def _reset_io(self, modules=None):
+        # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
+        # TODO - This is a temporary workaround until Qblox fixes the issue
+
+        modules = modules or self._driver.get_connected_modules().values()
+
+        for m in modules:
+            log.info(f"Resetting sequencer connections for module {m.slot_idx}")
+            m.disconnect_outputs()
+            if m.is_qrm_type:
+                m.disconnect_inputs()
+
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(
@@ -190,14 +202,7 @@ class QbloxControlHardware(ControlHardware):
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
-
-            # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
-            # TODO - This is a temporary workaround until Qblox fixes the issue
-            for slot_idx, module in self._driver.get_connected_modules().items():
-                log.info(f"Resetting sequencer connections for module {slot_idx}")
-                module.disconnect_outputs()
-                if module.is_qrm_type:
-                    module.disconnect_inputs()
+            self._reset_io()
 
         log.info(self._driver.get_system_status())
         self.is_connected = True
@@ -241,22 +246,30 @@ class QbloxControlHardware(ControlHardware):
     def set_data(self, qblox_packages: List[QbloxPackage]):
         self._resources.clear()
         self.allocate_resources(qblox_packages)
+
         if self.plot_packages:
             plot_packages(qblox_packages)
-        for package in qblox_packages:
-            module, sequencer = next(
-                (
-                    (m, t2s[package.target])
-                    for m, t2s in self._resources.items()
-                    if m.slot_idx == package.target.physical_channel.slot_idx
+
+        try:
+            for package in qblox_packages:
+                module, sequencer = next(
+                    (
+                        (m, t2s[package.target])
+                        for m, t2s in self._resources.items()
+                        if m.slot_idx == package.target.physical_channel.slot_idx
+                    )
                 )
-            )
-            if self.dump_sequence:
-                filename = f"schedules/target_{package.target.id}_module_{module.slot_idx}_sequencer_{sequencer.seq_idx}_@_{datetime.utcnow().strftime('%m-%d-%Y_%H%M%S')}.json"
-                os.makedirs(os.path.dirname(filename), exist_ok=True)
-                with open(filename, "w") as f:
-                    f.write(json.dumps(asdict(package.sequence)))
-            self.install(package, module, sequencer)
+
+                if self.dump_sequence:
+                    filename = f"schedules/target_{package.target.id}_module_{module.slot_idx}_sequencer_{sequencer.seq_idx}_@_{datetime.utcnow().strftime('%m-%d-%Y_%H%M%S')}.json"
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                    with open(filename, "w") as f:
+                        f.write(json.dumps(asdict(package.sequence)))
+
+                self.install(package, module, sequencer)
+        except BaseException as e:
+            self._reset_io(self._resources.keys())
+            raise e
 
     def start_playback(self, repetitions: int, repetition_time: float):
         if not any(self._resources):
