@@ -38,8 +38,6 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     Engine that can execute instructions on a quantum hardware model.
     """
 
-    max_instruction_len: int = Field(ge=1, default=200_000)
-
     def execute(self, instructions: QatFile):
         """Executes this qat file against this current hardware."""
         return self._common_execute(instructions)
