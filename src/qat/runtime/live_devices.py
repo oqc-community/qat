@@ -44,7 +44,6 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
 
     Args:
         instruments: The instruments that can be connected or disconnected.
-        is_connected: Flag determining whether the instruments are connected.
     """
 
     instruments: Dict[str, Instrument]
