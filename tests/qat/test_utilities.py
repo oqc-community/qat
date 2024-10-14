@@ -82,7 +82,7 @@ def test_gaussian_function_first_derivative():
 def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
     x = np.linspace(-width / 2, width / 2, 101)
     gaussian_zero = GaussianZeroEdgeFunction(std_dev, width, zero_at_edges)
-    y = gaussian_zero.eval(x)
+    y = gaussian_zero(x)
 
     assert np.isclose(max(y), 1.0)
     assert np.isclose(x[np.argmax(y)], 0.0)
@@ -99,7 +99,7 @@ def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
 def test_gaussian_square(width, std_dev, zero_at_edges):
     x = np.linspace(-2.0, 2.0, 101)
     gaussian_square = GaussianSquareFunction(width, std_dev, zero_at_edges)
-    y = gaussian_square.eval(x)
+    y = gaussian_square(x)
 
     # Test the shape looks like we expect it
     square_edge = width / 2 + 1e-8  # add small amount to deal with float errors
