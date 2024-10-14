@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Union
 
 from pydantic import ConfigDict, Field, model_validator
 
-from qat.purr.compiler.experimental.devices import (
+from qat.ir.devices import (
     ChannelType,
     PhysicalBaseband,
     PhysicalChannel,
@@ -14,7 +14,6 @@ from qat.purr.compiler.experimental.devices import (
     QubitCoupling,
     Resonator,
 )
-from qat.purr.compiler.experimental.error_mitigation import ErrorMitigation
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -46,7 +45,6 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
         allow_mutation=False, default=dict()
     )
     qubit_direction_couplings: List[QubitCoupling] = Field(allow_mutation=False, default=[])
-    error_mitigation: ErrorMitigation | None = None
 
     @model_validator(mode="after")
     def check_default_repeat_count(self):
