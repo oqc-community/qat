@@ -298,7 +298,6 @@ class QiskitEngine(InstructionExecutionEngine):
                 if results.results[0].success:
                     break
                 log.warning(f"AerSimulator simulation with method {method} failed.")
-                print(results)
             distribution = results.get_counts(circuit)
         except QiskitError as e:
             raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
