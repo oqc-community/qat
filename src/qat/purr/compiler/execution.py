@@ -445,9 +445,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     device_instructions: List[PositionData] = results.setdefault(
                         qtarget, []
                     )
-                    start = device_instructions[-1].end if any(device_instructions) else 0
                     delay_time = longest_length - total_durations[qtarget]
                     if delay_time > 0:
+                        start = (
+                            device_instructions[-1].end if any(device_instructions) else 0
+                        )
                         instr = Delay(qtarget, delay_time)
                         position_data = PositionData(
                             start,
