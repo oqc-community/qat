@@ -230,9 +230,12 @@ class QiskitEngine(InstructionExecutionEngine):
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
-    def _run_simulator(self, builder, aer_config, method, config, coupling_map):
+    def _run_simulator(self, builder, aer_config, method, coupling_map):
         qasm_sim = AerSimulator(
-            aer_config, noise_model=builder.model.noise_model, method=method, **config
+            aer_config,
+            noise_model=builder.model.noise_model,
+            method=method,
+            **qatconfig.SIMULATION.OPTIONS,
         )
         job = qasm_sim.run(
             transpile(builder.circuit, qasm_sim, coupling_map=coupling_map),
@@ -291,7 +294,6 @@ class QiskitEngine(InstructionExecutionEngine):
                     builder,
                     aer_config,
                     method,
-                    qatconfig.SIMULATION.OPTIONS.get(method, {}),
                     coupling_map,
                 )
 

@@ -21,10 +21,8 @@ class QatSimulationConfig(BaseModel):
     FALLBACK_SEQUENCE: list[allowed_methods] = ["automatic", "matrix_product_state"]
     """If the simulation fails, specify a fallback sequence of methods to call."""
     OPTIONS: dict = {
-        "matrix_product_state": {
-            "matrix_product_state_max_bond_dimension": 128,
-            "matrix_product_state_truncation_threshold": 1e-12,
-        }
+        "matrix_product_state_max_bond_dimension": 128,
+        "matrix_product_state_truncation_threshold": 1e-12,
     }
     """
     Specify options for a given Qiskit simulation method. See

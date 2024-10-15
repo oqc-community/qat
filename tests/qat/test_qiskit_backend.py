@@ -390,15 +390,11 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
-                "matrix_product_state_max_bond_dimension"
-            ]
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state_max_bond_dimension"]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
-                "matrix_product_state_truncation_threshold"
-            ]
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state_truncation_threshold"]
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
         qatconfig.SIMULATION.METHOD = "automatic"
@@ -451,14 +447,10 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
-                "matrix_product_state_max_bond_dimension"
-            ]
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state_max_bond_dimension"]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
-                "matrix_product_state_truncation_threshold"
-            ]
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state_truncation_threshold"]
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
