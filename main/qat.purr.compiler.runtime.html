@@ -51,6 +51,16 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
@@ -169,6 +179,28 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.CalibrationWithArgs.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runtime</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.CalibrationWithArgs.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.runtime.NewQuantumRuntime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.NewQuantumRuntime" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.runtime.QuantumRuntime" title="qat.purr.compiler.runtime.QuantumRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a>, <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin" title="qat.ir.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
+<p>Uses the new pass infrastructure.</p>
+<p>Notice how polymorphic calls to XEngine.optimize() and XEngine.validate() are avoided. Instead, we have
+a flat structure of passes. This allows developers to focus on efficiently implementing a pass and easily test,
+demonstrate, and register passes without worrying too much about where it fits into the global compilation
+workflow.</p>
+<p>The NewQuantumRuntime deliberately recognises the builder as the only acceptable form of input “IR” and refuses
+to take in a bare list of instructions. This reduces the constant confusion of “builder” vs “instructions”.</p>
+<p>The NewQuantumRuntime is also deliberately stripped out of any handling of compilation metrics. In fact, ideas
+similar to the new pass infrastructure can be applied to compilation metrics, that’s why we’re excluding them
+during this iteration partly because other pieces need to come together and partly because the current iteration
+needs to be kept light-weight and technically tractable.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline">
+<span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

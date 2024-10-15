@@ -1,0 +1,16 @@
+qat.ir package
+==============
+
+.. automodule:: qat.ir
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.ir.pass_base
+   qat.ir.result_base

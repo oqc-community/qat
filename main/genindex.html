@@ -48,6 +48,16 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">src</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.html">qat package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
@@ -233,7 +243,11 @@
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.add">add() (InstructionBuilder method)</a>
 
       <ul>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.add">(PassManager method)</a>
+</li>
         <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.add">(QatFile method)</a>
+</li>
+        <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.add">(ResultManager method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.add">(SequenceBuilder method)</a>
 </li>
@@ -325,6 +339,8 @@
       <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">allocate_resources() (QbloxControlHardware method)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.amount">amount (Quantity attribute)</a>
+</li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass">AnalysisPass (class in qat.ir.pass_base)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.AND">AND (Opcode attribute)</a>
 </li>
@@ -460,6 +476,12 @@
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.build_lucy_hardware">build_lucy_hardware() (in module qat.purr.backends.live)</a>
 </li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline">build_pass_pipeline() (InvokerMixin method)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline">(NewQuantumRuntime method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_physical_channel_buffers">build_physical_channel_buffers() (QuantumExecutionEngine method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_pulse_channel_buffers">build_pulse_channel_buffers() (QuantumExecutionEngine method)</a>
@@ -1386,8 +1408,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id">Id (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.id">id() (QbloxContext method)</a>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.id">id() (PassInfoMixin method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.id">(QbloxContext method)</a>
 </li>
+        <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.id">(ResultInfoMixin method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.if_triggered">if_triggered() (BasicInterrupt method)</a>
 
       <ul>
@@ -1482,6 +1510,8 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation">InstructionValidation (class in qat.compiler.validation_passes)</a>
+</li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument">Instrument (class in qat.purr.backends.live_devices)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SquareWeightAcq.integration_length">integration_length (SquareWeightAcq attribute)</a>
@@ -1493,6 +1523,8 @@
       <li><a href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.InterruptableExecutingMixin">InterruptableExecutingMixin (class in qat.purr.compiler.experimental.frontends)</a>
 </li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.InterruptError">InterruptError</a>
+</li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin">InvokerMixin (class in qat.ir.pass_base)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.is_basic_gate">is_basic_gate() (TketBuilder method)</a>
 </li>
@@ -1598,10 +1630,10 @@
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig">LoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.log">log() (CompositeLogger method)</a>
@@ -1631,6 +1663,8 @@
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.logic_xor">logic_xor() (SequenceBuilder method)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.logs_path">logs_path (BasicLogger property)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.lookup_by_type">lookup_by_type() (ResultManager method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.lookup_waveform_by_data">lookup_waveform_by_data() (SequenceBuilder method)</a>
 </li>
@@ -1798,8 +1832,6 @@
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_computed_fields">model_computed_fields (QatConfig attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_config">model_config (QatConfig attribute)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_fields">model_fields (QatConfig attribute)</a>
@@ -1810,11 +1842,25 @@
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.modify">(Qasm3ParserBase method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
       <ul>
         <li><a href="qat.html#module-qat">qat</a>
+</li>
+        <li><a href="qat.compiler.html#module-qat.compiler">qat.compiler</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#module-qat.compiler.transform_passes">qat.compiler.transform_passes</a>
+</li>
+        <li><a href="qat.compiler.validation_passes.html#module-qat.compiler.validation_passes">qat.compiler.validation_passes</a>
+</li>
+        <li><a href="qat.ir.html#module-qat.ir">qat.ir</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#module-qat.ir.pass_base">qat.ir.pass_base</a>
+</li>
+        <li><a href="qat.ir.result_base.html#module-qat.ir.result_base">qat.ir.result_base</a>
 </li>
         <li><a href="qat.purr.html#module-qat.purr">qat.purr</a>
 </li>
@@ -1967,6 +2013,12 @@
         <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.name">(WaveformDef attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.name">name() (PassInfoMixin method)</a>
+
+      <ul>
+        <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.name">(ResultInfoMixin method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.NANO">NANO (Scale attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.nco">nco (SequencerConfig attribute)</a>
@@ -1975,10 +2027,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_STEPS_PER_HZ">NCO_FREQ_STEPS_PER_HZ (Constants attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">NCO_MAX_FREQ (Constants attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">NCO_MAX_FREQ (Constants attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
@@ -1986,6 +2038,8 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.NEW_LINE">NEW_LINE (Opcode attribute)</a>
+</li>
+      <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime">NewQuantumRuntime (class in qat.purr.compiler.runtime)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.NOP">NOP (Opcode attribute)</a>
 </li>
@@ -2163,6 +2217,14 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.partial_id">partial_id() (PulseChannel method)</a>
 </li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept">PassConcept (class in qat.ir.pass_base)</a>
+</li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin">PassInfoMixin (class in qat.ir.pass_base)</a>
+</li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager">PassManager (class in qat.ir.pass_base)</a>
+</li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel">PassModel (class in qat.ir.pass_base)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.phase_offs">phase_offs (NcoConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.MixerConfig.phase_offset">phase_offset (MixerConfig attribute)</a>
@@ -2177,6 +2239,8 @@
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.phase_shift">(QuantumInstructionBuilder method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation">PhaseOptimisation (class in qat.compiler.transform_passes)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset">PhaseReset (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift">PhaseShift (class in qat.purr.compiler.instructions)</a>
@@ -2213,12 +2277,16 @@
       </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">PostProcessing (class in qat.purr.compiler.instructions)</a>
 </li>
+      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation">PostProcessingOptimisation (class in qat.compiler.transform_passes)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType">PostProcessType (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.predict_pulse_amplitude">predict_pulse_amplitude() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.prefix">prefix (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.process_barrier">process_barrier() (Qasm2Parser method)</a>
 
       <ul>
@@ -2231,8 +2299,6 @@
         <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQasmParser.process_cnot">(TketQasmParser method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.process_creg">process_creg() (Qasm2Parser method)</a>
 
       <ul>
@@ -2364,6 +2430,48 @@
 
       <ul>
         <li><a href="qat.html#module-qat">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.compiler
+
+      <ul>
+        <li><a href="qat.compiler.html#module-qat.compiler">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.compiler.transform_passes
+
+      <ul>
+        <li><a href="qat.compiler.transform_passes.html#module-qat.compiler.transform_passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.compiler.validation_passes
+
+      <ul>
+        <li><a href="qat.compiler.validation_passes.html#module-qat.compiler.validation_passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir
+
+      <ul>
+        <li><a href="qat.ir.html#module-qat.ir">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir.pass_base
+
+      <ul>
+        <li><a href="qat.ir.pass_base.html#module-qat.ir.pass_base">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir.result_base
+
+      <ul>
+        <li><a href="qat.ir.result_base.html#module-qat.ir.result_base">module</a>
 </li>
       </ul></li>
       <li>
@@ -2604,6 +2712,8 @@
         <li><a href="qat.purr.compiler.interrupt.html#module-qat.purr.compiler.interrupt">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.metrics
 
@@ -2625,8 +2735,6 @@
         <li><a href="qat.purr.compiler.runtime.html#module-qat.purr.compiler.runtime">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.waveforms
 
@@ -2859,6 +2967,8 @@
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ReadoutMitigation">ReadoutMitigation (class in qat.purr.compiler.hardware_models)</a>
 </li>
+      <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation">ReadoutValidation (class in qat.compiler.validation_passes)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine">RealtimeChipSimEngine (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel">RealtimeSimHardwareModel (class in qat.purr.backends.realtime_chip_simulator)</a>
@@ -2935,14 +3045,24 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.RestrictedQasm2Parser">RestrictedQasm2Parser (class in qat.purr.integrations.qasm)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultConcept">ResultConcept (class in qat.ir.result_base)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin">ResultInfoMixin (class in qat.ir.result_base)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager">ResultManager (class in qat.ir.result_base)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultModel">ResultModel (class in qat.ir.result_base)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.results">results (ResultManager property)</a>
+</li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.results_processing">results_processing() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ResultsProcessing">ResultsProcessing (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Return">Return (class in qat.purr.compiler.instructions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_">return_ (QatFile property)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>
@@ -2981,14 +3101,34 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSResonator">RTCSResonator (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-      <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs.run">run() (CalibrationWithArgs method)</a>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass.run">run() (AnalysisPass method)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs.run">(CalibrationWithArgs method)</a>
+</li>
+        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation.run">(InstructionValidation method)</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept.run">(PassConcept method)</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.run">(PassManager method)</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel.run">(PassModel method)</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run">(PhaseOptimisation method)</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation.run">(PostProcessingOptimisation method)</a>
+</li>
         <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.QatBackend.run">(QatBackend method)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock.run">(QuantumExecutableBlock method)</a>
 </li>
+        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation.run">(ReadoutValidation method)</a>
+</li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.run">(RemoteCalibration method)</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass.run">(TransformPass method)</a>
+</li>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass.run">(ValidationPass method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.calibrations.remote.html#qat.purr.backends.calibrations.remote.run_calibration">run_calibration() (in module qat.purr.backends.calibrations.remote)</a>
@@ -3005,6 +3145,8 @@
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.run_calibrations">(QiskitEngine method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.run_pass_pipeline">run_pass_pipeline() (InvokerMixin method)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.run_post_processing">run_post_processing() (QuantumExecutionEngine method)</a>
 </li>
       <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.run_qasm">run_qasm() (in module qat.purr.integrations.qiskit)</a>
@@ -3347,6 +3489,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.transform_to_value">transform_to_value() (Qasm3Parser method)</a>
 </li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass">TransformPass (class in qat.ir.pass_base)</a>
+</li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.trigger">trigger() (BasicInterrupt method)</a>
 
       <ul>
@@ -3401,11 +3545,13 @@
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.unit">unit (Quantity attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.UntargetedPulse">UntargetedPulse (class in qat.purr.integrations.qasm)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.upd_param">upd_param() (SequenceBuilder method)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.update">update() (ResultManager method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">UPDATE_PARAMETERS (Opcode attribute)</a>
 </li>
@@ -3437,6 +3583,12 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.validate_input_array">validate_input_array() (in module qat.purr.backends.utilities)</a>
 </li>
+      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass">ValidationPass (class in qat.ir.pass_base)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultModel.value">value (ResultModel property)</a>
+</li>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Variable">Variable (class in qat.purr.compiler.instructions)</a>
@@ -3451,6 +3603,8 @@
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationModel">VerificationModel (class in qat.purr.backends.verification)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.verify_instructions">verify_instructions() (in module qat.purr.backends.verification)</a>
 
       <ul>
@@ -3459,8 +3613,6 @@
         <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationEngine.verify_instructions">(VerificationEngine method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.verify_placement">verify_placement() (in module qat.purr.backends.qiskit_simulator)</a>
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.verify_program">verify_program() (in module qat.purr.backends.verification)</a>
