@@ -8,11 +8,13 @@ import numpy as np
 import pytest
 from compiler_config.config import InlineResultsProcessing
 
+from qat import qatconfig
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import (
+    MaxPulseLength,
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
@@ -21,7 +23,9 @@ from qat.purr.compiler.devices import (
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.instructions import (
     Acquire,
+    AcquireMode,
     CustomPulse,
+    MeasureBlock,
     PostProcessType,
     Pulse,
     Sweep,
@@ -135,6 +139,48 @@ class TestInstruction:
                     for _ in range(201000)
                 ]
             )
+
+    def test_instruction_limit_ignored_by_flag(self):
+        hw = get_default_echo_hardware()
+        qie = EchoEngine(model=hw)
+
+        invalid_pulse = [
+            Pulse(
+                PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
+                PulseShapeType.SQUARE,
+                width=MaxPulseLength + 1e-09,
+            )
+        ]
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
+        qie.validate(invalid_pulse)
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = False
+        with pytest.raises(ValueError):
+            qie.validate(invalid_pulse)
+
+    def test_instruction_limit_variable_ignored_by_flag(self):
+        hw = get_default_echo_hardware()
+        qubit = hw.qubits[0]
+        qie = EchoEngine(model=hw)
+
+        widths = [i * MaxPulseLength for i in np.arange(0.5, 2.01, 0.5)]
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("width", widths))
+            .pulse(
+                qubit.get_drive_channel(),
+                width=Variable("width"),
+                shape=PulseShapeType.SQUARE,
+            )
+        )
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
+        qie.validate(builder.instructions)
+
+        qatconfig.DISABLE_PULSE_DURATION_LIMITS = False
+        with pytest.raises(ValueError):
+            qie.validate(builder.instructions)
 
     def test_no_entanglement(self):
         hw = get_default_echo_hardware(2)
@@ -437,3 +483,120 @@ class TestInstructionSerialisation:
         deseri = InstructionBuilder.deserialize(seri)
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)
+
+
+class TestInstructionBlocks:
+    @pytest.mark.parametrize("mode", list(AcquireMode))
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_simple_measure_block(self, num_qubits, mode):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        mb = MeasureBlock(targets, mode)
+        assert isinstance(mb, MeasureBlock)
+        assert mb.quantum_targets == targets
+        assert mb._target_dict[targets[0].full_id()]["mode"] == mode
+        assert mb._entangled_qubits == set(targets)
+
+    @pytest.mark.parametrize("out_vars", [None, "c"])
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_measure_block_with_output_variables(self, num_qubits, out_vars):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        if isinstance(out_vars, str):
+            out_vars = [f"{out_vars}[{i}]" for i in range(num_qubits)]
+
+        mb = MeasureBlock(targets, AcquireMode.INTEGRATOR, output_variables=out_vars)
+        expected = out_vars or [None] * num_qubits
+        assert [val["output_variable"] for val in mb._target_dict.values()] == expected
+
+    @pytest.mark.parametrize("entangled_qubits", [None, 3])
+    @pytest.mark.parametrize("num_qubits", [1, 3])
+    def test_create_measure_block_with_entanglement(self, num_qubits, entangled_qubits):
+        hw = get_default_echo_hardware()
+        targets = hw.qubits[:num_qubits]
+
+        if isinstance(entangled_qubits, int):
+            entangled_qubits = targets.copy().append(hw.get_qubit(entangled_qubits))
+
+        mb = MeasureBlock(
+            targets, AcquireMode.INTEGRATOR, entangled_qubits=entangled_qubits
+        )
+        assert mb.quantum_targets == targets
+        if entangled_qubits is None:
+            assert mb._entangled_qubits == set(targets)
+        else:
+            assert mb._entangled_qubits == set(entangled_qubits)
+
+    def test_add_to_measure_block(self):
+        hw = get_default_echo_hardware()
+        targets = [hw.qubits[0], hw.qubits[-1]]
+        modes = [AcquireMode.INTEGRATOR, AcquireMode.SCOPE]
+        out_vars = ["c[0]", "b[1]"]
+        entangled_qubits = hw.qubits[:2]
+        mb = MeasureBlock(
+            targets[0],
+            modes[0],
+            output_variables=out_vars[:1],
+            entangled_qubits=entangled_qubits,
+        )
+        assert mb.quantum_targets == hw.qubits[:1]
+        mb.add_measurements(targets[1], modes[1], output_variables=out_vars[1])
+        entangled_qubits.append(targets[1])
+        assert mb.quantum_targets == targets
+        assert [val["mode"] for val in mb._target_dict.values()] == modes
+        assert [val["output_variable"] for val in mb._target_dict.values()] == out_vars
+        assert mb._entangled_qubits == set(entangled_qubits)
+
+    def test_cannot_add_duplicate_to_measure_block(self):
+        hw = get_default_echo_hardware()
+        targets = [hw.qubits[0], hw.qubits[-1]]
+        out_vars = ["c[0]", "b[1]"]
+        mb = MeasureBlock(
+            targets,
+            AcquireMode.INTEGRATOR,
+            output_variables=out_vars,
+        )
+        assert mb.quantum_targets == targets
+        with pytest.raises(ValueError):
+            mb.add_measurements(targets[1], AcquireMode.INTEGRATOR)
+
+    def test_measure_block_duration(self):
+        hw = get_default_echo_hardware()
+        target = hw.qubits[0]
+        mb = MeasureBlock([], AcquireMode.RAW)
+        assert mb.duration == 0.0
+        mb.add_measurements(target, AcquireMode.INTEGRATOR)
+        acq = mb.get_acquires(target)[0]
+        assert mb.duration > 0
+        assert mb.duration == pytest.approx(acq.delay + acq.duration)
+        mb._duration = 1
+        assert mb.duration == 1
+
+    def test_sequential_measure_block_from_builder(self):
+        """Test that measurements can be added in sequence."""
+        hw = get_default_echo_hardware()
+        builder = get_builder(hw)
+        assert len(builder._instructions) == 0
+        builder.measure(hw.get_qubit(0))
+        # Adding a non-post-processing Quantum instruction between measurements forces
+        # sequential measure blocks.
+        builder.synchronize(hw.qubits)
+        builder.measure(hw.get_qubit(2))
+        assert len(builder._instructions) == 3
+        assert builder._instructions[0].quantum_targets == [hw.get_qubit(0)]
+        assert builder._instructions[-1].quantum_targets == [hw.get_qubit(2)]
+
+    def test_fused_measure_block_from_builder(self):
+        """Test that measurements can be fused together."""
+        hw = get_default_echo_hardware()
+        builder = get_builder(hw)
+        assert len(builder._instructions) == 0
+        builder.measure(hw.get_qubit(0))
+        builder.measure(hw.get_qubit(2))
+        assert len(builder._instructions) == 1
+        assert builder._instructions[0].quantum_targets == [
+            hw.get_qubit(0),
+            hw.get_qubit(2),
+        ]

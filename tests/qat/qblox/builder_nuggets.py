@@ -14,7 +14,6 @@ def resonator_spect(model, qubit_indices=None):
         qubit = model.get_qubit(index)
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
-        assert acquire_channel == measure_channel
 
         center_freq = qubit.get_acquire_channel().frequency
         freqs = center_freq + np.linspace(-freq_range, freq_range, num_points)
@@ -41,9 +40,6 @@ def qubit_spect(model, qubit_indices=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         drive_channel = qubit.get_drive_channel()
-        measure_channel = qubit.get_measure_channel()
-        acquire_channel = qubit.get_acquire_channel()
-        assert acquire_channel == measure_channel
 
         freqs = drive_channel.frequency + np.linspace(-freq_range, freq_range, num_points)
         drive_amp_v = np.sqrt(10 ** (((drive_amp_dbm + 12) / 10) - 1))

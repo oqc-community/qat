@@ -74,7 +74,7 @@ class QatFile:
         for instruction in self.instructions:
             if (
                 isinstance(instruction, PostProcessing)
-                and instruction.acquire.output_variable == target_var
+                and instruction.output_variable == target_var
             ):
                 results.append(instruction)
 

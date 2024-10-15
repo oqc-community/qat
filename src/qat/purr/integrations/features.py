@@ -54,7 +54,7 @@ class Unit(Enum):
 
 # TODO: You don't want something lke this, just have two different objects for
 #   time/frequency.
-@dataclass
+@dataclass(frozen=True)
 class Quantity:
     amount: float
     unit: Unit
@@ -64,7 +64,7 @@ class Quantity:
         return f"{self.amount} {self.scale.value}{self.unit.value}"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Constraints:
     pulse_control_contraints: str = None
     max_scale: float = 1
