@@ -78,7 +78,7 @@ from tests.qat.qasm_utils import (
     get_test_file_path,
     parse_and_apply_optimiziations,
 )
-from tests.qat.utils import get_jagged_echo_hardware, update_qubit_indices
+from tests.qat.utils.models import get_jagged_echo_hardware, update_qubit_indices
 
 
 class TestQASM3:
