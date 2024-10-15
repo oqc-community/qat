@@ -40,7 +40,7 @@ def get_default_qiskit_hardware(
     Creates a hardware model compatible with the Qiskit simulator.
 
     If `strict_placement=True`, circuits can only be executed when circuit
-    intructions can be mapped directly onto the coupling map.
+    intructions act on adjacent qubits in the coupling map.
     """
     model = QiskitHardwareModel(qubit_count, noise_model)
     model.strict_placement = strict_placement
