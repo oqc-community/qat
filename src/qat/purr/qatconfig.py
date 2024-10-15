@@ -1,23 +1,36 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from qiskit_aer import AerSimulator
 
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
 
-class QatMPSConfig(BaseModel):
+class QatQiskitConfig(BaseModel):
     """
-    The default settings for using the MPS backend in the Qiskit Simulator.
+    The default settings for the Qiskit Simulator, including overridden MPS settings.
     """
 
     model_config = ConfigDict(validate_assignment=True)
-    MAX_BOND_DIMENSION: int = Field(gt=0, default=128)
-    """Default maximum bond dimension for MPS simulations."""
-    TRUNCATION: float = Field(ge=0.0, le=1.0, default=1e-12)
-    """The error threshold for dynamically truncating the bond dimension of MPS."""
+    allowed_methods: type = Literal[AerSimulator().available_methods()]
+    METHOD: allowed_methods = "automatic"
+    """The simulation method to use."""
+    FALLBACK_SEQUENCE: list[allowed_methods] = ["automatic", "matrix_product_state"]
+    """If the simulation fails, specify a fallback sequence of methods to call."""
+    OPTIONS: dict = {
+        "matrix_product_state": {
+            "matrix_product_state_max_bond_dimension": 128,
+            "matrix_product_state_truncation_threshold": 1e-12,
+        }
+    }
+    """
+    Specify options for a given Qiskit simulation method. See
+    https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
+    for options you can provide.
+    """
 
 
 class QatConfig(BaseSettings):
@@ -53,7 +66,7 @@ class QatConfig(BaseSettings):
     """Flag to disable the lower and upper pulse duration limits. 
     Only needs to be set to True for calibration purposes."""
 
-    MPS: QatMPSConfig = QatMPSConfig()
+    QISKIT: QatQiskitConfig = QatQiskitConfig()
     """MPS settings used in Qiskit's backend."""
 
     @field_validator("DISABLE_PULSE_DURATION_LIMITS")

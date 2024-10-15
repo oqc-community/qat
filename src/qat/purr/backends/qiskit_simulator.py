@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
@@ -230,28 +230,20 @@ class QiskitEngine(InstructionExecutionEngine):
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
-    def create_config(self, options: Dict[str, Any] = {}) -> Dict[str, Any]:
-        """
-        Returns the options for the AerSimulator with the default MPS truncation
-        options if none are given.
-        """
-        config = {
-            "method": options.pop("method", "automatic"),
-            "matrix_product_state_max_bond_dimension": options.pop(
-                "matrix_product_state_max_bond_dimension",
-                qatconfig.MPS.MAX_BOND_DIMENSION,
-            ),
-            "matrix_product_state_truncation_threshold": options.pop(
-                "matrix_product_state_truncation_threshold", qatconfig.MPS.TRUNCATION
-            ),
-        }
-        config.update(options)
-        return config
+    def _run_simulator(self, builder, aer_config, method, config, coupling_map):
+        qasm_sim = AerSimulator(
+            aer_config, noise_model=builder.model.noise_model, method=method, **config
+        )
+        job = qasm_sim.run(
+            transpile(builder.circuit, qasm_sim, coupling_map=coupling_map),
+            shots=builder.shot_count,
+        )
+        return job.result()
 
-    def execute(self, builder: QiskitBuilder, return_metadata: bool = False, **kwargs):
+    def execute(self, builder: QiskitBuilder, return_metadata: bool = False):
         """
         Execute a circuit using Qiskit's AerSimulator as a backend. Options for
-        the simulator can be given as key word arguments, see:
+        the simulator can be provided using qatconfig. See:
         https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
 
         Returns the measurements as a dict of bitstrings and associated counts.
@@ -284,37 +276,29 @@ class QiskitEngine(InstructionExecutionEngine):
 
         # AerSimulator can call a range of backends. We allow these to be choosen, along with
         # any relevant arguments.
-        config = self.create_config(kwargs)
-        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model, **config)
-
         try:
-            job = qasm_sim.run(
-                transpile(circuit, qasm_sim, coupling_map=coupling_map),
-                shots=builder.shot_count,
-            )
-            results = job.result()
+            # Determine the sequence of backends to try
+            method = qatconfig.QISKIT.METHOD
+            seq = qatconfig.QISKIT.FALLBACK_SEQUENCE
+            if method in seq:
+                seq.remove(method)
+            seq.insert(0, method)
 
-            # The job can fail if it runs into e.g. memory issues using the statevector
-            # simulator. In this case, and if no method is provided, try again using an
-            # MPS backend.
-            if (
-                not getattr(results, "success", False)
-                and results.results[0].metadata["method"] == "statevector"
-                and config.get("method", "automatic") == "automatic"
-            ):
-                log.info(
-                    f"Automatic statevector simulation in QiskitEngine failed with {results.status}.\n"
-                    "Trying again with MPS simulator."
+            # Run the simulator
+            results = {}
+            for method in seq:
+                results = self._run_simulator(
+                    builder,
+                    aer_config,
+                    method,
+                    qatconfig.QISKIT.OPTIONS.get(method, {}),
+                    coupling_map,
                 )
-                config.update({"method": "matrix_product_state"})
-                qasm_sim = AerSimulator(
-                    aer_config, noise_model=builder.model.noise_model, **config
-                )
-                job = qasm_sim.run(
-                    transpile(circuit, qasm_sim, coupling_map=coupling_map),
-                    shots=builder.shot_count,
-                )
-                results = job.result()
+
+                if results.results[0].success:
+                    break
+                log.warning(f"AerSimulator simulation with method {method} failed.")
+                print(results)
             distribution = results.get_counts(circuit)
         except QiskitError as e:
             raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
@@ -411,11 +395,10 @@ class QiskitRuntime(QuantumRuntime):
         repeats: int = None,
         error_mitigation: ErrorMitigationConfig = None,
         return_metadata: bool = False,
-        **kwargs,
     ):
         """
         Execute a circuit using Qiskit's AerSimulator as a backend. Options for
-        the simulator can be given as key word arguments, see:
+        the simulator can be provided using qatconfig. See:
         https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
 
         Returns the measurements as a dict of bitstrings and associated counts.
@@ -424,8 +407,7 @@ class QiskitRuntime(QuantumRuntime):
         """
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
-        # TODO - add error_mitigation for Qasm sim
-        results = self.engine.execute(builder, **kwargs, return_metadata=return_metadata)
+        results = self.engine.execute(builder, return_metadata=return_metadata)
         results = self._apply_error_mitigation(
             results, builder.instructions, error_mitigation
         )

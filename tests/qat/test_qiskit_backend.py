@@ -385,19 +385,23 @@ class TestQiskitBackend:
         for i in range(qubit_count):
             circ.measure(hw.get_qubit(i))
         engine = hw.create_engine()
-        counts, metadata = engine.execute(
-            circ, method="matrix_product_state", return_metadata=True
-        )
+        qatconfig.QISKIT.METHOD = "matrix_product_state"
+        counts, metadata = engine.execute(circ, return_metadata=True)
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.MPS.MAX_BOND_DIMENSION
+            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+                "matrix_product_state_max_bond_dimension"
+            ]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.MPS.TRUNCATION
+            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+                "matrix_product_state_truncation_threshold"
+            ]
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+        qatconfig.QISKIT.METHOD = "automatic"
 
     @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
     def test_automatic_stabilizer_backend(self, qubit_count):
@@ -447,27 +451,14 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.MPS.MAX_BOND_DIMENSION
+            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+                "matrix_product_state_max_bond_dimension"
+            ]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.MPS.TRUNCATION
+            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+                "matrix_product_state_truncation_threshold"
+            ]
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
-
-    def test_runtime_mps_backend(self):
-        # Tests the options when executing using the run time work as intended
-        hw = get_default_qiskit_hardware(2)
-        circ = (
-            hw.create_builder()
-            .X(hw.get_qubit(0), 0.5)
-            .cnot(hw.get_qubit(0), hw.get_qubit(1))
-            .measure(hw.get_qubit(0))
-            .measure(hw.get_qubit(1))
-        )
-        runtime = hw.create_runtime()
-        counts, metadata = runtime.execute(
-            circ, return_metadata=True, method="matrix_product_state"
-        )
-        assert metadata["method"] == "matrix_product_state"
-        assert counts["00"] + counts["11"] == 1000
