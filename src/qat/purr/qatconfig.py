@@ -9,7 +9,7 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class QatQiskitConfig(BaseModel):
+class QatSimulationConfig(BaseModel):
     """
     The default settings for the Qiskit Simulator, including overridden MPS settings.
     """
@@ -66,8 +66,8 @@ class QatConfig(BaseSettings):
     """Flag to disable the lower and upper pulse duration limits. 
     Only needs to be set to True for calibration purposes."""
 
-    QISKIT: QatQiskitConfig = QatQiskitConfig()
-    """MPS settings used in Qiskit's backend."""
+    SIMULATION: QatSimulationConfig = QatSimulationConfig()
+    """Simulation settings used in the Qiskit backend."""
 
     @field_validator("DISABLE_PULSE_DURATION_LIMITS")
     def check_disable_pulse_duration_limits(cls, DISABLE_PULSE_DURATION_LIMITS):

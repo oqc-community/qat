@@ -278,8 +278,8 @@ class QiskitEngine(InstructionExecutionEngine):
         # any relevant arguments.
         try:
             # Determine the sequence of backends to try
-            method = qatconfig.QISKIT.METHOD
-            seq = qatconfig.QISKIT.FALLBACK_SEQUENCE
+            method = qatconfig.SIMULATION.METHOD
+            seq = qatconfig.SIMULATION.FALLBACK_SEQUENCE
             if method in seq:
                 seq.remove(method)
             seq.insert(0, method)
@@ -291,7 +291,7 @@ class QiskitEngine(InstructionExecutionEngine):
                     builder,
                     aer_config,
                     method,
-                    qatconfig.QISKIT.OPTIONS.get(method, {}),
+                    qatconfig.SIMULATION.OPTIONS.get(method, {}),
                     coupling_map,
                 )
 

@@ -385,23 +385,23 @@ class TestQiskitBackend:
         for i in range(qubit_count):
             circ.measure(hw.get_qubit(i))
         engine = hw.create_engine()
-        qatconfig.QISKIT.METHOD = "matrix_product_state"
+        qatconfig.SIMULATION.METHOD = "matrix_product_state"
         counts, metadata = engine.execute(circ, return_metadata=True)
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
                 "matrix_product_state_max_bond_dimension"
             ]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
                 "matrix_product_state_truncation_threshold"
             ]
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
-        qatconfig.QISKIT.METHOD = "automatic"
+        qatconfig.SIMULATION.METHOD = "automatic"
 
     @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
     def test_automatic_stabilizer_backend(self, qubit_count):
@@ -451,13 +451,13 @@ class TestQiskitBackend:
         assert metadata["method"] == "matrix_product_state"
         assert (
             metadata["matrix_product_state_max_bond_dimension"]
-            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
                 "matrix_product_state_max_bond_dimension"
             ]
         )
         assert (
             metadata["matrix_product_state_truncation_threshold"]
-            == qatconfig.QISKIT.OPTIONS["matrix_product_state"][
+            == qatconfig.SIMULATION.OPTIONS["matrix_product_state"][
                 "matrix_product_state_truncation_threshold"
             ]
         )
