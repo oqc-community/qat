@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import sys
 from dataclasses import dataclass
 from functools import wraps
 from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mpmath import cosh
 from numpy import append, cos, pi, sin
 from scipy.special import erf
 
@@ -22,6 +22,7 @@ from qat.purr.compiler.instructions import (
 )
 
 UPCONVERT_SIGN = 1.0
+MAX_COSH_ARG = np.arccosh(sys.float_info.max)
 
 
 def remove_axes(original_dims, removed_axis_indices, axis_locations):
@@ -200,12 +201,18 @@ class DragGaussianFunction(ComplexFunction):
         return coef * (gauss - zae_chunk)
 
 
-class Sech(ComplexFunction):
+class SechFunction(ComplexFunction):
+    """
+    Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
+    zero at the edges.
+    """
+
     def __init__(self, width):
         self.width = width
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        return 1 / cosh(x / self.width)
+        vals = [min(val / self.width, MAX_COSH_ARG) for val in x]
+        return 1 / np.cosh(vals)
 
 
 class Sin(ComplexFunction):
