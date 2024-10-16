@@ -27,6 +27,7 @@ from qat.purr.compiler.instructions import (
     CustomPulse,
     Instruction,
     MeasureBlock,
+    MeasurePulse,
     PostProcessType,
     Pulse,
     Sweep,
@@ -319,6 +320,29 @@ class TestSweep:
         with pytest.raises(Exception):
             execute_instructions(EchoEngine(hw), builder)
         assert measure_channel.frequency == 9e9
+
+    def test_sweep_acquire_time(self):
+        hw = get_default_echo_hardware(2)
+        qubit = hw.get_qubit(0)
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+        acquire_times = [1.0e-6, 2.0e-6, 3.0e-6]
+
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("acquire_time", acquire_times))
+            .add(MeasurePulse(measure_channel, **qubit.pulse_measure))
+            .acquire(
+                acquire_channel,
+                time=Variable("acquire_time"),
+                delay=qubit.measure_acquire["delay"],
+            )
+        )
+        acquire_inst = builder.instructions[-1]
+        assert isinstance(acquire_inst, Acquire)
+        assert acquire_inst.time == acquire_inst.duration
+        assert isinstance(acquire_inst.time, Variable)
+        assert acquire_inst.time.name == "acquire_time"
 
 
 class TestInstructionExecution:
