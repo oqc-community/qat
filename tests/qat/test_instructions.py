@@ -36,6 +36,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.serializer import json_dumps, json_loads
+
 from tests.qat.utils.models import ListReturningEngine
 
 
