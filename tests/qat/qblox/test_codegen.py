@@ -13,7 +13,7 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire, MeasurePulse, Pulse
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
-from tests.qat.qblox.builder_nuggets import qubit_spect, resonator_spect
+from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect
 
 log = get_default_logger()
 
