@@ -2003,7 +2003,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                         delay = dev.measure_acquire["delay"]
                         break
             else:
-                log(
+                log.warning(
                     f"The acquire channel {pulse_channel.full_id()} is not assigned to a single resonator: "
                     "setting the delay to 0.0."
                 )
