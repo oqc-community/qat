@@ -88,6 +88,10 @@ class InstructionBuilder:
                 flat_list.append(inst)
         return flat_list
 
+    @instructions.setter
+    def instructions(self, value):
+        self._instructions = value
+
     @staticmethod
     def deserialize(blob) -> "InstructionBuilder":
         builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
@@ -679,6 +683,22 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             self.add(new_measure_block)
 
+    def _append_measure_block(
+        self,
+        previous_measure_block: MeasureBlock,
+        qubit: Qubit,
+        mode: AcquireMode,
+        entangled_qubits: List[Qubit],
+        output_variable: str = None,
+        **kwargs,
+    ):
+        previous_measure_block.add_measurements(
+            qubit, mode, output_variable, entangled_qubits, self.existing_names
+        )
+        acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
+
+        return previous_measure_block, acquire_instruction
+
     def measure(
         self,
         qubit: Qubit,
@@ -720,10 +740,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
             isinstance(previous_measure_block, MeasureBlock)
             and qubit not in previous_measure_block.quantum_targets
         ):
-            previous_measure_block.add_measurements(
-                qubit, mode, output_variable, entangled_qubits, self.existing_names
+            _, acquire_instruction = self._append_measure_block(
+                previous_measure_block,
+                qubit,
+                mode,
+                entangled_qubits,
+                output_variable,
+                **kwargs,
             )
-            acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
         else:
             new_measure_block, acquire_instruction = self._generate_measure_block(
                 qubit, mode, entangled_qubits, output_variable, **kwargs

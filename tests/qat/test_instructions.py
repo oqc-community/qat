@@ -33,7 +33,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
-from tests.qat.utils import ListReturningEngine
+from tests.qat.utils.models import ListReturningEngine
 
 
 class TestInstruction:
