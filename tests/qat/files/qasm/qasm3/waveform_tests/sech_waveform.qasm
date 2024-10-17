@@ -6,7 +6,7 @@ cal {
     frame q0_frame = newframe(q0_drive, 5e9, 0.0);
     frame q1_frame = newframe(q1_drive, 5e9, 0.0);
     waveform wf1 = sech(0.2, 100e-9, 50e-9);
-    waveform wf2 = sech(0.2, 200e-9, 20e-9);
+    waveform wf2 = sech(0.5, 200e-9, 20e-9);
 }
 defcal custom_gate $0 {
     play(q0_frame, wf1);
