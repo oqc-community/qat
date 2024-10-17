@@ -887,9 +887,7 @@ class MeasureBlock(QuantumInstructionBlock):
         instructions = [Synchronize(list(self._entangled_qubits))]
         for _, values in self._target_dict.items():
             instructions.extend([values["measure"], values["acquire"]])
-        instructions.extend(
-            [Synchronize(self.quantum_targets), PhaseReset(list(self._entangled_qubits))]
-        )
+        instructions.append(Synchronize(self.quantum_targets))
         return instructions
 
     @property
