@@ -1,18 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import json
 import warnings
-
-warnings.simplefilter("always", DeprecationWarning)
-warnings.warn(
-    "module 'qat.purr.utils.serializer' is deprecated, please use "
-    "'compiler_config.serialiser instead.'",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
 from typing import TYPE_CHECKING
 
-from compiler_config.serialiser import *  # fmt: skip
+import compiler_config.serialiser as legacy_serialiser
+
+from qat.purr.compiler.devices import QuantumComponent
+from qat.purr.compiler.instructions import Acquire
 
 if TYPE_CHECKING:
     from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -43,7 +38,31 @@ def json_load(
     return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
 
 
-class CustomQatJsonDecoder(CustomJsonDecoder):
+class CustomJSONEncoder(legacy_serialiser.CustomJSONEncoder):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "class 'qat.purr.utils.serializer.CustomJSONEncoder' is deprecated, please use "
+            "'compiler_config.serialiser.CustomJSONEncoder' or "
+            "'qat.purr.utils.serializer.CustomQatJsonEncoder' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class CustomJsonDecoder(legacy_serialiser.CustomJsonDecoder):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "class 'qat.purr.utils.serializer.CustomJsonDecoder' is deprecated, please use "
+            "'compiler_config.serialiser.CustomJsonDecoder' or "
+            "'qat.purr.utils.serializer.CustomQatJsonDecoder' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class CustomQatJsonDecoder(legacy_serialiser.CustomJsonDecoder):
     def __init__(self, *args, model=None, **kwargs):
         self.model: "QuantumHardwareModel" = model
         super().__init__(*args, **kwargs)
@@ -68,7 +87,7 @@ class CustomQatJsonDecoder(CustomJsonDecoder):
         return super().default(obj)
 
 
-class CustomQatJsonEncoder(CustomJSONEncoder):
+class CustomQatJsonEncoder(legacy_serialiser.CustomJSONEncoder):
     """
     It is a customised JSON encoder, which allows the serialization of the more complex
     objects.
@@ -88,8 +107,6 @@ class CustomQatJsonEncoder(CustomJSONEncoder):
     """
 
     def default(self, obj):
-        from qat.purr.compiler.devices import QuantumComponent
-        from qat.purr.compiler.instructions import Acquire
 
         # TODO: Acquire is a special wrapper component, not an actual component. Have a few too many special-cases
         #   for it now, think about reverting its special status.
