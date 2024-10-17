@@ -219,9 +219,7 @@ class SechFunction(ComplexFunction):
         # Restricting the argument such that cosh is within the max float range
         # will overcome this, and has a neglibable effect (as sech(x) outside this
         # range is practically zero).
-        x = np.array(
-            [max(min(np.real(val) / self.width, MAX_COSH_ARG), -MAX_COSH_ARG) for val in x]
-        )
+        x = np.clip(x.real / self.width, -MAX_COSH_ARG, MAX_COSH_ARG)
         return 1 / np.cosh(x)
 
 
