@@ -283,18 +283,23 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             ch_type, [self.get_quantum_device(device) for device in aux_device_ids]
         )
 
-    def get_pulse_channels_from_physical_channel(self, physical_channel_id: str):
+    def get_pulse_channels_from_physical_channel(
+        self, physical_channel: Union[str, PhysicalChannel]
+    ):
         # WARNING: this will not get pulse channels created during execution, only ones
         # predefined on the hardware.
+        if isinstance(physical_channel, str):
+            physical_channel = self.get_physical_channel(physical_channel)
         pulse_channels = []
         for pulse_channel in self.pulse_channels.values():
-            if pulse_channel.physical_channel_id == physical_channel_id:
+            if pulse_channel.physical_channel == physical_channel:
                 pulse_channels.append(pulse_channel)
 
         return pulse_channels
 
-    def get_devices_from_pulse_channel(self, id_: str):
-        pulse_channel = self.get_pulse_channel_from_id(id_)
+    def get_devices_from_pulse_channel(self, pulse_channel: Union[str, PulseChannel]):
+        if isinstance(pulse_channel, str):
+            pulse_channel = self.get_pulse_channel_from_id(pulse_channel)
         devices = [
             device
             for device in self.quantum_devices.values()
@@ -305,8 +310,11 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def get_pulse_channel_from_id(self, id_: str):
         return self.pulse_channels.get(id_)
 
-    def get_devices_from_physical_channel(self, id_: str):
-        physical_channel = self.get_physical_channel(id_)
+    def get_devices_from_physical_channel(
+        self, physical_channel: Union[str, PhysicalChannel]
+    ):
+        if isinstance(physical_channel, str):
+            physical_channel = self.physical_channels.get(physical_channel, None)
         devices = [
             device
             for device in self.quantum_devices.values()
@@ -370,7 +378,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         if isinstance(chanbit, Qubit):
             return chanbit, chanbit.get_default_pulse_channel()
         else:
-            quantum_devices = self.get_devices_from_pulse_channel(chanbit.full_id())
+            quantum_devices = self.get_devices_from_pulse_channel(chanbit)
             primary_devices = [
                 device
                 for device in quantum_devices
