@@ -555,7 +555,6 @@ class TestQASM3:
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
 
-
     @pytest.mark.parametrize(
         "hw", [get_default_echo_hardware(2), get_default_RTCS_hardware()]
     )
