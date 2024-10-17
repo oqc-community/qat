@@ -21,6 +21,7 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
+
 from tests.qat.qblox.conftest import DUMMY_CONFIG
 
 
