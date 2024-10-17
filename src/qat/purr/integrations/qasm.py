@@ -1562,11 +1562,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 width=width,
                 amp=amp,
                 std_dev=std_dev,
+                zero_at_edges=0,
             )
 
         elif intrinsic_name == "gaussian_zero_edge":
             amp, width, std_dev, zero_at_edges = _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            zero_at_edges = bool(zero_at_edges)
             _validate_waveform_args(
                 width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
             )
@@ -1586,11 +1587,26 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == "gaussian_square":
-            amp, width, square_width, std_dev = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
+            amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
+                tree.children[4], 4, 5
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
+            zero_at_edges = bool(zero_at_edges)
+            _validate_waveform_args(
+                width=width,
+                amp=amp,
+                square_width=square_width,
+                std_dev=std_dev,
+                zero_at_edges=zero_at_edges,
+            )
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN_SQUARE,
+                width=width,
+                std_dev=std_dev,
+                amp=amp,
+                square_width=square_width,
+                zero_at_edges=zero_at_edges,
+            )
 
         elif intrinsic_name == "sine":
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
