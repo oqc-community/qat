@@ -4,6 +4,7 @@ from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.devices import Calibratable, PulseChannelView
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
 from tests.qat.utils.models import get_jagged_echo_hardware
 
 
