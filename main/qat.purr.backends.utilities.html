@@ -420,12 +420,14 @@ numerically.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.utilities.Sech">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sech</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.utilities.Sech" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.purr.backends.utilities.SechFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SechFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.utilities.SechFunction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.utilities.ComplexFunction" title="qat.purr.backends.utilities.ComplexFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexFunction</span></code></a></p>
+<p>Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
+zero at the edges.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.utilities.Sech.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.utilities.Sech.eval" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.purr.backends.utilities.SechFunction.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.utilities.SechFunction.eval" title="Link to this definition"></a></dt>
 <dd><p>Function evaluated in domain described by x</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
