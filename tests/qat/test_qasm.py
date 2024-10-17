@@ -556,6 +556,19 @@ class TestQASM3:
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
 
+    @pytest.mark.parametrize(
+        "hw", [get_default_echo_hardware(2), get_default_RTCS_hardware()]
+    )
+    def test_capture_with_delay(self, hw):
+        # Tests that capture v2 in openpulse makes use of the qubit delay for an acquire channel.
+        qubit = hw.get_qubit(0)
+        parser = Qasm3Parser()
+        builder = parser.parse(
+            hw.create_builder(), get_qasm3("openpulse_tests/capture.qasm")
+        )
+        delay = [inst.delay for inst in builder.instructions if isinstance(inst, Acquire)]
+        assert delay[0] == qubit.measure_acquire["delay"]
+
     def test_gaussian_square(self):
         # Checks that the Gaussian Square pulses parse correectly.
         hw = get_default_echo_hardware(2)
