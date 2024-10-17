@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from itertools import product
+
 import numpy as np
 import pytest
 
 from qat.purr.backends.utilities import (
     BlackmanFunction,
     GaussianFunction,
+    GaussianSquareFunction,
+    GaussianZeroEdgeFunction,
     NumericFunction,
     SechFunction,
     SquareFunction,
@@ -70,6 +74,43 @@ def test_gaussian_function_first_derivative():
     # Test based on even function symmetry
     assert y_x[0] == -y_x[-1]
     assert y_x[1] == -y_x[-2]
+
+
+@pytest.mark.parametrize(
+    ["width", "std_dev", "zero_at_edges"],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
+)
+def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
+    x = np.linspace(-width / 2, width / 2, 101)
+    gaussian_zero = GaussianZeroEdgeFunction(std_dev, width, zero_at_edges)
+    y = gaussian_zero(x)
+
+    assert np.isclose(max(y), 1.0)
+    assert np.isclose(x[np.argmax(y)], 0.0)
+    if zero_at_edges:
+        assert np.isclose(y[0], 0.0) and np.isclose(y[-1], 0.0)
+    else:
+        assert y[0] > 0.0 and y[-1] > 0.0
+
+
+@pytest.mark.parametrize(
+    ["width", "std_dev", "zero_at_edges"],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
+)
+def test_gaussian_square(width, std_dev, zero_at_edges):
+    x = np.linspace(-2.0, 2.0, 101)
+    gaussian_square = GaussianSquareFunction(width, std_dev, zero_at_edges)
+    y = gaussian_square(x)
+
+    # Test the shape looks like we expect it
+    square_edge = width / 2 + 1e-8  # add small amount to deal with float errors
+    assert all([val < 1.0 for val in y[x < -square_edge]])
+    assert all([val < 1.0 for val in y[x > square_edge]])
+    assert all([np.isclose(val, 1.0) for val in y[(x > -square_edge) * (x < square_edge)]])
+
+    # Test zero at the edges
+    if zero_at_edges:
+        assert np.isclose(y[0], 0.0) and np.isclose(y[-1], 0.0)
 
 
 def test_blackman_function():

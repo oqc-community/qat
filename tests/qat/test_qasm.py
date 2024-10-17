@@ -71,6 +71,7 @@ from qat.purr.integrations.qasm import (
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
+
 from tests.qat.qasm_utils import (
     ProgramFileType,
     get_qasm2,
@@ -554,6 +555,24 @@ class TestQASM3:
 
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
+
+    def test_gaussian_square(self):
+        # Checks the that Gaussian Square pulses parse correectly.
+        hw = get_default_echo_hardware(2)
+        qasm_string = get_qasm3("waveform_tests/gaussian_square.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(get_builder(hw), qasm_string)
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        # Check the properties of the first pulse
+        assert np.isclose(pulses[0].width, 100e-9)
+        assert np.isclose(pulses[0].amp, 1)
+        assert np.isclose(pulses[0].square_width, 50e-9)
+        assert pulses[0].zero_at_edges == True
+        # Check the properties of the second pulse
+        assert np.isclose(pulses[1].width, 200e-9)
+        assert np.isclose(pulses[1].amp, 2.5)
+        assert np.isclose(pulses[1].square_width, 50e-9)
+        assert pulses[1].zero_at_edges == False
 
 
 class TestExecutionFrontend:

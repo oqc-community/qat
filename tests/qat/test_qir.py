@@ -13,6 +13,7 @@ from qat.purr.backends.realtime_chip_simulator import qutip_available
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
+
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
 from tests.qat.utils.models import get_jagged_echo_hardware
 
