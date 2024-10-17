@@ -34,7 +34,13 @@ from qiskit.qasm2 import CustomInstruction
 
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, Qubit
+from qat.purr.compiler.devices import (
+    ChannelType,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    Resonator,
+)
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -1556,11 +1562,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 width=width,
                 amp=amp,
                 std_dev=std_dev,
+                zero_at_edges=0,
             )
 
         elif intrinsic_name == "gaussian_zero_edge":
             amp, width, std_dev, zero_at_edges = _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            zero_at_edges = bool(zero_at_edges)
             _validate_waveform_args(
                 width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
             )
@@ -1580,11 +1587,26 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == "gaussian_square":
-            amp, width, square_width, std_dev = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
+            amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
+                tree.children[4], 4, 5
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
+            zero_at_edges = bool(zero_at_edges)
+            _validate_waveform_args(
+                width=width,
+                amp=amp,
+                square_width=square_width,
+                std_dev=std_dev,
+                zero_at_edges=zero_at_edges,
+            )
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN_SQUARE,
+                width=width,
+                std_dev=std_dev,
+                amp=amp,
+                square_width=square_width,
+                zero_at_edges=zero_at_edges,
+            )
 
         elif intrinsic_name == "sine":
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
@@ -1979,12 +2001,36 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # these post processing operations are removed for executions on live hardware.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
+
+        # Determine the delay for the channel
+        delay = 0.0
+        if pulse_channel.channel_type == ChannelType.acquire:
+            # TODO: remove full id when previous PR is merged
+            devices = [
+                dev
+                for dev in self.builder.model.get_devices_from_pulse_channel(
+                    pulse_channel.full_id()
+                )
+                if isinstance(dev, Resonator)
+            ]
+            if len(devices) == 1:
+                for dev in self.builder.model.quantum_devices.values():
+                    if isinstance(dev, Qubit) and dev.measure_device == devices[0]:
+                        delay = dev.measure_acquire["delay"]
+                        break
+            else:
+                log.warning(
+                    f"The acquire channel {pulse_channel.full_id()} is not assigned to a single resonator: "
+                    "setting the delay to 0.0."
+                )
+
         acquire = Acquire(
             channel=pulse_channel,
             time=time,
             mode=AcquireMode.INTEGRATOR,
             output_variable=output_variable,
             filter=filter,
+            delay=delay,
         )
         self.builder.add(acquire)
         self.builder.post_processing(

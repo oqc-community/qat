@@ -25,7 +25,9 @@ from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
     CustomPulse,
+    Instruction,
     MeasureBlock,
+    MeasurePulse,
     PostProcessType,
     Pulse,
     Sweep,
@@ -33,6 +35,8 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
+from qat.purr.utils.serializer import json_dumps, json_loads
+
 from tests.qat.utils.models import ListReturningEngine
 
 
@@ -318,6 +322,29 @@ class TestSweep:
             execute_instructions(EchoEngine(hw), builder)
         assert measure_channel.frequency == 9e9
 
+    def test_sweep_acquire_time(self):
+        hw = get_default_echo_hardware(2)
+        qubit = hw.get_qubit(0)
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+        acquire_times = [1.0e-6, 2.0e-6, 3.0e-6]
+
+        builder = (
+            get_builder(hw)
+            .sweep(SweepValue("acquire_time", acquire_times))
+            .add(MeasurePulse(measure_channel, **qubit.pulse_measure))
+            .acquire(
+                acquire_channel,
+                time=Variable("acquire_time"),
+                delay=qubit.measure_acquire["delay"],
+            )
+        )
+        acquire_inst = builder.instructions[-1]
+        assert isinstance(acquire_inst, Acquire)
+        assert acquire_inst.time == acquire_inst.duration
+        assert isinstance(acquire_inst.time, Variable)
+        assert acquire_inst.time.name == "acquire_time"
+
 
 class TestInstructionExecution:
     @pytest.mark.parametrize(
@@ -483,6 +510,49 @@ class TestInstructionSerialisation:
         deseri = InstructionBuilder.deserialize(seri)
         for original, serialised in zip(builder.instructions, deseri.instructions):
             assert str(original) == str(serialised)
+
+    def test_json_instructions(self, monkeypatch):
+        def equivalent(self, other):
+            return isinstance(self, type(other)) and (vars(self) == vars(other))
+
+        monkeypatch.setattr(Instruction, "__eq__", equivalent)
+
+        hw = get_default_echo_hardware(20)
+        builder = (
+            get_builder(hw)
+            .X(hw.get_qubit(0).get_drive_channel(), np.pi / 2.0)
+            .Y(hw.get_qubit(1))
+            .Z(hw.get_qubit(2))
+            .reset([hw.get_qubit(7), hw.get_qubit(8)])
+            .cnot(hw.get_qubit(2), hw.get_qubit(3))
+            .delay(hw.get_qubit(12), 0.2)
+            .had(hw.get_qubit(19))
+            .assign("dave", 5)
+            .returns(["dave"])
+            .ECR(hw.get_qubit(15), hw.get_qubit(16))
+            .repeat(50, 0.24)
+            .T(hw.get_qubit(7))
+            .Tdg(hw.get_qubit(7))
+            .S(hw.get_qubit(7))
+            .Sdg(hw.get_qubit(7))
+            .SX(hw.get_qubit(7))
+            .SXdg(hw.get_qubit(7))
+            .phase_shift(hw.get_qubit(7).get_drive_channel(), 0.72)
+            .pulse(hw.get_qubit(12).get_drive_channel(), PulseShapeType.GAUSSIAN, 0.002)
+            .results_processing("something", InlineResultsProcessing.Program)
+            .post_processing(
+                Acquire(hw.get_qubit(4).get_acquire_channel()),
+                PostProcessType.DOWN_CONVERT,
+            )
+            .sweep([SweepValue("1", [5]), SweepValue("2", [True])])
+            .synchronize([hw.get_qubit(5), hw.get_qubit(7), hw.get_qubit(9)])
+            .measure_mean_z(hw.get_qubit(0))
+        )
+
+        for instruction in builder.instructions:
+            js = json_dumps(instruction)
+            loaded = json_loads(js, model=hw)
+            assert loaded == instruction
 
 
 class TestInstructionBlocks:

@@ -7,6 +7,7 @@ from qat.ir.result_base import ResultInfoMixin, ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction, Repeat, Sweep
+
 from tests.qat.utils.builder_nuggets import resonator_spect
 
 

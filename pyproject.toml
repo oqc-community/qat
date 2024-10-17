@@ -96,6 +96,7 @@ py_version = 39
 profile = "black"
 line_length = 92
 known_first_party = ["qat"]
+known_local_folder = ["tests"]
 
 [tool.black]
 line-length = 92
