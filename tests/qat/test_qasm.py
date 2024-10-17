@@ -1024,11 +1024,11 @@ class TestParsing:
 
     def test_example(self):
         builder = parse_and_apply_optimiziations("example.qasm")
-        assert 349 == len(builder.instructions)
+        assert 347 == len(builder.instructions)
 
     def test_parallel(self):
         builder = parse_and_apply_optimiziations("parallel_test.qasm", qubit_count=8)
-        assert 2117 == len(builder.instructions)
+        assert 2116 == len(builder.instructions)
 
     def test_example_if(self):
         with pytest.raises(ValueError):
@@ -1037,11 +1037,11 @@ class TestParsing:
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
         builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
-        assert 97469 == len(builder.instructions)
+        assert 97467 == len(builder.instructions)
 
     def test_random_n5_d5(self):
         builder = parse_and_apply_optimiziations("random_n5_d5.qasm")
-        assert 4957 == len(builder.instructions)
+        assert 4956 == len(builder.instructions)
 
     def test_ordered_keys(self):
         builder = parse_and_apply_optimiziations(
@@ -1069,7 +1069,7 @@ class TestParsing:
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
         assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
-        assert 64 == len(builder.instructions)
+        assert 63 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))

@@ -589,7 +589,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             measure_instruction,
             acquire_instruction,
             Synchronize(qubit),
-            PhaseReset(entangled_qubits),
         ], acquire_instruction
 
     def _generate_measure_block(
@@ -610,7 +609,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def _find_previous_measurement_block(
         self,
         mblock_types: List[Instruction] = [Acquire, MeasurePulse],
-        optional_block_types: List[Instruction] = [Synchronize, PhaseReset],
+        optional_block_types: List[Instruction] = [Synchronize],
     ):
         # List of node types that a measurement can be made up of.
         mblock_types_cycle = itertools.cycle(mblock_types)
@@ -641,13 +640,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             previous_measure_block.insert(0, inst)
 
         pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
-        pre_phase_resets = [
-            val for val in previous_measure_block if isinstance(val, PhaseReset)
-        ]
         full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
             mblock_types + optional_block_types
         )
-        if full_measure_block and len(pre_syncs) >= 2 and len(pre_phase_resets) >= 1:
+        if full_measure_block and len(pre_syncs) >= 2:
             return previous_measure_block
         return None
 
@@ -656,20 +652,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         # entangled and/or can do it validly.
         pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
         new_syncs = [val for val in new_measure_block if isinstance(val, Synchronize)]
-        pre_phase_resets = [
-            val for val in previous_measure_block if isinstance(val, PhaseReset)
-        ]
-        new_phase_resets = [val for val in new_measure_block if isinstance(val, PhaseReset)]
         full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
             [val.__class__ for val in new_measure_block]
         )
-        if full_measure_block and len(pre_syncs) >= 2 and len(pre_phase_resets) >= 1:
+        if full_measure_block and len(pre_syncs) >= 2:
             # Merge the first and last sync with the new.
             pre_syncs[0] += new_syncs[0]
             pre_syncs[-1] += new_syncs[-1]
-
-            # reset all qubits
-            pre_phase_resets[-1] += new_phase_resets[-1]
 
             # Add in our current changes.
             self.insert(

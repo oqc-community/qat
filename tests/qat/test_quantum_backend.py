@@ -703,16 +703,13 @@ class TestBaseQuantum:
         assert [type(pos.instruction) for pos in drive_data] == [
             DrivePulse,
             Delay,
-            PhaseReset,
         ]
         assert [type(pos.instruction) for pos in measure_data] == [
             Delay,
             MeasurePulse,
-            PhaseReset,
         ]
         assert [type(pos.instruction) for pos in acquire_data] == [
             Delay,
             Acquire,
-            PhaseReset,
             *[PostProcessing] * 4,
         ]
