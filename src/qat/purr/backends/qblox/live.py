@@ -69,7 +69,9 @@ class QbloxLiveEngine(LiveDeviceEngine):
                 for aq in aqs:
                     physical_channel = aq.physical_channel
                     dt = physical_channel.sample_time
-                    physical_channel.readout_start = aq.start * dt + aq.delay
+                    physical_channel.readout_start = aq.start * dt + (
+                        aq.delay if aq.delay else 0.0
+                    )
                     physical_channel.readout_length = aq.samples * dt
                     physical_channel.acquire_mode_integrator = (
                         aq.mode == AcquireMode.INTEGRATOR
