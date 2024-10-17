@@ -95,7 +95,7 @@ def test_blackman_function_first_derivative():
     assert np.isclose(y[1], -y[-2], atol=1e-6)
 
 
-@pytest.mark.parametrize("width", [-2.0, -1.0, -0.1, 1e-3, 0.2, 1.2, 10])
+@pytest.mark.parametrize("width", [-2.0, -1.0, -0.1, -1e-6, 1e-3, 0.2, 1.2, 10])
 def test_sech_function(width):
     # Tests the sech pulse
     x = np.linspace(-1.0, 1.0, 101)

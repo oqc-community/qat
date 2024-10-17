@@ -211,8 +211,18 @@ class SechFunction(ComplexFunction):
         self.width = width
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        vals = [min(val / self.width, MAX_COSH_ARG) for val in x]
-        return 1 / np.cosh(vals)
+        # Having a narrow width can cause overflows in numpy
+        # Restricting the argument such that cosh is within the max float range
+        # will overcome this, and has a neglibable effect (as sech(x) outside this
+        # range is practically zero.
+        x = np.array(
+            [
+                max(min(np.real(val) / self.width, MAX_COSH_ARG), -MAX_COSH_ARG)
+                + 1j * np.imag(val) / self.width
+                for val in x
+            ]
+        )
+        return 1 / np.cosh(x)
 
 
 class Sin(ComplexFunction):
