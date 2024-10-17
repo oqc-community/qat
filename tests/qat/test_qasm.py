@@ -71,6 +71,7 @@ from qat.purr.integrations.qasm import (
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
+
 from tests.qat.qasm_utils import (
     ProgramFileType,
     get_qasm2,

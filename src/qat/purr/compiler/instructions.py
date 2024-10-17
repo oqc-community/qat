@@ -345,7 +345,11 @@ class Acquire(QuantumComponent, QuantumInstruction):
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
         self.time: float = time or 1.0e-6
-        if self.time < 0:
+        if not isinstance(self.time, Variable | float):
+            raise TypeError(
+                f"Acquire time must be of type 'float' or 'Variable', got {type(self.time)}."
+            )
+        if isinstance(self.time, float) and self.time < 0:
             raise ValueError(
                 f"Acquire time {self.time} cannot be less than or equal to zero."
             )
