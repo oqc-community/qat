@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import sys
 from dataclasses import dataclass
 from functools import wraps
 from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mpmath import cosh
 from numpy import cos, pi, sin
 from scipy.special import erf
 
@@ -22,6 +22,7 @@ from qat.purr.compiler.instructions import (
 )
 
 UPCONVERT_SIGN = 1.0
+MAX_COSH_ARG = np.arccosh(sys.float_info.max)
 
 
 def remove_axes(original_dims, removed_axis_indices, axis_locations):
@@ -204,12 +205,22 @@ class DragGaussianFunction(ComplexFunction):
         return coef * (gauss - zae_chunk)
 
 
-class Sech(ComplexFunction):
+class SechFunction(ComplexFunction):
+    """
+    Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
+    zero at the edges.
+    """
+
     def __init__(self, width):
         self.width = width
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        return 1 / cosh(x / self.width)
+        # Having a narrow width can cause overflows in numpy
+        # Restricting the argument such that cosh is within the max float range
+        # will overcome this, and has a neglibable effect (as sech(x) outside this
+        # range is practically zero).
+        x = np.clip(x.real / self.width, -MAX_COSH_ARG, MAX_COSH_ARG)
+        return 1 / np.cosh(x)
 
 
 class Sin(ComplexFunction):
@@ -390,7 +401,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
                 data.std_dev, data.width, data.zero_at_edges
             )
         elif data.shape == PulseShapeType.SECH:
-            num_func = Sech(data.std_dev)
+            num_func = SechFunction(data.std_dev)
         elif data.shape == PulseShapeType.SIN:
             num_func = Sin(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.COS:
