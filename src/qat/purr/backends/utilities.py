@@ -403,7 +403,7 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
                 data.std_dev, data.width, data.zero_at_edges
             )
         elif data.shape == PulseShapeType.SECH:
-            num_func = Sech(data.std_dev)
+            num_func = SechFunction(data.std_dev)
         elif data.shape == PulseShapeType.SIN:
             num_func = Sin(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.COS:
