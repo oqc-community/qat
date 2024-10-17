@@ -2151,7 +2151,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
                 args=mean_z_map_args,
             )
-            print(InlineResultsProcessing.Program)
             self.builder.results_processing(variable.name, InlineResultsProcessing.Program)
 
             self._attempt_declaration(variable)
