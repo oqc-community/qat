@@ -2,6 +2,7 @@ from qat.ir.pass_base import AnalysisPass, TransformPass, ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.runtime import NewQuantumRuntime
+
 from tests.qat.utils.builder_nuggets import resonator_spect
 
 

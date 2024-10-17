@@ -12,6 +12,7 @@ from qat.purr.backends.verification import (
     verify_program,
 )
 from qat.qat import execute
+
 from tests.qat.qasm_utils import ProgramFileType, get_qasm2, get_test_file_path
 
 
