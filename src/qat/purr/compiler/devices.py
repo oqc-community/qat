@@ -396,7 +396,6 @@ class PulseChannel(QuantumComponent, Calibratable):
         self.scale: complex = scale
 
         self.fixed_if: bool = fixed_if
-        self._update_hash()
 
         if frequency < self.min_frequency or frequency > self.max_frequency:
             raise ValueError(
