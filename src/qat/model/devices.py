@@ -29,11 +29,11 @@ class QuantumComponent(WarnOnExtraFieldsModel):
     def set_id(cls, id):
         return id or ""
 
-    def full_id(self):
-        return self.id
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.full_id()})"
+        return f"{type(self).__name__}({self.id})"
 
 
 class PhysicalBaseband(QuantumComponent):
@@ -68,8 +68,8 @@ class PhysicalChannel(QuantumComponent):
         max_frequency: Max frequency allowed in this physical channel.
     """
 
-    sample_time: float = Field(ge=0.0)
     baseband: PhysicalBaseband
+    sample_time: float = Field(ge=0.0)
     block_size: Optional[int] = Field(ge=1, default=1)
     phase_iq_offset: float = 0.0
     bias: float = 1.0
@@ -152,6 +152,18 @@ class PulseChannel(QuantumComponent):
     channel_type: Optional[ChannelType] = Field(allow_mutation=False, default=None)
     auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        if self.auxiliary_devices:
+            self.id += "-[" + ",".join([ad.id for ad in self.auxiliary_devices]) + "]"
+
+    @model_validator(mode="after")
+    def check_id(self):
+        if not self.id and self.channel_type is not None:
+            self.id = self.channel_type.name + "@" + self.physical_channel.id
+        return self
+
     @model_validator(mode="after")
     def check_channel_type(self):
         if (
@@ -161,6 +173,7 @@ class PulseChannel(QuantumComponent):
             raise ValueError(
                 f"Channel type {self.channel_type.name} requires at least one auxillary_device."
             )
+        return self
 
     @model_validator(mode="after")
     def check_frequency(self):
@@ -179,9 +192,9 @@ class PulseChannel(QuantumComponent):
         auxiliary_devices = auxiliary_devices or []
 
         if not isinstance(auxiliary_devices, List):
-            return [auxiliary_devices]
-        else:
-            return auxiliary_devices
+            auxiliary_devices = [auxiliary_devices]
+
+        return auxiliary_devices
 
     @property
     def sample_time(self):
@@ -217,7 +230,7 @@ class PulseChannel(QuantumComponent):
 
     @property
     def physical_channel_id(self):
-        return self.physical_channel.full_id()
+        return self.physical_channel.id
 
     @property
     def min_frequency(self):
@@ -227,17 +240,11 @@ class PulseChannel(QuantumComponent):
     def max_frequency(self):
         return self.physical_channel.pulse_channel_max_frequency
 
-    def full_id(self):
-        return self.physical_channel_id + "." + self.id
-
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
-
-    def __hash__(self):
-        return hash(self.full_id())
+        return self.id == other.id and self.physical_channel_id == other.physical_channel_id
 
 
 class FreqShiftPulseChannel(PulseChannel):
@@ -344,7 +351,7 @@ class Qubit(QuantumDevice):
         pulse_hw_x_pi_2: A single-qubit X gate.
     """
 
-    index: int = Field(ge=1)
+    index: int = Field(ge=0)
     coupled_qubits: Optional[List[Qubit]] = []
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
@@ -398,8 +405,8 @@ class Qubit(QuantumDevice):
         else:
             log.warning(f"Qubits {self} and {qubit} are already coupled.")
 
-        if qubit.full_id() not in self.pulse_hw_zx_pi_4:
-            self.pulse_hw_zx_pi_4[qubit.full_id()] = {
+        if qubit.id not in self.pulse_hw_zx_pi_4:
+            self.pulse_hw_zx_pi_4[qubit.id] = {
                 "shape": PulseShapeType.SOFT_SQUARE,
                 "width": 125e-9,
                 "rise": 10e-9,
@@ -452,8 +459,6 @@ class QubitCoupling(WarnOnExtraFieldsModel):
         direction: The indices of the coupled qubits.
         quality: The quality-level of the coupling.
     """
-
-    model_config = ConfigDict(validate_assignment=True)
 
     direction: tuple = Field(min_length=2, max_length=2)
     quality: float = Field(ge=0.0, le=1.0)

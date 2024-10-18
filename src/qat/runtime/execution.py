@@ -7,8 +7,10 @@ import numpy as np
 from pydantic import Field
 
 from qat.model.model import QuantumHardwareModel
+from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.instructions import Instruction
+from qat.purr.compiler.execution import SweepIterator
+from qat.purr.compiler.instructions import AcquireMode, Instruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
@@ -61,6 +63,60 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         Execution allows for interrupts triggered by events.
         """
         return self._common_execute(instructions, interrupt)
+
+    def __repr__(self):
+        return f"{type(self).__name__}(model={str(self.model)})"
+
+
+class EchoEngine(QuantumExecutionEngine):
+    """
+    A backend that just returns default values.
+    Primarily used for testing and no-backend situations.
+    """
+
+    def _execute_on_hardware(
+        self,
+        sweep_iterator: SweepIterator,
+        package: QatFile,
+        interrupt: Interrupt = NullInterrupt(),
+    ) -> Dict[str, np.ndarray]:
+        results = {}
+        while not sweep_iterator.is_finished():
+            sweep_iterator.do_sweep(package.instructions)
+
+            metadata = {"sweep_iteration": sweep_iterator.get_current_sweep_iteration()}
+            interrupt.if_triggered(metadata, throw=True)
+
+            position_map = self.create_duration_timeline(package.instructions)
+            pulse_channel_buffers = self.build_pulse_channel_buffers(position_map, True)
+            buffers = self.build_physical_channel_buffers(pulse_channel_buffers)
+            aq_map = self.build_acquire_list(position_map)
+
+            repeats = package.repeat.repeat_count
+            for channel_id, aqs in aq_map.items():
+                for aq in aqs:
+                    # just echo the output pulse back for now
+                    response = buffers[aq.physical_channel.full_id()][
+                        aq.start : aq.start + aq.samples
+                    ]
+                    if aq.mode != AcquireMode.SCOPE:
+                        if repeats > 0:
+                            response = np.tile(response, repeats).reshape((repeats, -1))
+
+                    response_axis = get_axis_map(aq.mode, response)
+                    for pp in package.get_pp_for_variable(aq.output_variable):
+                        response, response_axis = self.run_post_processing(
+                            pp, response, response_axis
+                        )
+
+                    var_result = results.setdefault(
+                        aq.output_variable,
+                        np.empty(
+                            sweep_iterator.get_results_shape(response.shape),
+                            response.dtype,
+                        ),
+                    )
+                    sweep_iterator.insert_result_at_sweep_position(var_result, response)
 
 
 class LiveDeviceEngine(QuantumExecutionEngine):
