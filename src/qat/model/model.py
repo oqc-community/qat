@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Union
 
 from pydantic import ConfigDict, Field, model_validator
 
-from qat.ir.devices import (
+from qat.model.devices import (
     ChannelType,
     PhysicalBaseband,
     PhysicalChannel,

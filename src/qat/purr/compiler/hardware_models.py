@@ -551,7 +551,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.__dict__.update(state)
 
     def build_pydantic(self):
-        from qat.ir.model import QuantumHardwareModel
+        from qat.model.model import QuantumHardwareModel
 
         return QuantumHardwareModel(
             default_acquire_mode=self.default_acquire_mode,

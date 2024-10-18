@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, List, Union
 import numpy as np
 from pydantic import Field
 
-from qat.ir.model import QuantumHardwareModel
+from qat.model.model import QuantumHardwareModel
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.instructions import Instruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt

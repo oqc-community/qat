@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from pydantic import model_validator
 
-from qat.ir.devices import PhysicalBaseband, PhysicalChannel
+from qat.model.devices import PhysicalBaseband, PhysicalChannel
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -48,6 +48,12 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
 
     instruments: Dict[str, Instrument]
 
+    def instrument_connected(self, name: str):
+        return self.instruments[name].is_connected
+
+    def all_instruments_connected(self):
+        return all([instrument.is_connected for instrument in self.instruments])
+
     def connect(self):
         if len(self.instruments) == 0:
             raise IndexError(
@@ -59,8 +65,7 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
             log.info(f"{type(instrument).__name__} with ID {instrument.id} connected.")
             instrument.is_connected = True
 
-        connected = [instrument.is_connected for instrument in self.instruments]
-        return all(connected)
+        return self.all_instruments_connected
 
     def disconnect(self):
         if len(self.instruments) == 0:
@@ -92,9 +97,12 @@ class DCBiasChannel(WarnOnExtraFieldsModel):
     This is generic DC Bias Channel class, It would ONLY accept DC bias card as
     instrument which needs to have get_voltage and set_voltage function.
 
-    Attributes
-        channel_idx: Index of the DC bias channel.
+    Attributes:
+        channel_idx: The index of the DC bias channel.
         bias_value:
+        instrument: The live instrument connected to this bias channel.
+        min_value: ???
+        max_value: ???
     """
 
     channel_idx: int | None = None
@@ -115,6 +123,10 @@ class DCBiasChannel(WarnOnExtraFieldsModel):
 class LivePhysicalBaseband(PhysicalBaseband):
     """
     A wrapper over the PhysicalBaseband, that connects to a live instrument.
+
+    Attributes:
+        channel_idx: The index of the channel associated with the baseband.
+        instrument: The live instrument connected to this baseband.
     """
 
     channel_idx: int | None = None
@@ -132,6 +144,10 @@ class ControlHardwareChannel(PhysicalChannel):
     """
     Wrapper over a PhysicalChannel, that maps to a live instrument channel.
     This (and derived) object should contain hardware specific information.
+
+    channel_idx: The index of the channel associated with this channel.
+    dcbiaschannel_pair: ???
+    switch_ch: ???
     """
 
     channel_idx: int
