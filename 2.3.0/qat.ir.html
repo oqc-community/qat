@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.ir package &mdash; QAT 2.3.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.ir.pass_base module" href="qat.ir.pass_base.html" />
+    <link rel="prev" title="qat.compiler.validation_passes module" href="qat.compiler.validation_passes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+      <li class="breadcrumb-item active">qat.ir package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.ir.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.ir">
+<span id="qat-ir-package"></span><h1>qat.ir package<a class="headerlink" href="#module-qat.ir" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass"><code class="docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass.run"><code class="docutils literal notranslate"><span class="pre">AnalysisPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin"><code class="docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.run_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.run_pass_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept"><code class="docutils literal notranslate"><span class="pre">PassConcept</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept.run"><code class="docutils literal notranslate"><span class="pre">PassConcept.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager"><code class="docutils literal notranslate"><span class="pre">PassManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.add"><code class="docutils literal notranslate"><span class="pre">PassManager.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.run"><code class="docutils literal notranslate"><span class="pre">PassManager.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel"><code class="docutils literal notranslate"><span class="pre">PassModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel.run"><code class="docutils literal notranslate"><span class="pre">PassModel.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass"><code class="docutils literal notranslate"><span class="pre">TransformPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass.run"><code class="docutils literal notranslate"><span class="pre">TransformPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass"><code class="docutils literal notranslate"><span class="pre">ValidationPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass.run"><code class="docutils literal notranslate"><span class="pre">ValidationPass.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultConcept"><code class="docutils literal notranslate"><span class="pre">ResultConcept</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.value"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.value()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager"><code class="docutils literal notranslate"><span class="pre">ResultManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.add"><code class="docutils literal notranslate"><span class="pre">ResultManager.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.lookup_by_type"><code class="docutils literal notranslate"><span class="pre">ResultManager.lookup_by_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.results"><code class="docutils literal notranslate"><span class="pre">ResultManager.results</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.update"><code class="docutils literal notranslate"><span class="pre">ResultManager.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultModel"><code class="docutils literal notranslate"><span class="pre">ResultModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultModel.value"><code class="docutils literal notranslate"><span class="pre">ResultModel.value</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.compiler.validation_passes.html" class="btn btn-neutral float-left" title="qat.compiler.validation_passes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.ir.pass_base.html" class="btn btn-neutral float-right" title="qat.ir.pass_base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.3.0
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.ir.html">2.3.0</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

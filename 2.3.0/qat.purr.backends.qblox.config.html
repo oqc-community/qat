@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.purr.backends.qblox.config module &mdash; QAT 2.3.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.purr.backends.qblox.constants module" href="qat.purr.backends.qblox.constants.html" />
+    <link rel="prev" title="qat.purr.backends.qblox.codegen module" href="qat.purr.backends.qblox.codegen.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.3.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5 current"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul class="current">
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.backends.html">qat.purr.backends package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a></li>
+      <li class="breadcrumb-item active">qat.purr.backends.qblox.config module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.purr.backends.qblox.config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.purr.backends.qblox.config">
+<span id="qat-purr-backends-qblox-config-module"></span><h1>qat.purr.backends.qblox.config module<a class="headerlink" href="#module-qat.purr.backends.qblox.config" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AttConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AttConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.AttConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AttConfig.in0">
+<span class="sig-name descname"><span class="pre">in0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AttConfig.in0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AttConfig.out0">
+<span class="sig-name descname"><span class="pre">out0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AttConfig.out0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AttConfig.out1">
+<span class="sig-name descname"><span class="pre">out1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AttConfig.out1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AwgConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cont_mode_en_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_mode_en_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_mode_waveform_idx_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_mode_waveform_idx_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upsample_rate_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upsample_rate_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.cont_mode_en_path0">
+<span class="sig-name descname"><span class="pre">cont_mode_en_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.cont_mode_en_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.cont_mode_en_path1">
+<span class="sig-name descname"><span class="pre">cont_mode_en_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.cont_mode_en_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path0">
+<span class="sig-name descname"><span class="pre">cont_mode_waveform_idx_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path1">
+<span class="sig-name descname"><span class="pre">cont_mode_waveform_idx_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.gain_path0">
+<span class="sig-name descname"><span class="pre">gain_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.gain_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.gain_path1">
+<span class="sig-name descname"><span class="pre">gain_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.gain_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.mod_en">
+<span class="sig-name descname"><span class="pre">mod_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.mod_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.offset_path0">
+<span class="sig-name descname"><span class="pre">offset_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.offset_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.offset_path1">
+<span class="sig-name descname"><span class="pre">offset_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.offset_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path0">
+<span class="sig-name descname"><span class="pre">upsample_rate_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path1">
+<span class="sig-name descname"><span class="pre">upsample_rate_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConnectionConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_value=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out2=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out3=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acq=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acq_I=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acq_Q=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.acq">
+<span class="sig-name descname"><span class="pre">acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.acq_I">
+<span class="sig-name descname"><span class="pre">acq_I</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.acq_I" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.acq_Q">
+<span class="sig-name descname"><span class="pre">acq_Q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.acq_Q" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.bulk_value">
+<span class="sig-name descname"><span class="pre">bulk_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.bulk_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.out0">
+<span class="sig-name descname"><span class="pre">out0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.out0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.out1">
+<span class="sig-name descname"><span class="pre">out1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.out1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.out2">
+<span class="sig-name descname"><span class="pre">out2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.out2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ConnectionConfig.out3">
+<span class="sig-name descname"><span class="pre">out3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ConnectionConfig.out3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.GainConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GainConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.GainConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.GainConfig.in0">
+<span class="sig-name descname"><span class="pre">in0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.GainConfig.in0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.GainConfig.in1">
+<span class="sig-name descname"><span class="pre">in1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.GainConfig.in1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out0_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0_in0_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0_in0_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out0_en">
+<span class="sig-name descname"><span class="pre">out0_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out0_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out0_freq">
+<span class="sig-name descname"><span class="pre">out0_freq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out0_freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out0_in0_en">
+<span class="sig-name descname"><span class="pre">out0_in0_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out0_in0_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out0_in0_freq">
+<span class="sig-name descname"><span class="pre">out0_in0_freq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out0_in0_freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out1_en">
+<span class="sig-name descname"><span class="pre">out1_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out1_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.LoConfig.out1_freq">
+<span class="sig-name descname"><span class="pre">out1_freq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.LoConfig.out1_freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.MixerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MixerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.MixerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.MixerConfig.gain_ratio">
+<span class="sig-name descname"><span class="pre">gain_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.MixerConfig.gain_ratio" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.MixerConfig.phase_offset">
+<span class="sig-name descname"><span class="pre">phase_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.MixerConfig.phase_offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModuleConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker_inverts=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lo=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attenuation=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_acq=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.attenuation">
+<span class="sig-name descname"><span class="pre">attenuation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.AttConfig" title="qat.purr.backends.qblox.config.AttConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.attenuation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.gain">
+<span class="sig-name descname"><span class="pre">gain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.GainConfig" title="qat.purr.backends.qblox.config.GainConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GainConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.gain" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.lo">
+<span class="sig-name descname"><span class="pre">lo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.LoConfig" title="qat.purr.backends.qblox.config.LoConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.lo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.marker_inverts">
+<span class="sig-name descname"><span class="pre">marker_inverts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.marker_inverts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.OffsetConfig" title="qat.purr.backends.qblox.config.OffsetConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">OffsetConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ModuleConfig.scope_acq">
+<span class="sig-name descname"><span class="pre">scope_acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.ScopeAcqConfig" title="qat.purr.backends.qblox.config.ScopeAcqConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScopeAcqConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ModuleConfig.scope_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.NcoConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NcoConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_offs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop_delay_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop_delay_comp_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.NcoConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.NcoConfig.freq">
+<span class="sig-name descname"><span class="pre">freq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.NcoConfig.freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.NcoConfig.phase_offs">
+<span class="sig-name descname"><span class="pre">phase_offs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.NcoConfig.phase_offs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp">
+<span class="sig-name descname"><span class="pre">prop_delay_comp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp_en">
+<span class="sig-name descname"><span class="pre">prop_delay_comp_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OffsetConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out0_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out1_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in0_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in0_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.in0">
+<span class="sig-name descname"><span class="pre">in0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.in0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.in0_path0">
+<span class="sig-name descname"><span class="pre">in0_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.in0_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.in0_path1">
+<span class="sig-name descname"><span class="pre">in0_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.in0_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.in1">
+<span class="sig-name descname"><span class="pre">in1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.in1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out0">
+<span class="sig-name descname"><span class="pre">out0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out0_path0">
+<span class="sig-name descname"><span class="pre">out0_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out0_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out0_path1">
+<span class="sig-name descname"><span class="pre">out0_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out0_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out1">
+<span class="sig-name descname"><span class="pre">out1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out1_path0">
+<span class="sig-name descname"><span class="pre">out1_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out1_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out1_path1">
+<span class="sig-name descname"><span class="pre">out1_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out1_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out2">
+<span class="sig-name descname"><span class="pre">out2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.OffsetConfig.out3">
+<span class="sig-name descname"><span class="pre">out3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.OffsetConfig.out3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot_idx=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfig.module">
+<span class="sig-name descname"><span class="pre">module</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.ModuleConfig" title="qat.purr.backends.qblox.config.ModuleConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfig.module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfig.sequencers">
+<span class="sig-name descname"><span class="pre">sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.purr.backends.qblox.config.SequencerConfig" title="qat.purr.backends.qblox.config.SequencerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfig.sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfig.slot_idx">
+<span class="sig-name descname"><span class="pre">slot_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfig.slot_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_lo_leakage">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer">
+<span class="sig-name descname"><span class="pre">calibrate_mixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer" title="Link to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Compensates for the LO leakage for input(s)/output(s) depending on module</p></li>
+<li><p>Suppresses undesired sideband on sequencer</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_sideband">
+<span class="sig-name descname"><span class="pre">calibrate_sideband</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_sideband" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg">
+<span class="sig-name descname"><span class="pre">configure_awg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection">
+<span class="sig-name descname"><span class="pre">configure_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_mixer">
+<span class="sig-name descname"><span class="pre">configure_mixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_mixer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_module">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configure_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_nco">
+<span class="sig-name descname"><span class="pre">configure_nco</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_nco" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QbloxConfigHelper.configure_sequencer">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configure_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_sequencer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmConfigHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="qat.purr.backends.qblox.config.QcmConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage">
+<span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation">
+<span class="sig-name descname"><span class="pre">configure_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_lo">
+<span class="sig-name descname"><span class="pre">configure_lo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_lo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_module">
+<span class="sig-name descname"><span class="pre">configure_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_offset">
+<span class="sig-name descname"><span class="pre">configure_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_sequencer">
+<span class="sig-name descname"><span class="pre">configure_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_sequencer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper.configure" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq">
+<span class="sig-name descname"><span class="pre">configure_scope_acq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmRfConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="qat.purr.backends.qblox.config.QrmConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QrmConfigHelper</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.calibrate_lo_leakage">
+<span class="sig-name descname"><span class="pre">calibrate_lo_leakage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.calibrate_lo_leakage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq">
+<span class="sig-name descname"><span class="pre">configure_acq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_attenuation">
+<span class="sig-name descname"><span class="pre">configure_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_attenuation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_lo">
+<span class="sig-name descname"><span class="pre">configure_lo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_lo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_module">
+<span class="sig-name descname"><span class="pre">configure_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_offset">
+<span class="sig-name descname"><span class="pre">configure_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer">
+<span class="sig-name descname"><span class="pre">configure_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeAcqConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer_select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_mode_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_mode_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_level_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_level_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_mode_en_path0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_mode_en_path1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path0">
+<span class="sig-name descname"><span class="pre">avg_mode_en_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path1">
+<span class="sig-name descname"><span class="pre">avg_mode_en_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.sequencer_select">
+<span class="sig-name descname"><span class="pre">sequencer_select</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.sequencer_select" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path0">
+<span class="sig-name descname"><span class="pre">trigger_level_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path1">
+<span class="sig-name descname"><span class="pre">trigger_level_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path0">
+<span class="sig-name descname"><span class="pre">trigger_mode_path0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path1">
+<span class="sig-name descname"><span class="pre">trigger_mode_path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequencerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sync_en=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_ovr_en=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_ovr_value=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_count_thresholds=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_threshold_inverts=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">awg=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demod_en_acq=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_weight_acq=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholded_acq=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl_acq=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.awg">
+<span class="sig-name descname"><span class="pre">awg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.AwgConfig" title="qat.purr.backends.qblox.config.AwgConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AwgConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.awg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.connection">
+<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.ConnectionConfig" title="qat.purr.backends.qblox.config.ConnectionConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.connection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.demod_en_acq">
+<span class="sig-name descname"><span class="pre">demod_en_acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.demod_en_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.marker_ovr_en">
+<span class="sig-name descname"><span class="pre">marker_ovr_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.marker_ovr_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.marker_ovr_value">
+<span class="sig-name descname"><span class="pre">marker_ovr_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.marker_ovr_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.mixer">
+<span class="sig-name descname"><span class="pre">mixer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.MixerConfig" title="qat.purr.backends.qblox.config.MixerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.mixer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.nco">
+<span class="sig-name descname"><span class="pre">nco</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.NcoConfig" title="qat.purr.backends.qblox.config.NcoConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">NcoConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.nco" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.square_weight_acq">
+<span class="sig-name descname"><span class="pre">square_weight_acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.SquareWeightAcq" title="qat.purr.backends.qblox.config.SquareWeightAcq"><code class="xref py py-class docutils literal notranslate"><span class="pre">SquareWeightAcq</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.square_weight_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.sync_en">
+<span class="sig-name descname"><span class="pre">sync_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.sync_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.thresholded_acq">
+<span class="sig-name descname"><span class="pre">thresholded_acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig" title="qat.purr.backends.qblox.config.ThresholdedAcqConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdedAcqConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.thresholded_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.trigger_count_thresholds">
+<span class="sig-name descname"><span class="pre">trigger_count_thresholds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.trigger_count_thresholds" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.trigger_threshold_inverts">
+<span class="sig-name descname"><span class="pre">trigger_threshold_inverts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.trigger_threshold_inverts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SequencerConfig.ttl_acq">
+<span class="sig-name descname"><span class="pre">ttl_acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.config.TtlAcqConfig" title="qat.purr.backends.qblox.config.TtlAcqConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TtlAcqConfig</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SequencerConfig.ttl_acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SquareWeightAcq">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareWeightAcq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.SquareWeightAcq" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.SquareWeightAcq.integration_length">
+<span class="sig-name descname"><span class="pre">integration_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.SquareWeightAcq.integration_length" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThresholdedAcqConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_invert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_invert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_address">
+<span class="sig-name descname"><span class="pre">marker_address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_address" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_en">
+<span class="sig-name descname"><span class="pre">marker_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_invert">
+<span class="sig-name descname"><span class="pre">marker_invert</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_invert" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.rotation">
+<span class="sig-name descname"><span class="pre">rotation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.rotation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_address">
+<span class="sig-name descname"><span class="pre">trigger_address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_address" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_en">
+<span class="sig-name descname"><span class="pre">trigger_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_invert">
+<span class="sig-name descname"><span class="pre">trigger_invert</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_invert" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.TtlAcqConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TtlAcqConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auto_bin_incr_en</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.TtlAcqConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.TtlAcqConfig.auto_bin_incr_en">
+<span class="sig-name descname"><span class="pre">auto_bin_incr_en</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.TtlAcqConfig.auto_bin_incr_en" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.TtlAcqConfig.input_select">
+<span class="sig-name descname"><span class="pre">input_select</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.TtlAcqConfig.input_select" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.TtlAcqConfig.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.config.TtlAcqConfig.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.purr.backends.qblox.codegen.html" class="btn btn-neutral float-left" title="qat.purr.backends.qblox.codegen module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.backends.qblox.constants.html" class="btn btn-neutral float-right" title="qat.purr.backends.qblox.constants module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.3.0
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.purr.backends.qblox.config.html">2.3.0</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
