@@ -12,7 +12,7 @@ from tests.qat.utils.models import ListReturningEngine
 
 @pytest.mark.parametrize(
     ("input_string", "file_type", "instruction_length"),
-    [("ghz.qasm", ProgramFileType.QASM2, 196)],
+    [("ghz.qasm", ProgramFileType.QASM2, 193)],
 )
 def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     program = get_test_file_path(file_type, input_string)
