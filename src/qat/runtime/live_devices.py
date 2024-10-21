@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Dict
+from collections.abc import Iterable
+from typing import Any, Dict, List
 
 from pydantic import model_validator
 
@@ -12,16 +13,22 @@ from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
 log = get_default_logger()
 
 
-class Instrument(WarnOnExtraFieldsModel):
+class AbstractInstrument(WarnOnExtraFieldsModel):
     """
     A dataclass for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
     To avoid saving driver specific data in the calibration files, the actual drivers should be a property of
     this object, so the calibration will skip it.
     """
 
-    address: str
     id: str | None = None
     is_connected: bool = False
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(id={self.id})"
+
+
+class Instrument(AbstractInstrument):
+    address: str
     _driver: Any | None
 
     @model_validator(mode="after")
@@ -37,6 +44,34 @@ class Instrument(WarnOnExtraFieldsModel):
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, address={self.address})"
 
+    def __iter__(self):
+        yield self
+
+
+class CompositeInstrument(AbstractInstrument, Iterable):
+    instruments: List[AbstractInstrument]
+
+    def add(self, instrument: AbstractInstrument):
+        if self._get_index(instrument):
+            raise KeyError(f"Instrument with id {instrument.id} is already present.")
+
+        self.instruments.append(instrument)
+
+    def remove(self, instrument: AbstractInstrument):
+        if idx := self._get_index(instrument):
+            self.instruments.pop(idx)
+        else:
+            raise KeyError(f"Instrument with id {instrument.id} not found.")
+
+    def _get_index(self, instrument: AbstractInstrument):
+        for idx, instr in enumerate(self.instruments):
+            if instr.id == instrument.id:
+                return idx
+
+    def __iter__(self):
+        for instrument in self.instruments:
+            yield from instrument
+
 
 class InstrumentConnectionManager(WarnOnExtraFieldsModel):
     """
@@ -46,7 +81,7 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
         instruments: The instruments that can be connected or disconnected.
     """
 
-    instruments: Dict[str, Instrument]
+    instruments: AbstractInstrument
 
     def instrument_connected(self, name: str):
         return self.instruments[name].is_connected
@@ -55,12 +90,6 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
         return all([instrument.is_connected for instrument in self.instruments])
 
     def connect(self):
-        if len(self.instruments) == 0:
-            raise IndexError(
-                "No instruments to be connected. Please add instruments to"
-                "the instrument connection manager."
-            )
-
         for instrument in self.instruments:
             log.info(f"{type(instrument).__name__} with ID {instrument.id} connected.")
             instrument.is_connected = True
@@ -68,12 +97,6 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
         return self.all_instruments_connected
 
     def disconnect(self):
-        if len(self.instruments) == 0:
-            raise IndexError(
-                "No instruments to be disconnected. Please add instruments to"
-                "the instrument connection manager."
-            )
-
         connected = []
         for instrument in self.instruments:
             if instrument.driver is not None:
