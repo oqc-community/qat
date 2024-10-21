@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import uuid
 from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 log = get_default_logger()
 
@@ -24,13 +25,14 @@ class QuantumComponent(WarnOnExtraFieldsModel):
     model_config = ConfigDict(validate_assignment=True)
 
     id: Optional[str] = ""
+    _uuid: str = PrivateAttr(default_factory=lambda: str(uuid.uuid4()))
 
     @field_validator("id")
     def set_id(cls, id):
         return id or ""
 
     def __hash__(self):
-        return hash(self.id)
+        return hash(self._uuid)
 
     def __repr__(self):
         return f"{type(self).__name__}({self.id})"
@@ -295,6 +297,16 @@ class QuantumDevice(QuantumComponent):
             )
 
         return self
+
+    def _create_pulse_channel_id(
+        self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
+    ):
+        if channel_type in MULTI_DEVICE_CHANNEL_TYPES and len(auxiliary_devices) == 0:
+            raise ValueError(
+                f"Channel type {channel_type.name} requires at least one "
+                "auxillary_device"
+            )
+        return ".".join([str(x.id) for x in (auxiliary_devices)] + [channel_type.name])
 
     def get_pulse_channel(
         self,

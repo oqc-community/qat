@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import uuid
 from abc import abstractmethod
 from collections.abc import Iterable
 from typing import Any, Dict, List
 
-from pydantic import model_validator
+from pydantic import PrivateAttr, model_validator
 
 from qat.model.devices import PhysicalBaseband, PhysicalChannel
 from qat.purr.utils.logger import get_default_logger
-from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 log = get_default_logger()
 
@@ -21,6 +22,7 @@ class AbstractInstrument(WarnOnExtraFieldsModel):
     """
 
     id: str | None = None
+    _uuid: str = PrivateAttr(default_factory=lambda: str(uuid.uuid4()))
     is_connected: bool = False
 
     def __str__(self):
@@ -78,41 +80,56 @@ class InstrumentConnectionManager(WarnOnExtraFieldsModel):
     Interface to implement the connection and disconnection of an instrument to a unique address.
 
     Args:
-        instruments: The instruments that can be connected or disconnected.
+        instrument: The (composite) instrument that can be connected or disconnected.
     """
 
-    instruments: AbstractInstrument
-
-    def instrument_connected(self, name: str):
-        return self.instruments[name].is_connected
+    instrument: AbstractInstrument
 
     def all_instruments_connected(self):
-        return all([instrument.is_connected for instrument in self.instruments])
+        return all([sub_instrument.is_connected for sub_instrument in self.instrument])
 
-    def connect(self):
-        for instrument in self.instruments:
-            log.info(f"{type(instrument).__name__} with ID {instrument.id} connected.")
-            instrument.is_connected = True
+    def connect_instrument(self, instrument: Instrument):
+        for sub_instrument in self.instrument:
+            if sub_instrument.__uuid == instrument._uuid:
+                log.info(
+                    f"{type(sub_instrument).__name__} with ID {sub_instrument.id} connected."
+                )
+                sub_instrument.is_connected = True
 
-        return self.all_instruments_connected
+    def connect_instruments(self):
+        for sub_instrument in self.instrument:
+            log.info(
+                f"{type(sub_instrument).__name__} with ID {sub_instrument.id} connected."
+            )
+            sub_instrument.is_connected = True
 
-    def disconnect(self):
+    def disconnect_instruments(self):
         connected = []
-        for instrument in self.instruments:
-            if instrument.driver is not None:
+        for sub_instrument in self.instrument:
+            if sub_instrument.driver is not None:
                 try:
-                    instrument.driver.close()
-                    instrument.driver = None
-                    instrument.is_connected = False
-                    log.info(f"{type(instrument).__name__} with ID {self.id} disconnected.")
+                    sub_instrument.driver.close()
+                    sub_instrument.driver = None
+                    sub_instrument.is_connected = False
+                    log.info(
+                        f"{type(sub_instrument).__name__} with ID {sub_instrument.id} disconnected."
+                    )
                 except BaseException as e:
                     log.warning(
-                        f"Failed to close instrument {type(instrument).__name__} at: "
-                        f"{instrument.address} ID: {instrument.id}\n{str(e)}"
+                        f"Failed to close instrument {type(sub_instrument).__name__} at: "
+                        f"{sub_instrument.address} ID: {sub_instrument.id}\n{str(e)}"
                     )
                 connected.append(False)
 
         return all(connected)
+
+    def disconnect_instrument(self, instrument: Instrument):
+        for sub_instrument in self.instrument:
+            if sub_instrument.__uuid == instrument._uuid:
+                log.info(
+                    f"{type(sub_instrument).__name__} with ID {sub_instrument.id} disconnected."
+                )
+                sub_instrument.is_connected = False
 
 
 class DCBiasChannel(WarnOnExtraFieldsModel):
@@ -122,8 +139,8 @@ class DCBiasChannel(WarnOnExtraFieldsModel):
 
     Attributes:
         channel_idx: The index of the DC bias channel.
-        bias_value:
-        instrument: The live instrument connected to this bias channel.
+        bias_value: The numerical value for the bias.
+        instrument: The live DC bias card connected to this bias channel.
         min_value: ???
         max_value: ???
     """
@@ -141,6 +158,11 @@ class DCBiasChannel(WarnOnExtraFieldsModel):
                 f"Min value {self.min_value} of {self.__class__.name} with instrument {str(self.instrument)} is larger than its max value {self.max_value}."
             )
         return self
+
+
+class DCBiasChannelPair(WarnOnExtraFieldsModel):
+    I: DCBiasChannel
+    Q: DCBiasChannel
 
 
 class LivePhysicalBaseband(PhysicalBaseband):
@@ -168,14 +190,15 @@ class ControlHardwareChannel(PhysicalChannel):
     Wrapper over a PhysicalChannel, that maps to a live instrument channel.
     This (and derived) object should contain hardware specific information.
 
-    channel_idx: The index of the channel associated with this channel.
-    dcbiaschannel_pair: ???
-    switch_ch: ???
+    Attributes:
+        channel_idx: The index of this channel.
+        dcbiaschannel_pair: The DC bias channels for the I and Q components.
+        switch_ch: ID of the switch channel.
     """
 
     channel_idx: int
-    dcbiaschannel_pair: Dict[str, DCBiasChannel]
-    switch_ch: Instrument | None = None
+    dcbiaschannel_pair: DCBiasChannelPair
+    switch_ch: str | None = None
 
     @model_validator(mode="after")
     def check_id(self):
@@ -198,7 +221,9 @@ class ControlHardware(Instrument):
                     f"Physical channel {str(physical_channel)} already in {str(self)}."
                 )
 
-        return physical_channel
+    @property
+    def channels(self):
+        return self.channels
 
     @abstractmethod
     def start_playback(self): ...

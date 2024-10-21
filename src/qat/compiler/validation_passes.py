@@ -6,6 +6,7 @@ import numpy as np
 from qat import qatconfig
 from qat.ir.pass_base import ValidationPass
 from qat.ir.result_base import ResultManager
+from qat.model.model import QuantumHardwareModel as NewQuantumHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
 from qat.purr.compiler.execution import QuantumExecutionEngine
@@ -20,6 +21,7 @@ from qat.purr.compiler.instructions import (
     Sweep,
     Variable,
 )
+from qat.runtime.execution import QuantumExecutionEngine as NewQuantumExecutionEngine
 
 
 class InstructionValidation(ValidationPass):
@@ -28,12 +30,21 @@ class InstructionValidation(ValidationPass):
     """
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        engine = next((a for a in args if isinstance(a, QuantumExecutionEngine)), None)
+        engine = next(
+            (
+                a
+                for a in args
+                if isinstance(a, QuantumExecutionEngine | NewQuantumExecutionEngine)
+            ),
+            None,
+        )
 
         if not engine:
             engine = kwargs.get("engine", None)
 
-        if not engine or not isinstance(engine, QuantumExecutionEngine):
+        if not engine or not isinstance(
+            engine, QuantumExecutionEngine | NewQuantumExecutionEngine
+        ):
             raise ValueError(
                 f"Expected to find an instance of {QuantumExecutionEngine} in arguments list, but got {engine} instead"
             )
@@ -88,12 +99,21 @@ class ReadoutValidation(ValidationPass):
     """
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        model = next((a for a in args if isinstance(a, QuantumHardwareModel)), None)
+        model = next(
+            (
+                a
+                for a in args
+                if isinstance(a, QuantumHardwareModel | NewQuantumHardwareModel)
+            ),
+            None,
+        )
 
         if not model:
             model = kwargs.get("model", None)
 
-        if not model or not isinstance(model, QuantumHardwareModel):
+        if not model or not isinstance(
+            model, QuantumHardwareModel | NewQuantumHardwareModel
+        ):
             raise ValueError(
                 f"Expected to find an instance of {QuantumHardwareModel} in arguments list, but got {model} instead"
             )

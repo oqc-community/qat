@@ -3,7 +3,7 @@ from typing import Dict
 import numpy as np
 from pydantic import ConfigDict
 
-from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 
 class ReadoutMitigation(WarnOnExtraFieldsModel):

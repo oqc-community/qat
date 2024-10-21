@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Dict, List, Tuple, Union
 
+import numpy as np
 from pydantic import ConfigDict, Field, model_validator
 
 from qat.model.devices import (
@@ -9,13 +11,21 @@ from qat.model.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
+    QuantumComponent,
     QuantumDevice,
     Qubit,
     QubitCoupling,
     Resonator,
 )
-from qat.purr.compiler.instructions import AcquireMode
-from qat.purr.utils.pydantic import WarnOnExtraFieldsModel
+from qat.purr.compiler.instructions import (
+    AcquireMode,
+    CrossResonanceCancelPulse,
+    CrossResonancePulse,
+    DrivePulse,
+    PhaseShift,
+    Synchronize,
+)
+from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 
 class QuantumHardwareModel(WarnOnExtraFieldsModel):
@@ -94,12 +104,7 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
     def add_hardware_component(
         self,
         name: str,
-        component: Union[
-            Dict[str, QuantumDevice],
-            Dict[str, PulseChannel],
-            Dict[str, PhysicalChannel],
-            Dict[str, PhysicalBaseband],
-        ],
+        component: Union[Dict[str, QuantumComponent],],
     ):
         if not hasattr(self, name) or not isinstance(
             components := getattr(self, name), Dict
@@ -118,6 +123,128 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
 
     def __str__(self):
         return f"{type(self).__name__}({self.qubits}, {self.resonators})"
+
+    def _resolve_qb_pulse_channel(self, chanbit: Union[Qubit, PulseChannel]):
+        if isinstance(chanbit, Qubit):
+            return chanbit, chanbit.get_default_pulse_channel()
+        else:
+            quantum_devices = self.get_devices_from_pulse_channel(chanbit.full_id())
+            primary_devices = [
+                device
+                for device in quantum_devices
+                if device.get_default_pulse_channel() == chanbit
+            ]
+            if len(primary_devices) > 1:
+                raise NotImplementedError(
+                    f"Too many devices use the channel with id {chanbit.full_id()} as "
+                    "a default channel to resolve a primary device."
+                )
+            elif len(primary_devices) == 0:
+                return None, chanbit
+            else:
+                return primary_devices[0], chanbit
+
+    def get_hw_x_pi_2(
+        self, qubit: Qubit, pulse_channel: PulseChannel = None, amp_scale: float = None
+    ):
+        if amp_scale is None or np.isclose(amp_scale, 1.0):
+            pulse_args = qubit.pulse_hw_x_pi_2
+        else:
+            pulse_args = deepcopy(qubit.pulse_hw_x_pi_2)
+            pulse_args["amp"] *= amp_scale
+
+        # note: this could be a more complicated set of instructions
+        return [
+            DrivePulse(pulse_channel or qubit.get_default_pulse_channel(), **pulse_args)
+        ]
+
+    def get_hw_z(self, qubit: Qubit, phase, pulse_channel: PulseChannel = None):
+        if phase == 0:
+            return []
+
+        instr_collection = [
+            PhaseShift(pulse_channel or qubit.get_default_pulse_channel(), phase)
+        ]
+        if pulse_channel is None or pulse_channel == qubit.get_default_pulse_channel():
+            instr_collection.extend(
+                PhaseShift(coupled_qubit.get_cross_resonance_channel(qubit), phase)
+                for coupled_qubit in qubit.coupled_qubits
+            )
+            # TODO: the cross-resonance cancellation channel mirrors the cr channel,
+            #   they should be tied together
+            instr_collection.extend(
+                PhaseShift(
+                    qubit.get_cross_resonance_cancellation_channel(coupled_qubit), phase
+                )
+                for coupled_qubit in qubit.coupled_qubits
+            )
+
+        return instr_collection
+
+    def get_hw_zx_pi_4(self, qubit: Qubit, target_qubit: Qubit):
+        control_channel = qubit.get_cross_resonance_channel(target_qubit)
+        target_channel = target_qubit.get_cross_resonance_cancellation_channel(qubit)
+        pulse = qubit.pulse_hw_zx_pi_4.get(target_qubit.id, None)
+        if pulse is None:
+            raise ValueError(
+                f"Tried to perform cross resonance on {str(target_qubit)} "
+                f"that isn't linked to {str(qubit)}."
+            )
+
+        return [
+            Synchronize([control_channel, target_channel]),
+            CrossResonancePulse(control_channel, **pulse),
+            CrossResonanceCancelPulse(target_channel, **pulse),
+        ]
+
+    def get_gate_U(self, qubit, theta, phi, lamb, pulse_channel: PulseChannel = None):
+        theta = self.constrain(theta)
+        return [
+            *self.get_hw_z(qubit, lamb + np.pi, pulse_channel),
+            *self.get_hw_x_pi_2(qubit, pulse_channel),
+            *self.get_hw_z(qubit, np.pi - theta, pulse_channel),
+            *self.get_hw_x_pi_2(qubit, pulse_channel),
+            *self.get_hw_z(qubit, phi, pulse_channel),
+        ]
+
+    def get_gate_X(self, qubit, theta, pulse_channel: PulseChannel = None):
+        theta = self.constrain(theta)
+        if np.isclose(theta, 0.0):
+            return []
+        elif np.isclose(theta, np.pi / 2.0):
+            return self.get_hw_x_pi_2(qubit, pulse_channel)
+        elif np.isclose(theta, -np.pi / 2.0):
+            return [
+                *self.get_hw_z(qubit, np.pi, pulse_channel),
+                *self.get_hw_x_pi_2(qubit, pulse_channel),
+                *self.get_hw_z(qubit, -np.pi, pulse_channel),
+            ]
+        return self.get_gate_U(qubit, theta, -np.pi / 2.0, np.pi / 2.0, pulse_channel)
+
+    def get_gate_Y(self, qubit, theta, pulse_channel: PulseChannel = None):
+        theta = self.constrain(theta)
+        if np.isclose(theta, 0.0):
+            return []
+        elif np.isclose(theta, np.pi / 2.0):
+            return [
+                *self.get_hw_z(qubit, -np.pi / 2.0, pulse_channel),
+                *self.get_hw_x_pi_2(qubit, pulse_channel),
+                *self.get_hw_z(qubit, np.pi / 2.0, pulse_channel),
+            ]
+        elif np.isclose(theta, -np.pi / 2.0):
+            return [
+                *self.get_hw_z(qubit, np.pi / 2.0, pulse_channel),
+                *self.get_hw_x_pi_2(qubit, pulse_channel),
+                *self.get_hw_z(qubit, -np.pi / 2.0, pulse_channel),
+            ]
+        return self.get_gate_U(qubit, theta, 0.0, 0.0, pulse_channel)
+
+    def get_gate_Z(self, qubit, theta, pulse_channel: PulseChannel = None):
+        theta = self.constrain(theta)
+        return self.get_hw_z(qubit, theta, pulse_channel)
+
+    def constrain(self, angle):
+        return (angle + np.pi) % (2 * np.pi) - np.pi
 
 
 class QuantumHardwareModelBuilder:
@@ -268,6 +395,3 @@ def build_hardware_model(qubit_count: int = 4, connectivity: list = None):
     )
 
     return builder.model
-
-
-hw_model = build_hardware_model(qubit_count=4)
