@@ -1,0 +1,1474 @@
+{
+    "py/object": "qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel",
+    "py/state": {
+        "default_acquire_mode": {
+            "py/reduce": [
+                {
+                    "py/type": "qat.purr.compiler.instructions.AcquireMode"
+                },
+                {
+                    "py/tuple": [
+                        "raw"
+                    ]
+                }
+            ],
+            "py/obj_ref_id": 131978454177856
+        },
+        "default_repeat_count": 1000,
+        "default_repetition_period": 0.0001,
+        "quantum_devices": {
+            "Q0": {
+                "py/object": "qat.purr.backends.realtime_chip_simulator.RTCSQubit",
+                "py/state": {
+                    "is_calibrated": true,
+                    "id": "Q0",
+                    "measure_device": {
+                        "py/object": "qat.purr.backends.realtime_chip_simulator.RTCSResonator",
+                        "py/state": {
+                            "is_calibrated": true,
+                            "id": "R0",
+                            "measure_device": null,
+                            "pulse_channels": {
+                                "measure": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                    "py/state": {
+                                        "pulse_channel": {
+                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                            "py/state": {
+                                                "is_calibrated": false,
+                                                "id": "R0.measure",
+                                                "physical_channel": {
+                                                    "py/object": "qat.purr.compiler.devices.PhysicalChannel",
+                                                    "py/state": {
+                                                        "is_calibrated": true,
+                                                        "id": "CH2",
+                                                        "sample_time": 1e-09,
+                                                        "baseband": {
+                                                            "py/object": "qat.purr.compiler.devices.PhysicalBaseband",
+                                                            "py/state": {
+                                                                "is_calibrated": true,
+                                                                "id": "L2",
+                                                                "frequency": 8000000000.0,
+                                                                "if_frequency": 250000000.0
+                                                            },
+                                                            "py/obj_ref_id": 131977510327568
+                                                        },
+                                                        "block_size": 1,
+                                                        "phase_offset": 0.0,
+                                                        "imbalance": 1.0,
+                                                        "acquire_allowed": true,
+                                                        "pulse_channel_min_frequency": 0.0,
+                                                        "pulse_channel_max_frequency": Infinity
+                                                    },
+                                                    "py/obj_ref_id": 131977510331360
+                                                },
+                                                "frequency": 8000000000.0,
+                                                "bias": {
+                                                    "py/object": "builtins.complex",
+                                                    "py/newargs": {
+                                                        "py/tuple": [
+                                                            0.0,
+                                                            0.0
+                                                        ]
+                                                    },
+                                                    "py/obj_ref_id": 131978461367728
+                                                },
+                                                "scale": {
+                                                    "py/object": "builtins.complex",
+                                                    "py/newargs": {
+                                                        "py/tuple": [
+                                                            1.0,
+                                                            0.0
+                                                        ]
+                                                    },
+                                                    "py/obj_ref_id": 131978461367440
+                                                },
+                                                "fixed_if": false
+                                            },
+                                            "py/obj_ref_id": 131977510331552
+                                        },
+                                        "channel_type": {
+                                            "py/reduce": [
+                                                {
+                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                },
+                                                {
+                                                    "py/tuple": [
+                                                        2
+                                                    ]
+                                                }
+                                            ],
+                                            "py/obj_ref_id": 131978455914176
+                                        },
+                                        "auxiliary_devices": [],
+                                        "_pulse_channel_attributes": {
+                                            "py/set": [
+                                                "frequency",
+                                                "load_calibration_from_file",
+                                                "is_calibrated",
+                                                "baseband_if_frequency",
+                                                "baseband_frequency",
+                                                "acquire_allowed",
+                                                "imbalance",
+                                                "id",
+                                                "save_calibration_to_file",
+                                                "bias",
+                                                "get_calibration",
+                                                "sample_time",
+                                                "physical_channel",
+                                                "block_size",
+                                                "scale",
+                                                "partial_id",
+                                                "physical_channel_id",
+                                                "phase_offset",
+                                                "min_frequency",
+                                                "full_id",
+                                                "_is_serializable",
+                                                "max_frequency",
+                                                "load_calibration",
+                                                "fixed_if",
+                                                "block_time"
+                                            ]
+                                        }
+                                    },
+                                    "py/obj_ref_id": 131977510331600
+                                },
+                                "acquire": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                    "py/state": {
+                                        "pulse_channel": {
+                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                            "py/state": {
+                                                "is_calibrated": false,
+                                                "id": "R0.acquire",
+                                                "physical_channel": {
+                                                    "py/id": 131977510331360
+                                                },
+                                                "frequency": 8000000000.0,
+                                                "bias": {
+                                                    "py/object": "builtins.complex",
+                                                    "py/newargs": {
+                                                        "py/tuple": [
+                                                            0.0,
+                                                            0.0
+                                                        ]
+                                                    },
+                                                    "py/obj_ref_id": 131978461367728
+                                                },
+                                                "scale": {
+                                                    "py/object": "builtins.complex",
+                                                    "py/newargs": {
+                                                        "py/tuple": [
+                                                            1.0,
+                                                            0.0
+                                                        ]
+                                                    },
+                                                    "py/obj_ref_id": 131978461367440
+                                                },
+                                                "fixed_if": false
+                                            },
+                                            "py/obj_ref_id": 131977510331648
+                                        },
+                                        "channel_type": {
+                                            "py/reduce": [
+                                                {
+                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                },
+                                                {
+                                                    "py/tuple": [
+                                                        6
+                                                    ]
+                                                }
+                                            ],
+                                            "py/obj_ref_id": 131978455914560
+                                        },
+                                        "auxiliary_devices": [],
+                                        "_pulse_channel_attributes": {
+                                            "py/set": [
+                                                "frequency",
+                                                "load_calibration_from_file",
+                                                "is_calibrated",
+                                                "baseband_if_frequency",
+                                                "baseband_frequency",
+                                                "acquire_allowed",
+                                                "imbalance",
+                                                "id",
+                                                "save_calibration_to_file",
+                                                "bias",
+                                                "get_calibration",
+                                                "sample_time",
+                                                "physical_channel",
+                                                "block_size",
+                                                "scale",
+                                                "partial_id",
+                                                "physical_channel_id",
+                                                "phase_offset",
+                                                "min_frequency",
+                                                "full_id",
+                                                "_is_serializable",
+                                                "max_frequency",
+                                                "load_calibration",
+                                                "fixed_if",
+                                                "block_time"
+                                            ]
+                                        }
+                                    },
+                                    "py/obj_ref_id": 131977510331744
+                                }
+                            },
+                            "default_pulse_channel_type": {
+                                "py/reduce": [
+                                    {
+                                        "py/type": "qat.purr.compiler.devices.ChannelType"
+                                    },
+                                    {
+                                        "py/tuple": [
+                                            2
+                                        ]
+                                    }
+                                ],
+                                "py/obj_ref_id": 131978455914176
+                            },
+                            "physical_channel": {
+                                "py/id": 131977510331360
+                            },
+                            "index": 0,
+                            "frequency": 8000000000.0,
+                            "width": 1000000.0
+                        },
+                        "py/obj_ref_id": 131977510331504
+                    },
+                    "pulse_channels": {
+                        "drive": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.drive",
+                                        "physical_channel": {
+                                            "py/object": "qat.purr.compiler.devices.PhysicalChannel",
+                                            "py/state": {
+                                                "is_calibrated": true,
+                                                "id": "CH1",
+                                                "sample_time": 5e-10,
+                                                "baseband": {
+                                                    "py/object": "qat.purr.compiler.devices.PhysicalBaseband",
+                                                    "py/state": {
+                                                        "is_calibrated": true,
+                                                        "id": "L1",
+                                                        "frequency": 5000000000.0,
+                                                        "if_frequency": 250000000.0
+                                                    },
+                                                    "py/obj_ref_id": 131979369899456
+                                                },
+                                                "block_size": 1,
+                                                "phase_offset": 0.0,
+                                                "imbalance": 1.0,
+                                                "acquire_allowed": false,
+                                                "pulse_channel_min_frequency": 0.0,
+                                                "pulse_channel_max_frequency": Infinity
+                                            },
+                                            "py/obj_ref_id": 131977510331312
+                                        },
+                                        "frequency": 5000000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978461367728
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    1.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978455850544
+                                        },
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131977510333328
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                1
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131978455913792
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "frequency",
+                                        "load_calibration_from_file",
+                                        "is_calibrated",
+                                        "baseband_if_frequency",
+                                        "baseband_frequency",
+                                        "acquire_allowed",
+                                        "imbalance",
+                                        "id",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "get_calibration",
+                                        "sample_time",
+                                        "physical_channel",
+                                        "block_size",
+                                        "scale",
+                                        "partial_id",
+                                        "physical_channel_id",
+                                        "phase_offset",
+                                        "min_frequency",
+                                        "full_id",
+                                        "_is_serializable",
+                                        "max_frequency",
+                                        "load_calibration",
+                                        "fixed_if",
+                                        "block_time"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131977510333376
+                        },
+                        "second_state": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.second_state",
+                                        "physical_channel": {
+                                            "py/id": 131977510331312
+                                        },
+                                        "frequency": 4750000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978461367728
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    1.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978461367440
+                                        },
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131977510332944
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                3
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131978455914272
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "frequency",
+                                        "load_calibration_from_file",
+                                        "is_calibrated",
+                                        "baseband_if_frequency",
+                                        "baseband_frequency",
+                                        "acquire_allowed",
+                                        "imbalance",
+                                        "id",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "get_calibration",
+                                        "sample_time",
+                                        "physical_channel",
+                                        "block_size",
+                                        "scale",
+                                        "partial_id",
+                                        "physical_channel_id",
+                                        "phase_offset",
+                                        "min_frequency",
+                                        "full_id",
+                                        "_is_serializable",
+                                        "max_frequency",
+                                        "load_calibration",
+                                        "fixed_if",
+                                        "block_time"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131977510333232
+                        },
+                        "Q1.cross_resonance": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.Q1.cross_resonance",
+                                        "physical_channel": {
+                                            "py/id": 131977510331312
+                                        },
+                                        "frequency": 5090000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978461367728
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    20.43888303393216,
+                                                    1.9018783700527548
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978455850864
+                                        },
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131977510335584
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                4
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131978455914368
+                                },
+                                "auxiliary_devices": [
+                                    {
+                                        "py/object": "qat.purr.backends.realtime_chip_simulator.RTCSQubit",
+                                        "py/state": {
+                                            "is_calibrated": true,
+                                            "id": "Q1",
+                                            "measure_device": {
+                                                "py/object": "qat.purr.backends.realtime_chip_simulator.RTCSResonator",
+                                                "py/state": {
+                                                    "is_calibrated": true,
+                                                    "id": "R1",
+                                                    "measure_device": null,
+                                                    "pulse_channels": {
+                                                        "measure": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                            "py/state": {
+                                                                "pulse_channel": {
+                                                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                                    "py/state": {
+                                                                        "is_calibrated": false,
+                                                                        "id": "R1.measure",
+                                                                        "physical_channel": {
+                                                                            "py/object": "qat.purr.compiler.devices.PhysicalChannel",
+                                                                            "py/state": {
+                                                                                "is_calibrated": true,
+                                                                                "id": "CH4",
+                                                                                "sample_time": 1e-09,
+                                                                                "baseband": {
+                                                                                    "py/object": "qat.purr.compiler.devices.PhysicalBaseband",
+                                                                                    "py/state": {
+                                                                                        "is_calibrated": true,
+                                                                                        "id": "L4",
+                                                                                        "frequency": 8500000000.0,
+                                                                                        "if_frequency": 250000000.0
+                                                                                    },
+                                                                                    "py/obj_ref_id": 131977510331216
+                                                                                },
+                                                                                "block_size": 1,
+                                                                                "phase_offset": 0.0,
+                                                                                "imbalance": 1.0,
+                                                                                "acquire_allowed": true,
+                                                                                "pulse_channel_min_frequency": 0.0,
+                                                                                "pulse_channel_max_frequency": Infinity
+                                                                            },
+                                                                            "py/obj_ref_id": 131977510331456
+                                                                        },
+                                                                        "frequency": 8500000000.0,
+                                                                        "bias": {
+                                                                            "py/object": "builtins.complex",
+                                                                            "py/newargs": {
+                                                                                "py/tuple": [
+                                                                                    0.0,
+                                                                                    0.0
+                                                                                ]
+                                                                            },
+                                                                            "py/obj_ref_id": 131978461367728
+                                                                        },
+                                                                        "scale": {
+                                                                            "py/object": "builtins.complex",
+                                                                            "py/newargs": {
+                                                                                "py/tuple": [
+                                                                                    1.0,
+                                                                                    0.0
+                                                                                ]
+                                                                            },
+                                                                            "py/obj_ref_id": 131978461367440
+                                                                        },
+                                                                        "fixed_if": false
+                                                                    },
+                                                                    "py/obj_ref_id": 131977510333568
+                                                                },
+                                                                "channel_type": {
+                                                                    "py/reduce": [
+                                                                        {
+                                                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                        },
+                                                                        {
+                                                                            "py/tuple": [
+                                                                                2
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "py/obj_ref_id": 131978455914176
+                                                                },
+                                                                "auxiliary_devices": [],
+                                                                "_pulse_channel_attributes": {
+                                                                    "py/set": [
+                                                                        "frequency",
+                                                                        "load_calibration_from_file",
+                                                                        "is_calibrated",
+                                                                        "baseband_if_frequency",
+                                                                        "baseband_frequency",
+                                                                        "acquire_allowed",
+                                                                        "imbalance",
+                                                                        "id",
+                                                                        "save_calibration_to_file",
+                                                                        "bias",
+                                                                        "get_calibration",
+                                                                        "sample_time",
+                                                                        "physical_channel",
+                                                                        "block_size",
+                                                                        "scale",
+                                                                        "partial_id",
+                                                                        "physical_channel_id",
+                                                                        "phase_offset",
+                                                                        "min_frequency",
+                                                                        "full_id",
+                                                                        "_is_serializable",
+                                                                        "max_frequency",
+                                                                        "load_calibration",
+                                                                        "fixed_if",
+                                                                        "block_time"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "py/obj_ref_id": 131977510333616
+                                                        },
+                                                        "acquire": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                            "py/state": {
+                                                                "pulse_channel": {
+                                                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                                    "py/state": {
+                                                                        "is_calibrated": false,
+                                                                        "id": "R1.acquire",
+                                                                        "physical_channel": {
+                                                                            "py/id": 131977510331456
+                                                                        },
+                                                                        "frequency": 8500000000.0,
+                                                                        "bias": {
+                                                                            "py/object": "builtins.complex",
+                                                                            "py/newargs": {
+                                                                                "py/tuple": [
+                                                                                    0.0,
+                                                                                    0.0
+                                                                                ]
+                                                                            },
+                                                                            "py/obj_ref_id": 131978461367728
+                                                                        },
+                                                                        "scale": {
+                                                                            "py/object": "builtins.complex",
+                                                                            "py/newargs": {
+                                                                                "py/tuple": [
+                                                                                    1.0,
+                                                                                    0.0
+                                                                                ]
+                                                                            },
+                                                                            "py/obj_ref_id": 131978461367440
+                                                                        },
+                                                                        "fixed_if": false
+                                                                    },
+                                                                    "py/obj_ref_id": 131977510333664
+                                                                },
+                                                                "channel_type": {
+                                                                    "py/reduce": [
+                                                                        {
+                                                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                        },
+                                                                        {
+                                                                            "py/tuple": [
+                                                                                6
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "py/obj_ref_id": 131978455914560
+                                                                },
+                                                                "auxiliary_devices": [],
+                                                                "_pulse_channel_attributes": {
+                                                                    "py/set": [
+                                                                        "frequency",
+                                                                        "load_calibration_from_file",
+                                                                        "is_calibrated",
+                                                                        "baseband_if_frequency",
+                                                                        "baseband_frequency",
+                                                                        "acquire_allowed",
+                                                                        "imbalance",
+                                                                        "id",
+                                                                        "save_calibration_to_file",
+                                                                        "bias",
+                                                                        "get_calibration",
+                                                                        "sample_time",
+                                                                        "physical_channel",
+                                                                        "block_size",
+                                                                        "scale",
+                                                                        "partial_id",
+                                                                        "physical_channel_id",
+                                                                        "phase_offset",
+                                                                        "min_frequency",
+                                                                        "full_id",
+                                                                        "_is_serializable",
+                                                                        "max_frequency",
+                                                                        "load_calibration",
+                                                                        "fixed_if",
+                                                                        "block_time"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "py/obj_ref_id": 131977510333760
+                                                        }
+                                                    },
+                                                    "default_pulse_channel_type": {
+                                                        "py/reduce": [
+                                                            {
+                                                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                            },
+                                                            {
+                                                                "py/tuple": [
+                                                                    2
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "py/obj_ref_id": 131978455914176
+                                                    },
+                                                    "physical_channel": {
+                                                        "py/id": 131977510331456
+                                                    },
+                                                    "index": 1,
+                                                    "frequency": 8500000000.0,
+                                                    "width": 1000000.0
+                                                },
+                                                "py/obj_ref_id": 131977510333472
+                                            },
+                                            "pulse_channels": {
+                                                "drive": {
+                                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                    "py/state": {
+                                                        "pulse_channel": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                            "py/state": {
+                                                                "is_calibrated": false,
+                                                                "id": "Q1.drive",
+                                                                "physical_channel": {
+                                                                    "py/object": "qat.purr.compiler.devices.PhysicalChannel",
+                                                                    "py/state": {
+                                                                        "is_calibrated": true,
+                                                                        "id": "CH3",
+                                                                        "sample_time": 5e-10,
+                                                                        "baseband": {
+                                                                            "py/object": "qat.purr.compiler.devices.PhysicalBaseband",
+                                                                            "py/state": {
+                                                                                "is_calibrated": true,
+                                                                                "id": "L3",
+                                                                                "frequency": 5090000000.0,
+                                                                                "if_frequency": 250000000.0
+                                                                            },
+                                                                            "py/obj_ref_id": 131977510331120
+                                                                        },
+                                                                        "block_size": 1,
+                                                                        "phase_offset": 0.0,
+                                                                        "imbalance": 1.0,
+                                                                        "acquire_allowed": false,
+                                                                        "pulse_channel_min_frequency": 0.0,
+                                                                        "pulse_channel_max_frequency": Infinity
+                                                                    },
+                                                                    "py/obj_ref_id": 131977510331408
+                                                                },
+                                                                "frequency": 5090000000.0,
+                                                                "bias": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            0.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978461367728
+                                                                },
+                                                                "scale": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            1.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978455850544
+                                                                },
+                                                                "fixed_if": false
+                                                            },
+                                                            "py/obj_ref_id": 131977510335248
+                                                        },
+                                                        "channel_type": {
+                                                            "py/reduce": [
+                                                                {
+                                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                },
+                                                                {
+                                                                    "py/tuple": [
+                                                                        1
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "py/obj_ref_id": 131978455913792
+                                                        },
+                                                        "auxiliary_devices": [],
+                                                        "_pulse_channel_attributes": {
+                                                            "py/set": [
+                                                                "frequency",
+                                                                "load_calibration_from_file",
+                                                                "is_calibrated",
+                                                                "baseband_if_frequency",
+                                                                "baseband_frequency",
+                                                                "acquire_allowed",
+                                                                "imbalance",
+                                                                "id",
+                                                                "save_calibration_to_file",
+                                                                "bias",
+                                                                "get_calibration",
+                                                                "sample_time",
+                                                                "physical_channel",
+                                                                "block_size",
+                                                                "scale",
+                                                                "partial_id",
+                                                                "physical_channel_id",
+                                                                "phase_offset",
+                                                                "min_frequency",
+                                                                "full_id",
+                                                                "_is_serializable",
+                                                                "max_frequency",
+                                                                "load_calibration",
+                                                                "fixed_if",
+                                                                "block_time"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131977510335296
+                                                },
+                                                "second_state": {
+                                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                    "py/state": {
+                                                        "pulse_channel": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                            "py/state": {
+                                                                "is_calibrated": false,
+                                                                "id": "Q1.second_state",
+                                                                "physical_channel": {
+                                                                    "py/id": 131977510331408
+                                                                },
+                                                                "frequency": 4840000000.0,
+                                                                "bias": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            0.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978461367728
+                                                                },
+                                                                "scale": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            1.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978461367440
+                                                                },
+                                                                "fixed_if": false
+                                                            },
+                                                            "py/obj_ref_id": 131977510334960
+                                                        },
+                                                        "channel_type": {
+                                                            "py/reduce": [
+                                                                {
+                                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                },
+                                                                {
+                                                                    "py/tuple": [
+                                                                        3
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "py/obj_ref_id": 131978455914272
+                                                        },
+                                                        "auxiliary_devices": [],
+                                                        "_pulse_channel_attributes": {
+                                                            "py/set": [
+                                                                "frequency",
+                                                                "load_calibration_from_file",
+                                                                "is_calibrated",
+                                                                "baseband_if_frequency",
+                                                                "baseband_frequency",
+                                                                "acquire_allowed",
+                                                                "imbalance",
+                                                                "id",
+                                                                "save_calibration_to_file",
+                                                                "bias",
+                                                                "get_calibration",
+                                                                "sample_time",
+                                                                "physical_channel",
+                                                                "block_size",
+                                                                "scale",
+                                                                "partial_id",
+                                                                "physical_channel_id",
+                                                                "phase_offset",
+                                                                "min_frequency",
+                                                                "full_id",
+                                                                "_is_serializable",
+                                                                "max_frequency",
+                                                                "load_calibration",
+                                                                "fixed_if",
+                                                                "block_time"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131977510335200
+                                                },
+                                                "Q0.cross_resonance": {
+                                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                    "py/state": {
+                                                        "pulse_channel": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                            "py/state": {
+                                                                "is_calibrated": false,
+                                                                "id": "Q1.Q0.cross_resonance",
+                                                                "physical_channel": {
+                                                                    "py/id": 131977510331408
+                                                                },
+                                                                "frequency": 5000000000.0,
+                                                                "bias": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            0.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978461367728
+                                                                },
+                                                                "scale": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            -19.960910767291143,
+                                                                            1.7755801175916415
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978455850896
+                                                                },
+                                                                "fixed_if": false
+                                                            },
+                                                            "py/obj_ref_id": 131977510335680
+                                                        },
+                                                        "channel_type": {
+                                                            "py/reduce": [
+                                                                {
+                                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                },
+                                                                {
+                                                                    "py/tuple": [
+                                                                        4
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "py/obj_ref_id": 131978455914368
+                                                        },
+                                                        "auxiliary_devices": [
+                                                            {
+                                                                "py/id": 131977510331792
+                                                            }
+                                                        ],
+                                                        "_pulse_channel_attributes": {
+                                                            "py/set": [
+                                                                "frequency",
+                                                                "load_calibration_from_file",
+                                                                "is_calibrated",
+                                                                "baseband_if_frequency",
+                                                                "baseband_frequency",
+                                                                "acquire_allowed",
+                                                                "imbalance",
+                                                                "id",
+                                                                "save_calibration_to_file",
+                                                                "bias",
+                                                                "get_calibration",
+                                                                "sample_time",
+                                                                "physical_channel",
+                                                                "block_size",
+                                                                "scale",
+                                                                "partial_id",
+                                                                "physical_channel_id",
+                                                                "phase_offset",
+                                                                "min_frequency",
+                                                                "full_id",
+                                                                "_is_serializable",
+                                                                "max_frequency",
+                                                                "load_calibration",
+                                                                "fixed_if",
+                                                                "block_time"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131977510335776
+                                                },
+                                                "Q0.cross_resonance_cancellation": {
+                                                    "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                                                    "py/state": {
+                                                        "pulse_channel": {
+                                                            "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                                            "py/state": {
+                                                                "is_calibrated": false,
+                                                                "id": "Q1.Q0.cross_resonance_cancellation",
+                                                                "physical_channel": {
+                                                                    "py/id": 131977510331408
+                                                                },
+                                                                "frequency": 5090000000.0,
+                                                                "bias": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            0.0,
+                                                                            0.0
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978461367728
+                                                                },
+                                                                "scale": {
+                                                                    "py/object": "builtins.complex",
+                                                                    "py/newargs": {
+                                                                        "py/tuple": [
+                                                                            -0.0006383792131791451,
+                                                                            -0.0018484650690712681
+                                                                        ]
+                                                                    },
+                                                                    "py/obj_ref_id": 131978455850928
+                                                                },
+                                                                "fixed_if": false
+                                                            },
+                                                            "py/obj_ref_id": 131977510335824
+                                                        },
+                                                        "channel_type": {
+                                                            "py/reduce": [
+                                                                {
+                                                                    "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                                },
+                                                                {
+                                                                    "py/tuple": [
+                                                                        5
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            "py/obj_ref_id": 131978455914464
+                                                        },
+                                                        "auxiliary_devices": [
+                                                            {
+                                                                "py/id": 131977510331792
+                                                            }
+                                                        ],
+                                                        "_pulse_channel_attributes": {
+                                                            "py/set": [
+                                                                "frequency",
+                                                                "load_calibration_from_file",
+                                                                "is_calibrated",
+                                                                "baseband_if_frequency",
+                                                                "baseband_frequency",
+                                                                "acquire_allowed",
+                                                                "imbalance",
+                                                                "id",
+                                                                "save_calibration_to_file",
+                                                                "bias",
+                                                                "get_calibration",
+                                                                "sample_time",
+                                                                "physical_channel",
+                                                                "block_size",
+                                                                "scale",
+                                                                "partial_id",
+                                                                "physical_channel_id",
+                                                                "phase_offset",
+                                                                "min_frequency",
+                                                                "full_id",
+                                                                "_is_serializable",
+                                                                "max_frequency",
+                                                                "load_calibration",
+                                                                "fixed_if",
+                                                                "block_time"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131977510335920
+                                                }
+                                            },
+                                            "default_pulse_channel_type": {
+                                                "py/reduce": [
+                                                    {
+                                                        "py/type": "qat.purr.compiler.devices.ChannelType"
+                                                    },
+                                                    {
+                                                        "py/tuple": [
+                                                            1
+                                                        ]
+                                                    }
+                                                ],
+                                                "py/obj_ref_id": 131978455913792
+                                            },
+                                            "physical_channel": {
+                                                "py/id": 131977510331408
+                                            },
+                                            "index": 1,
+                                            "coupled_qubits": [
+                                                {
+                                                    "py/id": 131977510331792
+                                                }
+                                            ],
+                                            "mean_z_map_args": [
+                                                2.1330969344627744,
+                                                -1.0223925761549326
+                                            ],
+                                            "discriminator": [
+                                                0.0
+                                            ],
+                                            "pulse_hw_zx_pi_4": {
+                                                "Q0": {
+                                                    "shape": {
+                                                        "py/reduce": [
+                                                            {
+                                                                "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                                            },
+                                                            {
+                                                                "py/tuple": [
+                                                                    "soft_square"
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "py/obj_ref_id": 131978455916768
+                                                    },
+                                                    "width": 1.25e-07,
+                                                    "rise": 1e-08,
+                                                    "amp": 1000000.0,
+                                                    "drag": 0.0,
+                                                    "phase": 0.0
+                                                }
+                                            },
+                                            "pulse_hw_x_pi_2": {
+                                                "shape": {
+                                                    "py/reduce": [
+                                                        {
+                                                            "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                                        },
+                                                        {
+                                                            "py/tuple": [
+                                                                "gaussian"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "py/obj_ref_id": 131978455916672
+                                                },
+                                                "width": 1e-07,
+                                                "rise": 0.3333333333333333,
+                                                "amp": 4368197.314536925,
+                                                "drag": 0.0,
+                                                "phase": 0.0
+                                            },
+                                            "pulse_measure": {
+                                                "shape": {
+                                                    "py/reduce": [
+                                                        {
+                                                            "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                                        },
+                                                        {
+                                                            "py/tuple": [
+                                                                "square"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "py/obj_ref_id": 131978455916528
+                                                },
+                                                "width": 1e-06,
+                                                "amp": 1.0,
+                                                "amp_setup": 0.0,
+                                                "rise": 0.0
+                                            },
+                                            "measure_acquire": {
+                                                "delay": 1.8e-07,
+                                                "sync": true,
+                                                "width": 1e-06,
+                                                "weights": null,
+                                                "use_weights": false
+                                            },
+                                            "_N": 2,
+                                            "_rotating_frame_frequency": 5090000000.0,
+                                            "frequency": 5090000000.0,
+                                            "anharmonicity": -250000000.0,
+                                            "decay_rate": 0.0,
+                                            "absorb_rate": 0.0,
+                                            "dephase_rate": 0.0
+                                        },
+                                        "py/obj_ref_id": 131977510333808
+                                    }
+                                ],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "frequency",
+                                        "load_calibration_from_file",
+                                        "is_calibrated",
+                                        "baseband_if_frequency",
+                                        "baseband_frequency",
+                                        "acquire_allowed",
+                                        "imbalance",
+                                        "id",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "get_calibration",
+                                        "sample_time",
+                                        "physical_channel",
+                                        "block_size",
+                                        "scale",
+                                        "partial_id",
+                                        "physical_channel_id",
+                                        "phase_offset",
+                                        "min_frequency",
+                                        "full_id",
+                                        "_is_serializable",
+                                        "max_frequency",
+                                        "load_calibration",
+                                        "fixed_if",
+                                        "block_time"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131977510335632
+                        },
+                        "Q1.cross_resonance_cancellation": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.Q1.cross_resonance_cancellation",
+                                        "physical_channel": {
+                                            "py/id": 131977510331312
+                                        },
+                                        "frequency": 5000000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978461367728
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    -0.002608579454171639,
+                                                    0.006639464852534781
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131978455850960
+                                        },
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131977510335968
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                5
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131978455914464
+                                },
+                                "auxiliary_devices": [
+                                    {
+                                        "py/id": 131977510333808
+                                    }
+                                ],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "frequency",
+                                        "load_calibration_from_file",
+                                        "is_calibrated",
+                                        "baseband_if_frequency",
+                                        "baseband_frequency",
+                                        "acquire_allowed",
+                                        "imbalance",
+                                        "id",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "get_calibration",
+                                        "sample_time",
+                                        "physical_channel",
+                                        "block_size",
+                                        "scale",
+                                        "partial_id",
+                                        "physical_channel_id",
+                                        "phase_offset",
+                                        "min_frequency",
+                                        "full_id",
+                                        "_is_serializable",
+                                        "max_frequency",
+                                        "load_calibration",
+                                        "fixed_if",
+                                        "block_time"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131977510336064
+                        }
+                    },
+                    "default_pulse_channel_type": {
+                        "py/reduce": [
+                            {
+                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                            },
+                            {
+                                "py/tuple": [
+                                    1
+                                ]
+                            }
+                        ],
+                        "py/obj_ref_id": 131978455913792
+                    },
+                    "physical_channel": {
+                        "py/id": 131977510331312
+                    },
+                    "index": 0,
+                    "coupled_qubits": [
+                        {
+                            "py/id": 131977510333808
+                        }
+                    ],
+                    "mean_z_map_args": [
+                        2.136329226009086,
+                        -1.0254571168804927
+                    ],
+                    "discriminator": [
+                        0.0
+                    ],
+                    "pulse_hw_zx_pi_4": {
+                        "Q1": {
+                            "shape": {
+                                "py/reduce": [
+                                    {
+                                        "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                    },
+                                    {
+                                        "py/tuple": [
+                                            "soft_square"
+                                        ]
+                                    }
+                                ],
+                                "py/obj_ref_id": 131978455916768
+                            },
+                            "width": 1.25e-07,
+                            "rise": 1e-08,
+                            "amp": 1000000.0,
+                            "drag": 0.0,
+                            "phase": 0.0
+                        }
+                    },
+                    "pulse_hw_x_pi_2": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "gaussian"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131978455916672
+                        },
+                        "width": 1e-07,
+                        "rise": 0.3333333333333333,
+                        "amp": 4368000.007595086,
+                        "drag": 0.0,
+                        "phase": 0.0
+                    },
+                    "pulse_measure": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "square"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131978455916528
+                        },
+                        "width": 1e-06,
+                        "amp": 1.0,
+                        "amp_setup": 0.0,
+                        "rise": 0.0
+                    },
+                    "measure_acquire": {
+                        "delay": 1.8e-07,
+                        "sync": true,
+                        "width": 1e-06,
+                        "weights": null,
+                        "use_weights": false
+                    },
+                    "_N": 2,
+                    "_rotating_frame_frequency": 5000000000.0,
+                    "frequency": 5000000000.0,
+                    "anharmonicity": -250000000.0,
+                    "decay_rate": 0.0,
+                    "absorb_rate": 0.0,
+                    "dephase_rate": 0.0
+                },
+                "py/obj_ref_id": 131977510331792
+            },
+            "R0": {
+                "py/id": 131977510331504
+            },
+            "Q1": {
+                "py/id": 131977510333808
+            },
+            "R1": {
+                "py/id": 131977510333472
+            }
+        },
+        "pulse_channels": {
+            "CH1.Q0.drive": {
+                "py/id": 131977510333376
+            },
+            "CH1.Q0.second_state": {
+                "py/id": 131977510333232
+            },
+            "CH1.Q0.Q1.cross_resonance": {
+                "py/id": 131977510335632
+            },
+            "CH1.Q0.Q1.cross_resonance_cancellation": {
+                "py/id": 131977510336064
+            },
+            "CH2.R0.measure": {
+                "py/id": 131977510331600
+            },
+            "CH2.R0.acquire": {
+                "py/id": 131977510331744
+            },
+            "CH3.Q1.drive": {
+                "py/id": 131977510335296
+            },
+            "CH3.Q1.second_state": {
+                "py/id": 131977510335200
+            },
+            "CH3.Q1.Q0.cross_resonance": {
+                "py/id": 131977510335776
+            },
+            "CH3.Q1.Q0.cross_resonance_cancellation": {
+                "py/id": 131977510335920
+            },
+            "CH4.R1.measure": {
+                "py/id": 131977510333616
+            },
+            "CH4.R1.acquire": {
+                "py/id": 131977510333760
+            }
+        },
+        "physical_channels": {
+            "CH1": {
+                "py/id": 131977510331312
+            },
+            "CH2": {
+                "py/id": 131977510331360
+            },
+            "CH3": {
+                "py/id": 131977510331408
+            },
+            "CH4": {
+                "py/id": 131977510331456
+            }
+        },
+        "basebands": {
+            "L1": {
+                "py/id": 131979369899456
+            },
+            "L2": {
+                "py/id": 131977510327568
+            },
+            "L3": {
+                "py/id": 131977510331120
+            },
+            "L4": {
+                "py/id": 131977510331216
+            }
+        },
+        "qubit_direction_couplings": [],
+        "error_mitigation": null,
+        "repeat_limit": 10000
+    },
+    "py/obj_ref_id": 131979369902480
+}
