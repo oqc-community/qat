@@ -556,7 +556,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self,
         qubit: Qubit,
         mode: AcquireMode,
-        entangled_qubits: List[Qubit],
         output_variable: str = None,
     ):
         measure_channel = qubit.get_measure_channel()
@@ -585,7 +584,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
         return [
-            Synchronize(entangled_qubits),
+            Synchronize(qubit),
             measure_instruction,
             acquire_instruction,
             Synchronize(qubit),
@@ -595,13 +594,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self,
         qubit: Qubit,
         mode: AcquireMode,
-        entangled_qubits: List[Qubit],
         output_variable: str = None,
         **kwargs,
     ):
-        measure_block = MeasureBlock(
-            qubit, mode, output_variable, entangled_qubits, self.existing_names
-        )
+        measure_block = MeasureBlock(qubit, mode, output_variable, self.existing_names)
         acquire_instruction = measure_block.get_acquires(qubit)[0]
 
         return measure_block, acquire_instruction
@@ -677,12 +673,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         previous_measure_block: MeasureBlock,
         qubit: Qubit,
         mode: AcquireMode,
-        entangled_qubits: List[Qubit],
         output_variable: str = None,
         **kwargs,
     ):
         previous_measure_block.add_measurements(
-            qubit, mode, output_variable, entangled_qubits, self.existing_names
+            qubit, mode, output_variable, self.existing_names
         )
         acquire_instruction = previous_measure_block.get_acquires(qubit)[0]
 
@@ -711,7 +706,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             raise ValueError(f"Wrong measure axis '{str(axis)}'!")
 
-        entangled_qubits = list(self._entanglement_map.get(qubit, []))
         previous_measure_block = self._find_previous_measurement_block()
 
         if isinstance(previous_measure_block, list):
@@ -722,7 +716,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 stacklevel=2,
             )
             new_measure_block, acquire_instruction = self._generate_legacy_measure_block(
-                qubit, mode, entangled_qubits, output_variable
+                qubit, mode, output_variable
             )
             self._join_legacy_measure_blocks(previous_measure_block, new_measure_block)
         elif (
@@ -730,16 +724,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
             and qubit not in previous_measure_block.quantum_targets
         ):
             _, acquire_instruction = self._append_measure_block(
-                previous_measure_block,
-                qubit,
-                mode,
-                entangled_qubits,
-                output_variable,
-                **kwargs,
+                previous_measure_block, qubit, mode, output_variable, **kwargs
             )
         else:
             new_measure_block, acquire_instruction = self._generate_measure_block(
-                qubit, mode, entangled_qubits, output_variable, **kwargs
+                qubit, mode, output_variable, **kwargs
             )
             self.add(new_measure_block)
 
