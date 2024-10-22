@@ -5,10 +5,10 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
 
 
-def resonator_spect(model, qubit_indices=None):
-    qubit_indices = qubit_indices or [0]
+def resonator_spect(model, qubit_indices=None, num_points=None):
+    qubit_indices = qubit_indices if qubit_indices is not None else [0]
+    num_points = num_points if num_points is not None else 10
     builder = get_builder(model)
-    num_points = 10
     freq_range = 50e6
     for index in qubit_indices:
         qubit = model.get_qubit(index)
@@ -60,5 +60,38 @@ def qubit_spect(model, qubit_indices=None):
                 rise=1.0 / 3.0,
             )
             .measure_mean_signal(qubit, output_variable=output_variable)
+        )
+    return builder
+
+
+def singledim_sweep(model, qubit_indices=None):
+    return resonator_spect(model, qubit_indices)
+
+
+def multidim_sweep(model, qubit_indices=None):
+    qubit_indices = qubit_indices or [0]
+    builder = get_builder(model)
+    num_points = 10
+    freq_range = 50e6
+
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        space1 = drive_channel.frequency + np.linspace(-freq_range, freq_range, num_points)
+        var1_name = f"drive_freq{qubit.index}"
+
+        space2 = acquire_channel.frequency + np.linspace(
+            -freq_range, freq_range, num_points
+        )
+        var2_name = f"acq_freq{qubit.index}"
+
+        builder = (
+            builder.sweep([SweepValue(var1_name, space1), SweepValue(var2_name, space2)])
+            .device_assign(drive_channel, "frequency", Variable(var1_name))
+            .device_assign(acquire_channel, "frequency", Variable(var2_name))
+            .measure_mean_signal(qubit, f"Q{qubit.index}")
+            .repeat(1000, 500e-6)
         )
     return builder
