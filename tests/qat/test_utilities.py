@@ -11,6 +11,7 @@ from qat.purr.backends.utilities import (
     GaussianSquareFunction,
     GaussianZeroEdgeFunction,
     NumericFunction,
+    SechFunction,
     SquareFunction,
     evaluate_shape,
 )
@@ -133,6 +134,17 @@ def test_blackman_function_first_derivative():
     # Test based on function symmetry
     assert np.isclose(y[0], -y[-1], atol=1e-6)
     assert np.isclose(y[1], -y[-2], atol=1e-6)
+
+
+@pytest.mark.parametrize("width", [-2.0, -1.0, -0.1, -1e-6, 1e-3, 0.2, 1.2, 10])
+def test_sech_function(width):
+    # Tests the sech pulse
+    x = np.linspace(-1.0, 1.0, 101)
+    sech = SechFunction(width)
+    y = sech(x)
+    max_idx = np.argmax(y)
+    assert np.isclose(x[max_idx], 0.0)
+    assert all(np.isclose(y[max_idx::-1], y[max_idx:]))
 
 
 @pytest.mark.skip(reason="I don't know what the new results should be.")

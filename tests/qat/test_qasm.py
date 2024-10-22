@@ -71,6 +71,7 @@ from qat.purr.integrations.qasm import (
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.qat import execute, execute_qasm, fetch_frontend
+
 from tests.qat.qasm_utils import (
     ProgramFileType,
     get_qasm2,
@@ -555,8 +556,21 @@ class TestQASM3:
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
 
+    @pytest.mark.parametrize(
+        "hw", [get_default_echo_hardware(2), get_default_RTCS_hardware()]
+    )
+    def test_capture_with_delay(self, hw):
+        # Tests that capture v2 in openpulse makes use of the qubit delay for an acquire channel.
+        qubit = hw.get_qubit(0)
+        parser = Qasm3Parser()
+        builder = parser.parse(
+            hw.create_builder(), get_qasm3("openpulse_tests/capture.qasm")
+        )
+        delay = [inst.delay for inst in builder.instructions if isinstance(inst, Acquire)]
+        assert delay[0] == qubit.measure_acquire["delay"]
+
     def test_gaussian_square(self):
-        # Checks the that Gaussian Square pulses parse correectly.
+        # Checks that the Gaussian Square pulses parse correectly.
         hw = get_default_echo_hardware(2)
         qasm_string = get_qasm3("waveform_tests/gaussian_square.qasm")
         parser = Qasm3Parser()
@@ -572,6 +586,22 @@ class TestQASM3:
         assert np.isclose(pulses[1].amp, 2.5)
         assert np.isclose(pulses[1].square_width, 50e-9)
         assert pulses[1].zero_at_edges == False
+
+    def test_sech(self):
+        # Checks that the sech waveforms parse correctly.
+        hw = get_default_echo_hardware(2)
+        qasm_string = get_qasm3("waveform_tests/sech_waveform.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(get_builder(hw), qasm_string)
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        # Check the properties of the first pulse
+        assert np.isclose(pulses[0].width, 100e-9)
+        assert np.isclose(pulses[0].amp, 0.2)
+        assert np.isclose(pulses[0].std_dev, 50e-9)
+        # Check the properties of the second pulse
+        assert np.isclose(pulses[1].width, 200e-9)
+        assert np.isclose(pulses[1].amp, 0.5)
+        assert np.isclose(pulses[1].std_dev, 20e-9)
 
 
 class TestExecutionFrontend:
@@ -994,11 +1024,11 @@ class TestParsing:
 
     def test_example(self):
         builder = parse_and_apply_optimiziations("example.qasm")
-        assert 349 == len(builder.instructions)
+        assert 347 == len(builder.instructions)
 
     def test_parallel(self):
         builder = parse_and_apply_optimiziations("parallel_test.qasm", qubit_count=8)
-        assert 2117 == len(builder.instructions)
+        assert 2116 == len(builder.instructions)
 
     def test_example_if(self):
         with pytest.raises(ValueError):
@@ -1007,11 +1037,11 @@ class TestParsing:
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
         builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
-        assert 97469 == len(builder.instructions)
+        assert 97467 == len(builder.instructions)
 
     def test_random_n5_d5(self):
         builder = parse_and_apply_optimiziations("random_n5_d5.qasm")
-        assert 4957 == len(builder.instructions)
+        assert 4956 == len(builder.instructions)
 
     def test_ordered_keys(self):
         builder = parse_and_apply_optimiziations(
@@ -1039,7 +1069,7 @@ class TestParsing:
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
         assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
-        assert 64 == len(builder.instructions)
+        assert 63 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))
@@ -1103,12 +1133,12 @@ class TestQatOptimization:
             6,
             ("R0", "R1", "R2", "R3", "R4", "R5"),
             (
-                (750, 1750),
-                (1750, 2750),
-                (1750, 2750),
-                (1750, 2750),
-                (750, 1750),
-                (1750, 2750),
+                (650, 1650),
+                (950, 1950),
+                (950, 1950),
+                (950, 1950),
+                (650, 1650),
+                (950, 1950),
             ),
         )
 
@@ -1117,7 +1147,7 @@ class TestQatOptimization:
             "move_measurements.qasm",
             12,
             ("R5", "R6", "R9"),
-            ((579800, 580800), (579800, 580800), (589800, 590800)),
+            ((579800, 580800), (579800, 580800), (589050, 590050)),
         )
 
 

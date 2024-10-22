@@ -13,6 +13,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute_qasm_with_metrics
+
 from tests.qat.qasm_utils import get_qasm2
 
 
