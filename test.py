@@ -2,19 +2,14 @@ from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 
-
-def deserialize_hw_model(version, model):
-    hw_dir = "tests/qat/files/hw_models/"
-    return Calibratable().load_calibration_from_file(
-        hw_dir + version + "/" + model + ".json"
-    )
-
-
-model = deserialize_hw_model("2.3.0", "echo")
+# serialize and deserialize a model
 model = get_default_RTCS_hardware()
+for c in model.couplings:
+    c.is_calibrated = True
+model.save_calibration_to_file("test.json", True)
+model = Calibratable().load_calibration_from_file("test.json")
 
-print(model.couplings)
-# create a circuit
+# execute a circuit
 circuit = (
     get_builder(model)
     .had(model.qubits[0])
