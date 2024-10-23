@@ -21,3 +21,9 @@ class QatCollection:
         self.qatfile = None
         self.timeline = None
         self.results = None
+
+    def reset(self):
+        self.builder = self.model.create_builder()
+        self.qatfile = None
+        self.timeline = None
+        self.results = None

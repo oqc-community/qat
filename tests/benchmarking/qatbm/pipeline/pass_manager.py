@@ -57,6 +57,7 @@ class BenchmarkingPassManager:
         Optionally, run many times and save each result.
         """
         for _ in range(iters):
+            self.qatcol.reset()
             result = self.wrapper.create_result()
             for pass_ in self.passes:
                 result[pass_] = self.wrapper.run(pass_, self.qatcol)
@@ -72,13 +73,37 @@ class BenchmarkingPassManager:
         Return the average execution time of each pass.
         """
         result = self.wrapper.create_result()
-        for res in self._results:
+        for res in self.results:
             for key, val in res.result.items():
-                result[key] = res.result.get(key, 0) + val
+                result[key] = result.result.get(key, 0) + val
 
-        num_results = len(self._results)
+        num_results = len(self.results)
         for key, val in result.result.items():
-            result[key] = val / num_results
+            result.result[key] = val / num_results
+
+        return result
+
+    @property
+    def min(self):
+        """
+        Returns the minimum execution time of each pass.
+        """
+        result = self.wrapper.create_result()
+        for res in self.results:
+            for key, val in res.result.items():
+                result[key] = min(result.result.get(key, 0), val)
+
+        return result
+
+    @property
+    def max(self):
+        """
+        Returns the minimum execution time of each pass.
+        """
+        result = self.wrapper.create_result()
+        for res in self.results:
+            for key, val in res.result.items():
+                result[key] = max(result.result.get(key, 0), val)
 
         return result
 

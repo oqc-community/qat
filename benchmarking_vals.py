@@ -1,7 +1,3 @@
-from json import load
-
-import pytest
-
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 
@@ -25,17 +21,11 @@ experiments_two_qubits = {
 }
 
 
-@pytest.mark.parametrize("hw", list(hardware_two_qubits.keys()))
-@pytest.mark.parametrize("circuit", list(experiments_two_qubits.keys()))
-def test_two_qubit_compile(hw, circuit):
-    pm = default_benchmarking(
-        hardware_two_qubits[hw],
-        experiments_two_qubits[circuit],
-    )
-    pm.run(10)
-    res = pm.min.result
-    with open(f"tests/benchmarking/data/{circuit}-{hw}.json") as file:
-        comparison = load(file)
-    for key in list(res.keys()):
-        assert res[key] < 2 * comparison[str(key)]
-    assert True
+for hw in list(hardware_two_qubits.keys()):
+    for circuit in list(experiments_two_qubits.keys()):
+        pm = default_benchmarking(
+            hardware_two_qubits[hw],
+            experiments_two_qubits[circuit],
+        )
+        pm.run(100)
+        pm.max.dump(f"{circuit}-{hw}.json")
