@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
@@ -11,6 +11,7 @@ from qiskit.transpiler.passes import CheckMap
 from qiskit_aer import AerSimulator
 from qiskit_aer.backends.backendconfiguration import AerBackendConfiguration
 
+from qat import qatconfig
 from qat.purr.backends.echo import (
     Connectivity,
     add_direction_couplings_to_hardware,
@@ -27,6 +28,7 @@ from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+qiskitconfig = qatconfig.SIMULATION.QISKIT
 
 
 def get_default_qiskit_hardware(
@@ -35,6 +37,12 @@ def get_default_qiskit_hardware(
     strict_placement=True,
     connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
 ) -> "QiskitHardwareModel":
+    """
+    Creates a hardware model compatible with the Qiskit simulator.
+
+    If `strict_placement=True`, circuits can only be executed when circuit
+    intructions act on adjacent qubits in the coupling map.
+    """
     model = QiskitHardwareModel(qubit_count, noise_model)
     model.strict_placement = strict_placement
 
@@ -223,7 +231,27 @@ class QiskitEngine(InstructionExecutionEngine):
     def run_calibrations(self, qubits_to_calibrate=None):
         pass
 
-    def execute(self, builder: QiskitBuilder) -> Dict[str, Any]:
+    def _run_simulator(self, builder, aer_config, method, coupling_map):
+        qasm_sim = AerSimulator(
+            aer_config,
+            noise_model=builder.model.noise_model,
+            method=method,
+            **qiskitconfig.OPTIONS,
+        )
+        job = qasm_sim.run(
+            transpile(builder.circuit, qasm_sim, coupling_map=coupling_map),
+            shots=builder.shot_count,
+        )
+        return job.result()
+
+    def execute(self, builder: QiskitBuilder):
+        """
+        Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
+        simulator can be provided using qatconfig.SIMULATION.QISKIT.
+
+        For more information, see:
+        https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
+        """
         if not isinstance(builder, QiskitBuilder):
             raise ValueError(
                 "Contravariance is not possible with QiskitEngine. "
@@ -247,14 +275,30 @@ class QiskitEngine(InstructionExecutionEngine):
             AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
         )
         aer_config.n_qubits = self.model.qubit_count
-        qasm_sim = AerSimulator(aer_config, noise_model=builder.model.noise_model)
 
+        # AerSimulator can call a range of backends. We allow these to be choosen, along with
+        # any relevant arguments.
         try:
-            job = qasm_sim.run(
-                transpile(circuit, qasm_sim, coupling_map=coupling_map),
-                shots=builder.shot_count,
-            )
-            results = job.result()
+            # Determine the sequence of backends to try
+            method = qiskitconfig.METHOD
+            seq = qiskitconfig.FALLBACK_SEQUENCE
+            if method in seq:
+                seq.remove(method)
+            seq.insert(0, method)
+
+            # Run the simulator
+            results = {}
+            for method in seq:
+                results = self._run_simulator(
+                    builder,
+                    aer_config,
+                    method,
+                    coupling_map,
+                )
+
+                if results.results[0].success:
+                    break
+                log.warning(f"AerSimulator simulation with method {method} failed.")
             distribution = results.get_counts(circuit)
         except QiskitError as e:
             raise ValueError(f"QiskitError while running Qiskit circuit: {str(e)}")
@@ -269,6 +313,7 @@ class QiskitEngine(InstructionExecutionEngine):
                 returns.extend(inst.variables)
         if len(assigns) > 1:
             log.warning("Qasm Simulator does not support multiple assignment.")
+
         if returns:
             # trim the qiskit returns to the classical register
             labels = assigns[returns[0]]
@@ -288,12 +333,17 @@ class QiskitEngine(InstructionExecutionEngine):
                 ("".join([key[idx] for idx in order])): value
                 for key, value in trimmed.items()
             }
-            return {key: trimmed for key in returns}
+            counts = {key: trimmed for key in returns}
         else:
             # trim the qiskit returns to the number of measurements
             removals = self.model.qubit_count - builder.bit_count
-            trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
-            return trimmed
+            counts = {key[removals:][::-1]: value for key, value in distribution.items()}
+
+        return (
+            (counts, results.results[0].metadata)
+            if qiskitconfig.ENABLE_METADATA
+            else counts
+        )
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
@@ -349,22 +399,29 @@ class QiskitRuntime(QuantumRuntime):
         repeats: int = None,
         error_mitigation: ErrorMitigationConfig = None,
     ):
+        """
+        Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
+        simulator can be provided using qatconfig.SIMULATION.QISKIT.
+
+        For more information, see:
+        https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
+        """
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
-
-        # TODO - add error_mitigation for Qasm sim
         results = self.engine.execute(builder)
+        if qiskitconfig.ENABLE_METADATA:
+            (results, metadata) = results
         results = self._apply_error_mitigation(
             results, builder.instructions, error_mitigation
         )
 
         if all([is_generated_name(k) for k in results.keys()]):
             if len(results) == 1:
-                return list(results.values())[0]
+                results = list(results.values())[0]
             else:
                 squashed_results = list(results.values())
                 if all(isinstance(val, np.ndarray) for val in squashed_results):
-                    return np.array(squashed_results)
-                return squashed_results
-        else:
-            return results
+                    results = np.array(squashed_results)
+                else:
+                    results = squashed_results
+        return (results, metadata) if qiskitconfig.ENABLE_METADATA else results
