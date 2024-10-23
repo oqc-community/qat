@@ -1,3 +1,5 @@
+from time import perf_counter
+
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -26,12 +28,18 @@ experiments_two_qubits = {
 
 @pytest.mark.parametrize("hw", list(hardware_two_qubits.keys()))
 @pytest.mark.parametrize("circuit", list(experiments_two_qubits.keys()))
-def test_two_qubit_compile(benchmark, hw, circuit):
+def test_two_qubit_compile(hw, circuit):
     def run():
         pm = default_benchmarking(
             hardware_two_qubits[hw], experiments_two_qubits[circuit], BenchmarkingWrapper()
         )
         pm.run()
 
-    benchmark(run)
-    assert True
+    total_time = 0.0
+    for i in range(100):
+        t = perf_counter()
+        run()
+        total_time += perf_counter() - t
+    print("search me")
+    print(total_time / 100)
+    assert False
