@@ -389,7 +389,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
-        self.physical_channel: PhysicalChannel = physical_channel
+        self.physical_channel = physical_channel
 
         self.frequency: float = frequency
         self.bias: complex = bias
@@ -403,6 +403,29 @@ class PulseChannel(QuantumComponent, Calibratable):
                 f"({self.min_frequency}, {self.max_frequency}) on physical "
                 f"channel with id {self.full_id()}."
             )
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, val):
+        self._id = val
+        if hasattr(self, "_physical_channel"):
+            self._update_full_id()
+
+    @property
+    def physical_channel(self):
+        return self._physical_channel
+
+    @physical_channel.setter
+    def physical_channel(self, channel: PhysicalChannel):
+        self._physical_channel = channel
+        if hasattr(self, "_id"):
+            self._update_full_id()
+
+    def _update_full_id(self):
+        self._full_id = self.physical_channel_id + "." + self.partial_id()
 
     @property
     def sample_time(self):
@@ -452,16 +475,16 @@ class PulseChannel(QuantumComponent, Calibratable):
         return self.id
 
     def full_id(self):
-        return self.physical_channel_id + "." + self.partial_id()
+        return self._full_id
 
     def __eq__(self, other):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self.full_id() == other.full_id()
+        return self._full_id == other._full_id
 
     def __hash__(self):
-        return hash(self.full_id())
+        return hash(self._full_id)
 
 
 class FreqShiftPulseChannel(PulseChannel):
@@ -552,6 +575,9 @@ class PulseChannelView(PulseChannel):
         if key in self._pulse_channel_attributes:
             return setattr(self.pulse_channel, key, value)
         return super().__setattr__(key, value)
+
+    def __hash__(self):
+        return self.pulse_channel.__hash__()
 
 
 class QuantumDevice(QuantumComponent, Calibratable):

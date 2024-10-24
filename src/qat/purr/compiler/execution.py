@@ -591,7 +591,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     ):
         # Check no pulse channels on this physical channel used a fixed if
         for channel in self.model.get_pulse_channels_from_physical_channel(
-            pulse_channel.physical_channel_id
+            pulse_channel.physical_channel
         ):
             if channel.fixed_if:
                 raise NotImplementedError(
