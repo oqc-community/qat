@@ -22,7 +22,13 @@ from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Assign, Instruction, Return, is_generated_name
+from qat.purr.compiler.instructions import (
+    Assign,
+    Instruction,
+    Return,
+    Variable,
+    is_generated_name,
+)
 from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
 
@@ -267,32 +273,34 @@ class QiskitEngine(InstructionExecutionEngine):
                 assigns[inst.name] = inst.value
             elif isinstance(inst, Return):
                 returns.extend(inst.variables)
-        if len(assigns) > 1:
-            log.warning("Qasm Simulator does not support multiple assignment.")
-        if returns:
-            # trim the qiskit returns to the classical register
-            labels = assigns[returns[0]]
-            removals = self.model.qubit_count - len(labels)
-            trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
+        # trim the qiskit returns to the number of measurements and revers the index order
+        trimmed = {
+            key[-builder.bit_count :][::-1]: value for key, value in distribution.items()
+        }
+        if len(returns) > 0:
+            task_results = {}
+            for creg in returns:
+                creg_result = {}
+                c_indices = [
+                    builder.bit_ordering[ref.name] if isinstance(ref, Variable) else None
+                    for ref in assigns[creg]
+                ]
+                for key, value in trimmed.items():
+                    key_list = list(key)
+                    new_key = "".join(
+                        [
+                            key_list[ind] if isinstance(ind, int) else "0"
+                            for ind in c_indices
+                        ]
+                    )
+                    if new_key in creg_result:
+                        creg_result[new_key] += value
+                    else:
+                        creg_result[new_key] = value
+                task_results[creg] = creg_result
 
-            # find the reordering
-            ctr = 0
-            order = []
-            for lbl in labels:
-                if str(lbl) in builder.bit_ordering:
-                    order.append(builder.bit_ordering[str(lbl)])
-                else:
-                    order.append(len(builder.bit_ordering) + ctr)
-                    ctr += 1
-            trimmed = {
-                ("".join([key[idx] for idx in order])): value
-                for key, value in trimmed.items()
-            }
-            return {key: trimmed for key in returns}
+            return task_results
         else:
-            # trim the qiskit returns to the number of measurements
-            removals = self.model.qubit_count - builder.bit_count
-            trimmed = {key[removals:][::-1]: value for key, value in distribution.items()}
             return trimmed
 
     def optimize(self, instructions: List[Instruction]) -> List[Instruction]:

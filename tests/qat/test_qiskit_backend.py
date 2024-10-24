@@ -373,3 +373,22 @@ class TestQiskitBackend:
         bitstring0 = "00"
         bitstring1 = "11"
         assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
+
+    @pytest.mark.parametrize(
+        "qasm, result_expectations",
+        [
+            ("basic_results_formats.qasm", {"ab": {"00": 1000}, "c": 1000}),
+            ("ordered_cregs.qasm", {"a": {"00": 1000}, "b": {"00": 1000}, "c": 1000}),
+            ("split_measure_assign.qasm", {"a": {"01": 1000}, "b": {"10": 1000}}),
+        ],
+    )
+    def test_multiple_cregs(self, qasm, result_expectations):
+        hw = get_default_qiskit_hardware()
+        result, _ = execute_qasm_with_metrics(get_qasm2(qasm), hw)
+        assert all([key in result.keys() for key in result_expectations.keys()])
+        for key, vals in result_expectations.items():
+            if isinstance(vals, dict):
+                assert result[key] == vals
+            else:
+                assert len(result[key].keys()) > 1
+                assert sum(result[key].values()) == 1000
