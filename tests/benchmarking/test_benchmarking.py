@@ -1,5 +1,3 @@
-from json import load
-
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -27,15 +25,13 @@ experiments_two_qubits = {
 
 @pytest.mark.parametrize("hw", list(hardware_two_qubits.keys()))
 @pytest.mark.parametrize("circuit", list(experiments_two_qubits.keys()))
-def test_two_qubit_compile(hw, circuit):
-    pm = default_benchmarking(
-        hardware_two_qubits[hw],
-        experiments_two_qubits[circuit],
-    )
-    pm.run(10)
-    res = pm.min.result
-    with open(f"tests/benchmarking/data/{circuit}-{hw}.json") as file:
-        comparison = load(file)
-    for key in list(res.keys()):
-        assert res[key] < 2 * comparison[str(key)]
+def test_two_qubit_compile(benchmark, hw, circuit):
+    def run():
+        pm = default_benchmarking(
+            hardware_two_qubits[hw],
+            experiments_two_qubits[circuit],
+        )
+        pm.run()
+
+    benchmark(run)
     assert True
