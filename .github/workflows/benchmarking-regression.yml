@@ -51,6 +51,10 @@ jobs:
       - name: Install dependancies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --sync
+      
+      - name: Install pytest-benchmark
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry run pip install pytest-benchmark
 
       - name: Benchmarking on main
         run: poetry run pytest --benchmark-only --benchmark-save="benchmark"

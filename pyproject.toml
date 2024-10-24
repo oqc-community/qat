@@ -46,7 +46,6 @@ qblox-instruments = "^0.14.0"
 lark-parser = "^0.12.0"
 pydantic-settings = ">=2.5.2"
 compiler-config = "0.1.0"
-pytest-benchmark = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
@@ -58,6 +57,7 @@ autoflake = "^2.2.0"
 isort = "^5.13.2"
 docplex = "^2.21.207"
 pre-commit = "^3.2.0"
+pytest-benchmark = "^4.0.0"
 
 [tool.poetry.group.licenses]
 optional = true
