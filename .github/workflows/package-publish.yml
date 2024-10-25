@@ -40,11 +40,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
-    - name: Check poetry version matches tag
+    - name: Check poetry and docs version matches tag
       run: | 
         POETRY_VERSION=$(poetry version -s)
         TAG=$(echo $GITHUB_REF | cut -d / -f 3)
-        [ $POETRY_VERSION = $TAG ] 
+        DOCS_VERSION=$(grep -oP 'version = "\K.*?(?=")' docs/source/conf.py)
+        [[ $POETRY_VERSION = $TAG && $DOCS_VERSION = $TAG ]] 
     - name: Poetry install
       run: poetry install --sync
 
