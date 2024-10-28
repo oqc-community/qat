@@ -344,7 +344,7 @@ class QiskitEngine(InstructionExecutionEngine):
                 task_results[creg] = creg_result
         else:
             task_results = trimmed
-        
+
         return (
             (task_results, results.results[0].metadata)
             if qiskitconfig.ENABLE_METADATA
