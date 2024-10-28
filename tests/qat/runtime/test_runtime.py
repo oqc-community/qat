@@ -1,7 +1,7 @@
 from qat.ir.pass_base import AnalysisPass, TransformPass, ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.compiler.runtime import NewQuantumRuntime
+from qat.runtime.runtime import QuantumRuntime
 
 from tests.qat.utils.builder_nuggets import resonator_spect
 
@@ -9,7 +9,7 @@ from tests.qat.utils.builder_nuggets import resonator_spect
 def test_new_quantum_runtime():
     model = get_default_echo_hardware()
     engine = model.create_engine()
-    runtime = NewQuantumRuntime(engine)
+    runtime = QuantumRuntime(engine)
 
     builder = resonator_spect(model)
     res_mgr = ResultManager()
