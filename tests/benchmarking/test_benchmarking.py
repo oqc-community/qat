@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -55,3 +57,13 @@ def test_benchmarks_qasm(benchmark, key):
 
     benchmark(run)
     assert True
+
+
+@pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)
+def test_regression_report_warn(benchmark):
+    benchmark(time.sleep, 0.1)
+
+
+@pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)
+def test_regression_report_fail(benchmark):
+    benchmark(time.sleep, 0.1)
