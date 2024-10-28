@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import uuid
-from typing import Dict, List, Literal, Optional
+from typing import List, Literal, Optional
 
 import numpy as np
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field
 
 from qat.purr.compiler.devices import ChannelType
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 
-class DeviceTagMixin(WarnOnExtraFieldsModel):
+class DeviceIdMixin(WarnOnExtraFieldsModel):
     """
     Base class for any logical object which can act as a target of a quantum action
     - a Qubit or various channels for a simple example.
@@ -20,26 +20,35 @@ class DeviceTagMixin(WarnOnExtraFieldsModel):
     """
 
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), allow_mutation=False)
-    tag_type: Optional[str] = None
+    id_type: str = ""
 
     def __init__(self, **data):
         super().__init__(**data)
-        self.tag_type = self.__class__.__name__
+        self.id_type = self.__class__.__name__
+
+    def __hash__(self):
+        return hash(self.uuid)
+
+    def __eq__(self, other: DeviceIdMixin):
+        return self.uuid == other.uuid
+
+    def __ne__(self, other: DeviceIdMixin):
+        return self.uuid != other.uuid
 
 
-class PhysicalBasebandId(DeviceTagMixin):
+class PhysicalBasebandId(DeviceIdMixin):
     pass
 
 
-class PhysicalChannelId(DeviceTagMixin):
+class PhysicalChannelId(DeviceIdMixin):
     pass
 
 
-class PulseChannelId(DeviceTagMixin):
-    pass
+class PulseChannelId(DeviceIdMixin):
+    channel_type: Optional[ChannelType] = None
 
 
-class QuantumDeviceId(DeviceTagMixin):
+class QuantumDeviceId(DeviceIdMixin):
     pass
 
 
@@ -51,28 +60,30 @@ class QubitId(QuantumDeviceId):
     pass
 
 
-class QuantumComponent(WarnOnExtraFieldsModel):
-    id: str = ""
-    tag: DeviceTagMixin = DeviceTagMixin()
-
-    @model_validator(mode="after")
-    def set_id(self):
-        if not self.id:
-            self.id = self.tag.uuid
-        return self
+class QuantumComponentData(WarnOnExtraFieldsModel):
+    id: DeviceIdMixin = DeviceIdMixin()
+    custom_id: str = ""
 
     @property
     def full_id(self):
-        return self.tag.uuid
+        return self.id.uuid
 
     def __hash__(self):
-        return hash(self.tag.uuid)
+        return hash(self.id.uuid)
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.id})"
+        return (
+            self.custom_id if self.custom_id else f"{type(self).__name__}({self.id.uuid})"
+        )
+
+    def __eq__(self, other: QuantumComponentData):
+        return self.full_id == other.full_id
+
+    def __ne__(self, other: QuantumComponentData):
+        return self.full_id != other.full_id
 
 
-class PhysicalBaseband(QuantumComponent):
+class PhysicalBasebandData(QuantumComponentData):
     """
     Models the Local Oscillator (LO) used with a mixer to change the
     frequency of a carrier signal.
@@ -86,10 +97,10 @@ class PhysicalBaseband(QuantumComponent):
     frequency: float = Field(ge=0.0)
     if_frequency: Optional[float] = Field(ge=0.0, default=250e6)
 
-    tag: PhysicalBasebandId = PhysicalBasebandId()
+    id: PhysicalBasebandId = PhysicalBasebandId()
 
 
-class PhysicalChannel(QuantumComponent):
+class PhysicalChannelData(QuantumComponentData):
     """
     Models a physical channel that can carry one or multiple pulses.
 
@@ -107,7 +118,7 @@ class PhysicalChannel(QuantumComponent):
         max_frequency: Max frequency allowed in this physical channel.
     """
 
-    baseband: PhysicalBaseband
+    baseband_id: PhysicalBasebandId
     sample_time: float = Field(ge=0.0)
     block_size: Optional[int] = Field(ge=1, default=1)
     phase_iq_offset: float = 0.0
@@ -117,14 +128,10 @@ class PhysicalChannel(QuantumComponent):
     min_frequency: float = Field(ge=0.0, default=0.0)
     max_frequency: float = np.inf
 
-    tag: PhysicalChannelId = PhysicalChannelId()
-
-    @field_serializer("baseband")
-    def serialise_baseband(self, baseband: PhysicalBaseband):
-        return baseband.tag
+    id: PhysicalChannelId = PhysicalChannelId()
 
 
-class PulseChannel(QuantumComponent):
+class PulseChannelData(QuantumComponentData):
     """
     Models a pulse channel on a particular device.
 
@@ -135,32 +142,27 @@ class PulseChannel(QuantumComponent):
         scale: Scale factor for mapping the voltage of the pulse to frequencies.
         fixed_if: Flag which determines if the intermediate frequency is fixed.
         channel_type: Type of the pulse.
-        auxiliary_devices: Any extra devices this PulseChannel could be affecting except
+        auxiliary_qubits: Any extra devices this PulseChannel could be affecting except
                            the current one. For example in cross resonance pulses.
     """
 
-    physical_channel: PhysicalChannel
+    physical_channel_id: PhysicalChannelId
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j
     scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
 
     channel_type: Optional[ChannelType] = Field(allow_mutation=False, default=None)
-    auxiliary_devices: List[QuantumDevice] = Field(allow_mutation=False, default=None)
+    auxiliary_qubits: List[QubitId] = Field(allow_mutation=False, default=None)
 
-    tag: PulseChannelId = PulseChannelId()
+    id: PulseChannelId = PulseChannelId()
 
-    @field_serializer("physical_channel")
-    def serialise_physical_channel(self, physical_channel: PhysicalChannel):
-        return physical_channel.tag
-
-    @field_serializer("auxiliary_devices")
-    def serialise_auxiliary_devices(self, auxiliary_devices: List[QuantumDevice]):
-        if auxiliary_devices:
-            return [auxiliary_device.tag for auxiliary_device in auxiliary_devices]
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.id.channel_type = self.channel_type
 
 
-class QuantumDevice(QuantumComponent):
+class QuantumDeviceData(QuantumComponentData):
     """
     A physical device whose main form of operation involves pulse channels.
 
@@ -173,36 +175,23 @@ class QuantumDevice(QuantumComponent):
         default_pulse_channel_type: Default type of pulse for the quantum device.
     """
 
-    pulse_channels: Dict[str, PulseChannel]
-    physical_channel: PhysicalChannel
-    measure_device: Optional[QuantumDevice] = None
+    pulse_channel_ids: List[PulseChannelId]
+    physical_channel_id: PhysicalChannelId
+    measure_device_id: Optional[ResonatorId] = None
     default_pulse_channel_type: ChannelType = ChannelType.measure
 
-    tag: QuantumDeviceId = QuantumDeviceId()
-
-    @field_serializer("pulse_channels")
-    def serialise_pulse_channels(self, pulse_channels: Dict[str, PulseChannel]):
-        return [pulse_channel.tag for pulse_channel in pulse_channels.values()]
-
-    @field_serializer("physical_channel")
-    def serialise_physical_channel(self, physical_channel: PhysicalChannel):
-        return physical_channel.tag
-
-    @field_serializer("measure_device")
-    def serialise_measure_device(self, measure_device: QuantumDevice):
-        if measure_device:
-            return measure_device.tag
+    id: QuantumDeviceId = QuantumDeviceId()
 
 
-class Resonator(QuantumDevice):
+class ResonatorData(QuantumDeviceData):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    measure_device: None = None
+    measure_device_id: None = None
 
-    tag: ResonatorId = ResonatorId()
+    id: ResonatorId = ResonatorId()
 
 
-class Qubit(QuantumDevice):
+class QubitData(QuantumDeviceData):
     """
     Models a superconducting qubit on a chip, and holds all information relating to it.
 
@@ -218,6 +207,6 @@ class Qubit(QuantumDevice):
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
 
-    measure_device: Resonator = None
+    measure_device_id: ResonatorId = None
 
-    tag: QubitId = QubitId()
+    id: QubitId = QubitId()
