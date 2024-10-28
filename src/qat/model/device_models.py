@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from typing import Dict, List, Literal, Optional
+from typing import List, Literal, Optional
 
 import numpy as np
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field, field_serializer
 
 from qat.purr.compiler.devices import ChannelType
 from qat.utils.pydantic import WarnOnExtraFieldsModel
@@ -20,10 +20,14 @@ class DeviceIdMixin(WarnOnExtraFieldsModel):
     """
 
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), allow_mutation=False)
+    id_type: str = ""
 
     def __init__(self, **data):
         super().__init__(**data)
         self.id_type = self.__class__.__name__
+
+    def __hash__(self):
+        return hash(self.uuid)
 
 
 class PhysicalBasebandId(DeviceIdMixin):
@@ -35,7 +39,7 @@ class PhysicalChannelId(DeviceIdMixin):
 
 
 class PulseChannelId(DeviceIdMixin):
-    pass
+    channel_type: Optional[ChannelType] = None
 
 
 class QuantumDeviceId(DeviceIdMixin):
@@ -151,9 +155,13 @@ class PulseChannel(QuantumComponent):
 
     id: PulseChannelId = PulseChannelId()
 
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.id.channel_type = self.channel_type
+
     @field_serializer("physical_channel")
     def serialise_physical_channel(self, physical_channel: PhysicalChannel):
-        return physical_channel.tag
+        return physical_channel.id
 
     @field_serializer("auxiliary_qubits")
     def serialise_auxiliary_qubits(self, auxiliary_qubits: List[QubitData]):
@@ -174,65 +182,20 @@ class QuantumDeviceData(QuantumComponent):
         default_pulse_channel_type: Default type of pulse for the quantum device.
     """
 
-    pulse_channels: Dict[str, PulseChannel]
-    physical_channel: PhysicalChannelId
-    measure_device: Optional[ResonatorData] = None
+    pulse_channel_ids: List[PulseChannelId]
+    physical_channel_id: PhysicalChannelId
+    measure_device_id: Optional[ResonatorId] = None
     default_pulse_channel_type: ChannelType = ChannelType.measure
 
     id: QuantumDeviceId = QuantumDeviceId()
-
-    @field_serializer("pulse_channels")
-    def serialise_pulse_channels(self, pulse_channels: Dict[str, PulseChannel]):
-        return [pulse_channel.id for pulse_channel in pulse_channels.values()]
-
-    @field_serializer("physical_channel")
-    def serialise_physical_channel(self, physical_channel: PhysicalChannel):
-        return physical_channel.id
-
-    @field_serializer("measure_device")
-    def serialise_measure_device(self, measure_device: ResonatorData):
-        if measure_device:
-            return measure_device.id
-
-    @model_validator(mode="after")
-    def check_pulse_channels(self):
-        invalid_pulse_channels = [
-            pulse_channel
-            for pulse_channel in self.pulse_channels.values()
-            if pulse_channel.physical_channel != self.physical_channel
-        ]
-
-        if any(invalid_pulse_channels):
-            error_pulse_channels_str = ",".join(
-                [str(pulse_channel) for pulse_channel in invalid_pulse_channels]
-            )
-            error_physical_channels_str = ",".join(
-                [
-                    str(pulse_channel.physical_channel)
-                    for pulse_channel in invalid_pulse_channels
-                ]
-            )
-            raise ValueError(
-                "Pulse channel has a physical channel and this must be equal to"
-                f"the device physical channel. Device {self} has physical channel {self.physical_channel} "
-                f"while pulse channels {error_pulse_channels_str} have associated physical channels {error_physical_channels_str}."
-            )
-
-        return self
 
 
 class ResonatorData(QuantumDeviceData):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    measure_device: None = None
+    measure_device_id: None = None
 
     id: ResonatorId = ResonatorId()
-
-    def get_measure_channel(self) -> PulseChannel:
-        return self.get_pulse_channel(ChannelType.measure)
-
-    def get_acquire_channel(self) -> PulseChannel:
-        return self.get_pulse_channel(ChannelType.acquire)
 
 
 class QubitData(QuantumDeviceData):
@@ -251,6 +214,6 @@ class QubitData(QuantumDeviceData):
     drive_amp: float = 1.0
     default_pulse_channel_type: Literal[ChannelType.drive] = ChannelType.drive
 
-    measure_device: ResonatorData = None
+    measure_device_id: ResonatorId = None
 
-    tag: QubitId = QubitId()
+    id: QubitId = QubitId()

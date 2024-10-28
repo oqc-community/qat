@@ -4,6 +4,7 @@ from typing import List
 
 from qat.model.device_models import PulseChannel, QuantumDeviceData, QubitData
 from qat.purr.compiler.devices import ChannelType
+from qat.purr.compiler.instructions import QuantumInstruction
 
 
 class QuantumDevice:
@@ -46,6 +47,9 @@ class Resonator(QuantumDevice):
 
 
 class Qubit(QuantumDevice):
+    def __init__(self, measure_device: Resonator):
+        self.measure_device = measure_device
+
     def get_acquire_channel(self) -> PulseChannel:
         return self.measure_device.get_acquire_channel()
 
@@ -81,3 +85,12 @@ class Qubit(QuantumDevice):
             self.get_measure_channel(),
             self.get_acquire_channel(),
         ]
+
+    def X(self) -> QuantumInstruction:
+        pass
+
+    def Y(self) -> QuantumInstruction:
+        pass
+
+    def Z(self) -> QuantumInstruction:
+        pass
