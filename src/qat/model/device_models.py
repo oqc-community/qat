@@ -4,7 +4,7 @@ import uuid
 from typing import List, Literal, Optional
 
 import numpy as np
-from pydantic import Field, field_serializer
+from pydantic import Field
 
 from qat.purr.compiler.devices import ChannelType
 from qat.utils.pydantic import WarnOnExtraFieldsModel
@@ -28,6 +28,12 @@ class DeviceIdMixin(WarnOnExtraFieldsModel):
 
     def __hash__(self):
         return hash(self.uuid)
+
+    def __eq__(self, other: DeviceIdMixin):
+        return self.uuid == other.uuid
+
+    def __ne__(self, other: DeviceIdMixin):
+        return self.uuid != other.uuid
 
 
 class PhysicalBasebandId(DeviceIdMixin):
@@ -54,7 +60,7 @@ class QubitId(QuantumDeviceId):
     pass
 
 
-class QuantumComponent(WarnOnExtraFieldsModel):
+class QuantumComponentData(WarnOnExtraFieldsModel):
     id: DeviceIdMixin = DeviceIdMixin()
     custom_id: str = ""
 
@@ -70,14 +76,14 @@ class QuantumComponent(WarnOnExtraFieldsModel):
             self.custom_id if self.custom_id else f"{type(self).__name__}({self.id.uuid})"
         )
 
-    def __eq__(self, other: QuantumComponent):
+    def __eq__(self, other: QuantumComponentData):
         return self.full_id == other.full_id
 
-    def __ne__(self, other: QuantumComponent):
+    def __ne__(self, other: QuantumComponentData):
         return self.full_id != other.full_id
 
 
-class PhysicalBaseband(QuantumComponent):
+class PhysicalBasebandData(QuantumComponentData):
     """
     Models the Local Oscillator (LO) used with a mixer to change the
     frequency of a carrier signal.
@@ -94,7 +100,7 @@ class PhysicalBaseband(QuantumComponent):
     id: PhysicalBasebandId = PhysicalBasebandId()
 
 
-class PhysicalChannel(QuantumComponent):
+class PhysicalChannelData(QuantumComponentData):
     """
     Models a physical channel that can carry one or multiple pulses.
 
@@ -112,7 +118,7 @@ class PhysicalChannel(QuantumComponent):
         max_frequency: Max frequency allowed in this physical channel.
     """
 
-    baseband: PhysicalBaseband
+    baseband_id: PhysicalBasebandId
     sample_time: float = Field(ge=0.0)
     block_size: Optional[int] = Field(ge=1, default=1)
     phase_iq_offset: float = 0.0
@@ -124,12 +130,8 @@ class PhysicalChannel(QuantumComponent):
 
     id: PhysicalChannelId = PhysicalChannelId()
 
-    @field_serializer("baseband")
-    def serialise_baseband(self, baseband: PhysicalBaseband):
-        return baseband.id
 
-
-class PulseChannel(QuantumComponent):
+class PulseChannelData(QuantumComponentData):
     """
     Models a pulse channel on a particular device.
 
@@ -144,14 +146,14 @@ class PulseChannel(QuantumComponent):
                            the current one. For example in cross resonance pulses.
     """
 
-    physical_channel: PhysicalChannel
+    physical_channel_id: PhysicalChannelId
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j
     scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
 
     channel_type: Optional[ChannelType] = Field(allow_mutation=False, default=None)
-    auxiliary_qubits: List[QubitData] = Field(allow_mutation=False, default=None)
+    auxiliary_qubits: List[QubitId] = Field(allow_mutation=False, default=None)
 
     id: PulseChannelId = PulseChannelId()
 
@@ -159,17 +161,8 @@ class PulseChannel(QuantumComponent):
         super().__init__(**data)
         self.id.channel_type = self.channel_type
 
-    @field_serializer("physical_channel")
-    def serialise_physical_channel(self, physical_channel: PhysicalChannel):
-        return physical_channel.id
 
-    @field_serializer("auxiliary_qubits")
-    def serialise_auxiliary_qubits(self, auxiliary_qubits: List[QubitData]):
-        if auxiliary_qubits:
-            return [qubit.id for qubit in auxiliary_qubits]
-
-
-class QuantumDeviceData(QuantumComponent):
+class QuantumDeviceData(QuantumComponentData):
     """
     A physical device whose main form of operation involves pulse channels.
 
