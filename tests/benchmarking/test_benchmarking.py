@@ -16,7 +16,7 @@ hardware_two_qubits = {
     "echo": get_default_echo_hardware(2),
     "rtcs": get_default_RTCS_hardware(),
 }
-circuits_two_qubits = ["bell_state", "random_cnot_two_qubits"]
+circuits_two_qubits = ["bell_state", "2qb_random_cnot", "2qb_clifford"]
 for circ in circuits_two_qubits:
     for hw_key, hw in hardware_two_qubits.items():
         experiments[f"{circ}[{hw_key}]"] = (circ, hw)
@@ -26,7 +26,7 @@ hardware_ten_qubits = {
     "echo": get_default_echo_hardware(10),
     "jagged": get_jagged_echo_hardware(10),
 }
-circuits_ten_qubits = ["ghz", "random_cnot_ten_qubits"]
+circuits_ten_qubits = ["10qb_ghz", "10qb_random_cnot"]
 for circ in circuits_ten_qubits:
     for hw_key, hw in hardware_ten_qubits.items():
         experiments[f"{circ}[{hw_key}]"] = (circ, hw)
