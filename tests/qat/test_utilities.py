@@ -7,11 +7,14 @@ import pytest
 
 from qat.purr.backends.utilities import (
     BlackmanFunction,
+    ExtraSoftSquareFunction,
     GaussianFunction,
     GaussianSquareFunction,
     GaussianZeroEdgeFunction,
     NumericFunction,
     SechFunction,
+    SofterSquareFunction,
+    SoftSquareFunction,
     SquareFunction,
     evaluate_shape,
 )
@@ -145,6 +148,23 @@ def test_sech_function(width):
     max_idx = np.argmax(y)
     assert np.isclose(x[max_idx], 0.0)
     assert all(np.isclose(y[max_idx::-1], y[max_idx:]))
+
+
+@pytest.mark.parametrize(
+    ["func", "width", "rise"],
+    product(
+        [SoftSquareFunction, SofterSquareFunction, ExtraSoftSquareFunction],
+        [0.5, 1.0, 2.0],
+        [1e-3, 1e-2, 1e-1],
+    ),
+)
+def test_soft_square_functions(func, width, rise):
+    # Tests the soft square functions
+    x = np.linspace(-1.0, 1.0, 101)
+    f = func(width, rise)
+    y = f(x).real
+    assert all(y[50] >= y.real)
+    assert all(np.isclose(y[50::-1], y[50:]))
 
 
 @pytest.mark.skip(reason="I don't know what the new results should be.")
