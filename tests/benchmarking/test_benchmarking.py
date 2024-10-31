@@ -67,3 +67,8 @@ def test_regression_report_warn(benchmark):
 @pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)
 def test_regression_report_fail(benchmark):
     benchmark(time.sleep, 0.1)
+
+
+@pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)
+def test_regression_report_improvement(benchmark):
+    benchmark(time.sleep, 0.1)
