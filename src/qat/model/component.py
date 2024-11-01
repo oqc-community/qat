@@ -5,6 +5,10 @@ import uuid
 from pydantic import BaseModel, Field, model_validator
 
 
+def make_refdict(*items: list[Component]):
+    return {i.to_component_id(): i for i in items}
+
+
 def get_reftype(model, field):
     """gets the Ref(Dict/List) type of a field or returns None otherwise"""
     if not hasattr(model.model_fields[field], "metadata"):
@@ -30,7 +34,7 @@ class ComponentId(BaseModel):
         id: The string representation of the quantum component.
     """
 
-    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), allow_mutation=False)
+    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
     id_type: str = ""
 
     def __init__(self, **data):
