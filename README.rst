@@ -108,7 +108,7 @@ Additionally, to report any concerns or
 Benchmarking
 ----------------------
 
-The performance of QAT can be measured using :code:`poetry run pytest --benchmark-only `, which runs our pre-defined benchmarks.
+The performance of QAT can be measured using our pre-defined benchmarks: :code:`poetry run pytest --benchmark-only`
 To compare to main, checkout the main branch and run :code:`poetry run pytest --benchmark-only --benchmark-save="<benchmark-name>"`. 
 Then checkout back to the branch you are working and run :code:`poetry run pytest --benchmark-only --benchmark-save="<benchmark-name>" --benchmark-compare --benchmark-compare-fail=min:50%`.
 If the test fails, it might indicate a performance regression: use the comparison table that is outputted to verify.
