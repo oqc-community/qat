@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from .component import Component, get_reftype
 
@@ -19,7 +19,7 @@ class AutoPopulate(BaseModel):
         reference_targets = {}
         for field_name in self.model_fields:
             if get_reftype(self, field_name):
-                raise ValidationError("AutoPopulate classes cannot have Ref fields")
+                raise Exception("AutoPopulate classes cannot have Ref fields")
             targets = {
                 target.to_component_id(): target
                 for target in self._get_components(field_name)
