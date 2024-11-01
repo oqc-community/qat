@@ -576,6 +576,9 @@ class PulseChannelView(PulseChannel):
             return setattr(self.pulse_channel, key, value)
         return super().__setattr__(key, value)
 
+    def full_id(self):
+        return self.pulse_channel.full_id()
+
     def __hash__(self):
         return self.pulse_channel.__hash__()
 
