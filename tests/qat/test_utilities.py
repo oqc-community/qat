@@ -159,7 +159,7 @@ def test_sech_function(width):
     ),
 )
 def test_soft_square_functions(func, width, rise):
-    # Tests the soft square functions
+    # Tests the properties of soft square functions: maximum, symmetry
     x = np.linspace(-1.0, 1.0, 101)
     f = func(width, rise)
     y = f(x).real
