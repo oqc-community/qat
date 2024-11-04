@@ -7,6 +7,7 @@ from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend
 
+from tests.benchmarking.utils.models import get_mock_live_hardware
 from tests.qat.utils.models import get_jagged_echo_hardware
 
 experiments = {}
@@ -15,6 +16,7 @@ experiments = {}
 hardware_two_qubits = {
     "echo": get_default_echo_hardware(2),
     "rtcs": get_default_RTCS_hardware(),
+    "mock_live": get_mock_live_hardware(2),
 }
 circuits_two_qubits = ["bell_state", "2qb_random_cnot", "2qb_clifford"]
 for circ in circuits_two_qubits:
@@ -25,6 +27,7 @@ for circ in circuits_two_qubits:
 hardware_ten_qubits = {
     "echo": get_default_echo_hardware(10),
     "jagged": get_jagged_echo_hardware(10),
+    "mock_live": get_mock_live_hardware(10),
 }
 circuits_ten_qubits = ["10qb_ghz", "10qb_random_cnot"]
 for circ in circuits_ten_qubits:
