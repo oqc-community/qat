@@ -65,6 +65,14 @@ jobs:
       run: echo "tag=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/tags/}}" >> $GITHUB_OUTPUT
       id: extract_tag
 
+    - name: Check poetry and docs version matches tag
+      if: github.ref_type == 'tag'
+      run: | 
+        POETRY_VERSION=$(poetry version -s)
+        TAG=$(echo $GITHUB_REF | cut -d / -f 3)
+        DOCS_VERSION=$(grep -oP 'version = "\K.*?(?=")' docs/source/conf.py)
+        [[ $POETRY_VERSION = $TAG && $DOCS_VERSION = $TAG ]] 
+
     - name: Build docs - tag
       if: github.ref_type == 'tag'
       run: |
