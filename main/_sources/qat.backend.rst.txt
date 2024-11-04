@@ -1,0 +1,19 @@
+qat.backend package
+===================
+
+.. automodule:: qat.backend
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.analysis_passes
+   qat.backend.codegen_base
+   qat.backend.graph
+   qat.backend.transform_passes
+   qat.backend.validation_passes

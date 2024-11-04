@@ -12,9 +12,11 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qat.backend
    qat.compiler
    qat.ir
    qat.purr
+   qat.utils
 
 Submodules
 ----------
