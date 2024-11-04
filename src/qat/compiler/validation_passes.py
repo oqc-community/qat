@@ -84,7 +84,7 @@ class InstructionValidation(ValidationPass):
 
 class ReadoutValidation(ValidationPass):
     """
-    Extracted from LiveDeviceEngine.optimize()
+    Extracted from LiveDeviceEngine.validate()
     """
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
@@ -99,6 +99,7 @@ class ReadoutValidation(ValidationPass):
             )
 
         consumed_qubits: List[str] = []
+        chanbits_map = {}
         for inst in builder.instructions:
             if isinstance(inst, PostProcessing):
                 if (
@@ -134,7 +135,17 @@ class ReadoutValidation(ValidationPass):
                 # Find target qubit from instruction and check whether it's been
                 # measured already.
                 acquired_qubits = [
-                    model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
+                    (
+                        (
+                            chanbits_map[chanbit]
+                            if chanbit in chanbits_map
+                            else chanbits_map.setdefault(
+                                chanbit,
+                                model._resolve_qb_pulse_channel(chanbit)[0],
+                            )
+                        )
+                        in consumed_qubits
+                    )
                     for chanbit in inst.quantum_targets
                     if isinstance(chanbit, (Qubit, PulseChannel))
                 ]

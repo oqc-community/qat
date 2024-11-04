@@ -400,6 +400,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             super().validate(instructions)
 
             consumed_qubits: List[str] = []
+            chanbits_map = {}
             for inst in instructions:
                 if isinstance(inst, PostProcessing):
                     if (
@@ -435,7 +436,17 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     # Find target qubit from instruction and check whether it's been
                     # measured already.
                     acquired_qubits = [
-                        self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
+                        (
+                            (
+                                chanbits_map[chanbit]
+                                if chanbit in chanbits_map
+                                else chanbits_map.setdefault(
+                                    chanbit,
+                                    self.model._resolve_qb_pulse_channel(chanbit)[0],
+                                )
+                            )
+                            in consumed_qubits
+                        )
                         for chanbit in inst.quantum_targets
                         if isinstance(chanbit, (Qubit, PulseChannel))
                     ]
