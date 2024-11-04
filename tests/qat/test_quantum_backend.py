@@ -716,3 +716,24 @@ class TestBaseQuantum:
             PhaseReset,
             *[PostProcessing] * 4,
         ]
+
+    def test_mid_circuit_validation(self):
+        """Tests that an error is thrown for mid-circuit measurements."""
+
+        hw = get_test_model()
+        engine = get_test_execution_engine(hw)
+        q0 = hw.get_qubit(0)
+        q1 = hw.get_qubit(1)
+        builder = (
+            get_builder(hw)
+            .had(q0)
+            .X(q1)
+            .measure(q0)
+            .measure(q1)
+            .cnot(q0, q1)
+            .measure(q0)
+            .measure(q1)
+        )
+        print("\n".join([str(type(inst)) for inst in builder.instructions]))
+        with pytest.raises(ValueError):
+            engine.validate(builder.instructions)

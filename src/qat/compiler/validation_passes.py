@@ -129,7 +129,7 @@ class ReadoutValidation(ValidationPass):
             # Check if we've got a measure in the middle of the circuit somewhere.
             elif isinstance(inst, Acquire):
                 for qbit in model.qubits:
-                    if qbit.get_measure_channel() == inst.channel:
+                    if qbit.get_acquire_channel() == inst.channel:
                         consumed_qubits.append(qbit)
             elif isinstance(inst, Pulse):
                 # Find target qubit from instruction and check whether it's been
