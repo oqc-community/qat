@@ -4,9 +4,9 @@ from copy import deepcopy
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-from qat.model.devices import (
+from qat.model.devices_old import (
     ChannelType,
     PhysicalBaseband,
     PhysicalChannel,
@@ -18,7 +18,6 @@ from qat.model.devices import (
     Resonator,
 )
 from qat.purr.compiler.instructions import (
-    AcquireMode,
     CrossResonanceCancelPulse,
     CrossResonancePulse,
     DrivePulse,
@@ -36,15 +35,6 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
     Attributes:
         repeat_limit: The maximum number of shots / repeats for the hardware model.
     """
-
-    model_config = ConfigDict(validate_assignment=True)
-
-    default_acquire_mode: AcquireMode = AcquireMode.RAW
-    default_repeat_count: int = 1000
-    default_repetition_period: float = 100e-6
-    repeat_limit: int | None = None
-    min_pulse_length: float = Field(ge=0.0, default=1e-09)  # default value in seconds
-    max_pulse_length: float = Field(gt=0.0, default=1e-03)  # default value in seconds
 
     quantum_devices: Dict[str, QuantumDevice] = Field(allow_mutation=False, default=dict())
     pulse_channels: Dict[str, PulseChannel] = Field(allow_mutation=False, default=dict())
