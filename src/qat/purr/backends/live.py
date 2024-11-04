@@ -450,8 +450,6 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                         for chanbit in inst.quantum_targets
                         if isinstance(chanbit, (Qubit, PulseChannel))
                     ]
-                    print(consumed_qubits)
-                    print(acquired_qubits)
 
                     if any(acquired_qubits):
                         raise ValueError(

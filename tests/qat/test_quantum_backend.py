@@ -734,6 +734,5 @@ class TestBaseQuantum:
             .measure(q0)
             .measure(q1)
         )
-        print("\n".join([str(type(inst)) for inst in builder.instructions]))
         with pytest.raises(ValueError):
             engine.validate(builder.instructions)
