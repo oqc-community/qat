@@ -85,7 +85,7 @@ class QuantumDevice(Component):
         default_pulse_channel_type: Default type of pulse for the quantum device.
     """
 
-    pulse_channels: RefDict[PulseChannel]
+    pulse_channels: RefDict[PulseChannel] = Field(frozen=True)
     physical_channel: Ref[PhysicalChannel]
     measure_device: Ref[Resonator]
 

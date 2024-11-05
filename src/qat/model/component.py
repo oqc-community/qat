@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from contextlib import contextmanager
 from typing import List
 
 from pydantic import BaseModel, Field, model_validator
@@ -31,10 +32,6 @@ class ComponentId(BaseModel):
 
     def __repr__(self):
         return f"{type(self).__name__}({self.uuid})"
-
-    @property
-    def id_type(self):
-        return self.__class__.__name__
 
     def to_component_id(self):
         return ComponentId(uuid=self.uuid)
@@ -85,6 +82,17 @@ class Component(ComponentId):
             case "RefDict":
                 return all(isinstance(v, Component) for v in field_value.values())
 
+    @contextmanager
+    def temporary_unfreeze(self, field_name: str):
+        """Context manager to temporarily unfreeze a field and populate its references."""
+        original_frozen = self.model_fields[field_name].frozen
+        self.model_fields[field_name].frozen = False
+
+        try:
+            yield
+        finally:
+            self.model_fields[field_name].frozen = original_frozen
+
     def populate(self, reference_targets):
         """Populate all references."""
         for field_name, v in self._ref_fields.items():
@@ -99,7 +107,9 @@ class Component(ComponentId):
                         new_value = {
                             k: reference_targets.get(v) for (k, v) in field_value.items()
                         }
-                setattr(self, field_name, new_value)
+
+                with self.temporary_unfreeze(field_name):
+                    setattr(self, field_name, new_value)
 
 
 def get_reftype(model, field):
