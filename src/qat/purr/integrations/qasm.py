@@ -2005,12 +2005,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # Determine the delay for the channel
         delay = 0.0
         if pulse_channel.channel_type == ChannelType.acquire:
-            # TODO: remove full id when previous PR is merged
             devices = [
                 dev
-                for dev in self.builder.model.get_devices_from_pulse_channel(
-                    pulse_channel.full_id()
-                )
+                for dev in self.builder.model.get_devices_from_pulse_channel(pulse_channel)
                 if isinstance(dev, Resonator)
             ]
             if len(devices) == 1:
