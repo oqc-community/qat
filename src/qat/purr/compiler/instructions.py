@@ -122,6 +122,15 @@ class Repeat(Instruction):
         return f"repeat {self.repeat_count},{self.repetition_period}"
 
 
+class EndRepeat(Instruction):
+    """
+    Basic scoping. Marks the end of the most recent repeat
+    """
+
+    def __repr__(self):
+        return f"end_repeat"
+
+
 class PhaseShift(QuantumInstruction):
     def __init__(self, channel: "PulseChannel", phase: float):
         super().__init__(channel)
@@ -527,7 +536,7 @@ class DeviceUpdate(QuantumInstruction):
     """
 
     def __init__(self, target: QuantumComponent, attribute: str, value):
-        super().__init__()
+        super().__init__(target)
         self.target = target
         self.attribute = attribute
         self.value = value
@@ -569,6 +578,15 @@ class Sweep(Instruction):
     def __repr__(self):
         args = ",".join(key + "=" + str(value) for key, value in self.variables.items())
         return f"sweep {args}"
+
+
+class EndSweep(Instruction):
+    """
+    Basic scoping. Marks the end of the most recent sweep
+    """
+
+    def __repr__(self):
+        return f"end_sweep"
 
 
 class Jump(Instruction):
@@ -793,21 +811,18 @@ class MeasureBlock(QuantumInstructionBlock):
         targets: Union[Qubit, List[Qubit]],
         mode: AcquireMode,
         output_variables: Union[str, List[str]] = None,
-        entangled_qubits: List[Qubit] = None,
         existing_names: Set[str] = None,
     ):
         self._target_dict = {}
-        self._entangled_qubits = set()
         self._existing_names = existing_names
         self._duration = 0.0
-        self.add_measurements(targets, mode, output_variables, entangled_qubits)
+        self.add_measurements(targets, mode, output_variables)
 
     def add_measurements(
         self,
         targets: Union[Qubit, List[Qubit]],
         mode: AcquireMode,
         output_variables: Union[str, List[str]] = None,
-        entangled_qubits: List[Qubit] = None,
         existing_names: Set[str] = None,
     ):
         targets = self._validate_types(targets, (Qubit))
@@ -839,11 +854,6 @@ class MeasureBlock(QuantumInstructionBlock):
                 "duration": duration,
             }
             self._duration = max(self._duration, duration)
-        self._entangled_qubits.update(
-            self._validate_types(entangled_qubits, (Qubit))
-            if entangled_qubits is not None
-            else targets
-        )
 
     @property
     def quantum_targets(self):
@@ -866,12 +876,11 @@ class MeasureBlock(QuantumInstructionBlock):
 
     @property
     def instructions(self) -> List[QuantumInstruction]:
-        instructions = [Synchronize(list(self._entangled_qubits))]
+        targets = self.quantum_targets
+        instructions = [Synchronize(targets)]
         for _, values in self._target_dict.items():
             instructions.extend([values["measure"], values["acquire"]])
-        instructions.extend(
-            [Synchronize(self.quantum_targets), PhaseReset(list(self._entangled_qubits))]
-        )
+        instructions.append(Synchronize(targets))
         return instructions
 
     @property

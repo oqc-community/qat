@@ -297,12 +297,11 @@ class SoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        return 0.5 * (
-            np.tanh((x + (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype)
-            - np.tanh(
-                (x - (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype
-            )
+        pulse = 0.5 * (
+            np.tanh((x.real + (self._width - self._rise) / 2.0) / self._rise)
+            - np.tanh((x.real - (self._width - self._rise) / 2.0) / self._rise)
         )
+        return pulse.astype(self._dtype)
 
 
 class SofterSquareFunction(NumericFunction):
@@ -312,13 +311,13 @@ class SofterSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh((x + self._width / 2.0 - self._rise) / self._rise) - np.tanh(
-            (x - self._width / 2.0 + self._rise) / self._rise
+        pulse = np.tanh((x.real + self._width / 2.0 - self._rise) / self._rise) - np.tanh(
+            (x.real - self._width / 2.0 + self._rise) / self._rise
         )
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
-        return np.array(pulse, dtype=self._dtype)
+        return pulse.astype(self._dtype)
 
 
 class ExtraSoftSquareFunction(NumericFunction):
@@ -328,13 +327,13 @@ class ExtraSoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh((x + self._width / 2.0 - 2.0 * self._rise) / self._rise) - np.tanh(
-            (x - self._width / 2.0 + 2.0 * self._rise) / self._rise
-        )
+        pulse = np.tanh(
+            (x.real + self._width / 2.0 - 2.0 * self._rise) / self._rise
+        ) - np.tanh((x.real - self._width / 2.0 + 2.0 * self._rise) / self._rise)
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
-        return np.array(pulse, dtype=self._dtype)
+        return pulse.astype(self._dtype)
 
 
 class SofterGaussianFunction(NumericFunction):
