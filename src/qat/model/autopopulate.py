@@ -42,6 +42,7 @@ class AutoPopulate(WarnOnExtraFieldsModel):
             if issubclass(inner_cls, Component):
                 return list(field_contents.values())
         elif container is None:
+            inner_cls = field_type
             if issubclass(inner_cls, Component):
                 return [field_contents]
         else:
