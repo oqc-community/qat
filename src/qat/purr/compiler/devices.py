@@ -481,10 +481,10 @@ class PulseChannel(QuantumComponent, Calibratable):
         if not isinstance(other, PulseChannel):
             return False
 
-        return self._full_id == other._full_id
+        return self.full_id() == other.full_id()
 
     def __hash__(self):
-        return hash(self._full_id)
+        return hash(self.full_id())
 
 
 class FreqShiftPulseChannel(PulseChannel):
