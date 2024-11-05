@@ -17,7 +17,7 @@ class ComponentId(BaseModel):
         id: The string representation of the quantum component.
     """
 
-    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), allow_mutation=False)
+    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
 
     def __init__(self, **data):
         super().__init__(**data)

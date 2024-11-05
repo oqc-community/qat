@@ -13,6 +13,7 @@ class PhysicalChannel(Component):
 
 
 class PulseChannel(Component):
+    some_val: int
     physical_channel: Ref[PhysicalChannel]
     auxiliary_qubits: RefList[Qubit] = []
 

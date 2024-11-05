@@ -21,14 +21,8 @@ class QuantumHardwareModel(AutoPopulate):
         qubits:
     """
 
-    physical_basebands: ComponentDict[PhysicalBaseband] = Field(
-        allow_mutation=False, default=dict()
-    )
-    physical_channels: ComponentDict[PhysicalChannel] = Field(
-        allow_mutation=False, default=dict()
-    )
-    pulse_channels: ComponentDict[PulseChannel] = Field(
-        allow_mutation=False, default=dict()
-    )
-    qubits: ComponentDict[Qubit] = Field(allow_mutation=False, default=dict())
-    resonators: ComponentDict[Resonator] = Field(allow_mutation=False, default=dict())
+    physical_basebands: ComponentDict[PhysicalBaseband] = Field(frozen=True, default=dict())
+    physical_channels: ComponentDict[PhysicalChannel] = Field(frozen=True, default=dict())
+    pulse_channels: ComponentDict[PulseChannel] = Field(frozen=True, default=dict())
+    qubits: ComponentDict[Qubit] = Field(frozen=True, default=dict())
+    resonators: ComponentDict[Resonator] = Field(frozen=True, default=dict())

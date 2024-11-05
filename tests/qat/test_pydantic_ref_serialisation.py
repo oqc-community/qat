@@ -66,7 +66,7 @@ def make_Outer(count=10, connections=3, seed=42):
     return Outer(A=A, B=B, C=C, D=D, id="outer")
 
 
-class Test_get_field_type_and_container:
+class Test_Refs:
     def test_ref_fields(self):
         class I(Component):
             s: str
