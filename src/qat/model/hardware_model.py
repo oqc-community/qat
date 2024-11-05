@@ -22,7 +22,12 @@ class QuantumHardwareModel(AutoPopulate):
     Base class for calibrating our QPU hardware.
 
     Attributes:
-        qubits:
+        version: The version of this hardware model.
+        physical_basebands: The physical basebands that model the LOs.
+        physical_channels: The physical channels that carry the pulses.
+        pulse_channels: The pulse channels on a particular device.
+        qubits: The superconducting qubits on the chip.
+        resonators: The resonators on the chip.
     """
 
     version: SemanticVersion = VERSION
