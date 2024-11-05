@@ -426,7 +426,9 @@ class PulseChannel(QuantumComponent, Calibratable):
             self._update_full_id()
 
     def _update_full_id(self):
-        self._full_id = self.physical_channel_id + "." + self.id
+        # check is necessary for legacy models
+        if hasattr(self._physical_channel, "id"):
+            self._full_id = self.physical_channel_id + "." + self.id
 
     @property
     def sample_time(self):
