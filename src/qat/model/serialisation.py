@@ -49,31 +49,31 @@ SerializeListToRefs = PlainSerializer(
 RefList = Annotated[List[ComponentId] | List[T], SerializeListToRefs, "RefList"]
 
 
-SerializeIdDict = PlainSerializer(
+SerializeComponentDict = PlainSerializer(
     lambda d: {k.uuid: v for (k, v) in d.items()},
     return_type=dict,
     when_used="always",
 )
 
 
-def deserializeIdDict(data):
-    """Reydrates IdDicts."""
+def deserializeComponentDict(data):
+    """Reydrates ComponentDicts."""
     out = {}
     for k, v in data.items():
         if isinstance(k, ComponentId):
             out[k] = v
         elif isinstance(k, str):
             componentid = ComponentId(**v)
-            assert k == componentid.uuid, "uuid key vs value mismatch on IdDict"
+            assert k == componentid.uuid, "uuid key vs value mismatch on ComponentDict"
             out[componentid] = v
         else:
             assert False, f"Unexpected value type {type(k)}."
     return out
 
 
-IdDict = Annotated[
+ComponentDict = Annotated[
     Dict[ComponentId, T],
-    SerializeIdDict,
-    BeforeValidator(deserializeIdDict),
-    "IdDict",
+    SerializeComponentDict,
+    BeforeValidator(deserializeComponentDict),
+    "ComponentDict",
 ]

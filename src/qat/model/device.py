@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from qat.model.component import Component
-from qat.model.ref import Ref, RefDict, RefList
+from qat.model.serialisation import Ref, RefDict, RefList
 
 
 class PhysicalBaseband(Component):

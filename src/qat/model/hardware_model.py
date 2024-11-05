@@ -10,7 +10,7 @@ from qat.model.device import (
     Qubit,
     Resonator,
 )
-from qat.model.ref import IdDict
+from qat.model.serialisation import ComponentDict
 
 
 class QuantumHardwareModel(AutoPopulate):
@@ -21,10 +21,14 @@ class QuantumHardwareModel(AutoPopulate):
         qubits:
     """
 
-    physical_basebands: IdDict[PhysicalBaseband] = Field(
+    physical_basebands: ComponentDict[PhysicalBaseband] = Field(
         allow_mutation=False, default=dict()
     )
-    physical_channels: IdDict[PhysicalChannel] = Field(allow_mutation=False, default=dict())
-    pulse_channels: IdDict[PulseChannel] = Field(allow_mutation=False, default=dict())
-    qubits: IdDict[Qubit] = Field(allow_mutation=False, default=dict())
-    resonators: IdDict[Resonator] = Field(allow_mutation=False, default=dict())
+    physical_channels: ComponentDict[PhysicalChannel] = Field(
+        allow_mutation=False, default=dict()
+    )
+    pulse_channels: ComponentDict[PulseChannel] = Field(
+        allow_mutation=False, default=dict()
+    )
+    qubits: ComponentDict[Qubit] = Field(allow_mutation=False, default=dict())
+    resonators: ComponentDict[Resonator] = Field(allow_mutation=False, default=dict())
