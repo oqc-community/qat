@@ -462,7 +462,7 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     @property
     def physical_channel_id(self):
-        return self.physical_channel.id
+        return self.physical_channel.full_id()
 
     @property
     def min_frequency(self):
