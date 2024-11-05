@@ -29,14 +29,12 @@ class PhysicalChannel(Component):
     Attributes:
         baseband: The physical baseband.
         sample_time: The rate at which the pulse is sampled.
-        block_size: The number of samples within a block ???
+        block_size: The number of samples within a single block.
         phase_iq_offset: Deviation of the phase difference of the I
                          and Q components from 90° due to imperfections
                          in the mixing of the LO and unmodulated signal.
         bias: The bias in voltages V_I / V_Q for the I and Q components.
         acquire_allowed: If the physical channel allows acquire pulses.
-        min_frequency: Min frequency allowed in this physical channel.
-        max_frequency: Max frequency allowed in this physical channel.
     """
 
     baseband: Ref[PhysicalBaseband] = Field(frozen=True)
@@ -115,3 +113,5 @@ class Qubit(QuantumDevice):
     index: int = Field(ge=0)
     drive_amp: float = 1.0
     default_pulse_channel_type: ChannelType = Field(frozen=True, default=ChannelType.drive)
+
+    coupled_qubits: Optional[RefList[Qubit]] = None

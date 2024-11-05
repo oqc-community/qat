@@ -77,12 +77,16 @@ def make_Hardware(count=10, connections=3, seed=42):
             ),
             measure_device=list(pick(resonators, 1).values())[0],
             default_channel_type=rng.choice(list(ChannelType), size=1)[0],
+            coupled_qubits=[],
         )
         for physical_channel in list(pick(physical_channels, count // 2).values())
     ]
 
     for pulse_channel in pulse_channels:
         pulse_channel.auxiliary_qubits = list(pick(qubits, 3).values())
+
+    for qubit in qubits:
+        qubit.coupled_qubits = [q for q in pick(qubits, 1).values() if qubit != q]
 
     return QuantumHardwareModel(
         physical_basebands=make_refdict(*physical_basebands),
