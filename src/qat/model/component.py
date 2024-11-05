@@ -34,7 +34,7 @@ class ComponentId(BaseModel):
         return f"{type(self).__name__}({self.uuid})"
 
     def to_component_id(self):
-        return ComponentId(uuid=self.uuid)
+        return self
 
     def model_dump_id(self):
         return self.to_component_id().model_dump()
@@ -62,6 +62,9 @@ class Component(ComponentId):
     @property
     def full_id(self):
         return self.uuid
+
+    def to_component_id(self):
+        return ComponentId(uuid=self.uuid)
 
     @model_validator(mode="after")
     def set_ref_fields(self):
