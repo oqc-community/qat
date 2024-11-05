@@ -389,6 +389,7 @@ class PulseChannel(QuantumComponent, Calibratable):
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
+        self._full_id = None
         self.physical_channel = physical_channel
 
         self.frequency: float = frequency
