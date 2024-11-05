@@ -345,6 +345,20 @@ class TestSweep:
         assert isinstance(acquire_inst.time, Variable)
         assert acquire_inst.time.name == "acquire_time"
 
+    def test_sweep_validity(self):
+        var1 = "var1"
+        space1 = [1, 2, 3]
+
+        var2 = "var2"
+        space2 = ["a", "b", "c"]
+
+        sweep = Sweep([SweepValue(var1, space1), SweepValue(var2, space2)])
+        assert len(sweep.variables) == 2
+
+        space2 = ["a", "b", "c", "d"]
+        with pytest.raises(ValueError):
+            Sweep([SweepValue(var1, space1), SweepValue(var2, space2)])
+
 
 class TestInstructionExecution:
     @pytest.mark.parametrize(
@@ -566,7 +580,6 @@ class TestInstructionBlocks:
         assert isinstance(mb, MeasureBlock)
         assert mb.quantum_targets == targets
         assert mb._target_dict[targets[0].full_id()]["mode"] == mode
-        assert mb._entangled_qubits == set(targets)
 
     @pytest.mark.parametrize("out_vars", [None, "c"])
     @pytest.mark.parametrize("num_qubits", [1, 3])
@@ -581,43 +594,21 @@ class TestInstructionBlocks:
         expected = out_vars or [None] * num_qubits
         assert [val["output_variable"] for val in mb._target_dict.values()] == expected
 
-    @pytest.mark.parametrize("entangled_qubits", [None, 3])
-    @pytest.mark.parametrize("num_qubits", [1, 3])
-    def test_create_measure_block_with_entanglement(self, num_qubits, entangled_qubits):
-        hw = get_default_echo_hardware()
-        targets = hw.qubits[:num_qubits]
-
-        if isinstance(entangled_qubits, int):
-            entangled_qubits = targets.copy().append(hw.get_qubit(entangled_qubits))
-
-        mb = MeasureBlock(
-            targets, AcquireMode.INTEGRATOR, entangled_qubits=entangled_qubits
-        )
-        assert mb.quantum_targets == targets
-        if entangled_qubits is None:
-            assert mb._entangled_qubits == set(targets)
-        else:
-            assert mb._entangled_qubits == set(entangled_qubits)
-
     def test_add_to_measure_block(self):
         hw = get_default_echo_hardware()
         targets = [hw.qubits[0], hw.qubits[-1]]
         modes = [AcquireMode.INTEGRATOR, AcquireMode.SCOPE]
         out_vars = ["c[0]", "b[1]"]
-        entangled_qubits = hw.qubits[:2]
         mb = MeasureBlock(
             targets[0],
             modes[0],
             output_variables=out_vars[:1],
-            entangled_qubits=entangled_qubits,
         )
         assert mb.quantum_targets == hw.qubits[:1]
         mb.add_measurements(targets[1], modes[1], output_variables=out_vars[1])
-        entangled_qubits.append(targets[1])
         assert mb.quantum_targets == targets
         assert [val["mode"] for val in mb._target_dict.values()] == modes
         assert [val["output_variable"] for val in mb._target_dict.values()] == out_vars
-        assert mb._entangled_qubits == set(entangled_qubits)
 
     def test_cannot_add_duplicate_to_measure_block(self):
         hw = get_default_echo_hardware()

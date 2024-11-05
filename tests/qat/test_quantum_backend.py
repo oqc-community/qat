@@ -703,16 +703,43 @@ class TestBaseQuantum:
         assert [type(pos.instruction) for pos in drive_data] == [
             DrivePulse,
             Delay,
-            PhaseReset,
         ]
         assert [type(pos.instruction) for pos in measure_data] == [
             Delay,
             MeasurePulse,
-            PhaseReset,
         ]
         assert [type(pos.instruction) for pos in acquire_data] == [
             Delay,
             Acquire,
-            PhaseReset,
             *[PostProcessing] * 4,
         ]
+
+    @pytest.mark.parametrize("pre_measures", [[0], [1], [0, 1]])
+    def test_mid_circuit_validation(self, pre_measures):
+        """Tests that an error is thrown for mid-circuit measurements."""
+
+        hw = get_test_model()
+        engine = get_test_execution_engine(hw)
+        q0 = hw.get_qubit(0)
+        q1 = hw.get_qubit(1)
+        builder = get_builder(hw).had(q0).X(q1)
+        for qbit in pre_measures:
+            builder.measure(hw.get_qubit(qbit))
+        builder.cnot(q0, q1).measure(q0).measure(q1)
+        with pytest.raises(ValueError):
+            engine.validate(builder.instructions)
+
+    @pytest.mark.parametrize("qbit", [0, 1])
+    def test_mid_circuit_validation_pass(self, qbit):
+        """
+        Checks a circuit successfully validates when a measurement occurs on one qubit,
+        and subsequent gates on another.
+        """
+
+        hw = get_test_model()
+        engine = get_test_execution_engine(hw)
+        q0 = hw.get_qubit(qbit)
+        q1 = hw.get_qubit(1 - qbit)
+        builder = get_builder(hw).had(q0).cnot(q0, q1).measure(q1).X(q0)
+        engine.validate(builder.instructions)
+        assert True
