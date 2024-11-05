@@ -426,7 +426,7 @@ class PulseChannel(QuantumComponent, Calibratable):
             self._update_full_id()
 
     def _update_full_id(self):
-        self._full_id = self.physical_channel_id + "." + self.partial_id()
+        self._full_id = self.physical_channel_id + "." + self.id
 
     @property
     def sample_time(self):
@@ -462,7 +462,7 @@ class PulseChannel(QuantumComponent, Calibratable):
 
     @property
     def physical_channel_id(self):
-        return self.physical_channel.full_id()
+        return self.physical_channel.id
 
     @property
     def min_frequency(self):
