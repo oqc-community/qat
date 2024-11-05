@@ -39,7 +39,7 @@ class PhysicalChannel(Component):
         max_frequency: Max frequency allowed in this physical channel.
     """
 
-    baseband: Ref[PhysicalBaseband]
+    baseband: Ref[PhysicalBaseband] = Field(frozen=True)
 
     sample_time: float = Field(ge=0.0)
     block_size: Optional[int] = Field(ge=1, default=1)
@@ -86,8 +86,8 @@ class QuantumDevice(Component):
     """
 
     pulse_channels: RefDict[PulseChannel] = Field(frozen=True)
-    physical_channel: Ref[PhysicalChannel]
-    measure_device: Ref[Resonator]
+    physical_channel: Ref[PhysicalChannel] = Field(frozen=True)
+    measure_device: Ref[Resonator] = Field(frozen=True)
 
     default_pulse_channel_type: ChannelType = Field(
         frozen=True, default=ChannelType.measure
@@ -97,7 +97,7 @@ class QuantumDevice(Component):
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    measure_device: None = None
+    measure_device: None = Field(frozen=True, default=None)
 
 
 class Qubit(QuantumDevice):
@@ -110,7 +110,7 @@ class Qubit(QuantumDevice):
         default_pulse_channel_type: Default type of pulse for the qubit.
     """
 
-    measure_device: Ref[Resonator]
+    measure_device: Ref[Resonator] = Field(frozen=True)
 
     index: int = Field(ge=0)
     drive_amp: float = 1.0
