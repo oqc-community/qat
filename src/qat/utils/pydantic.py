@@ -11,9 +11,12 @@ class WarnOnExtraFieldsModel(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate(cls, fields):
+        assert not "version" in set(
+            fields
+        ), "Changing the version on instantiation is not supported"
         if unknown_fields := set(fields) - set(cls.model_fields):
             log.warning(
-                f"Fields {unknown_fields}, which are no attributes of {cls.__name__}, will be ignored."
+                f"Fields {unknown_fields}, which are not attributes of {cls.__name__}, will be ignored."
             )
 
         return fields
