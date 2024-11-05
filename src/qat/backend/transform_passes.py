@@ -11,25 +11,8 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Return,
     Sweep,
-    SweepValue,
 )
 from qat.utils.algorithm import stable_partition
-
-
-class SweepDecomposition(TransformPass):
-
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Decomposes complex multi-dim sweeps into simpler one-dim sweeps.
-        """
-        result = []
-        for i, inst in enumerate(builder.instructions):
-            if isinstance(inst, Sweep) and len(inst.variables) > 1:
-                for name, value in inst.variables.items():
-                    result.append(Sweep(SweepValue(name, value)))
-            else:
-                result.append(inst)
-        builder.instructions = result
 
 
 class ScopeSanitisation(TransformPass):

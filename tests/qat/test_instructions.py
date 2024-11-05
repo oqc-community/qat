@@ -345,6 +345,20 @@ class TestSweep:
         assert isinstance(acquire_inst.time, Variable)
         assert acquire_inst.time.name == "acquire_time"
 
+    def test_sweep_validity(self):
+        var1 = "var1"
+        space1 = [1, 2, 3]
+
+        var2 = "var2"
+        space2 = ["a", "b", "c"]
+
+        sweep = Sweep([SweepValue(var1, space1), SweepValue(var2, space2)])
+        assert len(sweep.variables) == 2
+
+        space2 = ["a", "b", "c", "d"]
+        with pytest.raises(ValueError):
+            Sweep([SweepValue(var1, space1), SweepValue(var2, space2)])
+
 
 class TestInstructionExecution:
     @pytest.mark.parametrize(
