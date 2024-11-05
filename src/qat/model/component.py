@@ -5,8 +5,6 @@ from typing import List
 
 from pydantic import BaseModel, Field, model_validator
 
-from qat.utils.pydantic import WarnOnExtraFieldsModel
-
 
 class ComponentId(BaseModel):
     """
@@ -61,7 +59,7 @@ class ComponentId(BaseModel):
         return True
 
 
-class Component(ComponentId, WarnOnExtraFieldsModel):
+class Component(ComponentId):
     _ref_fields = {}
 
     @property

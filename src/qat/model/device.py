@@ -13,7 +13,7 @@ class PhysicalChannel(Component):
 
 
 class PulseChannel(Component):
-    some_val: int
+    some_val: int = -100
     physical_channel: Ref[PhysicalChannel]
     auxiliary_qubits: RefList[Qubit] = []
 

@@ -6,31 +6,57 @@ import numpy as np
 import pytest
 
 from qat.model.component import make_refdict
-from qat.model.device import PhysicalBaseband, PhysicalChannel, PulseChannel
+from qat.model.device import (
+    PhysicalBaseband,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    Resonator,
+)
 from qat.model.hardware_model import QuantumHardwareModel
 
 
 def make_Hardware(count=10, connections=3, seed=42):
     rng = np.random.default_rng(seed)
     pick = lambda L, size=3: make_refdict(*rng.choice(L, size=size))
+    pick_pulse_channels = lambda pulse_channels, physical_channel: make_refdict(
+        *[
+            pulse_ch
+            for pulse_ch in pulse_channels
+            if pulse_ch.physical_channel == physical_channel
+        ]
+    )
     physical_basebands = [PhysicalBaseband() for _ in range(count)]
     physical_channels = [
         PhysicalChannel(baseband=list(pick(physical_basebands, 1).values())[0])
-        for _ in range(count)
+        for _ in range(count // 5)
     ]
     pulse_channels = [
-        PulseChannel(
-            physical_channel=list(pick(physical_channels, 1).values())[0],
-            auxiliary_qubits=[],
-            some_val=1,
-        )
-        for _ in range(count)
+        PulseChannel(physical_channel=physical_channel, auxiliary_qubits=[])
+        for physical_channel in physical_channels
     ]
-    qubits = []  # finish this
-    resonators = []  # finish this
+    resonators = [
+        Resonator(
+            physical_channel=physical_channel,
+            pulse_channels=pick_pulse_channels(
+                pulse_channels=pulse_channels, physical_channel=physical_channels[0]
+            ),
+        )
+        for physical_channel in list(pick(physical_channels, count // 2).values())
+    ]
+    qubits = [
+        Qubit(
+            physical_channel=physical_channel,
+            pulse_channels=pick_pulse_channels(
+                pulse_channels=pulse_channels, physical_channel=physical_channels[0]
+            ),
+            measure_device=list(pick(resonators, 1).values())[0],
+        )
+        for physical_channel in list(pick(physical_channels, count // 2).values())
+    ]
 
-    # for pulse_channel in pulse_channels:
-    #    pulse_channel.auxiliary_qubits = list(pick(qubits, 3).values())
+    for pulse_channel in pulse_channels:
+        pulse_channel.auxiliary_qubits = list(pick(qubits, 3).values())
 
     return QuantumHardwareModel(
         physical_basebands=make_refdict(*physical_basebands),
