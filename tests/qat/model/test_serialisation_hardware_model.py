@@ -13,7 +13,7 @@ from qat.model.device import (
     Qubit,
     Resonator,
 )
-from qat.model.hardware_model import QuantumHardwareModel
+from qat.model.hardware_model import VERSION, QuantumHardwareModel
 from qat.purr.compiler.devices import ChannelType
 
 
@@ -132,3 +132,10 @@ class Test_HW_Serialise:
         pc = list(O2.pulse_channels.values())[0]
         pc.frequency = -1
         assert not O2._deepequals(O1)
+
+    def test_deserialise_version(self):
+        O1 = make_Hardware()
+        assert O1.version == VERSION
+
+        O2 = QuantumHardwareModel(**O1.model_dump())
+        assert O2.version == VERSION
