@@ -31,7 +31,7 @@ class ComponentId(BaseModel):
         return self.uuid != other.uuid
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.uuid})"
+        return self.uuid
 
     def to_component_id(self):
         return self
@@ -58,6 +58,9 @@ class ComponentId(BaseModel):
 
 class Component(ComponentId):
     _ref_fields = {}
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.uuid})"
 
     @property
     def full_id(self):

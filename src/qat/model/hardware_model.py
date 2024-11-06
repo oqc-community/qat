@@ -30,7 +30,7 @@ class QuantumHardwareModel(AutoPopulate):
         resonators: The resonators on the chip.
     """
 
-    version: SemanticVersion = VERSION
+    version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
     physical_basebands: ComponentDict[PhysicalBaseband] = Field(frozen=True, default=dict())
     physical_channels: ComponentDict[PhysicalChannel] = Field(frozen=True, default=dict())
     pulse_channels: ComponentDict[PulseChannel] = Field(frozen=True, default=dict())
