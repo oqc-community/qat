@@ -79,13 +79,11 @@ class QuantumDevice(Component):
         physical_channel: Physical channel associated with the pulse channels.
                           Note that this physical channel must be equal to the
                           physical channel associated with the pulse channels.
-        measure_device: A quantum device used to measure the state of this device.
         default_pulse_channel_type: Default type of pulse for the quantum device.
     """
 
     pulse_channels: RefDict[PulseChannel] = Field(frozen=True)
     physical_channel: Ref[PhysicalChannel] = Field(frozen=True)
-    measure_device: Ref[Resonator] = Field(frozen=True)
 
     default_pulse_channel_type: ChannelType = Field(
         frozen=True, default=ChannelType.measure
@@ -95,7 +93,7 @@ class QuantumDevice(Component):
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    measure_device: None = Field(frozen=True, default=None)
+    pass
 
 
 class Qubit(QuantumDevice):
@@ -104,14 +102,17 @@ class Qubit(QuantumDevice):
     Attributes:
         measure_device: The resonator coupled to the qubit.
         index: The index of the qubit on the chip.
-        drive_amp: Amplitude for the pulse controlling the |0> -> |1> transition of the qubit.
+        measure_amp: Amplitude for the measure pulse.
         default_pulse_channel_type: Default type of pulse for the qubit.
     """
 
     measure_device: Ref[Resonator] = Field(frozen=True)
 
     index: int = Field(ge=0)
-    drive_amp: float = 1.0
+    measure_amp: float = 1.0
     default_pulse_channel_type: ChannelType = Field(frozen=True, default=ChannelType.drive)
 
     coupled_qubits: Optional[RefList[Qubit]] = None
+
+    def __repr__(self):
+        return f"Q{self.index}"

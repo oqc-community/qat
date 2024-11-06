@@ -21,8 +21,8 @@ SerializeDictToRefs = PlainSerializer(
 )
 
 
-def deserializeDictToRefs(data):
-    """Reydrates Reference Dicts."""
+def deserialize_dict_to_refs(data):
+    """Rehydrates Reference Dicts."""
     out = {}
     for k, v in data.items():
         if isinstance(v, (Component, ComponentId)):
@@ -39,7 +39,7 @@ def deserializeDictToRefs(data):
 RefDict = Annotated[
     Dict[ComponentId, T] | Dict[ComponentId, ComponentId],
     SerializeDictToRefs,
-    BeforeValidator(deserializeDictToRefs),
+    BeforeValidator(deserialize_dict_to_refs),
     "RefDict",
 ]
 
@@ -56,8 +56,8 @@ SerializeComponentDict = PlainSerializer(
 )
 
 
-def deserializeComponentDict(data):
-    """Reydrates ComponentDicts."""
+def deserialize_component_dict(data):
+    """Rehydrates ComponentDicts."""
     out = {}
     for k, v in data.items():
         if isinstance(k, ComponentId):
@@ -74,6 +74,6 @@ def deserializeComponentDict(data):
 ComponentDict = Annotated[
     Dict[ComponentId, T],
     SerializeComponentDict,
-    BeforeValidator(deserializeComponentDict),
+    BeforeValidator(deserialize_component_dict),
     "ComponentDict",
 ]
