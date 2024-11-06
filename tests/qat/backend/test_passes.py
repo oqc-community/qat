@@ -14,11 +14,7 @@ from qat.backend.analysis_passes import (
     TriageResult,
 )
 from qat.backend.graph import ControlFlowGraph
-from qat.backend.transform_passes import (
-    ReturnSanitisation,
-    ScopeSanitisation,
-    SweepDecomposition,
-)
+from qat.backend.transform_passes import ReturnSanitisation, ScopeSanitisation
 from qat.backend.validation_passes import (
     NCOFrequencyVariability,
     ReturnSanitisationValidation,
@@ -36,7 +32,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 
-from tests.qat.utils.builder_nuggets import multidim_sweep, resonator_spect, singledim_sweep
+from tests.qat.utils.builder_nuggets import resonator_spect, singledim_sweep
 
 
 class TestAnalysisPasses:
@@ -174,24 +170,6 @@ class TestAnalysisPasses:
 
 
 class TestTransformPasses:
-    def test_sweep_decomposition_pass(self):
-        model = get_default_echo_hardware()
-        builder = singledim_sweep(model)
-        res_mgr = ResultManager()
-
-        sweeps = [s for s in builder.instructions if isinstance(s, Sweep)]
-        expected = sum([len(s.variables) for s in sweeps], 0)
-        SweepDecomposition().run(builder, res_mgr)
-        sweeps = [s for s in builder.instructions if isinstance(s, Sweep)]
-        assert len(sweeps) == expected
-
-        builder = multidim_sweep(model)
-        sweeps = [s for s in builder.instructions if isinstance(s, Sweep)]
-        expected = sum([len(s.variables) for s in sweeps], 0)
-        SweepDecomposition().run(builder, res_mgr)
-        sweeps = [s for s in builder.instructions if isinstance(s, Sweep)]
-        assert len(sweeps) == expected
-
     def test_scope_sanitisation_pass(self):
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
