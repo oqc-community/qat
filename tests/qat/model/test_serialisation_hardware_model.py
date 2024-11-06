@@ -17,7 +17,7 @@ from qat.model.hardware_model import VERSION, QuantumHardwareModel
 from qat.purr.compiler.devices import ChannelType
 
 
-def make_Hardware(count=10, connections=3, seed=42):
+def make_hardware(count=10, connections=3, seed=42):
     rng = np.random.default_rng(seed)
     pick = lambda L, size=3: make_refdict(*rng.choice(L, size=size))
     pick_pulse_channels = lambda pulse_channels, physical_channel: make_refdict(
@@ -100,24 +100,24 @@ def make_Hardware(count=10, connections=3, seed=42):
 class Test_HW_Serialise:
     @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
     def test_dump_load_eq(self, seed):
-        O1 = make_Hardware(seed=seed)
+        O1 = make_hardware(seed=seed)
         blob = O1.model_dump()
         O2 = QuantumHardwareModel(**blob)
 
         assert O1._deepequals(O2)
 
-        O3 = make_Hardware(seed=6353234234)
+        O3 = make_hardware(seed=6353234234)
         assert not O1._deepequals(O3)
 
     @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
     def test_dump_eq(self, seed):
-        O1 = make_Hardware(seed=seed)
+        O1 = make_hardware(seed=seed)
         blob = O1.model_dump()
 
         O2 = QuantumHardwareModel(**blob)
         blob2 = O2.model_dump()
 
-        O3 = make_Hardware(seed=6353234234)
+        O3 = make_hardware(seed=6353234234)
         blob3 = O3.model_dump()
 
         assert blob == blob2
@@ -125,7 +125,7 @@ class Test_HW_Serialise:
 
     @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
     def test_deep_equals(self, seed):
-        O1 = make_Hardware(seed=seed)
+        O1 = make_hardware(seed=seed)
         O2 = deepcopy(O1)
 
         assert O2._deepequals(O1)
@@ -134,7 +134,7 @@ class Test_HW_Serialise:
         assert not O2._deepequals(O1)
 
     def test_deserialise_version(self):
-        O1 = make_Hardware()
+        O1 = make_hardware()
         assert O1.version == VERSION
 
         O2 = QuantumHardwareModel(**O1.model_dump())
