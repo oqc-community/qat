@@ -1,0 +1,28 @@
+pipelines:
+  - name: default
+    stages:
+      - BuilderPass 
+      - OptimizationPass
+      - ValidationPass
+      - EmitterPass
+      - InjectorPass
+      - CreateTimelinePass
+    model:
+      from: local
+      path: blah-blib.json
+  - name: some-qpu
+    stages:
+      - SomestandardCompositePass
+    model:
+      from: store
+      name: somewhere/thing
+      version: "latest" # or ">=1.1.0"
+  - name: some-other-qpu
+    stages:
+      - name: SomeConfigurableCompositePass
+        parameters:
+          some_param: 5
+    model:
+      from: store
+      name: somewhere/thing
+      version: "latest" # or ">=1.1.0"
