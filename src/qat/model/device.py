@@ -70,6 +70,9 @@ class PulseChannel(Component):
     channel_type: Optional[ChannelType] = Field(frozen=True, default=None)
     auxiliary_qubits: RefList[Qubit] = []
 
+    def __repr__(self):
+        return Component.__repr__(self).replace(")", f", {self.channel_type.name})")
+
 
 class QuantumDevice(Component):
     """
