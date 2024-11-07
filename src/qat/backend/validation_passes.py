@@ -2,33 +2,10 @@ from qat.ir.pass_base import ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import EndRepeat, EndSweep, Repeat, Return, Sweep
+from qat.purr.compiler.instructions import Repeat, Return
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
-
-
-class ScopeSanitisationValidation(ValidationPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Repeat and Sweep scopes are valid if they have a start and end delimiters and if the delimiters
-        are balanced.
-        """
-
-        stack = []
-        for inst in builder.instructions:
-            if isinstance(inst, (Sweep, Repeat)):
-                stack.append(inst)
-            elif isinstance(inst, (EndSweep, EndRepeat)):
-                type = Sweep if isinstance(inst, EndSweep) else Repeat
-                try:
-                    if not isinstance(stack.pop(), type):
-                        raise ValueError(f"Unbalanced {type} scope. Found orphan {inst}")
-                except IndexError:
-                    raise ValueError(f"Unbalanced {type} scope. Found orphan {inst}")
-
-        if stack:
-            raise ValueError(f"Unbalanced scopes. Found orphans {stack}")
 
 
 class RepeatSanitisationValidation(ValidationPass):

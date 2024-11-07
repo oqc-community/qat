@@ -1,7 +1,7 @@
 import itertools
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -124,7 +124,6 @@ class TriagePass(AnalysisPass):
 
 @dataclass(frozen=True)
 class IterBound:
-    name: str = None
     start: Union[int, float] = 0
     step: Union[int, float] = 0
     end: Union[int, float] = 0
@@ -133,28 +132,24 @@ class IterBound:
 
 @dataclass
 class BindingResult(ResultInfoMixin):
-    iter_bounds: Dict[PulseChannel, List[IterBound]] = field(
+    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
+    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    var_binding: Dict[str, List[Instruction]] = field(
+    iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = field(
+        default_factory=lambda: defaultdict(dict)
+    )
+    reads: Dict[str, List[QuantumInstruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
+    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 class BindingPass(AnalysisPass):
     @staticmethod
-    def decompose_freq(frequency: float, target: PulseChannel):
-        if target.fixed_if:  # NCO freq constant
-            nco_freq = target.baseband_if_frequency
-            lo_freq = frequency - nco_freq
-        else:  # LO freq constant
-            lo_freq = target.baseband_frequency
-            nco_freq = frequency - lo_freq
-
-        return lo_freq, nco_freq
-
-    @staticmethod
-    def extract_iter_bound(name: str, value: Union[List, np.ndarray]):
+    def extract_iter_bound(value: Union[List, np.ndarray]):
         """
         Given a sequence of numbers (typically having been generated from np.linspace()), figure out
         if the numbers are linearly/evenly spaced, in which case returns an IterBound instance holding
@@ -179,83 +174,107 @@ class BindingPass(AnalysisPass):
         count = len(value)
 
         if count < 2:
-            return IterBound(name, start, step, end, count)
+            return IterBound(start, step, end, count)
 
         step = value[1] - value[0]
 
         if not np.isclose(step, (end - start) / (count - 1)):
             raise ValueError(f"Not a regularly partitioned space {value}")
 
-        return IterBound(name, start, step, end, count)
+        return IterBound(start, step, end, count)
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        Performs naive binding analysis of variables and instructions.
+        Builds binding of variables, instructions, and a view of variables from/to scopes.
+
+        Variables are implicitly declared in sweep instructions and are ultimately read from quantum
+        instructions. Thus, every iteration variable is associated to all the scopes it is declared in.
+
+        Values of the iteration variable are abstract and don't mean anything. In this pass, we only extract
+        the bound and associate it to the name variable. Further analysis is required on read sites to make
+        sure their usage is consistent and meaningful.
         """
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        target_map = triage_result.target_map
-
         result = BindingResult()
-        concrete_bounds: Dict[PulseChannel, List[IterBound]] = defaultdict(list)
-
+        stack = []
         for inst in builder.instructions:
+            parent_scopes = [(s, e) for (s, e) in result.scope2symbols if s in stack]
             if isinstance(inst, Sweep):
-                name, value = next(iter(inst.variables.items()))
-                bound: IterBound = self.extract_iter_bound(name, value)
-                result.var_binding[name].append(inst)
-                for t in target_map:
-                    if next(
-                        (b for b in result.iter_bounds[t] if b.name == name),
-                        None,
-                    ):
-                        raise ValueError(f"Variable {name} already declared")
-                    result.iter_bounds[t].append(bound)
-            elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
-                if not (
-                    bound := next(
-                        (
-                            b
-                            for b in result.iter_bounds[inst.target]
-                            if b.name == inst.value.name
-                        ),
-                        None,
+                stack.append(inst)
+                scope = (inst, None)
+                if p := next(iter(parent_scopes[::-1]), None):
+                    for name in result.scope2symbols[p]:
+                        if name not in result.scope2symbols[scope]:
+                            result.scope2symbols[scope].add(name)
+                            result.symbol2scopes[name].append(scope)
+
+                for name, value in inst.variables.items():
+                    result.scope2symbols[scope].add(name)
+                    result.symbol2scopes[name].append(scope)
+
+                    for t in triage_result.target_map:
+                        result.iter_bounds[t][name] = self.extract_iter_bound(value)
+
+                    result.writes[name].append(inst)
+            elif isinstance(inst, Repeat):
+                stack.append(inst)
+                scope = (inst, None)
+                if p := next(iter(parent_scopes[::-1]), None):
+                    for name in result.scope2symbols[p]:
+                        if name not in result.scope2symbols[scope]:
+                            result.scope2symbols[scope].add(name)
+                            result.symbol2scopes[name].append(scope)
+
+                # TODO - Desugaring could be much better when the IR is redesigned
+                name = f"repeat_{inst.repeat_count}_{hash(inst)}"
+                result.scope2symbols[scope].add(name)
+                result.symbol2scopes[name].append(scope)
+
+                for t in triage_result.target_map:
+                    result.iter_bounds[t][name] = IterBound(
+                        start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
                     )
+
+                result.writes[name].append(inst)
+            elif isinstance(inst, (EndSweep, EndRepeat)):
+                delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
+                try:
+                    delimiter = stack.pop()
+                except IndexError:
+                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+
+                if not isinstance(delimiter, delimiter_type):
+                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+
+                scope = next(
+                    ((s, e) for (s, e) in result.scope2symbols.keys() if s == delimiter)
+                )
+                symbols = result.scope2symbols[scope]
+                del result.scope2symbols[scope]
+                result.scope2symbols[(delimiter, inst)] = symbols
+
+                for name, scopes in result.symbol2scopes.items():
+                    result.symbol2scopes[name] = [
+                        (delimiter, inst) if s == scope else s for s in scopes
+                    ]
+            elif isinstance(inst, Acquire):
+                result.writes[inst.output_variable].append(inst)
+            elif isinstance(inst, DeviceUpdate):
+                if not (
+                    inst.value.name in result.symbol2scopes
+                    and [
+                        (s, e)
+                        for (s, e) in result.symbol2scopes[inst.value.name]
+                        if s in stack
+                    ]
                 ):
                     raise ValueError(
-                        f"Variable {inst.value.name} referenced but no prior declaration found"
+                        f"Variable {inst.value} referenced but no prior declaration found"
                     )
-
-                result.var_binding[bound.name].append(inst)
-                if inst.attribute == "frequency":
-                    # TODO - guard against fixed_if
-                    concrete_bounds[inst.target].append(
-                        IterBound(
-                            name=inst.value.name,
-                            start=self.decompose_freq(bound.start, inst.target)[1],
-                            step=bound.step,
-                            end=self.decompose_freq(bound.end, inst.target)[1],
-                            count=bound.count,
-                        )
-                    )
-                else:
-                    raise NotImplementedError(
-                        f"Unsupported processing of attribute {inst.attribute}"
-                    )
-
-        for t, bounds in concrete_bounds.items():
-            groups = defaultdict(set)
-            for b in bounds:
-                groups[b.name].add(b)
-
-            for name, grp in groups.items():
-                if len(grp) > 1:
-                    raise ValueError(
-                        f"Found multiple different uses for variable {name} on target {t}"
-                    )
-                result.iter_bounds[t] = [
-                    next(iter(grp)) if b.name == name else b for b in result.iter_bounds[t]
-                ]
+                result.reads[inst.value.name].append(inst)
+        if stack:
+            raise ValueError(f"Unbalanced scopes. Found orphans {stack}")
 
         res_mgr.add(result)
 
