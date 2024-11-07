@@ -719,7 +719,8 @@ class TestBaseQuantum:
     )
     def test_duration_timeline_times(self, hw):
         # Tests that the creation of a duration timeline with a two-qubit circuit
-        # gives a timeline where each pulse is concurrent.
+        # gives a timeline where the position map for each pulse channel has instructions
+        # that align
         engine = hw.create_engine()
         q1 = hw.get_qubit(0)
         q2 = hw.get_qubit(1)
@@ -819,7 +820,7 @@ class TestBaseQuantum:
             get_builder(hw)
             .X(q1, np.pi / 2.0)
             .X(q2, np.pi)
-            .cnot(q1, q2)
+            .ECR(q1, q2)
             .measure_mean_z(q1)
             .measure_mean_z(q2)
         )
@@ -829,7 +830,7 @@ class TestBaseQuantum:
         circs = [
             get_builder(hw).X(q1, np.pi / 2.0),
             get_builder(hw).X(q2, np.pi),
-            get_builder(hw).cnot(q1, q2),
+            get_builder(hw).ECR(q1, q2),
             get_builder(hw).measure_mean_z(q1),
             get_builder(hw).measure_mean_z(q2),
         ]
@@ -853,7 +854,7 @@ class TestBaseQuantum:
             .X(q1, np.pi / 2.0)
             .synchronize([q1, q2])
             .X(q2, np.pi)
-            .cnot(q1, q2)
+            .ECR(q1, q2)
             .measure_mean_z(q1)
             .measure_mean_z(q2)
         )
@@ -863,7 +864,7 @@ class TestBaseQuantum:
         circs = [
             get_builder(hw).X(q1, np.pi / 2.0),
             get_builder(hw).X(q2, np.pi),
-            get_builder(hw).cnot(q1, q2),
+            get_builder(hw).ECR(q1, q2),
             get_builder(hw).measure(q1),
             get_builder(hw).measure(q2),
         ]
