@@ -1,4 +1,5 @@
 import itertools
+from copy import deepcopy
 from typing import Dict
 
 import numpy as np
@@ -10,6 +11,7 @@ from qat.backend.analysis_passes import (
     CFGPass,
     CFGResult,
     IterBound,
+    TILegalisationPass,
     TriagePass,
     TriageResult,
 )
@@ -177,6 +179,42 @@ class TestAnalysisPasses:
             assert inst.output_variable in set(binding_result.writes.keys())
         for name in iter_bounds:
             assert name in set(binding_result.writes.keys())
+
+    def test_tilegalisation_pass(self):
+        model = get_default_echo_hardware()
+        builder = resonator_spect(model)
+        res_mgr = ResultManager()
+
+        ScopeSanitisation().run(builder, res_mgr)
+        TriagePass().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr)
+
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        bounds = deepcopy(binding_result.iter_bounds)
+        TILegalisationPass().run(builder, res_mgr)
+        legal_iter_bounds = binding_result.iter_bounds
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+
+        for target, symbol2iter_bound in legal_iter_bounds.items():
+            for name, legal_bound in symbol2iter_bound.items():
+                assert name in bounds[target]
+                if du := next(
+                    (
+                        inst
+                        for inst in triage_result.target_map[target]
+                        if isinstance(inst, DeviceUpdate) and inst.value.name == name
+                    ),
+                    None,
+                ):
+                    bound = bounds[target][name]
+                    assert legal_bound != bound
+                    assert legal_bound == IterBound(
+                        start=TILegalisationPass.decompose_freq(bound.start, du.target)[1],
+                        step=bound.step,
+                        end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
+                        count=bound.count,
+                    )
 
     def test_cfg_pass(self):
         model = get_default_echo_hardware()

@@ -1,7 +1,7 @@
 import itertools
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -10,7 +10,7 @@ from qat.backend.graph import ControlFlowGraph
 from qat.ir.pass_base import AnalysisPass, ResultManager
 from qat.ir.result_base import ResultInfoMixin
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel
+from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -19,6 +19,7 @@ from qat.purr.compiler.instructions import (
     EndSweep,
     Instruction,
     PostProcessing,
+    Pulse,
     QuantumInstruction,
     Repeat,
     ResultsProcessing,
@@ -279,6 +280,102 @@ class BindingPass(AnalysisPass):
         res_mgr.add(result)
 
 
+class TILegalisationPass(AnalysisPass):
+    """
+    An instruction is legal if it has a direct equivalent in the programming model implemented by the control
+    stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
+    as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
+    RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
+    and branching instructions such as jump.
+
+    This pass performs target-independent legalisation. The goal here is to understand how variables
+    are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
+    semantics and must be kept target-agnostic so that it can be reused among backends.
+
+    Particularly in QAT:
+        1) A sweep instruction is illegal because it specifies unclear iteration semantics.
+        2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
+    via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
+    until a "read" (usually on the instruction builder or on the hardware model) (typically from
+    a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
+    carries meaning for the variable and materialises its intention.
+    """
+
+    @staticmethod
+    def decompose_freq(frequency: float, target: PulseChannel):
+        if target.fixed_if:  # NCO freq constant
+            nco_freq = target.baseband_if_frequency
+            lo_freq = frequency - nco_freq
+        else:  # LO freq constant
+            lo_freq = target.baseband_frequency
+            nco_freq = frequency - lo_freq
+
+        return lo_freq, nco_freq
+
+    def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
+        if isinstance(inst, DeviceUpdate):
+            if inst.attribute == "frequency":
+                if inst.target.fixed_if:
+                    raise ValueError(
+                        f"fixed_if must be False on target {inst.target} to sweep over frequencies"
+                    )
+                return IterBound(
+                    start=self.decompose_freq(bound.start, inst.target)[1],
+                    step=bound.step,
+                    end=self.decompose_freq(bound.end, inst.target)[1],
+                    count=bound.count,
+                )
+            elif inst.attribute == "phase":
+                return bound
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {inst.attribute}"
+                )
+        elif isinstance(inst, Pulse):
+            if inst.shape != PulseShapeType.SQUARE:
+                raise ValueError("Cannot process non-trivial pulses")
+
+            attribute = next(
+                (
+                    attr
+                    for attr, var in inst.__dict__.items()
+                    if isinstance(var, Variable) and var.name == name
+                )
+            )
+            if attribute == "width":
+                return bound
+            elif attribute == "amp":
+                return bound
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of {attribute} for instruction {inst}"
+                )
+        else:
+            raise NotImplementedError(
+                f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
+            )
+
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+
+        legal_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
+
+        for name, instructions in binding_result.reads.items():
+            for inst in instructions:
+                for target in inst.quantum_targets:
+                    bound = binding_result.iter_bounds[target][name]
+                    legal_bound = self._legalise_bound(name, bound, inst)
+                    legal_iter_bounds[target][name].add(legal_bound)
+
+        for target, symbol2iter_bounds in legal_iter_bounds.items():
+            for name, iter_bounds in symbol2iter_bounds.items():
+                if len(iter_bounds) > 1:
+                    raise ValueError(f"Found multiple different uses for variable {name}")
+                binding_result.iter_bounds[target][name] = next(iter(iter_bounds))
+
+
 @dataclass
 class CFGResult(ResultInfoMixin):
     cfg: ControlFlowGraph = field(default_factory=lambda: ControlFlowGraph())
@@ -363,36 +460,6 @@ class CFGPass(AnalysisPass):
             return
 
         self._build_cfg(builder, cfg)
-
-
-class LegalisationPass(AnalysisPass):
-    """
-    The sole purpose of this pass is to allow us to understand what can and what cannot be run on the control stack.
-
-    An instruction is legal if it has a direct equivalent in the programming model implemented by the control stack.
-    The notion of "legal" is highly determined by the hardware features of the control stack as well as its
-    programming model.
-
-    Most control stacks such as Qblox have a direct ISA-level representation for basic quantum instructions such as
-    frequency and phase manipulation instructions, arithmetic instructions such as add, branching instructions
-    such as jump.
-
-    Particularly:
-    1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-    2) A repeat instruction with a very high repetition count is illegal because acquisition memory on a sequencer
-    is limited. This requires optimal batching of the repeat instruction into maximally supported batches of smaller
-    repeat counts.
-    3) Device updates/assigns in general are illegal because they are bound to a sweep instruction via a variable
-    name. In fact, a sweep variable remains obscure and opaque until a device update bound to it is encountered
-    to reveal what it intends to do with the variable (usually on the instruction builder or on the hardware model).
-    We say that a device update carries meaning for the sweep variable and materialises its intention.
-
-    A brute force implementation would increase the depth of loop nests via repeat batching as well as bubble
-    outwards any illegal instructions.
-    """
-
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        pass
 
 
 class LifetimePass(AnalysisPass):
