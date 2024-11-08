@@ -32,7 +32,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 
-from tests.qat.utils.builder_nuggets import resonator_spect, singledim_sweep
+from tests.qat.utils.builder_nuggets import resonator_spect
 
 
 class TestAnalysisPasses:
@@ -215,7 +215,7 @@ class TestTransformPasses:
 class TestValidationPasses:
     def test_nco_freq_pass(self):
         model = get_default_echo_hardware()
-        builder = singledim_sweep(model)
+        builder = resonator_spect(model)
         res_mgr = ResultManager()
 
         NCOFrequencyVariability().run(builder, res_mgr, model)
