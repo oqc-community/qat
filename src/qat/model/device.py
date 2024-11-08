@@ -92,11 +92,45 @@ class QuantumDevice(Component):
         frozen=True, default=ChannelType.measure
     )
 
+    def get_pulse_channel(
+        self,
+        channel_type: ChannelType,
+        auxiliary_qubits: RefList[Qubit] = None,
+    ) -> PulseChannel:
+        for pulse_channel in self.pulse_channels.values():
+            if pulse_channel.channel_type == channel_type:
+                if auxiliary_qubits:
+                    if auxiliary_qubits == pulse_channel.auxiliary_qubits:
+                        return pulse_channel
+                    else:
+                        raise KeyError(
+                            f"Pulse channel with channel type '{channel_type}' and auxiliary qubits '{auxiliary_qubits}' not found on device '{self}'."
+                        )
+                else:
+                    return pulse_channel
+
+        raise KeyError(
+            f"Pulse channel with channel type '{channel_type}' not found on device '{self}'."
+        )
+
+    def _update_pulse_channels(self, *pulse_channels: PulseChannel):
+        qubit_pulse_channels = self.pulse_channels
+        for pulse_channel in pulse_channels:
+            qubit_pulse_channels.update({pulse_channel.to_component_id(): pulse_channel})
+
+        return self.model_copy(update={"pulse_channels": qubit_pulse_channels})
+
 
 class Resonator(QuantumDevice):
     """Models a resonator on a chip. Can be connected to multiple qubits."""
 
-    pass
+    @property
+    def measure_channel(self) -> PulseChannel:
+        return self.get_pulse_channel(ChannelType.measure)
+
+    @property
+    def acquire_channel(self) -> PulseChannel:
+        return self.get_pulse_channel(ChannelType.acquire)
 
 
 class Qubit(QuantumDevice):
@@ -115,7 +149,31 @@ class Qubit(QuantumDevice):
     measure_amp: float = 1.0
     default_pulse_channel_type: ChannelType = Field(frozen=True, default=ChannelType.drive)
 
-    coupled_qubits: Optional[RefList[Qubit]] = None
+    coupled_qubits: Optional[RefList[Qubit]] = []
 
     def __repr__(self):
         return f"Q{self.index}"
+
+    @property
+    def drive_channel(self) -> PulseChannel:
+        return self.get_pulse_channel(ChannelType.drive)
+
+    @property
+    def measure_channel(self) -> PulseChannel:
+        return self.measure_device.measure_channel
+
+    @property
+    def acquire_channel(self) -> PulseChannel:
+        return self.measure_device.acquire_channel
+
+    @property
+    def all_channels(self) -> list[PulseChannel]:
+        """
+        Returns all channels associated with this qubit, including resonator channel
+        and other qubit devices that act as if they are on this object.
+        """
+        return [
+            *self.pulse_channels.values(),
+            self.measure_channel,
+            self.acquire_channel,
+        ]

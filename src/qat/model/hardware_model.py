@@ -46,3 +46,18 @@ class QuantumHardwareModel(AutoPopulate):
             VERSION >= version
         ), f"Latest supported hardware model version {VERSION}, found {version}"
         return VERSION
+
+    @property
+    def number_of_qubits(self):
+        return len(self.qubits)
+
+    @property
+    def number_of_resonators(self):
+        return len(self.resonators)
+
+    def get_qubit_with_index(self, i: int):
+        for qubit in self.qubits.values():
+            if qubit.index == i:
+                return qubit
+
+        raise KeyError(f"Qubit with index {i} does not exist.")
