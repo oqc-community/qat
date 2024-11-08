@@ -16,7 +16,6 @@ from qat.purr.compiler.instructions import (
     Return,
     Variable,
 )
-from qat.purr.compiler.metrics import CompilationMetrics
 from qat.qat import _return_or_build, fetch_frontend
 
 dir_path = Path(__file__).parent
@@ -48,6 +47,18 @@ skip_qasm3 = [
 skip_qir = [
     "teleportchain.ll",
     "bell_qir_measure.bc",
+]
+
+
+skip_exec = [
+    "qasm3-lark_parsing_test.qasm",
+    "qasm3-ecr_override_test.qasm",
+    "qasm3-tmp.qasm",
+    "qasm3-cx_override_test.qasm",
+    "qasm3-cnot_override_test.qasm",
+    "qasm3-invalid_pulse_length.qasm",
+    "qir-complicated.ll",
+    "qir-base_profile_ops.ll",
 ]
 
 
@@ -111,6 +122,13 @@ def short_file_name(path):
     return "-".join([path.parent.name, path.name])
 
 
+execution_files = [
+    p
+    for p in [*qasm2_files, *qasm3_files, *qir_files]
+    if short_file_name(p) not in skip_exec
+]
+
+
 @pytest.mark.parametrize(
     "compiler_config",
     [
@@ -140,8 +158,6 @@ class TestQATParity:
                 hardware=hardware,
                 compiler_config=compiler_config,
             )
-        else:
-            print(key)
         return self._purr_compiled[key]
 
     @pytest.mark.parametrize(
@@ -227,7 +243,7 @@ class TestQATParity:
         assert purr_ib.instructions == qat_ib.instructions
         assert purr_metrics.optimized_circuit == qat_metrics.optimized_circuit
 
-    @pytest.mark.parametrize("source_file", [*qir_files], ids=short_file_name)
+    @pytest.mark.parametrize("source_file", execution_files, ids=short_file_name)
     def test_qat_execute(
         self, request, source_file, hardware_model, compiler_config, monkeypatch
     ):
@@ -237,17 +253,11 @@ class TestQATParity:
             hardware=hardware_model,
             compiler_config=compiler_config,
         )
-        try:
-            purr_res, purr_metrics = QIRFrontend().execute(
-                instructions, hardware=hardware_model, compiler_config=compiler_config
-            )
-        except ValueError:
-            purr_res, purr_metrics = None, CompilationMetrics()
-        if purr_res is None:
-            qat_res, qat_metrics = None, CompilationMetrics()
-        else:
-            qat_res, qat_metrics = QAT(hardware_model).execute(
-                instructions, compiler_config=compiler_config
-            )
+        purr_res, purr_metrics = QIRFrontend().execute(
+            instructions, hardware=hardware_model, compiler_config=compiler_config
+        )
+        qat_res, qat_metrics = QAT(hardware_model).execute(
+            instructions, compiler_config=compiler_config
+        )
         assert purr_res == qat_res
         assert purr_metrics.as_dict() == qat_metrics.as_dict()
