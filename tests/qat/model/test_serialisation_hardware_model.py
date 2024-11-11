@@ -61,7 +61,7 @@ def make_hardware(count=10, connections=3, seed=42):
         Resonator(
             physical_channel=physical_channel,
             pulse_channels=pick_pulse_channels(
-                pulse_channels=pulse_channels, physical_channel=physical_channels[0]
+                pulse_channels=pulse_channels, physical_channel=physical_channel
             ),
             default_channel_type=rng.choice(list(ChannelType), size=1)[0],
         )
@@ -73,7 +73,7 @@ def make_hardware(count=10, connections=3, seed=42):
             drive_amp=np.random.uniform(-10, 10),
             physical_channel=physical_channel,
             pulse_channels=pick_pulse_channels(
-                pulse_channels=pulse_channels, physical_channel=physical_channels[0]
+                pulse_channels=pulse_channels, physical_channel=physical_channel
             ),
             measure_device=list(pick(resonators, 1).values())[0],
             default_channel_type=rng.choice(list(ChannelType), size=1)[0],
