@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from qat.model.component import Component
 from qat.model.serialisation import Ref, RefDict, RefList
@@ -91,6 +91,19 @@ class QuantumDevice(Component):
     default_pulse_channel_type: ChannelType = Field(
         frozen=True, default=ChannelType.measure
     )
+
+    @model_validator(mode="after")
+    def validate_physical_channel(self):
+        if self._is_populated("physical_channel") and self._is_populated("pulse_channels"):
+            for pulse_channel in self.pulse_channels.values():
+                if (
+                    pulse_channel.physical_channel.to_component_id()
+                    != self.physical_channel.to_component_id()
+                ):
+                    raise ValueError(
+                        f"Physical channel of the quantum device and pulse channels must be the same. Got {self.physical_channel} and {pulse_channel.physical_channel}."
+                    )
+        return self
 
     def get_pulse_channel(
         self,

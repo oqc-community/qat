@@ -33,6 +33,9 @@ class ComponentId(BaseModel):
     def __repr__(self):
         return self.uuid
 
+    def __str__(self):
+        return self.__repr__()
+
     def to_component_id(self):
         return self
 
@@ -136,3 +139,8 @@ def get_reftype(model, field):
 
 def make_refdict(*items: List[Component]):
     return {i.to_component_id(): i for i in items}
+
+
+c = Component()
+s = c.__repr__()
+print(c)
