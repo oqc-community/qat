@@ -46,7 +46,7 @@ jobs:
         
       - uses: actions/checkout@v4
         with:
-          ref: feature/lc/benchmarking_tests
+          ref: main
 
       - name: Install dependancies
         run: poetry install --sync
