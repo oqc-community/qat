@@ -2,12 +2,12 @@ import time
 
 import pytest
 
+from benchmarks.utils.models import get_mock_live_hardware
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend
 
-from tests.benchmarking.utils.models import get_mock_live_hardware
 from tests.qat.utils.models import get_jagged_echo_hardware
 
 experiments = {}
@@ -37,7 +37,7 @@ for circ in circuits_ten_qubits:
 
 # QASM2 Benchmarks
 def load_qasm(qasm_string):
-    with open(f"tests/benchmarking/qasm/{qasm_string}.qasm", "r") as f:
+    with open(f"benchmarks/qasm/{qasm_string}.qasm", "r") as f:
         return f.read()
 
 
