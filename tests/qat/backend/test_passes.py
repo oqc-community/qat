@@ -1,4 +1,5 @@
 import itertools
+from copy import deepcopy
 from typing import Dict
 
 import numpy as np
@@ -10,6 +11,7 @@ from qat.backend.analysis_passes import (
     CFGPass,
     CFGResult,
     IterBound,
+    TILegalisationPass,
     TriagePass,
     TriageResult,
 )
@@ -18,11 +20,11 @@ from qat.backend.transform_passes import ReturnSanitisation, ScopeSanitisation
 from qat.backend.validation_passes import (
     NCOFrequencyVariability,
     ReturnSanitisationValidation,
-    ScopeSanitisationValidation,
 )
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import (
+    Acquire,
     DeviceUpdate,
     EndRepeat,
     EndSweep,
@@ -32,7 +34,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 
-from tests.qat.utils.builder_nuggets import resonator_spect, singledim_sweep
+from tests.qat.utils.builder_nuggets import resonator_spect
 
 
 class TestAnalysisPasses:
@@ -84,95 +86,25 @@ class TestAnalysisPasses:
         "value, bound",
         [
             ([1, 2, 4, 10], None),
-            ([-0.1, 0, 0.1, 0.2, 0.3], IterBound("dummy", -0.1, 0.1, 0.3, 5)),
+            ([-0.1, 0, 0.1, 0.2, 0.3], IterBound(-0.1, 0.1, 0.3, 5)),
         ]
         + [
-            (np.linspace(b[0], b[1], 100), IterBound("dummy", b[0], 1, b[1], 100))
+            (np.linspace(b[0], b[1], 100), IterBound(b[0], 1, b[1], 100))
             for b in [(1, 100), (-50, 49)]
         ],
     )
     def test_extract_iter_bound(self, value, bound):
         if bound is None:
             with pytest.raises(ValueError):
-                BindingPass.extract_iter_bound("dummy", value)
+                BindingPass.extract_iter_bound(value)
         else:
-            assert BindingPass.extract_iter_bound("dummy", value) == bound
+            assert BindingPass.extract_iter_bound(value) == bound
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
-    def test_binding_pass_with_resonator_spect(self, num_points):
+    @pytest.mark.parametrize("qubit_indices", [[0, 1, 2, 3]])
+    def test_binding_pass_with_resonator_spect(self, num_points, qubit_indices):
         model = get_default_echo_hardware()
-        builder = resonator_spect(model, num_points=num_points)
-        res_mgr = ResultManager()
-
-        ReturnSanitisation().run(builder, res_mgr)
-        TriagePass().run(builder, res_mgr)
-        BindingPass().run(builder, res_mgr)
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-
-        target_map = triage_result.target_map
-        iter_bounds = binding_result.iter_bounds
-        var_binding = binding_result.var_binding
-        assert iter_bounds.keys() == target_map.keys()
-        assert var_binding
-
-        device_updates = [
-            inst
-            for inst in builder.instructions
-            if isinstance(inst, DeviceUpdate)
-            and isinstance(inst.value, Variable)
-            and inst.attribute == "frequency"
-        ]
-
-        raw_bounds = {
-            next(iter(inst.variables.keys())): BindingPass.extract_iter_bound(
-                *next(iter(inst.variables.items()))
-            )
-            for inst in builder.instructions
-            if isinstance(inst, Sweep)
-        }
-
-        for t, bounds in iter_bounds.items():
-            for b in bounds:
-                du = next(
-                    (
-                        inst
-                        for inst in device_updates
-                        if inst.target == t and inst.value.name == b.name
-                    ),
-                    None,
-                )
-
-                if du:
-                    assert b == IterBound(
-                        name=b.name,
-                        start=BindingPass.decompose_freq(raw_bounds[b.name].start, t)[1],
-                        step=raw_bounds[b.name].step,
-                        end=BindingPass.decompose_freq(raw_bounds[b.name].end, t)[1],
-                        count=raw_bounds[b.name].count,
-                    )
-                else:
-                    assert raw_bounds[b.name] in bounds
-
-    def test_cfg_pass(self):
-        model = get_default_echo_hardware()
-        builder = resonator_spect(model)
-        res_mgr = ResultManager()
-
-        ScopeSanitisation().run(builder, res_mgr)
-        ScopeSanitisationValidation().run(builder, res_mgr)
-        CFGPass().run(builder, res_mgr)
-        result: CFGResult = res_mgr.lookup_by_type(CFGResult)
-        assert result.cfg
-        assert result.cfg is not ControlFlowGraph()
-        assert len(result.cfg.nodes) == 5
-        assert len(result.cfg.edges) == 6
-
-
-class TestTransformPasses:
-    def test_scope_sanitisation_pass(self):
-        model = get_default_echo_hardware()
-        builder = resonator_spect(model)
+        builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
         res_mgr = ResultManager()
 
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
@@ -184,8 +116,9 @@ class TestTransformPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 0
 
+        TriagePass().run(builder, res_mgr)
         with pytest.raises(ValueError):
-            ScopeSanitisationValidation().run(builder, res_mgr)
+            BindingPass().run(builder, res_mgr)
 
         ScopeSanitisation().run(builder, res_mgr)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
@@ -197,9 +130,107 @@ class TestTransformPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 1
 
-        ReturnSanitisation().run(builder, res_mgr)
-        ScopeSanitisationValidation().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr)
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
+        assert len(binding_result.scope2symbols) == len(sweeps) + len(repeats)
+        sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
+        end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
+
+        iter_bounds = {
+            name: BindingPass.extract_iter_bound(value)
+            for inst in sweeps
+            for name, value in inst.variables.items()
+        }
+        for inst in repeats:
+            name = f"repeat_{inst.repeat_count}_{hash(inst)}"
+            iter_bounds[name] = IterBound(
+                start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
+            )
+
+        for scope, symbols in binding_result.scope2symbols.items():
+            for name in symbols:
+                assert name in iter_bounds
+                assert name in binding_result.symbol2scopes
+                assert scope in binding_result.symbol2scopes[name]
+
+                for t in triage_result.target_map:
+                    assert binding_result.iter_bounds[t][name] == iter_bounds[name]
+
+        for symbol, scopes in binding_result.symbol2scopes.items():
+            assert scopes
+            for scope in scopes:
+                assert scope in binding_result.scope2symbols
+                assert scope[0] in sweeps + repeats
+                assert scope[1] in end_sweeps + end_repeats
+            assert symbol in iter_bounds
+
+        device_updates = set(
+            inst
+            for inst in builder.instructions
+            if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
+        )
+        acquires = set(inst for inst in builder.instructions if isinstance(inst, Acquire))
+        assert set(binding_result.reads.keys()) == {
+            inst.value.name for inst in device_updates
+        }
+        for inst in acquires:
+            assert inst.output_variable in set(binding_result.writes.keys())
+        for name in iter_bounds:
+            assert name in set(binding_result.writes.keys())
+
+    def test_tilegalisation_pass(self):
+        model = get_default_echo_hardware()
+        builder = resonator_spect(model)
+        res_mgr = ResultManager()
+
+        ScopeSanitisation().run(builder, res_mgr)
+        TriagePass().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr)
+
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        bounds = deepcopy(binding_result.iter_bounds)
+        TILegalisationPass().run(builder, res_mgr)
+        legal_iter_bounds = binding_result.iter_bounds
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+
+        for target, symbol2iter_bound in legal_iter_bounds.items():
+            for name, legal_bound in symbol2iter_bound.items():
+                assert name in bounds[target]
+                if du := next(
+                    (
+                        inst
+                        for inst in triage_result.target_map[target]
+                        if isinstance(inst, DeviceUpdate) and inst.value.name == name
+                    ),
+                    None,
+                ):
+                    bound = bounds[target][name]
+                    assert legal_bound != bound
+                    assert legal_bound == IterBound(
+                        start=TILegalisationPass.decompose_freq(bound.start, du.target)[1],
+                        step=bound.step,
+                        end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
+                        count=bound.count,
+                    )
+
+    def test_cfg_pass(self):
+        model = get_default_echo_hardware()
+        builder = resonator_spect(model)
+        res_mgr = ResultManager()
+
+        ScopeSanitisation().run(builder, res_mgr)
+        CFGPass().run(builder, res_mgr)
+        result: CFGResult = res_mgr.lookup_by_type(CFGResult)
+        assert result.cfg
+        assert result.cfg is not ControlFlowGraph()
+        assert len(result.cfg.nodes) == 5
+        assert len(result.cfg.edges) == 6
+
+
+class TestTransformPasses:
     def test_return_sanitisation_pass(self):
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
@@ -215,7 +246,7 @@ class TestTransformPasses:
 class TestValidationPasses:
     def test_nco_freq_pass(self):
         model = get_default_echo_hardware()
-        builder = singledim_sweep(model)
+        builder = resonator_spect(model)
         res_mgr = ResultManager()
 
         NCOFrequencyVariability().run(builder, res_mgr, model)

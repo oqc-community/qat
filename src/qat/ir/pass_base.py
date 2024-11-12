@@ -1,10 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import List
+from dataclasses import dataclass
+from typing import List, Union
 
 from qat.ir.result_base import ResultManager
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+@dataclass
+class QatIR:
+    value: Union[str, bytes, InstructionBuilder]
+
+
+IR = Union[QatIR, InstructionBuilder]
 
 
 class PassConcept(ABC):
@@ -15,7 +25,7 @@ class PassConcept(ABC):
     """
 
     @abstractmethod
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         pass
 
 
@@ -30,7 +40,7 @@ class PassModel(PassConcept):
     def __init__(self, pass_obj):
         self._pass = pass_obj
 
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         return self._pass.run(ir, res_mgr, *args, **kwargs)
 
 
@@ -57,7 +67,7 @@ class AnalysisPass(PassInfoMixin):
     The IR is imperatively left intact.
     """
 
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         pass
 
 
@@ -66,7 +76,7 @@ class TransformPass(PassInfoMixin):
     Base class for all passes that mutate the IR in-place.
     """
 
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         pass
 
 
@@ -79,7 +89,7 @@ class ValidationPass(PassInfoMixin):
     It can change according to circumstances.
     """
 
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         pass
 
 
@@ -129,7 +139,7 @@ class PassManager(PassInfoMixin):
     def __init__(self):
         self.passes: List[PassModel] = []
 
-    def run(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         for p in self.passes:
             p.run(ir, res_mgr, *args, **kwargs)
 
@@ -158,5 +168,5 @@ class InvokerMixin(ABC):
     def build_pass_pipeline(self, *args, **kwargs) -> PassManager:
         pass
 
-    def run_pass_pipeline(self, ir, res_mgr: ResultManager, *args, **kwargs):
+    def run_pass_pipeline(self, ir: IR, res_mgr: ResultManager, *args, **kwargs):
         return self.build_pass_pipeline(*args, **kwargs).run(ir, res_mgr, *args, **kwargs)
