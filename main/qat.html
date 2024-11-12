@@ -60,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
 </ul>
@@ -142,6 +143,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
 </ul>
 </li>
@@ -228,13 +230,22 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.compiler.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysis"><code class="docutils literal notranslate"><span class="pre">InputAnalysis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisationResult"><code class="docutils literal notranslate"><span class="pre">InputOptimisationResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse"><code class="docutils literal notranslate"><span class="pre">Parse</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingOptimisation</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.QasmValidation"><code class="docutils literal notranslate"><span class="pre">QasmValidation</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a></li>
 </ul>
 </li>
@@ -251,6 +262,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager"><code class="docutils literal notranslate"><span class="pre">PassManager</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel"><code class="docutils literal notranslate"><span class="pre">PassModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR"><code class="docutils literal notranslate"><span class="pre">QatIR</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass"><code class="docutils literal notranslate"><span class="pre">TransformPass</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass"><code class="docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></li>
 </ul>
@@ -320,6 +332,16 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.core.html">qat.core module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.html#qat.core.QAT"><code class="docutils literal notranslate"><span class="pre">QAT</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html#qat.core.QAT.build_compile_pipeline"><code class="docutils literal notranslate"><span class="pre">QAT.build_compile_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html#qat.core.QAT.compile"><code class="docutils literal notranslate"><span class="pre">QAT.compile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html#qat.core.QAT.execute"><code class="docutils literal notranslate"><span class="pre">QAT.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html#qat.core.QAT.hardware_model"><code class="docutils literal notranslate"><span class="pre">QAT.hardware_model</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.qat.html">qat.qat module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.qat.html#qat.qat.execute"><code class="docutils literal notranslate"><span class="pre">execute()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.qat.html#qat.qat.execute_qasm"><code class="docutils literal notranslate"><span class="pre">execute_qasm()</span></code></a></li>

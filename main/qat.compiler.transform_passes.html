@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.compiler.validation_passes module" href="qat.compiler.validation_passes.html" />
-    <link rel="prev" title="qat.compiler package" href="qat.compiler.html" /> 
+    <link rel="prev" title="qat.compiler.analysis_passes module" href="qat.compiler.analysis_passes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
 </ul>
@@ -142,6 +143,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
 </ul>
 </li>
@@ -184,6 +186,62 @@
   <section id="module-qat.compiler.transform_passes">
 <span id="qat-compiler-transform-passes-module"></span><h1>qat.compiler.transform_passes module<a class="headerlink" href="#module-qat.compiler.transform_passes" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InputOptimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Run third party optimisation passes on the incoming QASM.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisation.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisation.run_qasm_optimisation">
+<span class="sig-name descname"><span class="pre">run_qasm_optimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizations</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisation.run_qasm_optimisation" title="Link to this definition"></a></dt>
+<dd><p>Extracted from DefaultOptimizers.optimize_qasm</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisation.run_qiskit_optimization">
+<span class="sig-name descname"><span class="pre">run_qiskit_optimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisation.run_qiskit_optimization" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>TODO: [QK] Current setup is unlikely to provide much benefit, refine settings</dt><dd><p>before using.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisationResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InputOptimisationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimised_circuit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisationResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin" title="qat.ir.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Method generated by attrs for class InputOptimisationResult.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisationResult.optimised_circuit">
+<span class="sig-name descname"><span class="pre">optimised_circuit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisationResult.optimised_circuit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.Parse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.Parse" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.Parse.parse_qir">
+<span class="sig-name descname"><span class="pre">parse_qir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qir_string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.Parse.parse_qir" title="Link to this definition"></a></dt>
+<dd><p>Extracted from QIRFrontend</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.Parse.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.Parse.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.compiler.transform_passes.PhaseOptimisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisation</span></span><a class="headerlink" href="#qat.compiler.transform_passes.PhaseOptimisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
@@ -215,7 +273,7 @@ Better pass name/id ?</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.compiler.html" class="btn btn-neutral float-left" title="qat.compiler package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.compiler.analysis_passes.html" class="btn btn-neutral float-left" title="qat.compiler.analysis_passes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.compiler.validation_passes.html" class="btn btn-neutral float-right" title="qat.compiler.validation_passes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

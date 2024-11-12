@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.compiler.transform_passes module" href="qat.compiler.transform_passes.html" />
+    <link rel="next" title="qat.compiler.analysis_passes module" href="qat.compiler.analysis_passes.html" />
     <link rel="prev" title="qat.backend.validation_passes module" href="qat.backend.validation_passes.html" /> 
 </head>
 
@@ -60,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
 </ul>
@@ -142,6 +143,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
 </ul>
 </li>
@@ -186,7 +188,34 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysis"><code class="docutils literal notranslate"><span class="pre">InputAnalysis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysis.run"><code class="docutils literal notranslate"><span class="pre">InputAnalysis.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult.language"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult.language</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult.raw_input"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult.raw_input</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation.run"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation.run_qasm_optimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run_qasm_optimisation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation.run_qiskit_optimization"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run_qiskit_optimization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisationResult"><code class="docutils literal notranslate"><span class="pre">InputOptimisationResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisationResult.optimised_circuit"><code class="docutils literal notranslate"><span class="pre">InputOptimisationResult.optimised_circuit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse"><code class="docutils literal notranslate"><span class="pre">Parse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse.parse_qir"><code class="docutils literal notranslate"><span class="pre">Parse.parse_qir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse.run"><code class="docutils literal notranslate"><span class="pre">Parse.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.run()</span></code></a></li>
 </ul>
@@ -200,6 +229,10 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.QasmValidation"><code class="docutils literal notranslate"><span class="pre">QasmValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.QasmValidation.run"><code class="docutils literal notranslate"><span class="pre">QasmValidation.run()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a><ul>
@@ -219,7 +252,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.backend.validation_passes.html" class="btn btn-neutral float-left" title="qat.backend.validation_passes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.compiler.transform_passes.html" class="btn btn-neutral float-right" title="qat.compiler.transform_passes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.compiler.analysis_passes.html" class="btn btn-neutral float-right" title="qat.compiler.analysis_passes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

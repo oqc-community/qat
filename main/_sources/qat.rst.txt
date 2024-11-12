@@ -24,4 +24,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.core
    qat.qat
