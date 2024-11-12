@@ -190,13 +190,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingPass</span></span><a class="headerlink" href="#qat.backend.analysis_passes.BindingPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingPass.decompose_freq">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompose_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingPass.decompose_freq" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingPass.extract_iter_bound">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
 <dd><p>Given a sequence of numbers (typically having been generated from np.linspace()), figure out
 if the numbers are linearly/evenly spaced, in which case returns an IterBound instance holding
 the start, step, end, and count of the numbers in the array, or else fail.</p>
@@ -207,23 +202,43 @@ evenly spaced approximation of the input sequence.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingPass.run" title="Link to this definition"></a></dt>
-<dd><p>Performs naive binding analysis of variables and instructions.</p>
+<dd><p>Builds binding of variables, instructions, and a view of variables from/to scopes.</p>
+<p>Variables are implicitly declared in sweep instructions and are ultimately read from quantum
+instructions. Thus, every iteration variable is associated to all the scopes it is declared in.</p>
+<p>Values of the iteration variable are abstract and don’t mean anything. In this pass, we only extract
+the bound and associate it to the name variable. Further analysis is required on read sites to make
+sure their usage is consistent and meaningful.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iter_bounds=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_binding=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scope2symbols=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol2scopes=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reads=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin" title="qat.ir.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.iter_bounds">
-<span class="sig-name descname"><span class="pre">iter_bounds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.backend.analysis_passes.IterBound" title="qat.backend.analysis_passes.IterBound"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterBound</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.iter_bounds" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iter_bounds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.backend.analysis_passes.IterBound" title="qat.backend.analysis_passes.IterBound"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterBound</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.iter_bounds" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.var_binding">
-<span class="sig-name descname"><span class="pre">var_binding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.var_binding" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.reads">
+<span class="sig-name descname"><span class="pre">reads</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.reads" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.scope2symbols">
+<span class="sig-name descname"><span class="pre">scope2symbols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.scope2symbols" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.symbol2scopes">
+<span class="sig-name descname"><span class="pre">symbol2scopes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]]]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.symbol2scopes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.BindingResult.writes">
+<span class="sig-name descname"><span class="pre">writes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.BindingResult.writes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -252,7 +267,7 @@ evenly spaced approximation of the input sequence.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.IterBound">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.IterBound" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.IterBound" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.IterBound.count">
@@ -265,11 +280,6 @@ evenly spaced approximation of the input sequence.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.analysis_passes.IterBound.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.backend.analysis_passes.IterBound.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.IterBound.start">
 <span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.backend.analysis_passes.IterBound.start" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -277,35 +287,6 @@ evenly spaced approximation of the input sequence.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.IterBound.step">
 <span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.backend.analysis_passes.IterBound.step" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.analysis_passes.LegalisationPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LegalisationPass</span></span><a class="headerlink" href="#qat.backend.analysis_passes.LegalisationPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
-<p>The sole purpose of this pass is to allow us to understand what can and what cannot be run on the control stack.</p>
-<p>An instruction is legal if it has a direct equivalent in the programming model implemented by the control stack.
-The notion of “legal” is highly determined by the hardware features of the control stack as well as its
-programming model.</p>
-<p>Most control stacks such as Qblox have a direct ISA-level representation for basic quantum instructions such as
-frequency and phase manipulation instructions, arithmetic instructions such as add, branching instructions
-such as jump.</p>
-<p>Particularly:
-1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-2) A repeat instruction with a very high repetition count is illegal because acquisition memory on a sequencer
-is limited. This requires optimal batching of the repeat instruction into maximally supported batches of smaller
-repeat counts.
-3) Device updates/assigns in general are illegal because they are bound to a sweep instruction via a variable
-name. In fact, a sweep variable remains obscure and opaque until a device update bound to it is encountered
-to reveal what it intends to do with the variable (usually on the instruction builder or on the hardware model).
-We say that a device update carries meaning for the sweep variable and materialises its intention.</p>
-<p>A brute force implementation would increase the depth of loop nests via repeat batching as well as bubble
-outwards any illegal instructions.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.analysis_passes.LegalisationPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.LegalisationPass.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -341,6 +322,41 @@ allows allocation to be represented as a graph coloring.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.LifetimePass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.LifetimePass.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TILegalisationPass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TILegalisationPass</span></span><a class="headerlink" href="#qat.backend.analysis_passes.TILegalisationPass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>An instruction is legal if it has a direct equivalent in the programming model implemented by the control
+stack. The notion of “legal” is highly determined by the hardware features of the control stack as well
+as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
+RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
+and branching instructions such as jump.</p>
+<p>This pass performs target-independent legalisation. The goal here is to understand how variables
+are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
+semantics and must be kept target-agnostic so that it can be reused among backends.</p>
+<dl class="simple">
+<dt>Particularly in QAT:</dt><dd><ol class="arabic simple">
+<li><p>A sweep instruction is illegal because it specifies unclear iteration semantics.</p></li>
+<li><p>Device updates/assigns in general are illegal because they are bound to a sweep instruction</p></li>
+</ol>
+</dd>
+</dl>
+<p>via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
+until a “read” (usually on the instruction builder or on the hardware model) (typically from
+a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
+carries meaning for the variable and materialises its intention.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TILegalisationPass.decompose_freq">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompose_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TILegalisationPass.decompose_freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TILegalisationPass.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TILegalisationPass.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
