@@ -17,6 +17,42 @@ from qat.model.hardware_model import VERSION, QuantumHardwareModel
 from qat.purr.compiler.devices import ChannelType
 
 
+def make_simple_hardware(count=10, connections=3, seed=42):
+    rng = np.random.default_rng(seed)
+    pick = lambda L, size=3: make_refdict(*rng.choice(L, size=size))
+    pick_pulse_channels = lambda pulse_channels, physical_channel: make_refdict(
+        *[
+            pulse_ch
+            for pulse_ch in pulse_channels
+            if pulse_ch.physical_channel == physical_channel
+        ]
+    )
+    physical_basebands = [
+        PhysicalBaseband(
+            frequency=np.random.uniform(1e05, 1e07),
+            if_frequency=np.random.uniform(1e05, 1e07),
+        )
+        for _ in range(count)
+    ]
+
+    physical_channels = [
+        PhysicalChannel(
+            baseband=list(pick(physical_basebands, 1).values())[0],
+            sample_time=np.random.uniform(1e-10, 1e-08),
+            block_size=np.random.randint(1, 10),
+            phase_iq_offset=np.random.uniform(0.0, 1.0),
+            bias=np.random.uniform(-1.0, 1.0),
+            acquire_allowed=rng.choice([True, False], size=1)[0],
+        )
+        for _ in range(count)
+    ]
+
+    return QuantumHardwareModel(
+        physical_basebands=make_refdict(*physical_basebands),
+        physical_channels=make_refdict(*physical_channels),
+    )
+
+
 def make_hardware(count=10, connections=3, seed=42):
     rng = np.random.default_rng(seed)
     pick = lambda L, size=3: make_refdict(*rng.choice(L, size=size))
@@ -130,7 +166,7 @@ class Test_HW_Serialise:
 
         assert O2._deepequals(O1)
         pc = list(O2.pulse_channels.values())[0]
-        pc.frequency = -1
+        pc.frequency = 9852345725297
         assert not O2._deepequals(O1)
 
     def test_deserialise_version(self):

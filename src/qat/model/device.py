@@ -60,7 +60,7 @@ class PulseChannel(Component):
                            the current one. For example in cross resonance pulses.
     """
 
-    physical_channel: Ref[PhysicalChannel]
+    physical_channel: Ref[PhysicalChannel] = Field(frozen=True)
 
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j

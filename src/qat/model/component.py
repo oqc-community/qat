@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import uuid
 from contextlib import contextmanager
-from typing import List
+from typing import get_args, get_origin
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ComponentId(BaseModel):
@@ -15,6 +15,8 @@ class ComponentId(BaseModel):
     Attributes:
         id: The string representation of the quantum component.
     """
+
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
 
@@ -117,8 +119,39 @@ class Component(ComponentId):
                             k: reference_targets.get(v) for (k, v) in field_value.items()
                         }
 
-                with self.temporary_unfreeze(field_name):
-                    setattr(self, field_name, new_value)
+                # Directly set the field in the model dict to bypass the frozen constraint.
+                self.__dict__[field_name] = new_value
+
+    @model_validator(mode="after")
+    def validate_model_types(self):
+        for field_name in self.model_fields:
+            if self._is_populated(field_name):
+                component = getattr(self, field_name)
+                self._check_valid_type(field_name, component)
+        return self
+
+    def _check_valid_type(self, field_name, field_value):
+        field_type = self.model_fields[field_name].annotation
+        inner_type = get_args(field_type)[1]
+        container_type = get_origin(inner_type)
+
+        if container_type is list:
+            field_contents = field_value
+            expected_type = get_args(inner_type)[0]
+        elif container_type is dict:
+            field_contents = list(field_value.values())
+            expected_type = get_args(inner_type)[1]
+        elif container_type is None:
+            field_contents = [field_value]
+            expected_type = inner_type
+        else:
+            raise Exception(f"Unknown field type for {field_value}.")
+
+        for component in field_contents:
+            if not isinstance(component, expected_type):
+                raise ValueError(
+                    f"Wrong type provided for {field_name} in {self}: expected {expected_type}, got {type(component)}."
+                )
 
 
 def get_reftype(model, field):
@@ -137,10 +170,5 @@ def get_reftype(model, field):
         return None
 
 
-def make_refdict(*items: List[Component]):
+def make_refdict(*items: list[Component]):
     return {i.to_component_id(): i for i in items}
-
-
-c = Component()
-s = c.__repr__()
-print(c)
