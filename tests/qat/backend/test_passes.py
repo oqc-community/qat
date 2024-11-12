@@ -180,7 +180,7 @@ class TestAnalysisPasses:
         for name in iter_bounds:
             assert name in set(binding_result.writes.keys())
 
-    def test_tilegalisation_pass(self):
+    def test_ti_legalisation_pass(self):
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
@@ -194,27 +194,30 @@ class TestAnalysisPasses:
         TILegalisationPass().run(builder, res_mgr)
         legal_iter_bounds = binding_result.iter_bounds
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-
-        for target, symbol2iter_bound in legal_iter_bounds.items():
-            for name, legal_bound in symbol2iter_bound.items():
-                assert name in bounds[target]
-                if du := next(
-                    (
+        assert set(legal_iter_bounds.keys()) == set(bounds.keys())
+        for target, symbol2bound in legal_iter_bounds.items():
+            assert set(symbol2bound.keys()) == set(bounds[target].keys())
+            for name in binding_result.symbol2scopes:
+                bound = bounds[target][name]
+                legal_bound = symbol2bound[name]
+                if name in binding_result.reads:
+                    device_updates = [
                         inst
-                        for inst in triage_result.target_map[target]
-                        if isinstance(inst, DeviceUpdate) and inst.value.name == name
-                    ),
-                    None,
-                ):
-                    bound = bounds[target][name]
-                    assert legal_bound != bound
-                    assert legal_bound == IterBound(
-                        start=TILegalisationPass.decompose_freq(bound.start, du.target)[1],
-                        step=bound.step,
-                        end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
-                        count=bound.count,
-                    )
+                        for inst in binding_result.reads[name]
+                        if isinstance(inst, DeviceUpdate) and inst.target == target
+                    ]
+                    for du in device_updates:
+                        assert legal_bound != bound
+                        assert legal_bound == IterBound(
+                            start=TILegalisationPass.decompose_freq(bound.start, du.target)[
+                                1
+                            ],
+                            step=bound.step,
+                            end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
+                            count=bound.count,
+                        )
+                else:
+                    assert legal_bound == bound
 
     def test_cfg_pass(self):
         model = get_default_echo_hardware()
