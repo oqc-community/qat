@@ -58,7 +58,9 @@ def qubit_spect(model, qubit_indices=None):
     builder = get_builder(model)
     builder.synchronize([model.get_qubit(index) for index in qubit_indices])
     for index in qubit_indices:
-        builder.device_assign(model.get_qubit(index).get_drive_channel(), "scale", 1)
+        # TODO - Provide better processing of static DeviceUpdates
+        model.get_qubit(index).get_drive_channel().scale = 1
+        # builder.device_assign(model.get_qubit(index).get_drive_channel(), "scale", 1)
     builder.sweep(
         [SweepValue(f"freq{index}", scan_freqs[f"Q{index}"]) for index in qubit_indices]
     )

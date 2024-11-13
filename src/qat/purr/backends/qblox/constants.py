@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class Constants:
     MAX_GAIN_SIZE = pow(2, 16) - 1
     """Max size of gain in Q1ASM programs."""
@@ -72,29 +69,3 @@ class Constants:
     """
     Maximum offset for QRM-RF
     """
-
-
-class ConversionHelper:
-    @staticmethod
-    def phase_as_steps(phase_rad: float) -> int:
-        phase_deg = np.rad2deg(phase_rad)
-        phase_deg %= 360
-        return int(round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG))
-
-    @staticmethod
-    def freq_as_steps(freq_hz: float) -> int:
-        steps = int(round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ))
-
-        if (
-            steps < -Constants.NCO_FREQ_LIMIT_STEPS
-            or steps > Constants.NCO_FREQ_LIMIT_STEPS
-        ):
-            min_max_frequency_in_hz = (
-                Constants.NCO_FREQ_LIMIT_STEPS / Constants.NCO_FREQ_STEPS_PER_HZ
-            )
-            raise ValueError(
-                f"IF frequency must be in [-{min_max_frequency_in_hz:e}, {min_max_frequency_in_hz:e}] Hz. "
-                f"Got {freq_hz:e} Hz"
-            )
-
-        return steps

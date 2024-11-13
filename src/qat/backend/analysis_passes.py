@@ -1,5 +1,6 @@
 import itertools
 from collections import defaultdict
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -357,23 +358,36 @@ class TILegalisationPass(AnalysisPass):
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-
-        legal_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
-            lambda: defaultdict(set)
+        legal_iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = deepcopy(
+            binding_result.iter_bounds
         )
 
+        read_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
+            lambda: defaultdict(set)
+        )
         for name, instructions in binding_result.reads.items():
             for inst in instructions:
                 for target in inst.quantum_targets:
                     bound = binding_result.iter_bounds[target][name]
                     legal_bound = self._legalise_bound(name, bound, inst)
-                    legal_iter_bounds[target][name].add(legal_bound)
+                    read_iter_bounds[target][name].add(legal_bound)
 
-        for target, symbol2iter_bounds in legal_iter_bounds.items():
-            for name, iter_bounds in symbol2iter_bounds.items():
-                if len(iter_bounds) > 1:
-                    raise ValueError(f"Found multiple different uses for variable {name}")
-                binding_result.iter_bounds[target][name] = next(iter(iter_bounds))
+        for target, bounds in binding_result.iter_bounds.items():
+            if target in read_iter_bounds:
+                for name, bound_set in read_iter_bounds[target].items():
+                    if len(bound_set) > 1:
+                        raise ValueError(
+                            f"Found multiple different uses for variable {name}"
+                        )
+                    legal_iter_bounds[target][name] = next(iter(bound_set))
+            else:
+                legal_iter_bounds[target] = {
+                    name: IterBound(start=1, step=1, end=bound.count, count=bound.count)
+                    for name, bound in bounds.items()
+                }
+
+        # TODO: the proper way is to produce a new result and invalidate the old one
+        binding_result.iter_bounds = legal_iter_bounds
 
 
 @dataclass
