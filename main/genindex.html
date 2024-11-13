@@ -74,6 +74,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
@@ -353,7 +354,11 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ADDRESS">ADDRESS (Opcode attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult.alloc_mgrs">alloc_mgrs (PreCodegenResult attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">allocate_resources() (QbloxControlHardware method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager">AllocationManager (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.allowed_methods">allowed_methods (QiskitSimulationConfig attribute)</a>
 </li>
@@ -508,6 +513,10 @@
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline">build_pass_pipeline() (InvokerMixin method)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter.build_pass_pipeline">(NewQbloxEmitter method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.build_pass_pipeline">(NewQbloxLiveEngine method)</a>
+</li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline">(NewQuantumRuntime method)</a>
 </li>
       </ul></li>
@@ -623,6 +632,8 @@
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.clear">(InstructionBuilder method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.clear">(NewQbloxContext method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.clear">(QbloxContext method)</a>
 </li>
@@ -773,8 +784,6 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType">ControlType (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.ConversionHelper">ConversionHelper (class in qat.purr.backends.qblox.constants)</a>
-</li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Cos">Cos (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.COS">COS (PulseShapeType attribute)</a>
@@ -829,8 +838,12 @@
       </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.create_label">create_label() (InstructionBuilder method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.create_package">create_package() (QbloxContext method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.create_package">create_package() (NewQbloxContext method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.create_package">(QbloxContext method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.create_pulse_channel">create_pulse_channel() (PhysicalChannel method)</a>
 
       <ul>
@@ -840,6 +853,8 @@
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_runtime">create_runtime() (HardwareModel method)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveHardwareModel.create_runtime">(QbloxLiveHardwareModel method)</a>
+</li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitHardwareModel.create_runtime">(QiskitHardwareModel method)</a>
 </li>
       </ul></li>
@@ -932,6 +947,8 @@
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.delay">delay() (InstructionBuilder method)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.delay">(NewQbloxContext method)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.delay">(QbloxContext method)</a>
 </li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.delay">(QiskitBuilder method)</a>
@@ -963,6 +980,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors">DeviceInjectors (class in qat.purr.compiler.execution)</a>
@@ -1010,6 +1029,8 @@
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.duration">(MeasureBlock property)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.duration">(NewQbloxContext property)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse.duration">(Pulse property)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.duration">(QbloxContext property)</a>
@@ -1047,6 +1068,8 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxEmitter.emit">(QbloxEmitter method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter.emit_packages">emit_packages() (NewQbloxEmitter method)</a>
+</li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.enable">enable() (CompilationMetrics method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.ENABLE_METADATA">ENABLE_METADATA (QiskitSimulationConfig attribute)</a>
@@ -1064,6 +1087,16 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndSweep">EndSweep (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.backend.codegen_base.html#qat.backend.codegen_base.DfsTraversal.enter">enter() (DfsTraversal method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.enter">(QbloxCFGWalker method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_repeat">enter_repeat() (NewQbloxContext static method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.epilogue">epilogue() (NewQbloxContext static method)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals">Equals (class in qat.purr.compiler.instructions)</a>
 </li>
@@ -1154,6 +1187,14 @@
       <li><a href="qat.qat.html#qat.qat.execute_with_metrics">execute_with_metrics() (in module qat.qat)</a>
 </li>
       <li><a href="qat.backend.codegen_base.html#qat.backend.codegen_base.DfsTraversal.exit">exit() (DfsTraversal method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.exit">(QbloxCFGWalker method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.exit_repeat">exit_repeat() (NewQbloxContext static method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.exit_sweep">exit_sweep() (NewQbloxContext static method)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.extern_frame">extern_frame() (Qasm3Parser method)</a>
 </li>
@@ -1231,7 +1272,7 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.freq">freq (NcoConfig attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.ConversionHelper.freq_as_steps">freq_as_steps() (ConversionHelper static method)</a>
+      <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">freq_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift">freq_shift (ChannelType attribute)</a>
 </li>
@@ -1286,6 +1327,8 @@
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.GaussianWaveform">GaussianWaveform (class in qat.purr.compiler.waveforms)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.GaussianZeroEdgeFunction">GaussianZeroEdgeFunction (class in qat.purr.backends.utilities)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.gen_label">gen_label() (AllocationManager method)</a>
 </li>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.generate_connectivity">generate_connectivity() (in module qat.purr.backends.echo)</a>
 </li>
@@ -1365,10 +1408,10 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel">get_drive_channel() (Qubit method)</a>
 </li>
-      <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_frame_mappings">get_frame_mappings() (in module qat.purr.integrations.qasm)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_frame_mappings">get_frame_mappings() (in module qat.purr.integrations.qasm)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_freq_shift_channel">get_freq_shift_channel() (Qubit method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_U">get_gate_U() (QuantumHardwareModel method)</a>
@@ -1503,9 +1546,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id">Id (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.id">id() (PassInfoMixin method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.id">id() (NewQbloxContext method)</a>
 
       <ul>
+        <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.id">(PassInfoMixin method)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.id">(QbloxContext method)</a>
 </li>
         <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.id">(ResultInfoMixin method)</a>
@@ -1642,6 +1687,8 @@
       <ul>
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata.is_empty">(InjectionMetadata method)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.is_empty">(NewQbloxContext method)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.is_empty">(QbloxContext method)</a>
 </li>
       </ul></li>
@@ -1717,6 +1764,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.label">label() (SequenceBuilder method)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.labels">labels (AllocationManager attribute)</a>
+</li>
       <li><a href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult.language">language (InputAnalysisResult attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.LanguageFrontend">LanguageFrontend (class in qat.purr.compiler.frontends)</a>
@@ -1755,10 +1804,10 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.load_default_gates">load_default_gates() (Qasm3ParserBase method)</a>
 </li>
-      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig">LoConfig (class in qat.purr.backends.qblox.config)</a>
@@ -1873,8 +1922,12 @@
         <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.measure">(TketBuilder method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">measure_acquire() (QbloxContext method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.measure_acquire">measure_acquire() (NewQbloxContext method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">(QbloxContext method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.measure_device">measure_device (Qubit attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure_mean_signal">measure_mean_signal() (InstructionBuilder method)</a>
@@ -1954,6 +2007,8 @@
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.model">model (LiveDeviceEngine attribute)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.model">(QbloxLiveEngineAdapter attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.model">(QuantumRuntime property)</a>
 </li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.model">(RealtimeChipSimEngine attribute)</a>
@@ -2046,6 +2101,8 @@
         <li><a href="qat.purr.backends.live_devices.html#module-qat.purr.backends.live_devices">qat.purr.backends.live_devices</a>
 </li>
         <li><a href="qat.purr.backends.qblox.html#module-qat.purr.backends.qblox">qat.purr.backends.qblox</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.analysis_passes.html#module-qat.purr.backends.qblox.analysis_passes">qat.purr.backends.qblox.analysis_passes</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#module-qat.purr.backends.qblox.codegen">qat.purr.backends.qblox.codegen</a>
 </li>
@@ -2204,10 +2261,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">NCO_MAX_FREQ (Constants attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
@@ -2215,6 +2272,12 @@
       <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.NCOFrequencyVariability">NCOFrequencyVariability (class in qat.backend.validation_passes)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.NEW_LINE">NEW_LINE (Opcode attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext">NewQbloxContext (class in qat.purr.backends.qblox.codegen)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter">NewQbloxEmitter (class in qat.purr.backends.qblox.codegen)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine">NewQbloxLiveEngine (class in qat.purr.backends.qblox.live)</a>
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime">NewQuantumRuntime (class in qat.purr.compiler.runtime)</a>
 </li>
@@ -2274,6 +2337,8 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.optimize">(InstructionExecutionEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.optimize">(LiveDeviceEngine method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.optimize">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxEmitter.optimize">(QbloxEmitter method)</a>
 </li>
@@ -2414,7 +2479,7 @@
 </li>
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel">PassModel (class in qat.ir.pass_base)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.ConversionHelper.phase_as_steps">phase_as_steps() (ConversionHelper static method)</a>
+      <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">phase_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.phase_offs">phase_offs (NcoConfig attribute)</a>
 </li>
@@ -2474,8 +2539,12 @@
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TriageResult.pp_map">pp_map (TriageResult attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass">PreCodegenPass (class in qat.purr.backends.qblox.codegen)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult">PreCodegenResult (class in qat.purr.backends.qblox.codegen)</a>
+</li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.predict_pulse_amplitude">predict_pulse_amplitude() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.prefix">prefix (qat.purr.utils.logger.LogFolder parameter)</a>
@@ -2569,6 +2638,8 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis">ProcessAxis (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.program">program (Sequence attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.prologue">prologue() (NewQbloxContext static method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp">prop_delay_comp (NcoConfig attribute)</a>
 </li>
@@ -2781,6 +2852,13 @@
 
       <ul>
         <li><a href="qat.purr.backends.qblox.html#module-qat.purr.backends.qblox">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.purr.backends.qblox.analysis_passes
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.analysis_passes.html#module-qat.purr.backends.qblox.analysis_passes">module</a>
 </li>
       </ul></li>
       <li>
@@ -3119,6 +3197,8 @@
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatSimulationConfig">QatSimulationConfig (class in qat.purr.qatconfig)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker">QbloxCFGWalker (class in qat.purr.backends.qblox.codegen)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfig">QbloxConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper">QbloxConfigHelper (class in qat.purr.backends.qblox.config)</a>
@@ -3129,7 +3209,11 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxEmitter">QbloxEmitter (class in qat.purr.backends.qblox.codegen)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass">QbloxLegalisationPass (class in qat.purr.backends.qblox.analysis_passes)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine">QbloxLiveEngine (class in qat.purr.backends.qblox.live)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter">QbloxLiveEngineAdapter (class in qat.purr.backends.qblox.live)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveHardwareModel">QbloxLiveHardwareModel (class in qat.purr.backends.qblox.live)</a>
 </li>
@@ -3271,7 +3355,13 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.UntargetedPulse.ref_instance">ref_instance (UntargetedPulse property)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.reg_alloc">reg_alloc() (AllocationManager method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.reg_free">reg_free() (AllocationManager method)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.REGISTER_SIZE">REGISTER_SIZE (Constants attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.registers">registers (AllocationManager attribute)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Registers">Registers (class in qat.purr.integrations.qasm)</a>
 </li>
@@ -3325,8 +3415,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.RESET_PHASE">RESET_PHASE (Opcode attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.reset_phase">reset_phase() (QbloxContext static method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.reset_phase">reset_phase() (NewQbloxContext static method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.reset_phase">(QbloxContext static method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resolve_qb_pulse_channel">resolve_qb_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator">Resonator (class in qat.purr.compiler.devices)</a>
@@ -3432,9 +3526,13 @@
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation.run">(PostProcessingOptimisation method)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass.run">(PreCodegenPass method)</a>
+</li>
         <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.QasmValidation.run">(QasmValidation method)</a>
 </li>
         <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.QatBackend.run">(QatBackend method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run">(QbloxLegalisationPass method)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock.run">(QuantumExecutableBlock method)</a>
 </li>
@@ -3619,14 +3717,24 @@
 </li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SetupHoldWaveform">SetupHoldWaveform (class in qat.purr.compiler.waveforms)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_frequency">shift_frequency() (QbloxContext method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.shift_frequency">shift_frequency() (NewQbloxContext method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_frequency">(QbloxContext method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_phase">shift_phase() (QbloxContext method)</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.shift_phase">shift_phase() (NewQbloxContext method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_phase">(QbloxContext method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.shutdown">shutdown() (InstructionExecutionEngine method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.shutdown">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.shutdown">(QbloxLiveEngine method)</a>
 </li>
@@ -3639,10 +3747,10 @@
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN">SIN (PulseShapeType attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN">SIN (PulseShapeType attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfig.slot_idx">slot_idx (QbloxConfig attribute)</a>
 
       <ul>
@@ -3716,6 +3824,8 @@
       <ul>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.startup">(LiveDeviceEngine method)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.startup">(NewQbloxLiveEngine method)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.startup">(QbloxLiveEngine method)</a>
 </li>
       </ul></li>
@@ -3782,6 +3892,8 @@
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.synchronize">synchronize() (InstructionBuilder method)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.synchronize">(NewQbloxContext static method)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.synchronize">(QbloxContext static method)</a>
 </li>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.synchronize">(QuantumInstructionBuilder method)</a>
@@ -3936,6 +4048,8 @@
       <ul>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.validate">(LiveDeviceEngine method)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.validate">(NewQbloxLiveEngine method)</a>
+</li>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.validate">(Qasm2Parser method)</a>
 </li>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.validate">(Qasm3ParserBase method)</a>
@@ -3971,10 +4085,10 @@
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationEngine">VerificationEngine (class in qat.purr.backends.verification)</a>
 </li>
-      <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationError">VerificationError</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationError">VerificationError</a>
+</li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationModel">VerificationModel (class in qat.purr.backends.verification)</a>
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.verify_instructions">verify_instructions() (in module qat.purr.backends.verification)</a>
@@ -4033,6 +4147,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.wait_trigger">wait_trigger() (SequenceBuilder method)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.walk">walk() (QbloxCFGWalker method)</a>
+</li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.AbstractParser.walk_node">walk_node() (AbstractParser method)</a>
 
       <ul>
@@ -4049,8 +4165,14 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform">Waveform (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.waveform">waveform() (QbloxContext method)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.waveform">waveform() (NewQbloxContext method)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.waveform">(QbloxContext method)</a>
 </li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.AbstractWaveform.waveform_definition">waveform_definition (AbstractWaveform attribute)</a>
 
       <ul>
@@ -4071,8 +4193,6 @@
         <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SquareWaveform.waveform_definition">(SquareWaveform attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.waveform_definition">waveform_definition() (Qasm3Parser method)</a>
 </li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef">WaveformDef (class in qat.purr.compiler.waveforms)</a>

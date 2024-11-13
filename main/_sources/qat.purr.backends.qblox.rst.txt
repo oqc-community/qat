@@ -12,6 +12,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.purr.backends.qblox.analysis_passes
    qat.purr.backends.qblox.codegen
    qat.purr.backends.qblox.config
    qat.purr.backends.qblox.constants
