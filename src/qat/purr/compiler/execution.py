@@ -707,6 +707,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 post_processing.args, value, value_axis
             )
 
+    @property
+    def error_mitigation(self):
+        return self.model.error_mitigation
+
     def __repr__(self):
         if self.model is not None:
             return f"{self.__class__.__name__} with {len(self.model.qubits)} qubits"
