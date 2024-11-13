@@ -74,6 +74,7 @@ from qat.qat import execute, execute_qasm, fetch_frontend
 
 from tests.qat.qasm_utils import (
     ProgramFileType,
+    get_default_qasm3_gate_qasms,
     get_qasm2,
     get_qasm3,
     get_test_file_path,
@@ -602,6 +603,18 @@ class TestQASM3:
         assert np.isclose(pulses[1].width, 200e-9)
         assert np.isclose(pulses[1].amp, 0.5)
         assert np.isclose(pulses[1].std_dev, 20e-9)
+
+    @pytest.mark.parametrize(
+        "qasm", get_default_qasm3_gate_qasms(), ids=lambda val: val.split("\n")[-2]
+    )
+    def test_default_gates(self, qasm):
+        """Check that all default gates can be parsed."""
+        hw = get_default_echo_hardware(4)
+        parser = Qasm3Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
 
 
 class TestExecutionFrontend:
