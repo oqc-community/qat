@@ -22,7 +22,7 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
 
-from tests.qat.qblox.conftest import DUMMY_CONFIG
+from tests.qat.backend.conftest import DUMMY_CONFIG
 
 
 class TestQbloxConfigMixin:
