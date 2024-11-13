@@ -1,0 +1,7 @@
+qat.model.component module
+==========================
+
+.. automodule:: qat.model.component
+   :members:
+   :undoc-members:
+   :show-inheritance:

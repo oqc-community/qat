@@ -1,0 +1,7 @@
+qat.model.serialisation module
+==============================
+
+.. automodule:: qat.model.serialisation
+   :members:
+   :undoc-members:
+   :show-inheritance:
