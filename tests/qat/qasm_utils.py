@@ -71,19 +71,22 @@ def parse_and_apply_optimiziations(
     return builder
 
 
+qasm3_gates = {}
+
+
 def get_default_qasm3_gate_qasms():
-    context = QasmContext()
-    Qasm3ParserBase().load_default_gates(context)
-    gate_list = []
-    for name, defi in context.gates.items():
-        needed_num_args = len(defi.arguments)
-        arg_string = (
-            "" if needed_num_args == 0 else "(" + ", ".join(["0"] * needed_num_args) + ")"
-        )
-        needed_num_qubits = len(defi.qubits)
-        N = max(needed_num_qubits, 2)
-        qubit_string = ", ".join([f"q[{i}]" for i in range(needed_num_qubits)])
-        gate_list.append(
-            f"""OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{name}{arg_string} {qubit_string};\nmeasure q -> c;"""
-        )
-    return gate_list
+    if len(qasm3_gates) == 0:
+        context = QasmContext()
+        Qasm3ParserBase().load_default_gates(context)
+        for name, defi in context.gates.items():
+            needed_num_args = len(defi.arguments)
+            arg_string = (
+                ""
+                if needed_num_args == 0
+                else "(" + ", ".join(["0"] * needed_num_args) + ")"
+            )
+            N = len(defi.qubits)
+            qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
+            gate_string = f"{name}{arg_string} {qubit_string};"
+            qasm3_gates[name] = (N, gate_string)
+    return list(qasm3_gates.values())
