@@ -1,6 +1,7 @@
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
+from itertools import chain
 from typing import Dict, List
 
 import numpy as np
@@ -1082,16 +1083,16 @@ class PreCodegenPass(AnalysisPass):
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         result = PreCodegenResult()
 
-        for name, instructions in binding_result.writes.items():
-            for inst in instructions:
-                targets = (
-                    inst.quantum_targets
-                    if isinstance(inst, QuantumInstruction)
-                    else triage_result.target_map.keys()
-                )
-                for target in targets:
-                    result.alloc_mgrs[target].reg_alloc(name)
-                    result.alloc_mgrs[target].gen_label(name)
+        for target in triage_result.target_map:
+            alloc_mgr = result.alloc_mgrs[target]
+            iter_bound_result = binding_result.iter_bound_results[target]
+            reads = binding_result.rw_results[target].reads
+            writes = binding_result.rw_results[target].writes
+
+            names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
+            for name in names:
+                alloc_mgr.reg_alloc(name)
+                alloc_mgr.gen_label(name)
 
         res_mgr.add(result)
 
