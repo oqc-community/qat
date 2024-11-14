@@ -142,6 +142,24 @@ class TriagePass(AnalysisPass):
         res_mgr.add(result)
 
 
+@dataclass
+class ScopingResult:
+    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
+    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+
+
+@dataclass
+class ReadWriteResult:
+    reads: Dict[str, List[QuantumInstruction]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
+
+
 @dataclass(frozen=True)
 class IterBound:
     start: Union[int, float] = 0
@@ -152,19 +170,15 @@ class IterBound:
 
 @dataclass
 class BindingResult(ResultInfoMixin):
-    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
-        default_factory=lambda: defaultdict(set)
+    scoping_results: Dict[PulseChannel, ScopingResult] = field(
+        default_factory=lambda: defaultdict(lambda: ScopingResult())
     )
-    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
-        default_factory=lambda: defaultdict(list)
+    rw_results: Dict[PulseChannel, ReadWriteResult] = field(
+        default_factory=lambda: defaultdict(lambda: ReadWriteResult())
     )
-    iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = field(
+    iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = field(
         default_factory=lambda: defaultdict(dict)
     )
-    reads: Dict[str, List[QuantumInstruction]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
-    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 class BindingPass(AnalysisPass):
@@ -217,84 +231,95 @@ class BindingPass(AnalysisPass):
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
-        stack = []
-        for inst in builder.instructions:
-            parent_scopes = [(s, e) for (s, e) in result.scope2symbols if s in stack]
-            if isinstance(inst, Sweep):
-                stack.append(inst)
-                scope = (inst, None)
-                if p := next(iter(parent_scopes[::-1]), None):
-                    for name in result.scope2symbols[p]:
-                        if name not in result.scope2symbols[scope]:
-                            result.scope2symbols[scope].add(name)
-                            result.symbol2scopes[name].append(scope)
+        for target, instructions in triage_result.target_map.items():
+            scoping_result = result.scoping_results[target]
+            rw_result = result.rw_results[target]
+            iter_bound_result = result.iter_bound_results[target]
 
-                for name, value in inst.variables.items():
-                    result.scope2symbols[scope].add(name)
-                    result.symbol2scopes[name].append(scope)
+            stack = []
+            for inst in instructions:
+                parent_scopes = [
+                    (s, e) for (s, e) in scoping_result.scope2symbols if s in stack
+                ]
+                if isinstance(inst, Sweep):
+                    stack.append(inst)
+                    scope = (inst, None)
+                    if p := next(iter(parent_scopes[::-1]), None):
+                        for name in scoping_result.scope2symbols[p]:
+                            if name not in scoping_result.scope2symbols[scope]:
+                                scoping_result.scope2symbols[scope].add(name)
+                                scoping_result.symbol2scopes[name].append(scope)
 
-                    for t in triage_result.target_map:
-                        result.iter_bounds[t][name] = self.extract_iter_bound(value)
+                    for name, value in inst.variables.items():
+                        scoping_result.scope2symbols[scope].add(name)
+                        scoping_result.symbol2scopes[name].append(scope)
 
-                    result.writes[name].append(inst)
-            elif isinstance(inst, Repeat):
-                stack.append(inst)
-                scope = (inst, None)
-                if p := next(iter(parent_scopes[::-1]), None):
-                    for name in result.scope2symbols[p]:
-                        if name not in result.scope2symbols[scope]:
-                            result.scope2symbols[scope].add(name)
-                            result.symbol2scopes[name].append(scope)
+                        iter_bound_result[name] = self.extract_iter_bound(value)
 
-                # TODO - Desugaring could be much better when the IR is redesigned
-                name = f"repeat_{inst.repeat_count}_{hash(inst)}"
-                result.scope2symbols[scope].add(name)
-                result.symbol2scopes[name].append(scope)
+                        rw_result.writes[name].append(inst)
+                elif isinstance(inst, Repeat):
+                    stack.append(inst)
+                    scope = (inst, None)
+                    if p := next(iter(parent_scopes[::-1]), None):
+                        for name in scoping_result.scope2symbols[p]:
+                            if name not in scoping_result.scope2symbols[scope]:
+                                scoping_result.scope2symbols[scope].add(name)
+                                scoping_result.symbol2scopes[name].append(scope)
 
-                for t in triage_result.target_map:
-                    result.iter_bounds[t][name] = IterBound(
+                    # TODO - Desugaring could be much better when the IR is redesigned
+                    name = f"repeat_{inst.repeat_count}_{hash(inst)}"
+                    scoping_result.scope2symbols[scope].add(name)
+                    scoping_result.symbol2scopes[name].append(scope)
+
+                    iter_bound_result[name] = IterBound(
                         start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
                     )
 
-                result.writes[name].append(inst)
-            elif isinstance(inst, (EndSweep, EndRepeat)):
-                delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
-                try:
-                    delimiter = stack.pop()
-                except IndexError:
-                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+                    rw_result.writes[name].append(inst)
+                elif isinstance(inst, (EndSweep, EndRepeat)):
+                    delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
+                    try:
+                        delimiter = stack.pop()
+                    except IndexError:
+                        raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
-                if not isinstance(delimiter, delimiter_type):
-                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+                    if not isinstance(delimiter, delimiter_type):
+                        raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
-                scope = next(
-                    ((s, e) for (s, e) in result.scope2symbols.keys() if s == delimiter)
-                )
-                symbols = result.scope2symbols[scope]
-                del result.scope2symbols[scope]
-                result.scope2symbols[(delimiter, inst)] = symbols
-
-                for name, scopes in result.symbol2scopes.items():
-                    result.symbol2scopes[name] = [
-                        (delimiter, inst) if s == scope else s for s in scopes
-                    ]
-            elif isinstance(inst, Acquire):
-                result.writes[inst.output_variable].append(inst)
-            elif isinstance(inst, DeviceUpdate):
-                if not (
-                    inst.value.name in result.symbol2scopes
-                    and [
-                        (s, e)
-                        for (s, e) in result.symbol2scopes[inst.value.name]
-                        if s in stack
-                    ]
-                ):
-                    raise ValueError(
-                        f"Variable {inst.value} referenced but no prior declaration found"
+                    scope = next(
+                        (
+                            (s, e)
+                            for (s, e) in scoping_result.scope2symbols.keys()
+                            if s == delimiter
+                        )
                     )
-                result.reads[inst.value.name].append(inst)
-        if stack:
-            raise ValueError(f"Unbalanced scopes. Found orphans {stack}")
+                    symbols = scoping_result.scope2symbols[scope]
+                    del scoping_result.scope2symbols[scope]
+                    scoping_result.scope2symbols[(delimiter, inst)] = symbols
+
+                    for name, scopes in scoping_result.symbol2scopes.items():
+                        scoping_result.symbol2scopes[name] = [
+                            (delimiter, inst) if s == scope else s for s in scopes
+                        ]
+                elif isinstance(inst, Acquire):
+                    rw_result.writes[inst.output_variable].append(inst)
+                elif isinstance(inst, DeviceUpdate):
+                    if not (
+                        inst.value.name in scoping_result.symbol2scopes
+                        and [
+                            (s, e)
+                            for (s, e) in scoping_result.symbol2scopes[inst.value.name]
+                            if s in stack
+                        ]
+                    ):
+                        raise ValueError(
+                            f"Variable {inst.value} referenced but no prior declaration found in target {target}"
+                        )
+                    rw_result.reads[inst.value.name].append(inst)
+            if stack:
+                raise ValueError(
+                    f"Unbalanced scopes. Found orphans {stack} in target {target}"
+                )
 
         res_mgr.add(result)
 
