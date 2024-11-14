@@ -6,7 +6,14 @@ from typing import Dict, List
 
 import numpy as np
 
-from qat.backend.analysis_passes import BindingResult, CFGResult, IterBound, TriageResult
+from qat.backend.analysis_passes import (
+    BindingResult,
+    CFGPass,
+    CFGResult,
+    IterBound,
+    ReadWriteResult,
+    TriageResult,
+)
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.graph import ControlFlowGraph
 from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager
@@ -633,9 +640,15 @@ class AllocationManager:
 
 
 class NewQbloxContext:
-    def __init__(self, alloc_mgr: AllocationManager, iter_bounds: Dict[str, IterBound]):
-        self.alloc_mgr = alloc_mgr
+    def __init__(
+        self,
+        rw_result: ReadWriteResult,
+        iter_bounds: Dict[str, IterBound],
+        alloc_mgr: AllocationManager,
+    ):
+        self.rw_result = rw_result
         self.iter_bounds = iter_bounds
+        self.alloc_mgr = alloc_mgr
 
         self.sequence_builder = SequenceBuilder()
         self.sequencer_config = SequencerConfig()
@@ -1021,14 +1034,18 @@ class NewQbloxContext:
 
             context._wait_seconds(inst.repetition_period)
             context.sequence_builder.add(register, bound.step, register)
+            context.sequence_builder.nop()
             context.sequence_builder.jlt(
                 register, bound.end + bound.step, label
             )  # extra step for jlt
 
     @staticmethod
     def enter_sweep(inst: Sweep, contexts: Dict):
-        for name in inst.variables.keys():
-            for context in contexts.values():
+        for context in contexts.values():
+            names = [n for n in inst.variables if n in context.rw_result.writes]
+
+            # TODO - multiple variable definition in a single target
+            for name in names:
                 register = context.alloc_mgr.registers[name]
                 label = context.alloc_mgr.labels[name]
                 bound = context.iter_bounds[name]
@@ -1038,8 +1055,11 @@ class NewQbloxContext:
 
     @staticmethod
     def exit_sweep(inst: Sweep, contexts: Dict):
-        for name in inst.variables.keys():
-            for context in contexts.values():
+        for context in contexts.values():
+            names = [n for n in inst.variables if n in context.rw_result.writes]
+
+            # TODO - multiple variable definition in a single target
+            for name in names:
                 register = context.alloc_mgr.registers[name]
                 label = context.alloc_mgr.labels[name]
                 bound = context.iter_bounds[name]
@@ -1099,29 +1119,35 @@ class PreCodegenPass(AnalysisPass):
 
 class NewQbloxEmitter(InvokerMixin):
     def build_pass_pipeline(self, *args, **kwargs):
-        return PassManager() | PreCodegenPass()
+        return PassManager() | PreCodegenPass() | CFGPass()
 
     def emit_packages(
         self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
     ) -> List[QbloxPackage]:
         self.run_pass_pipeline(builder, res_mgr, *args, **kwargs)
 
-        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
 
+        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = (
+            binding_result.iter_bound_results
+        )
         alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
-        iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = binding_result.iter_bounds
 
         contexts = {
-            t: NewQbloxContext(alloc_mgr=alloc_mgrs[t], iter_bounds=iter_bounds[t])
+            t: NewQbloxContext(
+                rw_result=rw_results[t], iter_bounds=iter_bounds[t], alloc_mgr=alloc_mgrs[t]
+            )
             for t in triage_result.target_map
         }
+
+        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
         cfg_walker = QbloxCFGWalker(contexts)
         cfg_walker.walk(cfg_result.cfg)
 
-        # Digard empty contexts
+        # Discard empty contexts
         return [
             context.create_package(target)
             for target, context in contexts.items()
@@ -1167,7 +1193,10 @@ class QbloxCFGWalker(DfsTraversal):
                         for block in self._entered:
                             head = block.head()
                             if isinstance(head, Sweep):
-                                name = next(iter(head.variables.keys()))
+                                name = next(
+                                    (n for n in context.iter_bounds if n in head.variables),
+                                    f"sweep_{hash(head)}",
+                                )
                                 iter_bound = context.iter_bounds[name]
                                 num_bins *= iter_bound.count
                             elif isinstance(head, Repeat):

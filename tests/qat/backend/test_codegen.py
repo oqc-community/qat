@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from qat.backend.analysis_passes import BindingPass, CFGPass, TILegalisationPass, TriagePass
+from qat.backend.analysis_passes import BindingPass, TILegalisationPass, TriagePass
 from qat.backend.transform_passes import (
     RepeatSanitisation,
     ReturnSanitisation,
@@ -338,96 +338,111 @@ class TestNewQbloxEmitter(InvokerMixin):
             | ReturnSanitisation()
             | TriagePass()
             | BindingPass()
-            | CFGPass()
             | TILegalisationPass()
             | QbloxLegalisationPass()
         )
 
-    def test_compile_resonator_spect(self, model):
-        index = 0
-        qubit = model.get_qubit(index)
-        acquire_channel = qubit.get_acquire_channel()
+    @pytest.mark.parametrize("num_points", [1, 10, 100])
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_resonator_spect(self, model, num_points, qubit_indices):
+        builder = resonator_spect(model, qubit_indices, num_points)
         res_mgr = ResultManager()
-        builder = resonator_spect(model, [index])
         engine = model.create_engine()
         runtime = model.create_runtime()
         runtime.run_pass_pipeline(builder, res_mgr, model, engine)
+
         self.run_pass_pipeline(builder, res_mgr, model)
         packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
-        assert len(packages) == 1
-        acquire_pkg = packages[0]
-        assert acquire_pkg.target == acquire_channel
+        assert len(packages) == len(qubit_indices)
 
-        measure_pulse = next(
-            (inst for inst in builder.instructions if isinstance(inst, MeasurePulse))
-        )
-        assert acquire_channel in measure_pulse.quantum_targets
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            acquire_channel = qubit.get_acquire_channel()
+            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            measure_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
+                )
+            )
 
-        assert acquire_pkg.sequence.acquisitions
+            assert acquire_pkg.sequence.acquisitions
+            assert f"freq{qubit.index}_0" in acquire_pkg.sequence.program
 
-        assert f"freq{qubit.index}_0" in acquire_pkg.sequence.program
+            if measure_pulse.shape == PulseShapeType.SQUARE:
+                assert not acquire_pkg.sequence.waveforms
+                assert "play" not in acquire_pkg.sequence.program
+                assert "set_awg_offs" in acquire_pkg.sequence.program
+                assert "upd_param" in acquire_pkg.sequence.program
+            else:
+                assert acquire_pkg.sequence.waveforms
+                assert "play" in acquire_pkg.sequence.program
+                assert "set_awg_offs" not in acquire_pkg.sequence.program
+                assert "upd_param" not in acquire_pkg.sequence.program
 
-        if measure_pulse.shape == PulseShapeType.SQUARE:
-            assert not acquire_pkg.sequence.waveforms
-            assert "play" not in acquire_pkg.sequence.program
-            assert "set_awg_offs" in acquire_pkg.sequence.program
-            assert "upd_param" in acquire_pkg.sequence.program
-        else:
-            assert acquire_pkg.sequence.waveforms
-            assert "play" in acquire_pkg.sequence.program
-            assert "set_awg_offs" not in acquire_pkg.sequence.program
-            assert "upd_param" not in acquire_pkg.sequence.program
-
-    def test_compile_qubit_spect(self, model):
-        index = 0
-        qubit = model.get_qubit(index)
-        drive_channel = qubit.get_drive_channel()
-        acquire_channel = qubit.get_acquire_channel()
+    @pytest.mark.parametrize("num_points", [1, 10, 100])
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_qubit_spect(self, model, num_points, qubit_indices):
+        builder = qubit_spect(model, qubit_indices, num_points)
         res_mgr = ResultManager()
-        builder = qubit_spect(model, [index])
         engine = model.create_engine()
         runtime = model.create_runtime()
         runtime.run_pass_pipeline(builder, res_mgr, model, engine)
+
         self.run_pass_pipeline(builder, res_mgr, model)
         packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
-        assert len(packages) == 2
+        assert len(packages) == 2 * len(qubit_indices)
 
-        # Drive
-        drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
-        drive_pulse = next(
-            (inst for inst in builder.instructions if isinstance(inst, Pulse))
-        )
-        assert drive_channel in drive_pulse.quantum_targets
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            acquire_channel = qubit.get_acquire_channel()
 
-        assert not drive_pkg.sequence.acquisitions
+            # Drive
+            drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
+            drive_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
+                )
+            )
 
-        if drive_pulse.shape == PulseShapeType.SQUARE:
-            assert not drive_pkg.sequence.waveforms
-            assert "play" not in drive_pkg.sequence.program
-            assert "set_awg_offs" in drive_pkg.sequence.program
-            assert "upd_param" in drive_pkg.sequence.program
-        else:
-            assert drive_pkg.sequence.waveforms
-            assert "play" in drive_pkg.sequence.program
-            assert "set_awg_offs" not in drive_pkg.sequence.program
-            assert "upd_param" not in drive_pkg.sequence.program
+            assert not drive_pkg.sequence.acquisitions
 
-        # Readout
-        acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
-        measure_pulse = next(
-            (inst for inst in builder.instructions if isinstance(inst, MeasurePulse))
-        )
-        assert acquire_channel in measure_pulse.quantum_targets
+            if drive_pulse.shape == PulseShapeType.SQUARE:
+                assert not drive_pkg.sequence.waveforms
+                assert "play" not in drive_pkg.sequence.program
+                assert "set_awg_offs" in drive_pkg.sequence.program
+                assert "upd_param" in drive_pkg.sequence.program
+            else:
+                assert drive_pkg.sequence.waveforms
+                assert "play" in drive_pkg.sequence.program
+                assert "set_awg_offs" not in drive_pkg.sequence.program
+                assert "upd_param" not in drive_pkg.sequence.program
 
-        assert acquire_pkg.sequence.acquisitions
+            # Readout
+            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            measure_pulse = next(
+                (
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
+                )
+            )
 
-        if measure_pulse.shape == PulseShapeType.SQUARE:
-            assert not acquire_pkg.sequence.waveforms
-            assert "play" not in acquire_pkg.sequence.program
-            assert "set_awg_offs" in acquire_pkg.sequence.program
-            assert "upd_param" in acquire_pkg.sequence.program
-        else:
-            assert acquire_pkg.sequence.waveforms
-            assert "play" in acquire_pkg.sequence.program
-            assert "set_awg_offs" not in acquire_pkg.sequence.program
-            assert "upd_param" not in acquire_pkg.sequence.program
+            assert acquire_pkg.sequence.acquisitions
+
+            if measure_pulse.shape == PulseShapeType.SQUARE:
+                assert not acquire_pkg.sequence.waveforms
+                assert "play" not in acquire_pkg.sequence.program
+                assert "set_awg_offs" in acquire_pkg.sequence.program
+                assert "upd_param" in acquire_pkg.sequence.program
+            else:
+                assert acquire_pkg.sequence.waveforms
+                assert "play" in acquire_pkg.sequence.program
+                assert "set_awg_offs" not in acquire_pkg.sequence.program
+                assert "upd_param" not in acquire_pkg.sequence.program
