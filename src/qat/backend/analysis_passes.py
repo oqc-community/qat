@@ -325,26 +325,6 @@ class BindingPass(AnalysisPass):
 
 
 class TILegalisationPass(AnalysisPass):
-    """
-    An instruction is legal if it has a direct equivalent in the programming model implemented by the control
-    stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
-    as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
-    RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
-    and branching instructions such as jump.
-
-    This pass performs target-independent legalisation. The goal here is to understand how variables
-    are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-    semantics and must be kept target-agnostic so that it can be reused among backends.
-
-    Particularly in QAT:
-        1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-        2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
-    via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
-    until a "read" (usually on the instruction builder or on the hardware model) (typically from
-    a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
-    carries meaning for the variable and materialises its intention.
-    """
-
     @staticmethod
     def decompose_freq(frequency: float, target: PulseChannel):
         if target.fixed_if:  # NCO freq constant
@@ -400,37 +380,55 @@ class TILegalisationPass(AnalysisPass):
             )
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        An instruction is legal if it has a direct equivalent in the programming model implemented by the control
+        stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
+        as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
+        RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
+        and branching instructions such as jump.
+
+        This pass performs target-independent legalisation. The goal here is to understand how variables
+        are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
+        semantics and must be kept target-agnostic so that it can be reused among backends.
+
+        Particularly in QAT:
+            1) A sweep instruction is illegal because it specifies unclear iteration semantics.
+            2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
+        via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
+        until a "read" (usually on the instruction builder or on the hardware model) (typically from
+        a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
+        carries meaning for the variable and materialises its intention.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        legal_iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = deepcopy(
-            binding_result.iter_bounds
-        )
 
-        read_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        for name, instructions in binding_result.reads.items():
-            for inst in instructions:
-                for target in inst.quantum_targets:
-                    bound = binding_result.iter_bounds[target][name]
-                    legal_bound = self._legalise_bound(name, bound, inst)
-                    read_iter_bounds[target][name].add(legal_bound)
+        for target in triage_result.target_map:
+            rw_result = binding_result.rw_results[target]
+            bound_result = binding_result.iter_bound_results[target]
+            legal_bound_result: Dict[str, IterBound] = deepcopy(bound_result)
 
-        for target, bounds in binding_result.iter_bounds.items():
-            if target in read_iter_bounds:
-                for name, bound_set in read_iter_bounds[target].items():
+            read_bounds: Dict[str, Set[IterBound]] = defaultdict(set)
+            for name, instructions in rw_result.reads.items():
+                for inst in instructions:
+                    legal_bound = self._legalise_bound(name, bound_result[name], inst)
+                    read_bounds[name].add(legal_bound)
+
+            for name, bound in bound_result.items():
+                if name in read_bounds:
+                    bound_set = read_bounds[name]
                     if len(bound_set) > 1:
                         raise ValueError(
-                            f"Found multiple different uses for variable {name}"
+                            f"Ambiguous bounds for variable {name} in target {target}"
                         )
-                    legal_iter_bounds[target][name] = next(iter(bound_set))
-            else:
-                legal_iter_bounds[target] = {
-                    name: IterBound(start=1, step=1, end=bound.count, count=bound.count)
-                    for name, bound in bounds.items()
-                }
+                    legal_bound_result[name] = next(iter(bound_set))
+                else:
+                    legal_bound_result[name] = IterBound(
+                        start=1, step=1, end=bound.count, count=bound.count
+                    )
 
-        # TODO: the proper way is to produce a new result and invalidate the old one
-        binding_result.iter_bounds = legal_iter_bounds
+            # TODO: the proper way is to produce a new result and invalidate the old one
+            binding_result.iter_bound_results[target] = legal_bound_result
 
 
 @dataclass

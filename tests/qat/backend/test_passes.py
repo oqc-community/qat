@@ -195,31 +195,37 @@ class TestAnalysisPasses:
         BindingPass().run(builder, res_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        bounds = deepcopy(binding_result.iter_bounds)
-        TILegalisationPass().run(builder, res_mgr)
-        legal_iter_bounds = binding_result.iter_bounds
+        binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        assert set(legal_iter_bounds.keys()) == set(bounds.keys())
-        for target, symbol2bound in legal_iter_bounds.items():
-            assert set(symbol2bound.keys()) == set(bounds[target].keys())
-            for name in binding_result.symbol2scopes:
-                bound = bounds[target][name]
-                legal_bound = symbol2bound[name]
-                if name in binding_result.reads:
+        TILegalisationPass().run(builder, res_mgr)
+
+        legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+
+        for target, instructions in triage_result.target_map.items():
+            scoping_result = binding_result.scoping_results[target]
+            rw_result = binding_result.rw_results[target]
+
+            bounds = binding_result.iter_bound_results[target]
+            legal_bounds = legal_binding_result.iter_bound_results[target]
+
+            assert set(legal_bounds.keys()) == set(bounds.keys())
+
+            for name in scoping_result.symbol2scopes:
+                bound = bounds[name]
+                legal_bound = legal_bounds[name]
+                if name in rw_result.reads:
                     device_updates = [
                         inst
-                        for inst in binding_result.reads[name]
-                        if isinstance(inst, DeviceUpdate) and inst.target == target
+                        for inst in rw_result.reads[name]
+                        if isinstance(inst, DeviceUpdate)
                     ]
                     for du in device_updates:
+                        assert du.target == target
                         assert legal_bound != bound
                         assert legal_bound == IterBound(
-                            start=TILegalisationPass.decompose_freq(bound.start, du.target)[
-                                1
-                            ],
+                            start=TILegalisationPass.decompose_freq(bound.start, target)[1],
                             step=bound.step,
-                            end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
+                            end=TILegalisationPass.decompose_freq(bound.end, target)[1],
                             count=bound.count,
                         )
                 else:
