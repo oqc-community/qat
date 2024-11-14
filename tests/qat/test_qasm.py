@@ -605,11 +605,26 @@ class TestQASM3:
         assert np.isclose(pulses[1].std_dev, 20e-9)
 
     @pytest.mark.parametrize(
-        "qasm", get_default_qasm3_gate_qasms(), ids=lambda val: val.split("\n")[-2]
+        "gate_tup", get_default_qasm3_gate_qasms(), ids=lambda val: val[-1]
     )
-    def test_default_gates(self, qasm):
-        """Check that all default gates can be parsed."""
-        hw = get_default_echo_hardware(4)
+    def test_default_gates(self, gate_tup):
+        """Check that each default gate can be parsed individually."""
+        N, gate_string = gate_tup
+        qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_string}\nmeasure q -> c;"
+        hw = get_default_echo_hardware(max(N, 2))
+        parser = Qasm3Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
+
+    def test_default_gates_together(self):
+        """Check that all default gates can be parsed together."""
+        Ns, strings = zip(*get_default_qasm3_gate_qasms())
+        N = max(Ns)
+        gate_strings = "\n".join(strings)
+        qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_strings}\nmeasure q -> c;"
+        hw = get_default_echo_hardware(max(N, 2))
         parser = Qasm3Parser()
         builder = parser.parse(hw.create_builder(), qasm)
         assert isinstance(builder, InstructionBuilder)
