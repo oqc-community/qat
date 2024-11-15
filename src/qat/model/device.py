@@ -31,10 +31,29 @@ class Component(WarnOnExtraFieldsModel):
         return hash(self.uuid)
 
     def __eq__(self, other: Component):
-        return self.uuid == other.uuid
+        if type(self) != type(other):
+            return False
+
+        if self.model_fields != other.model_fields:
+            return False
+
+        if self.uuid != other.uuid:
+            return False
+
+        for field_name in self.model_fields:
+            field_s = getattr(self, field_name)
+            field_o = getattr(other, field_name)
+            if isinstance(field_s, float) and isinstance(field_o, float):
+                if np.isnan(field_s) and np.isnan(field_o):
+                    continue
+
+            if field_s != field_o:
+                return False
+
+        return True
 
     def __ne__(self, other: Component):
-        return self.uuid != other.uuid
+        return not self.__eq__(other)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.uuid})"
@@ -146,6 +165,22 @@ class PulseChannels(WarnOnExtraFieldsModel):
             if not field_value.calibrated:
                 return False
         return True
+
+    def __eq__(self, other: PulseChannels):
+        if type(self) != type(other):
+            return False
+
+        if self.model_fields != other.model_fields:
+            return False
+
+        for field_name in self.model_fields:
+            if getattr(self, field_name) != getattr(other, field_name):
+                return False
+
+        return True
+
+    def __ne__(self, other: PulseChannels):
+        return not self.__eq__(other)
 
 
 class ResonatorPulseChannels(PulseChannels):
