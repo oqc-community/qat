@@ -17,30 +17,39 @@ from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.qatconfig import QatConfig
 from qat.qat import QATInput
 
+from qat.pipelines import DefaultCompile, DefaultExecute
+from qat.coreconfig import PipelinesConfig
+
 
 class QAT:
-    def __init__(self):
+    def __init__(
+        self,
+        qatconfig: Optional[QatConfig] = None,
+        pipelinesconfig: Optional[PipelinesConfig] = None,
+    ):
 
         self._compile_pipelines = {}
         self._execute_pipelines = {}
 
-        self.config = QatConfig()
+        self.config = qatconfig or QatConfig()
+        self._populate_pipelines(pipelinesconfig or PipelinesConfig())
 
-        # This will move to pydantic on QatConfig
-        rtcs_hw = get_default_RTCS_hardware()
-        self.add_pipeline(
-            "rtcs",
-            compile_pipeline=self.build_default_compile_pipeline(rtcs_hw),
-            execute_pipeline=self.build_default_execute_pipeline(rtcs_hw),
-        )
+    def _populate_pipelines(self, pipeline_settings: PipelinesConfig):
+        for pipe in pipeline_settings.pipelines:
 
-        echo_hw = get_default_echo_hardware()
-        self.add_pipeline(
-            "echo",
-            compile_pipeline=self.build_default_compile_pipeline(echo_hw),
-            execute_pipeline=self.build_default_execute_pipeline(echo_hw),
-        )
-        self.set_default_pipeline("rtcs")
+            match pipe.hardware.hardware_type:
+                case "rtcs":
+                    hw = get_default_RTCS_hardware()
+                case "echo":
+                    qubit_count = pipe.hardware.qubit_count
+                    hw = get_default_echo_hardware(qubit_count=qubit_count)
+
+            self.add_pipeline(pipe.name, pipe.compile(hw), pipe.execute(hw))
+
+            if pipe.default:
+                default = pipe.name
+
+        self.set_default_pipeline(default)
 
     def set_default_pipeline(
         self,
@@ -121,32 +130,3 @@ class QAT:
         return frontend.execute(
             instructions, pipeline.passes[0]._pass.hardware, compiler_config
         )
-
-    @staticmethod
-    def build_default_compile_pipeline(hardware_model):
-        """This will move elsewhere"""
-        pipeline = PassManager()
-        return (
-            pipeline
-            | InputAnalysis()
-            | InputOptimisation(hardware_model)
-            | Parse(hardware_model)
-        )
-
-    @staticmethod
-    def build_default_execute_pipeline(hardware_model):
-        """This will move elsewhere"""
-        pipeline = PassManager()
-        return pipeline | ExecutionPass(hardware_model)
-
-
-class ExecutionPass(TransformPass):
-    """
-    This is temporary hack that just holds a hardware model
-    """
-
-    def __init__(self, hardware: QuantumHardwareModel):
-        self.hardware = hardware
-
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        pass
