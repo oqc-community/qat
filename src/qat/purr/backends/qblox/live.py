@@ -5,7 +5,6 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.analysis_passes import (
     BindingPass,
-    CFGPass,
     TILegalisationPass,
     TriagePass,
     TriageResult,
@@ -161,7 +160,6 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             | ReturnSanitisation()
             | TriagePass()
             | BindingPass()
-            | CFGPass()
             | TILegalisationPass()
             | QbloxLegalisationPass()
         )
