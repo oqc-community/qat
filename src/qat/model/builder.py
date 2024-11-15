@@ -7,7 +7,6 @@ from qat.model.device import (
     MeasurePulseChannel,
     PhysicalBaseband,
     PhysicalChannel,
-    PulseChannel,
     Qubit,
     QubitId,
     QubitPulseChannels,
@@ -101,64 +100,3 @@ class QuantumHardwareModelBuilder:
 
     def model_dump(self):
         return self.model.model_dump()
-
-
-import itertools as it
-import random
-
-import networkx as nx
-
-
-def random_topology(n, max_degree=3, seed=42):
-    """
-    Generates a random undirected graph, similarly to an Erdős-Rényi
-    graph, but enforcing that the resulting graph is conneted
-    """
-    edges = list(it.combinations(range(n), 2))
-    random.Random(seed).shuffle(edges)
-    G = nx.Graph()
-    G.add_nodes_from(range(n))
-    for node_edges in edges:
-        if (
-            len(G.edges(node_edges[0])) < max_degree
-            and len(G.edges(node_edges[1])) < max_degree
-        ):
-            G.add_edge(*node_edges)
-
-    return {node: set(neighbors) for node, neighbors in G.adjacency()}
-
-
-def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
-    for qubit in hardware_model.qubits.values():
-        # Calibrate physical channel.
-        for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:
-            physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
-            physical_channel.baseband.frequency = random.Random(seed).uniform(1e05, 1e07)
-            physical_channel.baseband.if_frequency = random.Random(seed).uniform(1e05, 1e07)
-
-        # Calibrate qubit and resonator pulse channels.
-        for pulse_channels in [qubit.pulse_channels, qubit.resonator.pulse_channels]:
-            for pulse_channel_name in pulse_channels.model_fields:
-                pulse_channel = getattr(pulse_channels, pulse_channel_name)
-                if isinstance(pulse_channel, PulseChannel):
-                    pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
-                elif isinstance(pulse_channel, tuple):
-                    for sub_pulse_channel in pulse_channel:
-                        sub_pulse_channel.frequency = random.Random(seed).uniform(
-                            1e08, 1e10
-                        )
-
-    return hardware_model
-
-
-n_qubits = 8
-seed = 42
-
-hw1 = QuantumHardwareModelBuilder(
-    topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
-).model
-hw1 = randomly_calibrate(hardware_model=hw1, seed=seed)
-
-hw2 = QuantumHardwareModel(**hw1.model_dump())
-
-eqs = hw1 == hw2
