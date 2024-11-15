@@ -150,7 +150,7 @@ class Test_HW_Calibration:
 @pytest.mark.parametrize("n_qubits", [8, 16, 32, 64])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
 class Test_HW_Topology:
-    def test_constrained_topology(self, n_qubits, seed):
+    def test_constrained_topology_subgraph(self, n_qubits, seed):
         topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
         constrained_topology = deepcopy(topology)
 

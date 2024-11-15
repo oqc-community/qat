@@ -4,7 +4,7 @@ import uuid
 from typing import Optional
 
 import numpy as np
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -19,8 +19,6 @@ class Component(WarnOnExtraFieldsModel):
     Attributes:
         uuid: The unique string representation of the component.
     """
-
-    model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
 
@@ -76,6 +74,7 @@ class PhysicalBaseband(Component):
     """
     Models the Local Oscillator (LO) used with a mixer to change the
     frequency of a carrier signal.
+
     Attributes:
         frequency: The frequency of the LO.
         if_frequency: The intermediate frequency (IF) resulting from
@@ -89,15 +88,16 @@ class PhysicalBaseband(Component):
 class PhysicalChannel(Component):
     """
     Models a physical channel that can carry one or multiple pulses.
+
     Attributes:
         baseband: The physical baseband.
+
         sample_time: The rate at which the pulse is sampled.
         block_size: The number of samples within a single block.
         phase_iq_offset: Deviation of the phase difference of the I
                          and Q components from 90° due to imperfections
                          in the mixing of the LO and unmodulated signal.
         bias: The bias in voltages V_I / V_Q for the I and Q components.
-        acquire_allowed: If the physical channel allows acquire pulses.
     """
 
     baseband: PhysicalBaseband = Field(frozen=True)
@@ -111,6 +111,7 @@ class PhysicalChannel(Component):
 class PulseChannel(Component):
     """
     Models a pulse channel on a particular device.
+
     Attributes:
         physical_channel: Physical channel that carries the pulse.
         frequency: Frequency of the pulse.
@@ -158,6 +159,10 @@ class CrossResonanceCancellationPulseChannel(PulseChannel):
 
 
 class PulseChannels(WarnOnExtraFieldsModel):
+    """
+    Encapsulates a collection of pulse channels.
+    """
+
     @property
     def calibrated(self):
         for field_name in self.model_fields:
@@ -202,6 +207,13 @@ class QbloxResonatorPulseChannels(PulseChannels):
 
 
 class Resonator(Component):
+    """Models a resonator on a chip. Can be connected to multiple qubits.
+
+    Attributes:
+        physical_channel: The physical channel that carries the pulses to the physical resonator.
+        pulse_channels: The pulse channels for controlling the resonator.
+    """
+
     physical_channel: PhysicalChannel
     pulse_channels: ResonatorPulseChannels
 
@@ -222,6 +234,15 @@ class QubitPulseChannels(PulseChannels):
 
 
 class Qubit(Component):
+    """
+    Models a superconducting qubit on a chip, and holds all information relating to it.
+
+    Attributes:
+        physical_channel: The physical channel that carries the pulses to the physical qubit.
+        pulse_channels: The pulse channels for controlling the qubit.
+        resonator: The measure device of the qubit.
+    """
+
     physical_channel: PhysicalChannel
     pulse_channels: QubitPulseChannels
     resonator: Resonator

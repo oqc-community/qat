@@ -13,6 +13,12 @@ VERSION = Version(0, 0, 1)
 
 
 class LogicalHardwareModel(WarnOnExtraFieldsModel):
+    """Models a hardware with a given topology.
+
+    Attributes:
+        topology: Connectivity of the qubits in the hardware model.
+    """
+
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
     topology: dict[QubitId, set[QubitId]]
 
@@ -36,6 +42,9 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
         if self.version != other.version:
             return False
 
+        if self.topology != other.topology:
+            return False
+
         return True
 
     def __ne__(self, other: LogicalHardwareModel) -> bool:
@@ -43,6 +52,13 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
 
 
 class QuantumHardwareModel(LogicalHardwareModel):
+    """Class for calibrating our QPU hardware.
+
+    Attributes:
+        qubits: The superconducting qubits on the chip.
+        constrained_topology: The connectivities between the qubits, which can be a subgraph of the physical topology.
+    """
+
     qubits: dict[QubitId, Qubit]
     constrained_topology: Optional[dict[QubitId, set[QubitId]]] = None
 
