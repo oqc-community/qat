@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, '**patch-release**']
   workflow_dispatch:
 
 permissions:
