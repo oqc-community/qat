@@ -1,12 +1,45 @@
 from __future__ import annotations
 
+import uuid
 from typing import Optional
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
-from qat.model.component import Component
-from qat.model.serialisation import Ref, RefDict, RefList
-from qat.purr.compiler.devices import ChannelType
+from qat.utils.pydantic import WarnOnExtraFieldsModel
+
+QubitId = int
+
+
+class Component(WarnOnExtraFieldsModel):
+    """
+    Base class for any logical object which can act as a target of a quantum action
+    - a Qubit or various channels for a simple example.
+
+    Attributes:
+        uuid: The unique string representation of the component.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")
+
+    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+    def __hash__(self):
+        return hash(self.uuid)
+
+    def __eq__(self, other: Component):
+        return self.uuid == other.uuid
+
+    def __ne__(self, other: Component):
+        return self.uuid != other.uuid
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.uuid})"
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class PhysicalBaseband(Component):
@@ -19,7 +52,7 @@ class PhysicalBaseband(Component):
                       mixing the baseband with the carrier signal.
     """
 
-    frequency: float = Field(ge=0.0)
+    frequency: float = Field(ge=0.0, default=250e06)
     if_frequency: Optional[float] = Field(ge=0.0, default=250e6)
 
 
@@ -37,13 +70,12 @@ class PhysicalChannel(Component):
         acquire_allowed: If the physical channel allows acquire pulses.
     """
 
-    baseband: Ref[PhysicalBaseband] = Field(frozen=True)
+    baseband: PhysicalBaseband = Field(frozen=True)
 
-    sample_time: float = Field(ge=0.0)
+    sample_time: float = Field(ge=0.0, default=1e-09)
     block_size: Optional[int] = Field(ge=1, default=1)
     phase_iq_offset: float = 0.0
     bias: float = 1.0
-    acquire_allowed: bool = False
 
 
 class PulseChannel(Component):
@@ -55,138 +87,85 @@ class PulseChannel(Component):
         bias: Mean value of the signal, quantifies offset relative to zero mean.
         scale: Scale factor for mapping the voltage of the pulse to frequencies.
         fixed_if: Flag which determines if the intermediate frequency is fixed.
-        channel_type: Type of the pulse.
-        auxiliary_qubits: Any extra devices this PulseChannel could be affecting except
-                           the current one. For example in cross resonance pulses.
     """
-
-    physical_channel: Ref[PhysicalChannel] = Field(frozen=True)
 
     frequency: float = Field(ge=0.0, default=0.0)
     bias: complex = 0.0 + 0.0j
     scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
 
-    channel_type: Optional[ChannelType] = Field(frozen=True, default=None)
-    auxiliary_qubits: RefList[Qubit] = []
 
-    def __repr__(self):
-        return Component.__repr__(self).replace(")", f", {self.channel_type.name})")
+class MeasurePulseChannel(PulseChannel):
+    pass
 
 
-class QuantumDevice(Component):
-    """
-    A physical device whose main form of operation involves pulse channels.
-    Attributes:
-        pulse_channels: Pulse channels with their ids as keys.
-        physical_channel: Physical channel associated with the pulse channels.
-                          Note that this physical channel must be equal to the
-                          physical channel associated with the pulse channels.
-        default_pulse_channel_type: Default type of pulse for the quantum device.
-    """
+class DrivePulseChannel(PulseChannel):
+    pass
 
-    pulse_channels: RefDict[PulseChannel] = Field(frozen=True)
-    physical_channel: Ref[PhysicalChannel] = Field(frozen=True)
 
-    default_pulse_channel_type: ChannelType = Field(
-        frozen=True, default=ChannelType.measure
-    )
+class AcquirePulseChannel(PulseChannel):
+    pass
+
+
+class MeasureAcquirePulseChannel(PulseChannel):
+    pass
+
+
+class SecondStatePulseChannel(PulseChannel):
+    pass
+
+
+class FreqShiftPulseChannel(PulseChannel):
+    pass
+
+
+class CrossResonancePulseChannel(PulseChannel):
+    target_qubit: QubitId
+
+
+class CrossResonanceCancellationPulseChannel(PulseChannel):
+    target_qubit: QubitId
+
+
+class ResonatorPulseChannels(WarnOnExtraFieldsModel):
+    measure: MeasurePulseChannel
+    acquire: AcquirePulseChannel
+
+
+class QbloxResonatorPulseChannels(WarnOnExtraFieldsModel):
+    measure: MeasureAcquirePulseChannel
+    acquire: MeasureAcquirePulseChannel
 
     @model_validator(mode="after")
-    def validate_physical_channel(self):
-        if self._is_populated("physical_channel") and self._is_populated("pulse_channels"):
-            for pulse_channel in self.pulse_channels.values():
-                if (
-                    pulse_channel.physical_channel.to_component_id()
-                    != self.physical_channel.to_component_id()
-                ):
-                    raise ValueError(
-                        f"Physical channel of the quantum device and pulse channels must be the same. Got {self.physical_channel} and {pulse_channel.physical_channel}."
-                    )
+    def validate_pulse_channels(self):
+        if self.measure != self.acquire:
+            raise ValueError(
+                f"Measure and acquire pulse channels must be equal in {self.__class__.__name__}, got: {self.measure} and {self.acquire}."
+            )
         return self
 
-    def get_pulse_channel(
-        self,
-        channel_type: ChannelType,
-        auxiliary_qubits: RefList[Qubit] = None,
-    ) -> PulseChannel:
-        for pulse_channel in self.pulse_channels.values():
-            if pulse_channel.channel_type == channel_type:
-                if auxiliary_qubits:
-                    if auxiliary_qubits == pulse_channel.auxiliary_qubits:
-                        return pulse_channel
-                    else:
-                        raise KeyError(
-                            f"Pulse channel with channel type '{channel_type}' and auxiliary qubits '{auxiliary_qubits}' not found on device '{self}'."
-                        )
-                else:
-                    return pulse_channel
 
-        raise KeyError(
-            f"Pulse channel with channel type '{channel_type}' not found on device '{self}'."
-        )
-
-    def _update_pulse_channels(self, *pulse_channels: PulseChannel):
-        qubit_pulse_channels = self.pulse_channels
-        for pulse_channel in pulse_channels:
-            qubit_pulse_channels.update({pulse_channel.to_component_id(): pulse_channel})
-
-        return self.model_copy(update={"pulse_channels": qubit_pulse_channels})
+class Resonator(Component):
+    physical_channel: PhysicalChannel
+    pulse_channels: ResonatorPulseChannels
 
 
-class Resonator(QuantumDevice):
-    """Models a resonator on a chip. Can be connected to multiple qubits."""
+class QubitPulseChannels(WarnOnExtraFieldsModel):
+    drive: DrivePulseChannel = Field(frozen=True, default=DrivePulseChannel())
+    second_state: SecondStatePulseChannel = Field(
+        frozen=True, default=SecondStatePulseChannel()
+    )
+    freq_shift: FreqShiftPulseChannel = Field(frozen=True, default=FreqShiftPulseChannel())
 
-    @property
-    def measure_channel(self) -> PulseChannel:
-        return self.get_pulse_channel(ChannelType.measure)
+    cross_resonance_channels: tuple[CrossResonancePulseChannel, ...] = Field(
+        frozen=True, max_length=3
+    )
+    cross_resonance_cancellation_channels: tuple[
+        CrossResonanceCancellationPulseChannel, ...
+    ] = Field(frozen=True, max_length=3)
 
-    @property
-    def acquire_channel(self) -> PulseChannel:
-        return self.get_pulse_channel(ChannelType.acquire)
 
-
-class Qubit(QuantumDevice):
-    """
-    Models a superconducting qubit on a chip, and holds all information relating to it.
-    Attributes:
-        measure_device: The resonator coupled to the qubit.
-        index: The index of the qubit on the chip.
-        measure_amp: Amplitude for the measure pulse.
-        default_pulse_channel_type: Default type of pulse for the qubit.
-    """
-
-    measure_device: Ref[Resonator] = Field(frozen=True)
-
-    index: int = Field(ge=0)
-    measure_amp: float = 1.0
-    default_pulse_channel_type: ChannelType = Field(frozen=True, default=ChannelType.drive)
-
-    coupled_qubits: Optional[RefList[Qubit]] = []
-
-    def __repr__(self):
-        return f"Q{self.index}"
-
-    @property
-    def drive_channel(self) -> PulseChannel:
-        return self.get_pulse_channel(ChannelType.drive)
-
-    @property
-    def measure_channel(self) -> PulseChannel:
-        return self.measure_device.measure_channel
-
-    @property
-    def acquire_channel(self) -> PulseChannel:
-        return self.measure_device.acquire_channel
-
-    @property
-    def all_channels(self) -> list[PulseChannel]:
-        """
-        Returns all channels associated with this qubit, including resonator channel
-        and other qubit devices that act as if they are on this object.
-        """
-        return [
-            *self.pulse_channels.values(),
-            self.measure_channel,
-            self.acquire_channel,
-        ]
+class Qubit(Component):
+    physical_channel: PhysicalChannel
+    pulse_channels: QubitPulseChannels
+    resonator: Resonator
