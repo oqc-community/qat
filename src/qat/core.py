@@ -20,19 +20,26 @@ from qat.qat import QATInput
 
 class QAT:
     def __init__(self):
+
+        self._compile_pipelines = {}
+        self._execute_pipelines = {}
+
         self.config = QatConfig()
 
         # This will move to pydantic on QatConfig
-        self._compile_pipelines = {
-            "rtcs": self.build_default_compile_pipeline(get_default_RTCS_hardware()),
-            "echo": self.build_default_compile_pipeline(get_default_echo_hardware()),
-        }
+        rtcs_hw = get_default_RTCS_hardware()
+        self.add_pipeline(
+            "rtcs",
+            compile_pipeline=self.build_default_compile_pipeline(rtcs_hw),
+            execute_pipeline=self.build_default_execute_pipeline(rtcs_hw),
+        )
 
-        self._execution_pipelines = {
-            "rtcs": self.build_default_execute_pipeline(get_default_RTCS_hardware()),
-            "echo": self.build_default_execute_pipeline(get_default_echo_hardware()),
-        }
-
+        echo_hw = get_default_echo_hardware()
+        self.add_pipeline(
+            "echo",
+            compile_pipeline=self.build_default_compile_pipeline(echo_hw),
+            execute_pipeline=self.build_default_execute_pipeline(echo_hw),
+        )
         self.set_default_pipeline("rtcs")
 
     def set_default_pipeline(
@@ -51,7 +58,29 @@ class QAT:
             raise Exception(f"Execution pipeline {compile} not found")
 
         self._compile_pipelines["default"] = self._compile_pipelines[compile]
-        self._execution_pipelines["default"] = self._execution_pipelines[execute]
+        self._execute_pipelines["default"] = self._execute_pipelines[execute]
+
+    def add_pipeline(
+        self, name: str, compile_pipeline: PassManager | None, execute_pipeline
+    ):
+        if not (compile_pipeline or execute_pipeline):
+            raise Exception(
+                "At least one of compile_pipeline or execute_pipeline must be set"
+            )
+        if (name in self._compile_pipelines) or (name in self._execute_pipelines):
+            raise Exception(
+                f"A pipeline with name {name} already exists, remove that pipeline first"
+            )
+
+        if compile_pipeline:
+            self._compile_pipelines[name] = compile_pipeline
+
+        if execute_pipeline:
+            self._execute_pipelines[name] = execute_pipeline
+
+    def remove_pipeline(self, name: str):
+        del self._compile_pipelines[name]
+        del self._execute_pipelines[name]
 
     def compile(
         self,
@@ -82,7 +111,7 @@ class QAT:
         pipeline: PassManager | str = "default",
     ):
         if isinstance(pipeline, str):
-            pipeline = self._execution_pipelines[pipeline]
+            pipeline = self._execute_pipelines[pipeline]
 
         compiler_config = compiler_config or CompilerConfig()
         compilation_results = ResultManager()
