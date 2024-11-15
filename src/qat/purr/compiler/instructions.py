@@ -673,6 +673,14 @@ class Variable:
     def __repr__(self):
         return self.name
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, Variable)
+            and other.name == self.name
+            and other.var_type == self.var_type
+            and other.value == self.value
+        )
+
 
 class Label(Instruction):
     """
