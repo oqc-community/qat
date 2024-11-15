@@ -112,31 +112,35 @@ class InputOptimisationResult(ResultInfoMixin):
     optimised_circuit: str = None
 
 
+def get_compiler_config(args):
+    compiler_config = next(
+        (a for a in args if isinstance(a, CompilerConfig)), CompilerConfig()
+    )
+    return compiler_config
+
+
 class InputOptimisation(TransformPass):
     """Run third party optimisation passes on the incoming QASM."""
 
     def __init__(
         self,
         hardware: QuantumHardwareModel,
-        compiler_config: Optional[CompilerConfig] = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.hardware = hardware
-        self.compiler_config = compiler_config or CompilerConfig()
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        compiler_config = get_compiler_config(args)
         optimisation_result = InputOptimisationResult()
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
         program = input_results.raw_input
-        if self.compiler_config.optimizations is None:
-            self.compiler_config.optimizations = get_optimizer_config(language)
+        if compiler_config.optimizations is None:
+            compiler_config.optimizations = get_optimizer_config(language)
         if language in (Languages.Qasm2, Languages.Qasm3):
-            program = self.run_qasm_optimisation(
-                program, self.compiler_config.optimizations
-            )
+            program = self.run_qasm_optimisation(program, compiler_config.optimizations)
             optimisation_result.optimised_circuit = program
         ir.value = program
         res_mgr.add(optimisation_result)
@@ -186,36 +190,32 @@ class InputOptimisation(TransformPass):
 
 
 class Parse(TransformPass):
-    def __init__(
-        self,
-        hardware: QuantumHardwareModel,
-        compiler_config: Optional[CompilerConfig] = None,
-    ):
+    def __init__(self, hardware: QuantumHardwareModel):
         self.hardware = hardware
-        self.compiler_config = compiler_config or CompilerConfig()
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        compiler_config = get_compiler_config(args)
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
         builder = self.hardware.create_builder()
         parser = None
         if language == Languages.QIR:
-            builder = self.parse_qir(ir.value)
+            builder = self.parse_qir(ir.value, compiler_config)
         elif language == Languages.Qasm2:
             parser = CloudQasmParser()
         elif language == Languages.Qasm3:
             parser = Qasm3Parser()
         if parser is not None:
-            if self.compiler_config.results_format.format is not None:
-                parser.results_format = self.compiler_config.results_format.format
+            if compiler_config.results_format.format is not None:
+                parser.results_format = compiler_config.results_format.format
             builder = parser.parse(builder, ir.value)
         ir.value = (
             self.hardware.create_builder()
-            .repeat(self.compiler_config.repeats, self.compiler_config.repetition_period)
+            .repeat(compiler_config.repeats, compiler_config.repetition_period)
             .add(builder)
         )
 
-    def parse_qir(self, qir_string):
+    def parse_qir(self, qir_string, compiler_config):
         """Extracted from QIRFrontend"""
         # TODO: Resolve circular import
         from qat.purr.integrations.qir import QIRParser
@@ -230,8 +230,8 @@ class Parse(TransformPass):
             fp.close()
             try:
                 parser = QIRParser(self.hardware)
-                if self.compiler_config.results_format.format is not None:
-                    parser.results_format = self.compiler_config.results_format.format
+                if compiler_config.results_format.format is not None:
+                    parser.results_format = compiler_config.results_format.format
                 quantum_builder = parser.parse(fp.name)
             finally:
                 os.remove(fp.name)
