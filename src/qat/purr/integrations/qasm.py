@@ -983,6 +983,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             case "u" | "U":
                 theta, phi, _lambda = arguments
                 return self.add_unitary(theta, phi, _lambda, target_qubits, self.builder)
+            case "cu" | "CU":
+                raise NotImplementedError("Controlled Unitary gate is not yet supported.")
             case "cx" | "CX":
                 return self.add_cnot(*target_qubits, self.builder)
             case "ecr" | "ECR":

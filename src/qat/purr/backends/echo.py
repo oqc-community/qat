@@ -76,8 +76,8 @@ def apply_setup_to_hardware(
                         frequency=5.5e9,
                         scale=0.0,
                     )
-                qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
-                qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
+            qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
+            qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
     else:
         for connection in connectivity:
             left_index, right_index = connection
