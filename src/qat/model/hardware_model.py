@@ -57,5 +57,9 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
                 return False
         return True
 
+    @property
+    def number_of_qubits(self):
+        return len(self.qubits)
+
     def qubit_with_index(self, index: int | QubitId):
         return self.qubits[index]

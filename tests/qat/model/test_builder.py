@@ -3,10 +3,10 @@ import random
 from copy import deepcopy
 
 import networkx as nx
-import numpy as np
 import pytest
 
 from qat.model.builder import QuantumHardwareModelBuilder
+from qat.model.device import PulseChannel
 from qat.model.hardware_model import VERSION, QuantumHardwareModel
 
 
@@ -31,8 +31,7 @@ def random_topology(n, max_degree=3, seed=42):
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
-class Test_HW_Builder:
-
+class Test_HW_Builder_Serialisation:
     def test_built_model_serialises(self, n_qubits, seed):
         builder = QuantumHardwareModelBuilder(
             topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
@@ -101,15 +100,48 @@ class Test_HW_Builder:
         hw2 = QuantumHardwareModel(**hw1.model_dump())
         assert hw2.version == VERSION
 
-    def test_built_model_calibration(self, n_qubits, seed):
+
+def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
+    for qubit in hardware_model.qubits.values():
+        # Calibrate physical channel.
+        for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:
+            physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
+            physical_channel.baseband.frequency = random.Random(seed).uniform(1e05, 1e07)
+            physical_channel.baseband.if_frequency = random.Random(seed).uniform(1e05, 1e07)
+
+        # Calibrate qubit and resonator pulse channels.
+        for pulse_channels in [qubit.pulse_channels, qubit.resonator.pulse_channels]:
+            for pulse_channel_name in pulse_channels.model_fields:
+                pulse_channel = getattr(pulse_channels, pulse_channel_name)
+                if isinstance(pulse_channel, PulseChannel):
+                    pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
+                elif isinstance(pulse_channel, tuple):
+                    for sub_pulse_channel in pulse_channel:
+                        sub_pulse_channel.frequency = random.Random(seed).uniform(
+                            1e08, 1e10
+                        )
+
+    return hardware_model
+
+
+@pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
+@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+class Test_HW_Builder_Calibration:
+    def test_model_calibration(self, n_qubits, seed):
         hw = QuantumHardwareModelBuilder(
             topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
         ).model
-        assert not hw.calibrated, "Default hardware model must be uncalibrated."
+        assert hw.number_of_qubits == n_qubits
+        assert not hw.calibrated
 
-        for qubit in hw.qubits.values():
+        hw2 = randomly_calibrate(hardware_model=hw, seed=seed)
+        assert hw2.calibrated
 
-            for field_name in qubit.physical_channel.model_fields:
-                field_value = getattr(qubit.physical_channel, field_name)
-                if isinstance(field_value, float) and np.isnan(field_value):
-                    qubit.physical_channel.model_fields
+    def test_model_calibration_serialises(self, n_qubits, seed):
+        hw1 = QuantumHardwareModelBuilder(
+            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+        ).model
+        hw1 = randomly_calibrate(hardware_model=hw1, seed=seed)
+
+        hw2 = QuantumHardwareModel(**hw1.model_dump())
+        assert hw1 == hw2
