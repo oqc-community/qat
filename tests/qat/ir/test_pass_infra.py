@@ -60,4 +60,4 @@ def test_pass_manager():
 
     # Verify that the instructions list has been reversed
     assert isinstance(builder.instructions[0], Repeat)
-    assert isinstance(builder.instructions[-1], Sweep)
+    assert isinstance(builder.instructions[-2], Sweep)

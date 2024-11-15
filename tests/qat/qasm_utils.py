@@ -9,7 +9,12 @@ from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import get_builder
-from qat.purr.integrations.qasm import Qasm2Parser, qasm_from_file
+from qat.purr.integrations.qasm import (
+    Qasm2Parser,
+    Qasm3ParserBase,
+    QasmContext,
+    qasm_from_file,
+)
 
 
 class ProgramFileType(Enum):
@@ -64,3 +69,24 @@ def parse_and_apply_optimiziations(
 
     builder = parser.parse(get_builder(hardware), qasm)
     return builder
+
+
+qasm3_gates = {}
+
+
+def get_default_qasm3_gate_qasms():
+    if len(qasm3_gates) == 0:
+        context = QasmContext()
+        Qasm3ParserBase().load_default_gates(context)
+        for name, defi in context.gates.items():
+            needed_num_args = len(defi.arguments)
+            arg_string = (
+                ""
+                if needed_num_args == 0
+                else "(" + ", ".join(["0"] * needed_num_args) + ")"
+            )
+            N = len(defi.qubits)
+            qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
+            gate_string = f"{name}{arg_string} {qubit_string};"
+            qasm3_gates[name] = (N, gate_string)
+    return list(qasm3_gates.values())

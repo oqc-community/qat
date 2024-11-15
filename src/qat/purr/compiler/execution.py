@@ -426,50 +426,54 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         total_durations: Dict[PulseChannel, int] = dict()
 
         for instruction in instructions:
-            for qtarget in instruction.quantum_targets:
-                # TODO: Acquire is a special quantum target for post processing.
-                #  This should probably be changed.
-                if isinstance(qtarget, Acquire):
-                    qtarget = qtarget.channel
+            # TODO: Acquire is a special quantum target for post processing.
+            #  This should probably be changed.
+            qtargets = [
+                qtarget.channel if isinstance(qtarget, Acquire) else qtarget
+                for qtarget in instruction.quantum_targets
+            ]
 
-                device_instructions: List[PositionData] = results.setdefault(qtarget, [])
-                if not any(device_instructions):
-                    sample_start = 0
-                else:
-                    sample_start = device_instructions[-1].end
-
-                # For syncs we want to look at the currently-processed instructions on
-                # the channels we target, get the max end time then align all of our
-                # channels to that point in time.
-                position_data = None
-                if isinstance(instruction, Synchronize):
-                    current_durations = {
-                        qt: total_durations.setdefault(qt, 0)
-                        for qt in instruction.quantum_targets
-                    }
-                    longest_length = max(current_durations.values(), default=0.0)
+            # For syncs we want to look at the currently-processed instructions on
+            # the channels we target, get the max end time then align all of our
+            # channels to that point in time.
+            if isinstance(instruction, Synchronize):
+                longest_length = max(
+                    [total_durations.setdefault(qt, 0) for qt in qtargets],
+                    default=0.0,
+                )
+                for qtarget in qtargets:
+                    device_instructions: List[PositionData] = results.setdefault(
+                        qtarget, []
+                    )
                     delay_time = longest_length - total_durations[qtarget]
                     if delay_time > 0:
+                        start = (
+                            device_instructions[-1].end if any(device_instructions) else 0
+                        )
                         instr = Delay(qtarget, delay_time)
                         position_data = PositionData(
-                            sample_start,
-                            sample_start + calculate_duration(instr),
+                            start,
+                            start + calculate_duration(instr),
                             instr,
                         )
-                else:
-                    position_data = PositionData(
-                        sample_start,
-                        sample_start + calculate_duration(instruction),
-                        instruction,
+                        device_instructions.append(position_data)
+                        total_durations[qtarget] = longest_length
+            else:
+                duration = calculate_duration(instruction)
+                for qtarget in qtargets:
+                    device_instructions: List[PositionData] = results.setdefault(
+                        qtarget, []
                     )
-
-                if position_data is not None:
-                    device_instructions.append(position_data)
-
-                    # Calculate running durations for sync/delay evaluation
-                    current_duration = total_durations.setdefault(qtarget, 0)
+                    start = device_instructions[-1].end if any(device_instructions) else 0
+                    device_instructions.append(
+                        PositionData(
+                            start,
+                            start + duration,
+                            instruction,
+                        )
+                    )
                     total_durations[qtarget] = (
-                        current_duration + position_data.instruction.duration
+                        total_durations.get(qtarget, 0) + instruction.duration
                     )
 
         # Strip timelines that only hold delays and phase resets, since that just means nothing is
@@ -591,7 +595,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     ):
         # Check no pulse channels on this physical channel used a fixed if
         for channel in self.model.get_pulse_channels_from_physical_channel(
-            pulse_channel.physical_channel_id
+            pulse_channel.physical_channel
         ):
             if channel.fixed_if:
                 raise NotImplementedError(
@@ -702,6 +706,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             return software_post_process_discriminate(
                 post_processing.args, value, value_axis
             )
+
+    @property
+    def error_mitigation(self):
+        return self.model.error_mitigation
 
     def __repr__(self):
         if self.model is not None:

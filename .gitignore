@@ -14,6 +14,9 @@ calibration_results/
 **/*.temp
 **/tmp.*
 
+# Benchmarks 
+.benchmarks/
+
 # Docs
 docs/build/*
 docs/source/*

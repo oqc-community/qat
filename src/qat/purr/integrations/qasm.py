@@ -856,9 +856,10 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         return f"{name}[{','.join([str(qb) for qb in target_qubits])}]"
 
     def _attempt_declaration(self, var: Variable, context: QasmContext):
-        if var.name in context.variables:
+        if (old_var := context.variables.get(var.name, None)) is None:
+            context.variables[var.name] = var
+        elif old_var != var:
             raise ValueError(f"Can't redeclare variable {var.name}")
-        context.variables[var.name] = var
 
     def visit_ClassicalDeclaration(
         self, node: ast.ClassicalDeclaration, context: QasmContext
@@ -2005,12 +2006,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # Determine the delay for the channel
         delay = 0.0
         if pulse_channel.channel_type == ChannelType.acquire:
-            # TODO: remove full id when previous PR is merged
             devices = [
                 dev
-                for dev in self.builder.model.get_devices_from_pulse_channel(
-                    pulse_channel.full_id()
-                )
+                for dev in self.builder.model.get_devices_from_pulse_channel(pulse_channel)
                 if isinstance(dev, Resonator)
             ]
             if len(devices) == 1:
@@ -2133,7 +2131,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 mean_z_map_args = args[3]
             else:
                 resonator = self.builder.model.get_devices_from_physical_channel(
-                    pulse_channel.physical_channel_id
+                    pulse_channel.physical_channel
                 )[0]
                 for qb in self.builder.model.qubits:
                     if qb.measure_device == resonator:
