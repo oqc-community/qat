@@ -47,7 +47,6 @@ class QuantumHardwareModelBuilder:
                 physical_channel=physical_channel_r, pulse_channels=pulse_channels_r
             )
             qubit = Qubit(
-                qubit_index=qubit_id,
                 physical_channel=physical_channel_q,
                 pulse_channels=pulse_channels_q,
                 resonator=resonator,
@@ -90,3 +89,6 @@ class QuantumHardwareModelBuilder:
             measure=MeasurePulseChannel(), acquire=AcquirePulseChannel()
         )
         return pulse_channels_r
+
+    def model_dump(self):
+        return self.model.model_dump()

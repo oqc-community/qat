@@ -25,3 +25,10 @@ class QuantumHardwareModel(WarnOnExtraFieldsModel):
             VERSION >= version
         ), f"Latest supported hardware model version {VERSION}, found {version}"
         return VERSION
+
+    @property
+    def calibrated(self):
+        for qubit in self.qubits.values():
+            if not qubit.calibrated:
+                return False
+        return True

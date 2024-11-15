@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 
+import numpy as np
 from pydantic import ConfigDict, Field, model_validator
 
 from qat.utils.pydantic import WarnOnExtraFieldsModel
@@ -41,6 +42,16 @@ class Component(WarnOnExtraFieldsModel):
     def __str__(self):
         return self.__repr__()
 
+    @property
+    def calibrated(self):
+        for field_name in self.model_fields:
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, Component) and not field_value.calibrated:
+                return False
+            elif isinstance(field_value, float) and np.isnan(field_value):
+                return False
+        return True
+
 
 class PhysicalBaseband(Component):
     """
@@ -52,8 +63,8 @@ class PhysicalBaseband(Component):
                       mixing the baseband with the carrier signal.
     """
 
-    frequency: float = Field(ge=0.0, default=250e06)
-    if_frequency: Optional[float] = Field(ge=0.0, default=250e6)
+    frequency: float = Field(default=np.nan)
+    if_frequency: Optional[float] = Field(default=np.nan)
 
 
 class PhysicalChannel(Component):
@@ -72,10 +83,10 @@ class PhysicalChannel(Component):
 
     baseband: PhysicalBaseband = Field(frozen=True)
 
-    sample_time: float = Field(ge=0.0, default=1e-09)
+    sample_time: float = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
-    phase_iq_offset: float = 0.0
-    bias: float = 1.0
+    phase_iq_offset: complex = 0.0 + 0.0j
+    bias: complex = 0.0 + 0.0j
 
 
 class PulseChannel(Component):
@@ -89,7 +100,7 @@ class PulseChannel(Component):
         fixed_if: Flag which determines if the intermediate frequency is fixed.
     """
 
-    frequency: float = Field(ge=0.0, default=0.0)
+    frequency: float = Field(default=np.nan)
     bias: complex = 0.0 + 0.0j
     scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
@@ -127,12 +138,22 @@ class CrossResonanceCancellationPulseChannel(PulseChannel):
     target_qubit: QubitId
 
 
-class ResonatorPulseChannels(WarnOnExtraFieldsModel):
+class PulseChannels(WarnOnExtraFieldsModel):
+    @property
+    def calibrated(self):
+        for field_name in self.model_fields:
+            field_value = getattr(self, field_name)
+            if not field_value.calibrated:
+                return False
+        return True
+
+
+class ResonatorPulseChannels(PulseChannels):
     measure: MeasurePulseChannel
     acquire: AcquirePulseChannel
 
 
-class QbloxResonatorPulseChannels(WarnOnExtraFieldsModel):
+class QbloxResonatorPulseChannels(PulseChannels):
     measure: MeasureAcquirePulseChannel
     acquire: MeasureAcquirePulseChannel
 
@@ -150,7 +171,7 @@ class Resonator(Component):
     pulse_channels: ResonatorPulseChannels
 
 
-class QubitPulseChannels(WarnOnExtraFieldsModel):
+class QubitPulseChannels(PulseChannels):
     drive: DrivePulseChannel = Field(frozen=True, default=DrivePulseChannel())
     second_state: SecondStatePulseChannel = Field(
         frozen=True, default=SecondStatePulseChannel()
