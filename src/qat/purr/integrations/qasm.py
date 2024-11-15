@@ -856,9 +856,10 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         return f"{name}[{','.join([str(qb) for qb in target_qubits])}]"
 
     def _attempt_declaration(self, var: Variable, context: QasmContext):
-        if var.name in context.variables:
+        if (old_var := context.variables.get(var.name, None)) is None:
+            context.variables[var.name] = var
+        elif old_var != var:
             raise ValueError(f"Can't redeclare variable {var.name}")
-        context.variables[var.name] = var
 
     def visit_ClassicalDeclaration(
         self, node: ast.ClassicalDeclaration, context: QasmContext
