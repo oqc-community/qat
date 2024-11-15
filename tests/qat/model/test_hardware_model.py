@@ -3,7 +3,9 @@ import random
 from copy import deepcopy
 
 import networkx as nx
+import numpy as np
 import pytest
+from pydantic import ValidationError
 
 from qat.model.builder import QuantumHardwareModelBuilder
 from qat.model.device import PulseChannel
@@ -26,12 +28,12 @@ def random_topology(n, max_degree=3, seed=42):
         ):
             G.add_edge(*node_edges)
 
-    return {node: list(neighbors) for node, neighbors in G.adjacency()}
+    return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
-class Test_HW_Builder_Serialisation:
+class Test_HW_Serialisation:
     def test_built_model_serialises(self, n_qubits, seed):
         builder = QuantumHardwareModelBuilder(
             topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
@@ -40,9 +42,7 @@ class Test_HW_Builder_Serialisation:
         hw1 = builder.model
         hw2 = QuantumHardwareModel(**hw1.model_dump())
 
-        assert (
-            hw1 == hw2
-        ), "Serialised and deserialised version of the hardware model must be equal."
+        assert hw1 == hw2
 
         builder = QuantumHardwareModelBuilder(topology=random_topology(n_qubits))
 
@@ -126,7 +126,7 @@ def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
-class Test_HW_Builder_Calibration:
+class Test_HW_Calibration:
     def test_model_calibration(self, n_qubits, seed):
         hw = QuantumHardwareModelBuilder(
             topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
@@ -145,3 +145,47 @@ class Test_HW_Builder_Calibration:
 
         hw2 = QuantumHardwareModel(**hw1.model_dump())
         assert hw1 == hw2
+
+
+@pytest.mark.parametrize("n_qubits", [8, 16, 32, 64])
+@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+class Test_HW_Topology:
+    def test_constrained_topology(self, n_qubits, seed):
+        topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        constrained_topology = deepcopy(topology)
+
+        constrained_qubits = random.Random(seed).sample(
+            list(range(0, n_qubits)), int(np.sqrt(n_qubits))
+        )
+        for qubit in constrained_qubits:
+            popped_edge = constrained_topology[qubit].pop()
+            constrained_topology[popped_edge].remove(qubit)
+
+        QuantumHardwareModelBuilder(topology=topology, constrained_topology=topology)
+
+        QuantumHardwareModelBuilder(
+            topology=topology, constrained_topology=constrained_topology
+        )
+
+        wrong_topology = deepcopy(topology)
+        wrong_topology[0].add(n_qubits)
+        wrong_topology[n_qubits] = {0}
+        with pytest.raises(ValidationError):
+            QuantumHardwareModelBuilder(
+                topology=topology, constrained_topology=wrong_topology
+            )
+
+    def test_valid_topology(self, n_qubits, seed):
+        valid_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+
+        wrong_qubit = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+        wrong_topology = deepcopy(valid_topology)
+        wrong_topology[wrong_qubit].pop()
+
+        with pytest.raises(ValidationError):
+            QuantumHardwareModelBuilder(topology=wrong_topology)
+
+        with pytest.raises(ValidationError):
+            QuantumHardwareModelBuilder(
+                topology=valid_topology, constrained_topology=wrong_topology
+            )

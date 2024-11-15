@@ -7,6 +7,7 @@ from qat.model.device import (
     MeasurePulseChannel,
     PhysicalBaseband,
     PhysicalChannel,
+    PulseChannel,
     Qubit,
     QubitId,
     QubitPulseChannels,
@@ -18,9 +19,13 @@ from qat.model.hardware_model import QuantumHardwareModel
 
 
 class QuantumHardwareModelBuilder:
-    def __init__(self, topology: dict[int, list[int]]):
+    def __init__(
+        self,
+        topology: dict[int, set[int]],
+        constrained_topology: dict[int, set[int]] = None,
+    ):
         self._current_model = self._build_uncalibrated_hardware_model_from_topology(
-            topology
+            topology, constrained_topology
         )
 
     @property
@@ -28,7 +33,9 @@ class QuantumHardwareModelBuilder:
         return self._current_model
 
     def _build_uncalibrated_hardware_model_from_topology(
-        self, topology: dict[QubitId, list[QubitId]]
+        self,
+        topology: dict[int, set[int]],
+        constrained_topology: dict[int, set[int]] = None,
     ):
         qubits = {}
         for qubit_id, qubit_connectivity in topology.items():
@@ -54,7 +61,9 @@ class QuantumHardwareModelBuilder:
 
             qubits[qubit_id] = qubit
 
-        return QuantumHardwareModel(qubits=qubits, topology=topology)
+        return QuantumHardwareModel(
+            qubits=qubits, topology=topology, constrained_topology=constrained_topology
+        )
 
     def _build_uncalibrated_baseband(self):
         return PhysicalBaseband()
@@ -116,15 +125,40 @@ def random_topology(n, max_degree=3, seed=42):
         ):
             G.add_edge(*node_edges)
 
-    return {node: list(neighbors) for node, neighbors in G.adjacency()}
+    return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
-builder = QuantumHardwareModelBuilder(topology=random_topology(2))
-hw = builder.model
+def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
+    for qubit in hardware_model.qubits.values():
+        # Calibrate physical channel.
+        for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:
+            physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
+            physical_channel.baseband.frequency = random.Random(seed).uniform(1e05, 1e07)
+            physical_channel.baseband.if_frequency = random.Random(seed).uniform(1e05, 1e07)
 
-hw_serialised = hw.model_dump()
+        # Calibrate qubit and resonator pulse channels.
+        for pulse_channels in [qubit.pulse_channels, qubit.resonator.pulse_channels]:
+            for pulse_channel_name in pulse_channels.model_fields:
+                pulse_channel = getattr(pulse_channels, pulse_channel_name)
+                if isinstance(pulse_channel, PulseChannel):
+                    pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
+                elif isinstance(pulse_channel, tuple):
+                    for sub_pulse_channel in pulse_channel:
+                        sub_pulse_channel.frequency = random.Random(seed).uniform(
+                            1e08, 1e10
+                        )
 
-hw_deserialised = QuantumHardwareModel(**hw_serialised)
-list(hw.qubits.values())[0].pulse_channels.drive.frequency = 9852345725297
+    return hardware_model
 
-flg = hw == hw_deserialised
+
+n_qubits = 8
+seed = 42
+
+hw1 = QuantumHardwareModelBuilder(
+    topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+).model
+hw1 = randomly_calibrate(hardware_model=hw1, seed=seed)
+
+hw2 = QuantumHardwareModel(**hw1.model_dump())
+
+eqs = hw1 == hw2
