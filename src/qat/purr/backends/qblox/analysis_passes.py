@@ -1,54 +1,19 @@
 from collections import defaultdict
+from copy import deepcopy
 from typing import Dict, Set
 
 import numpy as np
 
-from qat.backend.analysis_passes import BindingResult, IterBound
+from qat.backend.analysis_passes import BindingResult, IterBound, TriageResult
 from qat.ir.pass_base import AnalysisPass
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import DeviceUpdate, Instruction, Pulse, Variable
 
 
 class QbloxLegalisationPass(AnalysisPass):
-    """
-    Performs target-dependent legalisation for QBlox.
-
-        A) A repeat instruction with a very high repetition count is illegal because acquisition memory
-    on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
-    supported batches of smaller repeat counts.
-
-    This pass does not do any batching. More features and adjustments will follow in future iterations.
-
-        B) Previously processed variables such as frequencies, phases, and amplitudes still need digital conversion
-    to a representation that's required by the QBlox ISA.
-
-    + NCO's 1GHz frequency range by 4e9 steps:
-        + [-500, 500] Mhz <=> [-2e9, 2e9] steps
-        + 1 Hz            <=> 4 steps
-    + NCO's 360° phase range by 1e9 steps:
-        + 1e9    steps    <=> 2*pi rad
-        + 125e6  steps    <=> pi/4 rad
-    + Time and samples are quantified in nanoseconds
-    + Amplitude depends on the type of the module:
-        + [-1, 1]         <=> [-2.5, 2.5] V (for QCM)
-        + [-1, 1]         <=> [-0.5, 0.5] V (for QRM)
-    + AWG offset:
-        + [-1, 1]         <=> [-32 768, 32 767]
-
-    The last point is interesting as it requires knowledge of physical configuration of qubits and the modules
-    they are wired to. This knowledge is typically found during execution and involving it early on would upset
-    the rest of the compilation flow. In fact, it complicates this pass in particular, involves allocation
-    concepts that should not be treated here, and promotes a monolithic compilation style. A temporary workaround
-    is to simply assume the legality of amplitudes from the start whereby users are required to convert
-    the desired voltages to the equivalent ratio AOT.
-
-    This pass performs target-dependent conversion as described in part (B). More features and adjustments
-    will follow in future iterations.
-    """
-
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
         phase_deg = np.rad2deg(phase_rad)
@@ -130,7 +95,7 @@ class QbloxLegalisationPass(AnalysisPass):
                 legal_bound.start,
                 legal_bound.step,
                 legal_bound.end,
-                legal_bound.end,
+                legal_bound.count,
             ]
         ):
             raise ValueError(
@@ -146,20 +111,64 @@ class QbloxLegalisationPass(AnalysisPass):
         )
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        Performs target-dependent legalisation for QBlox.
+
+            A) A repeat instruction with a very high repetition count is illegal because acquisition memory
+        on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
+        supported batches of smaller repeat counts.
+
+        This pass does not do any batching. More features and adjustments will follow in future iterations.
+
+            B) Previously processed variables such as frequencies, phases, and amplitudes still need digital conversion
+        to a representation that's required by the QBlox ISA.
+
+        + NCO's 1GHz frequency range by 4e9 steps:
+            + [-500, 500] Mhz <=> [-2e9, 2e9] steps
+            + 1 Hz            <=> 4 steps
+        + NCO's 360° phase range by 1e9 steps:
+            + 1e9    steps    <=> 2*pi rad
+            + 125e6  steps    <=> pi/4 rad
+        + Time and samples are quantified in nanoseconds
+        + Amplitude depends on the type of the module:
+            + [-1, 1]         <=> [-2.5, 2.5] V (for QCM)
+            + [-1, 1]         <=> [-0.5, 0.5] V (for QRM)
+        + AWG offset:
+            + [-1, 1]         <=> [-32 768, 32 767]
+
+        The last point is interesting as it requires knowledge of physical configuration of qubits and the modules
+        they are wired to. This knowledge is typically found during execution and involving it early on would upset
+        the rest of the compilation flow. In fact, it complicates this pass in particular, involves allocation
+        concepts that should not be treated here, and promotes a monolithic compilation style. A temporary workaround
+        is to simply assume the legality of amplitudes from the start whereby users are required to convert
+        the desired voltages to the equivalent ratio AOT.
+
+        This pass performs target-dependent conversion as described in part (B). More features and adjustments
+        will follow in future iterations.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
-        qblox_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        for name, instructions in binding_result.reads.items():
-            for inst in instructions:
-                for target in inst.quantum_targets:
-                    bound = binding_result.iter_bounds[target][name]
-                    legal_bound = self._legalise_bound(name, bound, inst)
-                    qblox_iter_bounds[target][name].add(legal_bound)
+        for target in triage_result.target_map:
+            rw_result = binding_result.rw_results[target]
+            bound_result = binding_result.iter_bound_results[target]
+            legal_bound_result: Dict[str, IterBound] = deepcopy(bound_result)
 
-        for target, symbol2iter_bounds in qblox_iter_bounds.items():
-            for name, iter_bounds in symbol2iter_bounds.items():
-                if len(iter_bounds) > 1:
-                    raise ValueError(f"Ambiguous Qblox bounds for variable {name}")
-                binding_result.iter_bounds[target][name] = next(iter(iter_bounds))
+            qblox_bounds: Dict[str, Set[IterBound]] = defaultdict(set)
+            for name, instructions in rw_result.reads.items():
+                for inst in instructions:
+                    legal_bound = self._legalise_bound(name, bound_result[name], inst)
+                    qblox_bounds[name].add(legal_bound)
+
+            for name, bound in bound_result.items():
+                if name in qblox_bounds:
+                    bound_set = qblox_bounds[name]
+                    if len(bound_set) > 1:
+                        raise ValueError(
+                            f"Ambiguous Qblox bounds for variable {name} in target {target}"
+                        )
+                    legal_bound_result[name] = next(iter(bound_set))
+
+            # TODO: the proper way is to produce a new result and invalidate the old one
+            binding_result.iter_bound_results[target] = legal_bound_result
