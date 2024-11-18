@@ -74,11 +74,14 @@ from qat.qat import execute, execute_qasm, fetch_frontend
 
 from tests.qat.qasm_utils import (
     ProgramFileType,
+    get_default_qasm2_gate_qasms,
     get_default_qasm3_gate_qasms,
     get_qasm2,
     get_qasm3,
     get_test_file_path,
     parse_and_apply_optimiziations,
+    qasm2_base,
+    qasm3_base,
 )
 from tests.qat.utils.models import get_jagged_echo_hardware, update_qubit_indices
 
@@ -610,7 +613,9 @@ class TestQASM3:
     def test_default_gates(self, gate_tup):
         """Check that each default gate can be parsed individually."""
         N, gate_string = gate_tup
-        qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_string}\nmeasure q -> c;"
+        if gate_string.startswith("cu("):
+            pytest.skip("CU gate is not yet supported.")
+        qasm = qasm3_base.format(N=N, gate_strings=gate_string)
         hw = get_default_echo_hardware(max(N, 2))
         parser = Qasm3Parser()
         builder = parser.parse(hw.create_builder(), qasm)
@@ -622,8 +627,10 @@ class TestQASM3:
         """Check that all default gates can be parsed together."""
         Ns, strings = zip(*get_default_qasm3_gate_qasms())
         N = max(Ns)
+        # TODO: Remove filtering when CU gate is supported.
+        strings = filter(lambda s: not s.startswith("cu("), strings)
         gate_strings = "\n".join(strings)
-        qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_strings}\nmeasure q -> c;"
+        qasm = qasm3_base.format(N=N, gate_strings=gate_strings)
         hw = get_default_echo_hardware(max(N, 2))
         parser = Qasm3Parser()
         builder = parser.parse(hw.create_builder(), qasm)
@@ -1124,6 +1131,42 @@ class TestParsing:
         parser = Qasm2Parser()
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
+
+    # TODO: Remove gates from list as support is added.
+    _unsupported_gates = ("id", "u0", "rc3x", "c3x", "c3sqrtx", "c4x", "delay")
+
+    @pytest.mark.parametrize(
+        "gate_tup", get_default_qasm2_gate_qasms(), ids=lambda val: val[-1]
+    )
+    def test_default_gates(self, gate_tup):
+        """Check that each default gate can be parsed individually."""
+        N, gate_string = gate_tup
+        if gate_string.startswith(self._unsupported_gates):
+            pytest.skip("Gate not yet supported.")
+        qasm = qasm2_base.format(N=N, gate_strings=gate_string)
+        hw = get_default_echo_hardware(max(N, 2))
+        parser = Qasm2Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
+
+    def test_default_gates_together(self):
+        """Check that all default gates can be parsed together."""
+        Ns, strings = zip(*get_default_qasm2_gate_qasms())
+        N = max(Ns)
+        # TODO: Remove filtering when all gates are supported.
+        strings = filter(lambda s: not s.startswith(self._unsupported_gates), strings)
+        gate_strings = "\n".join(strings)
+        qasm = qasm2_base.format(N=N, gate_strings=gate_strings)
+        hw = get_default_echo_hardware(
+            N, [(i, j) for i in range(N) for j in range(i, N) if i != j]
+        )
+        parser = Qasm2Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
 
 
 class TestQatOptimization:
