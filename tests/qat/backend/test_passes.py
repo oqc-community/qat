@@ -101,8 +101,8 @@ class TestAnalysisPasses:
             assert BindingPass.extract_iter_bound(value) == bound
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
-    @pytest.mark.parametrize("qubit_indices", [[0, 1, 2, 3]])
-    def test_binding_pass_with_resonator_spect(self, num_points, qubit_indices):
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1], [0, 1, 2]])
+    def test_binding_pass(self, num_points, qubit_indices):
         model = get_default_echo_hardware()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
         res_mgr = ResultManager()
@@ -116,7 +116,6 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 0
 
-        TriagePass().run(builder, res_mgr)
         with pytest.raises(ValueError):
             BindingPass().run(builder, res_mgr)
 
@@ -130,55 +129,61 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 1
 
+        TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
-        assert len(binding_result.scope2symbols) == len(sweeps) + len(repeats)
-        sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
-        end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
+        for target, instructions in triage_result.target_map.items():
+            scoping_result = binding_result.scoping_results[target]
+            rw_result = binding_result.rw_results[target]
+            iter_bound_result = binding_result.iter_bound_results[target]
 
-        iter_bounds = {
-            name: BindingPass.extract_iter_bound(value)
-            for inst in sweeps
-            for name, value in inst.variables.items()
-        }
-        for inst in repeats:
-            name = f"repeat_{inst.repeat_count}_{hash(inst)}"
-            iter_bounds[name] = IterBound(
-                start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
+            assert len(scoping_result.scope2symbols) == len(sweeps) + len(repeats)
+            sweeps = [inst for inst in instructions if isinstance(inst, Sweep)]
+            end_sweeps = [inst for inst in instructions if isinstance(inst, EndSweep)]
+
+            iter_bounds = {
+                name: BindingPass.extract_iter_bound(value)
+                for inst in sweeps
+                for name, value in inst.variables.items()
+            }
+            for inst in repeats:
+                name = f"repeat_{inst.repeat_count}_{hash(inst)}"
+                iter_bounds[name] = IterBound(
+                    start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
+                )
+
+            for scope, symbols in scoping_result.scope2symbols.items():
+                for name in symbols:
+                    assert name in iter_bounds
+                    assert name in scoping_result.symbol2scopes
+                    assert scope in scoping_result.symbol2scopes[name]
+
+                    for t in triage_result.target_map:
+                        assert iter_bound_result[name] == iter_bounds[name]
+
+            for symbol, scopes in scoping_result.symbol2scopes.items():
+                assert scopes
+                for scope in scopes:
+                    assert scope in scoping_result.scope2symbols
+                    assert scope[0] in sweeps + repeats
+                    assert scope[1] in end_sweeps + end_repeats
+                assert symbol in iter_bounds
+
+            device_updates = set(
+                inst
+                for inst in instructions
+                if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
             )
-
-        for scope, symbols in binding_result.scope2symbols.items():
-            for name in symbols:
-                assert name in iter_bounds
-                assert name in binding_result.symbol2scopes
-                assert scope in binding_result.symbol2scopes[name]
-
-                for t in triage_result.target_map:
-                    assert binding_result.iter_bounds[t][name] == iter_bounds[name]
-
-        for symbol, scopes in binding_result.symbol2scopes.items():
-            assert scopes
-            for scope in scopes:
-                assert scope in binding_result.scope2symbols
-                assert scope[0] in sweeps + repeats
-                assert scope[1] in end_sweeps + end_repeats
-            assert symbol in iter_bounds
-
-        device_updates = set(
-            inst
-            for inst in builder.instructions
-            if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
-        )
-        acquires = set(inst for inst in builder.instructions if isinstance(inst, Acquire))
-        assert set(binding_result.reads.keys()) == {
-            inst.value.name for inst in device_updates
-        }
-        for inst in acquires:
-            assert inst.output_variable in set(binding_result.writes.keys())
-        for name in iter_bounds:
-            assert name in set(binding_result.writes.keys())
+            acquires = set(inst for inst in instructions if isinstance(inst, Acquire))
+            assert set(rw_result.reads.keys()) == {
+                inst.value.name for inst in device_updates
+            }
+            for inst in acquires:
+                assert inst.output_variable in set(rw_result.writes.keys())
+            for name in iter_bounds:
+                assert name in set(rw_result.writes.keys())
 
     def test_ti_legalisation_pass(self):
         model = get_default_echo_hardware()
@@ -189,31 +194,38 @@ class TestAnalysisPasses:
         TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
 
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        bounds = deepcopy(binding_result.iter_bounds)
-        TILegalisationPass().run(builder, res_mgr)
-        legal_iter_bounds = binding_result.iter_bounds
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        assert set(legal_iter_bounds.keys()) == set(bounds.keys())
-        for target, symbol2bound in legal_iter_bounds.items():
-            assert set(symbol2bound.keys()) == set(bounds[target].keys())
-            for name in binding_result.symbol2scopes:
-                bound = bounds[target][name]
-                legal_bound = symbol2bound[name]
-                if name in binding_result.reads:
+        TILegalisationPass().run(builder, res_mgr)
+
+        legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+
+        for target, instructions in triage_result.target_map.items():
+            scoping_result = binding_result.scoping_results[target]
+            rw_result = binding_result.rw_results[target]
+
+            bounds = binding_result.iter_bound_results[target]
+            legal_bounds = legal_binding_result.iter_bound_results[target]
+
+            assert set(legal_bounds.keys()) == set(bounds.keys())
+
+            for name in scoping_result.symbol2scopes:
+                bound = bounds[name]
+                legal_bound = legal_bounds[name]
+                if name in rw_result.reads:
                     device_updates = [
                         inst
-                        for inst in binding_result.reads[name]
-                        if isinstance(inst, DeviceUpdate) and inst.target == target
+                        for inst in rw_result.reads[name]
+                        if isinstance(inst, DeviceUpdate)
                     ]
                     for du in device_updates:
+                        assert du.target == target
                         assert legal_bound != bound
                         assert legal_bound == IterBound(
-                            start=TILegalisationPass.decompose_freq(bound.start, du.target)[
-                                1
-                            ],
+                            start=TILegalisationPass.decompose_freq(bound.start, target)[1],
                             step=bound.step,
-                            end=TILegalisationPass.decompose_freq(bound.end, du.target)[1],
+                            end=TILegalisationPass.decompose_freq(bound.end, target)[1],
                             count=bound.count,
                         )
                 else:

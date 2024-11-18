@@ -38,9 +38,9 @@ def resonator_spect(model, qubit_indices=None, num_points=None):
     return builder
 
 
-def qubit_spect(model, qubit_indices=None):
+def qubit_spect(model, qubit_indices=None, num_points=None):
     qubit_indices = qubit_indices or [0]
-    num_points = 10
+    num_points = num_points if num_points is not None else 10
     freq_range = 50e6
     drive_amp_dbm = -40
     drive_amp_v = np.sqrt(10 ** (((drive_amp_dbm + 12) / 10) - 1))
