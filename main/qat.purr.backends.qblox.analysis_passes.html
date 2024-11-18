@@ -200,7 +200,30 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLegalisationPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
-<p>Performs target-dependent legalisation for QBlox.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">freq_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run" title="Link to this definition"></a></dt>
+<dd><p>Performs target-dependent legalisation for QBlox.</p>
 <blockquote>
 <div><ol class="upperalpha simple">
 <li><p>A repeat instruction with a very high repetition count is illegal because acquisition memory</p></li>
@@ -257,30 +280,7 @@ is to simply assume the legality of amplitudes from the start whereby users are 
 the desired voltages to the equivalent ratio AOT.</p>
 <p>This pass performs target-dependent conversion as described in part (B). More features and adjustments
 will follow in future iterations.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">freq_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
-</dd>
-</dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

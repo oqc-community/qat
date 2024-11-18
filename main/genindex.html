@@ -1720,7 +1720,7 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.is_generated_name">is_generated_name() (in module qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.iter_bounds">iter_bounds (BindingResult attribute)</a>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.iter_bound_results">iter_bound_results (BindingResult attribute)</a>
 </li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.BasicBlock.iterator">iterator() (BasicBlock method)</a>
 </li>
@@ -3431,7 +3431,9 @@
 </li>
       <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation">ReadoutValidation (class in qat.compiler.validation_passes)</a>
 </li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.reads">reads (BindingResult attribute)</a>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ReadWriteResult.reads">reads (ReadWriteResult attribute)</a>
+</li>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ReadWriteResult">ReadWriteResult (class in qat.backend.analysis_passes)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine">RealtimeChipSimEngine (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
@@ -3689,6 +3691,8 @@
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.run_tket_optimizations">run_tket_optimizations() (in module qat.purr.integrations.tket)</a>
 </li>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.rw_results">rw_results (BindingResult attribute)</a>
+</li>
       <li><a href="qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.rx">rx() (QIRParser method)</a>
 </li>
       <li><a href="qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.ry">ry() (QIRParser method)</a>
@@ -3727,13 +3731,17 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.SCOPE">SCOPE (AcquireMode attribute)</a>
 </li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.scope2symbols">scope2symbols (BindingResult attribute)</a>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ScopingResult.scope2symbols">scope2symbols (ScopingResult attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.scope_acq">scope_acq (ModuleConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig">ScopeAcqConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.backend.transform_passes.html#qat.backend.transform_passes.ScopeSanitisation">ScopeSanitisation (class in qat.backend.transform_passes)</a>
+</li>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.scoping_results">scoping_results (BindingResult attribute)</a>
+</li>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ScopingResult">ScopingResult (class in qat.backend.analysis_passes)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Sdg">Sdg() (InstructionBuilder method)</a>
 </li>
@@ -3841,10 +3849,10 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN">SIN (PulseShapeType attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfig.slot_idx">slot_idx (QbloxConfig attribute)</a>
@@ -3977,7 +3985,7 @@
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.SXdg">SXdg() (InstructionBuilder method)</a>
 </li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.symbol2scopes">symbol2scopes (BindingResult attribute)</a>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ScopingResult.symbol2scopes">symbol2scopes (ScopingResult attribute)</a>
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.sync_baseband_frequencies_to_value">sync_baseband_frequencies_to_value() (in module qat.purr.backends.live)</a>
 </li>
@@ -4315,7 +4323,7 @@
       </ul></li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.QPUVersion.with_version">with_version() (QPUVersion static method)</a>
 </li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.BindingResult.writes">writes (BindingResult attribute)</a>
+      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ReadWriteResult.writes">writes (ReadWriteResult attribute)</a>
 </li>
   </ul></td>
 </tr></table>
