@@ -39,7 +39,7 @@ class QbloxLegalisationPass(AnalysisPass):
         return steps
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate):
+        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
             if inst.attribute == "frequency":
                 legal_bound = IterBound(
                     start=self.freq_as_steps(bound.start),

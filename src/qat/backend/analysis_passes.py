@@ -72,7 +72,7 @@ class TriagePass(AnalysisPass):
                 else:
                     targets.update(inst.quantum_targets)
 
-            if isinstance(inst, DeviceUpdate):
+            if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
                 reads[inst.target].add(inst.value.name)
 
         result = TriageResult()
@@ -303,7 +303,7 @@ class BindingPass(AnalysisPass):
                         ]
                 elif isinstance(inst, Acquire):
                     rw_result.writes[inst.output_variable].append(inst)
-                elif isinstance(inst, DeviceUpdate):
+                elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
                     if not (
                         inst.value.name in scoping_result.symbol2scopes
                         and [
@@ -337,7 +337,7 @@ class TILegalisationPass(AnalysisPass):
         return lo_freq, nco_freq
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate):
+        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
             if inst.attribute == "frequency":
                 if inst.target.fixed_if:
                     raise ValueError(
