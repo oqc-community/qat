@@ -610,8 +610,6 @@ class TestQASM3:
     def test_default_gates(self, gate_tup):
         """Check that each default gate can be parsed individually."""
         N, gate_string = gate_tup
-        if gate_string.startswith("cu("):
-            pytest.skip("CU gate is not yet supported.")
         qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_string}\nmeasure q -> c;"
         hw = get_default_echo_hardware(max(N, 2))
         parser = Qasm3Parser()
@@ -624,8 +622,6 @@ class TestQASM3:
         """Check that all default gates can be parsed together."""
         Ns, strings = zip(*get_default_qasm3_gate_qasms())
         N = max(Ns)
-        # TODO: Remove filtering when CU gate is supported.
-        strings = filter(lambda s: not s.startswith("cu("), strings)
         gate_strings = "\n".join(strings)
         qasm = f"OPENQASM 3.0;\nbit[{N}] c;\nqubit[{N}] q;\n{gate_strings}\nmeasure q -> c;"
         hw = get_default_echo_hardware(max(N, 2))

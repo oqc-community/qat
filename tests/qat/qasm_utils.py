@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from enum import Enum, auto
+from importlib.util import find_spec
 from os.path import abspath, dirname, join
+from pathlib import Path
 
 from compiler_config.config import Qasm2Optimizations
+from openqasm3 import ast
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
@@ -77,7 +80,11 @@ qasm3_gates = {}
 def get_default_qasm3_gate_qasms():
     if len(qasm3_gates) == 0:
         context = QasmContext()
-        Qasm3ParserBase().load_default_gates(context)
+        file_path = Path(
+            find_spec("qiskit.qasm.libs").submodule_search_locations[0], "stdgates.inc"
+        )
+        node = ast.Include(filename=file_path)
+        Qasm3ParserBase().visit(node, context)
         for name, defi in context.gates.items():
             needed_num_args = len(defi.arguments)
             arg_string = (
