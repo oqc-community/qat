@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Optional
 
 from pydantic import Field, field_validator, model_validator
@@ -13,14 +14,14 @@ VERSION = Version(0, 0, 1)
 
 
 class LogicalHardwareModel(WarnOnExtraFieldsModel):
-    """Models a hardware with a given topology.
+    """Models a hardware with a given connectivity.
 
     :param version: Semantic version of the hardware model.
-    :param logical_topology: Connectivity of the qubits in the hardware model.
+    :param logical_connectivity: Connectivity of the qubits in the hardware model.
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
-    logical_topology: dict[QubitId, set[QubitId]]
+    logical_connectivity: dict[QubitId, set[QubitId]]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -42,7 +43,7 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
         if self.version != other.version:
             return False
 
-        if self.logical_topology != other.logical_topology:
+        if self.logical_connectivity != other.logical_connectivity:
             return False
 
         return True
@@ -55,28 +56,29 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     """Class for calibrating our QPU hardware.
 
     :param qubits: The superconducting qubits on the chip.
-    :param physical_topology: The connectivities of the physical qubits on the QPU.
-    :param logical_topology: The connectivities of the qubits used for compilation,
-                    which is equal to `physical_topology` or a subset thereof.
+    :param physical_connectivity: The connectivities of the physical qubits on the QPU.
+    :param logical_connectivity: The connectivities of the qubits used for compilation,
+                    which is equal to `physical_connectivity` or a subset thereof.
     """
 
     qubits: dict[QubitId, Qubit]
-    physical_topology: dict[QubitId, set[QubitId]] = Field(frozen=True)
-    logical_topology: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
+    physical_connectivity: dict[QubitId, set[QubitId]] = Field(frozen=True)
+    logical_connectivity: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
 
     @model_validator(mode="before")
-    def validate_topology(cls, data):
-        physical_topology = data["physical_topology"]
+    def validate_connectivity(cls, data):
+        physical_connectivity = data["physical_connectivity"]
+        logical_connectivity = data.get("logical_connectivity", None)
 
-        try:
-            logical_topology = data["logical_topology"]
-            for qubit_index in physical_topology:
-                if not logical_topology[qubit_index] <= physical_topology[qubit_index]:
-                    raise ValueError(
-                        "Logical topology must be a subgraph of the physical topology."
-                    )
-        except (KeyError, TypeError):
-            data["logical_topology"] = physical_topology
+        if not logical_connectivity:
+            logical_connectivity = deepcopy(data["physical_connectivity"])
+            data["logical_connectivity"] = logical_connectivity
+
+        for qubit_index in logical_connectivity:
+            if not logical_connectivity[qubit_index] <= physical_connectivity[qubit_index]:
+                raise ValueError(
+                    "Logical connectivity must be a subgraph of the physical connectivity."
+                )
 
         return data
 

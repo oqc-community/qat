@@ -114,7 +114,7 @@ class TestDevicesValidation:
 
     def test_qubit_pair(self, seed):
         physical_topology = {0: {1}, 1: {0}}
-        builder = PhysicalHardwareModelBuilder(physical_topology=physical_topology)
+        builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
         hw = builder.model
         for qubit in hw.qubits.values():
             assert not qubit.calibrated

@@ -148,28 +148,22 @@ class PulseChannel(Component):
     fixed_if: bool = False
 
 
-class MeasurePulseChannel(PulseChannel):
-    pass
+class MeasurePulseChannel(PulseChannel): ...
 
 
-class DrivePulseChannel(PulseChannel):
-    pass
+class DrivePulseChannel(PulseChannel): ...
 
 
-class AcquirePulseChannel(PulseChannel):
-    pass
+class AcquirePulseChannel(PulseChannel): ...
 
 
-class MeasureAcquirePulseChannel(PulseChannel):
-    pass
+class MeasureAcquirePulseChannel(PulseChannel): ...
 
 
-class SecondStatePulseChannel(PulseChannel):
-    pass
+class SecondStatePulseChannel(PulseChannel): ...
 
 
-class FreqShiftPulseChannel(PulseChannel):
-    pass
+class FreqShiftPulseChannel(PulseChannel): ...
 
 
 class CrossResonancePulseChannel(PulseChannel):
@@ -276,13 +270,3 @@ class Qubit(Component):
     physical_channel: PhysicalChannel
     pulse_channels: QubitPulseChannels
     resonator: Resonator
-
-
-bb = PhysicalBaseband(
-    frequency=5,
-    if_frequency=5,
-)
-physical_channel = PhysicalChannel(baseband=bb, sample_time=0.1)
-
-resonator = Resonator(physical_channel=physical_channel)
-clbr = resonator.calibrated
