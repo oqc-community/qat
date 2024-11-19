@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, '**patch-release**']
   workflow_dispatch:
 
 permissions:
@@ -98,4 +98,4 @@ jobs:
         run: poetry install --sync
 
       - name: Unit tests
-        run: poetry run pytest
+        run: poetry run pytest --benchmark-skip

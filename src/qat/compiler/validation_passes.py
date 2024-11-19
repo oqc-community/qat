@@ -154,3 +154,8 @@ class ReadoutValidation(ValidationPass):
                     raise ValueError(
                         "Mid-circuit measurements currently unable to be used."
                     )
+
+
+class QasmValidation(ValidationPass):
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        pass
