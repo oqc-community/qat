@@ -84,7 +84,10 @@ class Component(WarnOnExtraFieldsModel):
     def calibrated(self):
         for field_name in self.model_fields:
             field_value = getattr(self, field_name)
-            if isinstance(field_value, Component) and not field_value.calibrated:
+            if (
+                isinstance(field_value, (Component, PulseChannelSet))
+                and not field_value.calibrated
+            ):
                 return False
             elif isinstance(field_value, float) and np.isnan(field_value):
                 return False
@@ -273,3 +276,13 @@ class Qubit(Component):
     physical_channel: PhysicalChannel
     pulse_channels: QubitPulseChannels
     resonator: Resonator
+
+
+bb = PhysicalBaseband(
+    frequency=5,
+    if_frequency=5,
+)
+physical_channel = PhysicalChannel(baseband=bb, sample_time=0.1)
+
+resonator = Resonator(physical_channel=physical_channel)
+clbr = resonator.calibrated
