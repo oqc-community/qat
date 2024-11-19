@@ -228,13 +228,22 @@ class TestQbloxLiveEngine:
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngineAdapter:
-    def test_resonator_spect(self, model):
+    def test_engine_adapter(self, model):
         runtime = model.create_runtime()
         assert isinstance(runtime.engine, QbloxLiveEngineAdapter)
         assert isinstance(runtime.engine._legacy_engine, QbloxLiveEngine)
         assert isinstance(runtime.engine._new_engine, NewQbloxLiveEngine)
 
+    def test_resonator_spect(self, model):
+        runtime = model.create_runtime()
         runtime.engine.enable_hax = True
         builder = resonator_spect(model)
+        results = runtime.execute(builder)
+        assert results is not None
+
+    def test_qubit_spect(self, model):
+        runtime = model.create_runtime()
+        runtime.engine.enable_hax = True
+        builder = qubit_spect(model)
         results = runtime.execute(builder)
         assert results is not None
