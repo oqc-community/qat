@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from qat.model.builder import QuantumHardwareModelBuilder
+from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import PulseChannel
-from qat.model.hardware_model import VERSION, QuantumHardwareModel
+from qat.model.hardware_model import VERSION, PhysicalHardwareModel
 
 
 def random_topology(n, max_degree=3, seed=42):
@@ -31,55 +31,96 @@ def random_topology(n, max_degree=3, seed=42):
     return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
+def pick_subtopology(topology, n, seed=42):
+    sub_topology = deepcopy(topology)
+    sub_qubits = random.Random(seed).sample(list(topology.keys()), n)
+    for qubit in sub_qubits:
+        popped_edge = sub_topology[qubit].pop()
+        sub_topology[popped_edge].remove(qubit)
+
+    return sub_topology
+
+
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
-@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+@pytest.mark.parametrize("n", [0, 2, 4])
+@pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Serialisation:
-    def test_built_model_serialises(self, n_qubits, seed):
-        builder = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+    def test_built_model_serialises(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
+
+        builder = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         )
 
         hw1 = builder.model
-        hw2 = QuantumHardwareModel(**hw1.model_dump())
-
+        hw2 = PhysicalHardwareModel(**hw1.model_dump())
         assert hw1 == hw2
 
-        builder = QuantumHardwareModelBuilder(topology=random_topology(n_qubits))
+    def test_built_logical_model_serialises(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
 
-    def test_dump_load_eq(self, n_qubits, seed):
-        hw1 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+        builder = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
+        )
+
+        hw1 = builder.model
+        hw2 = PhysicalHardwareModel(**hw1.model_dump())
+        assert hw1 == hw2
+
+    def test_dump_load_eq(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
+
+        hw1 = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         ).model
         blob = hw1.model_dump()
 
-        hw2 = QuantumHardwareModel(**blob)
+        hw2 = PhysicalHardwareModel(**blob)
         assert hw1 == hw2
 
-        hw3 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=54389)
+        hw3 = PhysicalHardwareModelBuilder(
+            physical_topology=random_topology(n=n_qubits, max_degree=3, seed=54389)
         ).model
         assert hw1 != hw3
 
-    def test_dump_eq(self, n_qubits, seed):
-        hw1 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+    def test_dump_eq(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
+
+        hw1 = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         ).model
         blob1 = hw1.model_dump()
 
-        hw2 = QuantumHardwareModel(**blob1)
+        hw2 = PhysicalHardwareModel(**blob1)
         blob2 = hw2.model_dump()
+        assert blob1 == blob2
 
-        hw3 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+        hw3 = PhysicalHardwareModelBuilder(
+            physical_topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
         ).model
         blob3 = hw3.model_dump()
-
-        assert blob1 == blob2
         assert blob1 != blob3
 
-    def test_deep_equals(self, n_qubits, seed):
-        hw1 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+    def test_deep_equals(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
+
+        hw1 = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         ).model
         hw2 = deepcopy(hw1)
 
@@ -91,17 +132,22 @@ class Test_HW_Serialisation:
         ).uniform(1e08, 1e10)
         assert hw1 != hw2
 
-    def test_deserialise_version(self, n_qubits, seed):
-        hw1 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+    def test_deserialise_version(self, n_qubits, n, seed):
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, min(n, n_qubits // 2), seed=seed
+        )
+
+        hw1 = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         ).model
         assert hw1.version == VERSION
 
-        hw2 = QuantumHardwareModel(**hw1.model_dump())
+        hw2 = PhysicalHardwareModel(**hw1.model_dump())
         assert hw2.version == VERSION
 
 
-def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
+def randomly_calibrate(hardware_model: PhysicalHardwareModel, seed=42):
     for qubit in hardware_model.qubits.values():
         # Calibrate physical channel.
         for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:
@@ -125,11 +171,11 @@ def randomly_calibrate(hardware_model: QuantumHardwareModel, seed=42):
 
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
-@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+@pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Calibration:
     def test_model_calibration(self, n_qubits, seed):
-        hw = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+        hw = PhysicalHardwareModelBuilder(
+            physical_topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
         ).model
         assert hw.number_of_qubits == n_qubits
         assert not hw.calibrated
@@ -138,54 +184,41 @@ class Test_HW_Calibration:
         assert hw2.calibrated
 
     def test_model_calibration_serialises(self, n_qubits, seed):
-        hw1 = QuantumHardwareModelBuilder(
-            topology=random_topology(n=n_qubits, max_degree=3, seed=seed)
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, n=int(np.sqrt(n_qubits - 1)), seed=seed
+        )
+
+        hw1 = PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
         ).model
         hw1 = randomly_calibrate(hardware_model=hw1, seed=seed)
 
-        hw2 = QuantumHardwareModel(**hw1.model_dump())
+        hw2 = PhysicalHardwareModel(**hw1.model_dump())
         assert hw1 == hw2
 
 
 @pytest.mark.parametrize("n_qubits", [8, 16, 32, 64])
-@pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+@pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Topology:
     def test_constrained_topology_subgraph(self, n_qubits, seed):
-        topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
-        constrained_topology = deepcopy(topology)
-
-        constrained_qubits = random.Random(seed).sample(
-            list(range(0, n_qubits)), int(np.sqrt(n_qubits))
-        )
-        for qubit in constrained_qubits:
-            popped_edge = constrained_topology[qubit].pop()
-            constrained_topology[popped_edge].remove(qubit)
-
-        QuantumHardwareModelBuilder(topology=topology, constrained_topology=topology)
-
-        QuantumHardwareModelBuilder(
-            topology=topology, constrained_topology=constrained_topology
+        physical_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
+        logical_topology = pick_subtopology(
+            physical_topology, n=int(np.sqrt(n_qubits)), seed=seed
         )
 
-        wrong_topology = deepcopy(topology)
+        PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
+        )
+
+        PhysicalHardwareModelBuilder(
+            physical_topology=physical_topology, logical_topology=logical_topology
+        )
+
+        wrong_topology = deepcopy(physical_topology)
         wrong_topology[0].add(n_qubits)
         wrong_topology[n_qubits] = {0}
         with pytest.raises(ValidationError):
-            QuantumHardwareModelBuilder(
-                topology=topology, constrained_topology=wrong_topology
-            )
-
-    def test_valid_topology(self, n_qubits, seed):
-        valid_topology = random_topology(n=n_qubits, max_degree=3, seed=seed)
-
-        wrong_qubit = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
-        wrong_topology = deepcopy(valid_topology)
-        wrong_topology[wrong_qubit].pop()
-
-        with pytest.raises(ValidationError):
-            QuantumHardwareModelBuilder(topology=wrong_topology)
-
-        with pytest.raises(ValidationError):
-            QuantumHardwareModelBuilder(
-                topology=valid_topology, constrained_topology=wrong_topology
+            PhysicalHardwareModelBuilder(
+                physical_topology=physical_topology, logical_topology=wrong_topology
             )

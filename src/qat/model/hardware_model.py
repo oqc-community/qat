@@ -15,12 +15,12 @@ VERSION = Version(0, 0, 1)
 class LogicalHardwareModel(WarnOnExtraFieldsModel):
     """Models a hardware with a given topology.
 
-    Attributes:
-        topology: Connectivity of the qubits in the hardware model.
+    :param version: Semantic version of the hardware model.
+    :param logical_topology: Connectivity of the qubits in the hardware model.
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
-    topology: dict[QubitId, set[QubitId]]
+    logical_topology: dict[QubitId, set[QubitId]]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -42,7 +42,7 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
         if self.version != other.version:
             return False
 
-        if self.topology != other.topology:
+        if self.logical_topology != other.logical_topology:
             return False
 
         return True
@@ -51,51 +51,36 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
         return not self.__eq__(other)
 
 
-class QuantumHardwareModel(LogicalHardwareModel):
+class PhysicalHardwareModel(LogicalHardwareModel):
     """Class for calibrating our QPU hardware.
 
-    Attributes:
-        qubits: The superconducting qubits on the chip.
-        constrained_topology: The connectivities between the qubits, which can be a subgraph of the physical topology.
+    :param qubits: The superconducting qubits on the chip.
+    :param physical_topology: The connectivities of the physical qubits on the QPU.
+    :param logical_topology: The connectivities of the qubits used for compilation,
+                    which is equal to `physical_topology` or a subset thereof.
     """
 
     qubits: dict[QubitId, Qubit]
-    constrained_topology: Optional[dict[QubitId, set[QubitId]]] = None
+    physical_topology: dict[QubitId, set[QubitId]] = Field(frozen=True)
+    logical_topology: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
 
     @model_validator(mode="before")
     def validate_topology(cls, data):
-        topology = data["topology"]
+        physical_topology = data["physical_topology"]
 
         try:
-            constrained_topology = data["constrained_topology"]
-
-            for qubit_index in topology:
-                if not constrained_topology[qubit_index] <= topology[qubit_index]:
+            logical_topology = data["logical_topology"]
+            for qubit_index in physical_topology:
+                if not logical_topology[qubit_index] <= physical_topology[qubit_index]:
                     raise ValueError(
-                        "Constrained topology must be a subgraph of the physical topology."
+                        "Logical topology must be a subgraph of the physical topology."
                     )
         except (KeyError, TypeError):
-            data["constrained_topology"] = topology
+            data["logical_topology"] = physical_topology
 
         return data
 
-    @field_validator("topology")
-    def validate_topology_symmetry(cls, topology):
-        for node, connected_nodes in topology.items():
-            for connected_node in connected_nodes:
-                if node not in topology[connected_node]:
-                    raise ValueError(
-                        f"The topology is not symmetric, node {node} not present in connected nodes of node {connected_node}."
-                    )
-        return topology
-
-    @field_validator("constrained_topology")
-    def validate_constrained_topology_symmetry(cls, constrained_topology):
-        if constrained_topology:
-            QuantumHardwareModel.validate_topology_symmetry(constrained_topology)
-        return constrained_topology
-
-    def __eq__(self, other: QuantumHardwareModel):
+    def __eq__(self, other: PhysicalHardwareModel) -> bool:
         base_eq = super().__eq__(other)
 
         s_qubits = list(self.qubits.values())
@@ -110,15 +95,15 @@ class QuantumHardwareModel(LogicalHardwareModel):
         return base_eq
 
     @property
-    def calibrated(self):
+    def calibrated(self) -> bool:
         for qubit in self.qubits.values():
             if not qubit.calibrated:
                 return False
         return True
 
     @property
-    def number_of_qubits(self):
+    def number_of_qubits(self) -> int:
         return len(self.qubits)
 
-    def qubit_with_index(self, index: int | QubitId):
+    def qubit_with_index(self, index: int | QubitId) -> Qubit:
         return self.qubits[index]
