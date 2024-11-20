@@ -1001,9 +1001,14 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
             for arg, value in zip(gate_def.arguments, arguments):
-                self._attempt_declaration(
-                    Variable(self.visit(arg, context), type(value), value), gate_context
-                )
+                if (known_var := context.variables.get(arg.name, None)) is not None:
+                    self._attempt_declaration(
+                        Variable(known_var.name, type(value), value), gate_context
+                    )
+                else:
+                    self._attempt_declaration(
+                        Variable(self.visit(arg, context), type(value), value), gate_context
+                    )
             for qb_name, value in zip(gate_def.qubits, target_qubits):
                 if isinstance(qb_name, (QubitRegister, Qubit)):
                     continue

@@ -10,7 +10,8 @@
 
 
 // phase gate
-gate p(λ) a { ctrl @ gphase(λ) a; }
+// gate p(λ) a { ctrl @ gphase(λ) a; }
+gate p(λ) a { u1(λ) a; }
 
 // Pauli gate: bit-flip or NOT gate
 gate x a { U(π, 0, π) a; gphase(-π/2);}
