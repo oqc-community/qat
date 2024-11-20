@@ -10,12 +10,12 @@ from qat.model.device import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
-    QubitId,
     QubitPulseChannels,
     Resonator,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
+from qat.model.hardware_base import QubitId
 from qat.model.hardware_model import PhysicalHardwareModel
 
 
@@ -33,7 +33,7 @@ class PhysicalHardwareModelBuilder:
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: Optional[dict[int, set[int]]] = None,
     ):
-        self._current_model = self._build_uncalibrated_hardware_model_from_connectivity(
+        self._current_model = self._build_uncalibrated_hardware_model(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
         )
@@ -42,7 +42,7 @@ class PhysicalHardwareModelBuilder:
     def model(self):
         return self._current_model
 
-    def _build_uncalibrated_hardware_model_from_connectivity(
+    def _build_uncalibrated_hardware_model(
         self,
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: dict[int, set[int]] = None,

@@ -7,9 +7,8 @@ import numpy as np
 from pydantic import Field, model_validator
 from pydantic_core import core_schema
 
+from qat.model.hardware_base import QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
-
-QubitId = int
 
 
 class CalibratablePositiveFloat(float):
@@ -29,9 +28,6 @@ class CalibratablePositiveFloat(float):
         else:
             return self.__eq__(other)
 
-    def __neq__(self, other: CalibratablePositiveFloat):
-        return not self.__eq__(other)
-
 
 class Component(WarnOnExtraFieldsModel):
     """
@@ -43,20 +39,17 @@ class Component(WarnOnExtraFieldsModel):
 
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     def __hash__(self):
         return hash(self.uuid)
 
     def __eq__(self, other: Component):
-        if type(self) != type(other):
+        if self.uuid != other.uuid:
+            return False
+
+        if not type(self) is type(other):
             return False
 
         if self.model_fields != other.model_fields:
-            return False
-
-        if self.uuid != other.uuid:
             return False
 
         for field_name in self.model_fields:
@@ -71,9 +64,6 @@ class Component(WarnOnExtraFieldsModel):
 
         return True
 
-    def __ne__(self, other: Component):
-        return not self.__eq__(other)
-
     def __repr__(self):
         return f"{self.__class__.__name__}({self.uuid})"
 
@@ -81,12 +71,12 @@ class Component(WarnOnExtraFieldsModel):
         return self.__repr__()
 
     @property
-    def calibrated(self):
+    def is_calibrated(self):
         for field_name in self.model_fields:
             field_value = getattr(self, field_name)
             if (
                 isinstance(field_value, (Component, PulseChannelSet))
-                and not field_value.calibrated
+                and not field_value.is_calibrated
             ):
                 return False
             elif isinstance(field_value, float) and np.isnan(field_value):
@@ -180,16 +170,16 @@ class PulseChannelSet(WarnOnExtraFieldsModel):
     """
 
     @property
-    def calibrated(self):
+    def is_calibrated(self):
         for field_name in self.model_fields:
             field_value = getattr(self, field_name)
-            if isinstance(field_value, Component) and not field_value.calibrated:
+            if isinstance(field_value, Component) and not field_value.is_calibrated:
                 return False
             elif isinstance(field_value, tuple):
                 for pulse_channel in field_value:
                     if (
                         isinstance(pulse_channel, Component)
-                        and not pulse_channel.calibrated
+                        and not pulse_channel.is_calibrated
                     ):
                         return False
         return True

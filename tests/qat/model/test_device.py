@@ -18,11 +18,11 @@ from qat.model.device import (
 class TestDevicesValidation:
     def test_physical_baseband(self, seed):
         bb = PhysicalBaseband()
-        assert not bb.calibrated
+        assert not bb.is_calibrated
 
         bb.frequency = random.Random(seed).uniform(1e05, 1e07)
         bb.if_frequency = random.Random(seed).uniform(1e05, 1e07)
-        assert bb.calibrated
+        assert bb.is_calibrated
 
         with pytest.raises(ValidationError):
             bb.frequency = random.Random(seed).uniform(-1e05, -1e07)
@@ -37,10 +37,10 @@ class TestDevicesValidation:
         )
 
         physical_channel = PhysicalChannel(baseband=bb)
-        assert not physical_channel.calibrated
+        assert not physical_channel.is_calibrated
 
         physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
-        assert physical_channel.calibrated
+        assert physical_channel.is_calibrated
 
         with pytest.raises(ValidationError):
             physical_channel.sample_time = random.Random(seed).uniform(-1e-08, -1e-10)
@@ -50,10 +50,10 @@ class TestDevicesValidation:
 
     def test_pulse_channel(self, seed):
         pulse_channel = PulseChannel()
-        assert not pulse_channel.calibrated
+        assert not pulse_channel.is_calibrated
 
         pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
-        assert pulse_channel.calibrated
+        assert pulse_channel.is_calibrated
 
         with pytest.raises(ValidationError):
             pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
@@ -68,12 +68,12 @@ class TestDevicesValidation:
         )
 
         resonator = Resonator(physical_channel=physical_channel)
-        assert not resonator.calibrated
+        assert not resonator.is_calibrated
 
         for pulse_channel_name in resonator.pulse_channels.model_fields:
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
-        assert resonator.calibrated
+        assert resonator.is_calibrated
 
         for pulse_channel_name in resonator.pulse_channels.model_fields:
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
@@ -98,14 +98,14 @@ class TestDevicesValidation:
         for pulse_channel_name in ["drive", "second_state", "freq_shift"]:
             pulse_channel = getattr(qubit_pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
-        assert qubit_pulse_channels.calibrated
+        assert qubit_pulse_channels.is_calibrated
 
         qubit = Qubit(
             physical_channel=physical_channel,
             pulse_channels=qubit_pulse_channels,
             resonator=resonator,
         )
-        assert qubit.calibrated
+        assert qubit.is_calibrated
 
         for pulse_channel_name in ["drive", "second_state", "freq_shift"]:
             pulse_channel = getattr(qubit.pulse_channels, pulse_channel_name)
@@ -117,7 +117,7 @@ class TestDevicesValidation:
         builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
         hw = builder.model
         for qubit in hw.qubits.values():
-            assert not qubit.calibrated
+            assert not qubit.is_calibrated
 
             qubit.physical_channel.baseband.frequency = random.Random(seed).uniform(
                 1e05, 1e07
@@ -163,4 +163,4 @@ class TestDevicesValidation:
                 with pytest.raises(ValidationError):
                     crc_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
-            assert qubit.calibrated
+            assert qubit.is_calibrated

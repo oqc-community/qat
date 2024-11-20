@@ -7,7 +7,8 @@ from pydantic import Field, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
-from qat.model.device import Qubit, QubitId
+from qat.model.device import Qubit
+from qat.model.hardware_base import QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 VERSION = Version(0, 0, 1)
@@ -99,7 +100,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     @property
     def calibrated(self) -> bool:
         for qubit in self.qubits.values():
-            if not qubit.calibrated:
+            if not qubit.is_calibrated:
                 return False
         return True
 
