@@ -1,0 +1,25 @@
+qat package
+===========
+
+.. automodule:: qat
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.compiler
+   qat.ir
+   qat.purr
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.qat

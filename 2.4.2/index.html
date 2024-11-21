@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; QAT 2.4.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sphinx_paramlinks.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#">
+            
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.4.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.html">qat package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">QAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <hr class="docutils" />
+<a class="reference internal image-reference" href="_images/qat-logo.png"><img alt="_images/qat-logo.png" src="_images/qat-logo.png" style="width: 400px;" /></a>
+<div class="toctree-wrapper compound">
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p><strong>QAT</strong> (Quantum Assembly Toolkit/Toolchain) is a low-level quantum compiler and runtime which facilitates executing quantum IRs
+such as <a class="reference external" href="https://openqasm.com/">QASM</a>, <a class="reference external" href="https://openqasm.com/language/openpulse.html">OpenPulse</a> and
+<a class="reference external" href="https://devblogs.microsoft.com/qsharp/introducing-quantum-intermediate-representation-qir/">QIR</a> against QPU drivers.
+It facilitates the execution of largely-optimised code, converted into abstract pulse-level and hardware-level instructions,
+which are then transformed and delivered to an appropriate driver.</p>
+<p>For the official QAT documentation, please see <a class="reference external" href="https://oqc-community.github.io/qat">QAT</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>QAT can be installed from <a class="reference external" href="https://pypi.org/project/qat-compiler/">PyPI</a> via:
+<code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">qat-compiler</span></code></p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="building-from-source">
+<h1>Building from Source<a class="headerlink" href="#building-from-source" title="Link to this heading"></a></h1>
+<p>We use <a class="reference external" href="https://python-poetry.org/">poetry</a> for dependency management and run on
+<a class="reference external" href="https://www.python.org/downloads/">Python 3.8+</a>.
+Once both of these are installed run this in the root folder to install all the dependencies that you need:
+<code class="code docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">install</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are contributing to the project we recommend that you also run</p>
+<p><code class="code docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">pre-commit</span> <span class="pre">install</span></code>
+to enable pre-commit checks.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="roadmap">
+<h1>Roadmap<a class="headerlink" href="#roadmap" title="Link to this heading"></a></h1>
+<p>Here’s a list of what we’re currently working on, if you want to get involved contact the person or group linked.</p>
+<p>In-development:</p>
+<ul class="simple">
+<li><p>Classical-quantum hybrid computation. <a class="reference external" href="mailto:jdumbell&#37;&#52;&#48;oxfordquantumcircuits&#46;com">John Dumbell</a></p></li>
+<li><p>Runtime-embedded QEC. <a class="reference external" href="mailto:jfriel&#37;&#52;&#48;oxfordquantumcircuits&#46;com">Jamie Friel</a></p></li>
+</ul>
+<p>Designing / verifying suitability:</p>
+<ul class="simple">
+<li><p>Distributed QPU execution. <a class="reference external" href="mailto:jdumbell&#37;&#52;&#48;oxfordquantumcircuits&#46;com">John Dumbell</a></p></li>
+</ul>
+<p>To-do:</p>
+<ul class="simple">
+<li><p>Full QASM v3 support. Currently waiting for available parsers.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h1>
+<p>To take the first steps towards contributing to QAT, visit our
+<a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CONTRIBUTING.rst">contribution</a> documents, which provides details about our
+process.
+We also encourage new contributors to familiarise themselves with the
+<a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CODE_OF_CONDUCT.rst">code of conduct</a> and to adhere to these
+expectations.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="where-to-get-help">
+<h1>Where to get help<a class="headerlink" href="#where-to-get-help" title="Link to this heading"></a></h1>
+<p>For support, please reach out in the <a class="reference external" href="https://github.com/oqc-community/qat/discussions">Discussions</a> tab of this repository or file an <a class="reference external" href="https://github.com/oqc-community/qat/issues">issue</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="licence">
+<h1>Licence<a class="headerlink" href="#licence" title="Link to this heading"></a></h1>
+<p>This code in this repository is licensed under the BSD 3-Clause Licence.
+Please see <a class="reference external" href="https://github.com/oqc-community/qat/blob/main/LICENSE">LICENSE</a> for more information.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="feedback">
+<h1>Feedback<a class="headerlink" href="#feedback" title="Link to this heading"></a></h1>
+<p>Please let us know your feedback and any suggestions by reaching out in <a class="reference external" href="https://github.com/oqc-community/qat/discussions">Discussions</a>.
+Additionally, to report any concerns or
+<a class="reference external" href="https://github.com/oqc-community/qat/blob/main/CODE_OF_CONDUCT.rst">code of conduct</a> violations please use this
+<a class="reference external" href="https://docs.google.com/forms/d/e/1FAIpQLSeyEX_txP3JDF3RQrI3R7ilPHV9JcZIyHPwLLlF6Pz7iGnocw/viewform?usp=sf_link">form</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="faq">
+<h1>FAQ<a class="headerlink" href="#faq" title="Link to this heading"></a></h1>
+<blockquote>
+<div><p>Why is this in Python?</p>
+</div></blockquote>
+<p>Mixture of reasons. Primary one is that v1.0 was an early prototype and since the majority of the quantum community
+know Python it was the fastest way to build a system which the most people could contribute to building. The API’s would
+always stick around anyway, but as time goes on the majority of its internals has been, is being, or will be moved to Rust/C++.</p>
+<blockquote>
+<div><p>Where do I get started?</p>
+</div></blockquote>
+<p>Our tests are a good place to start as they will show you the various ways to run QAT. Running and then stepping
+through how it functions is the best way to learn.</p>
+<p>We have what’s known as an echo model and engine which is used to test QATs functionality when not attached to a QPU.
+You’ll see these used almost exclusively in the tests, but you can also use this model to see how QAT functions on
+larger and more novel architectures.</p>
+<p>High-level architectural documents are incoming and will help explain its various concepts at a glance, but
+right now aren’t complete.</p>
+<blockquote>
+<div><p>What OS’s does QAT run on?</p>
+</div></blockquote>
+<p>Windows and Linux are its primary development environments. Most of its code is OS-agnostic but we can’t
+guarantee it won’t have bugs on untried ones. Dependencies are usually where you’ll have problems, not the core
+QAT code itself.</p>
+<p>If you need to make changes to get your OS running feel free to PR them to get them included.</p>
+<blockquote>
+<div><p>I don’t see anything related to OQC’s hardware here!</p>
+</div></blockquote>
+<p>Certain parts of how we run our QPU have to stay propriety and for our initial release we did not have time to
+properly unpick this from things we can happily release. We want to release as much as possible and as you’re
+reading this are likely busy doing just that.</p>
+<blockquote>
+<div><p>Do you have your own simulator?</p>
+</div></blockquote>
+<p>We have a real-time chip simulator that is used to help test potential changes and their ramifications to hardware.
+It focuses on accuracy and testing small-scale changes so should not be considered a general simulator. 3/4 qubit
+simulations is its maximum without runtime being prohibitive.</p>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-right" title="src" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.4.2
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="index.html">2.4.2</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
