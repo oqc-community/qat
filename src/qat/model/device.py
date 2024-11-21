@@ -4,7 +4,7 @@ import uuid
 from typing import Optional
 
 import numpy as np
-from pydantic import Field, model_validator
+from pydantic import Field
 from pydantic_core import core_schema
 
 from qat.model.hardware_base import QubitId
@@ -204,19 +204,6 @@ class PulseChannelSet(WarnOnExtraFieldsModel):
 class ResonatorPulseChannels(PulseChannelSet):
     measure: MeasurePulseChannel = Field(default=MeasurePulseChannel())
     acquire: AcquirePulseChannel = Field(default=AcquirePulseChannel())
-
-
-class QbloxResonatorPulseChannels(PulseChannelSet):
-    measure: MeasureAcquirePulseChannel = Field(default=MeasureAcquirePulseChannel())
-    acquire: MeasureAcquirePulseChannel = Field(default=MeasureAcquirePulseChannel())
-
-    @model_validator(mode="after")
-    def validate_pulse_channels(self):
-        if self.measure != self.acquire:
-            raise ValueError(
-                f"Measure and acquire pulse channels must be equal in {self.__class__.__name__}, got: {self.measure} and {self.acquire}."
-            )
-        return self
 
 
 class Resonator(Component):
