@@ -1,0 +1,7 @@
+qat.model.hardware\_base module
+===============================
+
+.. automodule:: qat.model.hardware_base
+   :members:
+   :undoc-members:
+   :show-inheritance:

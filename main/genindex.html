@@ -68,11 +68,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.autopopulate.html">qat.model.autopopulate module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.component.html">qat.model.component module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html">qat.model.hardware_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.serialisation.html">qat.model.serialisation module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -237,7 +236,11 @@
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ACQUIRE">ACQUIRE (Opcode attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing.acquire">acquire (PostProcessing property)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.acquire">(ResonatorPulseChannels attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.acquire">acquire() (InstructionBuilder method)</a>
 
       <ul>
@@ -259,6 +262,8 @@
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed">acquire_weighed() (SequenceBuilder method)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode">AcquireMode (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel">AcquirePulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.acquisitions">acquisitions (Sequence attribute)</a>
 </li>
@@ -434,8 +439,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.TtlAcqConfig.auto_bin_incr_en">auto_bin_incr_en (TtlAcqConfig attribute)</a>
 </li>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate">AutoPopulate (class in qat.model.autopopulate)</a>
+      <li><a href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel.auxiliary_qubit">auxiliary_qubit (CrossResonanceCancellationPulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.auxiliary_qubit">(CrossResonancePulseChannel attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path0">avg_mode_en_path0 (ScopeAcqConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path1">avg_mode_en_path1 (ScopeAcqConfig attribute)</a>
@@ -458,8 +467,12 @@
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.base_folder_path">base_folder_path (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxPhysicalChannel.baseband">baseband (QbloxPhysicalChannel attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.baseband">baseband (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxPhysicalChannel.baseband">(QbloxPhysicalChannel attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.baseband_frequency">baseband_frequency (PhysicalChannel property)</a>
 
       <ul>
@@ -478,6 +491,14 @@
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger">BasicLogger (class in qat.purr.utils.logger)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.bias">bias (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.bias">(PulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.bias">(qat.model.device.PulseChannel parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.bias_value">bias_value (DCBiasChannel property)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.BinaryOperator">BinaryOperator (class in qat.purr.compiler.instructions)</a>
@@ -496,16 +517,20 @@
 </li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.BlackmanWaveform">BlackmanWaveform (class in qat.purr.compiler.waveforms)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size">block_size (PulseChannel property)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.block_size">block_size (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size">(PulseChannel property)</a>
 </li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.block_time">block_time (PhysicalChannel property)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_time">(PulseChannel property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.branches">branches (qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics parameter)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.build">build() (SequenceBuilder method)</a>
@@ -574,6 +599,8 @@
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable">Calibratable (class in qat.purr.compiler.devices)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.CalibratablePositiveFloat">CalibratablePositiveFloat (class in qat.model.device)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_lo_leakage">calibrate_lo_leakage() (QbloxConfigHelper method)</a>
 
       <ul>
@@ -585,6 +612,8 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer">calibrate_mixer() (QbloxConfigHelper method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_sideband">calibrate_sideband() (QbloxConfigHelper method)</a>
+</li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.calibrated">calibrated (PhysicalHardwareModel property)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.calibration_definition">calibration_definition() (Qasm3Parser method)</a>
 </li>
@@ -688,9 +717,7 @@
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.ComplexFunction">ComplexFunction (class in qat.purr.backends.utilities)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.Component">Component (class in qat.model.component)</a>
-</li>
-      <li><a href="qat.model.component.html#qat.model.component.ComponentId">ComponentId (class in qat.model.component)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Component">Component (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger">CompositeLogger (class in qat.purr.utils.logger)</a>
 </li>
@@ -750,14 +777,14 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.connect">connect() (Instrument method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.connect">(QbloxControlHardware method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.connect_to_instrument">connect_to_instrument() (DCBiasChannel method)</a>
 
       <ul>
@@ -888,11 +915,19 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.cross_resonance_cancellation">cross_resonance_cancellation (ChannelType attribute)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.cross_resonance_cancellation_channels">cross_resonance_cancellation_channels (QubitPulseChannels attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.cross_resonance_channels">cross_resonance_channels (QubitPulseChannels attribute)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.CouplingType.CrossKerr">CrossKerr (CouplingType attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel">CrossResonanceCancellationPulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CrossResonanceCancelPulse">CrossResonanceCancelPulse (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CrossResonancePulse">CrossResonancePulse (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel">CrossResonancePulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cswap">cswap() (InstructionBuilder method)</a>
 </li>
@@ -990,16 +1025,12 @@
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.deserialize">deserialize() (InstructionBuilder static method)</a>
 </li>
-      <li><a href="qat.model.serialisation.html#qat.model.serialisation.deserialize_component_dict">deserialize_component_dict() (in module qat.model.serialisation)</a>
-</li>
-      <li><a href="qat.model.serialisation.html#qat.model.serialisation.deserialize_dict_to_refs">deserialize_dict_to_refs() (in module qat.model.serialisation)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors">DeviceInjectors (class in qat.purr.compiler.execution)</a>
@@ -1027,10 +1058,16 @@
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.DragGaussianFunction">DragGaussianFunction (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.drive">drive (ChannelType attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.drive">(QubitPulseChannels attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.drive_hamiltonian">drive_hamiltonian (Section attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DrivePulse">DrivePulse (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel">DrivePulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.driver">driver (Instrument property)</a>
 </li>
@@ -1276,12 +1313,18 @@
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.output.params.fit_type">(qat.purr.utils.logger.CompositeLogger.output parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PulseChannel.fixed_if">fixed_if (PulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.fixed_if">(qat.model.device.PulseChannel parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.Flow">Flow (class in qat.backend.graph)</a>
+</li>
+      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.FluidBuilderWrapper">FluidBuilderWrapper (class in qat.purr.compiler.builders)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.FluidBuilderWrapper">FluidBuilderWrapper (class in qat.purr.compiler.builders)</a>
-</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.folder_name">folder_name (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.OpenPulseFeatures.for_hardware">for_hardware() (OpenPulseFeatures method)</a>
@@ -1295,9 +1338,27 @@
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">freq_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift">freq_shift (ChannelType attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.freq_shift">(QubitPulseChannels attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.purr.compiler.devices)</a>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FreqShiftPulseChannel">(class in qat.purr.compiler.devices)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.frequency">frequency (PhysicalBaseband attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.frequency">(PulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.params.frequency">(qat.model.device.PhysicalBaseband parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.frequency">(qat.model.device.PulseChannel parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Unit.FREQUENCY">FREQUENCY (Unit attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.frequency_shift">frequency_shift() (QuantumInstructionBuilder method)</a>
@@ -1305,8 +1366,6 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift">FrequencyShift (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_qfile">from_qfile() (SweepIterator static method)</a>
-</li>
-      <li><a href="qat.model.component.html#qat.model.component.Component.full_id">full_id (Component property)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.full_id">full_id() (PulseChannel method)</a>
 
@@ -1430,10 +1489,10 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel">get_drive_channel() (Qubit method)</a>
 </li>
-      <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_frame_mappings">get_frame_mappings() (in module qat.purr.integrations.qasm)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_frame_mappings">get_frame_mappings() (in module qat.purr.integrations.qasm)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_freq_shift_channel">get_freq_shift_channel() (Qubit method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_U">get_gate_U() (QuantumHardwareModel method)</a>
@@ -1506,8 +1565,6 @@
 </li>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.get_readout_mitigation">get_readout_mitigation() (in module qat.purr.compiler.error_mitigation.readout_mitigation)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.get_reftype">get_reftype() (in module qat.model.component)</a>
-</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_resonator_response_segments">get_resonator_response_segments() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_resonator_response_signal_segment">get_resonator_response_signal_segment() (in module qat.purr.backends.realtime_chip_simulator)</a>
@@ -1578,6 +1635,12 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.id">(QbloxContext method)</a>
 </li>
         <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.id">(ResultInfoMixin method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.if_frequency">if_frequency (PhysicalBaseband attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.params.if_frequency">(qat.model.device.PhysicalBaseband parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.if_triggered">if_triggered() (BasicInterrupt method)</a>
@@ -1704,8 +1767,14 @@
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.is_basic_gate">is_basic_gate() (TketBuilder method)</a>
 </li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated">is_calibrated (QuantumHardwareModel property)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Component.is_calibrated">is_calibrated (Component property)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.is_calibrated">(PulseChannelSet property)</a>
 </li>
+        <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated">(QuantumHardwareModel property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.BasicBlock.is_empty">is_empty() (BasicBlock method)</a>
 
       <ul>
@@ -1828,14 +1897,14 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.load_default_gates">load_default_gates() (Qasm3ParserBase method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig">LoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.log">log() (CompositeLogger method)</a>
 </li>
       <li><a href="qat.purr.utils.logging_utils.html#qat.purr.utils.logging_utils.log_duration">log_duration() (in module qat.purr.utils.logging_utils)</a>
@@ -1862,6 +1931,20 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.logic_xor">logic_xor() (SequenceBuilder method)</a>
 </li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.logical_connectivity">logical_connectivity (LogicalHardwareModel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.logical_connectivity">(PhysicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity">(qat.model.builder.PhysicalHardwareModelBuilder parameter)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.params.logical_connectivity">(qat.model.hardware_model.LogicalHardwareModel parameter)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity">(qat.model.hardware_model.PhysicalHardwareModel parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel">LogicalHardwareModel (class in qat.model.hardware_model)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.logs_path">logs_path (BasicLogger property)</a>
 </li>
       <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.lookup_by_type">lookup_by_type() (ResultManager method)</a>
@@ -1885,8 +1968,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.macq">macq (ChannelType attribute)</a>
-</li>
-      <li><a href="qat.model.component.html#qat.model.component.make_refdict">make_refdict() (in module qat.model.component)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.makeRecord">makeRecord() (BasicLogger method)</a>
 </li>
@@ -1938,6 +2019,8 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType.MEASURE">MEASURE (ControlType attribute)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.measure">measure (ResonatorPulseChannels attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure">measure() (InstructionBuilder method)</a>
 
       <ul>
@@ -1984,11 +2067,15 @@
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_z">(QuantumInstructionBuilder method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.MeasureAcquirePulseChannel">MeasureAcquirePulseChannel (class in qat.model.device)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock">MeasureBlock (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics">MeasurementStatistics (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasurePulse">MeasurePulse (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel">MeasurePulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.MEGA">MEGA (Scale attribute)</a>
 </li>
@@ -2033,6 +2120,8 @@
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.model">model (LiveDeviceEngine attribute)</a>
 
       <ul>
+        <li><a href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder.model">(PhysicalHardwareModelBuilder property)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.model">(QbloxLiveEngineAdapter attribute)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.model">(QuantumRuntime property)</a>
@@ -2040,12 +2129,34 @@
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.model">(RealtimeChipSimEngine attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate.model_computed_fields">model_computed_fields (AutoPopulate attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_computed_fields">model_computed_fields (AcquirePulseChannel attribute)</a>
 
       <ul>
-        <li><a href="qat.model.component.html#qat.model.component.Component.model_computed_fields">(Component attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.Component.model_computed_fields">(Component attribute)</a>
 </li>
-        <li><a href="qat.model.component.html#qat.model.component.ComponentId.model_computed_fields">(ComponentId attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel.model_computed_fields">(CrossResonanceCancellationPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.model_computed_fields">(CrossResonancePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.model_computed_fields">(DrivePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.model_computed_fields">(FreqShiftPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_computed_fields">(LogicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasureAcquirePulseChannel.model_computed_fields">(MeasureAcquirePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.model_computed_fields">(MeasurePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.model_computed_fields">(PhysicalBaseband attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.model_computed_fields">(PhysicalChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.model_computed_fields">(PhysicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.model_computed_fields">(PulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.model_computed_fields">(PulseChannelSet attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_computed_fields">(QatConfig attribute)</a>
 </li>
@@ -2053,15 +2164,47 @@
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_computed_fields">(QiskitSimulationConfig attribute)</a>
 </li>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.model_computed_fields">(Qubit attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.model_computed_fields">(QubitPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.model_computed_fields">(Resonator attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.model_computed_fields">(ResonatorPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.model_computed_fields">(SecondStatePulseChannel attribute)</a>
+</li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel.model_computed_fields">(WarnOnExtraFieldsModel attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate.model_config">model_config (AutoPopulate attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_config">model_config (AcquirePulseChannel attribute)</a>
 
       <ul>
-        <li><a href="qat.model.component.html#qat.model.component.Component.model_config">(Component attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.Component.model_config">(Component attribute)</a>
 </li>
-        <li><a href="qat.model.component.html#qat.model.component.ComponentId.model_config">(ComponentId attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel.model_config">(CrossResonanceCancellationPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.model_config">(CrossResonancePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.model_config">(DrivePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.model_config">(FreqShiftPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_config">(LogicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasureAcquirePulseChannel.model_config">(MeasureAcquirePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.model_config">(MeasurePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.model_config">(PhysicalBaseband attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.model_config">(PhysicalChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.model_config">(PhysicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.model_config">(PulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.model_config">(PulseChannelSet attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_config">(QatConfig attribute)</a>
 </li>
@@ -2069,17 +2212,51 @@
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_config">(QiskitSimulationConfig attribute)</a>
 </li>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.model_config">(Qubit attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.model_config">(QubitPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.model_config">(Resonator attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.model_config">(ResonatorPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.model_config">(SecondStatePulseChannel attribute)</a>
+</li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel.model_config">(WarnOnExtraFieldsModel attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.component.html#qat.model.component.ComponentId.model_dump_id">model_dump_id() (ComponentId method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder.model_dump">model_dump() (PhysicalHardwareModelBuilder method)</a>
 </li>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate.model_fields">model_fields (AutoPopulate attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_fields">model_fields (AcquirePulseChannel attribute)</a>
 
       <ul>
-        <li><a href="qat.model.component.html#qat.model.component.Component.model_fields">(Component attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.Component.model_fields">(Component attribute)</a>
 </li>
-        <li><a href="qat.model.component.html#qat.model.component.ComponentId.model_fields">(ComponentId attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel.model_fields">(CrossResonanceCancellationPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.model_fields">(CrossResonancePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.model_fields">(DrivePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.model_fields">(FreqShiftPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_fields">(LogicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasureAcquirePulseChannel.model_fields">(MeasureAcquirePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.model_fields">(MeasurePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.model_fields">(PhysicalBaseband attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.model_fields">(PhysicalChannel attribute)</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.model_fields">(PhysicalHardwareModel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.model_fields">(PulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.model_fields">(PulseChannelSet attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_fields">(QatConfig attribute)</a>
 </li>
@@ -2087,15 +2264,17 @@
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_fields">(QiskitSimulationConfig attribute)</a>
 </li>
-        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel.model_fields">(WarnOnExtraFieldsModel attribute)</a>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.model_fields">(Qubit attribute)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate.model_post_init">model_post_init() (AutoPopulate method)</a>
-
-      <ul>
-        <li><a href="qat.model.component.html#qat.model.component.Component.model_post_init">(Component method)</a>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.model_fields">(QubitPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.model_fields">(Resonator attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.model_fields">(ResonatorPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.model_fields">(SecondStatePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel.model_fields">(WarnOnExtraFieldsModel attribute)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.modify">modify() (Qasm2Parser method)</a>
@@ -2140,11 +2319,13 @@
 </li>
         <li><a href="qat.model.html#module-qat.model">qat.model</a>
 </li>
-        <li><a href="qat.model.autopopulate.html#module-qat.model.autopopulate">qat.model.autopopulate</a>
+        <li><a href="qat.model.builder.html#module-qat.model.builder">qat.model.builder</a>
 </li>
-        <li><a href="qat.model.component.html#module-qat.model.component">qat.model.component</a>
+        <li><a href="qat.model.device.html#module-qat.model.device">qat.model.device</a>
 </li>
-        <li><a href="qat.model.serialisation.html#module-qat.model.serialisation">qat.model.serialisation</a>
+        <li><a href="qat.model.hardware_base.html#module-qat.model.hardware_base">qat.model.hardware_base</a>
+</li>
+        <li><a href="qat.model.hardware_model.html#module-qat.model.hardware_model">qat.model.hardware_model</a>
 </li>
         <li><a href="qat.purr.html#module-qat.purr">qat.purr</a>
 </li>
@@ -2323,10 +2504,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.NCOFrequencyVariability">NCOFrequencyVariability (class in qat.backend.validation_passes)</a>
@@ -2352,6 +2533,8 @@
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.NOTSET">NOTSET (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt">NullInterrupt (class in qat.purr.compiler.interrupt)</a>
+</li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits">number_of_qubits (PhysicalHardwareModel property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_REGISTERS">NUMBER_OF_REGISTERS (Constants attribute)</a>
 </li>
@@ -2541,6 +2724,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">phase_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.phase_iq_offset">phase_iq_offset (PhysicalChannel attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.phase_offs">phase_offs (NcoConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.MixerConfig.phase_offset">phase_offset (MixerConfig attribute)</a>
@@ -2561,13 +2746,45 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift">PhaseShift (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.physical_channel">physical_channel (SimpleAcquire attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.physical_channel">physical_channel (qat.model.device.PulseChannel parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.params.physical_channel">(qat.model.device.Qubit parameter)</a>
 </li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.params.physical_channel">(qat.model.device.Resonator parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.physical_channel">(Qubit attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.physical_channel">(Resonator attribute)</a>
+</li>
+        <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.physical_channel">(SimpleAcquire attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.physical_channel_id">physical_channel_id (PulseChannel property)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalBaseband">PhysicalBaseband (class in qat.purr.compiler.devices)</a>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity">physical_connectivity (PhysicalHardwareModel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder.params.physical_connectivity">(qat.model.builder.PhysicalHardwareModelBuilder parameter)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel">PhysicalChannel (class in qat.purr.compiler.devices)</a>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity">(qat.model.hardware_model.PhysicalHardwareModel parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband">PhysicalBaseband (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalBaseband">(class in qat.purr.compiler.devices)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel">PhysicalChannel (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel">(class in qat.purr.compiler.devices)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel">PhysicalHardwareModel (class in qat.model.hardware_model)</a>
+</li>
+      <li><a href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder">PhysicalHardwareModelBuilder (class in qat.model.builder)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.PLAY">PLAY (Opcode attribute)</a>
 </li>
@@ -2583,12 +2800,6 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses">plot_pulses() (RealtimeChipSimEngine method)</a>
 </li>
-      <li><a href="qat.model.autopopulate.html#qat.model.autopopulate.AutoPopulate.populate">populate() (AutoPopulate method)</a>
-
-      <ul>
-        <li><a href="qat.model.component.html#qat.model.component.Component.populate">(Component method)</a>
-</li>
-      </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.post_processing">post_processing() (InstructionBuilder method)</a>
@@ -2601,12 +2812,12 @@
 </li>
       <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation">PostProcessingOptimisation (class in qat.compiler.transform_passes)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType">PostProcessType (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TriageResult.pp_map">pp_map (TriageResult attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass">PreCodegenPass (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult">PreCodegenResult (class in qat.purr.backends.qblox.codegen)</a>
@@ -2723,9 +2934,25 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.pulse_channel">pulse_channel (SimpleAcquire attribute)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.params.pulse_channels">pulse_channels (qat.model.device.Qubit parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.params.pulse_channels">(qat.model.device.Resonator parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.pulse_channels">(Qubit attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.pulse_channels">(Resonator attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.pulse_control_contraints">pulse_control_contraints (Constraints attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel">PulseChannel (class in qat.purr.compiler.devices)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PulseChannel">PulseChannel (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel">(class in qat.purr.compiler.devices)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet">PulseChannelSet (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannelView">PulseChannelView (class in qat.purr.compiler.devices)</a>
 </li>
@@ -2872,24 +3099,31 @@
 </li>
       </ul></li>
       <li>
-    qat.model.autopopulate
+    qat.model.builder
 
       <ul>
-        <li><a href="qat.model.autopopulate.html#module-qat.model.autopopulate">module</a>
+        <li><a href="qat.model.builder.html#module-qat.model.builder">module</a>
 </li>
       </ul></li>
       <li>
-    qat.model.component
+    qat.model.device
 
       <ul>
-        <li><a href="qat.model.component.html#module-qat.model.component">module</a>
+        <li><a href="qat.model.device.html#module-qat.model.device">module</a>
 </li>
       </ul></li>
       <li>
-    qat.model.serialisation
+    qat.model.hardware_base
 
       <ul>
-        <li><a href="qat.model.serialisation.html#module-qat.model.serialisation">module</a>
+        <li><a href="qat.model.hardware_base.html#module-qat.model.hardware_base">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.model.hardware_model
+
+      <ul>
+        <li><a href="qat.model.hardware_model.html#module-qat.model.hardware_model">module</a>
 </li>
       </ul></li>
       <li>
@@ -3109,8 +3343,6 @@
         <li><a href="qat.purr.compiler.experimental.frontends.html#module-qat.purr.compiler.experimental.frontends">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.frontends
 
@@ -3118,6 +3350,8 @@
         <li><a href="qat.purr.compiler.frontends.html#module-qat.purr.compiler.frontends">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.hardware_models
 
@@ -3395,17 +3629,29 @@
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime">QuantumRuntime (class in qat.purr.compiler.runtime)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit">Qubit (class in qat.purr.compiler.devices)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit">Qubit (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit">(class in qat.purr.compiler.devices)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id">qubit_id (OperatorInfo attribute)</a>
+</li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">qubit_with_index() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QubitCoupling">QubitCoupling (class in qat.purr.compiler.devices)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels">QubitPulseChannels (class in qat.model.device)</a>
+</li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.QubitRegister">QubitRegister (class in qat.purr.integrations.qasm)</a>
 </li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits">qubits (QuantumHardwareModel property)</a>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubits">qubits (PhysicalHardwareModel attribute)</a>
 
       <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.params.qubits">(qat.model.hardware_model.PhysicalHardwareModel parameter)</a>
+</li>
+        <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits">(QuantumHardwareModel property)</a>
+</li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.qubits">(Section attribute)</a>
 </li>
       </ul></li>
@@ -3519,7 +3765,19 @@
       </ul></li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resolve_qb_pulse_channel">resolve_qb_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator">Resonator (class in qat.purr.compiler.devices)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Resonator">Resonator (class in qat.model.device)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator">(class in qat.purr.compiler.devices)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.params.resonator">resonator (qat.model.device.Qubit parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.resonator">(Qubit attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels">ResonatorPulseChannels (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resonators">resonators (QuantumHardwareModel property)</a>
 </li>
@@ -3553,6 +3811,8 @@
 </li>
       <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.ReturnSanitisationValidation">ReturnSanitisationValidation (class in qat.backend.validation_passes)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector.revert">revert() (DeviceInjector method)</a>
 
       <ul>
@@ -3569,8 +3829,6 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector.revert">(VariableInjector method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.Connectivity.Ring">Ring (Connectivity attribute)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency">rotating_frame_frequency (RTCSQubit property)</a>
@@ -3711,8 +3969,12 @@
 </li>
       <li><a href="qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.s_adj">s_adj() (QIRParser method)</a>
 </li>
-      <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.sample_time">sample_time (PulseChannel property)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.sample_time">sample_time (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.sample_time">(PulseChannel property)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.samples">samples (SimpleAcquire attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable.save_calibration_to_file">save_calibration_to_file() (Calibratable method)</a>
@@ -3727,8 +3989,14 @@
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale">Scale (class in qat.purr.integrations.features)</a>
 </li>
-      <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.scale">scale (Quantity attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.PulseChannel.scale">scale (PulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.scale">(qat.model.device.PulseChannel parameter)</a>
 </li>
+        <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.scale">(Quantity attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.SCOPE">SCOPE (AcquireMode attribute)</a>
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ScopingResult.scope2symbols">scope2symbols (ScopingResult attribute)</a>
@@ -3750,8 +4018,14 @@
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SechFunction">SechFunction (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.second_state">second_state (ChannelType attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.second_state">(QubitPulseChannels attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.SecondStatePulse">SecondStatePulse (class in qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel">SecondStatePulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section">Section (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
@@ -3813,8 +4087,6 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.set_ph_delta">set_ph_delta() (SequenceBuilder method)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.Component.set_ref_fields">set_ref_fields() (Component method)</a>
-</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SETUP_HOLD">SETUP_HOLD (PulseShapeType attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SetupHoldFunction">SetupHoldFunction (class in qat.purr.backends.utilities)</a>
@@ -3845,12 +4117,12 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.SIMULATION">SIMULATION (QatConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN">SIN (PulseShapeType attribute)</a>
@@ -4025,8 +4297,6 @@
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Tdg">Tdg() (InstructionBuilder method)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.Component.temporary_unfreeze">temporary_unfreeze() (Component method)</a>
-</li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.TERA">TERA (Scale attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.threshold">threshold (ThresholdedAcqConfig attribute)</a>
@@ -4059,20 +4329,14 @@
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQasmParser">TketQasmParser (class in qat.purr.integrations.tket)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.Component.to_component_id">to_component_id() (Component method)</a>
-
-      <ul>
-        <li><a href="qat.model.component.html#qat.model.component.ComponentId.to_component_id">(ComponentId method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.FeatureMetadata.to_json_dict">to_json_dict() (FeatureMetadata method)</a>
 
       <ul>
         <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.OpenPulseFeatures.to_json_dict">(OpenPulseFeatures method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.transform_to_value">transform_to_value() (Qasm3Parser method)</a>
 </li>
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass">TransformPass (class in qat.ir.pass_base)</a>
@@ -4137,10 +4401,10 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.UntargetedPulse">UntargetedPulse (class in qat.purr.integrations.qasm)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.upd_param">upd_param() (SequenceBuilder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.update">update() (ResultManager method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">UPDATE_PARAMETERS (Opcode attribute)</a>
@@ -4149,17 +4413,23 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path1">upsample_rate_path1 (AwgConfig attribute)</a>
 </li>
-      <li><a href="qat.model.component.html#qat.model.component.ComponentId.uuid">uuid (ComponentId attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Component.uuid">uuid (Component attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Component.params.uuid">(qat.model.device.Component parameter)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.validate">validate() (InstructionExecutionEngine method)</a>
+      <li><a href="qat.model.device.html#qat.model.device.CalibratablePositiveFloat.validate">validate() (CalibratablePositiveFloat class method)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.validate">(InstructionExecutionEngine method)</a>
+</li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.validate">(LiveDeviceEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.validate">(NewQbloxLiveEngine method)</a>
@@ -4177,6 +4447,8 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel.validate">(WarnOnExtraFieldsModel class method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity">validate_connectivity() (PhysicalHardwareModel class method)</a>
+</li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.validate_input_array">validate_input_array() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass">ValidationPass (class in qat.ir.pass_base)</a>
@@ -4199,10 +4471,10 @@
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationEngine">VerificationEngine (class in qat.purr.backends.verification)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationError">VerificationError</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.VerificationModel">VerificationModel (class in qat.purr.backends.verification)</a>
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.verify_instructions">verify_instructions() (in module qat.purr.backends.verification)</a>
@@ -4217,7 +4489,15 @@
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.verify_program">verify_program() (in module qat.purr.backends.verification)</a>
 </li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.version">version (LogicalHardwareModel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.params.version">(qat.model.hardware_model.LogicalHardwareModel parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.version">version() (Qasm3Parser method)</a>
+</li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.version_compatibility">version_compatibility() (LogicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.visit_BinaryExpression">visit_BinaryExpression() (Qasm3ParserBase method)</a>
 </li>

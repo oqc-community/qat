@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.model.serialisation module" href="qat.model.serialisation.html" />
-    <link rel="prev" title="qat.model.device module" href="qat.model.device.html" /> 
+    <link rel="next" title="qat.purr package" href="qat.purr.html" />
+    <link rel="prev" title="qat.model.hardware_base module" href="qat.model.hardware_base.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -71,11 +71,10 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.model.html">qat.model package</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="qat.model.autopopulate.html">qat.model.autopopulate module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.component.html">qat.model.component module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html">qat.model.hardware_base module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.model.hardware_model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.serialisation.html">qat.model.serialisation module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -192,8 +191,143 @@
              
 
 
-  <section id="qat-model-hardware-model-module">
-<h1>qat.model.hardware_model module<a class="headerlink" href="#qat-model-hardware-model-module" title="Link to this heading"></a></h1>
+  <section id="module-qat.model.hardware_model">
+<span id="qat-model-hardware-model-module"></span><h1>qat.model.hardware_model module<a class="headerlink" href="#module-qat.model.hardware_model" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LogicalHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel" title="qat.utils.pydantic.WarnOnExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarnOnExtraFieldsModel</span></code></a></p>
+<p>Models a hardware with a given connectivity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.model.hardware_model.LogicalHardwareModel.params.version"></span><strong>version</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.LogicalHardwareModel.params.version">¶</a> – Semantic version of the hardware model.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.LogicalHardwareModel.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.LogicalHardwareModel.params.logical_connectivity">¶</a> – Connectivity of the qubits in the hardware model.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.logical_connectivity">
+<span class="sig-name descname"><span class="pre">logical_connectivity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[QubitId,</span> <span class="pre">set[QubitId]]</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.logical_connectivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">ComputedFieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">FieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'logical_connectivity':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">required=True),</span> <span class="pre">'version':</span> <span class="pre">FieldInfo(annotation=SemanticVersion,</span> <span class="pre">required=False,</span> <span class="pre">default=Version(major=0,</span> <span class="pre">minor=0,</span> <span class="pre">patch=1,</span> <span class="pre">prerelease=None,</span> <span class="pre">build=None),</span> <span class="pre">frozen=True,</span> <span class="pre">repr=False)}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SemanticVersion</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.version_compatibility">
+<span class="sig-name descname"><span class="pre">version_compatibility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.version_compatibility" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.model.hardware_model.LogicalHardwareModel" title="qat.model.hardware_model.LogicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicalHardwareModel</span></code></a></p>
+<p>Class for calibrating our QPU hardware.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.qubits"></span><strong>qubits</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.qubits">¶</a> – The superconducting qubits on the chip.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity">¶</a> – The connectivities of the physical qubits on the QPU.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity">¶</a> – The connectivities of the qubits used for compilation,
+which is equal to <cite>physical_connectivity</cite> or a subset thereof.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.calibrated">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibrated</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.calibrated" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.logical_connectivity">
+<span class="sig-name descname"><span class="pre">logical_connectivity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[dict[QubitId,</span> <span class="pre">set[QubitId]]]</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.logical_connectivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">ComputedFieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">FieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'logical_connectivity':</span> <span class="pre">FieldInfo(annotation=Union[dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'physical_connectivity':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">required=True,</span> <span class="pre">frozen=True),</span> <span class="pre">'qubits':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">Qubit],</span> <span class="pre">required=True),</span> <span class="pre">'version':</span> <span class="pre">FieldInfo(annotation=SemanticVersion,</span> <span class="pre">required=False,</span> <span class="pre">default=Version(major=0,</span> <span class="pre">minor=0,</span> <span class="pre">patch=1,</span> <span class="pre">prerelease=None,</span> <span class="pre">build=None),</span> <span class="pre">frozen=True,</span> <span class="pre">repr=False)}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity">
+<span class="sig-name descname"><span class="pre">physical_connectivity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[QubitId,</span> <span class="pre">set[QubitId]]</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">
+<span class="sig-name descname"><span class="pre">qubit_with_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.qubits">
+<span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[QubitId,</span> <span class="pre">Qubit]</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.qubits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -201,8 +335,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.model.device.html" class="btn btn-neutral float-left" title="qat.model.device module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.model.serialisation.html" class="btn btn-neutral float-right" title="qat.model.serialisation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.model.hardware_base.html" class="btn btn-neutral float-left" title="qat.model.hardware_base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.html" class="btn btn-neutral float-right" title="qat.purr package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

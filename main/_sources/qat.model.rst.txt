@@ -12,8 +12,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.model.autopopulate
-   qat.model.component
+   qat.model.builder
    qat.model.device
+   qat.model.hardware_base
    qat.model.hardware_model
-   qat.model.serialisation
