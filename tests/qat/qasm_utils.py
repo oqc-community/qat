@@ -90,7 +90,7 @@ def get_default_qasm3_gate_qasms():
             arg_string = (
                 ""
                 if needed_num_args == 0
-                else "(" + ", ".join(["0"] * needed_num_args) + ")"
+                else "(" + ", ".join(["1.2"] * needed_num_args) + ")"
             )
             N = len(defi.qubits)
             qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
