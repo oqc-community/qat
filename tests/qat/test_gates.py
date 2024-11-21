@@ -132,8 +132,7 @@ class TestDoubleGates:
         product of this gate with the identity matrix.
 
         """
-        if func_name == "had":
-            pytest.skip("Hadamard is ill defined")
+
         builder = self.model.create_builder()
         gate_method = getattr(builder, func_name)
         gate_method(self.model.get_qubit(qubit), *args)
