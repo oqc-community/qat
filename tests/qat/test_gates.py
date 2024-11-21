@@ -14,9 +14,29 @@ from tests.qat.utils.matrix_builder import Gates, get_default_matrix_hardware
 
 
 def assert_same_up_to_phase(gate1, gate2):
+    """
+    If gates U_{1} and U_{2} are equivalent upto a global phase (U_{2} = e^{-i\\gamma} U_{1}), then
+
+        U_{2}^{\\dagger} x U_{1} = e^{-i\\gamma} * identity.
+
+    This fact can be used to test that this is true.
+    """
     gate = np.conj(np.transpose(gate1)) @ gate2
-    gate /= gate[0, 0]
-    assert np.isclose(gate, np.eye(np.shape(gate1)[0])).all()
+    if np.isclose(gate[0, 0], 0.0 + 0.0j):
+        assert False
+    assert np.isclose(gate / gate[0, 0], np.eye(np.shape(gate1)[0])).all()
+
+
+def extend_gate(gate, num_qubits, pos=0):
+    """
+    Used to extend a gate on a connected subsystem of qubits to a large number of qubits,
+    num_qubits. The position of the first gate is given by pos.
+    """
+
+    num_qubits_gate = int(np.log2(np.size(gate, 0)))
+    id_before = np.eye(2**pos)
+    id_after = np.eye(2 ** (num_qubits - num_qubits_gate - pos))
+    return np.kron(np.kron(id_before, gate), id_after)
 
 
 def single_gate_list():
@@ -41,30 +61,38 @@ def single_gate_list():
     return func_to_gates
 
 
+@pytest.mark.parametrize("num_qubits", [1, 2, 3])
 class TestSingleGates:
-
-    model = get_default_matrix_hardware(1)
 
     @pytest.mark.parametrize(
         ["func_name", "args", "gate"],
         [(val[0], val[2], val[1]) for val in single_gate_list().values()],
     )
-    def test_gates(self, func_name, args, gate):
+    def test_gates(self, func_name, args, gate, num_qubits):
         """Tests that the decomposition of single gates matches their definition."""
-        builder = self.model.create_builder()
-        gate_method = getattr(builder, func_name)
-        gate_method(self.model.get_qubit(0), *args)
-        assert_same_up_to_phase(builder.matrix, gate)
+        model = get_default_matrix_hardware(num_qubits)
 
-    def test_hadamard(self):
+        for pos in range(num_qubits):
+            builder = model.create_builder()
+            gate_method = getattr(builder, func_name)
+            gate_method(model.get_qubit(pos), *args)
+            assert_same_up_to_phase(builder.matrix, extend_gate(gate, num_qubits, pos))
+
+    def test_hadamard(self, num_qubits):
         """The Hadamard has various decompositions - test them also."""
-        builder = self.model.create_builder()
-        builder.had(self.model.get_qubit(0))
+        model = get_default_matrix_hardware(num_qubits)
+        decompositions = [
+            Gates.z() @ Gates.ry(-np.pi / 2),
+            Gates.ry(np.pi / 2) @ Gates.z(),
+            Gates.x() @ Gates.ry(np.pi / 2),
+            Gates.ry(-np.pi / 2) @ Gates.x(),
+        ]
 
-        assert_same_up_to_phase(builder.matrix, Gates.z() @ Gates.ry(-np.pi / 2))
-        assert_same_up_to_phase(builder.matrix, Gates.ry(np.pi / 2) @ Gates.z())
-        assert_same_up_to_phase(builder.matrix, Gates.x() @ Gates.ry(np.pi / 2))
-        assert_same_up_to_phase(builder.matrix, Gates.ry(-np.pi / 2) @ Gates.x())
+        for pos in range(num_qubits):
+            builder = model.create_builder()
+            builder.had(model.get_qubit(pos))
+            for gate in decompositions:
+                assert_same_up_to_phase(builder.matrix, extend_gate(gate, num_qubits, pos))
 
 
 def double_gate_list():
@@ -87,60 +115,36 @@ def double_gate_rev_list():
     return func_to_gates
 
 
+@pytest.mark.parametrize("num_qubits", [2, 3, 4])
 class TestDoubleGates:
-
-    model = get_default_matrix_hardware(2)
-
     @pytest.mark.parametrize(
         ["func_name", "args", "gate"],
         [(val[0], val[2], val[1]) for val in double_gate_list().values()],
     )
-    def test_two_gates(self, func_name, args, gate):
+    def test_two_gates(self, func_name, args, gate, num_qubits):
         """Test the various two gates supported by our builders."""
-        builder = self.model.create_builder()
-        gate_method = getattr(builder, func_name)
-        gate_method(self.model.get_qubit(0), self.model.get_qubit(1), *args)
-        assert_same_up_to_phase(builder.matrix, gate)
+        model = get_default_matrix_hardware(num_qubits)
+        for pos in range(num_qubits - 1):
+            builder = model.create_builder()
+            gate_method = getattr(builder, func_name)
+            gate_method(model.get_qubit(pos), model.get_qubit(pos + 1), *args)
+            assert_same_up_to_phase(builder.matrix, extend_gate(gate, num_qubits, pos))
 
     @pytest.mark.parametrize(
         ["func_name", "args", "gate"],
         [(val[0], val[2], val[1]) for val in double_gate_rev_list().values()],
     )
-    def test_two_gates_rev(self, func_name, args, gate):
+    def test_two_gates_rev(self, func_name, args, gate, num_qubits):
         """
         Test the various two gates supported by our builders with qubit order
         reversed.
         """
-        builder = self.model.create_builder()
-        gate_method = getattr(builder, func_name)
-        gate_method(self.model.get_qubit(1), self.model.get_qubit(0), *args)
-        assert_same_up_to_phase(builder.matrix, gate)
-
-    @pytest.mark.parametrize(
-        ["func_name", "args", "gate", "qubit"],
-        [
-            (val[0], val[2], val[1], qubit)
-            for val in single_gate_list().values()
-            for qubit in [0, 1]
-        ],
-    )
-    def test_single_gates(self, func_name, args, gate, qubit):
-        """
-        Tests that the decomposition of single gates matches their definition when
-        applied to a multi-qubit model. Basically a sanity check that if gates are
-        only applied to a single qubit, then the resulting circuit is a tensor
-        product of this gate with the identity matrix.
-
-        """
-
-        builder = self.model.create_builder()
-        gate_method = getattr(builder, func_name)
-        gate_method(self.model.get_qubit(qubit), *args)
-        if qubit == 0:
-            gate = np.kron(gate, np.eye(2))
-        else:
-            gate = np.kron(np.eye(2), gate)
-        assert_same_up_to_phase(builder.matrix, gate)
+        model = get_default_matrix_hardware(num_qubits)
+        for pos in range(num_qubits - 1):
+            builder = model.create_builder()
+            gate_method = getattr(builder, func_name)
+            gate_method(model.get_qubit(pos + 1), model.get_qubit(pos), *args)
+            assert_same_up_to_phase(builder.matrix, extend_gate(gate, num_qubits, pos))
 
 
 class TestQasm2:
@@ -159,7 +163,7 @@ class TestQasm2:
         """Check that each QASM2 gate can be parsed individually."""
         # Skip some gates
         if gate.name == "rccx" or gate.name == "rc3x":
-            pytest.skip("Gates are defined by their decompositions. Difficult to compare.")
+            pytest.skip("Gate is defined by its decompositions. Difficult to compare.")
         elif gate.name == "delay":
             pytest.skip("Delay not implemented.")
         elif gate.name == "id" or gate.name == "u0":
