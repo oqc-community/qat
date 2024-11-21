@@ -51,18 +51,15 @@ class TestSingleGates:
     )
     def test_gates(self, func_name, args, gate):
         """Tests that the decomposition of single gates matches their definition."""
-        if func_name == "had":
-            pytest.skip("Hadamard is ill defined")
         builder = self.model.create_builder()
         gate_method = getattr(builder, func_name)
         gate_method(self.model.get_qubit(0), *args)
         assert_same_up_to_phase(builder.matrix, gate)
 
-    @pytest.mark.skip("Hadamard gates currently have a non-standard implementation")
     def test_hadamard(self):
         """The Hadamard has various decompositions - test them also."""
         builder = self.model.create_builder()
-        builder.h(self.model.get_qubit(0))
+        builder.had(self.model.get_qubit(0))
 
         assert_same_up_to_phase(builder.matrix, Gates.z() @ Gates.ry(-np.pi / 2))
         assert_same_up_to_phase(builder.matrix, Gates.ry(np.pi / 2) @ Gates.z())

@@ -285,8 +285,8 @@ class InstructionBuilder:
         raise NotImplementedError("Not available on this hardware model.")
 
     def had(self, qubit: Qubit):
-        self.Y(qubit, math.pi / 2)
-        return self.Z(qubit)
+        self.Z(qubit)
+        return self.Y(qubit, math.pi / 2)
 
     def post_processing(
         self, acq: Acquire, process, axes=None, target: Qubit = None, args=None
