@@ -12,6 +12,7 @@ from qat.model.hardware_base import (
     CalibratablePositiveFloat,
     CalibratableUnitInterval,
     QubitId,
+    ValidatedDict,
 )
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -70,7 +71,9 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     qubits: dict[QubitId, Qubit]
     physical_connectivity: dict[QubitId, set[QubitId]] = Field(frozen=True)
     logical_connectivity: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
-    physical_connectivity_quality: dict[tuple[QubitId, QubitId], CalibratableUnitInterval]
+    physical_connectivity_quality: ValidatedDict[
+        tuple[QubitId, QubitId], CalibratableUnitInterval
+    ]
 
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):

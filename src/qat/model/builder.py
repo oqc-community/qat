@@ -15,7 +15,7 @@ from qat.model.device import (
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
-from qat.model.hardware_base import QubitId
+from qat.model.hardware_base import CalibratableUnitInterval, QubitId
 from qat.model.hardware_model import PhysicalHardwareModel
 
 
@@ -24,6 +24,7 @@ class PhysicalHardwareModelBuilder:
     A builder class that builds a physical hardware model based on the given connectivity.
 
     :param physical_connectivity: The connectivities of the physical qubits on the QPU.
+    :param physical_connectivity_quality: Quality of the connections between the qubits.
     :param logical_connectivity: The connectivities of the qubits used for compilation,
                             which is equal to `physical_connectivity` or a subset thereof.
     """
@@ -31,13 +32,15 @@ class PhysicalHardwareModelBuilder:
     def __init__(
         self,
         physical_connectivity: dict[int, set[int]],
+        physical_connectivity_quality: dict[
+            tuple[QubitId, QubitId], CalibratableUnitInterval
+        ] = None,
         logical_connectivity: Optional[dict[int, set[int]]] = None,
-        physical_connectivity_quality: None = None,
     ):
         self._current_model = self._build_uncalibrated_hardware_model(
             physical_connectivity=physical_connectivity,
-            logical_connectivity=logical_connectivity,
             physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity=logical_connectivity,
         )
 
     @property
@@ -85,8 +88,8 @@ class PhysicalHardwareModelBuilder:
         return PhysicalHardwareModel(
             qubits=qubits,
             logical_connectivity=logical_connectivity,
-            physical_connectivity=physical_connectivity,
             physical_connectivity_quality=physical_connectivity_quality,
+            physical_connectivity=physical_connectivity,
         )
 
     def _build_uncalibrated_baseband(self):

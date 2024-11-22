@@ -8,13 +8,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Uni
 
 import numpy as np
 
-from qat.model.device import (
-    PhysicalBaseband,
-    PhysicalChannel,
-    PulseChannel,
-    Qubit,
-    Resonator,
-)
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,

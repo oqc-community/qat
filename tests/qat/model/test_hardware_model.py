@@ -242,7 +242,7 @@ class Test_HW_Calibration:
 
 @pytest.mark.parametrize("n_qubits", [8, 16, 32, 64])
 @pytest.mark.parametrize("seed", [1, 2, 3])
-class Test_HW_Topology:
+class Test_HW_Connectivity:
     def test_constrained_connectivity_subgraph(self, n_qubits, seed):
         physical_connectivity, _, logical_connectivity = generate_connectivity_data(
             n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
@@ -263,6 +263,30 @@ class Test_HW_Topology:
                 physical_connectivity=physical_connectivity,
                 logical_connectivity=wrong_connectivity,
             )
+
+    def test_invalid_connectivity_quality(self, n_qubits, seed):
+        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+            generate_connectivity_data(
+                n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
+            )
+        )
+
+        hw = PhysicalHardwareModelBuilder(
+            physical_connectivity=physical_connectivity,
+            logical_connectivity=logical_connectivity,
+            physical_connectivity_quality=physical_connectivity_quality,
+        ).model
+
+        for q_index in hw.physical_connectivity_quality:
+            with pytest.raises(ValueError):
+                hw.physical_connectivity_quality.update(
+                    {q_index: random.Random(seed).uniform(-1.0, -0.001)}
+                )
+
+            with pytest.raises(ValueError):
+                hw.physical_connectivity_quality.update(
+                    {q_index: random.Random(seed).uniform(1.001, 100.0)}
+                )
 
 
 @pytest.mark.parametrize("seed", [500, 501, 502])

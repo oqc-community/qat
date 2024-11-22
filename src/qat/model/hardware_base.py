@@ -1,45 +1,68 @@
 from __future__ import annotations
 
+from typing import Annotated, TypeVar, get_args
+
 import numpy as np
-from pydantic import NonNegativeInt
-from pydantic_core import core_schema
+from annotated_types import Predicate
+from pydantic import NonNegativeInt, RootModel
 
 # This base file is used to implement classes/methods common to all hardware.
 
 QubitId = NonNegativeInt
 
 
-class CalibratablePositiveFloat(float):
-    """
-    A calibratable float whose value must be >=0.
-    """
-
-    @classmethod
-    def validate(cls, v):
-        if not np.isnan(v) and v < 0.0:
-            raise ValueError(f"Given value {v} must be >=0.")
-        return cls(v)
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, source_type, handler) -> core_schema.CoreSchema:
-        return core_schema.no_info_plain_validator_function(cls.validate)
-
-    def __eq__(self, other: CalibratablePositiveFloat):
-        if np.isnan(self) and np.isnan(other):
-            return True
-        else:
-            return super().__eq__(other)
+def validate_calibratable_positive_float(v: CalibratablePositiveFloat):
+    if not np.isnan(v) and v < 0.0:
+        raise ValueError(f"Given value {v} must be >=0.")
+    return v
 
 
-class CalibratableUnitInterval(CalibratablePositiveFloat):
-    """
-    A calibratable float whose value must lie in the interval [0, 1].
-    """
+CalibratablePositiveFloat = Annotated[
+    float,
+    Predicate(validate_calibratable_positive_float),
+    validate_calibratable_positive_float,
+]
 
-    @classmethod
-    def validate(cls, v):
-        super().validate(v)
 
-        if not np.isnan(v) and v > 1.0:
-            raise ValueError("Given value {v} must be <= 1.")
-        return cls(v)
+def validate_calibratable_unit_interval(v: CalibratableUnitInterval):
+    if not np.isnan(v):
+        if v < 0.0 or v > 1.0:
+            raise ValueError("Given value {v} must be in the interval [0, 1].")
+    return v
+
+
+CalibratableUnitInterval = Annotated[
+    float,
+    Predicate(validate_calibratable_unit_interval),
+    validate_calibratable_unit_interval,
+]
+
+K = TypeVar("K")
+V = TypeVar("V", CalibratablePositiveFloat, CalibratableUnitInterval)
+
+
+class ValidatedDict(RootModel[dict[K, V]]):
+    root: dict[K, V]
+
+    def __setitem__(self, key, value):
+        field_type = self.model_fields["root"].annotation
+        f_validate = get_args(get_args(field_type)[1])[-1]
+
+        value = f_validate(value)
+        self.root[key] = value
+
+    def __getitem__(self, key):
+        return self.root.get(key, None)
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __eq__(self, other: ValidatedDict):
+        return self.root.__eq__(other)
+
+    def update(self, data: dict[K, V]):
+        for key, value in data.items():
+            self.__setitem__(key, value)
+
+    def __repr__(self):
+        return self.root.__repr__()
