@@ -48,7 +48,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependancies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
         run: poetry install --sync --with dev
 
       - name: Formatting tests
@@ -94,7 +94,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependancies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
         run: poetry install --sync
 
       - name: Unit tests
