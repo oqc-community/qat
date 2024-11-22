@@ -98,4 +98,4 @@ jobs:
         run: poetry install --sync
 
       - name: Unit tests
-        run: poetry run pytest --benchmark-skip
+        run: poetry run pytest -n auto --benchmark-skip
