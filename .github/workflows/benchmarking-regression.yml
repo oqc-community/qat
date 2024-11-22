@@ -25,6 +25,10 @@ jobs:
         shell: bash
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Set up Python 3.x
         id: setup-python
         uses: actions/setup-python@v5
@@ -43,10 +47,6 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-        
-      - uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Install dependancies
         if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
