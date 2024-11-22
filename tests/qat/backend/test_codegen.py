@@ -1,8 +1,14 @@
 import numpy as np
 import pytest
 
-from qat.backend.analysis_passes import BindingPass, TILegalisationPass, TriagePass
+from qat.backend.analysis_passes import (
+    BindingPass,
+    TILegalisationPass,
+    TriagePass,
+    TriageResult,
+)
 from qat.backend.transform_passes import (
+    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
@@ -344,6 +350,7 @@ class TestNewQbloxEmitter(InvokerMixin):
             | RepeatSanitisation()
             | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
@@ -360,6 +367,8 @@ class TestNewQbloxEmitter(InvokerMixin):
         runtime.run_pass_pipeline(builder, res_mgr, model, engine)
 
         self.run_pass_pipeline(builder, res_mgr, model)
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+
         packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == len(qubit_indices)
 
@@ -377,7 +386,8 @@ class TestNewQbloxEmitter(InvokerMixin):
             )
 
             assert acquire_pkg.sequence.acquisitions
-            assert f"freq{qubit.index}_0" in acquire_pkg.sequence.program
+            for sweep in triage_result.sweeps:
+                assert f"sweep_{hash(sweep)}_0" in acquire_pkg.sequence.program
 
             if measure_pulse.shape == PulseShapeType.SQUARE:
                 assert not acquire_pkg.sequence.waveforms
@@ -413,6 +423,7 @@ class TestNewQbloxEmitter(InvokerMixin):
         try:
             injectors.inject()
             self.run_pass_pipeline(builder, res_mgr, model)
+
             packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
             assert len(packages) == 2 * len(qubit_indices)
 
