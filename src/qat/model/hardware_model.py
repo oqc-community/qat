@@ -3,11 +3,11 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
-from qat.model.device import Qubit
+from qat.model.device import CalibratablePositiveFloat, Qubit
 from qat.model.hardware_base import QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -19,10 +19,12 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
 
     :param version: Semantic version of the hardware model.
     :param logical_connectivity: Connectivity of the qubits in the hardware model.
+    :param logical_coupling_map: Quality of the connections between the qubits. As the connectivity is directional, the second element in `tuple[QubitId, QubitId]` is the qui
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
-    logical_connectivity: dict[QubitId, set[QubitId]]
+    logical_connectivity: dict[QubitId, set[tuple[QubitId, CalibratablePositiveFloat]]]
+    logical_coupling_map: dict[tuple[QubitId, QubitId], CalibratablePositiveFloat]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -33,6 +35,37 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
             VERSION >= version
         ), f"Latest supported hardware model version {VERSION}, found {version}"
         return VERSION
+
+    @model_validator(mode="before")
+    def default_logical_coupling_map(cls, data):
+        if not data.get("logical_coupling_map", None):
+            logical_coupling_map = {}
+            logical_connectivity = data["logical_connectivity"]
+
+            for q1_index, connected_qubits in logical_connectivity.items():
+                for q2_index in connected_qubits:
+                    logical_coupling_map[(q1_index, q2_index)] = 1.0
+
+            data["logical_coupling_map"] = logical_coupling_map
+
+        return data
+
+    @model_validator(mode="after")
+    def validate_qubit_coupling(self):
+        for q1_index, q2_index in self.logical_coupling_map:
+            if not self.logical_connectivity.get(q1_index, None):
+                raise ValidationError(
+                    f"The coupling ({q1_index}, {q2_index}) is not present in `logical_connectivity`."
+                )
+
+        for q1_index, connected_qubits in self.logical_connectivity.items():
+            for q2_index in connected_qubits:
+                if (q1_index, q2_index) not in self.logical_coupling_map:
+                    raise ValidationError(
+                        f"The coupling ({q1_index}, {q2_index}) is not present in `logical_coupling_map`."
+                    )
+
+        return self
 
     def __eq__(self, other: LogicalHardwareModel) -> bool:
         if type(self) != type(other):
@@ -67,21 +100,25 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     logical_connectivity: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
 
     @model_validator(mode="before")
-    def validate_connectivity(cls, data):
-        physical_connectivity = data["physical_connectivity"]
-        logical_connectivity = data.get("logical_connectivity", None)
-
-        if not logical_connectivity:
+    def default_logical_connectivity(cls, data):
+        if not data.get("logical_connectivity", None):
             logical_connectivity = deepcopy(data["physical_connectivity"])
             data["logical_connectivity"] = logical_connectivity
 
-        for qubit_index in logical_connectivity:
-            if not logical_connectivity[qubit_index] <= physical_connectivity[qubit_index]:
+        return data
+
+    @model_validator(mode="after")
+    def validate_connectivity(self):
+        for qubit_index in self.logical_connectivity:
+            if (
+                not self.logical_connectivity[qubit_index]
+                <= self.physical_connectivity[qubit_index]
+            ):
                 raise ValueError(
                     "Logical connectivity must be a subgraph of the physical connectivity."
                 )
 
-        return data
+        return self
 
     def __eq__(self, other: PhysicalHardwareModel) -> bool:
         base_eq = super().__eq__(other)

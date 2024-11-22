@@ -32,10 +32,12 @@ class PhysicalHardwareModelBuilder:
         self,
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: Optional[dict[int, set[int]]] = None,
+        logical_coupling_map: None = None,
     ):
         self._current_model = self._build_uncalibrated_hardware_model(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
+            logical_coupling_map=logical_coupling_map,
         )
 
     @property

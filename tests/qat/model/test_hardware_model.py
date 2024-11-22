@@ -43,6 +43,14 @@ def pick_subconnectivity(connectivity, n, seed=42):
     return sub_connectivity
 
 
+def random_coupling_map(connectivity, seed=42):
+    coupling_map = {}
+    for q1_index, connected_qubits in connectivity.items():
+        for q2_index in connected_qubits:
+            coupling_map[(q1_index, q2_index)] = random.Random(seed).uniform(0.0, 1.0)
+    return coupling_map
+
+
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
 @pytest.mark.parametrize("n", [0, 2, 4])
 @pytest.mark.parametrize("seed", [1, 2, 3])
@@ -52,10 +60,12 @@ class Test_HW_Serialisation:
         logical_connectivity = pick_subconnectivity(
             physical_connectivity, min(n, n_qubits // 2), seed=seed
         )
+        logical_coupling_map = random_coupling_map(logical_connectivity, seed=seed)
 
         builder = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
+            logical_coupling_map=logical_coupling_map,
         )
 
         hw1 = builder.model

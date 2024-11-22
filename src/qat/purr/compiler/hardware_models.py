@@ -8,6 +8,13 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Uni
 
 import numpy as np
 
+from qat.model.device import (
+    PhysicalBaseband,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    Resonator,
+)
 from qat.purr.compiler.devices import (
     Calibratable,
     ChannelType,
@@ -557,3 +564,6 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             )
 
         self.__dict__.update(state)
+
+    def model_dump(self):
+        pass

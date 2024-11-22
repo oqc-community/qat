@@ -26,7 +26,7 @@ class CalibratablePositiveFloat(float):
         if np.isnan(self) and np.isnan(other):
             return True
         else:
-            return self.__eq__(other)
+            return super().__eq__(other)
 
 
 class Component(WarnOnExtraFieldsModel):
