@@ -1,3 +1,5 @@
+from compiler_config.config import CompilerConfig
+
 from qat.ir.pass_base import ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -48,6 +50,17 @@ class NCOFrequencyVariability(ValidationPass):
         for channel in model.pulse_channels.values():
             if channel.fixed_if:
                 raise ValueError("Cannot allow constance of the NCO frequency")
+
+
+class HardwareConfigValidity(ValidationPass):
+    def __init__(
+        self, hardware_model: QuantumHardwareModel, compiler_config: CompilerConfig
+    ):
+        self.hardware_model = hardware_model
+        self.compiler_config = compiler_config
+
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        self.compiler_config.validate(self.hardware_model)
 
 
 # TODO - bring in stuff from verification.py in here in the form of a pass (or a bunch of passes)

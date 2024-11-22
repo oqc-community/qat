@@ -6,6 +6,7 @@ import numpy as np
 from qat import qatconfig
 from qat.ir.pass_base import ValidationPass
 from qat.ir.result_base import ResultManager
+from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
 from qat.purr.compiler.execution import QuantumExecutionEngine
@@ -97,6 +98,9 @@ class ReadoutValidation(ValidationPass):
             raise ValueError(
                 f"Expected to find an instance of {QuantumHardwareModel} in arguments list, but got {model} instead"
             )
+
+        if not isinstance(model, LiveHardwareModel):
+            return
 
         consumed_qubits: List[str] = []
         chanbits_map = {}
