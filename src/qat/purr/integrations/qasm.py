@@ -816,10 +816,12 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             self.visit(node, context)
 
     def visit_Include(self, node: ast.Include, context: QasmContext):
-        if node.filename in ("stdgates.inc", "qelib1.inc"):
+        if node.filename == "qelib1.inc":
             file_path = Path(
                 find_spec("qiskit.qasm.libs").submodule_search_locations[0], node.filename
             )
+        elif node.filename == "stdgates.inc":
+            file_path = Path(Path(__file__).parent, "grammars", node.filename)
         else:
             file_path = Path(node.filename)
         if not file_path.is_file():
@@ -983,24 +985,30 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             case "u" | "U":
                 theta, phi, _lambda = arguments
                 return self.add_unitary(theta, phi, _lambda, target_qubits, self.builder)
-            case "cu" | "CU":
-                raise NotImplementedError("Controlled Unitary gate is not yet supported.")
             case "cx" | "CX":
                 return self.add_cnot(*target_qubits, self.builder)
             case "ecr" | "ECR":
                 return self.add_ecr(target_qubits, self.builder)
 
+        if len(node.modifiers) > 0:
+            raise NotImplementedError("Gate modifiers are not yet supported.")
+
         gate_context = QasmContext(
             Registers(),
             context.gates,
-            dict(context.variables),
+            dict(),
         )
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
             for arg, value in zip(gate_def.arguments, arguments):
-                self._attempt_declaration(
-                    Variable(self.visit(arg, context), type(value), value), gate_context
-                )
+                if (known_var := context.variables.get(arg.name, None)) is not None:
+                    self._attempt_declaration(
+                        Variable(known_var.name, type(value), value), gate_context
+                    )
+                else:
+                    self._attempt_declaration(
+                        Variable(self.visit(arg, context), type(value), value), gate_context
+                    )
             for qb_name, value in zip(gate_def.qubits, target_qubits):
                 if isinstance(qb_name, (QubitRegister, Qubit)):
                     continue
