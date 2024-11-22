@@ -26,7 +26,6 @@ from qat.purr.compiler.instructions import (
     ResultsProcessing,
     Return,
     Sweep,
-    SweepValue,
     Variable,
 )
 
@@ -60,7 +59,6 @@ class TriagePass(AnalysisPass):
         """
 
         targets = set()
-        reads: Dict[PulseChannel, Set[str]] = defaultdict(set)
         for inst in builder.instructions:
             if isinstance(inst, QuantumInstruction):
                 if isinstance(inst, PostProcessing):
@@ -71,9 +69,6 @@ class TriagePass(AnalysisPass):
                             targets.add(qt)
                 else:
                     targets.update(inst.quantum_targets)
-
-            if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
-                reads[inst.target].add(inst.value.name)
 
         result = TriageResult()
         for inst in builder.instructions:
@@ -86,18 +81,8 @@ class TriagePass(AnalysisPass):
                     else:
                         result.target_map[qt].append(inst)
             elif isinstance(inst, Sweep):
-                count = len(next(iter(inst.variables.values())))
                 for t in targets:
-                    variables = [
-                        SweepValue(name, value)
-                        for name, value in inst.variables.items()
-                        if name in reads[t]
-                    ] or [
-                        SweepValue(
-                            f"sweep_{hash(inst)}", np.linspace(1, count, count, dtype=int)
-                        )
-                    ]
-                    result.target_map[t].append(Sweep(variables))
+                    result.target_map[t].append(inst)
             else:
                 for t in targets:
                     result.target_map[t].append(inst)
@@ -253,9 +238,7 @@ class BindingPass(AnalysisPass):
                     for name, value in inst.variables.items():
                         scoping_result.scope2symbols[scope].add(name)
                         scoping_result.symbol2scopes[name].append(scope)
-
                         iter_bound_result[name] = self.extract_iter_bound(value)
-
                         rw_result.writes[name].append(inst)
                 elif isinstance(inst, Repeat):
                     stack.append(inst)
@@ -266,15 +249,13 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
-                    # TODO - Desugaring could be much better when the IR is redesigned
-                    name = f"repeat_{inst.repeat_count}_{hash(inst)}"
+                    name = f"repeat_{hash(inst)}"
+                    count = inst.repeat_count
                     scoping_result.scope2symbols[scope].add(name)
                     scoping_result.symbol2scopes[name].append(scope)
-
                     iter_bound_result[name] = IterBound(
-                        start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
+                        start=1, step=1, end=count, count=count
                     )
-
                     rw_result.writes[name].append(inst)
                 elif isinstance(inst, (EndSweep, EndRepeat)):
                     delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
@@ -422,10 +403,6 @@ class TILegalisationPass(AnalysisPass):
                             f"Ambiguous bounds for variable {name} in target {target}"
                         )
                     legal_bound_result[name] = next(iter(bound_set))
-                else:
-                    legal_bound_result[name] = IterBound(
-                        start=1, step=1, end=bound.count, count=bound.count
-                    )
 
             # TODO: the proper way is to produce a new result and invalidate the old one
             binding_result.iter_bound_results[target] = legal_bound_result
