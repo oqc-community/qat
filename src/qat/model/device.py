@@ -5,28 +5,9 @@ from typing import Optional
 
 import numpy as np
 from pydantic import Field
-from pydantic_core import core_schema
 
-from qat.model.hardware_base import QubitId
+from qat.model.hardware_base import CalibratablePositiveFloat, QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
-
-
-class CalibratablePositiveFloat(float):
-    @classmethod
-    def validate(cls, v):
-        if not np.isnan(v) and v < 0.0:
-            raise ValueError("value must be >= 0")
-        return cls(v)
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, source_type, handler) -> core_schema.CoreSchema:
-        return core_schema.no_info_plain_validator_function(cls.validate)
-
-    def __eq__(self, other: CalibratablePositiveFloat):
-        if np.isnan(self) and np.isnan(other):
-            return True
-        else:
-            return super().__eq__(other)
 
 
 class Component(WarnOnExtraFieldsModel):

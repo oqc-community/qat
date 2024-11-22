@@ -7,8 +7,12 @@ from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
-from qat.model.device import CalibratablePositiveFloat, Qubit
-from qat.model.hardware_base import QubitId
+from qat.model.device import Qubit
+from qat.model.hardware_base import (
+    CalibratablePositiveFloat,
+    CalibratableUnitInterval,
+    QubitId,
+)
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 VERSION = Version(0, 0, 1)
@@ -19,12 +23,10 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
 
     :param version: Semantic version of the hardware model.
     :param logical_connectivity: Connectivity of the qubits in the hardware model.
-    :param logical_coupling_map: Quality of the connections between the qubits. As the connectivity is directional, the second element in `tuple[QubitId, QubitId]` is the qui
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
     logical_connectivity: dict[QubitId, set[tuple[QubitId, CalibratablePositiveFloat]]]
-    logical_coupling_map: dict[tuple[QubitId, QubitId], CalibratablePositiveFloat]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -35,37 +37,6 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
             VERSION >= version
         ), f"Latest supported hardware model version {VERSION}, found {version}"
         return VERSION
-
-    @model_validator(mode="before")
-    def default_logical_coupling_map(cls, data):
-        if not data.get("logical_coupling_map", None):
-            logical_coupling_map = {}
-            logical_connectivity = data["logical_connectivity"]
-
-            for q1_index, connected_qubits in logical_connectivity.items():
-                for q2_index in connected_qubits:
-                    logical_coupling_map[(q1_index, q2_index)] = 1.0
-
-            data["logical_coupling_map"] = logical_coupling_map
-
-        return data
-
-    @model_validator(mode="after")
-    def validate_qubit_coupling(self):
-        for q1_index, q2_index in self.logical_coupling_map:
-            if not self.logical_connectivity.get(q1_index, None):
-                raise ValidationError(
-                    f"The coupling ({q1_index}, {q2_index}) is not present in `logical_connectivity`."
-                )
-
-        for q1_index, connected_qubits in self.logical_connectivity.items():
-            for q2_index in connected_qubits:
-                if (q1_index, q2_index) not in self.logical_coupling_map:
-                    raise ValidationError(
-                        f"The coupling ({q1_index}, {q2_index}) is not present in `logical_coupling_map`."
-                    )
-
-        return self
 
     def __eq__(self, other: LogicalHardwareModel) -> bool:
         if type(self) != type(other):
@@ -91,6 +62,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     :param qubits: The superconducting qubits on the chip.
     :param physical_connectivity: The connectivities of the physical qubits on the QPU.
+    :param physical_connectivity_quality: Quality of the connections between the qubits.
     :param logical_connectivity: The connectivities of the qubits used for compilation,
                     which is equal to `physical_connectivity` or a subset thereof.
     """
@@ -98,12 +70,26 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     qubits: dict[QubitId, Qubit]
     physical_connectivity: dict[QubitId, set[QubitId]] = Field(frozen=True)
     logical_connectivity: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
+    physical_connectivity_quality: dict[tuple[QubitId, QubitId], CalibratableUnitInterval]
 
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):
         if not data.get("logical_connectivity", None):
             logical_connectivity = deepcopy(data["physical_connectivity"])
             data["logical_connectivity"] = logical_connectivity
+
+        return data
+
+    @model_validator(mode="before")
+    def default_physical_connectivity_quality(cls, data):
+        if not data.get("physical_connectivity_quality", None):
+            physical_connectivity_quality = {}
+
+            for q1_index, connected_qubits in data["physical_connectivity"].items():
+                for q2_index in connected_qubits:
+                    physical_connectivity_quality[(q1_index, q2_index)] = 1.0
+
+            data["physical_connectivity_quality"] = physical_connectivity_quality
 
         return data
 
@@ -117,6 +103,23 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                 raise ValueError(
                     "Logical connectivity must be a subgraph of the physical connectivity."
                 )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_connectivity_quality(self):
+        for q1_index, q2_index in self.physical_connectivity_quality:
+            if not self.physical_connectivity.get(q1_index, None):
+                raise ValidationError(
+                    f"The coupling ({q1_index}, {q2_index}) is not present in `physical_connectivity`."
+                )
+
+        for q1_index, connected_qubits in self.physical_connectivity.items():
+            for q2_index in connected_qubits:
+                if (q1_index, q2_index) not in self.physical_connectivity_quality:
+                    raise ValidationError(
+                        f"The coupling ({q1_index}, {q2_index}) is not present in `physical_connectivity_quality`."
+                    )
 
         return self
 
@@ -135,7 +138,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         return base_eq
 
     @property
-    def calibrated(self) -> bool:
+    def is_calibrated(self) -> bool:
         for qubit in self.qubits.values():
             if not qubit.is_calibrated:
                 return False

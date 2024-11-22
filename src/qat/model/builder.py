@@ -32,12 +32,12 @@ class PhysicalHardwareModelBuilder:
         self,
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: Optional[dict[int, set[int]]] = None,
-        logical_coupling_map: None = None,
+        physical_connectivity_quality: None = None,
     ):
         self._current_model = self._build_uncalibrated_hardware_model(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            logical_coupling_map=logical_coupling_map,
+            physical_connectivity_quality=physical_connectivity_quality,
         )
 
     @property
@@ -48,6 +48,7 @@ class PhysicalHardwareModelBuilder:
         self,
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: dict[int, set[int]] = None,
+        physical_connectivity_quality: None = None,
     ):
         logical_connectivity = logical_connectivity or physical_connectivity
 
@@ -85,6 +86,7 @@ class PhysicalHardwareModelBuilder:
             qubits=qubits,
             logical_connectivity=logical_connectivity,
             physical_connectivity=physical_connectivity,
+            physical_connectivity_quality=physical_connectivity_quality,
         )
 
     def _build_uncalibrated_baseband(self):
