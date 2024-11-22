@@ -10,6 +10,7 @@ from qat.backend.analysis_passes import (
     TriageResult,
 )
 from qat.backend.transform_passes import (
+    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
@@ -170,6 +171,7 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             | RepeatSanitisation()
             | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()

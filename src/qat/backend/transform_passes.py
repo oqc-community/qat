@@ -1,5 +1,7 @@
 import itertools
 
+import numpy as np
+
 from qat.ir.pass_base import TransformPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -79,3 +81,21 @@ class ReturnSanitisation(TransformPass):
             unique_variables = set(acq.output_variable for acq in acquires)
 
         builder.returns(list(unique_variables))
+
+
+class DesugaringPass(TransformPass):
+    """
+    Transforms syntactic sugars and implicit effects. Not that it applies here, but a classical
+    example of a sugar syntax is the ternary expression "cond ? val1 : val2" which is nothing more
+    than an if else in disguise.
+
+    The goal of this pass is to desugar any syntactic and semantic sugars. One of these sugars
+    is iteration constructs such as Sweep and Repeat.
+    """
+
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        for inst in builder.instructions:
+            if isinstance(inst, Sweep):
+                count = len(next(iter(inst.variables.values())))
+                iter_name = f"sweep_{hash(inst)}"
+                inst.variables[iter_name] = np.linspace(1, count, count, dtype=int).tolist()
