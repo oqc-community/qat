@@ -9,7 +9,7 @@ from pydantic import AfterValidator, RootModel
 
 
 def validate_non_negative(v: int):
-    if v < 0:
+    if not isinstance(v, int) or v < 0:
         raise ValueError(f"Given value {v} must be an int and >=0.")
     return v
 
@@ -37,7 +37,7 @@ CalibratablePositiveFloat = Annotated[
 def validate_calibratable_unit_interval(v: CalibratableUnitInterval):
     if not np.isnan(v):
         if v < 0.0 or v > 1.0:
-            raise ValueError("Given value {v} must be in the interval [0, 1].")
+            raise ValueError(f"Given value {v} must be in the interval [0, 1].")
     return v
 
 
@@ -62,10 +62,12 @@ class ValidatedSet(RootModel[set[V]]):
     root: set[V]
 
     def add(self, value: V):
-        field_type = self.model_fields["root"].annotation
-        f_validate = get_validator_from_annotated(get_args(field_type)[0])
-
-        value = f_validate(value)
+        print(value, end="\t")
+        annotation = self.model_fields["root"].annotation
+        f_validate = get_validator_from_annotated(get_args(annotation)[0])
+        if f_validate:
+            print(f_validate)
+            value = f_validate(value)
         self.root.add(value)
 
     def discard(self, value):
@@ -102,10 +104,16 @@ class ValidatedDict(RootModel[dict[K, V]]):
     root: dict[K, V]
 
     def __setitem__(self, key, value):
-        field_type = self.model_fields["root"].annotation
-        f_validate = get_validator_from_annotated(get_args(field_type)[1])
+        annotation = self.model_fields["root"].annotation
 
-        value = f_validate(value)
+        f_validate_key = get_validator_from_annotated(get_args(annotation)[0])
+        if f_validate_key:
+            key = f_validate_key(key)
+
+        f_validate_value = get_validator_from_annotated(get_args(annotation)[1])
+        if f_validate_value:
+            value = f_validate_value(value)
+
         self.root[key] = value
 
     def __getitem__(self, key):
@@ -120,11 +128,11 @@ class ValidatedDict(RootModel[dict[K, V]]):
     def values(self):
         return self.root.values()
 
-    def __iter__(self):
-        return iter(self.root)
-
     def items(self):
         return self.root.items()
+
+    def __iter__(self):
+        return iter(self.root)
 
     def __eq__(self, other: ValidatedDict):
         if isinstance(other, ValidatedDict):

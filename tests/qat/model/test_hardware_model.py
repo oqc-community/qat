@@ -288,6 +288,31 @@ class Test_HW_Connectivity:
                     {q_index: random.Random(seed).uniform(1.001, 100.0)}
                 )
 
+    def test_invalid_physical_connectivity_mutation(self, n_qubits, seed):
+        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+            generate_connectivity_data(
+                n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
+            )
+        )
+
+        hw = PhysicalHardwareModelBuilder(
+            physical_connectivity=physical_connectivity,
+            logical_connectivity=logical_connectivity,
+            physical_connectivity_quality=physical_connectivity_quality,
+        ).model
+
+        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+
+        invalid_int = random.Random(seed).sample(list(range(-n_qubits, -1)), 1)[0]
+        invalid_float = random.Random(seed).uniform(-10.0, 10.0)
+        invalid_str = "abc"
+        for invalid_value in [invalid_int, invalid_float, invalid_str]:
+            with pytest.raises(ValueError):
+                hw.physical_connectivity[q].add(invalid_value)
+
+            with pytest.raises(ValueError):
+                hw.logical_connectivity[q].add(invalid_value)
+
 
 @pytest.mark.parametrize("seed", [500, 501, 502])
 @pytest.mark.parametrize("n_removed_qubits", [1, 2, 3, 4])
