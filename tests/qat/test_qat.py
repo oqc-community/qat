@@ -5,13 +5,14 @@ from compiler_config.config import CompilerConfig, MetricsType, QuantumResultsFo
 
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.qat import execute_with_metrics
+
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
-from tests.qat.utils import ListReturningEngine
+from tests.qat.utils.models import ListReturningEngine
 
 
 @pytest.mark.parametrize(
     ("input_string", "file_type", "instruction_length"),
-    [("ghz.qasm", ProgramFileType.QASM2, 196)],
+    [("ghz.qasm", ProgramFileType.QASM2, 193)],
 )
 def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     program = get_test_file_path(file_type, input_string)

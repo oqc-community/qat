@@ -34,7 +34,13 @@ from qiskit.qasm2 import CustomInstruction
 
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, Qubit
+from qat.purr.compiler.devices import (
+    ChannelType,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    Resonator,
+)
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -810,10 +816,12 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             self.visit(node, context)
 
     def visit_Include(self, node: ast.Include, context: QasmContext):
-        if node.filename in ("stdgates.inc", "qelib1.inc"):
+        if node.filename == "qelib1.inc":
             file_path = Path(
                 find_spec("qiskit.qasm.libs").submodule_search_locations[0], node.filename
             )
+        elif node.filename == "stdgates.inc":
+            file_path = Path(Path(__file__).parent, "grammars", node.filename)
         else:
             file_path = Path(node.filename)
         if not file_path.is_file():
@@ -850,9 +858,10 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         return f"{name}[{','.join([str(qb) for qb in target_qubits])}]"
 
     def _attempt_declaration(self, var: Variable, context: QasmContext):
-        if var.name in context.variables:
+        if (old_var := context.variables.get(var.name, None)) is None:
+            context.variables[var.name] = var
+        elif old_var != var:
             raise ValueError(f"Can't redeclare variable {var.name}")
-        context.variables[var.name] = var
 
     def visit_ClassicalDeclaration(
         self, node: ast.ClassicalDeclaration, context: QasmContext
@@ -981,17 +990,25 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             case "ecr" | "ECR":
                 return self.add_ecr(target_qubits, self.builder)
 
+        if len(node.modifiers) > 0:
+            raise NotImplementedError("Gate modifiers are not yet supported.")
+
         gate_context = QasmContext(
             Registers(),
             context.gates,
-            dict(context.variables),
+            dict(),
         )
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
             for arg, value in zip(gate_def.arguments, arguments):
-                self._attempt_declaration(
-                    Variable(self.visit(arg, context), type(value), value), gate_context
-                )
+                if (known_var := context.variables.get(arg.name, None)) is not None:
+                    self._attempt_declaration(
+                        Variable(known_var.name, type(value), value), gate_context
+                    )
+                else:
+                    self._attempt_declaration(
+                        Variable(self.visit(arg, context), type(value), value), gate_context
+                    )
             for qb_name, value in zip(gate_def.qubits, target_qubits):
                 if isinstance(qb_name, (QubitRegister, Qubit)):
                     continue
@@ -1556,11 +1573,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 width=width,
                 amp=amp,
                 std_dev=std_dev,
+                zero_at_edges=0,
             )
 
         elif intrinsic_name == "gaussian_zero_edge":
             amp, width, std_dev, zero_at_edges = _validate_arg_length(tree.children[4], 4)
-            zero_at_edges = 0 if not zero_at_edges else 1
+            zero_at_edges = bool(zero_at_edges)
             _validate_waveform_args(
                 width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
             )
@@ -1580,11 +1598,26 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
 
         elif intrinsic_name == "gaussian_square":
-            amp, width, square_width, std_dev = _validate_arg_length(tree.children[4], 4)
-            _validate_waveform_args(
-                width=width, amp=amp, square_width=square_width, std_dev=std_dev
+            amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
+                tree.children[4], 4, 5
             )
-            raise ValueError("Gaussian square waveform currently not supported.")
+            zero_at_edges = bool(zero_at_edges)
+            _validate_waveform_args(
+                width=width,
+                amp=amp,
+                square_width=square_width,
+                std_dev=std_dev,
+                zero_at_edges=zero_at_edges,
+            )
+            waveform = UntargetedPulse(
+                Pulse,
+                PulseShapeType.GAUSSIAN_SQUARE,
+                width=width,
+                std_dev=std_dev,
+                amp=amp,
+                square_width=square_width,
+                zero_at_edges=zero_at_edges,
+            )
 
         elif intrinsic_name == "sine":
             amp, width, frequency, phase = _validate_arg_length(tree.children[4], 4)
@@ -1738,15 +1771,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
             expr_list = True
             cal_def = qb_specific_cal_def_expr_list
 
-        if name in ("cnot", "CNOT"):
-            self._q3_patcher.add_cnot(qubits[0], qubits[1], self.builder)
-        elif name in ("u", "U"):
-            # TODO: Untested as not in grammar.
+        if name in ("u", "U"):
+            # u is not in openpulse grammar so cannot be overridden...
             self._q3_patcher.add_unitary(
                 others[0], others[1], others[2], qubits, self.builder
             )
-        elif name in ("ecr", "ECR"):
-            self._q3_patcher.add_ecr(qubits, self.builder)
 
         # Prioritize calibration definitions here if people override the base functions.
         # We also don't care about qubit scoping and restrictions.
@@ -1806,6 +1835,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 name=ast.Identifier(name), qubits=qubits, arguments=others, modifiers=[]
             )
             self._q3_patcher.visit(node, self._current_context)
+        elif name in ("cnot", "CNOT"):
+            self._q3_patcher.add_cnot(qubits[0], qubits[1], self.builder)
+        elif name in ("ecr", "ECR"):
+            self._q3_patcher.add_ecr(qubits, self.builder)
         elif throw_on_missing:
             raise ValueError(
                 f"Can't find gate implementation for '{name}' with supplied arguments."
@@ -1979,12 +2012,33 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # these post processing operations are removed for executions on live hardware.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
+
+        # Determine the delay for the channel
+        delay = 0.0
+        if pulse_channel.channel_type == ChannelType.acquire:
+            devices = [
+                dev
+                for dev in self.builder.model.get_devices_from_pulse_channel(pulse_channel)
+                if isinstance(dev, Resonator)
+            ]
+            if len(devices) == 1:
+                for dev in self.builder.model.quantum_devices.values():
+                    if isinstance(dev, Qubit) and dev.measure_device == devices[0]:
+                        delay = dev.measure_acquire["delay"]
+                        break
+            else:
+                log.warning(
+                    f"The acquire channel {pulse_channel.full_id()} is not assigned to a single resonator: "
+                    "setting the delay to 0.0."
+                )
+
         acquire = Acquire(
             channel=pulse_channel,
             time=time,
             mode=AcquireMode.INTEGRATOR,
             output_variable=output_variable,
             filter=filter,
+            delay=delay,
         )
         self.builder.add(acquire)
         self.builder.post_processing(
@@ -2087,7 +2141,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 mean_z_map_args = args[3]
             else:
                 resonator = self.builder.model.get_devices_from_physical_channel(
-                    pulse_channel.physical_channel_id
+                    pulse_channel.physical_channel
                 )[0]
                 for qb in self.builder.model.qubits:
                     if qb.measure_device == resonator:

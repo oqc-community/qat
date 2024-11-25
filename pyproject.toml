@@ -2,7 +2,7 @@
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
-version = "2.1.0"
+version = "2.4.0"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 documentation = "https://oqc-community.github.io/qat"
@@ -42,10 +42,12 @@ scipy = ">=1.13.1"
 pyqir = ">=0.8.0a1"
 regex = ">=2022.6.2"
 jsonpickle = ">=2.2.0"
-qblox-instruments = "^0.14.0"
+qblox-instruments = "0.14.1"
 lark-parser = "^0.12.0"
 pydantic-settings = ">=2.5.2"
-compiler-config = { git = "https://github.com/oqc-community/compiler-config.git", branch = "main" }
+compiler-config = "0.1.0"
+pydantic-extra-types = "^2.10.0"
+semver = "^3.0.2"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
@@ -57,6 +59,8 @@ autoflake = "^2.2.0"
 isort = "^5.13.2"
 docplex = "^2.21.207"
 pre-commit = "^3.2.0"
+pytest-benchmark = "^4.0.0"
+jinja2 = "^3.1.4"
 
 [tool.poetry.group.licenses]
 optional = true
@@ -96,6 +100,7 @@ py_version = 39
 profile = "black"
 line_length = 92
 known_first_party = ["qat"]
+known_local_folder = ["tests"]
 
 [tool.black]
 line-length = 92
@@ -117,8 +122,6 @@ filterwarnings = [
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow.
     'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
-    # TODO: Investigate and resolve RuntimeWarning on Windows.
-    'default:.*overflow encountered in tanh:RuntimeWarning:qat.purr.backends.utilities',
     # Qiskit Experiment using deprecated version of PulseBackendConfiguration
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
     # Qiskit IBM Experiment package using an old pkg_resources version

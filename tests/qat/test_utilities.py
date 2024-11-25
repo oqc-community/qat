@@ -1,12 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+from itertools import product
+
 import numpy as np
 import pytest
 
 from qat.purr.backends.utilities import (
     BlackmanFunction,
+    ExtraSoftSquareFunction,
     GaussianFunction,
+    GaussianSquareFunction,
+    GaussianZeroEdgeFunction,
     NumericFunction,
+    SechFunction,
+    SofterSquareFunction,
+    SoftSquareFunction,
     SquareFunction,
     evaluate_shape,
 )
@@ -71,6 +79,43 @@ def test_gaussian_function_first_derivative():
     assert y_x[1] == -y_x[-2]
 
 
+@pytest.mark.parametrize(
+    ["width", "std_dev", "zero_at_edges"],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
+)
+def test_gaussian_zero_edge(width, std_dev, zero_at_edges):
+    x = np.linspace(-width / 2, width / 2, 101)
+    gaussian_zero = GaussianZeroEdgeFunction(std_dev, width, zero_at_edges)
+    y = gaussian_zero(x)
+
+    assert np.isclose(max(y), 1.0)
+    assert np.isclose(x[np.argmax(y)], 0.0)
+    if zero_at_edges:
+        assert np.isclose(y[0], 0.0) and np.isclose(y[-1], 0.0)
+    else:
+        assert y[0] > 0.0 and y[-1] > 0.0
+
+
+@pytest.mark.parametrize(
+    ["width", "std_dev", "zero_at_edges"],
+    product([0.5, 1.0, 1.5], [0.05, 0.1, 1.0], [False, True]),
+)
+def test_gaussian_square(width, std_dev, zero_at_edges):
+    x = np.linspace(-2.0, 2.0, 101)
+    gaussian_square = GaussianSquareFunction(width, std_dev, zero_at_edges)
+    y = gaussian_square(x)
+
+    # Test the shape looks like we expect it
+    square_edge = width / 2 + 1e-8  # add small amount to deal with float errors
+    assert all([val < 1.0 for val in y[x < -square_edge]])
+    assert all([val < 1.0 for val in y[x > square_edge]])
+    assert all([np.isclose(val, 1.0) for val in y[(x > -square_edge) * (x < square_edge)]])
+
+    # Test zero at the edges
+    if zero_at_edges:
+        assert np.isclose(y[0], 0.0) and np.isclose(y[-1], 0.0)
+
+
 def test_blackman_function():
     x = np.arange(start=-1, stop=1.5, step=0.5)
     blackman = BlackmanFunction(width=2)
@@ -92,6 +137,34 @@ def test_blackman_function_first_derivative():
     # Test based on function symmetry
     assert np.isclose(y[0], -y[-1], atol=1e-6)
     assert np.isclose(y[1], -y[-2], atol=1e-6)
+
+
+@pytest.mark.parametrize("width", [-2.0, -1.0, -0.1, -1e-6, 1e-3, 0.2, 1.2, 10])
+def test_sech_function(width):
+    # Tests the sech pulse
+    x = np.linspace(-1.0, 1.0, 101)
+    sech = SechFunction(width)
+    y = sech(x)
+    max_idx = np.argmax(y)
+    assert np.isclose(x[max_idx], 0.0)
+    assert all(np.isclose(y[max_idx::-1], y[max_idx:]))
+
+
+@pytest.mark.parametrize(
+    ["func", "width", "rise"],
+    product(
+        [SoftSquareFunction, SofterSquareFunction, ExtraSoftSquareFunction],
+        [0.5, 1.0, 2.0],
+        [1e-3, 1e-2, 1e-1],
+    ),
+)
+def test_soft_square_functions(func, width, rise):
+    # Tests the properties of soft square functions: maximum, symmetry
+    x = np.linspace(-1.0, 1.0, 101)
+    f = func(width, rise)
+    y = f(x).real
+    assert all(y[50] >= y.real)
+    assert all(np.isclose(y[50::-1], y[50:]))
 
 
 @pytest.mark.skip(reason="I don't know what the new results should be.")

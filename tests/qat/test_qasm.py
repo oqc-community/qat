@@ -3,6 +3,7 @@
 from itertools import permutations
 from os import listdir
 from os.path import dirname, isfile, join
+from pathlib import Path
 from typing import List
 
 import networkx as nx
@@ -53,6 +54,7 @@ from qat.purr.compiler.instructions import (
     CrossResonancePulse,
     CustomPulse,
     Delay,
+    Instruction,
     MeasurePulse,
     Pulse,
     Return,
@@ -70,15 +72,21 @@ from qat.purr.integrations.qasm import (
 )
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
+from qat.purr.utils.serializer import json_load, json_loads
 from qat.qat import execute, execute_qasm, fetch_frontend
+
 from tests.qat.qasm_utils import (
     ProgramFileType,
+    get_default_qasm2_gate_qasms,
+    get_default_qasm3_gate_qasms,
     get_qasm2,
     get_qasm3,
     get_test_file_path,
     parse_and_apply_optimiziations,
+    qasm2_base,
+    qasm3_base,
 )
-from tests.qat.utils import get_jagged_echo_hardware, update_qubit_indices
+from tests.qat.utils.models import get_jagged_echo_hardware, update_qubit_indices
 
 
 class TestQASM3:
@@ -211,22 +219,94 @@ class TestQASM3:
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
         assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
 
-    def test_cx_override(self):
-        hw = get_default_echo_hardware()
+    # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
+    # not support cX.
+    @pytest.mark.parametrize(
+        "test, gate", [("cx", "cnot"), ("cnot", "cnot"), ("ecr", "ECR")]
+    )
+    def test_override(self, test, gate):
+        # Tests overriding gates using openpulse: checks the overridden gate
+        # yields the correct pulses, and that the unchanged gates are the same
+        # as those created by the circuit builder.
+        hw = get_default_echo_hardware(4)
         parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), get_qasm3("cx_override_test.qasm"))
-        # assert that there are 2 extra_soft_square pulses, coming from custom def
+        result = parser.parse(get_builder(hw), get_qasm3(f"{test}_override_test.qasm"))
+        qasm_inst = result.instructions
+        qasm_inst_names = [str(inst) for inst in qasm_inst]
+
+        # test the extra_soft_square pulses are as expected
+        ess_pulses = [
+            inst
+            for inst in qasm_inst
+            if hasattr(inst, "shape") and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+        ]
+        assert len(ess_pulses) == 2
+        assert all([len(inst.quantum_targets) == 1 for inst in ess_pulses])
+        assert ess_pulses[0].quantum_targets[0].partial_id() == "q1_frame"
+        assert ess_pulses[1].quantum_targets[0].partial_id() == "q2_frame"
+
+        # test the ecrs on (0, 1) and (2, 3) are unchanged by the override
+        circuit = hw.create_builder()
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(0), hw.get_qubit(1))
+        circ_inst = circuit.instructions
+        circ_inst_names = [str(inst) for inst in circ_inst]
+        assert qasm_inst_names[0 : len(circ_inst_names)] == circ_inst_names
+
+        circuit = hw.create_builder()
+        func = getattr(circuit, gate)
+        func(hw.get_qubit(2), hw.get_qubit(3))
+        circ_inst = circuit.instructions
+        circ_inst_names = [str(inst) for inst in circ_inst]
         assert (
-            len(
-                [
-                    inst
-                    for inst in result.instructions
-                    if hasattr(inst, "shape")
-                    and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
-                ]
-            )
-            == 2
+            qasm_inst_names[len(qasm_inst_names) - len(circ_inst_names) :]
+            == circ_inst_names
         )
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ["pi", "2*pi", "-pi/2", "-7*pi/2", "0", "pi/4"],
+            [np.pi, 2 * np.pi, -np.pi / 2, -7 * np.pi / 2, 0.0, np.pi / 4],
+            np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(6)),
+            [0.0, 0.0, 0.0, 0.0, "pi/2", 0.0],
+            ["2*pi", "-pi/2", 0.0, 0.0, "pi/2", "-2*pi"],
+        ],
+    )
+    def test_u_gate(self, params):
+        """
+        Tests the validty of the U gate with OpenPulse by checking that the
+        parsed circuit matches the same circuit created with the circuit builder.
+        """
+        hw = get_default_echo_hardware(2)
+
+        # build the circuit from QASM
+        qasm = get_qasm3("u_gate.qasm")
+        for i in range(6):
+            qasm = qasm.replace(f"param{i}", str(params[i]))
+        parser = Qasm3Parser()
+        result = parser.parse(get_builder(hw), qasm)
+        qasm_inst = result.instructions
+
+        # create the circuit using the circuit builder
+        builder = hw.create_builder()
+        params = [eval(str(param).replace("pi", "np.pi")) for param in params]
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+        (
+            builder.Z(q1, params[2])
+            .Y(q1, params[0])
+            .Z(q1, params[1])
+            .Z(q2, params[5])
+            .Y(q2, params[3])
+            .Z(q2, params[4])
+        )
+        circ_inst = builder.instructions
+
+        # validate that the circuits match
+        assert len(qasm_inst) == len(circ_inst)
+        for i in range(len(qasm_inst)):
+            assert str(qasm_inst[i]) == str(circ_inst[i])
 
     def test_invalid_frames(self):
         hw = get_default_echo_hardware()
@@ -482,6 +562,95 @@ class TestQASM3:
 
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
+
+    @pytest.mark.parametrize(
+        "hw", [get_default_echo_hardware(2), get_default_RTCS_hardware()]
+    )
+    def test_capture_with_delay(self, hw):
+        # Tests that capture v2 in openpulse makes use of the qubit delay for an acquire channel.
+        qubit = hw.get_qubit(0)
+        parser = Qasm3Parser()
+        builder = parser.parse(
+            hw.create_builder(), get_qasm3("openpulse_tests/capture.qasm")
+        )
+        delay = [inst.delay for inst in builder.instructions if isinstance(inst, Acquire)]
+        assert delay[0] == qubit.measure_acquire["delay"]
+
+    def test_gaussian_square(self):
+        # Checks that the Gaussian Square pulses parse correectly.
+        hw = get_default_echo_hardware(2)
+        qasm_string = get_qasm3("waveform_tests/gaussian_square.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(get_builder(hw), qasm_string)
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        # Check the properties of the first pulse
+        assert np.isclose(pulses[0].width, 100e-9)
+        assert np.isclose(pulses[0].amp, 1)
+        assert np.isclose(pulses[0].square_width, 50e-9)
+        assert pulses[0].zero_at_edges == True
+        # Check the properties of the second pulse
+        assert np.isclose(pulses[1].width, 200e-9)
+        assert np.isclose(pulses[1].amp, 2.5)
+        assert np.isclose(pulses[1].square_width, 50e-9)
+        assert pulses[1].zero_at_edges == False
+
+    def test_sech(self):
+        # Checks that the sech waveforms parse correctly.
+        hw = get_default_echo_hardware(2)
+        qasm_string = get_qasm3("waveform_tests/sech_waveform.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(get_builder(hw), qasm_string)
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        # Check the properties of the first pulse
+        assert np.isclose(pulses[0].width, 100e-9)
+        assert np.isclose(pulses[0].amp, 0.2)
+        assert np.isclose(pulses[0].std_dev, 50e-9)
+        # Check the properties of the second pulse
+        assert np.isclose(pulses[1].width, 200e-9)
+        assert np.isclose(pulses[1].amp, 0.5)
+        assert np.isclose(pulses[1].std_dev, 20e-9)
+
+    @pytest.mark.parametrize(
+        "gate_tup", get_default_qasm3_gate_qasms(), ids=lambda val: val[-1]
+    )
+    def test_default_gates(self, gate_tup, monkeypatch):
+        """Check that each default gate can be parsed individually."""
+
+        def equivalent(self, other):
+            return isinstance(self, type(other)) and (vars(self) == vars(other))
+
+        monkeypatch.setattr(Instruction, "__eq__", equivalent)
+
+        N, gate_string = gate_tup
+        file_name = gate_string.split(" ")[0].split("(")[0] + ".json"
+        qasm = qasm3_base.format(N=N, gate_strings=gate_string)
+        hw = get_default_echo_hardware(
+            N, [(i, j) for i in range(N) for j in range(i, N) if i != j]
+        )
+        parser = Qasm3Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        with Path(Path(__file__).parent, "files", "qasm", "instructions", file_name).open(
+            "r"
+        ) as f:
+            expectations = [json_loads(i, model=hw) for i in json_load(f)]
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
+        for instruction, expected in zip(builder.instructions, expectations):
+            assert expected == instruction
+
+    def test_default_gates_together(self):
+        """Check that all default gates can be parsed together."""
+        Ns, strings = zip(*get_default_qasm3_gate_qasms())
+        N = max(Ns)
+        gate_strings = "\n".join(strings)
+        qasm = qasm3_base.format(N=N, gate_strings=gate_strings)
+        hw = get_default_echo_hardware(max(N, 2))
+        parser = Qasm3Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
 
 
 class TestExecutionFrontend:
@@ -904,11 +1073,11 @@ class TestParsing:
 
     def test_example(self):
         builder = parse_and_apply_optimiziations("example.qasm")
-        assert 349 == len(builder.instructions)
+        assert 347 == len(builder.instructions)
 
     def test_parallel(self):
         builder = parse_and_apply_optimiziations("parallel_test.qasm", qubit_count=8)
-        assert 2117 == len(builder.instructions)
+        assert 2116 == len(builder.instructions)
 
     def test_example_if(self):
         with pytest.raises(ValueError):
@@ -917,11 +1086,11 @@ class TestParsing:
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
         builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
-        assert 97469 == len(builder.instructions)
+        assert 97467 == len(builder.instructions)
 
     def test_random_n5_d5(self):
         builder = parse_and_apply_optimiziations("random_n5_d5.qasm")
-        assert 4957 == len(builder.instructions)
+        assert 4956 == len(builder.instructions)
 
     def test_ordered_keys(self):
         builder = parse_and_apply_optimiziations(
@@ -949,7 +1118,7 @@ class TestParsing:
     def test_ecr_intrinsic(self):
         builder = parse_and_apply_optimiziations("ecr.qasm")
         assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
-        assert 64 == len(builder.instructions)
+        assert 63 == len(builder.instructions)
 
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))
@@ -976,6 +1145,42 @@ class TestParsing:
         parser = Qasm2Parser()
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
+
+    # TODO: Remove gates from list as support is added.
+    _unsupported_gates = ("id", "u0", "rc3x", "c3x", "c3sqrtx", "c4x", "delay")
+
+    @pytest.mark.parametrize(
+        "gate_tup", get_default_qasm2_gate_qasms(), ids=lambda val: val[-1]
+    )
+    def test_default_gates(self, gate_tup):
+        """Check that each default gate can be parsed individually."""
+        N, gate_string = gate_tup
+        if gate_string.startswith(self._unsupported_gates):
+            pytest.skip("Gate not yet supported.")
+        qasm = qasm2_base.format(N=N, gate_strings=gate_string)
+        hw = get_default_echo_hardware(max(N, 2))
+        parser = Qasm2Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
+
+    def test_default_gates_together(self):
+        """Check that all default gates can be parsed together."""
+        Ns, strings = zip(*get_default_qasm2_gate_qasms())
+        N = max(Ns)
+        # TODO: Remove filtering when all gates are supported.
+        strings = filter(lambda s: not s.startswith(self._unsupported_gates), strings)
+        gate_strings = "\n".join(strings)
+        qasm = qasm2_base.format(N=N, gate_strings=gate_strings)
+        hw = get_default_echo_hardware(
+            N, [(i, j) for i in range(N) for j in range(i, N) if i != j]
+        )
+        parser = Qasm2Parser()
+        builder = parser.parse(hw.create_builder(), qasm)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) > 0
+        assert isinstance(builder.instructions[-1], Return)
 
 
 class TestQatOptimization:
@@ -1013,12 +1218,12 @@ class TestQatOptimization:
             6,
             ("R0", "R1", "R2", "R3", "R4", "R5"),
             (
-                (750, 1750),
-                (1750, 2750),
-                (1750, 2750),
-                (1750, 2750),
-                (750, 1750),
-                (1750, 2750),
+                (650, 1650),
+                (950, 1950),
+                (950, 1950),
+                (950, 1950),
+                (650, 1650),
+                (950, 1950),
             ),
         )
 
@@ -1027,7 +1232,7 @@ class TestQatOptimization:
             "move_measurements.qasm",
             12,
             ("R5", "R6", "R9"),
-            ((579800, 580800), (579800, 580800), (589800, 590800)),
+            ((579800, 580800), (579800, 580800), (589050, 590050)),
         )
 
 

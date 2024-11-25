@@ -21,7 +21,8 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.qat import execute_qasm
-from tests.qat.utils import get_jagged_echo_hardware
+
+from tests.qat.utils.models import get_jagged_echo_hardware
 
 
 def apply_error_mitigation_setup(
@@ -42,6 +43,41 @@ def apply_error_mitigation_setup(
     hw.error_mitigation = ErrorMitigation(ReadoutMitigation(linear=lin_mit))
 
     return hw
+
+
+@pytest.mark.parametrize(
+    "model",
+    [get_default_echo_hardware(), get_default_RTCS_hardware(), get_jagged_echo_hardware()],
+)
+class TestErrorMitigationValidation:
+
+    def apply_mitigation(
+        self,
+        hw,
+        q0_ro_fidelity_0=0.8,
+        q0_ro_fidelity_1=0.7,
+        q1_ro_fidelity_0=0.9,
+        q1_ro_fidelity_1=0.6,
+    ):
+        hw = apply_error_mitigation_setup(
+            hw, q0_ro_fidelity_0, q0_ro_fidelity_1, q1_ro_fidelity_0, q1_ro_fidelity_1
+        )
+        compiler_config = CompilerConfig(
+            results_format=QuantumResultsFormat().binary_count(),
+            error_mitigation=ErrorMitigationConfig.LinearMitigation,
+        )
+        return hw, compiler_config
+
+    def test_hardware_validation(self, model):
+        model, compiler_config = self.apply_mitigation(model)
+        compiler_config.validate(model)
+        assert True
+
+    def test_engine_validation(self, model):
+        model, compiler_config = self.apply_mitigation(model)
+        engine = model.create_engine()
+        compiler_config.validate(engine)
+        assert True
 
 
 class TestReadoutMitigation:
@@ -305,7 +341,6 @@ class TestOnNoisySimulator:
             super().__init__(model, auto_plot, sim_qubit_dt)
             self.fidelity_r0 = {qubit.index: 1.0 for qubit in self.model.qubits}
             self.fidelity_r1 = {qubit.index: 1.0 for qubit in self.model.qubits}
-            self.error_mitigation = model.error_mitigation
 
         def _execute_on_hardware(
             self, sweep_iterator: SweepIterator, package: QatFile, interrupt=None

@@ -27,12 +27,24 @@ from qat.purr.compiler.devices import (
     build_qubit,
     build_resonator,
 )
-from qat.purr.compiler.emitter import QatFile
+from qat.purr.compiler.emitter import InstructionEmitter, QatFile
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import PhaseShift, SweepValue, Variable
+from qat.purr.compiler.instructions import (
+    Acquire,
+    Delay,
+    DrivePulse,
+    MeasurePulse,
+    PhaseReset,
+    PhaseShift,
+    PostProcessing,
+    Pulse,
+    SweepValue,
+    Variable,
+)
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute
+
 from tests.qat.qasm_utils import get_qasm2
 from tests.qat.test_readout_mitigation import apply_error_mitigation_setup
 
@@ -445,11 +457,10 @@ class TestBaseQuantum:
             .pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"))
             .measure_scope_mode(qubit)
         )
+
         engine = get_test_execution_engine(hw)
-        try:
-            pytest.raises(ValueError, execute_instructions(engine, builder))
-        except ValueError:
-            pass
+        with pytest.raises(ValueError):
+            execute_instructions(engine, builder)
 
         time = np.linspace(0.0, 100e-6, nb_points)
         builder = (
@@ -632,3 +643,389 @@ class TestBaseQuantum:
         engine = get_test_execution_engine(hw)
         generated_batches = engine._generate_repeat_batches(repeat_count)
         assert generated_batches == expected_batches
+
+    def test_empty_channels_removed(self):
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+
+        builder = (
+            get_builder(hw).X(qubit, np.pi / 2.0).measure_mean_z(qubit).synchronize(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        qat_file = InstructionEmitter().emit(builder.instructions, hw)
+
+        channels_with_pulses = [
+            qubit.get_drive_channel(),
+            qubit.get_measure_channel(),
+            qubit.get_acquire_channel(),
+        ]
+        channels_removed = [
+            qubit.get_second_state_channel(),
+            qubit.get_cross_resonance_channel(hw.get_qubit(1)),
+            qubit.get_cross_resonance_cancellation_channel(hw.get_qubit(1)),
+        ]
+
+        # Check if empty channels are in QAT file
+        sync_instr = qat_file.instructions[-1]
+        for ch in channels_removed:
+            assert ch in sync_instr.quantum_targets
+
+        position_map = engine.create_duration_timeline(qat_file.instructions)
+
+        for ch in channels_with_pulses:
+            assert ch in position_map.keys()
+        for ch in channels_removed:
+            assert ch not in position_map.keys()
+        for ch, positions in position_map.items():
+            assert not all(
+                [
+                    isinstance(p.instruction, (Delay, PhaseShift, PhaseReset))
+                    for p in positions
+                ]
+            )
+
+    def test_create_duration_timeline_mapping(self):
+        """Test that instructions are correctly mapped to expected channels."""
+        hw = get_test_model()
+        qubit = hw.get_qubit(0)
+
+        builder = (
+            get_builder(hw).X(qubit, np.pi / 2.0).measure_mean_z(qubit).synchronize(qubit)
+        )
+        engine = get_test_execution_engine(hw)
+        qat_file = InstructionEmitter().emit(builder.instructions, hw)
+
+        position_map = engine.create_duration_timeline(qat_file.instructions)
+
+        drive_data = position_map[qubit.get_drive_channel()]
+        measure_data = position_map[qubit.get_measure_channel()]
+        acquire_data = position_map[qubit.get_acquire_channel()]
+
+        assert [type(pos.instruction) for pos in drive_data] == [
+            DrivePulse,
+            Delay,
+        ]
+        assert [type(pos.instruction) for pos in measure_data] == [
+            Delay,
+            MeasurePulse,
+        ]
+        assert [type(pos.instruction) for pos in acquire_data] == [
+            Delay,
+            Acquire,
+            *[PostProcessing] * 4,
+        ]
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_aligns(self, hw):
+        """
+        For circuits where quantum targets are synced, check that instructions align.
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .ECR(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        pos_map = engine.create_duration_timeline(builder.instructions)
+
+        # Check that pulse instructions start concurrently
+        q1_cr = q1.get_pulse_channel(ChannelType.cross_resonance, [q2])
+        q2_crc = q2.get_pulse_channel(ChannelType.cross_resonance_cancellation, [q1])
+        times_q1_cr = [
+            inst.start for inst in pos_map[q1_cr] if isinstance(inst.instruction, Pulse)
+        ]
+        times_q2_crc = [
+            inst.start for inst in pos_map[q2_crc] if isinstance(inst.instruction, Pulse)
+        ]
+        assert len(times_q1_cr) > 0
+        assert len(times_q1_cr) == len(times_q2_crc)
+        assert all(np.isclose(times_q1_cr, times_q2_crc))
+
+        # Check that the acquires start concurrently
+        q1_acquire = q1.get_acquire_channel()
+        q2_acquire = q2.get_acquire_channel()
+        times_q1_acquire = [
+            inst.start
+            for inst in pos_map[q1_acquire]
+            if isinstance(inst.instruction, Acquire)
+        ]
+        times_q2_acquire = [
+            inst.start
+            for inst in pos_map[q2_acquire]
+            if isinstance(inst.instruction, Acquire)
+        ]
+        assert len(times_q1_acquire) == 1
+        assert len(times_q2_acquire) == 1
+        assert np.isclose(times_q1_acquire[0], times_q2_acquire[0])
+
+        # Check that the measures start concurrently
+        q1_measure = q1.get_measure_channel()
+        q2_measure = q2.get_measure_channel()
+        times_q1_measure = [
+            inst.start
+            for inst in pos_map[q1_measure]
+            if isinstance(inst.instruction, MeasurePulse)
+        ]
+        times_q2_measure = [
+            inst.start
+            for inst in pos_map[q2_measure]
+            if isinstance(inst.instruction, MeasurePulse)
+        ]
+        assert len(times_q1_measure) == 1
+        assert len(times_q2_measure) == 1
+        assert np.isclose(times_q1_measure[0], times_q2_measure[0])
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_times(self, hw):
+        """
+        Tests that the creation of a duration timeline with a two-qubit circuit
+        gives a timeline where the position map for each pulse channel has instructions
+        that align
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .cnot(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Check the times match up
+        for val in res1.values():
+            end = 0
+            for pos in val:
+                assert end == pos.start
+                end = pos.end
+
+    def compare_position_maps(self, res1, res2):
+        for key in res1.keys():
+            starts1 = [
+                inst.start
+                for inst in res1[key]
+                if (not isinstance(inst.instruction, Delay))
+            ]
+            starts2 = [
+                inst.start
+                for inst in res2[key]
+                if (not isinstance(inst.instruction, Delay))
+            ]
+            ends1 = [
+                inst.start
+                for inst in res1[key]
+                if (not isinstance(inst.instruction, Delay))
+            ]
+            ends2 = [
+                inst.start
+                for inst in res2[key]
+                if (not isinstance(inst.instruction, Delay))
+            ]
+            assert starts1 == starts2
+            assert ends1 == ends2
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_sync_ecr(self, hw):
+        """
+        Tests that a redundant sync has no effect on the circuit.
+        In this example, the ECR adds a sync itself, so syncing before is redundant.
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .ECR(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Build the same circuit with an unnecessary sync & check the times match up
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .synchronize([q1, q2])
+            .ECR(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res2 = engine.create_duration_timeline(builder.instructions)
+        self.compare_position_maps(res1, res2)
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_sync_x_pulses(self, hw):
+        """
+        Tests that a redundant sync has no effect on the circuit.
+        In this example, the two x pulses on Q1 take the same time to execute as the single
+        pulser in Q2, so the sync is redundant.
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .X(q1, np.pi / 2.0)
+            .had(q1)
+            .had(q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res1 = engine.create_duration_timeline(builder.instructions)
+
+        # Build the same circuit with an unnecessary sync & check the times match up
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .X(q1, np.pi / 2.0)
+            .synchronize([q1, q2])
+            .had(q1)
+            .had(q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        res2 = engine.create_duration_timeline(builder.instructions)
+        self.compare_position_maps(res1, res2)
+
+    def evaluate_circuit_time(self, hw, engine, builder):
+        qatfile = InstructionEmitter().emit(builder.instructions, hw)
+        res = engine.create_duration_timeline(qatfile.instructions)
+        # pulse channels could have different block times
+        return max([val[-1].end * pc.block_time for pc, val in res.items()])
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_compare(self, hw):
+        """
+        Tests that the duration of individual circuit elements matches that
+        of the full circuit.
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Build a simple circuit
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .X(q2, np.pi)
+            .ECR(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        maxtime = self.evaluate_circuit_time(hw, engine, builder)
+
+        # Check the circuit executes in an expected time
+        circs = [
+            get_builder(hw).X(q1, np.pi / 2.0),
+            get_builder(hw).X(q2, np.pi),
+            get_builder(hw).ECR(q1, q2),
+            get_builder(hw).measure_mean_z(q1),
+            get_builder(hw).measure_mean_z(q2),
+        ]
+
+        ts = [self.evaluate_circuit_time(hw, engine, circ) for circ in circs]
+
+        # ECR will sync q1 and q2 before and after, so the total execution time is
+        # a maximum of the X pulses plus a maximum of the measures.
+        assert np.isclose(max(ts[0], ts[1]) + ts[2] + max(ts[3], ts[4]), maxtime)
+
+    @pytest.mark.parametrize(
+        "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
+    )
+    def test_duration_timeline_compare_sync(self, hw):
+        """
+        Tests that the duration of individual circuit elements matches that
+        of the full circuit when syncs are used.
+        """
+        engine = hw.create_engine()
+        q1 = hw.get_qubit(0)
+        q2 = hw.get_qubit(1)
+
+        # Check that synchronize gives the expected times
+        builder = (
+            get_builder(hw)
+            .X(q1, np.pi / 2.0)
+            .synchronize([q1, q2])
+            .X(q2, np.pi)
+            .ECR(q1, q2)
+            .measure_mean_z(q1)
+            .measure_mean_z(q2)
+        )
+        maxtime = self.evaluate_circuit_time(hw, engine, builder)
+
+        # Check the circuit executes in an expected time
+        circs = [
+            get_builder(hw).X(q1, np.pi / 2.0),
+            get_builder(hw).X(q2, np.pi),
+            get_builder(hw).ECR(q1, q2),
+            get_builder(hw).measure_mean_z(q1),
+            get_builder(hw).measure_mean_z(q2),
+        ]
+
+        ts = [self.evaluate_circuit_time(hw, engine, circ) for circ in circs]
+
+        # start time of measures will be synced because of the ECR, so the total
+        # execution time will only depend on the max of the two measures
+        assert np.isclose(ts[0] + ts[1] + ts[2] + max(ts[3], ts[4]), maxtime)
+
+    @pytest.mark.parametrize("pre_measures", [[0], [1], [0, 1]])
+    def test_mid_circuit_validation(self, pre_measures):
+        """Tests that an error is thrown for mid-circuit measurements."""
+
+        hw = get_test_model()
+        engine = get_test_execution_engine(hw)
+        q0 = hw.get_qubit(0)
+        q1 = hw.get_qubit(1)
+        builder = get_builder(hw).had(q0).X(q1)
+        for qbit in pre_measures:
+            builder.measure(hw.get_qubit(qbit))
+        builder.cnot(q0, q1).measure(q0).measure(q1)
+        with pytest.raises(ValueError):
+            engine.validate(builder.instructions)
+
+    @pytest.mark.parametrize("qbit", [0, 1])
+    def test_mid_circuit_validation_pass(self, qbit):
+        """
+        Checks a circuit successfully validates when a measurement occurs on one qubit,
+        and subsequent gates on another.
+        """
+
+        hw = get_test_model()
+        engine = get_test_execution_engine(hw)
+        q0 = hw.get_qubit(qbit)
+        q1 = hw.get_qubit(1 - qbit)
+        builder = get_builder(hw).had(q0).cnot(q0, q1).measure(q1).X(q0)
+        engine.validate(builder.instructions)
+        assert True

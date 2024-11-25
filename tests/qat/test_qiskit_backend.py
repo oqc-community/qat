@@ -8,12 +8,16 @@ from qiskit_aer.noise import (
     thermal_relaxation_error,
 )
 
+from qat import qatconfig
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.qat import execute_qasm_with_metrics
+
 from tests.qat.qasm_utils import get_qasm2
+
+qiskitconfig = qatconfig.SIMULATION.QISKIT
 
 
 class TestQiskitBackend:
@@ -372,3 +376,111 @@ class TestQiskitBackend:
         bitstring0 = "00"
         bitstring1 = "11"
         assert result["c"][bitstring0] + result["c"][bitstring1] == 1000
+
+    @pytest.mark.parametrize(
+        "qasm, result_expectations",
+        [
+            ("basic_results_formats.qasm", {"ab": {"00": 1000}, "c": 1000}),
+            ("ordered_cregs.qasm", {"a": {"00": 1000}, "b": {"00": 1000}, "c": 1000}),
+            ("split_measure_assign.qasm", {"a": {"01": 1000}, "b": {"10": 1000}}),
+        ],
+    )
+    def test_multiple_cregs(self, qasm, result_expectations):
+        hw = get_default_qiskit_hardware()
+        result, _ = execute_qasm_with_metrics(get_qasm2(qasm), hw)
+        assert all([key in result.keys() for key in result_expectations.keys()])
+        for key, vals in result_expectations.items():
+            if isinstance(vals, dict):
+                assert result[key] == vals
+            else:
+                assert len(result[key].keys()) > 1
+                assert sum(result[key].values()) == 1000
+
+    @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
+    def test_mps_backend(self, qubit_count):
+        # Tests the MPS backend
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.X(hw.get_qubit(0), 0.5)
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine()
+        qiskitconfig.METHOD = "matrix_product_state"
+        qiskitconfig.ENABLE_METADATA = True
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "matrix_product_state"
+        assert (
+            metadata["matrix_product_state_max_bond_dimension"]
+            == qiskitconfig.OPTIONS["matrix_product_state_max_bond_dimension"]
+        )
+        assert (
+            metadata["matrix_product_state_truncation_threshold"]
+            == qiskitconfig.OPTIONS["matrix_product_state_truncation_threshold"]
+        )
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+        qiskitconfig.METHOD = "automatic"
+        qiskitconfig.ENABLE_METADATA = False
+
+    @pytest.mark.parametrize("qubit_count", [2, 5, 10, 20, 37, 52])
+    def test_automatic_stabilizer_backend(self, qubit_count):
+        # Tests that automatic settings choose a stabiliser backend when all gates
+        # are cliffords
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.had(hw.get_qubit(0))
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine()
+        qiskitconfig.ENABLE_METADATA = True
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "stabilizer"
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+        qiskitconfig.ENABLE_METADATA = False
+
+    def test_automatic_statevector_backend(self):
+        # Tests that for a circuit with non-clifford gates and a small qubit count,
+        # the method will default to state vector.
+        hw = get_default_qiskit_hardware(2)
+        circ = (
+            hw.create_builder()
+            .X(hw.get_qubit(0), 0.5)
+            .cnot(hw.get_qubit(0), hw.get_qubit(1))
+            .measure(hw.get_qubit(0))
+            .measure(hw.get_qubit(1))
+        )
+        engine = hw.create_engine()
+        qiskitconfig.ENABLE_METADATA = True
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "statevector"
+        assert counts["00"] + counts["11"] == 1000
+        qiskitconfig.ENABLE_METADATA = False
+
+    def test_automatic_mps_backend(self):
+        # Tests that for a circuit with non-clifford gates and a large qubit count,
+        # the method will default to MPS after failing with statevector.
+        qubit_count = 52
+        hw = get_default_qiskit_hardware(qubit_count)
+        circ = hw.create_builder()
+        circ.X(hw.get_qubit(0), 0.5)
+        for i in range(qubit_count - 1):
+            circ.cnot(hw.get_qubit(i), hw.get_qubit(i + 1))
+        for i in range(qubit_count):
+            circ.measure(hw.get_qubit(i))
+        engine = hw.create_engine()
+        qiskitconfig.ENABLE_METADATA = True
+        counts, metadata = engine.execute(circ)
+        assert metadata["method"] == "matrix_product_state"
+        assert (
+            metadata["matrix_product_state_max_bond_dimension"]
+            == qiskitconfig.OPTIONS["matrix_product_state_max_bond_dimension"]
+        )
+        assert (
+            metadata["matrix_product_state_truncation_threshold"]
+            == qiskitconfig.OPTIONS["matrix_product_state_truncation_threshold"]
+        )
+        assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
+        qiskitconfig.ENABLE_METADATA = False

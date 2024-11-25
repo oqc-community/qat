@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
+import sys
 from dataclasses import dataclass
 from functools import wraps
 from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mpmath import cosh
-from numpy import append, cos, pi, sin
+from numpy import cos, pi, sin
 from scipy.special import erf
 
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
@@ -22,6 +22,8 @@ from qat.purr.compiler.instructions import (
 )
 
 UPCONVERT_SIGN = 1.0
+# use slightly below the maxmiumum allowed float to avoid flaky overflow errors
+MAX_COSH_ARG = np.arccosh(0.99 * sys.float_info.max)
 
 
 def remove_axes(original_dims, removed_axis_indices, axis_locations):
@@ -144,42 +146,46 @@ class GaussianFunction(ComplexFunction):
 
 
 class GaussianZeroEdgeFunction(ComplexFunction):
-    def __init__(self, std_dev, width, zero_at_edges):
+    """
+    A Gaussian pulse that can be normalized to be zero at the edges.
+    """
+
+    def __init__(self, std_dev: float, width: float, zero_at_edges: bool):
         self.std_dev = std_dev
         self.width = width
         self.zero_at_edges = zero_at_edges
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        zae_chunk = self.zero_at_edges * (
-            np.exp(-0.5 * (self.width / 2 * self.std_dev) ** 2)
-        )
-        coef = 1 / (1 - zae_chunk)
         gauss = np.exp(-0.5 * (x / self.std_dev) ** 2)
-        return coef * (gauss - zae_chunk)
+        if self.zero_at_edges:
+            zae_chunk = self.zero_at_edges * (
+                np.exp(-0.5 * ((self.width / 2) / self.std_dev) ** 2)
+            )
+            gauss = (gauss - zae_chunk) / (1 - zae_chunk)
+        return gauss
 
 
-class GaussianSquare(ComplexFunction):
-    def __init__(self, width, square_width):
-        self.width = width
+class GaussianSquareFunction(NumericFunction):
+    """
+    A square pulse with a Gaussian rise and fall at the edges.
+    """
+
+    def __init__(self, square_width: float, std_dev: float, zero_at_edges: bool):
         self.square_width = square_width
+        self.std_dev = std_dev
+        self.zero_at_edges = zero_at_edges
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        gauss = np.exp(-0.5 * (x / self.width) ** 2)
-        square = np.ones(shape=x.shape, dtype=self._dtype)
-        square_slots = int(self.square_width * self.dt)
-        if square_slots > len(x):
-            raise ValueError(
-                f"The length of the square portion [[{self.square_width}]] cannot "
-                f"exceed the total pulse length [[{len(x)*self.dt}]] in a square "
-                "guassian."
-            )
-        gaus_len = int((len(x) - square_slots) / 2)
-        first_chunk = gauss[0:gaus_len]
-        second_chunk = square[0:square_slots]
-        final_chunk = gauss[gaus_len + square_slots :]
-        return append(first_chunk, second_chunk, final_chunk)
+        y = np.ones(shape=x.shape, dtype=self._dtype)
+        x_rise = x[x < -self.square_width / 2] + (self.square_width / 2)
+        x_fall = x[x > self.square_width / 2] - (self.square_width / 2)
+        y[x < -self.square_width / 2] = np.exp(-0.5 * (x_rise / self.std_dev) ** 2)
+        y[x > self.square_width / 2] = np.exp(-0.5 * (x_fall / self.std_dev) ** 2)
+        if self.zero_at_edges:
+            y = (y - y[0]) / (1 - y[0])
+        return y
 
 
 class DragGaussianFunction(ComplexFunction):
@@ -200,12 +206,22 @@ class DragGaussianFunction(ComplexFunction):
         return coef * (gauss - zae_chunk)
 
 
-class Sech(ComplexFunction):
+class SechFunction(ComplexFunction):
+    """
+    Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
+    zero at the edges.
+    """
+
     def __init__(self, width):
         self.width = width
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        return 1 / cosh(x / self.width)
+        # Having a narrow width can cause overflows in numpy
+        # Restricting the argument such that cosh is within the max float range
+        # will overcome this, and has a neglibable effect (as sech(x) outside this
+        # range is practically zero).
+        x = np.clip(x.real / self.width, -MAX_COSH_ARG, MAX_COSH_ARG)
+        return 1 / np.cosh(x)
 
 
 class Sin(ComplexFunction):
@@ -282,12 +298,11 @@ class SoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        return 0.5 * (
-            np.tanh((x + (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype)
-            - np.tanh(
-                (x - (self._width - self._rise) / 2.0) / self._rise, dtype=self._dtype
-            )
+        pulse = 0.5 * (
+            np.tanh((x.real + (self._width - self._rise) / 2.0) / self._rise)
+            - np.tanh((x.real - (self._width - self._rise) / 2.0) / self._rise)
         )
+        return pulse.astype(self._dtype)
 
 
 class SofterSquareFunction(NumericFunction):
@@ -297,13 +312,13 @@ class SofterSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh((x + self._width / 2.0 - self._rise) / self._rise) - np.tanh(
-            (x - self._width / 2.0 + self._rise) / self._rise
+        pulse = np.tanh((x.real + self._width / 2.0 - self._rise) / self._rise) - np.tanh(
+            (x.real - self._width / 2.0 + self._rise) / self._rise
         )
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
-        return np.array(pulse, dtype=self._dtype)
+        return pulse.astype(self._dtype)
 
 
 class ExtraSoftSquareFunction(NumericFunction):
@@ -313,13 +328,13 @@ class ExtraSoftSquareFunction(NumericFunction):
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh((x + self._width / 2.0 - 2.0 * self._rise) / self._rise) - np.tanh(
-            (x - self._width / 2.0 + 2.0 * self._rise) / self._rise
-        )
+        pulse = np.tanh(
+            (x.real + self._width / 2.0 - 2.0 * self._rise) / self._rise
+        ) - np.tanh((x.real - self._width / 2.0 + 2.0 * self._rise) / self._rise)
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
-        return np.array(pulse, dtype=self._dtype)
+        return pulse.astype(self._dtype)
 
 
 class SofterGaussianFunction(NumericFunction):
@@ -386,13 +401,15 @@ def evaluate_shape(data: Waveform, t, phase_offset=0.0):
                 data.std_dev, data.width, data.zero_at_edges
             )
         elif data.shape == PulseShapeType.SECH:
-            num_func = Sech(data.std_dev)
+            num_func = SechFunction(data.std_dev)
         elif data.shape == PulseShapeType.SIN:
             num_func = Sin(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.COS:
             num_func = Cos(data.frequency, data.internal_phase)
         elif data.shape == PulseShapeType.GAUSSIAN_SQUARE:
-            num_func = GaussianSquare(data.std_dev, data.square_width)
+            num_func = GaussianSquareFunction(
+                data.square_width, data.std_dev, data.zero_at_edges
+            )
         else:
             raise ValueError(f"'{str(data.shape)}' is an unknown pulse shape.")
 

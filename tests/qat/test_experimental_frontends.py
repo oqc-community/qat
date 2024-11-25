@@ -17,9 +17,10 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.interrupt import BasicInterrupt, InterruptError
 from qat.purr.compiler.runtime import get_builder
 from qat.qat import _execute_with_metrics
+
 from tests.qat.qasm_utils import get_qasm2
 from tests.qat.test_qir import _get_qir_path
-from tests.qat.utils import raises_thread_exception
+from tests.qat.utils.models import raises_thread_exception
 
 
 def _get_qasm_path(file_name):

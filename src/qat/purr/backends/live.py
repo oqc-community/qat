@@ -329,7 +329,9 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                 for aq in aqs:
                     physical_channel = aq.physical_channel
                     dt = physical_channel.sample_time
-                    physical_channel.readout_start = aq.start * dt + aq.delay
+                    physical_channel.readout_start = aq.start * dt + (
+                        aq.delay if aq.delay else 0.0
+                    )
                     physical_channel.readout_length = aq.samples * dt
                     physical_channel.acquire_mode_integrator = (
                         aq.mode == AcquireMode.INTEGRATOR
@@ -398,6 +400,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             super().validate(instructions)
 
             consumed_qubits: List[str] = []
+            chanbits_map = {}
             for inst in instructions:
                 if isinstance(inst, PostProcessing):
                     if (
@@ -427,13 +430,23 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                 # Check if we've got a measure in the middle of the circuit somewhere.
                 elif isinstance(inst, Acquire):
                     for qbit in self.model.qubits:
-                        if qbit.get_measure_channel() == inst.channel:
+                        if qbit.get_acquire_channel() == inst.channel:
                             consumed_qubits.append(qbit)
                 elif isinstance(inst, Pulse):
                     # Find target qubit from instruction and check whether it's been
                     # measured already.
                     acquired_qubits = [
-                        self.model._resolve_qb_pulse_channel(chanbit)[0] in consumed_qubits
+                        (
+                            (
+                                chanbits_map[chanbit]
+                                if chanbit in chanbits_map
+                                else chanbits_map.setdefault(
+                                    chanbit,
+                                    self.model._resolve_qb_pulse_channel(chanbit)[0],
+                                )
+                            )
+                            in consumed_qubits
+                        )
                         for chanbit in inst.quantum_targets
                         if isinstance(chanbit, (Qubit, PulseChannel))
                     ]

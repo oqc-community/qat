@@ -13,8 +13,9 @@ from qat.purr.backends.realtime_chip_simulator import qutip_available
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.integrations.qir import QIRParser
 from qat.qat import execute, execute_qir
+
 from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
-from tests.qat.utils import get_jagged_echo_hardware
+from tests.qat.utils.models import get_jagged_echo_hardware
 
 
 def _get_qir_path(file_name):
@@ -55,7 +56,7 @@ class TestQIR:
     def test_base_profile_ops(self):
         parser = QIRParser(get_default_echo_hardware(7))
         builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
-        assert len(builder.instructions) == 181
+        assert len(builder.instructions) == 180
 
     def test_cudaq_input(self):
         results = execute(
@@ -103,7 +104,7 @@ class TestQIR:
     def test_qir_instruction_builder(self):
         parser = QIRParser(get_default_echo_hardware(4))
         builder = parser.parse(_get_qir_path("generator-bell.ll"))
-        assert len(builder.instructions) == 97
+        assert len(builder.instructions) == 96
 
     def test_common_entrypoint_file(self):
         config = CompilerConfig()
