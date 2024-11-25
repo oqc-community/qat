@@ -38,9 +38,9 @@ def resonator_spect(model, qubit_indices=None, num_points=None):
     return builder
 
 
-def qubit_spect(model, qubit_indices=None):
+def qubit_spect(model, qubit_indices=None, num_points=None):
     qubit_indices = qubit_indices or [0]
-    num_points = 10
+    num_points = num_points if num_points is not None else 10
     freq_range = 50e6
     drive_amp_dbm = -40
     drive_amp_v = np.sqrt(10 ** (((drive_amp_dbm + 12) / 10) - 1))
@@ -58,9 +58,9 @@ def qubit_spect(model, qubit_indices=None):
     builder = get_builder(model)
     builder.synchronize([model.get_qubit(index) for index in qubit_indices])
     for index in qubit_indices:
-        # TODO - Provide better processing of static DeviceUpdates
-        model.get_qubit(index).get_drive_channel().scale = 1
-        # builder.device_assign(model.get_qubit(index).get_drive_channel(), "scale", 1)
+        # TODO - A skeptical usage of DeviceInjectors on static device updates
+        # TODO - Figure out what they mean w/r to scopes and control flow
+        builder.device_assign(model.get_qubit(index).get_drive_channel(), "scale", 1)
     builder.sweep(
         [SweepValue(f"freq{index}", scan_freqs[f"Q{index}"]) for index in qubit_indices]
     )

@@ -22,7 +22,8 @@ from qat.purr.compiler.instructions import (
 )
 
 UPCONVERT_SIGN = 1.0
-MAX_COSH_ARG = np.arccosh(sys.float_info.max)
+# use slightly below the maxmiumum allowed float to avoid flaky overflow errors
+MAX_COSH_ARG = np.arccosh(0.99 * sys.float_info.max)
 
 
 def remove_axes(original_dims, removed_axis_indices, axis_locations):

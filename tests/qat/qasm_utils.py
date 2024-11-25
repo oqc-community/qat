@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
 from enum import Enum, auto
+from importlib.util import find_spec
 from os.path import abspath, dirname, join
+from pathlib import Path
 
 from compiler_config.config import Qasm2Optimizations
+from openqasm3 import ast
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
@@ -71,22 +74,66 @@ def parse_and_apply_optimiziations(
     return builder
 
 
+qasm3_base = """
+OPENQASM 3.0;
+bit[{N}] c;
+qubit[{N}] q;
+{gate_strings}
+measure q -> c;
+"""
+
+
 qasm3_gates = {}
 
 
 def get_default_qasm3_gate_qasms():
     if len(qasm3_gates) == 0:
         context = QasmContext()
-        Qasm3ParserBase().load_default_gates(context)
+        file_path = Path(
+            find_spec("qiskit.qasm.libs").submodule_search_locations[0], "stdgates.inc"
+        )
+        node = ast.Include(filename=file_path)
+        Qasm3ParserBase().visit(node, context)
         for name, defi in context.gates.items():
             needed_num_args = len(defi.arguments)
             arg_string = (
                 ""
                 if needed_num_args == 0
-                else "(" + ", ".join(["0"] * needed_num_args) + ")"
+                else "(" + ", ".join(["1.2"] * needed_num_args) + ")"
             )
             N = len(defi.qubits)
             qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
             gate_string = f"{name}{arg_string} {qubit_string};"
             qasm3_gates[name] = (N, gate_string)
     return list(qasm3_gates.values())
+
+
+qasm2_base = """
+OPENQASM 2.0;
+include "qelib1.inc";
+creg c[{N}];
+qreg q[{N}];
+{gate_strings}
+measure q -> c;
+"""
+
+
+qasm2_gates = {}
+
+
+def get_default_qasm2_gate_qasms():
+    if len(qasm2_gates) == 0:
+        intrinsics = Qasm2Parser()._get_intrinsics()
+        for defi in intrinsics:
+            name = defi.name
+            needed_num_args = defi.num_params
+            arg_string = (
+                ""
+                if needed_num_args == 0
+                else "(" + ", ".join(["1.2"] * needed_num_args) + ")"
+            )
+            N = defi.num_qubits
+            qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
+            gate_string = f"{name}{arg_string} {qubit_string};"
+            qasm2_gates[name] = (N, gate_string)
+    return list(qasm2_gates.values())

@@ -72,7 +72,7 @@ class TriagePass(AnalysisPass):
 
         result = TriageResult()
         for inst in builder.instructions:
-            # View instructions by target
+            # Dissect by target
             if isinstance(inst, QuantumInstruction):
                 for qt in inst.quantum_targets:
                     if isinstance(qt, Acquire):
@@ -80,6 +80,9 @@ class TriagePass(AnalysisPass):
                             result.target_map[aqt].append(inst)
                     else:
                         result.target_map[qt].append(inst)
+            elif isinstance(inst, Sweep):
+                for t in targets:
+                    result.target_map[t].append(inst)
             else:
                 for t in targets:
                     result.target_map[t].append(inst)
@@ -124,6 +127,24 @@ class TriagePass(AnalysisPass):
         res_mgr.add(result)
 
 
+@dataclass
+class ScopingResult:
+    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
+    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+
+
+@dataclass
+class ReadWriteResult:
+    reads: Dict[str, List[QuantumInstruction]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
+
+
 @dataclass(frozen=True)
 class IterBound:
     start: Union[int, float] = 0
@@ -134,19 +155,15 @@ class IterBound:
 
 @dataclass
 class BindingResult(ResultInfoMixin):
-    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
-        default_factory=lambda: defaultdict(set)
+    scoping_results: Dict[PulseChannel, ScopingResult] = field(
+        default_factory=lambda: defaultdict(lambda: ScopingResult())
     )
-    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
-        default_factory=lambda: defaultdict(list)
+    rw_results: Dict[PulseChannel, ReadWriteResult] = field(
+        default_factory=lambda: defaultdict(lambda: ReadWriteResult())
     )
-    iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = field(
+    iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = field(
         default_factory=lambda: defaultdict(dict)
     )
-    reads: Dict[str, List[QuantumInstruction]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
-    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 class BindingPass(AnalysisPass):
@@ -199,109 +216,96 @@ class BindingPass(AnalysisPass):
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
-        stack = []
-        for inst in builder.instructions:
-            parent_scopes = [(s, e) for (s, e) in result.scope2symbols if s in stack]
-            if isinstance(inst, Sweep):
-                stack.append(inst)
-                scope = (inst, None)
-                if p := next(iter(parent_scopes[::-1]), None):
-                    for name in result.scope2symbols[p]:
-                        if name not in result.scope2symbols[scope]:
-                            result.scope2symbols[scope].add(name)
-                            result.symbol2scopes[name].append(scope)
+        for target, instructions in triage_result.target_map.items():
+            scoping_result = result.scoping_results[target]
+            rw_result = result.rw_results[target]
+            iter_bound_result = result.iter_bound_results[target]
 
-                for name, value in inst.variables.items():
-                    result.scope2symbols[scope].add(name)
-                    result.symbol2scopes[name].append(scope)
+            stack = []
+            for inst in instructions:
+                parent_scopes = [
+                    (s, e) for (s, e) in scoping_result.scope2symbols if s in stack
+                ]
+                if isinstance(inst, Sweep):
+                    stack.append(inst)
+                    scope = (inst, None)
+                    if p := next(iter(parent_scopes[::-1]), None):
+                        for name in scoping_result.scope2symbols[p]:
+                            if name not in scoping_result.scope2symbols[scope]:
+                                scoping_result.scope2symbols[scope].add(name)
+                                scoping_result.symbol2scopes[name].append(scope)
 
-                    for t in triage_result.target_map:
-                        result.iter_bounds[t][name] = self.extract_iter_bound(value)
+                    for name, value in inst.variables.items():
+                        scoping_result.scope2symbols[scope].add(name)
+                        scoping_result.symbol2scopes[name].append(scope)
+                        iter_bound_result[name] = self.extract_iter_bound(value)
+                        rw_result.writes[name].append(inst)
+                elif isinstance(inst, Repeat):
+                    stack.append(inst)
+                    scope = (inst, None)
+                    if p := next(iter(parent_scopes[::-1]), None):
+                        for name in scoping_result.scope2symbols[p]:
+                            if name not in scoping_result.scope2symbols[scope]:
+                                scoping_result.scope2symbols[scope].add(name)
+                                scoping_result.symbol2scopes[name].append(scope)
 
-                    result.writes[name].append(inst)
-            elif isinstance(inst, Repeat):
-                stack.append(inst)
-                scope = (inst, None)
-                if p := next(iter(parent_scopes[::-1]), None):
-                    for name in result.scope2symbols[p]:
-                        if name not in result.scope2symbols[scope]:
-                            result.scope2symbols[scope].add(name)
-                            result.symbol2scopes[name].append(scope)
-
-                # TODO - Desugaring could be much better when the IR is redesigned
-                name = f"repeat_{inst.repeat_count}_{hash(inst)}"
-                result.scope2symbols[scope].add(name)
-                result.symbol2scopes[name].append(scope)
-
-                for t in triage_result.target_map:
-                    result.iter_bounds[t][name] = IterBound(
-                        start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
+                    name = f"repeat_{hash(inst)}"
+                    count = inst.repeat_count
+                    scoping_result.scope2symbols[scope].add(name)
+                    scoping_result.symbol2scopes[name].append(scope)
+                    iter_bound_result[name] = IterBound(
+                        start=1, step=1, end=count, count=count
                     )
+                    rw_result.writes[name].append(inst)
+                elif isinstance(inst, (EndSweep, EndRepeat)):
+                    delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
+                    try:
+                        delimiter = stack.pop()
+                    except IndexError:
+                        raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
-                result.writes[name].append(inst)
-            elif isinstance(inst, (EndSweep, EndRepeat)):
-                delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
-                try:
-                    delimiter = stack.pop()
-                except IndexError:
-                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+                    if not isinstance(delimiter, delimiter_type):
+                        raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
-                if not isinstance(delimiter, delimiter_type):
-                    raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+                    scope = next(
+                        (
+                            (s, e)
+                            for (s, e) in scoping_result.scope2symbols.keys()
+                            if s == delimiter
+                        )
+                    )
+                    symbols = scoping_result.scope2symbols[scope]
+                    del scoping_result.scope2symbols[scope]
+                    scoping_result.scope2symbols[(delimiter, inst)] = symbols
 
-                scope = next(
-                    ((s, e) for (s, e) in result.scope2symbols.keys() if s == delimiter)
+                    for name, scopes in scoping_result.symbol2scopes.items():
+                        scoping_result.symbol2scopes[name] = [
+                            (delimiter, inst) if s == scope else s for s in scopes
+                        ]
+                elif isinstance(inst, Acquire):
+                    rw_result.writes[inst.output_variable].append(inst)
+                elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
+                    if not (
+                        inst.value.name in scoping_result.symbol2scopes
+                        and [
+                            (s, e)
+                            for (s, e) in scoping_result.symbol2scopes[inst.value.name]
+                            if s in stack
+                        ]
+                    ):
+                        raise ValueError(
+                            f"Variable {inst.value} referenced but no prior declaration found in target {target}"
+                        )
+                    rw_result.reads[inst.value.name].append(inst)
+            if stack:
+                raise ValueError(
+                    f"Unbalanced scopes. Found orphans {stack} in target {target}"
                 )
-                symbols = result.scope2symbols[scope]
-                del result.scope2symbols[scope]
-                result.scope2symbols[(delimiter, inst)] = symbols
-
-                for name, scopes in result.symbol2scopes.items():
-                    result.symbol2scopes[name] = [
-                        (delimiter, inst) if s == scope else s for s in scopes
-                    ]
-            elif isinstance(inst, Acquire):
-                result.writes[inst.output_variable].append(inst)
-            elif isinstance(inst, DeviceUpdate):
-                if not (
-                    inst.value.name in result.symbol2scopes
-                    and [
-                        (s, e)
-                        for (s, e) in result.symbol2scopes[inst.value.name]
-                        if s in stack
-                    ]
-                ):
-                    raise ValueError(
-                        f"Variable {inst.value} referenced but no prior declaration found"
-                    )
-                result.reads[inst.value.name].append(inst)
-        if stack:
-            raise ValueError(f"Unbalanced scopes. Found orphans {stack}")
 
         res_mgr.add(result)
 
 
 class TILegalisationPass(AnalysisPass):
-    """
-    An instruction is legal if it has a direct equivalent in the programming model implemented by the control
-    stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
-    as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
-    RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
-    and branching instructions such as jump.
-
-    This pass performs target-independent legalisation. The goal here is to understand how variables
-    are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-    semantics and must be kept target-agnostic so that it can be reused among backends.
-
-    Particularly in QAT:
-        1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-        2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
-    via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
-    until a "read" (usually on the instruction builder or on the hardware model) (typically from
-    a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
-    carries meaning for the variable and materialises its intention.
-    """
-
     @staticmethod
     def decompose_freq(frequency: float, target: PulseChannel):
         if target.fixed_if:  # NCO freq constant
@@ -314,7 +318,7 @@ class TILegalisationPass(AnalysisPass):
         return lo_freq, nco_freq
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate):
+        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
             if inst.attribute == "frequency":
                 if inst.target.fixed_if:
                     raise ValueError(
@@ -357,37 +361,51 @@ class TILegalisationPass(AnalysisPass):
             )
 
     def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        An instruction is legal if it has a direct equivalent in the programming model implemented by the control
+        stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
+        as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
+        RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
+        and branching instructions such as jump.
+
+        This pass performs target-independent legalisation. The goal here is to understand how variables
+        are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
+        semantics and must be kept target-agnostic so that it can be reused among backends.
+
+        Particularly in QAT:
+            1) A sweep instruction is illegal because it specifies unclear iteration semantics.
+            2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
+        via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
+        until a "read" (usually on the instruction builder or on the hardware model) (typically from
+        a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
+        carries meaning for the variable and materialises its intention.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        legal_iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = deepcopy(
-            binding_result.iter_bounds
-        )
 
-        read_iter_bounds: Dict[PulseChannel, Dict[str, Set[IterBound]]] = defaultdict(
-            lambda: defaultdict(set)
-        )
-        for name, instructions in binding_result.reads.items():
-            for inst in instructions:
-                for target in inst.quantum_targets:
-                    bound = binding_result.iter_bounds[target][name]
-                    legal_bound = self._legalise_bound(name, bound, inst)
-                    read_iter_bounds[target][name].add(legal_bound)
+        for target in triage_result.target_map:
+            rw_result = binding_result.rw_results[target]
+            bound_result = binding_result.iter_bound_results[target]
+            legal_bound_result: Dict[str, IterBound] = deepcopy(bound_result)
 
-        for target, bounds in binding_result.iter_bounds.items():
-            if target in read_iter_bounds:
-                for name, bound_set in read_iter_bounds[target].items():
+            read_bounds: Dict[str, Set[IterBound]] = defaultdict(set)
+            for name, instructions in rw_result.reads.items():
+                for inst in instructions:
+                    legal_bound = self._legalise_bound(name, bound_result[name], inst)
+                    read_bounds[name].add(legal_bound)
+
+            for name, bound in bound_result.items():
+                if name in read_bounds:
+                    bound_set = read_bounds[name]
                     if len(bound_set) > 1:
                         raise ValueError(
-                            f"Found multiple different uses for variable {name}"
+                            f"Ambiguous bounds for variable {name} in target {target}"
                         )
-                    legal_iter_bounds[target][name] = next(iter(bound_set))
-            else:
-                legal_iter_bounds[target] = {
-                    name: IterBound(start=1, step=1, end=bound.count, count=bound.count)
-                    for name, bound in bounds.items()
-                }
+                    legal_bound_result[name] = next(iter(bound_set))
 
-        # TODO: the proper way is to produce a new result and invalidate the old one
-        binding_result.iter_bounds = legal_iter_bounds
+            # TODO: the proper way is to produce a new result and invalidate the old one
+            binding_result.iter_bound_results[target] = legal_bound_result
 
 
 @dataclass

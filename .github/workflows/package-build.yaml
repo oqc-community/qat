@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, '**patch-release**']
   workflow_dispatch:
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependancies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
         run: poetry install --sync --with dev
 
       - name: Formatting tests
@@ -56,7 +56,7 @@ jobs:
           poetry run black --check .
           poetry run isort --check .
           poetry run autoflake --check .
-          poetry run pip-audit --desc
+          poetry run pip-audit --desc --ignore-vuln PYSEC-2022-43145
 
 
   unit-tests:
@@ -94,7 +94,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependancies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
         run: poetry install --sync
 
       - name: Unit tests

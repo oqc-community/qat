@@ -5,12 +5,12 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.analysis_passes import (
     BindingPass,
-    CFGPass,
     TILegalisationPass,
     TriagePass,
     TriageResult,
 )
 from qat.backend.transform_passes import (
+    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
@@ -23,11 +23,23 @@ from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
 from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import QatFile
-from qat.purr.compiler.execution import SweepIterator, _binary_average, _numpy_array_to_list
-from qat.purr.compiler.instructions import AcquireMode, IndexAccessor, Instruction, Variable
+from qat.purr.compiler.execution import (
+    DeviceInjectors,
+    SweepIterator,
+    _binary_average,
+    _numpy_array_to_list,
+)
+from qat.purr.compiler.instructions import (
+    AcquireMode,
+    DeviceUpdate,
+    IndexAccessor,
+    Instruction,
+    Variable,
+)
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.runtime import NewQuantumRuntime
 from qat.purr.utils.logging_utils import log_duration
+from qat.utils.algorithm import stable_partition
 
 
 class QbloxLiveHardwareModel(LiveHardwareModel):
@@ -159,9 +171,9 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             | RepeatSanitisation()
             | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
-            | CFGPass()
             | TILegalisationPass()
             | QbloxLegalisationPass()
         )
@@ -169,62 +181,75 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
         self._model_exists()
 
-        with log_duration("Codegen run in {} seconds."):
-            res_mgr = ResultManager()
-            self.run_pass_pipeline(builder, res_mgr, self.model)
-            packages = NewQbloxEmitter().emit_packages(builder, res_mgr, self.model)
+        # TODO - A skeptical usage of DeviceInjectors on static device updates
+        # TODO - Figure out what they mean w/r to scopes and control flow
+        static_dus, builder.instructions = stable_partition(
+            builder.instructions,
+            lambda inst: isinstance(inst, DeviceUpdate)
+            and not isinstance(inst.value, Variable),
+        )
+        injectors = DeviceInjectors(static_dus)
 
-        with log_duration("QPU returned results in {} seconds."):
-            self.model.control_hardware.set_data(packages)
-            playback_results: Dict[str, np.ndarray] = (
-                self.model.control_hardware.start_playback(None, None)
-            )
+        try:
+            injectors.inject()
+            with log_duration("Codegen run in {} seconds."):
+                res_mgr = ResultManager()
+                self.run_pass_pipeline(builder, res_mgr, self.model)
+                packages = NewQbloxEmitter().emit_packages(builder, res_mgr, self.model)
 
-            # Post execution step needs a lot of work
-            # TODO - Robust batching analysis (as a pass !)
-            # TODO - Lowerability analysis pass
+            with log_duration("QPU returned results in {} seconds."):
+                self.model.control_hardware.set_data(packages)
+                playback_results: Dict[str, np.ndarray] = (
+                    self.model.control_hardware.start_playback(None, None)
+                )
 
-            triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-            acquire_map = triage_result.acquire_map
-            pp_map = triage_result.pp_map
-            sweeps = triage_result.sweeps
+                # Post execution step needs a lot of work
+                # TODO - Robust batching analysis (as a pass !)
+                # TODO - Lowerability analysis pass
 
-            def create_sweep_iterator():
-                switerator = SweepIterator()
-                for sweep in sweeps:
-                    switerator.add_sweep(sweep)
-                return switerator
+                triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+                acquire_map = triage_result.acquire_map
+                pp_map = triage_result.pp_map
+                sweeps = triage_result.sweeps
 
-            results = {}
-            for t, acquires in acquire_map.items():
-                switerator = create_sweep_iterator()
-                for acq in acquires:
-                    big_response = playback_results[acq.output_variable]
-                    sweep_splits = np.split(big_response, switerator.length)
-                    switerator.reset_iteration()
-                    while not switerator.is_finished():
-                        # just to advance iteration, no need for injection
-                        # TODO - A generic loop nest model. Sth similar to SweepIterator but does not mixin injection stuff
-                        switerator.do_sweep([])
-                        response = sweep_splits[switerator.current_iteration]
-                        response_axis = get_axis_map(acq.mode, response)
-                        for pp in pp_map[acq.output_variable]:
-                            response, response_axis = self.run_post_processing(
-                                pp, response, response_axis
-                            )
-                            handle = results.setdefault(
-                                acq.output_variable,
-                                np.empty(
-                                    switerator.get_results_shape(response.shape),
-                                    response.dtype,
-                                ),
-                            )
-                            switerator.insert_result_at_sweep_position(handle, response)
+                def create_sweep_iterator():
+                    switerator = SweepIterator()
+                    for sweep in sweeps:
+                        switerator.add_sweep(sweep)
+                    return switerator
 
-            results = self._process_results(results, triage_result)
-            results = self._process_assigns(results, triage_result)
+                results = {}
+                for t, acquires in acquire_map.items():
+                    switerator = create_sweep_iterator()
+                    for acq in acquires:
+                        big_response = playback_results[acq.output_variable]
+                        sweep_splits = np.split(big_response, switerator.length)
+                        switerator.reset_iteration()
+                        while not switerator.is_finished():
+                            # just to advance iteration, no need for injection
+                            # TODO - A generic loop nest model. Sth similar to SweepIterator but does not mixin injection stuff
+                            switerator.do_sweep([])
+                            response = sweep_splits[switerator.current_iteration]
+                            response_axis = get_axis_map(acq.mode, response)
+                            for pp in pp_map[acq.output_variable]:
+                                response, response_axis = self.run_post_processing(
+                                    pp, response, response_axis
+                                )
+                                handle = results.setdefault(
+                                    acq.output_variable,
+                                    np.empty(
+                                        switerator.get_results_shape(response.shape),
+                                        response.dtype,
+                                    ),
+                                )
+                                switerator.insert_result_at_sweep_position(handle, response)
 
-            return results
+                results = self._process_results(results, triage_result)
+                results = self._process_assigns(results, triage_result)
+
+                return results
+        finally:
+            injectors.revert()
 
     def _process_results(self, results, triage_result: TriageResult):
         """
