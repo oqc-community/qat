@@ -9,10 +9,10 @@ from semver import Version
 
 from qat.model.device import Qubit
 from qat.model.hardware_base import (
-    CalibratablePositiveFloat,
     CalibratableUnitInterval,
     QubitId,
     ValidatedDict,
+    ValidatedSet,
 )
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
@@ -27,7 +27,7 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
-    logical_connectivity: dict[QubitId, set[tuple[QubitId, CalibratablePositiveFloat]]]
+    logical_connectivity: ValidatedDict[QubitId, ValidatedSet[QubitId]]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -68,9 +68,13 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                     which is equal to `physical_connectivity` or a subset thereof.
     """
 
-    qubits: dict[QubitId, Qubit]
-    physical_connectivity: dict[QubitId, set[QubitId]] = Field(frozen=True)
-    logical_connectivity: Optional[dict[QubitId, set[QubitId]]] = Field(default=None)
+    qubits: ValidatedDict[QubitId, Qubit]
+    physical_connectivity: ValidatedDict[QubitId, ValidatedSet[QubitId]] = Field(
+        frozen=True
+    )
+    logical_connectivity: Optional[ValidatedDict[QubitId, ValidatedSet[QubitId]]] = Field(
+        default=None
+    )
     physical_connectivity_quality: ValidatedDict[
         tuple[QubitId, QubitId], CalibratableUnitInterval
     ]
