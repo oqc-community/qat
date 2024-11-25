@@ -49,15 +49,15 @@ class QatConfig(BaseSettings):
 
     >>> import os
     >>> os.environ["QAT_MAX_REPEATS_LIMIT"] = "654321"
-    >>> QatConfig()
-    QatConfig(MAX_REPEATS_LIMIT=654321, DISABLE_PULSE_DURATION_LIMITS=False)
-    >>> QatConfig(MAX_REPEATS_LIMIT=123)
-    QatConfig(MAX_REPEATS_LIMIT=123, DISABLE_PULSE_DURATION_LIMITS=False)
+    >>> QatConfig() # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=654321, ...)
+    >>> QatConfig(MAX_REPEATS_LIMIT=123) # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=123, ...)
 
     >>> qatconfig = QatConfig()
     >>> qatconfig.MAX_REPEATS_LIMIT = 16000
-    >>> qatconfig
-    QatConfig(MAX_REPEATS_LIMIT=16000, DISABLE_PULSE_DURATION_LIMITS=False)
+    >>> qatconfig # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=16000, ...)
 
     >>> QatConfig(MAX_REPEATS_LIMIT=100.5) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):

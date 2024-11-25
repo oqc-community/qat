@@ -108,7 +108,7 @@ target-version = ["py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 addopts = [
-    "--import-mode=importlib"
+    "--import-mode=importlib", "--doctest-modules"
 ]
 filterwarnings = [
     # Set warnings to raise errors in pytest runs.
@@ -131,6 +131,8 @@ filterwarnings = [
     # DOcplex using deprecated escape sequence
     'default:.*invalid escape sequence:SyntaxWarning::1092',
     'default:.*invalid escape sequence:DeprecationWarning::1092',
+    # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
+    'default:.*GlobalisePhasedX:DeprecationWarning'
 ]
 
 [tool.poetry.scripts]
