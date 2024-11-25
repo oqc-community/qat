@@ -271,24 +271,17 @@ class Test_HW_Connectivity:
             )
         )
 
-        hw = PhysicalHardwareModelBuilder(
-            physical_connectivity=physical_connectivity,
-            logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
-        ).model
+        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+        physical_connectivity_quality.update({q: random.Random(seed).uniform(-1.0, -0.001)})
 
-        for q_index in hw.physical_connectivity_quality:
-            with pytest.raises(ValueError):
-                hw.physical_connectivity_quality.update(
-                    {q_index: random.Random(seed).uniform(-1.0, -0.001)}
-                )
+        with pytest.raises(ValueError):
+            PhysicalHardwareModelBuilder(
+                physical_connectivity=physical_connectivity,
+                logical_connectivity=logical_connectivity,
+                physical_connectivity_quality=physical_connectivity_quality,
+            ).model
 
-            with pytest.raises(ValueError):
-                hw.physical_connectivity_quality.update(
-                    {q_index: random.Random(seed).uniform(1.001, 100.0)}
-                )
-
-    def test_invalid_physical_connectivity_mutation(self, n_qubits, seed):
+    def test_frozen_connectivity(self, n_qubits, seed):
         physical_connectivity, physical_connectivity_quality, logical_connectivity = (
             generate_connectivity_data(
                 n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
@@ -302,16 +295,43 @@ class Test_HW_Connectivity:
         ).model
 
         q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+        q1_altered = random.Random(seed + 1).sample(list(range(0, n_qubits)), 1)[0]
+        q2_altered = random.Random(seed + 2).sample(list(range(0, n_qubits)), 1)[0]
+
+        with pytest.raises(AttributeError):
+            hw.physical_connectivity[q].add((q1_altered, q2_altered))
+
+        with pytest.raises(AttributeError):
+            hw.logical_connectivity[q].add((q1_altered, q2_altered))
+
+        with pytest.raises(AttributeError):
+            hw.physical_connectivity[q].discard(q1_altered)
+
+        with pytest.raises(AttributeError):
+            hw.logical_connectivity[q].discard(q2_altered)
+
+    def test_invalid_connectivity_type(self, n_qubits, seed):
+        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+            generate_connectivity_data(
+                n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
+            )
+        )
+
+        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
 
         invalid_int = random.Random(seed).sample(list(range(-n_qubits, -1)), 1)[0]
         invalid_float = random.Random(seed).uniform(-10.0, 10.0)
         invalid_str = "abc"
         for invalid_value in [invalid_int, invalid_float, invalid_str]:
-            with pytest.raises(ValueError):
-                hw.physical_connectivity[q].add(invalid_value)
+            physical_connectivity[q] = (invalid_value, invalid_value)
+            logical_connectivity[q] = (invalid_value, invalid_value)
 
             with pytest.raises(ValueError):
-                hw.logical_connectivity[q].add(invalid_value)
+                hw = PhysicalHardwareModelBuilder(
+                    physical_connectivity=physical_connectivity,
+                    logical_connectivity=logical_connectivity,
+                    physical_connectivity_quality=physical_connectivity_quality,
+                ).model
 
 
 @pytest.mark.parametrize("seed", [500, 501, 502])

@@ -8,12 +8,7 @@ from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
 from qat.model.device import Qubit
-from qat.model.hardware_base import (
-    CalibratableUnitInterval,
-    QubitId,
-    ValidatedDict,
-    ValidatedSet,
-)
+from qat.model.hardware_base import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 VERSION = Version(0, 0, 1)
@@ -27,7 +22,7 @@ class LogicalHardwareModel(WarnOnExtraFieldsModel):
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
-    logical_connectivity: ValidatedDict[QubitId, ValidatedSet[QubitId]]
+    logical_connectivity: FrozenDict[QubitId, FrozenSet[QubitId]]
 
     @field_validator("version")
     def version_compatibility(version: Version):
@@ -68,14 +63,12 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                     which is equal to `physical_connectivity` or a subset thereof.
     """
 
-    qubits: ValidatedDict[QubitId, Qubit]
-    physical_connectivity: ValidatedDict[QubitId, ValidatedSet[QubitId]] = Field(
-        frozen=True
-    )
-    logical_connectivity: Optional[ValidatedDict[QubitId, ValidatedSet[QubitId]]] = Field(
+    qubits: FrozenDict[QubitId, Qubit]
+    physical_connectivity: FrozenDict[QubitId, FrozenSet[QubitId]] = Field(frozen=True)
+    logical_connectivity: Optional[FrozenDict[QubitId, FrozenSet[QubitId]]] = Field(
         default=None
     )
-    physical_connectivity_quality: ValidatedDict[
+    physical_connectivity_quality: FrozenDict[
         tuple[QubitId, QubitId], CalibratableUnitInterval
     ]
 
