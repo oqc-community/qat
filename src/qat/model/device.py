@@ -98,8 +98,8 @@ class PhysicalChannel(Component):
 
     sample_time: CalibratablePositiveFloat = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
-    phase_iq_offset: complex = 0.0 + 0.0j
-    bias: complex = 0.0 + 0.0j
+    phase_iq_offset: float | complex = 0.0 + 0.0j
+    bias: float | complex = 0.0 + 0.0j
 
 
 class PulseChannel(Component):
@@ -114,8 +114,8 @@ class PulseChannel(Component):
     """
 
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
-    bias: complex = 0.0 + 0.0j
-    scale: complex = 1.0 + 0.0j
+    bias: float | complex = 0.0 + 0.0j
+    scale: float | complex = 1.0 + 0.0j
     fixed_if: bool = False
 
 
