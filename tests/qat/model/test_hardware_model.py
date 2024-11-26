@@ -45,21 +45,21 @@ def pick_subconnectivity(connectivity, n, seed=42):
     sub_connectivity = deepcopy(connectivity)
     sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
     for qubit in sub_qubits:
-        popped_edge = sub_connectivity[qubit].pop()
-        sub_connectivity[popped_edge].remove(qubit)
+        popped_node = sub_connectivity[qubit].pop()
+        sub_connectivity[popped_node].remove(qubit)
 
     return sub_connectivity
 
 
 def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
     physical_connectivity = random_connectivity(n=n_qubits, seed=seed)
-    physical_connectivity_quality = random_quality_map(
-        connectivity=physical_connectivity, seed=seed
-    )
     logical_connectivity = pick_subconnectivity(
         physical_connectivity, n=n_logical_qubits, seed=seed
     )
-    return (physical_connectivity, physical_connectivity_quality, logical_connectivity)
+    logical_connectivity_quality = random_quality_map(
+        connectivity=logical_connectivity, seed=seed
+    )
+    return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
 
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
@@ -67,7 +67,7 @@ def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
 @pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Serialisation:
     def test_built_model_serialises(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -76,7 +76,7 @@ class Test_HW_Serialisation:
         builder = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         )
 
         hw1 = builder.model
@@ -84,7 +84,7 @@ class Test_HW_Serialisation:
         assert hw1 == hw2
 
     def test_built_logical_model_serialises(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -93,7 +93,7 @@ class Test_HW_Serialisation:
         builder = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         )
 
         hw1 = builder.model
@@ -101,7 +101,7 @@ class Test_HW_Serialisation:
         assert hw1 == hw2
 
     def test_dump_load_eq(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -110,7 +110,7 @@ class Test_HW_Serialisation:
         hw1 = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         blob = hw1.model_dump()
 
@@ -123,7 +123,7 @@ class Test_HW_Serialisation:
         assert hw1 != hw3
 
     def test_dump_eq(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -132,7 +132,7 @@ class Test_HW_Serialisation:
         hw1 = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         blob1 = hw1.model_dump()
 
@@ -147,7 +147,7 @@ class Test_HW_Serialisation:
         assert blob1 != blob3
 
     def test_deep_equals(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -156,7 +156,7 @@ class Test_HW_Serialisation:
         hw1 = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         hw2 = deepcopy(hw1)
 
@@ -169,7 +169,7 @@ class Test_HW_Serialisation:
         assert hw1 != hw2
 
     def test_deserialise_version(self, n_qubits, n_logical_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
             )
@@ -178,7 +178,7 @@ class Test_HW_Serialisation:
         hw1 = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         assert hw1.version == VERSION
 
@@ -223,7 +223,7 @@ class Test_HW_Calibration:
         assert hw2.is_calibrated
 
     def test_model_calibration_serialises(self, n_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
             )
@@ -232,7 +232,7 @@ class Test_HW_Calibration:
         hw1 = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         hw1 = randomly_calibrate(hardware_model=hw1, seed=seed)
 
@@ -244,7 +244,7 @@ class Test_HW_Calibration:
 @pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Connectivity:
     def test_constrained_connectivity_subgraph(self, n_qubits, seed):
-        physical_connectivity, _, logical_connectivity = generate_connectivity_data(
+        physical_connectivity, logical_connectivity, _ = generate_connectivity_data(
             n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
         )
 
@@ -265,24 +265,24 @@ class Test_HW_Connectivity:
             )
 
     def test_invalid_connectivity_quality(self, n_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
             )
         )
 
         q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
-        physical_connectivity_quality.update({q: random.Random(seed).uniform(-1.0, -0.001)})
+        logical_connectivity_quality.update({q: random.Random(seed).uniform(-1.0, -0.001)})
 
         with pytest.raises(ValueError):
             PhysicalHardwareModelBuilder(
                 physical_connectivity=physical_connectivity,
                 logical_connectivity=logical_connectivity,
-                physical_connectivity_quality=physical_connectivity_quality,
+                logical_connectivity_quality=logical_connectivity_quality,
             ).model
 
     def test_frozen_connectivity(self, n_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
             )
@@ -291,7 +291,7 @@ class Test_HW_Connectivity:
         hw = PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
 
         q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
@@ -311,7 +311,7 @@ class Test_HW_Connectivity:
             hw.logical_connectivity[q].discard(q2_altered)
 
     def test_invalid_connectivity_type(self, n_qubits, seed):
-        physical_connectivity, physical_connectivity_quality, logical_connectivity = (
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(int(np.sqrt(n_qubits - 1)), n_qubits // 2), seed=seed
             )
@@ -330,7 +330,7 @@ class Test_HW_Connectivity:
                 hw = PhysicalHardwareModelBuilder(
                     physical_connectivity=physical_connectivity,
                     logical_connectivity=logical_connectivity,
-                    physical_connectivity_quality=physical_connectivity_quality,
+                    logical_connectivity_quality=logical_connectivity_quality,
                 ).model
 
 
@@ -340,11 +340,11 @@ class Test_OQC_Hardware:
     def test_lucy(self, seed, n_removed_qubits):
         n_qubits = 8
         qubit_indices = list(range(0, n_qubits))
+
+        ring_graph = nx.cycle_graph(n_qubits)
         ring_architecture = {
-            i: {qubit_indices[i - 1], qubit_indices[i % (n_qubits - 1) + 1]}
-            for i in range(0, n_qubits)
+            node: set(neighbors) for node, neighbors in ring_graph.adjacency()
         }
-        ring_connectivity_quality = random_quality_map(ring_architecture, seed=seed)
 
         # Randomly remove 3 qubits from the GPU connectivity.
         removed_qubits = set(
@@ -356,9 +356,12 @@ class Test_OQC_Hardware:
         for connected_qubits in logical_connectivity.values():
             connected_qubits -= removed_qubits
 
+        logical_connectivity_quality = random_quality_map(logical_connectivity, seed=seed)
+
         hw = PhysicalHardwareModelBuilder(
             physical_connectivity=ring_architecture,
-            physical_connectivity_quality=ring_connectivity_quality,
+            logical_connectivity=logical_connectivity,
+            logical_connectivity_quality=logical_connectivity_quality,
         ).model
         assert hw.number_of_qubits == n_qubits
         assert not hw.is_calibrated
@@ -375,9 +378,9 @@ class Test_OQC_Hardware:
             connections = json.load(f)
             for c in connections["connections"]:
                 lattice_connectivity[c[0]].add(c[1])
+                lattice_connectivity[c[1]].add(c[0])
                 qubit_indices.update([c[0], c[1]])
         lattice_connectivity = dict(lattice_connectivity)
-        lattice_connectivity_quality = random_quality_map(lattice_connectivity, seed=seed)
 
         # Randomly remove 3 qubits from the GPU connectivity.
         removed_qubits = set(
@@ -391,6 +394,8 @@ class Test_OQC_Hardware:
         for connected_qubits in logical_connectivity.values():
             connected_qubits -= removed_qubits
 
+        logical_connectivity_quality = random_quality_map(logical_connectivity, seed=seed)
+
         n_physical_qubits = len(
             set(lattice_connectivity.keys()).union(*lattice_connectivity.values())
         )
@@ -402,10 +407,10 @@ class Test_OQC_Hardware:
         builder = PhysicalHardwareModelBuilder(
             physical_connectivity=lattice_connectivity,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=lattice_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
         )
         hw = builder.model
         assert hw.number_of_qubits == n_physical_qubits
         assert hw.physical_connectivity == lattice_connectivity
         assert hw.logical_connectivity == logical_connectivity
-        assert hw.physical_connectivity_quality == lattice_connectivity_quality
+        assert hw.logical_connectivity_quality == logical_connectivity_quality

@@ -15,7 +15,7 @@ from qat.model.device import (
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
-from qat.model.hardware_base import CalibratableUnitInterval, QubitId
+from qat.model.hardware_base import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
 from qat.model.hardware_model import PhysicalHardwareModel
 
 
@@ -23,23 +23,22 @@ class PhysicalHardwareModelBuilder:
     """
     A builder class that builds a physical hardware model based on the given connectivity.
 
-    :param physical_connectivity: The connectivities of the physical qubits on the QPU.
-    :param physical_connectivity_quality: Quality of the connections between the qubits.
-    :param logical_connectivity: The connectivities of the qubits used for compilation,
-                            which is equal to `physical_connectivity` or a subset thereof.
+    :param physical_connectivity: The connectivities of the physical qubits on the QPU (undirected graph).
+    :param logical_connectivity: The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of `physical_connectivity`.
+    :param logical_connectivity_quality: Quality of the connections between the qubits.
     """
 
     def __init__(
         self,
-        physical_connectivity: dict[int, set[int]],
-        physical_connectivity_quality: dict[
+        physical_connectivity: dict[int, FrozenSet[int]],
+        logical_connectivity: Optional[dict[int, FrozenSet[int]]] = None,
+        logical_connectivity_quality: FrozenDict[
             tuple[QubitId, QubitId], CalibratableUnitInterval
         ] = None,
-        logical_connectivity: Optional[dict[int, set[int]]] = None,
     ):
         self._current_model = self._build_uncalibrated_hardware_model(
             physical_connectivity=physical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
             logical_connectivity=logical_connectivity,
         )
 
@@ -51,7 +50,7 @@ class PhysicalHardwareModelBuilder:
         self,
         physical_connectivity: dict[int, set[int]],
         logical_connectivity: dict[int, set[int]] = None,
-        physical_connectivity_quality: None = None,
+        logical_connectivity_quality: None = None,
     ):
         logical_connectivity = logical_connectivity or physical_connectivity
 
@@ -61,7 +60,7 @@ class PhysicalHardwareModelBuilder:
 
         qubits = {}
         for qubit_id in unique_qubit_indices:
-            qubit_connectivity = physical_connectivity.get(qubit_id, set())
+            qubit_connectivity = logical_connectivity.get(qubit_id, set())
 
             bb_q = self._build_uncalibrated_baseband()
             bb_r = self._build_uncalibrated_baseband()
@@ -88,7 +87,7 @@ class PhysicalHardwareModelBuilder:
         return PhysicalHardwareModel(
             qubits=qubits,
             logical_connectivity=logical_connectivity,
-            physical_connectivity_quality=physical_connectivity_quality,
+            logical_connectivity_quality=logical_connectivity_quality,
             physical_connectivity=physical_connectivity,
         )
 
@@ -130,5 +129,71 @@ class PhysicalHardwareModelBuilder:
         return self.model.model_dump()
 
 
-physical_topology = {0: {1}, 1: {0}}
-builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
+import itertools as it
+import random
+from copy import deepcopy
+
+import networkx as nx
+
+
+def random_connectivity(n, max_degree=3, seed=42):
+    """
+    Generates a random undirected graph, similarly to an Erdős-Rényi
+    graph, but enforcing that the resulting graph is conneted
+    """
+    edges = list(it.combinations(range(n), 2))
+    random.Random(seed).shuffle(edges)
+    G = nx.Graph()
+    G.add_nodes_from(range(n))
+    for node_edges in edges:
+        if (
+            len(G.edges(node_edges[0])) < max_degree
+            and len(G.edges(node_edges[1])) < max_degree
+        ):
+            G.add_edge(*node_edges)
+
+    return {node: set(neighbors) for node, neighbors in G.adjacency()}
+
+
+def random_quality_map(connectivity, seed=42):
+    coupling_map = {}
+    for q1_index, connected_qubits in connectivity.items():
+        for q2_index in connected_qubits:
+            coupling_map[(q1_index, q2_index)] = random.Random(seed).uniform(0.0, 1.0)
+    return coupling_map
+
+
+def pick_subconnectivity(connectivity, n, seed=42):
+    sub_connectivity = deepcopy(connectivity)
+    sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
+    for qubit in sub_qubits:
+        popped_node = sub_connectivity[qubit].pop()
+        sub_connectivity[popped_node].remove(qubit)
+
+    return sub_connectivity
+
+
+def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
+    physical_connectivity = random_connectivity(n=n_qubits, seed=seed)
+    logical_connectivity = pick_subconnectivity(
+        physical_connectivity, n=n_logical_qubits, seed=seed
+    )
+    logical_connectivity_quality = random_quality_map(
+        connectivity=logical_connectivity, seed=seed
+    )
+    return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
+
+
+n_qubits = 2
+
+physical_connectivity, logical_connectivity, logical_connectivity_quality = (
+    generate_connectivity_data(n_qubits, 0)
+)
+
+builder = PhysicalHardwareModelBuilder(
+    physical_connectivity=physical_connectivity,
+    logical_connectivity=logical_connectivity,
+    logical_connectivity_quality=logical_connectivity_quality,
+)
+
+hw1 = builder.model
