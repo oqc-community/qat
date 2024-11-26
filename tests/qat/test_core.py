@@ -1,12 +1,20 @@
 import re
 from pathlib import Path
+from random import random
 
 import pytest
-from compiler_config.config import CompilerConfig, Tket, TketOptimizations
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+    Tket,
+    TketOptimizations,
+)
 
 from qat.core import QAT
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.frontends import QIRFrontend
+from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -62,6 +70,23 @@ skip_exec = [
 ]
 
 
+multi_reg_files = [
+    "qasm2-split_measure_assign.qasm",
+    "qasm2-basic_results_formats.qasm",
+    "qasm2-ordered_cregs.qasm",
+    "qasm2-example.qasm",
+]
+
+
+no_acquire_files = [
+    "qasm3-delay.qasm",
+    "qasm3-ecr_test.qasm",
+    "qasm3-redefine_defcal.qasm",
+    "qasm3-arb_waveform.qasm",
+    "qasm3-complex_gates_test.qasm",
+]
+
+
 qasm2_files = [
     p
     for p in Path(dir_path, "files", "qasm", "qasm2").glob("*.qasm")
@@ -92,7 +117,7 @@ gen_name_pattern = re.compile(r"generated_name_[0-9]+")
 
 
 def _strip_generated_rng(o):
-    """Strip away the randong number part of 'generated_name_4826354253464' allowing for
+    """Strip away the random number part of 'generated_name_4826354253464' allowing for
     simple equivalency check."""
     if isinstance(o, dict):
         for k, v in o.items():
@@ -129,6 +154,26 @@ execution_files = [
 ]
 
 
+def generate_random_linear(qubit_indices, random_data=True):
+    output = {}
+    for index in qubit_indices:
+        random_0 = random() if random_data else 1
+        random_1 = random() if random_data else 1
+        output[str(index)] = {
+            "0|0": random_0,
+            "1|0": 1 - random_0,
+            "1|1": random_1,
+            "0|1": 1 - random_1,
+        }
+    return output
+
+
+def apply_error_mitigation_setup(hw):
+    lin_mit = generate_random_linear([q.index for q in hw.qubits])
+    hw.error_mitigation = ErrorMitigation(ReadoutMitigation(linear=lin_mit))
+    return hw
+
+
 @pytest.mark.parametrize(
     "compiler_config",
     [
@@ -138,10 +183,22 @@ execution_files = [
             CompilerConfig(optimizations=Tket(TketOptimizations.Two)),
             id="TketOptimizations.Two",
         ),
+        pytest.param(
+            CompilerConfig(
+                results_format=QuantumResultsFormat().binary_count(),
+                error_mitigation=ErrorMitigationConfig.LinearMitigation,
+            ),
+            id="ErrorMitigation",
+        ),
     ],
 )
 @pytest.mark.parametrize(
-    "hardware_model", [pytest.param(get_default_echo_hardware(32), id="Echo32Q")]
+    "hardware_model",
+    [
+        pytest.param(
+            apply_error_mitigation_setup(get_default_echo_hardware(32)), id="Echo32Q"
+        )
+    ],
 )
 class TestQATParity:
     """Test that qat.core.QAT generates the same outputs as the qat.purr stack."""
@@ -247,6 +304,20 @@ class TestQATParity:
     def test_qat_execute(
         self, request, source_file, hardware_model, compiler_config, monkeypatch
     ):
+        if (
+            compiler_config is not None
+            and (em := compiler_config.error_mitigation) is not None
+        ):
+            if ErrorMitigationConfig.LinearMitigation in em:
+                short_name = short_file_name(source_file)
+                if short_name in multi_reg_files:
+                    pytest.skip("ErrorMitigation not implemented for multiple registers.")
+                elif short_name.startswith("qir-"):
+                    pytest.skip("ErrorMitigation not implemented for QIR files.")
+                elif short_name in no_acquire_files:
+                    pytest.skip(
+                        "ErrorMitigation not implemented for program with no acquire."
+                    )
         instructions, _ = self.purr_compile(
             request,
             str(source_file),

@@ -18,12 +18,13 @@ from qat.ir.pass_base import PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.runtime import get_runtime
 from qat.purr.qatconfig import QatConfig
 from qat.qat import QATInput
 from qat.runtime.analysis_passes import CalibrationAnalysis, CalibrationAnalysisResult
+from qat.runtime.transform_passes import ErrorMitigation, ResultTransform
 
 
 class QAT:
@@ -51,7 +52,7 @@ class QAT:
         builder: InstructionBuilder,
         compiler_config: Optional[CompilerConfig] = None,
     ):
-        # TODO: Replace frontend.execute with pass manager pipeline
+        # TODO: Improve metrics and config handling
         compiler_config = compiler_config or CompilerConfig()
         execution_results = ResultManager()
         metrics = CompilationMetrics()
@@ -60,26 +61,33 @@ class QAT:
         pipeline = self.build_pre_execute_pipeline(compiler_config)
         pipeline.run(builder, execution_results, self.hardware_model, engine)
 
+        # TODO: Improve calibration handling
         calibrations = execution_results.lookup_by_type(
             CalibrationAnalysisResult
         ).calibration_executables
-
         active_runtime = get_runtime(self.hardware_model)
-
         active_runtime.run_quantum_executable(calibrations)
+
         metrics.record_metric(
             MetricsType.OptimizedInstructionCount, len(builder.instructions)
         )
         results = engine.execute(
             builder.instructions,
         )
-        results = active_runtime._transform_results(
-            results, compiler_config.results_format, compiler_config.repeats
-        )
-        results = active_runtime._apply_error_mitigation(
-            results, builder.instructions, compiler_config.error_mitigation
-        )
-        return results, metrics
+
+        # TODO: Should this be a pass in a pre-execution Pipeline?
+        try:
+            index_mapping = get_cl2qu_index_mapping(
+                builder.instructions, self.hardware_model
+            )
+        except ValueError:
+            index_mapping = {}
+
+        # Result processing pipeline
+        pipeline = self.build_result_processing_pipeline(compiler_config)
+        ir = QatIR(value=results)
+        pipeline.run(ir, execution_results, mapping=index_mapping)
+        return ir.value, metrics
 
     @property
     def hardware_model(self):
@@ -114,4 +122,12 @@ class QAT:
             | PostProcessingOptimisation()
             | InstructionValidation()
             | ReadoutValidation()
+        )
+
+    def build_result_processing_pipeline(self, compiler_config: CompilerConfig):
+        pipeline = PassManager()
+        return (
+            pipeline
+            | ResultTransform(compiler_config)
+            | ErrorMitigation(self.hardware_model, compiler_config)
         )
