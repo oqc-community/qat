@@ -216,23 +216,9 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">ComputedFieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">FieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'logical_connectivity':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">required=True),</span> <span class="pre">'version':</span> <span class="pre">FieldInfo(annotation=SemanticVersion,</span> <span class="pre">required=False,</span> <span class="pre">default=Version(major=0,</span> <span class="pre">minor=0,</span> <span class="pre">patch=1,</span> <span class="pre">prerelease=None,</span> <span class="pre">build=None),</span> <span class="pre">frozen=True,</span> <span class="pre">repr=False)}</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -277,23 +263,9 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_computed_fields">
-<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">ComputedFieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_computed_fields" title="Link to this definition"></a></dt>
-<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.model_fields">
-<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Dict[str,</span> <span class="pre">FieldInfo]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'logical_connectivity':</span> <span class="pre">FieldInfo(annotation=Union[dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'physical_connectivity':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">set[int]],</span> <span class="pre">required=True,</span> <span class="pre">frozen=True),</span> <span class="pre">'qubits':</span> <span class="pre">FieldInfo(annotation=dict[int,</span> <span class="pre">Qubit],</span> <span class="pre">required=True),</span> <span class="pre">'version':</span> <span class="pre">FieldInfo(annotation=SemanticVersion,</span> <span class="pre">required=False,</span> <span class="pre">default=Version(major=0,</span> <span class="pre">minor=0,</span> <span class="pre">patch=1,</span> <span class="pre">prerelease=None,</span> <span class="pre">build=None),</span> <span class="pre">frozen=True,</span> <span class="pre">repr=False)}</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.model_fields" title="Link to this definition"></a></dt>
-<dd><p>Metadata about the fields defined on the model,
-mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p>
-<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
 </dd></dl>
 
 <dl class="py property">
