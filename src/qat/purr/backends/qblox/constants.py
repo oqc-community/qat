@@ -27,6 +27,12 @@ class Constants:
     """Number of registers available in the Qblox sequencers."""
     MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS: int = 16384
     """Maximal amount of scope trace acquisition datapoints returned."""
+    MAX_TOTAL_BINNED_ACQUISITIONS: int = 589824
+    MAX_012_BINNED_ACQUISITIONS: int = 1 << 17
+    MAX_345_BINNED_ACQUISITIONS: int = 1 << 16
+    """Each sequencer has 131072 bins with some caveats. If you are using all sequencers
+    you are limited to 131k bins for the first three sequencers and 65536 bins for the final
+    three to a maximum number of 589824 bins."""
     MAX_SAMPLE_SIZE_WAVEFORMS: int = 16384
     """Maximal amount of samples in the waveforms to be uploaded to a sequencer."""
     GRID_TIME = 4  # ns

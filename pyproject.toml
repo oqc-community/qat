@@ -131,6 +131,8 @@ filterwarnings = [
     # DOcplex using deprecated escape sequence
     'default:.*invalid escape sequence:SyntaxWarning::1092',
     'default:.*invalid escape sequence:DeprecationWarning::1092',
+    # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
+    'default:.*GlobalisePhasedX:DeprecationWarning'
 ]
 
 [tool.poetry.scripts]
