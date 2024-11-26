@@ -128,8 +128,3 @@ class PhysicalHardwareModelBuilder:
 
     def model_dump(self):
         return self.model.model_dump()
-
-
-physical_topology = {0: {1}, 1: {0}}
-builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
-hw = builder.model

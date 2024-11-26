@@ -112,6 +112,9 @@ class ValidatedSet(PydSetBase):
     def discard(self, value):
         self.root.discard(value)
 
+    def pop(self):
+        self.root.pop()
+
     def remove(self, value):
         self.root.remove(value)
 
