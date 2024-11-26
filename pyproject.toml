@@ -48,6 +48,7 @@ pydantic-settings = ">=2.5.2"
 compiler-config = "0.1.0"
 pydantic-extra-types = "^2.10.0"
 semver = "^3.0.2"
+frozendict = "^2.4.6"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
