@@ -78,5 +78,6 @@ def qubit_spect(model, qubit_indices=None, num_points=None):
             rise=1.0 / 3.0,
         )
         builder.measure_mean_signal(qubit, output_variable=f"Q{index}")
-        builder.repeat(1000, 500e-6)
+
+    builder.repeat(1000, 500e-6)
     return builder

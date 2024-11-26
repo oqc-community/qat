@@ -1208,6 +1208,14 @@ class QbloxCFGWalker(DfsTraversal):
                                 name = f"repeat_{hash(head)}"
                                 iter_bound = context.iter_bounds[name]
                                 num_bins *= iter_bound.count
+
+                        if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+                            raise ValueError(
+                                f"""
+                                Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                                Please reduce number of points or number of shots
+                                """
+                            )
                         context.iter_bounds[next_inst.output_variable] = IterBound(
                             start=0, step=1, end=num_bins, count=num_bins
                         )
