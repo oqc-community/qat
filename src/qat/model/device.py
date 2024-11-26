@@ -4,9 +4,9 @@ import uuid
 from typing import Optional
 
 import numpy as np
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 
-from qat.model.hardware_base import CalibratablePositiveFloat, QubitId
+from qat.model.hardware_base import CalibratablePositiveFloat, FrozenDict, QubitId
 from qat.utils.pydantic import WarnOnExtraFieldsModel
 
 
@@ -140,9 +140,15 @@ class FreqShiftPulseChannel(PulseChannel): ...
 class CrossResonancePulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
+
 
 class CrossResonanceCancellationPulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
 
 
 class PulseChannelSet(WarnOnExtraFieldsModel):
@@ -208,12 +214,28 @@ class QubitPulseChannels(PulseChannelSet):
     )
     freq_shift: FreqShiftPulseChannel = Field(frozen=True, default=FreqShiftPulseChannel())
 
-    cross_resonance_channels: tuple[CrossResonancePulseChannel, ...] = Field(
-        frozen=True, max_length=3, default=tuple()
+    cross_resonance_channels: FrozenDict[QubitId, CrossResonancePulseChannel] = Field(
+        frozen=True, max_length=3, default=FrozenDict({})
     )
-    cross_resonance_cancellation_channels: tuple[
-        CrossResonanceCancellationPulseChannel, ...
-    ] = Field(frozen=True, max_length=3, default=tuple())
+    cross_resonance_cancellation_channels: FrozenDict[
+        QubitId, CrossResonanceCancellationPulseChannel
+    ] = Field(frozen=True, max_length=3, default=FrozenDict({}))
+
+    @field_validator("cross_resonance_channels", "cross_resonance_cancellation_channels")
+    def validate_channels_qubit_mapping(cls, channels):
+        for aux_qubit_id, pulse_channel in channels.items():
+            assert (
+                aux_qubit_id == pulse_channel.auxiliary_qubit
+            ), f"Mismatch in mapping for qubit id in {channels}."
+        return channels
+
+    @model_validator(mode="after")
+    def validate_cross_resonance_pulse_channels(self):
+        assert (
+            self.cross_resonance_channels.keys()
+            == self.cross_resonance_cancellation_channels.keys()
+        ), f"Mismatch between auxiliary qubit ids for cross resonance and cross resonance cancellation channels."
+        return self
 
 
 class Qubit(Component):

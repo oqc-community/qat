@@ -333,6 +333,35 @@ class Test_HW_Connectivity:
                     logical_connectivity_quality=logical_connectivity_quality,
                 ).model
 
+    def test_mismatch_qubits_cr_crc(self, n_qubits, seed):
+        physical_connectivity = random_connectivity(n_qubits, seed=seed)
+
+        hw = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity).model
+        blob = hw.model_dump()
+
+        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+        for aux_qubit_id, pulse_channel in blob["qubits"][q]["pulse_channels"][
+            "cross_resonance_channels"
+        ].items():
+            pulse_channel["auxiliary_qubit"] = aux_qubit_id + 12321
+
+        with pytest.raises(ValidationError):
+            PhysicalHardwareModel(**blob)
+
+    def test_mismatch_qubits_vs_connectivity(self, n_qubits, seed):
+        physical_connectivity = random_connectivity(n_qubits, seed=seed)
+
+        hw = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity).model
+        blob = hw.model_dump()
+
+        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
+        changed_connectivity = set(deepcopy(blob["logical_connectivity"][q]))
+        changed_connectivity.pop()
+        blob["logical_connectivity"][q] = changed_connectivity
+
+        with pytest.raises(ValidationError):
+            PhysicalHardwareModel(**blob)
+
 
 @pytest.mark.parametrize("seed", [500, 501, 502])
 @pytest.mark.parametrize("n_removed_qubits", [1, 2, 3, 4])

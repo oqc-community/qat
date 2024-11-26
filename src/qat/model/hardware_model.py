@@ -127,16 +127,13 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         cross_resonance_edges = {
             (src, chan.auxiliary_qubit)
             for src, qubit in self.qubits.items()
-            for chan in qubit.pulse_channels.cross_resonance_channels
+            for chan in qubit.pulse_channels.cross_resonance_channels.values()
         }
         cross_cancellation_edges = {
             (chan.auxiliary_qubit, tgt)
             for tgt, qubit in self.qubits.items()
-            for chan in qubit.pulse_channels.cross_resonance_cancellation_channels
+            for chan in qubit.pulse_channels.cross_resonance_cancellation_channels.values()
         }
-
-        print(logical_connectivities)
-        print(cross_resonance_edges)
 
         assert (
             cross_resonance_edges == cross_cancellation_edges

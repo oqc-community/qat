@@ -170,9 +170,10 @@ class _PydanticFrozenDictAnnotation:
         def validate_from_dict(d: dict | frozendict) -> frozendict:
             return frozendict(d)
 
+        k, v = get_args(source_type)
         frozendict_schema = core_schema.chain_schema(
             [
-                handler.generate_schema(dict[*get_args(source_type)]),
+                handler.generate_schema(dict[k, v]),
                 core_schema.no_info_plain_validator_function(validate_from_dict),
                 core_schema.is_instance_schema(frozendict),
             ]

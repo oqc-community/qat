@@ -153,12 +153,14 @@ class TestDevicesValidation:
                 with pytest.raises(ValidationError):
                     pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
-            for cr_channel in qubit.pulse_channels.cross_resonance_channels:
+            for cr_channel in qubit.pulse_channels.cross_resonance_channels.values():
                 cr_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
                 with pytest.raises(ValidationError):
                     cr_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
-            for crc_channel in qubit.pulse_channels.cross_resonance_cancellation_channels:
+            for (
+                crc_channel
+            ) in qubit.pulse_channels.cross_resonance_cancellation_channels.values():
                 crc_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
                 with pytest.raises(ValidationError):
                     crc_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)

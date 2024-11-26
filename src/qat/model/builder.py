@@ -98,18 +98,19 @@ class PhysicalHardwareModelBuilder:
         return PhysicalChannel(baseband=baseband)
 
     def _build_uncalibrated_qubit_pulse_channels(self, qubit_connectivity: list[QubitId]):
-        cross_resonance_channels = tuple(
-            [
-                CrossResonancePulseChannel(auxiliary_qubit=q_other)
+        cross_resonance_channels = FrozenDict(
+            {
+                q_other: CrossResonancePulseChannel(auxiliary_qubit=q_other)
                 for q_other in qubit_connectivity
-            ]
+            }
         )
-        cross_resonance_cancellation_channels = tuple(
-            [
-                CrossResonanceCancellationPulseChannel(auxiliary_qubit=q_other)
+        cross_resonance_cancellation_channels = FrozenDict(
+            {
+                q_other: CrossResonanceCancellationPulseChannel(auxiliary_qubit=q_other)
                 for q_other in qubit_connectivity
-            ]
+            }
         )
+
         pulse_channels = QubitPulseChannels(
             drive=DrivePulseChannel(),
             freq_shift=FreqShiftPulseChannel(),
@@ -129,71 +130,6 @@ class PhysicalHardwareModelBuilder:
         return self.model.model_dump()
 
 
-import itertools as it
-import random
-from copy import deepcopy
-
-import networkx as nx
-
-
-def random_connectivity(n, max_degree=3, seed=42):
-    """
-    Generates a random undirected graph, similarly to an Erdős-Rényi
-    graph, but enforcing that the resulting graph is conneted
-    """
-    edges = list(it.combinations(range(n), 2))
-    random.Random(seed).shuffle(edges)
-    G = nx.Graph()
-    G.add_nodes_from(range(n))
-    for node_edges in edges:
-        if (
-            len(G.edges(node_edges[0])) < max_degree
-            and len(G.edges(node_edges[1])) < max_degree
-        ):
-            G.add_edge(*node_edges)
-
-    return {node: set(neighbors) for node, neighbors in G.adjacency()}
-
-
-def random_quality_map(connectivity, seed=42):
-    coupling_map = {}
-    for q1_index, connected_qubits in connectivity.items():
-        for q2_index in connected_qubits:
-            coupling_map[(q1_index, q2_index)] = random.Random(seed).uniform(0.0, 1.0)
-    return coupling_map
-
-
-def pick_subconnectivity(connectivity, n, seed=42):
-    sub_connectivity = deepcopy(connectivity)
-    sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
-    for qubit in sub_qubits:
-        popped_node = sub_connectivity[qubit].pop()
-        sub_connectivity[popped_node].remove(qubit)
-
-    return sub_connectivity
-
-
-def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
-    physical_connectivity = random_connectivity(n=n_qubits, seed=seed)
-    logical_connectivity = pick_subconnectivity(
-        physical_connectivity, n=n_logical_qubits, seed=seed
-    )
-    logical_connectivity_quality = random_quality_map(
-        connectivity=logical_connectivity, seed=seed
-    )
-    return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
-
-
-n_qubits = 2
-
-physical_connectivity, logical_connectivity, logical_connectivity_quality = (
-    generate_connectivity_data(n_qubits, 0)
-)
-
-builder = PhysicalHardwareModelBuilder(
-    physical_connectivity=physical_connectivity,
-    logical_connectivity=logical_connectivity,
-    logical_connectivity_quality=logical_connectivity_quality,
-)
-
-hw1 = builder.model
+physical_topology = {0: {1}, 1: {0}}
+builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
+hw = builder.model
