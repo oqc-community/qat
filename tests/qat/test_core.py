@@ -69,6 +69,15 @@ skip_exec = [
     "qir-base_profile_ops.ll",
 ]
 
+skip_serialization = [
+    *skip_exec,
+    # skip because they use undefined pulse channels
+    "qasm3-arb_waveform.qasm",
+    "qasm3-redefine_defcal.qasm",
+    # skip because of bug in legacy that gives "phase" as a bool
+    "qasm3-complex_gates_test.qasm",
+]
+
 
 multi_reg_files = [
     "qasm2-split_measure_assign.qasm",
@@ -111,6 +120,25 @@ qir_files.extend(
 def equivalent_vars(self, other):
     """Used to overload '__eq__' so that a==b if they are equivalent."""
     return isinstance(self, type(other)) and (vars(self) == vars(other))
+
+
+def equivalent_array(self, other):
+    if isinstance(self, type(other)):
+        vars_self = vars(self)
+        vars_other = vars(other)
+        if len(vars_self) != len(vars_other):
+            return False
+        for key in vars_self.keys():
+            if not key in vars_other:
+                return False
+            check = vars_self[key] == vars_other[key]
+            if not isinstance(check, bool):
+                check = all(check)
+                print(vars_self[key])
+                print(vars_other[key])
+            if not check:
+                return False
+    return True
 
 
 gen_name_pattern = re.compile(r"generated_name_[0-9]+")
@@ -332,3 +360,37 @@ class TestQATParity:
         )
         assert purr_res == qat_res
         assert purr_metrics.as_dict() == qat_metrics.as_dict()
+
+
+serialization_files = [
+    p
+    for p in [*qasm2_files, *qasm3_files, *qir_files]
+    if short_file_name(p) not in skip_serialization
+]
+
+
+@pytest.mark.parametrize(
+    "compiler_config",
+    [
+        pytest.param(None, id="No_config"),
+        pytest.param(CompilerConfig(), id="Default_config"),
+        pytest.param(
+            CompilerConfig(optimizations=Tket(TketOptimizations.Two)),
+            id="TketOptimizations.Two",
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "hardware_model", [pytest.param(get_default_echo_hardware(32), id="Echo32Q")]
+)
+class TestSerialization:
+
+    @pytest.mark.parametrize("source_file", serialization_files, ids=short_file_name)
+    def test_qat_serialize(self, source_file, hardware_model, compiler_config, monkeypatch):
+        monkeypatch.setattr(Instruction, "__eq__", equivalent_array)
+        monkeypatch.setattr(Variable, "__eq__", equivalent_vars)
+        qat = QAT(hardware_model)
+        qat_ib, qat_metrics = qat.compile(str(source_file), compiler_config=compiler_config)
+        blob = qat.serialize(qat_ib)
+        new_qat_ib = qat.deserialize(blob)
+        assert qat_ib.instructions == new_qat_ib.instructions

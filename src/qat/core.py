@@ -14,10 +14,11 @@ from qat.compiler.transform_passes import (
     PostProcessingOptimisation,
 )
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
+from qat.ir.instruction_list import InstructionList
 from qat.ir.pass_base import PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
 from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.runtime import get_runtime
@@ -25,6 +26,7 @@ from qat.purr.qatconfig import QatConfig
 from qat.qat import QATInput
 from qat.runtime.analysis_passes import CalibrationAnalysis, CalibrationAnalysisResult
 from qat.runtime.transform_passes import ErrorMitigation, ResultTransform
+from qat.utils.ir_converter import IRConverter
 
 
 class QAT:
@@ -88,6 +90,33 @@ class QAT:
         ir = QatIR(value=results)
         pipeline.run(ir, execution_results, mapping=index_mapping)
         return ir.value, metrics
+
+    def serialize(self, builder: InstructionBuilder) -> str:
+        """
+        Serializes the QatIR to a JSON blob.
+
+        Currently converts the legacy instructions to a list of Pydantic instructions,
+        and serializes this.
+        """
+        pydantic_instructions = IRConverter().legacy_to_pydantic_instructions(
+            builder.instructions
+        )
+        return pydantic_instructions.serialize()
+
+    def deserialize(self, blob: str) -> QuantumInstructionBuilder:
+        """
+        Deserialize a JSON blob of instructions to QatIR.
+
+        The blob must have been generated using a Pydantic InstructionList. However,
+        the deserialized instructions are return as the legacy instructions inside a
+        QuantumInstructionBuilder. This process makes use of the hardware model to
+        repopulate the instructions with the necessary PulseChannels.
+        """
+        pydantic_instructions = InstructionList.deserialize(blob)
+        instructions = IRConverter(self._hardware_model).pydantic_to_legacy_instructions(
+            pydantic_instructions,
+        )
+        return QuantumInstructionBuilder(self._hardware_model, instructions)
 
     @property
     def hardware_model(self):
