@@ -1,0 +1,16 @@
+qat.runtime package
+===================
+
+.. automodule:: qat.runtime
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.runtime.analysis_passes
+   qat.runtime.transform_passes

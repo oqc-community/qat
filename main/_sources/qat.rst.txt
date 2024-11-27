@@ -17,6 +17,7 @@ Subpackages
    qat.ir
    qat.model
    qat.purr
+   qat.runtime
    qat.utils
 
 Submodules
