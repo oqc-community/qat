@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 
 from qat import qatconfig
-from qat.ir.pass_base import ValidationPass
+from qat.ir.pass_base import QatIR, ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
@@ -28,7 +28,11 @@ class InstructionValidation(ValidationPass):
     Extracted from QuantumExecutionEngine.validate()
     """
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+
         engine = next((a for a in args if isinstance(a, QuantumExecutionEngine)), None)
 
         if not engine:
@@ -88,7 +92,11 @@ class ReadoutValidation(ValidationPass):
     Extracted from LiveDeviceEngine.validate()
     """
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+
         model = next((a for a in args if isinstance(a, QuantumHardwareModel)), None)
 
         if not model:
@@ -161,5 +169,5 @@ class ReadoutValidation(ValidationPass):
 
 
 class QasmValidation(ValidationPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         pass
