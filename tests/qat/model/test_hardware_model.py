@@ -1,4 +1,3 @@
-import itertools as it
 import json
 import random
 from collections import defaultdict
@@ -13,53 +12,11 @@ from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import PulseChannel
 from qat.model.hardware_model import VERSION, PhysicalHardwareModel
 
-
-def random_connectivity(n, max_degree=3, seed=42):
-    """
-    Generates a random undirected graph, similarly to an Erdős-Rényi
-    graph, but enforcing that the resulting graph is conneted
-    """
-    edges = list(it.combinations(range(n), 2))
-    random.Random(seed).shuffle(edges)
-    G = nx.Graph()
-    G.add_nodes_from(range(n))
-    for node_edges in edges:
-        if (
-            len(G.edges(node_edges[0])) < max_degree
-            and len(G.edges(node_edges[1])) < max_degree
-        ):
-            G.add_edge(*node_edges)
-
-    return {node: set(neighbors) for node, neighbors in G.adjacency()}
-
-
-def random_quality_map(connectivity, seed=42):
-    coupling_map = {}
-    for q1_index, connected_qubits in connectivity.items():
-        for q2_index in connected_qubits:
-            coupling_map[(q1_index, q2_index)] = random.Random(seed).uniform(0.0, 1.0)
-    return coupling_map
-
-
-def pick_subconnectivity(connectivity, n, seed=42):
-    sub_connectivity = deepcopy(connectivity)
-    sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
-    for qubit in sub_qubits:
-        popped_node = sub_connectivity[qubit].pop()
-        sub_connectivity[popped_node].remove(qubit)
-
-    return sub_connectivity
-
-
-def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
-    physical_connectivity = random_connectivity(n=n_qubits, seed=seed)
-    logical_connectivity = pick_subconnectivity(
-        physical_connectivity, n=n_logical_qubits, seed=seed
-    )
-    logical_connectivity_quality = random_quality_map(
-        connectivity=logical_connectivity, seed=seed
-    )
-    return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
+from tests.qat.utils.hardware_models import (
+    generate_connectivity_data,
+    random_connectivity,
+    random_quality_map,
+)
 
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])

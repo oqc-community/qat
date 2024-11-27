@@ -11,10 +11,10 @@ from pydantic_core import core_schema
 # This base file is used to implement classes/methods common to all hardware.
 
 
-def validate_non_negative(v: int):
-    if not isinstance(v, int) or v < 0:
-        raise ValueError(f"Given value {v} must be an int and >=0.")
-    return v
+def validate_non_negative(value: int):
+    if not isinstance(value, int) or value < 0:
+        raise ValueError(f"Given value {value} must be an int and >=0.")
+    return value
 
 
 NonNegativeInt = Annotated[
@@ -25,10 +25,10 @@ NonNegativeInt = Annotated[
 QubitId = NonNegativeInt
 
 
-def validate_calibratable_positive_float(v: CalibratablePositiveFloat):
-    if not np.isnan(v) and v < 0.0:
-        raise ValueError(f"Given value {v} must be >=0.")
-    return v
+def validate_calibratable_positive_float(value: CalibratablePositiveFloat):
+    if not np.isnan(value) and value < 0.0:
+        raise ValueError(f"Given value {value} must be >=0.")
+    return value
 
 
 CalibratablePositiveFloat = Annotated[
@@ -37,11 +37,11 @@ CalibratablePositiveFloat = Annotated[
 ]
 
 
-def validate_calibratable_unit_interval(v: CalibratableUnitInterval):
-    if not np.isnan(v):
-        if v < 0.0 or v > 1.0:
-            raise ValueError(f"Given value {v} must be in the interval [0, 1].")
-    return v
+def validate_calibratable_unit_interval(value: CalibratableUnitInterval):
+    if not np.isnan(value):
+        if value < 0.0 or value > 1.0:
+            raise ValueError(f"Given value {value} must be in the interval [0, 1].")
+    return value
 
 
 CalibratableUnitInterval = Annotated[
@@ -50,8 +50,8 @@ CalibratableUnitInterval = Annotated[
 ]
 
 
-K = TypeVar("K")
-V = TypeVar("V")
+K = TypeVar("K")  # General type for the keys.
+V = TypeVar("V")  # General type for the values.
 
 
 def get_validator_from_annotated(annotated_type):

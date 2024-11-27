@@ -106,9 +106,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def validate_connectivity(self):
 
         # Check if all qubits exist in physical connectivity.
-        assert (
-            self.qubits.keys() == self.physical_connectivity.keys()
-        ), f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."
+        if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity
+            assert (
+                self.qubits.keys() == self.physical_connectivity.keys()
+            ), f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."
 
         # Check if logical connectivity is subset of physical connectivity.
         for qubit_index in self.logical_connectivity:
@@ -130,8 +131,8 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             for chan in qubit.pulse_channels.cross_resonance_channels.values()
         }
         cross_cancellation_edges = {
-            (chan.auxiliary_qubit, tgt)
-            for tgt, qubit in self.qubits.items()
+            (src, chan.auxiliary_qubit)
+            for src, qubit in self.qubits.items()
             for chan in qubit.pulse_channels.cross_resonance_cancellation_channels.values()
         }
 
