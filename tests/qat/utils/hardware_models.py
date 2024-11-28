@@ -9,6 +9,7 @@ from qat.purr.compiler.devices import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
+    QubitCoupling,
     Resonator,
 )
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -130,6 +131,7 @@ def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardw
             scale=0.0,
         )
         qubit_left.add_coupled_qubit(qubit_right)
+        hw.qubit_direction_couplings.append(QubitCoupling(connection))
 
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True
