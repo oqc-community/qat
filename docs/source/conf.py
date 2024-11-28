@@ -20,7 +20,7 @@ author = (
     "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>, "
     "Luke Causer <lcauser@oxfordquantumcircuits.com>"
 )
-release = version = "2.3.0"
+release = version = "2.5.0"
 add_module_names = False
 autoclass_content = "both"
 smv_remote_whitelist = None

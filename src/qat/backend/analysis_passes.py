@@ -8,7 +8,7 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.graph import ControlFlowGraph
-from qat.ir.pass_base import AnalysisPass, ResultManager
+from qat.ir.pass_base import AnalysisPass, QatIR, ResultManager
 from qat.ir.result_base import ResultInfoMixin
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -48,7 +48,7 @@ class TriageResult(ResultInfoMixin):
 
 
 class TriagePass(AnalysisPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Builds a view of instructions per quantum target AOT.
         Builds selections of instructions useful for subsequent analysis/transform passes,
@@ -57,6 +57,10 @@ class TriagePass(AnalysisPass):
         This is equivalent to the QatFile and simplifies the duration timeline creation in
         legacy code.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         targets = set()
         for inst in builder.instructions:
@@ -202,7 +206,7 @@ class BindingPass(AnalysisPass):
 
         return IterBound(start, step, end, count)
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Builds binding of variables, instructions, and a view of variables from/to scopes.
 
@@ -213,6 +217,10 @@ class BindingPass(AnalysisPass):
         the bound and associate it to the name variable. Further analysis is required on read sites to make
         sure their usage is consistent and meaningful.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
@@ -360,7 +368,7 @@ class TILegalisationPass(AnalysisPass):
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
             )
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         An instruction is legal if it has a direct equivalent in the programming model implemented by the control
         stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
@@ -380,6 +388,10 @@ class TILegalisationPass(AnalysisPass):
         a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
         carries meaning for the variable and materialises its intention.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
@@ -414,7 +426,11 @@ class CFGResult(ResultInfoMixin):
 
 
 class CFGPass(AnalysisPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+
         result = CFGResult()
         self._build_cfg(builder, result.cfg)
         res_mgr.add(result)
@@ -522,5 +538,5 @@ class LifetimePass(AnalysisPass):
     With this in mind, this pass spits out a colored interference graph that will be used by the code generator.
     """
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         pass
