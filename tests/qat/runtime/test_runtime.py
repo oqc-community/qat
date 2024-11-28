@@ -1,4 +1,4 @@
-from qat.ir.pass_base import AnalysisPass, TransformPass, ValidationPass
+from qat.ir.pass_base import AnalysisPass, QatIR, TransformPass, ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.runtime import NewQuantumRuntime
@@ -19,4 +19,4 @@ def test_new_quantum_runtime():
     assert not any([m for m in pipeline.passes if isinstance(m._pass, AnalysisPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, TransformPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, ValidationPass)])
-    runtime.run_pass_pipeline(builder, res_mgr, model, engine)
+    runtime.run_pass_pipeline(QatIR(builder), res_mgr, model, engine)

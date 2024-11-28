@@ -16,7 +16,7 @@ from qat.backend.analysis_passes import (
 )
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.graph import ControlFlowGraph
-from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager
+from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
@@ -1097,12 +1097,16 @@ class PreCodegenResult:
 
 
 class PreCodegenPass(AnalysisPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Precedes assembly codegen.
         Performs a naive register allocation through a manager object.
         Computes useful information in the form of attributes.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
