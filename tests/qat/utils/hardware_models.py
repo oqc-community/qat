@@ -79,7 +79,7 @@ def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
     return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
 
 
-def apply_setup_to_hardware(qubit_count: int, connectivity) -> QuantumHardwareModel:
+def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardwareModel:
     """Apply lucy to the passed-in hardware."""
     qubit_devices = []
     resonator_devices = []

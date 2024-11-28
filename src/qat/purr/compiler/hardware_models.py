@@ -563,7 +563,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         self.__dict__.update(state)
 
-    def export_new(self):
+    def export_pydantic(self):
         new_qubits = {}
         logical_connectivity = defaultdict(set)
 
