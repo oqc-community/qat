@@ -50,8 +50,8 @@ CalibratableUnitInterval = Annotated[
 ]
 
 
-K = TypeVar("K")  # General type for the keys.
-V = TypeVar("V")  # General type for the values.
+K = TypeVar("GeneralKey")
+V = TypeVar("GeneralValue")
 
 
 def get_validator_from_annotated(annotated_type):
