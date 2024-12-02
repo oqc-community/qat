@@ -126,6 +126,17 @@ filterwarnings = [
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
     # Qiskit IBM Experiment package using an old pkg_resources version
     'default:.*pkg_resources:DeprecationWarning:qiskit_ibm_experiment.client.session',
+    # Qiskit internal usage of deprecated of DAG Circuit fields
+    'default:.*qiskit\.dagcircuit\.dagcircuit\.DAGCircuit\.:DeprecationWarning:qiskit:',
+    # Qiskit internal usage of deprecated of Instruction field
+    'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qiskit.*:',
+    # TODO: Evaluate if this warning requires action from our point
+    'default:.*Conditioned gates:FutureWarning:qiskit:',
+    'default:.*Conditioned gates:FutureWarning:qat.purr.integrations.qasm:',
+    'default:.*qiskit\.circuit\.singleton\._SingletonInstructionOverrides\.c_if:DeprecationWarning:qiskit:',
+    'default:.*qiskit\.circuit\.instruction\.Instruction\.c_if:DeprecationWarning::',
+    # TODO: Resolve usage of deprecated Qiskit Instruction field
+    'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qat.purr.integrations.qasm:',
     # Lark using deprecated version on sre_parse and sre_constants
     'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
     # DOcplex using deprecated escape sequence
