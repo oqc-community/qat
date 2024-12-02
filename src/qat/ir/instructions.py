@@ -93,10 +93,6 @@ class IndexAccessor(Variable):
 
     index: int
 
-    def __init__(self, name, index, **kwargs):
-        super().__init__(name)
-        self.index = index
-
     def __repr__(self):
         return f"{self.name}[{self.index}]"
 
@@ -116,9 +112,6 @@ class Repeat(Instruction):
     repeat_count: Optional[int] = None
     repetition_period: Optional[float] = None
 
-    def __init__(self, repeat_count: int = None, repetition_period=None, **kwargs):
-        super().__init__(repeat_count=repeat_count, repetition_period=repetition_period)
-
     def __repr__(self):
         return f"repeat {self.repeat_count},{self.repetition_period}"
 
@@ -137,9 +130,6 @@ class Assign(Instruction):
     inst: Literal["Assign"] = "Assign"
     name: str
     value: Any
-
-    def __init__(self, name, value, **kwargs):
-        super().__init__(name=name, value=value)
 
     def __repr__(self):
         return f"{self.name} = {str(self.value)}"
@@ -163,9 +153,6 @@ class Return(Instruction):
 
     inst: Literal["Return"] = "Return"
     variables: List[str] = []
-
-    def __init__(self, variables: List[str] = [], **kwargs):
-        super().__init__(variables=variables)
 
     def __repr__(self):
         return f"return {','.join(self.variables)}"
@@ -195,14 +182,6 @@ class Sweep(Instruction):
     inst: Literal["Sweep"] = "Sweep"
     operations: List[SweepValue] = []
     variables: Dict[str, List[Any]] = None
-
-    def __init__(
-        self,
-        operations: Union[SweepValue, List[SweepValue]] = None,
-        variables: Dict[str, List[Any]] = None,
-        **kwargs,
-    ):
-        super().__init__(operations=operations, variables=variables)
 
     @property
     def length(self):
@@ -254,14 +233,10 @@ class Label(Instruction):
     inst: Literal["Label"] = "Label"
     name: str
 
-    def __init__(self, name, **kwargs):
-        """If you need a name, use generate_name and pass in existing values."""
-        super().__init__(name=name)
-
     @staticmethod
     def with_random_name(existing_names=None):
         """Build a label with a randomly generated name."""
-        return Label(build_generated_name(existing_names))
+        return Label(name=build_generated_name(existing_names))
 
     def __repr__(self):
         return f"{self.name}:"
@@ -270,14 +245,12 @@ class Label(Instruction):
 class Jump(Instruction):
     """
     Classic jump instruction, should be linked to label with an optional condition.
+    The target can be a label or a string that points to a label.
     """
 
     inst: Literal["Jump"] = "Jump"
     target: str
-    condition: Any
-
-    def __init__(self, target: Union[str, Label], condition=None, **kwargs):
-        return super().__init__(target=target, condition=condition)
+    condition: Any = None
 
     def __repr__(self):
         if self.condition is not None:
@@ -300,10 +273,8 @@ class ResultsProcessing(Instruction):
 
     inst: Literal["ResultsProcessing"] = "ResultsProcessing"
     variable: str
+    # TODO: rename to something better
     res_processing: InlineResultsProcessing
-
-    def __init__(self, variable: str, res_processing: InlineResultsProcessing, **kwargs):
-        super().__init__(variable=variable, res_processing=res_processing)
 
     def __repr__(self):
         return f"{self.variable}: {str(self.res_processing.name)}"
@@ -318,7 +289,13 @@ class QuantumInstruction(Instruction):
     """
 
     inst: Literal["QuantumInstruction"] = "QuantumInstruction"
+    # TODO: rename to taregts
     quantum_targets: Union[set[str], str]
+
+    def __init__(self, quantum_targets, **kwargs):
+        # overwrite the init to accept quantum targets as a position argument
+        # TODO: decide whether to use *args
+        return super().__init__(quantum_targets=quantum_targets, **kwargs)
 
     @property
     def duration(self):
@@ -330,6 +307,9 @@ class QuantumInstruction(Instruction):
         """
         Fetches the IDs from quantum components.
         """
+        if isinstance(targets, tuple) and len(targets) == 1:
+            targets = targets[0]
+
         if isinstance(targets, (set, list, tuple)):
             targets = set(
                 [
@@ -355,9 +335,6 @@ class PhaseShift(QuantumInstruction):
     quantum_targets: str
     phase: Union[float, Variable] = 0.0
 
-    def __init__(self, quantum_targets: PulseChannel, phase: float, **kwargs):
-        super().__init__(quantum_targets=quantum_targets, phase=phase)
-
     @property
     def channel(self):
         return self.quantum_targets
@@ -368,9 +345,12 @@ class PhaseShift(QuantumInstruction):
     @field_validator("quantum_targets", mode="before")
     @classmethod
     def _is_pulse_channel(cls, target):
+        if isinstance(target, list) and len(target) == 1:
+            target = target[0]
+
         if not isinstance(target, (str, PulseChannel)):
             raise ValueError(
-                f"channel has type {str(type(target))}: it must have type PulseChannel"
+                f"channel has type {type(target).__name__}: it must have type PulseChannel"
             )
         return target.full_id() if isinstance(target, PulseChannel) else target
 
@@ -382,9 +362,6 @@ class FrequencyShift(QuantumInstruction):
     quantum_targets: str
     frequency: Union[float, Variable] = 0.0
 
-    def __init__(self, quantum_targets: PulseChannel, frequency: float, **kwargs):
-        super().__init__(quantum_targets=quantum_targets, frequency=frequency)
-
     @property
     def channel(self):
         return self.quantum_targets
@@ -395,9 +372,12 @@ class FrequencyShift(QuantumInstruction):
     @field_validator("quantum_targets", mode="before")
     @classmethod
     def _is_pulse_channel(cls, target):
+        if isinstance(target, list) and len(target) == 1:
+            target = target[0]
+
         if not isinstance(target, (str, PulseChannel)):
             raise ValueError(
-                f"channel has type {str(type(target))}: it must have type PulseChannel"
+                f"channel has type {type(target).__name__}: it must have type PulseChannel"
             )
         return target.full_id() if isinstance(target, PulseChannel) else target
 
@@ -418,9 +398,6 @@ class Delay(QuantumInstruction):
     inst: Literal["Delay"] = "Delay"
     time: float = Field(ge=0.0, default=0.0)
 
-    def __init__(self, quantum_targets: QuantumComponent, time: float, **kwargs):
-        super().__init__(quantum_targets=quantum_targets, time=time)
-
     @property
     def duration(self):
         return self.time
@@ -437,13 +414,6 @@ class GroupInstruction(QuantumInstruction):
     """
 
     inst: Literal["GroupInstruction"] = "GroupInstruction"
-
-    def __init__(
-        self,
-        quantum_targets: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
-        **kwargs,
-    ):
-        super().__init__(quantum_targets=quantum_targets)
 
     @field_validator("quantum_targets", mode="before")
     @classmethod
@@ -616,17 +586,6 @@ class Pulse(Waveform):
     square_width: Union[Variable, float] = 0.0
     ignore_channel_scale: bool = False
 
-    def __init__(
-        self,
-        quantum_targets: PulseChannel,
-        shape: PulseShapeType,
-        width: float,
-        **kwargs,
-    ):
-        super().__init__(
-            quantum_targets=quantum_targets, shape=shape, width=width, **kwargs
-        )
-
     @property
     def duration(self):
         return self.width
@@ -683,8 +642,8 @@ class Acquire(QuantumInstruction):
         **kwargs,
     ):
         # TODO: can't delegate output to validator as it requires "existing_names".
-        # Figure out the best way to do this (might just be as simple as replacing)
-        # generate_name with something simplier...
+        # Figure out the best way to do this (might just be as simple as replacing
+        # generate_name with something simplier...)
         super().__init__(
             quantum_targets=quantum_targets,
             time=time or 1e-6,
@@ -754,26 +713,6 @@ class PostProcessing(Instruction):
     args: List[Any] = []
     result_needed: bool = False
 
-    def __init__(
-        self,
-        acquire: Acquire,
-        process,
-        axes=[],
-        args=[],
-        results_needed: bool = False,
-        **kwargs,
-    ):
-        # TODO: Should find out why ags can't reference model objects in builder serialization.
-        #   But deep copying them, as the values shouldn't vary, should be fine.
-
-        super().__init__(
-            acquire=acquire,
-            process=process,
-            args=args or [],
-            axes=axes,
-            results_needed=results_needed,
-        )
-
     @property
     def output_variable(self):
         return self.acquire.output_variable
@@ -789,7 +728,7 @@ class PostProcessing(Instruction):
     @field_validator("axes", mode="before")
     @classmethod
     def _axes_as_list(cls, axes):
-        if not axes:
+        if axes:
             return axes if isinstance(axes, List) else [axes]
         return []
 
@@ -798,9 +737,6 @@ class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
     inst: Literal["Reset"] = "Reset"
-
-    def __init__(self, quantum_targets, **kwargs):
-        return super().__init__(quantum_targets=quantum_targets)
 
     def __repr__(self):
         return f"reset {','.join(self.quantum_targets)}"
@@ -842,9 +778,6 @@ class DeviceUpdate(QuantumInstruction):
     inst: Literal["DeviceUpdate"] = "DeviceUpdate"
     attribute: str
     value: Any
-
-    def __init__(self, target: QuantumComponent, attribute: str, value, **kwargs):
-        super().__init__(target, attribute=attribute, value=value)
 
     def __repr__(self):
         return f"{self.target}.{self.attribute} = {str(self.value)}"

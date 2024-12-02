@@ -77,14 +77,10 @@ class IRConverter:
         # The legacy instructions has inconsistencies with the name of how members
         # are saved and how they are provided in __init__. In these instances, we have
         # to manually define how to deal with these cases.
-        if isinstance(instruction, self.legacy_instructions["PhaseShift"]):
-            return pydantic_type(args["quantum_targets"][0], args["phase"])
-
-        elif isinstance(instruction, self.legacy_instructions["FrequencyShift"]):
-            return pydantic_type(args["quantum_targets"][0], args["frequency"])
-
-        elif isinstance(instruction, self.legacy_instructions["ResultsProcessing"]):
-            return pydantic_type(args["variable"], args["results_processing"])
+        if isinstance(instruction, self.legacy_instructions["ResultsProcessing"]):
+            return pydantic_type(
+                variable=args["variable"], res_processing=args["results_processing"]
+            )
 
         elif isinstance(instruction, self.legacy_instructions["PostProcessing"]):
             acquire_legacy = args.pop("quantum_targets")
@@ -108,6 +104,7 @@ class IRConverter:
                     else:
                         itms.append(val)
                     args["value"] = itms
+
         return pydantic_type(**args)
 
     def _pydantic_to_legacy_instruction(self, instruction: PydanticInstruction):
@@ -177,7 +174,6 @@ class IRConverter:
                 for i, val in enumerate(args["value"]):
                     if isinstance(val, PydanticVariable):
                         args["value"][i] = LegacyVariable(val.name, val.var_type, val.value)
-                print([type(arg) for arg in args["value"]])
             inst = legacy_type(**args)
 
         elif isinstance(instruction, self.pydantic_instructions["QuantumInstruction"]):

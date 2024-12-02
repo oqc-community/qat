@@ -6,7 +6,6 @@ import pytest
 from compiler_config.config import InlineResultsProcessing
 from pydantic import ValidationError
 
-from qat.ir import instructions as PydanticInstructions
 from qat.ir.instruction_list import InstructionList
 from qat.ir.instructions import (
     Acquire,
@@ -89,26 +88,26 @@ class TestRepeat:
         ["repeat_count", "repetition_period"], product([0, 10, 1024], [10, None])
     )
     def test_initiate(self, repeat_count, repetition_period):
-        inst = Repeat(repeat_count, repetition_period)
+        inst = Repeat(repeat_count=repeat_count, repetition_period=repetition_period)
         assert inst.repeat_count == repeat_count
         assert inst.repetition_period == repetition_period
 
 
 class TestAssign:
     def test_initiate(self):
-        inst = Assign("test", 1)
+        inst = Assign(name="test", value=1)
         assert inst.name == "test"
         assert inst.value == 1
 
 
 class TestReturn:
     def test_single_return(self):
-        inst = Return("test")
+        inst = Return(variables="test")
         assert inst.variables == ["test"]
 
     @pytest.mark.parametrize("vars", [["test"], ["clark", "kent"]])
     def test_multiple_returns(self, vars):
-        inst = Return(vars)
+        inst = Return(variables=vars)
         assert inst.variables == vars
 
     @pytest.mark.parametrize(
@@ -116,7 +115,7 @@ class TestReturn:
     )
     def test_wrong_input(self, vars):
         with pytest.raises(ValidationError):
-            Return(vars)
+            Return(variables=vars)
 
 
 class TestLabel:
@@ -127,13 +126,13 @@ class TestLabel:
     @pytest.mark.parametrize("name", [4, 3.14, None])
     def test_validation(self, name):
         with pytest.raises(ValidationError):
-            Label(name)
+            Label(name=name)
 
 
 class TestJump:
     @pytest.mark.parametrize("name", ["test", Label.with_random_name()])
     def test_jump(self, name):
-        inst = Jump(name)
+        inst = Jump(target=name)
         assert isinstance(inst.target, str)
 
 
@@ -145,14 +144,14 @@ class TestSweep:
 class TestResults:
     @pytest.mark.parametrize("res_processing", InlineResultsProcessing)
     def test_res_processing(self, res_processing):
-        inst = ResultsProcessing("test", res_processing)
+        inst = ResultsProcessing(variable="test", res_processing=res_processing)
         assert inst.variable == "test"
         assert inst.res_processing == res_processing
 
     @pytest.mark.parametrize("res_processing", ["mean"])
     def test_wrong_results(self, res_processing):
         with pytest.raises(ValidationError):
-            ResultsProcessing("test", res_processing)
+            ResultsProcessing(variable="test", res_processing=res_processing)
 
 
 class TestQuantumInstruction:
@@ -166,7 +165,7 @@ class TestQuantumInstruction:
             self.model.quantum_devices,
         )
         for target in targets:
-            inst = QuantumInstruction(quantum_targets=target)
+            inst = QuantumInstruction(target)
             assert inst.quantum_targets == target
 
     def test_create_multiple_targets(self):
@@ -180,7 +179,7 @@ class TestQuantumInstruction:
         targets.append([lst[0] for lst in targets])
 
         for target_list in targets:
-            inst = QuantumInstruction(quantum_targets=target_list)
+            inst = QuantumInstruction(target_list)
             for target in inst.quantum_targets:
                 assert target in target_list
 
@@ -193,7 +192,7 @@ class TestPhaseShift:
         product(model.pulse_channels.values(), [0.0, -np.pi, 0.235, np.random.rand()]),
     )
     def test_initiation(self, chan, val):
-        inst = PhaseShift(chan, val)
+        inst = PhaseShift(chan, phase=val)
         assert inst.channel == chan.full_id()
         assert inst.phase == val
 
@@ -205,7 +204,7 @@ class TestPhaseShift:
     )
     def test_validation_pulse_channel(self, chan, val):
         with pytest.raises(ValueError):
-            PhaseShift(chan, val)
+            PhaseShift(chan, phase=val)
 
     @pytest.mark.parametrize(
         ["chan", "val"],
@@ -213,7 +212,7 @@ class TestPhaseShift:
     )
     def test_validation_phase(self, chan, val):
         with pytest.raises(ValidationError):
-            PhaseShift(chan, val)
+            PhaseShift(chan, phase=val)
 
 
 class TestFrequencyShift:
@@ -224,7 +223,7 @@ class TestFrequencyShift:
         product(model.pulse_channels.values(), [0.0, -np.pi, 0.235, np.random.rand()]),
     )
     def test_initiation(self, chan, val):
-        inst = FrequencyShift(chan, val)
+        inst = FrequencyShift(chan, frequency=val)
         assert inst.channel == chan.full_id()
         assert inst.frequency == val
 
@@ -236,7 +235,7 @@ class TestFrequencyShift:
     )
     def test_validation_pulse_channel(self, chan, val):
         with pytest.raises(ValueError):
-            FrequencyShift(chan, val)
+            FrequencyShift(chan, frequency=val)
 
     @pytest.mark.parametrize(
         ["chan", "val"],
@@ -244,7 +243,7 @@ class TestFrequencyShift:
     )
     def test_validation_phase(self, chan, val):
         with pytest.raises(ValidationError):
-            FrequencyShift(chan, val)
+            FrequencyShift(chan, frequency=val)
 
 
 class TestDelay:
@@ -261,7 +260,7 @@ class TestDelay:
         ),
     )
     def test_targets(self, target, delay):
-        inst = Delay(target, delay)
+        inst = Delay(target, time=delay)
         assert inst.quantum_targets == target.full_id()
         assert inst.time == delay
         assert inst.duration == delay
@@ -269,7 +268,7 @@ class TestDelay:
     @pytest.mark.parametrize("delay", [-1, -1e-8, "pi"])
     def test_validation(self, delay):
         with pytest.raises(ValidationError):
-            Delay(self.model.get_qubit(0), delay)
+            Delay(self.model.get_qubit(0), time=delay)
 
 
 # Syncrhonize and PhaseReset are similar in that they just collect unique pulse channels.
@@ -321,7 +320,7 @@ class TestSynchronizePhaseReset:
     def test_add_target(self, instruction):
         inst = instruction(self.model.get_qubit(0))
         inst = inst + self.model.get_qubit(1)
-        inst2 = Synchronize([self.model.get_qubit(0), self.model.get_qubit(1)])
+        inst2 = instruction([self.model.get_qubit(0), self.model.get_qubit(1)])
         assert inst.quantum_targets == inst2.quantum_targets
 
     @pytest.mark.parametrize("target", ["test", 2.54, ["test", 2.54]])
@@ -382,7 +381,7 @@ class TestPulse:
     )
     def test_waveform(self, pulse, duration, shape):
         chan = list(self.model.pulse_channels.values())[0]
-        inst = pulse(chan, shape, duration)
+        inst = pulse(chan, shape=shape, width=duration)
         assert inst.width == duration
         assert inst.duration == duration
         assert inst.shape == shape
@@ -390,13 +389,13 @@ class TestPulse:
     def test_invalid_shape(self):
         with pytest.raises(AttributeError):
             chan = list(self.model.pulse_channels.values())[0]
-            Pulse(chan, PulseShapeType.CIRCLE, 8e-8)
+            Pulse(chan, shape=PulseShapeType.CIRCLE, width=8e-8)
 
     @pytest.mark.parametrize("duration", [8e-8j, "pi"])
     def test_invalid_duraiton(self, duration):
         with pytest.raises(ValidationError):
             chan = list(self.model.pulse_channels.values())[0]
-            Pulse(chan, PulseShapeType.SQUARE, duration)
+            Pulse(chan, shape=PulseShapeType.SQUARE, width=duration)
 
 
 class TestAcquire:
@@ -410,14 +409,14 @@ class TestAcquire:
 
     def test_filter(self):
         chan = self.model.get_qubit(0).get_acquire_channel()
-        filter = Pulse(chan, PulseShapeType.GAUSSIAN, 1e-6)
+        filter = Pulse(chan, shape=PulseShapeType.GAUSSIAN, width=1e-6)
         inst = Acquire(chan, 1e-6, filter=filter)
         assert inst.filter == filter
 
     @pytest.mark.parametrize("time", [0, 5e-7, 1.01e-6, 2e-6])
     def test_filter_validation(self, time):
         chan = self.model.get_qubit(0).get_acquire_channel()
-        filter = Pulse(chan, PulseShapeType.GAUSSIAN, time)
+        filter = Pulse(chan, shape=PulseShapeType.GAUSSIAN, width=time)
         with pytest.raises(ValidationError):
             inst = Acquire(chan, 1e-6, filter=filter)
 
@@ -429,7 +428,7 @@ class TestPostProcessing:
     def test_initiate(self, pp):
         chan = self.model.get_qubit(0).get_acquire_channel()
         acquire = Acquire(chan)
-        inst = PostProcessing(acquire, pp)
+        inst = PostProcessing(acquire=acquire, process=pp)
         assert inst.process == pp
         assert inst.acquire == acquire
 
@@ -539,26 +538,32 @@ class TestInstructionList:
     def all_instructions(self):
         model = get_default_echo_hardware()
         instruction_list = [
-            Repeat(1000, 0.0005),
-            Assign("test", 42),
-            Return(["dave", "steve"]),
+            Repeat(repeat_count=1000, repetition_period=0.0005),
+            Assign(name="test", value=42),
+            Return(variables=["dave", "steve"]),
             Sweep(),
             EndSweep(),
             Label.with_random_name(),
-            Jump("test"),
-            PhaseShift(model.get_qubit(0).get_drive_channel(), np.pi),
-            FrequencyShift(model.get_qubit(1).get_measure_channel(), 7e8),
-            Delay(model.get_qubit(0).get_drive_channel(), 1e-8),
+            Jump(target="test"),
+            PhaseShift(model.get_qubit(0).get_drive_channel(), phase=np.pi),
+            FrequencyShift(model.get_qubit(1).get_measure_channel(), frequency=7e8),
+            Delay(model.get_qubit(0).get_drive_channel(), time=1e-8),
             Synchronize(model.qubits),
             MeasurePulse(
                 model.get_qubit(1).get_measure_channel(),
-                PulseShapeType.SQUARE,
-                Variable(name="length", var_type=float, value=1e-6),
+                shape=PulseShapeType.SQUARE,
+                width=Variable(name="length", var_type=float, value=1e-6),
             ),
             DrivePulse(
-                model.get_qubit(0).get_drive_channel(), PulseShapeType.GAUSSIAN, 8e-8
+                model.get_qubit(0).get_drive_channel(),
+                shape=PulseShapeType.GAUSSIAN,
+                width=8e-8,
             ),
-            Acquire(model.get_qubit(0).get_acquire_channel(), 1e-6, AcquireMode.INTEGRATOR),
+            Acquire(
+                model.get_qubit(0).get_acquire_channel(),
+                time=1e-6,
+                mode=AcquireMode.INTEGRATOR,
+            ),
             Reset(model.get_qubit(1)),
             PhaseReset(model.get_qubit(0)),
             MeasureBlock.create_block(model.get_qubit(1), AcquireMode.RAW),
@@ -573,7 +578,56 @@ class TestInstructionList:
             assert instruction == new_instructions.instruction_list[i]
 
 
-def make_instruction_list(InstructionTypes):
+def make_pydantic_instruction_list():
+    hw = get_default_echo_hardware()
+    instructions = [
+        Repeat(repeat_count=1000, repetition_period=5e-4),
+        Assign(name="test", value=5),
+        Return(variables=["test", "dave"]),
+        Label(name="test"),
+        Jump(target="test"),
+        # ResultsProcessing("test", PostProcessType.MEAN),
+        PhaseShift(hw.get_qubit(0).get_drive_channel(), phase=-0.123),
+        FrequencyShift(hw.get_qubit(0).get_drive_channel(), fequency=1e8),
+        Delay(hw.get_qubit(0).get_drive_channel(), time=8e-8),
+        Synchronize(hw.qubits[0:3]),
+        Synchronize(hw.qubits[0]),
+        Synchronize(hw.qubits[0].get_measure_channel()),
+        CustomPulse(hw.get_qubit(1).get_drive_channel(), np.ones(101)),
+        Pulse(hw.get_qubit(0).get_drive_channel(), shape=PulseShapeType.SQUARE, width=8e-8),
+        MeasurePulse(
+            hw.get_qubit(0).get_measure_channel(), shape=PulseShapeType.GAUSSIAN, width=8e-8
+        ),
+        DrivePulse(
+            hw.get_qubit(0).get_drive_channel(), shape=PulseShapeType.SECH, width=8e-8
+        ),
+        CrossResonancePulse(
+            hw.get_qubit(0).get_cross_resonance_channel(hw.get_qubit(1)),
+            shape=PulseShapeType.SQUARE,
+            width=8e-8,
+        ),
+        CrossResonanceCancelPulse(
+            hw.get_qubit(1).get_cross_resonance_cancellation_channel(hw.get_qubit(0)),
+            shape=PulseShapeType.SQUARE,
+            width=8e-8,
+        ),
+        Acquire(hw.get_qubit(0).get_acquire_channel()),
+        PostProcessing(
+            acquire=Acquire(hw.get_qubit(1).get_acquire_channel()),
+            process=PostProcessType.MEAN,
+        ),
+        Reset(hw.get_qubit(0).get_drive_channel()),
+        Reset(hw.get_qubit(0)),
+        Reset(hw.qubits[0:2]),
+        PhaseReset(hw.get_qubit(0).get_drive_channel()),
+        PhaseReset(hw.get_qubit(0)),
+        PhaseReset(hw.qubits[0:2]),
+    ]
+
+    return hw, instructions
+
+
+def make_legacy_instruction_list(InstructionTypes):
     hw = get_default_echo_hardware()
     instructions = [
         InstructionTypes.Repeat(1000, 5e-4),
@@ -639,8 +693,8 @@ def eq_instructions(inst1, inst2):
     return True
 
 
-hw, legacy_instructions = make_instruction_list(LegacyInstructions)
-hw, pydantic_instructions = make_instruction_list(PydanticInstructions)
+hw, legacy_instructions = make_legacy_instruction_list(LegacyInstructions)
+hw, pydantic_instructions = make_pydantic_instruction_list()
 
 
 class TestConversion:
