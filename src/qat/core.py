@@ -61,7 +61,8 @@ class QAT:
         metrics.enable(compiler_config.metrics)
         engine = self.hardware_model.create_engine()
         pipeline = self.build_pre_execute_pipeline(compiler_config)
-        pipeline.run(builder, execution_results, self.hardware_model, engine)
+        ir = QatIR(builder)
+        pipeline.run(ir, execution_results, self.hardware_model, engine)
 
         # TODO: Improve calibration handling
         calibrations = execution_results.lookup_by_type(

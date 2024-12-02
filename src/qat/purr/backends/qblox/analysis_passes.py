@@ -5,7 +5,7 @@ from typing import Dict, Set
 import numpy as np
 
 from qat.backend.analysis_passes import BindingResult, IterBound, TriageResult
-from qat.ir.pass_base import AnalysisPass
+from qat.ir.pass_base import AnalysisPass, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.compiler.builders import InstructionBuilder
@@ -110,7 +110,7 @@ class QbloxLegalisationPass(AnalysisPass):
             count=legal_bound.count,
         )
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Performs target-dependent legalisation for QBlox.
 
@@ -146,6 +146,10 @@ class QbloxLegalisationPass(AnalysisPass):
         This pass performs target-dependent conversion as described in part (B). More features and adjustments
         will follow in future iterations.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)

@@ -25,6 +25,7 @@ from qat.backend.validation_passes import (
     NCOFrequencyVariability,
     ReturnSanitisationValidation,
 )
+from qat.ir.pass_base import QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import (
@@ -49,9 +50,10 @@ class TestAnalysisPasses:
         builder = resonator_spect(model, [index])
 
         res_mgr = ResultManager()
-        ReturnSanitisation().run(builder, res_mgr)
-        ReturnSanitisationValidation().run(builder, res_mgr)
-        TriagePass().run(builder, res_mgr)
+        ir = QatIR(builder)
+        ReturnSanitisation().run(ir, res_mgr)
+        ReturnSanitisationValidation().run(ir, res_mgr)
+        TriagePass().run(ir, res_mgr)
         result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         assert result
         assert result.sweeps
@@ -110,6 +112,7 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
         end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
@@ -121,9 +124,9 @@ class TestAnalysisPasses:
         assert len(end_repeats) == 0
 
         with pytest.raises(ValueError):
-            BindingPass().run(builder, res_mgr)
+            BindingPass().run(ir, res_mgr)
 
-        ScopeSanitisation().run(builder, res_mgr)
+        ScopeSanitisation().run(ir, res_mgr)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
         end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
         repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
@@ -133,8 +136,8 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 1
 
-        TriagePass().run(builder, res_mgr)
-        BindingPass().run(builder, res_mgr)
+        TriagePass().run(ir, res_mgr)
+        BindingPass().run(ir, res_mgr)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
@@ -193,15 +196,16 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
-        ScopeSanitisation().run(builder, res_mgr)
-        TriagePass().run(builder, res_mgr)
-        BindingPass().run(builder, res_mgr)
+        ScopeSanitisation().run(ir, res_mgr)
+        TriagePass().run(ir, res_mgr)
+        BindingPass().run(ir, res_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        TILegalisationPass().run(builder, res_mgr)
+        TILegalisationPass().run(ir, res_mgr)
 
         legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
@@ -239,9 +243,10 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
-        ScopeSanitisation().run(builder, res_mgr)
-        CFGPass().run(builder, res_mgr)
+        ScopeSanitisation().run(ir, res_mgr)
+        CFGPass().run(ir, res_mgr)
         result: CFGResult = res_mgr.lookup_by_type(CFGResult)
         assert result.cfg
         assert result.cfg is not ControlFlowGraph()
@@ -254,26 +259,28 @@ class TestTransformPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
         with pytest.raises(ValueError):
-            ReturnSanitisationValidation().run(builder, res_mgr)
+            ReturnSanitisationValidation().run(ir, res_mgr)
 
-        ReturnSanitisation().run(builder, res_mgr)
-        ReturnSanitisationValidation().run(builder, res_mgr)
+        ReturnSanitisation().run(ir, res_mgr)
+        ReturnSanitisationValidation().run(ir, res_mgr)
 
     def test_desugaring_pass(self):
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
-        TriagePass().run(builder, res_mgr)
+        TriagePass().run(ir, res_mgr)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
         assert len(triage_result.sweeps) == 1
         sweep = next(iter(triage_result.sweeps))
         assert len(sweep.variables) == 1
 
-        DesugaringPass().run(builder, res_mgr)
+        DesugaringPass().run(ir, res_mgr)
         assert len(sweep.variables) == 2
         assert f"sweep_{hash(sweep)}" in sweep.variables
 
@@ -283,14 +290,15 @@ class TestValidationPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        ir = QatIR(builder)
 
-        NCOFrequencyVariability().run(builder, res_mgr, model)
+        NCOFrequencyVariability().run(ir, res_mgr, model)
 
         channel = next(iter(model.pulse_channels.values()))
         channel.fixed_if = True
 
         with pytest.raises(ValueError):
-            NCOFrequencyVariability().run(builder, res_mgr, model)
+            NCOFrequencyVariability().run(ir, res_mgr, model)
 
         channel.fixed_if = False
-        NCOFrequencyVariability().run(builder, res_mgr, model)
+        NCOFrequencyVariability().run(ir, res_mgr, model)
