@@ -4,29 +4,17 @@ from pydantic import BaseModel, Field
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
-from qat.ir.instructions import Instruction, InstructionBlock, MeasureBlock
+from qat.ir.instructions import (
+    Instruction,
+    InstructionBlock,
+    MeasureBlock,
+    find_all_instructions,
+)
 from qat.ir.waveforms import AbstractWaveform
-
-
-def _all_instructions(start_types=[Instruction]):
-    """
-    Creates a tuple of all possible instructions, used in seralization.
-    """
-    instructions = set()
-    check = start_types
-    while check:
-        parent = check.pop()
-        for child in parent.__subclasses__():
-            if child not in instructions:
-                check.append(child)
-                instructions.add(child)
-
-    return tuple(instructions)
-
 
 InstBlockList = List[
     Annotated[
-        Union[_all_instructions([Instruction, InstructionBlock, AbstractWaveform])],
+        Union[find_all_instructions([Instruction, InstructionBlock, AbstractWaveform])],
         Field(discriminator="inst"),
     ]
 ]

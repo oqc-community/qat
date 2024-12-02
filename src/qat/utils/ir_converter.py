@@ -1,6 +1,6 @@
 import copy
 
-from qat.ir.instruction_list import InstructionList, _all_instructions
+from qat.ir.instruction_list import InstructionList, find_all_instructions
 from qat.ir.instructions import Instruction as PydanticInstruction
 from qat.ir.instructions import Variable as PydanticVariable
 from qat.ir.waveforms import AbstractWaveform as PydanticAbstractWaveform
@@ -21,11 +21,13 @@ class IRConverter:
         # create a mapping of instructions
         self.pydantic_instructions = {
             inst.__name__: inst
-            for inst in _all_instructions([PydanticInstruction, PydanticAbstractWaveform])
+            for inst in find_all_instructions(
+                [PydanticInstruction, PydanticAbstractWaveform]
+            )
         }
         self.legacy_instructions = {
             inst.__name__: inst
-            for inst in _all_instructions([LegacyInstruction, LegacyAbstractWaveform])
+            for inst in find_all_instructions([LegacyInstruction, LegacyAbstractWaveform])
         }
 
     def legacy_to_pydantic_instructions(self, instructions: list[LegacyInstruction]):
@@ -68,7 +70,9 @@ class IRConverter:
 
         for key, val in args.items():
             if isinstance(val, LegacyVariable):
-                args[key] = PydanticVariable(val.name, val.var_type, val.value)
+                args[key] = PydanticVariable(
+                    name=val.name, var_type=val.var_type, value=val.value
+                )
 
         # The legacy instructions has inconsistencies with the name of how members
         # are saved and how they are provided in __init__. In these instances, we have
@@ -89,12 +93,18 @@ class IRConverter:
         elif isinstance(instruction, self.legacy_instructions["Assign"]):
             if isinstance(args["value"], LegacyVariable):
                 val = args["value"]
-                args["value"] = PydanticVariable(val.name, val.var_type, val.value)
+                args["value"] = PydanticVariable(
+                    name=val.name, var_type=val.var_type, value=val.value
+                )
             elif isinstance(args["value"], list):
                 itms = []
                 for i, val in enumerate(args["value"]):
                     if isinstance(val, LegacyVariable):
-                        itms.append(PydanticVariable(val.name, val.var_type, val.value))
+                        itms.append(
+                            PydanticVariable(
+                                name=val.name, var_type=val.var_type, value=val.value
+                            )
+                        )
                     else:
                         itms.append(val)
                     args["value"] = itms

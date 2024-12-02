@@ -47,10 +47,11 @@ from qat.utils.ir_converter import IRConverter
 class TestVariable:
 
     @pytest.mark.parametrize(
-        ["type", "val", "change"], [(float, 0.1, 0.2), (str, "clark", "kent")]
+        ["type", "val", "change"],
+        [(float, 0.1, 0.2), (str, "clark", "kent"), (float, None, 0.1), (float, 0.1, None)],
     )
     def test_assign(self, type, val, change):
-        var = Variable("test", type, val)
+        var = Variable(name="test", var_type=type, value=val)
         assert var.value == val
         var.value = change
         assert var.value == change
@@ -66,12 +67,12 @@ class TestVariable:
     )
     def test_wrong_type(self, type, val, change):
         with pytest.raises(ValueError):
-            var = Variable("test", type, val)
+            var = Variable(name="test", var_type=type, value=val)
             var.value = change
 
     @pytest.mark.parametrize(["val", "change"], [(0.1, "kent"), ("clark", 0.2)])
     def test_no_type(self, val, change):
-        var = Variable("test", value=val)
+        var = Variable(name="test", value=val)
         assert var.value == val
         var.value = change
         assert var.value == change
@@ -110,7 +111,9 @@ class TestReturn:
         inst = Return(vars)
         assert inst.variables == vars
 
-    @pytest.mark.parametrize("vars", [0.4, ["test", 0.4], Variable("test", float, 0.4)])
+    @pytest.mark.parametrize(
+        "vars", [0.4, ["test", 0.4], Variable(name="test", var_type=float, value=0.4)]
+    )
     def test_wrong_input(self, vars):
         with pytest.raises(ValidationError):
             Return(vars)
@@ -132,6 +135,11 @@ class TestJump:
     def test_jump(self, name):
         inst = Jump(name)
         assert isinstance(inst.target, str)
+
+
+# TODO: add tests to make sure sweep validators work as expected...
+class TestSweep:
+    pass
 
 
 class TestResults:
@@ -545,7 +553,7 @@ class TestInstructionList:
             MeasurePulse(
                 model.get_qubit(1).get_measure_channel(),
                 PulseShapeType.SQUARE,
-                Variable("length", float, 1e-6),
+                Variable(name="length", var_type=float, value=1e-6),
             ),
             DrivePulse(
                 model.get_qubit(0).get_drive_channel(), PulseShapeType.GAUSSIAN, 8e-8

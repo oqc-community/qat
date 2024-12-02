@@ -19,7 +19,12 @@ from typing_extensions import Annotated
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
 
 # The following things from legacy instructions are unchanged, so just import for now.
-from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
+from qat.purr.compiler.instructions import (
+    AcquireMode,
+    PostProcessType,
+    ProcessAxis,
+    build_generated_name,
+)
 from qat.purr.utils.logger import get_default_logger
 
 
@@ -36,26 +41,6 @@ class SweepValue(SweepOperation):
 
 
 ### Variables
-def build_generated_name(existing_names=None, prefix=None):
-    if existing_names is None:
-        existing_names = set()
-
-    if prefix is None:
-        prefix = ""
-
-    if any(prefix) and not prefix.endswith("_"):
-        prefix = f"{prefix}_"
-
-    variable_name = f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
-    while variable_name in existing_names:
-        variable_name = (
-            f"{prefix}generated_name_{np.random.randint(np.iinfo(np.int32).max)}"
-        )
-
-    existing_names.add(variable_name)
-    return variable_name
-
-
 class Variable(BaseModel):
     """
     States that this value is actually a variable that should be fetched instead.
@@ -67,12 +52,11 @@ class Variable(BaseModel):
     value: Any = None
     model_config = ConfigDict(validate_assignment=True)
 
-    def __init__(self, name, var_type=None, value=None, **kwargs):
-        super().__init__(name=name, var_type=var_type, value=value)
-
     @staticmethod
     def with_random_name(existing_names=None, var_type=None, value=None):
-        return Variable(Variable.generate_name(existing_names), var_type, value)
+        return Variable(
+            name=Variable.generate_name(existing_names), var_type=var_type, value=value
+        )
 
     @staticmethod
     def generate_name(existing_names=None):
@@ -99,7 +83,7 @@ class Variable(BaseModel):
     @classmethod
     def _validate_value_type(cls, value, val_info):
         var_type = val_info.data["var_type"]
-        if var_type != None and not isinstance(value, var_type):
+        if var_type != None and not isinstance(value, var_type) and value != None:
             raise ValueError(f"Value provided has type {type(value)}: must be {var_type}")
         return value
 
@@ -129,8 +113,8 @@ class Repeat(Instruction):
     """
 
     inst: Literal["Repeat"] = "Repeat"
-    repeat_count: Any
-    repetition_period: Any = None  # TODO: probably can only be a float, but not sure...
+    repeat_count: Optional[int] = None
+    repetition_period: Optional[float] = None
 
     def __init__(self, repeat_count: int = None, repetition_period=None, **kwargs):
         super().__init__(repeat_count=repeat_count, repetition_period=repetition_period)
@@ -178,21 +162,15 @@ class Return(Instruction):
     """A statement defining what to return from a quantum execution."""
 
     inst: Literal["Return"] = "Return"
-    variables: Optional[List[str]]
+    variables: List[str] = []
 
-    def __init__(self, variables: List[str] = None, **kwargs):
-        if variables is None:
-            variables = []
-
-        if not isinstance(variables, List):
-            variables = [variables]
-
+    def __init__(self, variables: List[str] = [], **kwargs):
         super().__init__(variables=variables)
 
     def __repr__(self):
         return f"return {','.join(self.variables)}"
 
-    @field_validator("variables")
+    @field_validator("variables", mode="before")
     @classmethod
     def _variables_as_list(cls, variables):
         variables = (
@@ -215,8 +193,8 @@ class Sweep(Instruction):
     """
 
     inst: Literal["Sweep"] = "Sweep"
-    operations: List[SweepValue]
-    variables: Dict[str, List[Any]]
+    operations: List[SweepValue] = []
+    variables: Dict[str, List[Any]] = None
 
     def __init__(
         self,
@@ -224,19 +202,6 @@ class Sweep(Instruction):
         variables: Dict[str, List[Any]] = None,
         **kwargs,
     ):
-        if operations is None:
-            operations = []
-        elif not isinstance(operations, List):
-            operations = [operations]
-
-        # Get the length of the variables, which we will then assume is the sweep
-        # length.
-        if not variables:
-            variables = {op.name: op.value for op in operations}
-        sweep_lengths = [len(value) for value in variables.values()]
-        if len(set(sweep_lengths)) > 1:
-            raise ValueError("Sweep variables have inconsistent lengths.")
-
         super().__init__(operations=operations, variables=variables)
 
     @property
@@ -246,6 +211,28 @@ class Sweep(Instruction):
     def __repr__(self):
         args = ",".join(key + "=" + str(value) for key, value in self.variables.items())
         return f"sweep {args}"
+
+    @field_validator("operations", mode="before")
+    @classmethod
+    def _operations_as_list(cls, operations):
+        if operations is None:
+            operations = []
+        elif not isinstance(operations, List):
+            operations = [operations]
+        return operations
+
+    @field_validator("variables", mode="before")
+    @classmethod
+    def _create_variable_dict(cls, variables, info: ValidationInfo):
+        if not variables:
+            variables = {op.name: op.value for op in info.data["operations"]}
+
+        # Get the length of the variables, which we will then assume is the sweep
+        # length.
+        sweep_lengths = [len(value) for value in variables.values()]
+        if len(set(sweep_lengths)) > 1:
+            raise ValueError("Sweep variables have inconsistent lengths.")
+        return variables
 
 
 class EndSweep(Instruction):
@@ -273,11 +260,8 @@ class Label(Instruction):
 
     @staticmethod
     def with_random_name(existing_names=None):
-        return Label(Label.generate_name(existing_names))
-
-    @staticmethod
-    def generate_name(existing_names=None):
-        return build_generated_name(existing_names)
+        """Build a label with a randomly generated name."""
+        return Label(build_generated_name(existing_names))
 
     def __repr__(self):
         return f"{self.name}:"
@@ -293,16 +277,20 @@ class Jump(Instruction):
     condition: Any
 
     def __init__(self, target: Union[str, Label], condition=None, **kwargs):
-        return super().__init__(
-            target=target.name if isinstance(target, Label) else target,
-            condition=condition,
-        )
+        return super().__init__(target=target, condition=condition)
 
     def __repr__(self):
         if self.condition is not None:
             return f"if {str(self.condition)} -> {str(self.target)}"
         else:
             return f"-> {str(self.target)}"
+
+    @field_validator("target", mode="before")
+    @classmethod
+    def _target_from_label(cls, target):
+        if isinstance(target, Label):
+            return target.name
+        return target
 
 
 class ResultsProcessing(Instruction):
@@ -675,8 +663,8 @@ class CrossResonanceCancelPulse(Pulse):
 class Acquire(QuantumInstruction):
     inst: Literal["Acquire"] = "Acquire"
     suffix_incrementor: int = 0
-    time: Union[float, Variable]
-    mode: AcquireMode
+    time: Union[float, Variable] = 1e-6
+    mode: AcquireMode = (AcquireMode.RAW,)
     output_variable: str = None
     delay: Optional[float] = None
     # was previously union of pulse and custom pulse: can this be extended to waveform?
@@ -694,9 +682,12 @@ class Acquire(QuantumInstruction):
         suffix_incrementor: int = 0,
         **kwargs,
     ):
+        # TODO: can't delegate output to validator as it requires "existing_names".
+        # Figure out the best way to do this (might just be as simple as replacing)
+        # generate_name with something simplier...
         super().__init__(
             quantum_targets=quantum_targets,
-            time=time or 1.0e-6,
+            time=time or 1e-6,
             mode=mode or AcquireMode.RAW,
             delay=delay,
             output_variable=output_variable
@@ -779,7 +770,7 @@ class PostProcessing(Instruction):
             acquire=acquire,
             process=process,
             args=args or [],
-            axes=[] if axes == None else axes if isinstance(axes, List) else [axes],
+            axes=axes,
             results_needed=results_needed,
         )
 
@@ -794,6 +785,13 @@ class PostProcessing(Instruction):
         return (
             f"{self.process.value} {self.acquire.output_variable}{args}{axis}{output_var}"
         )
+
+    @field_validator("axes", mode="before")
+    @classmethod
+    def _axes_as_list(cls, axes):
+        if not axes:
+            return axes if isinstance(axes, List) else [axes]
+        return []
 
 
 class Reset(QuantumInstruction):
@@ -853,7 +851,7 @@ class DeviceUpdate(QuantumInstruction):
 
 
 ### Instruction blocks
-def _all_instructions(start_types=[Instruction]):
+def find_all_instructions(start_types=[Instruction]):
     """
     Creates a tuple of all possible instructions, used in seralization.
     """
@@ -870,7 +868,7 @@ def _all_instructions(start_types=[Instruction]):
 
 
 Inst = Annotated[
-    Union[_all_instructions()],
+    Union[find_all_instructions()],
     Field(discriminator="inst"),
 ]
 InstList = List[Inst]
@@ -918,7 +916,7 @@ class MeasureBlock(InstructionBlock):
     @property
     def instructions(self):
         instructions = [Synchronize(self.pulse_channel_targets)]
-        for _, val in self.target_dict.items():
+        for val in self.target_dict.values():
             instructions.extend([val.measure, val.acquire])
         instructions.append(Synchronize(self.pulse_channel_targets))
         return instructions

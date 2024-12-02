@@ -134,11 +134,10 @@ def equivalent_array(self, other):
             check = vars_self[key] == vars_other[key]
             if not isinstance(check, bool):
                 check = all(check)
-                print(vars_self[key])
-                print(vars_other[key])
             if not check:
                 return False
-    return True
+        return True
+    return False
 
 
 gen_name_pattern = re.compile(r"generated_name_[0-9]+")
