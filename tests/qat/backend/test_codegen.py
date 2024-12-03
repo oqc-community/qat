@@ -13,7 +13,7 @@ from qat.backend.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.ir.pass_base import InvokerMixin, PassManager
+from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
 from qat.purr.backends.qblox.codegen import (
@@ -361,15 +361,16 @@ class TestNewQbloxEmitter(InvokerMixin):
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_resonator_spect(self, model, num_points, qubit_indices):
         builder = resonator_spect(model, qubit_indices, num_points)
+        ir = QatIR(builder)
         res_mgr = ResultManager()
         engine = model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(builder, res_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, model, engine)
 
-        self.run_pass_pipeline(builder, res_mgr, model)
+        self.run_pass_pipeline(ir, res_mgr, model)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
-        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
         assert len(packages) == len(qubit_indices)
 
         for index in qubit_indices:
@@ -404,10 +405,11 @@ class TestNewQbloxEmitter(InvokerMixin):
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_qubit_spect(self, model, num_points, qubit_indices):
         builder = qubit_spect(model, qubit_indices, num_points)
+        ir = QatIR(builder)
         res_mgr = ResultManager()
         engine = model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(builder, res_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, model, engine)
 
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
@@ -422,9 +424,9 @@ class TestNewQbloxEmitter(InvokerMixin):
         injectors = DeviceInjectors(static_dus)
         try:
             injectors.inject()
-            self.run_pass_pipeline(builder, res_mgr, model)
+            self.run_pass_pipeline(ir, res_mgr, model)
 
-            packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
+            packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
             assert len(packages) == 2 * len(qubit_indices)
 
             for index in qubit_indices:

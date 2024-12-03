@@ -42,7 +42,11 @@ class PhaseOptimisation(TransformPass):
     Extracted from QuantumExecutionEngine.optimize()
     """
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+
         accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: List[Instruction] = []
         for instruction in builder.instructions:
@@ -79,7 +83,11 @@ class PostProcessingOptimisation(TransformPass):
     Better pass name/id ?
     """
 
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+
         pp_insts = [val for val in builder.instructions if isinstance(val, PostProcessing)]
         discarded = []
         for pp in pp_insts:

@@ -15,7 +15,7 @@ from qat.backend.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.ir.pass_base import InvokerMixin, PassManager
+from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
@@ -194,8 +194,9 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             injectors.inject()
             with log_duration("Codegen run in {} seconds."):
                 res_mgr = ResultManager()
-                self.run_pass_pipeline(builder, res_mgr, self.model)
-                packages = NewQbloxEmitter().emit_packages(builder, res_mgr, self.model)
+                ir = QatIR(builder)
+                self.run_pass_pipeline(ir, res_mgr, self.model)
+                packages = NewQbloxEmitter().emit_packages(ir, res_mgr, self.model)
 
             with log_duration("QPU returned results in {} seconds."):
                 self.model.control_hardware.set_data(packages)
