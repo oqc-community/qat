@@ -122,24 +122,6 @@ def equivalent_vars(self, other):
     return isinstance(self, type(other)) and (vars(self) == vars(other))
 
 
-def equivalent_array(self, other):
-    if isinstance(self, type(other)):
-        vars_self = vars(self)
-        vars_other = vars(other)
-        if len(vars_self) != len(vars_other):
-            return False
-        for key in vars_self.keys():
-            if not key in vars_other:
-                return False
-            check = vars_self[key] == vars_other[key]
-            if not isinstance(check, bool):
-                check = all(check)
-            if not check:
-                return False
-        return True
-    return False
-
-
 gen_name_pattern = re.compile(r"generated_name_[0-9]+")
 
 
