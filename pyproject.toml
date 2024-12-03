@@ -101,7 +101,7 @@ py_version = 39
 profile = "black"
 line_length = 92
 known_first_party = ["qat"]
-known_local_folder = ["tests"]
+known_local_folder = ["tests", "benchmarks"]
 
 [tool.black]
 line-length = 92
@@ -134,6 +134,9 @@ filterwarnings = [
     'default:.*invalid escape sequence:DeprecationWarning::1092',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
     'default:.*GlobalisePhasedX:DeprecationWarning'
+]
+markers = [
+  "ab_test",
 ]
 
 [tool.poetry.scripts]
