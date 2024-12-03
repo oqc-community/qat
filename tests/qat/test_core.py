@@ -174,7 +174,6 @@ def apply_error_mitigation_setup(hw):
     return hw
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize(
     "compiler_config",
     [
