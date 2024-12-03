@@ -166,7 +166,7 @@ class TestQuantumInstruction:
         )
         for target in targets:
             inst = QuantumInstruction(target)
-            assert inst.quantum_targets == target
+            assert inst.targets == target
 
     def test_create_multiple_targets(self):
         targets = [
@@ -180,7 +180,7 @@ class TestQuantumInstruction:
 
         for target_list in targets:
             inst = QuantumInstruction(target_list)
-            for target in inst.quantum_targets:
+            for target in inst.targets:
                 assert target in target_list
 
 
@@ -261,7 +261,7 @@ class TestDelay:
     )
     def test_targets(self, target, delay):
         inst = Delay(target, time=delay)
-        assert inst.quantum_targets == target.full_id()
+        assert inst.targets == target.full_id()
         assert inst.time == delay
         assert inst.duration == delay
 
@@ -288,7 +288,7 @@ class TestSynchronizePhaseReset:
     )
     def test_pulse_channels(self, instruction, targets):
         inst = instruction(targets)
-        assert len(inst.quantum_targets) == len(targets) if isinstance(targets, list) else 1
+        assert len(inst.targets) == len(targets) if isinstance(targets, list) else 1
 
     @pytest.mark.parametrize(
         "targets",
@@ -302,26 +302,26 @@ class TestSynchronizePhaseReset:
         inst = instruction(targets)
         targets = targets if isinstance(targets, list) else [targets]
         len_targets = sum([len(target.pulse_channels) for target in targets])
-        assert len_targets == len(inst.quantum_targets)
+        assert len_targets == len(inst.targets)
         target_ids = [
             chan.full_id() for target in targets for chan in target.pulse_channels.values()
         ]
         for target_id in target_ids:
-            assert target_id in inst.quantum_targets
+            assert target_id in inst.targets
 
     def test_add_instruction(self, instruction):
         inst1 = instruction(self.model.get_qubit(0))
         inst2 = instruction(self.model.get_qubit(1))
         inst3 = inst1 + inst2
-        targets = inst1.quantum_targets
-        targets.update(inst2.quantum_targets)
-        assert inst3.quantum_targets == targets
+        targets = inst1.targets
+        targets.update(inst2.targets)
+        assert inst3.targets == targets
 
     def test_add_target(self, instruction):
         inst = instruction(self.model.get_qubit(0))
         inst = inst + self.model.get_qubit(1)
         inst2 = instruction([self.model.get_qubit(0), self.model.get_qubit(1)])
-        assert inst.quantum_targets == inst2.quantum_targets
+        assert inst.targets == inst2.targets
 
     @pytest.mark.parametrize("target", ["test", 2.54, ["test", 2.54]])
     def test_add_validation(self, instruction, target):
@@ -333,7 +333,7 @@ class TestSynchronizePhaseReset:
         inst = instruction(self.model.get_qubit(0))
         inst2 = inst + self.model.get_qubit(1)
         inst += self.model.get_qubit(1)
-        assert inst.quantum_targets == inst2.quantum_targets
+        assert inst.targets == inst2.targets
 
 
 class TestCustomPulse:
@@ -355,7 +355,7 @@ class TestCustomPulse:
             self.gaussian_shape(points, amp),
             ignore,
         )
-        assert inst.quantum_targets == chan.full_id()
+        assert inst.targets == chan.full_id()
         assert inst.sample_time == chan.physical_channel.sample_time
         assert inst.duration == chan.physical_channel.sample_time * points
 
@@ -405,7 +405,7 @@ class TestAcquire:
         chan = self.model.get_qubit(0).get_acquire_channel()
         inst = Acquire(chan)
         assert inst.time == 1e-6
-        assert inst.quantum_targets == chan.full_id()
+        assert inst.targets == chan.full_id()
 
     def test_filter(self):
         chan = self.model.get_qubit(0).get_acquire_channel()
@@ -438,13 +438,11 @@ class TestReset:
 
     def test_single_qubit(self):
         inst = Reset(self.model.get_qubit(0))
-        assert inst.quantum_targets == set(
-            [self.model.get_qubit(0).get_drive_channel().full_id()]
-        )
+        assert inst.targets == set([self.model.get_qubit(0).get_drive_channel().full_id()])
 
     def test_multiple_qubits(self):
         inst = Reset(self.model.qubits[0:2])
-        assert inst.quantum_targets == set(
+        assert inst.targets == set(
             [
                 self.model.get_qubit(0).get_drive_channel().full_id(),
                 self.model.get_qubit(1).get_drive_channel().full_id(),
@@ -467,7 +465,7 @@ class TestInstructionBlocks:
 
         mb = MeasureBlock.create_block(targets, mode)
         assert isinstance(mb, MeasureBlock)
-        assert mb.quantum_targets == [t.full_id() for t in targets]
+        assert mb.targets == [t.full_id() for t in targets]
         assert mb.target_dict[targets[0].full_id()].mode == mode
 
     @pytest.mark.parametrize("out_vars", [None, "c"])
@@ -495,9 +493,9 @@ class TestInstructionBlocks:
             modes[0],
             output_variables=out_vars[:1],
         )
-        assert mb.quantum_targets == [t.full_id() for t in hw.qubits[:1]]
+        assert mb.targets == [t.full_id() for t in hw.qubits[:1]]
         mb.add_measurements(targets[1], modes[1], output_variables=out_vars[1])
-        assert mb.quantum_targets == [t.full_id() for t in targets]
+        assert mb.targets == [t.full_id() for t in targets]
         assert [val.mode for val in mb.target_dict.values()] == modes
         assert [val.output_variable for val in mb.target_dict.values()] == out_vars
 
@@ -510,7 +508,7 @@ class TestInstructionBlocks:
             AcquireMode.INTEGRATOR,
             output_variables=out_vars,
         )
-        assert mb.quantum_targets == [t.full_id() for t in targets]
+        assert mb.targets == [t.full_id() for t in targets]
         with pytest.raises(ValueError):
             mb.add_measurements(targets[1], AcquireMode.INTEGRATOR)
 

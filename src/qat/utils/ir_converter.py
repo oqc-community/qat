@@ -105,6 +105,9 @@ class IRConverter:
                         itms.append(val)
                     args["value"] = itms
 
+        if "quantum_targets" in args:
+            args["targets"] = args.pop("quantum_targets")
+
         return pydantic_type(**args)
 
     def _pydantic_to_legacy_instruction(self, instruction: PydanticInstruction):
@@ -133,8 +136,8 @@ class IRConverter:
 
         # pydantic instructions save quantum targets by id: repopulate them with
         # the correct pulse channel views.
-        if "quantum_targets" in args:
-            qts_str = args.pop("quantum_targets")
+        if "targets" in args:
+            qts_str = args.pop("targets")
             if isinstance(qts_str, str):
                 qts = self._fetch_quantum_target(qts_str)
             else:

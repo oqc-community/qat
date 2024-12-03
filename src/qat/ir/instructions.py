@@ -47,7 +47,6 @@ class Variable(BaseModel):
     """
 
     name: str
-    # TODO: we might consider limiting what types a variable can take...
     var_type: Optional[type] = None
     value: Any = None
     model_config = ConfigDict(validate_assignment=True)
@@ -137,6 +136,7 @@ class Assign(Instruction):
     @field_validator("value", mode="before")
     @classmethod
     def _list_to_vars(cls, val):
+        # Variables are serialised as dicts: we need to defined how to deserialize them.
         if isinstance(val, list):
             lst = []
             for itm in val:
@@ -289,19 +289,18 @@ class QuantumInstruction(Instruction):
     """
 
     inst: Literal["QuantumInstruction"] = "QuantumInstruction"
-    # TODO: rename to taregts
-    quantum_targets: Union[set[str], str]
+    # TODO: rename to targets
+    targets: Union[set[str], str]
 
-    def __init__(self, quantum_targets, **kwargs):
+    def __init__(self, targets, **kwargs):
         # overwrite the init to accept quantum targets as a position argument
-        # TODO: decide whether to use *args
-        return super().__init__(quantum_targets=quantum_targets, **kwargs)
+        return super().__init__(targets=targets, **kwargs)
 
     @property
     def duration(self):
         return 0.0
 
-    @field_validator("quantum_targets", mode="before")
+    @field_validator("targets", mode="before")
     @classmethod
     def _components_to_ids(cls, targets):
         """
@@ -332,17 +331,17 @@ class PhaseShift(QuantumInstruction):
     """
 
     inst: Literal["PhaseShift"] = "PhaseShift"
-    quantum_targets: str
+    targets: str
     phase: Union[float, Variable] = 0.0
 
     @property
     def channel(self):
-        return self.quantum_targets
+        return self.targets
 
     def __repr__(self):
         return f"phaseshift {self.channel},{self.phase}"
 
-    @field_validator("quantum_targets", mode="before")
+    @field_validator("targets", mode="before")
     @classmethod
     def _is_pulse_channel(cls, target):
         if isinstance(target, list) and len(target) == 1:
@@ -350,7 +349,7 @@ class PhaseShift(QuantumInstruction):
 
         if not isinstance(target, (str, PulseChannel)):
             raise ValueError(
-                f"channel has type {type(target).__name__}: it must have type PulseChannel"
+                f"channel has type {type(target).__name__}: it must have type PulseChannel."
             )
         return target.full_id() if isinstance(target, PulseChannel) else target
 
@@ -359,17 +358,17 @@ class FrequencyShift(QuantumInstruction):
     """Change the frequency of a pulse channel."""
 
     inst: Literal["FrequencyShift"] = "FrequencyShift"
-    quantum_targets: str
+    targets: str
     frequency: Union[float, Variable] = 0.0
 
     @property
     def channel(self):
-        return self.quantum_targets
+        return self.targets
 
     def __repr__(self):
         return f"frequencyshift {self.channel},{self.frequency}"
 
-    @field_validator("quantum_targets", mode="before")
+    @field_validator("targets", mode="before")
     @classmethod
     def _is_pulse_channel(cls, target):
         if isinstance(target, list) and len(target) == 1:
@@ -415,7 +414,7 @@ class GroupInstruction(QuantumInstruction):
 
     inst: Literal["GroupInstruction"] = "GroupInstruction"
 
-    @field_validator("quantum_targets", mode="before")
+    @field_validator("targets", mode="before")
     @classmethod
     def _pulse_channels_to_strs(cls, targets):
         targets = [targets] if not isinstance(targets, list) else targets
@@ -440,7 +439,7 @@ class GroupInstruction(QuantumInstruction):
         sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
     ):
         new_targets = self._pulse_channels_to_strs(sync_channels)
-        self.quantum_targets.update(new_targets)
+        self.targets.update(new_targets)
         return self
 
     def __add__(self, other):
@@ -450,7 +449,7 @@ class GroupInstruction(QuantumInstruction):
 
     def __iadd__(self, other):
         if isinstance(other, type(self)):
-            self.quantum_targets.update(other.quantum_targets)
+            self.targets.update(other.targets)
         elif isinstance(other, (QuantumComponent, list)):
             self.add_channels(other)
         else:
@@ -470,7 +469,7 @@ class Synchronize(GroupInstruction):
     inst: Literal["Synchronize"] = "Synchronize"
 
     def __repr__(self):
-        return f"sync {','.join(self.quantum_targets)}"
+        return f"sync {','.join(self.targets)}"
 
 
 class PhaseReset(GroupInstruction):
@@ -481,7 +480,7 @@ class PhaseReset(GroupInstruction):
     inst: Literal["PhaseReset"] = "PhaseReset"
 
     def __repr__(self):
-        return f"phase reset {','.join(self.quantum_targets)}"
+        return f"phase reset {','.join(self.targets)}"
 
 
 class Waveform(QuantumInstruction):
@@ -490,11 +489,7 @@ class Waveform(QuantumInstruction):
 
     @property
     def channel(self):
-        return (
-            self.quantum_targets
-            if isinstance(self.quantum_targets, str)
-            else self.quantum_targets[0]
-        )
+        return self.targets if isinstance(self.targets, str) else self.targets[0]
 
 
 class CustomPulse(Waveform):
@@ -511,7 +506,7 @@ class CustomPulse(Waveform):
 
     def __init__(
         self,
-        quantum_targets: PulseChannel,
+        targets: PulseChannel,
         samples: np.ndarray,
         ignore_channel_scale: bool = False,
         sample_time=None,
@@ -520,7 +515,7 @@ class CustomPulse(Waveform):
         # TODO: should we be storing properties of the pulse channel in the instruction?
         # It is only used for calcualting the duration (which was previously done externally).
         if not sample_time:
-            chan = quantum_targets
+            chan = targets
             if isinstance(chan, list):
                 chan = chan[0]
             if not isinstance(chan, PulseChannel):
@@ -530,7 +525,7 @@ class CustomPulse(Waveform):
             sample_time = chan.sample_time
 
         super().__init__(
-            quantum_targets=quantum_targets,
+            targets=targets,
             samples=samples,
             ignore_channel_scale=ignore_channel_scale,
             sample_time=sample_time,
@@ -631,7 +626,7 @@ class Acquire(QuantumInstruction):
 
     def __init__(
         self,
-        quantum_targets: PulseChannel,
+        targets: PulseChannel,
         time: Union[float, Variable] = None,
         mode: AcquireMode = None,
         output_variable: Optional[str] = None,
@@ -645,12 +640,12 @@ class Acquire(QuantumInstruction):
         # Figure out the best way to do this (might just be as simple as replacing
         # generate_name with something simplier...)
         super().__init__(
-            quantum_targets=quantum_targets,
+            targets=targets,
             time=time or 1e-6,
             mode=mode or AcquireMode.RAW,
             delay=delay,
             output_variable=output_variable
-            or self.generate_name(existing_names, quantum_targets.full_id()),
+            or self.generate_name(existing_names, targets.full_id()),
             filter=filter,
             suffix_incrementor=suffix_incrementor,
         )
@@ -664,7 +659,7 @@ class Acquire(QuantumInstruction):
 
     @property
     def channel(self):
-        return self.quantum_targets
+        return self.targets
 
     def __repr__(self):
         out_var = f"->{self.output_variable}" if self.output_variable else ""
@@ -739,9 +734,9 @@ class Reset(QuantumInstruction):
     inst: Literal["Reset"] = "Reset"
 
     def __repr__(self):
-        return f"reset {','.join(self.quantum_targets)}"
+        return f"reset {','.join(self.targets)}"
 
-    @field_validator("quantum_targets", mode="before")
+    @field_validator("targets", mode="before")
     @classmethod
     def _components_to_ids(cls, targets):
         if not isinstance(targets, (set, list, tuple)):
@@ -855,7 +850,7 @@ class MeasureBlock(InstructionBlock):
         return instructions
 
     @property
-    def quantum_targets(self):
+    def targets(self):
         return list(self.target_dict.keys())
 
     @property
@@ -886,10 +881,7 @@ class MeasureBlock(InstructionBlock):
         existing_names: Set[str] = None,
     ):
         targets = self._validate_types(targets, (Qubit))
-        if (
-            len((duplicates := [t for t in targets if t.full_id() in self.quantum_targets]))
-            > 0
-        ):
+        if len((duplicates := [t for t in targets if t.full_id() in self.targets])) > 0:
             raise ValueError(
                 "Target can only be measured once in a 'MeasureBlock'. "
                 f"Duplicates: {duplicates}"
