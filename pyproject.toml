@@ -33,7 +33,7 @@ qutip = ">=5.0.3"
 toml = "^0.10.2"
 openqasm3 = { version = "^1.0.0", extras = ["parser"] }
 pytket = "^1.31.0"
-qiskit = "^1.2.0"
+qiskit = "~1.2.0"
 qiskit-optimization = "^0.6.0"
 qiskit-aer = "^0.15.0"
 qiskit-algorithms = "^0.3.0"
