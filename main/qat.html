@@ -72,6 +72,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html">qat.model.hardware_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
@@ -300,9 +301,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html#qat.model.builder.PhysicalHardwareModelBuilder"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModelBuilder</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html#qat.model.convert_legacy.convert_legacy_hw_to_pydantic"><code class="docutils literal notranslate"><span class="pre">convert_legacy_hw_to_pydantic()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.AcquirePulseChannel"><code class="docutils literal notranslate"><span class="pre">AcquirePulseChannel</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePositiveFloat"><code class="docutils literal notranslate"><span class="pre">CalibratablePositiveFloat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.CrossResonanceCancellationPulseChannel"><code class="docutils literal notranslate"><span class="pre">CrossResonanceCancellationPulseChannel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel"><code class="docutils literal notranslate"><span class="pre">CrossResonancePulseChannel</span></code></a></li>
@@ -321,7 +325,19 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html#qat.model.device.SecondStatePulseChannel"><code class="docutils literal notranslate"><span class="pre">SecondStatePulseChannel</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_base.html">qat.model.hardware_base module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_base.html">qat.model.hardware_base module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.FrozenDict"><code class="docutils literal notranslate"><span class="pre">FrozenDict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.FrozenSet"><code class="docutils literal notranslate"><span class="pre">FrozenSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.PydDictBase"><code class="docutils literal notranslate"><span class="pre">PydDictBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.PydSetBase"><code class="docutils literal notranslate"><span class="pre">PydSetBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.ValidatedDict"><code class="docutils literal notranslate"><span class="pre">ValidatedDict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.ValidatedSet"><code class="docutils literal notranslate"><span class="pre">ValidatedSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.get_validator_from_annotated"><code class="docutils literal notranslate"><span class="pre">get_validator_from_annotated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.validate_calibratable_positive_float"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_positive_float()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.validate_calibratable_unit_interval"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_base.html#qat.model.hardware_base.validate_non_negative"><code class="docutils literal notranslate"><span class="pre">validate_non_negative()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">LogicalHardwareModel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></li>
@@ -478,7 +494,6 @@
       <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
       <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
       <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
-      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>
