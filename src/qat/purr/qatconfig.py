@@ -53,6 +53,7 @@ class QatConfig(BaseSettings):
     QatConfig(MAX_REPEATS_LIMIT=654321, ...)
     >>> QatConfig(MAX_REPEATS_LIMIT=123) # doctest: +ELLIPSIS
     QatConfig(MAX_REPEATS_LIMIT=123, ...)
+    >>> del os.environ["QAT_MAX_REPEATS_LIMIT"]
 
     >>> qatconfig = QatConfig()
     >>> qatconfig.MAX_REPEATS_LIMIT = 16000
