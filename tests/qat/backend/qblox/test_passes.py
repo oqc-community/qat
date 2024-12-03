@@ -11,7 +11,7 @@ from qat.backend.analysis_passes import (
     TriageResult,
 )
 from qat.backend.transform_passes import RepeatSanitisation, ScopeSanitisation
-from qat.ir.pass_base import PassManager
+from qat.ir.pass_base import PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
@@ -38,7 +38,7 @@ class TestAnalysisPasses:
             | PreCodegenPass()
         )
 
-        pipeline.run(builder, res_mgr, model)
+        pipeline.run(QatIR(builder), res_mgr, model)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         target_map = triage_result.target_map
@@ -60,12 +60,12 @@ class TestAnalysisPasses:
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
-        ).run(builder, res_mgr)
+        ).run(QatIR(builder), res_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        QbloxLegalisationPass().run(builder, res_mgr)
+        QbloxLegalisationPass().run(QatIR(builder), res_mgr)
 
         legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 

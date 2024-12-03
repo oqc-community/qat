@@ -16,7 +16,7 @@ from qat.backend.analysis_passes import (
 )
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.graph import ControlFlowGraph
-from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager
+from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
@@ -1097,12 +1097,16 @@ class PreCodegenResult:
 
 
 class PreCodegenPass(AnalysisPass):
-    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Precedes assembly codegen.
         Performs a naive register allocation through a manager object.
         Computes useful information in the form of attributes.
         """
+
+        builder = ir.value
+        if not isinstance(builder, InstructionBuilder):
+            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
@@ -1208,6 +1212,14 @@ class QbloxCFGWalker(DfsTraversal):
                                 name = f"repeat_{hash(head)}"
                                 iter_bound = context.iter_bounds[name]
                                 num_bins *= iter_bound.count
+
+                        if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+                            raise ValueError(
+                                f"""
+                                Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                                Please reduce number of points or number of shots
+                                """
+                            )
                         context.iter_bounds[next_inst.output_variable] = IterBound(
                             start=0, step=1, end=num_bins, count=num_bins
                         )
