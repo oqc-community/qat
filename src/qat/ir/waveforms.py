@@ -38,6 +38,9 @@ class Waveform(AbstractWaveform):
     def duration(self):
         return self.width
 
+    def __repr__(self):
+        return f"waveform {self.shape.value},{self.width},{self.amp},{self.phase}"
+
 
 class CustomWaveform(AbstractWaveform):
     samples: List[Union[complex, float]]
@@ -47,6 +50,9 @@ class CustomWaveform(AbstractWaveform):
         # TODO: this depends on the pulse channel too, so we need to decide
         # how to deal with this.
         return 0.0
+
+    def __repr__(self):
+        return f"custom waveform"
 
 
 class PulseType(Enum):
@@ -75,10 +81,7 @@ class Pulse(QuantumInstruction):
     waveform: Union[Waveform, CustomWaveform]
 
     def __repr__(self):
-        return (
-            f"pulse {self.channel},{self.waveform.shape.value},"
-            f"{self.waveform.amp},{self.phase},{self.width}"
-        )
+        return f"pulse {self.channel},{self.waveform}"
 
     @property
     def duration(self):

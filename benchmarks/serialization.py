@@ -1,6 +1,6 @@
 import pytest
 
-from qat.ir.instructions import InstructionList
+from qat.ir.instruction_list import InstructionList
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.frontends import QASMFrontend
