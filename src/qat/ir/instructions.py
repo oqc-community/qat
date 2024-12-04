@@ -523,25 +523,3 @@ class DeviceUpdate(QuantumInstruction):
 
     def __repr__(self):
         return f"{self.target}.{self.attribute} = {str(self.value)}"
-
-
-### Instruction blocks
-class InstructionBlock(BaseModel):
-    """
-    An Instruction grouping type. Allows working with blocks of Instructions as a unit.
-    """
-
-    inst: Literal["InstructionBlock"] = "InstructionBlock"
-
-    def _validate_types(self, items, valid_types, label="targets"):
-        if items is None:
-            items = []
-        elif not isinstance(items, List):
-            items = [items]
-
-        invalid_items = [item for item in items if not isinstance(item, valid_types)]
-        if any(invalid_items):
-            invalid_items_str = ",".join([str(item) for item in invalid_items])
-            raise ValueError(f"Invalid {label} for {type(self)}: {invalid_items_str}")
-
-        return items

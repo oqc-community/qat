@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
-from qat.ir.instructions import Instruction, InstructionBlock
+from qat.ir.instructions import Instruction
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse
 
@@ -28,7 +28,7 @@ def find_all_instructions(start_types=[Instruction]):
 # An annotated type used in instruction lists so python can correctly
 # identify instruction types during deserialization.
 all_instructions = find_all_instructions(
-    [Instruction, InstructionBlock, MeasureBlock, Acquire, PostProcessing, Pulse]
+    [Instruction, MeasureBlock, Acquire, PostProcessing, Pulse]
 )
 InstList = List[
     Annotated[

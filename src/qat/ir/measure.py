@@ -5,13 +5,7 @@ from typing import Any, Dict, List, Literal, Optional, Set, Union
 import numpy as np
 from pydantic import BaseModel, ValidationInfo, field_validator
 
-from qat.ir.instructions import (
-    Instruction,
-    InstructionBlock,
-    QuantumInstruction,
-    Synchronize,
-    Variable,
-)
+from qat.ir.instructions import Instruction, QuantumInstruction, Synchronize, Variable
 from qat.ir.waveforms import Pulse, PulseType, Waveform
 from qat.purr.compiler.devices import PulseChannel, Qubit
 
@@ -142,7 +136,7 @@ class MeasureData(BaseModel):
     targets: List[str] = None
 
 
-class MeasureBlock(InstructionBlock):
+class MeasureBlock(Instruction):
     """Groups multiple qubit measurements together."""
 
     inst: Literal["MeasureBlock"] = "MeasureBlock"
@@ -169,6 +163,12 @@ class MeasureBlock(InstructionBlock):
             targets.extend(target.targets)
         return targets
 
+    def get_acquires(self, targets: Union[Qubit, List[Qubit]]):
+        if not isinstance(targets, list):
+            targets = [targets]
+        targets = [t.full_id() if isinstance(t, Qubit) else t for t in targets]
+        return [self.target_dict[qt].acquire for qt in targets]
+
     @staticmethod
     def create_block(
         qubit: Union[Qubit, List[Qubit]],
@@ -191,12 +191,23 @@ class MeasureBlock(InstructionBlock):
         output_variables: Union[str, List[str]] = None,
         existing_names: Set[str] = None,
     ):
-        targets = self._validate_types(targets, (Qubit))
+        """
+        Adds qubits to the measure block.
+
+        In the future, we should consider moving this to e.g. the Instruction Builder.
+        """
+        targets = [targets] if not isinstance(targets, List) else targets
+        invalid_items = [target for target in targets if not isinstance(target, Qubit)]
+        if len(invalid_items) > 0:
+            invalid_items_str = ",".join([str(item) for item in invalid_items])
+            raise ValueError(f"The following items are not Qubits: {invalid_items_str}")
+
         if len((duplicates := [t for t in targets if t.full_id() in self.targets])) > 0:
             raise ValueError(
                 "Target can only be measured once in a 'MeasureBlock'. "
                 f"Duplicates: {duplicates}"
             )
+
         if not isinstance(output_variables, list):
             output_variables = [] if output_variables is None else [output_variables]
         if (num_out_vars := len(output_variables)) == 0:
@@ -206,6 +217,7 @@ class MeasureBlock(InstructionBlock):
                 f"Unsupported number of `output_variables`: {num_out_vars}, "
                 f"must be `None` or match numer of targets: {len(targets)}."
             )
+
         for target, output_variable in zip(targets, output_variables):
             meas, acq = self._generate_measure_acquire(
                 target, mode, output_variable, existing_names
@@ -254,12 +266,6 @@ class MeasureBlock(InstructionBlock):
             measure_instruction,
             acquire_instruction,
         ]
-
-    def get_acquires(self, targets: Union[Qubit, List[Qubit]]):
-        if not isinstance(targets, list):
-            targets = [targets]
-        targets = [t.full_id() if isinstance(t, Qubit) else t for t in targets]
-        return [self.target_dict[qt].acquire for qt in targets]
 
     def __repr__(self):
         target_strings = []
