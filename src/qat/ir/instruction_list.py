@@ -5,7 +5,6 @@ from pydantic_core import from_json
 from typing_extensions import Annotated
 
 from qat.ir.instructions import Instruction, InstructionBlock, find_all_instructions
-from qat.ir.measure import MeasureBlock
 
 # An annotated type used in instruction lists so python can correctly
 # identify instruction types during deserialization.
@@ -27,13 +26,7 @@ class InstructionList(BaseModel):
 
     @property
     def instructions(self):
-        flat_list = []
-        for inst in self.instruction_list:
-            if isinstance(inst, MeasureBlock):
-                flat_list.extend(inst.instructions)
-            else:
-                flat_list.append(inst)
-        return flat_list
+        return self.instruction_list
 
     @instructions.setter
     def instructions(self, value):
