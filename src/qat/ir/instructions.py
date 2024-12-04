@@ -46,12 +46,8 @@ class Variable(BaseModel):
     @staticmethod
     def with_random_name(existing_names=None, var_type=None, value=None):
         return Variable(
-            name=Variable.generate_name(existing_names), var_type=var_type, value=value
+            name=build_generated_name(existing_names), var_type=var_type, value=value
         )
-
-    @staticmethod
-    def generate_name(existing_names=None):
-        return build_generated_name(existing_names)
 
     def __repr__(self):
         return self.name
@@ -265,11 +261,10 @@ class ResultsProcessing(Instruction):
 
     inst: Literal["ResultsProcessing"] = "ResultsProcessing"
     variable: str
-    # TODO: rename to something better
-    res_processing: InlineResultsProcessing
+    results_processing: InlineResultsProcessing
 
     def __repr__(self):
-        return f"{self.variable}: {str(self.res_processing.name)}"
+        return f"{self.variable}: {str(self.results_processing.name)}"
 
 
 ### Quantum Instructions
@@ -281,7 +276,6 @@ class QuantumInstruction(Instruction):
     """
 
     inst: Literal["QuantumInstruction"] = "QuantumInstruction"
-    # TODO: rename to targets
     targets: Union[set[str], str]
 
     def __init__(self, targets, **kwargs):
@@ -376,7 +370,6 @@ class FrequencyShift(QuantumInstruction):
 class Id(QuantumInstruction):
     """Simply a no-op, called an Identity gate."""
 
-    # TODO: do we really need this?
     inst: Literal["Id"] = "Id"
 
     def __repr__(self):

@@ -93,7 +93,6 @@ class Acquire(QuantumInstruction):
         )
 
 
-# TODO: Was previously a quantum instruction, determine if this needs to be
 class PostProcessing(Instruction):
     """
     States what post-processing should happen after data has been acquired. This can

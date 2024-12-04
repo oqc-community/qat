@@ -117,22 +117,17 @@ class TestJump:
         assert isinstance(inst.target, str)
 
 
-# TODO: add tests to make sure sweep validators work as expected...
-class TestSweep:
-    pass
-
-
 class TestResults:
     @pytest.mark.parametrize("res_processing", InlineResultsProcessing)
     def test_res_processing(self, res_processing):
-        inst = ResultsProcessing(variable="test", res_processing=res_processing)
+        inst = ResultsProcessing(variable="test", results_processing=res_processing)
         assert inst.variable == "test"
-        assert inst.res_processing == res_processing
+        assert inst.results_processing == res_processing
 
     @pytest.mark.parametrize("res_processing", ["mean"])
     def test_wrong_results(self, res_processing):
         with pytest.raises(ValidationError):
-            ResultsProcessing(variable="test", res_processing=res_processing)
+            ResultsProcessing(variable="test", results_processing=res_processing)
 
 
 class TestQuantumInstruction:

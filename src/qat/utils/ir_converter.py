@@ -90,12 +90,7 @@ class IRConverter:
         # The legacy instructions has inconsistencies with the name of how members
         # are saved and how they are provided in __init__. In these instances, we have
         # to manually define how to deal with these cases.
-        if isinstance(instruction, self.legacy_instructions["ResultsProcessing"]):
-            return pydantic_type(
-                variable=args["variable"], res_processing=args["results_processing"]
-            )
-
-        elif isinstance(instruction, self.legacy_instructions["PostProcessing"]):
+        if isinstance(instruction, self.legacy_instructions["PostProcessing"]):
             acquire_legacy = args.pop("quantum_targets")
             args["acquire"] = self._legacy_to_pydantic_instruction(acquire_legacy[0])
 
@@ -171,6 +166,9 @@ class IRConverter:
             result_needed = args.pop("result_needed")
             inst = legacy_type(acquire, **args)
             inst.result_needed = result_needed
+
+        elif isinstance(instruction, self.pydantic_instructions["ResultsProcessing"]):
+            inst = legacy_type(args["variable"], args["results_processing"])
 
         elif isinstance(instruction, self.pydantic_instructions["Assign"]):
             if isinstance(args["value"], PydanticVariable):
