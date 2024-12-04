@@ -13,7 +13,6 @@ from pydantic import (
     field_serializer,
     field_validator,
 )
-from typing_extensions import Annotated
 
 from qat.purr.compiler.devices import PulseChannel, QuantumComponent, Qubit
 
@@ -527,29 +526,6 @@ class DeviceUpdate(QuantumInstruction):
 
 
 ### Instruction blocks
-def find_all_instructions(start_types=[Instruction]):
-    """
-    Creates a tuple of all possible instructions, used in seralization.
-    """
-    instructions = set()
-    check = start_types
-    while check:
-        parent = check.pop()
-        for child in parent.__subclasses__():
-            if child not in instructions:
-                check.append(child)
-                instructions.add(child)
-
-    return tuple(instructions)
-
-
-Inst = Annotated[
-    Union[find_all_instructions()],
-    Field(discriminator="inst"),
-]
-InstList = List[Inst]
-
-
 class InstructionBlock(BaseModel):
     """
     An Instruction grouping type. Allows working with blocks of Instructions as a unit.

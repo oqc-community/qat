@@ -176,8 +176,10 @@ class MeasureBlock(InstructionBlock):
         output_variables: str = None,
         existing_names=set(),
     ):
-        # set as a seperate static method as overwriting __init__ would
-        # make this unserialisable...
+        """
+        Initiate a measure block by specifying a qubit / a list of qubits and an acquire
+        mode.
+        """
         measure_block = MeasureBlock(existing_names=existing_names)
         measure_block.add_measurements(qubit, mode, output_variables)
         return measure_block

@@ -4,13 +4,35 @@ from pydantic import BaseModel, Field
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
-from qat.ir.instructions import Instruction, InstructionBlock, find_all_instructions
+from qat.ir.instructions import Instruction, InstructionBlock
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
+from qat.ir.waveforms import Pulse
+
+
+def find_all_instructions(start_types=[Instruction]):
+    """
+    Creates a tuple of all possible instructions, used in seralization.
+    """
+    instructions = set()
+    check = start_types
+    while check:
+        parent = check.pop()
+        for child in parent.__subclasses__():
+            if child not in instructions:
+                check.append(child)
+                instructions.add(child)
+
+    return tuple(instructions)
+
 
 # An annotated type used in instruction lists so python can correctly
 # identify instruction types during deserialization.
-InstBlockList = List[
+all_instructions = find_all_instructions(
+    [Instruction, InstructionBlock, MeasureBlock, Acquire, PostProcessing, Pulse]
+)
+InstList = List[
     Annotated[
-        Union[find_all_instructions([Instruction, InstructionBlock])],
+        Union[all_instructions],
         Field(discriminator="inst"),
     ]
 ]
@@ -22,7 +44,7 @@ class InstructionList(BaseModel):
     to (de)serialize.
     """
 
-    instruction_list: InstBlockList = []
+    instruction_list: InstList = []
 
     @property
     def instructions(self):

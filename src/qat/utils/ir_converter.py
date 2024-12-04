@@ -1,7 +1,7 @@
 import copy
 from typing import Union
 
-from qat.ir.instruction_list import InstructionList, find_all_instructions
+from qat.ir.instruction_list import InstructionList, all_instructions, find_all_instructions
 from qat.ir.instructions import Instruction as PydanticInstruction
 from qat.ir.instructions import Variable as PydanticVariable
 from qat.ir.waveforms import CustomWaveform as PydanticCustomWaveform
@@ -36,9 +36,7 @@ class IRConverter:
             self._build_target_dict()
 
         # create a mapping of instructions
-        self.pydantic_instructions = {
-            inst.__name__: inst for inst in find_all_instructions([PydanticInstruction])
-        }
+        self.pydantic_instructions = {inst.__name__: inst for inst in all_instructions}
         self.legacy_instructions = {
             inst.__name__: inst
             for inst in find_all_instructions([LegacyInstruction, LegacyAbstractWaveform])
