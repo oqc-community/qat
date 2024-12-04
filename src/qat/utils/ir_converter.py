@@ -27,6 +27,9 @@ from qat.purr.compiler.waveforms import AbstractWaveform as LegacyAbstractWavefo
 class IRConverter:
 
     def __init__(self, model: QuantumHardwareModel = None):
+        """
+        The IRConverter can be used to convert between legacy QAT IR and new QAT IR.
+        """
         self.model = model
         self._target_cache = {}
         if self.model:

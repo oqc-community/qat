@@ -43,6 +43,10 @@ class Waveform(AbstractWaveform):
 
 
 class CustomWaveform(AbstractWaveform):
+    """
+    Provide a list of amplitudes to define a custom waveform.
+    """
+
     samples: List[Union[complex, float]]
 
     @property

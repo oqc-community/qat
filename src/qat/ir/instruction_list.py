@@ -7,6 +7,8 @@ from typing_extensions import Annotated
 from qat.ir.instructions import Instruction, InstructionBlock, find_all_instructions
 from qat.ir.measure import MeasureBlock
 
+# An annotated type used in instruction lists so python can correctly
+# identify instruction types during deserialization.
 InstBlockList = List[
     Annotated[
         Union[find_all_instructions([Instruction, InstructionBlock])],
@@ -16,6 +18,11 @@ InstBlockList = List[
 
 
 class InstructionList(BaseModel):
+    """
+    A Pydantic wrapper around a list of instructions that can be used
+    to (de)serialize.
+    """
+
     instruction_list: InstBlockList = []
 
     @property
