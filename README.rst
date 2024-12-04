@@ -46,20 +46,8 @@ Once both of these are installed run this in the root folder to install all the 
 Roadmap
 ----------------------
 
-Here's a list of what we're currently working on, if you want to get involved contact the person or group linked.
+We're currently working on a some significant refactors, we'll be sharing more on this and our future plans soon.
 
-In-development:
-
-- Classical-quantum hybrid computation. `John Dumbell <jdumbell@oxfordquantumcircuits.com>`_
-- Runtime-embedded QEC. `Jamie Friel <jfriel@oxfordquantumcircuits.com>`_
-
-Designing / verifying suitability:
-
-- Distributed QPU execution. `John Dumbell <jdumbell@oxfordquantumcircuits.com>`_
-
-To-do:
-
-- Full QASM v3 support. Currently waiting for available parsers.
 
 |
 

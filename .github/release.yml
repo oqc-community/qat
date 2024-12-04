@@ -18,6 +18,9 @@ changelog:
     - title: 📖 Documentation
       labels:
         - documentation
+    - title: 🧪 Experimental
+      labels:
+        - experimental
     - title: Other Changes
       labels:
         - "*"

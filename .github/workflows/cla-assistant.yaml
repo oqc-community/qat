@@ -8,7 +8,7 @@ on:
 
 jobs:
   cla-acknowledgement:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: "Check that the CLA has been acknowledged"
     steps:
       - name: "CLA Assistant"

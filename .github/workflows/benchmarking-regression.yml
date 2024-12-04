@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest]
+        os: [ ubuntu-22.04]
         python: ["3.10"]
     defaults:
       run:
