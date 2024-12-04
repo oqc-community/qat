@@ -1,4 +1,4 @@
-.. image:: https://github.com/oqc-community/qat/blob/main/qat-logo.png
+.. image:: https://github.com/oqc-community/qat/blob/main/qat-logo.png?raw=True
   :width: 400
   :alt: QAT
 

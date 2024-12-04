@@ -1,10 +1,12 @@
 import pytest
 
-from benchmarks.utils.models import get_mock_live_hardware
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QASMFrontend
+
+from benchmarks.utils.helpers import load_qasm
+from benchmarks.utils.models import get_mock_live_hardware
 
 experiments = {}
 
@@ -28,12 +30,6 @@ circuits_ten_qubits = ["10qb_ghz", "10qb_random_cnot"]
 for circ in circuits_ten_qubits:
     for hw_key, hw in hardware_ten_qubits.items():
         experiments[f"{circ}[{hw_key}]"] = (circ, hw)
-
-
-# QASM2 Benchmarks
-def load_qasm(qasm_string):
-    with open(f"benchmarks/qasm/{qasm_string}.qasm", "r") as f:
-        return f.read()
 
 
 @pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)

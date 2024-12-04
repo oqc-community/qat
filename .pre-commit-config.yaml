@@ -23,7 +23,7 @@ repos:
       - id: autoflake
         stages: [ commit, manual ]
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.5.1
+    rev: 1.8.4
     hooks:
       - id: poetry-lock
         args: ["--no-update"]
