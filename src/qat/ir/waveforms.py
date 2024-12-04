@@ -64,12 +64,12 @@ class PulseType(Enum):
     States the intention of a pulse, e.g., to drive a Qubit, or take a measurement.
     """
 
-    DRIVE = "DRIVE"
-    MEASURE = "MEASURE"
-    SECOND_STATE = "SECOND_STATE"
-    CROSS_RESONANCE = "CROSS_RESONANCE"
-    CROSS_RESONANCE_CANCEL = "CROSS_RESONANCE_CANCEL"
-    OTHER = "OTHER"
+    DRIVE = "drive"
+    MEASURE = "measure"
+    SECOND_STATE = "second_state"
+    CROSS_RESONANCE = "cross_resonance"
+    CROSS_RESONANCE_CANCEL = "cross_resonance_cancel"
+    OTHER = "other"
 
 
 class Pulse(QuantumInstruction):
