@@ -1,11 +1,25 @@
 import copy
+from typing import Union
 
 from qat.ir.instruction_list import InstructionList, find_all_instructions
 from qat.ir.instructions import Instruction as PydanticInstruction
 from qat.ir.instructions import Variable as PydanticVariable
-from qat.ir.waveforms import AbstractWaveform as PydanticAbstractWaveform
+from qat.ir.waveforms import CustomWaveform as PydanticCustomWaveform
+from qat.ir.waveforms import Pulse as PydanticPulse
+from qat.ir.waveforms import PulseType
+from qat.ir.waveforms import Waveform as PydanticWaveform
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.instructions import (
+    CrossResonanceCancelPulse,
+    CrossResonancePulse,
+    CustomPulse,
+    DrivePulse,
+)
 from qat.purr.compiler.instructions import Instruction as LegacyInstruction
+from qat.purr.compiler.instructions import MeasurePulse
+from qat.purr.compiler.instructions import Pulse
+from qat.purr.compiler.instructions import Pulse as LegacyPulse
+from qat.purr.compiler.instructions import SecondStatePulse
 from qat.purr.compiler.instructions import Variable as LegacyVariable
 from qat.purr.compiler.waveforms import AbstractWaveform as LegacyAbstractWaveform
 
@@ -20,10 +34,7 @@ class IRConverter:
 
         # create a mapping of instructions
         self.pydantic_instructions = {
-            inst.__name__: inst
-            for inst in find_all_instructions(
-                [PydanticInstruction, PydanticAbstractWaveform]
-            )
+            inst.__name__: inst for inst in find_all_instructions([PydanticInstruction])
         }
         self.legacy_instructions = {
             inst.__name__: inst
@@ -63,9 +74,10 @@ class IRConverter:
         QuantumComponents with their full_id.
         """
 
-        pydantic_type = self.pydantic_instructions[type(instruction).__name__]
+        if isinstance(instruction, (LegacyPulse, CustomPulse)):
+            return self._legacy_to_pydantic_pulse(instruction)
 
-        # any serious performance problems by using copy?
+        pydantic_type = self.pydantic_instructions[type(instruction).__name__]
         args = copy.copy(instruction.__dict__)
 
         for key, val in args.items():
@@ -124,9 +136,10 @@ class IRConverter:
                 )
             )
 
-        legacy_type = self.legacy_instructions[type(instruction).__name__]
+        if isinstance(instruction, PydanticPulse):
+            return self._pydantic_to_legacy_pulse(instruction)
 
-        # any serious performance problems by using copy?
+        legacy_type = self.legacy_instructions[type(instruction).__name__]
         args = copy.copy(instruction.__dict__)
         args.pop("inst")
 
@@ -147,14 +160,6 @@ class IRConverter:
         if isinstance(instruction, self.pydantic_instructions["Jump"]):
             inst = legacy_type(args["target"], args["condition"])
 
-        elif isinstance(instruction, self.pydantic_instructions["AbstractWaveform"]):
-            inst = legacy_type(
-                qts, args["width"], args["amp"], args["ignore_channel_scale"]
-            )
-
-        elif isinstance(instruction, self.pydantic_instructions["Pulse"]):
-            inst = legacy_type(qts, **args)
-
         elif isinstance(instruction, self.pydantic_instructions["Acquire"]):
             args.pop("suffix_incrementor")
             inst = legacy_type(qts, **args)
@@ -165,9 +170,6 @@ class IRConverter:
             result_needed = args.pop("result_needed")
             inst = legacy_type(acquire, **args)
             inst.result_needed = result_needed
-
-        elif isinstance(instruction, self.pydantic_instructions["CustomPulse"]):
-            inst = legacy_type(qts, args["samples"], args["ignore_channel_scale"])
 
         elif isinstance(instruction, self.pydantic_instructions["Assign"]):
             if isinstance(args["value"], PydanticVariable):
@@ -186,6 +188,77 @@ class IRConverter:
             inst = legacy_type(**args)
 
         return inst
+
+    def _pydantic_to_legacy_pulse(self, instruction: PydanticPulse):
+        """
+        Converts a pydantic Pulse instruction to a legacy Pulse.
+        """
+
+        args = copy.deepcopy(vars(instruction))
+        waveform = args.pop("waveform")
+        del args["inst"]
+
+        # Determine the legacy instruction type
+        if isinstance(waveform, PydanticCustomWaveform):
+            return CustomPulse(
+                self._fetch_quantum_target(args["targets"]),
+                waveform.samples,
+                args["ignore_channel_scale"],
+            )
+        if (type := args.pop("type")) == PulseType.DRIVE:
+            legacy_type = DrivePulse
+        elif type == PulseType.CROSS_RESONANCE:
+            legacy_type = CrossResonancePulse
+        elif type == PulseType.CROSS_RESONANCE_CANCEL:
+            legacy_type = CrossResonanceCancelPulse
+        elif type == PulseType.MEASURE:
+            legacy_type = MeasurePulse
+        elif type == PulseType.SECOND_STATE:
+            legacy_type = SecondStatePulse
+        else:
+            legacy_type = Pulse
+
+        # Create the legacy instruction using the arguments
+        waveform_args = vars(waveform)
+        return legacy_type(
+            self._fetch_quantum_target(args["targets"]),
+            waveform_args.pop("shape"),
+            waveform_args.pop("width"),
+            ignore_channel_scale=args["ignore_channel_scale"],
+            **waveform_args,
+        )
+
+    def _legacy_to_pydantic_pulse(self, instruction: Union[LegacyPulse, CustomPulse]):
+        """
+        Converts a legacy pulse into a pydantic pulse.
+        """
+
+        # Determine the type
+        if isinstance(instruction, DrivePulse):
+            type = PulseType.DRIVE
+        elif isinstance(instruction, CrossResonancePulse):
+            type = PulseType.CROSS_RESONANCE
+        elif isinstance(instruction, CrossResonanceCancelPulse):
+            type = PulseType.CROSS_RESONANCE_CANCEL
+        elif isinstance(instruction, MeasurePulse):
+            type = PulseType.MEASURE
+        elif isinstance(instruction, SecondStatePulse):
+            type = PulseType.SECOND_STATE
+        else:
+            type = PulseType.OTHER
+
+        # Create a pydantic pulse
+        args = copy.copy(vars(instruction))
+        return PydanticPulse(
+            targets=args.pop("quantum_targets"),
+            ignore_channel_scale=args.pop("ignore_channel_scale"),
+            type=type,
+            waveform=(
+                PydanticCustomWaveform(**args)
+                if isinstance(instruction, CustomPulse)
+                else PydanticWaveform(**args)
+            ),
+        )
 
     def _fetch_quantum_target(self, target: str):
         """

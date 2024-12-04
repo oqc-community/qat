@@ -4,17 +4,12 @@ from pydantic import BaseModel, Field
 from pydantic_core import from_json
 from typing_extensions import Annotated
 
-from qat.ir.instructions import (
-    Instruction,
-    InstructionBlock,
-    MeasureBlock,
-    find_all_instructions,
-)
-from qat.ir.waveforms import AbstractWaveform
+from qat.ir.instructions import Instruction, InstructionBlock, find_all_instructions
+from qat.ir.measure import MeasureBlock
 
 InstBlockList = List[
     Annotated[
-        Union[find_all_instructions([Instruction, InstructionBlock, AbstractWaveform])],
+        Union[find_all_instructions([Instruction, InstructionBlock])],
         Field(discriminator="inst"),
     ]
 ]

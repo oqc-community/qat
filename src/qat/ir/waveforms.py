@@ -1,132 +1,89 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Oxford Quantum Circuits Ltd
-from typing import Literal
+from enum import Enum
+from typing import List, Literal, Union
 
 from pydantic import BaseModel
 
-from qat.ir.instructions import Pulse
+from qat.ir.instructions import QuantumInstruction, Variable
 from qat.purr.compiler.devices import PulseShapeType
 
 
-class WaveformDef(BaseModel):
-    # from what I can tell, type and udescription are never used...
-    name: str
-    type: str = "Unknown"
-    description: str = "Empty"
+class AbstractWaveform(BaseModel): ...
 
 
-class AbstractWaveform(Pulse):
-    inst: Literal["AbstractWaveform"] = "AbstractWaveform"
-    waveform_definition: WaveformDef = None
+class Waveform(AbstractWaveform):
+    """
+    Stores the attributes which define a waveform.
+    """
+
+    shape: PulseShapeType
+    width: Union[Variable, float] = 0.0
+    amp: Union[Variable, float] = 0.0
+    phase: Union[Variable, float] = 0.0
+
+    # All of the following are shape specific, we should probably deal with this better.
+    drag: Union[Variable, float] = 0.0
+    rise: Union[Variable, float] = 0.0
+    amp_setup: Union[Variable, float] = 0.0
+    scale_factor: Union[Variable, float] = 1.0
+    zero_at_edges: bool = False
+    beta: Union[Variable, float] = 0.0
+    frequency: Union[Variable, float] = 0.0
+    internal_phase: Union[Variable, float] = 0.0
+    std_dev: Union[Variable, float] = 0.0
+    square_width: Union[Variable, float] = 0.0
+
+    @property
+    def duration(self):
+        return self.width
 
 
-class SquareWaveform(AbstractWaveform):
-    inst: Literal["SquareWaveform"] = "SquareWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Gaussian")
+class CustomWaveform(AbstractWaveform):
+    samples: List[Union[complex, float]]
 
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.SQUARE,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
+    @property
+    def duration(self):
+        # TODO: this depends on the pulse channel too, so we need to decide
+        # how to deal with this.
+        return 0.0
+
+
+class PulseType(Enum):
+    """
+    States the intention of a pulse, e.g., to drive a Qubit, or take a measurement.
+    """
+
+    DRIVE = "DRIVE"
+    MEASURE = "MEASURE"
+    SECOND_STATE = "SECOND_STATE"
+    CROSS_RESONANCE = "CROSS_RESONANCE"
+    CROSS_RESONANCE_CANCEL = "CROSS_RESONANCE_CANCEL"
+    OTHER = "OTHER"
+
+
+class Pulse(QuantumInstruction):
+    """
+    Instructs a pulse channel to send a waveform. The intention of the waveform
+    (e.g. a drive or measure pulse) can be specified using the type.
+    """
+
+    inst: Literal["Pulse"] = "Pulse"
+    targets: str
+    ignore_channel_scale: bool = False
+    type: PulseType = PulseType.OTHER
+    waveform: Union[Waveform, CustomWaveform]
+
+    def __repr__(self):
+        return (
+            f"pulse {self.channel},{self.waveform.shape.value},"
+            f"{self.waveform.amp},{self.phase},{self.width}"
         )
 
+    @property
+    def duration(self):
+        return self.waveform.duration
 
-class GaussianWaveform(AbstractWaveform):
-    inst: Literal["Gaussianform"] = "GaussianWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Gaussian")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.GAUSSIAN,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class SoftSquareWaveform(AbstractWaveform):
-    inst: Literal["SoftSquareWaveform"] = "SoftSquareWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Soft square")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.SOFT_SQUARE,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class BlackmanWaveform(AbstractWaveform):
-    inst: Literal["BlackmanWaveform"] = "BlackmanWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Blackman")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.BLACKMAN,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class SetupHoldWaveform(AbstractWaveform):
-    inst: Literal["SetupHoldWaveform"] = "SetupHoldWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Setup hold")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.SETUP_HOLD,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class SofterSquareWaveform(AbstractWaveform):
-    inst: Literal["SofterSquareWaveform"] = "SofterSquareWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Softer square")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.SOFTER_SQUARE,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class ExtraSoftSquareWaveform(AbstractWaveform):
-    inst: Literal["ExtraSoftSquareWaveform"] = "ExtraSoftSquareWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Extra soft square")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.EXTRA_SOFT_SQUARE,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
-
-
-class SofterGaussianWaveform(AbstractWaveform):
-    inst: Literal["SofterGaussianWaveform"] = "SofterGaussianWaveform"
-    waveform_definition: WaveformDef = WaveformDef(name="Softer Gaussian")
-
-    def __init__(self, quantum_targets, width, amp, ignore_channel_scale, **kwargs):
-        super().__init__(
-            quantum_targets,
-            PulseShapeType.SOFTER_GAUSSIAN,
-            width,
-            amp=amp,
-            ignore_channel_scale=ignore_channel_scale,
-        )
+    @property
+    def channel(self):
+        return self.targets
