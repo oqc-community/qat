@@ -16,10 +16,6 @@ np.set_printoptions(
     edgeitems=3000000, linewidth=100000000, formatter=dict(float=lambda x: "%.3g" % x)
 )
 
-import logging
-
-logging.disable()
-
 
 class PhysicalBufferPlotEngine(EchoEngine):
     def __init__(
