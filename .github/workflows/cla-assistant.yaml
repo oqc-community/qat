@@ -8,12 +8,12 @@ on:
 
 jobs:
   cla-acknowledgement:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: "Check that the CLA has been acknowledged"
     steps:
       - name: "CLA Assistant"
         if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the Contributor License Agreement and I hereby accept the Terms.') || github.event_name == 'pull_request_target'
-        uses: cla-assistant/github-action@v2.3.0
+        uses: contributor-assistant/github-action@v2.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN : ${{ secrets.REPO_BOT_ACCESS_TOKEN }}

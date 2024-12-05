@@ -2,7 +2,7 @@
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
-version = "2.5.0"
+version = "2.5.1"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 documentation = "https://oqc-community.github.io/qat"
@@ -33,7 +33,7 @@ qutip = ">=5.0.3"
 toml = "^0.10.2"
 openqasm3 = { version = "^1.0.0", extras = ["parser"] }
 pytket = "^1.31.0"
-qiskit = "^1.2.0"
+qiskit = "~1.2.0"
 qiskit-optimization = "^0.6.0"
 qiskit-aer = "^0.15.0"
 qiskit-algorithms = "^0.3.0"
@@ -48,6 +48,7 @@ pydantic-settings = ">=2.5.2"
 compiler-config = "0.1.0"
 pydantic-extra-types = "^2.10.0"
 semver = "^3.0.2"
+frozendict = "^2.4.6"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=24.3.0"
@@ -100,7 +101,7 @@ py_version = 39
 profile = "black"
 line_length = 92
 known_first_party = ["qat"]
-known_local_folder = ["tests"]
+known_local_folder = ["tests", "benchmarks"]
 
 [tool.black]
 line-length = 92
@@ -133,6 +134,9 @@ filterwarnings = [
     'default:.*invalid escape sequence:DeprecationWarning::1092',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
     'default:.*GlobalisePhasedX:DeprecationWarning'
+]
+markers = [
+  "ab_test",
 ]
 
 [tool.poetry.scripts]
