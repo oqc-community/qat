@@ -1,5 +1,6 @@
 from typing import Literal, Optional
 
+from compiler_config.config import CompilerConfig
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from qiskit_aer import AerSimulator
@@ -48,15 +49,15 @@ class QatConfig(BaseSettings):
 
     >>> import os
     >>> os.environ["QAT_MAX_REPEATS_LIMIT"] = "654321"
-    >>> QatConfig()
-    QatConfig(MAX_REPEATS_LIMIT=654321, DISABLE_PULSE_DURATION_LIMITS=False)
-    >>> QatConfig(MAX_REPEATS_LIMIT=123)
-    QatConfig(MAX_REPEATS_LIMIT=123, DISABLE_PULSE_DURATION_LIMITS=False)
-
+    >>> QatConfig() # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=654321, ...)
+    >>> QatConfig(MAX_REPEATS_LIMIT=123) # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=123, ...)
+    >>> del os.environ["QAT_MAX_REPEATS_LIMIT"]
     >>> qatconfig = QatConfig()
     >>> qatconfig.MAX_REPEATS_LIMIT = 16000
-    >>> qatconfig
-    QatConfig(MAX_REPEATS_LIMIT=16000, DISABLE_PULSE_DURATION_LIMITS=False)
+    >>> qatconfig # doctest: +ELLIPSIS
+    QatConfig(MAX_REPEATS_LIMIT=16000, ...)
 
     >>> QatConfig(MAX_REPEATS_LIMIT=100.5) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
@@ -86,10 +87,16 @@ class QatConfig(BaseSettings):
             )
         return DISABLE_PULSE_DURATION_LIMITS
 
+    def validate(self, compiler_config: CompilerConfig):
+        """_summary_
+
+        Args:
+            compiler_config (CompilerConfig): _description_
+        """
+        if compiler_config.repeats and (compiler_config.repeats > self.MAX_REPEATS_LIMIT):
+            raise ValueError(
+                f"Number of shots {compiler_config.repeats} exceeds the maximum amount of {self.MAX_REPEATS_LIMIT}."
+            )
+
 
 qatconfig = QatConfig()
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

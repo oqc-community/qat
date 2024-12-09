@@ -13,6 +13,7 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
+from qat import qatconfig
 from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingOptimisation
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
@@ -383,6 +384,7 @@ def execute_instructions(
 ):
     if config is None:
         config = CompilerConfig()
+    qatconfig.validate(config)
     config.validate(hardware)
 
     active_runtime = get_runtime(hardware)

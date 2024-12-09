@@ -313,6 +313,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             # Rebuild repeat list if the hardware can't support the current setup.
             repeat_count = qat_file.repeat.repeat_count
+            if repeat_count > qatconfig.MAX_REPEATS_LIMIT:
+                raise ValueError(
+                    f"Number of shots {repeat_count} exceeds the maximum amount of {qatconfig.MAX_REPEATS_LIMIT}."
+                )
+
             if repeat_count > self.model.repeat_limit:
                 log.info(
                     f"Running {repeat_count} shots at once is "
