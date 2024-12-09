@@ -46,7 +46,7 @@ Once both of these are installed run this in the root folder to install all the 
 Roadmap
 ----------------------
 
-We're currently working on a some significant refactors, we'll be sharing more on this and our future plans soon.
+We're currently working on a some significant refactors, we'll be sharing more on this and our future plans soon!
 
 
 |
