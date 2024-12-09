@@ -30,7 +30,7 @@ Building from Source
 ----------------------
 
 We use `poetry <https://python-poetry.org/>`_ for dependency management and run on
-`Python 3.8+ <https://www.python.org/downloads/>`_.
+`Python 3.10+ <https://www.python.org/downloads/>`_.
 Once both of these are installed run this in the root folder to install all the dependencies that you need:
 :code:`poetry install`
 
