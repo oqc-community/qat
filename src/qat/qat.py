@@ -10,6 +10,7 @@ from compiler_config.config import CompilerConfig
 
 import qat.purr.compiler.experimental.frontends as experimental_frontends
 import qat.purr.compiler.frontends as core_frontends
+from qat import qatconfig
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.frontends import LanguageFrontend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -127,6 +128,8 @@ def _execute_with_metrics(
     metrics = CompilationMetrics()
     if compiler_config is not None:
         metrics.enable(compiler_config.metrics, overwrite=True)
+        # Validate if compiler config respects 'system limits' within QAT.
+        qatconfig.validate(compiler_config)
 
     instructions, build_metrics = _return_or_build(
         qat_input, frontend.parse, hardware=hardware, compiler_config=compiler_config
