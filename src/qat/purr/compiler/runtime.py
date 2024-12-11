@@ -213,7 +213,8 @@ class QuantumRuntime(MetricsMixin):
             )
 
         instructions = self.engine.optimize(instructions)
-        self.engine.validate(instructions)
+        if not qatconfig.INSTRUCTION_VALIDATION.DISABLED:
+            self.engine.validate(instructions)
         self.record_metric(
             MetricsType.OptimizedInstructionCount, opt_inst_count := len(instructions)
         )

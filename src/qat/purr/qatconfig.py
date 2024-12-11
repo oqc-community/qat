@@ -1,3 +1,4 @@
+import warnings
 from typing import Literal, Optional
 
 from compiler_config.config import CompilerConfig
@@ -43,6 +44,41 @@ class QatSimulationConfig(BaseModel):
     QISKIT: QiskitSimulationConfig = QiskitSimulationConfig()
 
 
+class InstructionValidationConfig(BaseModel):
+    """
+    The default settings for validation of instructions.
+    """
+
+    model_config = ConfigDict(validate_assignment=True)
+    NO_MID_CIRCUIT_MEASUREMENT: bool = True
+    MAX_INSTRUCTION_LENGTH: bool = True
+    ACQUIRE_CHANNEL: bool = True
+    PULSE_DURATION_LIMITS: bool = True
+
+    @property
+    def DISABLED(self):
+        return not (
+            self.NO_MID_CIRCUIT_MEASUREMENT
+            | self.MAX_INSTRUCTION_LENGTH
+            | self.ACQUIRE_CHANNEL
+            | self.PULSE_DURATION_LIMITS
+        )
+
+    def disable(self):
+        self.NO_MID_CIRCUIT_MEASUREMENT = False
+        self.MAX_INSTRUCTION_LENGTH = False
+        self.ACQUIRE_CHANNEL = False
+        self.PULSE_DURATION_LIMITS = False
+
+    @field_validator("PULSE_DURATION_LIMITS")
+    def check_disable_pulse_duration_limits(cls, PULSE_DURATION_LIMITS):
+        if not PULSE_DURATION_LIMITS:
+            log.warning(
+                "Disabled check for pulse duration limits, which should ideally only be used for calibration purposes."
+            )
+        return PULSE_DURATION_LIMITS
+
+
 class QatConfig(BaseSettings):
     """
     Full settings for a single job. Allows environment variables to be overridden by direct assignment.
@@ -72,20 +108,34 @@ class QatConfig(BaseSettings):
     )
     MAX_REPEATS_LIMIT: Optional[int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
-    DISABLE_PULSE_DURATION_LIMITS: bool = False
-    """Flag to disable the lower and upper pulse duration limits. 
-    Only needs to be set to True for calibration purposes."""
+
+    INSTRUCTION_VALIDATION: InstructionValidationConfig = InstructionValidationConfig()
+    """Options for Instruction validation before execution."""
+
+    @property
+    def DISABLE_PULSE_DURATION_LIMITS(self):
+        """Flag to disable the lower and upper pulse duration limits.
+        Only needs to be set to True for calibration purposes."""
+        warnings.warn(
+            "'QatConfig().DISABLE_PULSE_DURATION_LIMITS' is being deprecated, please use "
+            "'QatConfig().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return not self.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
+
+    @DISABLE_PULSE_DURATION_LIMITS.setter
+    def DISABLE_PULSE_DURATION_LIMITS(self, val: bool):
+        warnings.warn(
+            "'QatConfig().DISABLE_PULSE_DURATION_LIMITS' is being deprecated, please use "
+            "'QatConfig().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = not val
 
     SIMULATION: QatSimulationConfig = QatSimulationConfig()
     """Options for QATs simulation backends."""
-
-    @field_validator("DISABLE_PULSE_DURATION_LIMITS")
-    def check_disable_pulse_duration_limits(cls, DISABLE_PULSE_DURATION_LIMITS):
-        if DISABLE_PULSE_DURATION_LIMITS:
-            log.warning(
-                "Disabled check for pulse duration limits, which should ideally only be used for calibration purposes."
-            )
-        return DISABLE_PULSE_DURATION_LIMITS
 
     def validate(self, compiler_config: CompilerConfig):
         """_summary_

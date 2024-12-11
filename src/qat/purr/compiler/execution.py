@@ -227,33 +227,36 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def validate(self, instructions: List[Instruction]):
         """Validates this graph for execution on the current hardware."""
+        validation_settings = qatconfig.INSTRUCTION_VALIDATION
         self._model_exists()
 
-        instruction_length = len(instructions)
-        if instruction_length > self.max_instruction_len:
-            raise ValueError(
-                f"Program too large to be run in a single block on current hardware. "
-                f"{instruction_length} instructions."
-            )
+        if validation_settings.MAX_INSTRUCTION_LENGTH:
+            instruction_length = len(instructions)
+            if instruction_length > self.max_instruction_len:
+                raise ValueError(
+                    f"Program too large to be run in a single block on current hardware. "
+                    f"{instruction_length} instructions."
+                )
 
         for inst in instructions:
-            if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
+            if (
+                validation_settings.ACQUIRE_CHANNEL
+                and isinstance(inst, Acquire)
+                and not inst.channel.acquire_allowed
+            ):
                 raise ValueError(
                     f"Cannot perform an acquire on the physical channel with id "
                     f"{inst.channel.physical_channel}"
                 )
-            if isinstance(inst, (Pulse, CustomPulse)):
+            if validation_settings.PULSE_DURATION_LIMITS and isinstance(
+                inst, (Pulse, CustomPulse)
+            ):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
-                    if (
-                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
-                    ):  # Do not throw error if we specifically disabled the limit checks.
-                        # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
-                        # which is specific to each hardware model and can be stored as a member variables there.
-                        raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {inst.duration} s"
-                        )
+                    raise ValueError(
+                        f"Max Waveform width is {MaxPulseLength} s "
+                        f"given: {inst.duration} s"
+                    )
                 elif isinstance(duration, Variable):
                     values = next(
                         iter(
@@ -266,11 +269,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         )
                     )
                     if np.max(values) > MaxPulseLength:
-                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
-                            raise ValueError(
-                                f"Max Waveform width is {MaxPulseLength} s "
-                                f"given: {values} s"
-                            )
+                        raise ValueError(
+                            f"Max Waveform width is {MaxPulseLength} s "
+                            f"given: {values} s"
+                        )
 
     def _generate_repeat_batches(self, repeats):
         """

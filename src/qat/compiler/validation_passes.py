@@ -139,33 +139,34 @@ class ReadoutValidation(ValidationPass):
                     )
 
             # Check if we've got a measure in the middle of the circuit somewhere.
-            elif isinstance(inst, Acquire):
-                for qbit in model.qubits:
-                    if qbit.get_acquire_channel() == inst.channel:
-                        consumed_qubits.append(qbit)
-            elif isinstance(inst, Pulse):
-                # Find target qubit from instruction and check whether it's been
-                # measured already.
-                acquired_qubits = [
-                    (
+            elif qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
+                if isinstance(inst, Acquire):
+                    for qbit in model.qubits:
+                        if qbit.get_acquire_channel() == inst.channel:
+                            consumed_qubits.append(qbit)
+                elif isinstance(inst, Pulse):
+                    # Find target qubit from instruction and check whether it's been
+                    # measured already.
+                    acquired_qubits = [
                         (
-                            chanbits_map[chanbit]
-                            if chanbit in chanbits_map
-                            else chanbits_map.setdefault(
-                                chanbit,
-                                model._resolve_qb_pulse_channel(chanbit)[0],
+                            (
+                                chanbits_map[chanbit]
+                                if chanbit in chanbits_map
+                                else chanbits_map.setdefault(
+                                    chanbit,
+                                    model._resolve_qb_pulse_channel(chanbit)[0],
+                                )
                             )
+                            in consumed_qubits
                         )
-                        in consumed_qubits
-                    )
-                    for chanbit in inst.quantum_targets
-                    if isinstance(chanbit, (Qubit, PulseChannel))
-                ]
+                        for chanbit in inst.quantum_targets
+                        if isinstance(chanbit, (Qubit, PulseChannel))
+                    ]
 
-                if any(acquired_qubits):
-                    raise ValueError(
-                        "Mid-circuit measurements currently unable to be used."
-                    )
+                    if any(acquired_qubits):
+                        raise ValueError(
+                            "Mid-circuit measurements currently unable to be used."
+                        )
 
 
 class QasmValidation(ValidationPass):

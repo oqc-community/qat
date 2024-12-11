@@ -37,6 +37,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.serializer import json_dumps, json_loads
 
+from tests.qat.test_quantum_backend import get_test_execution_engine
 from tests.qat.utils.models import ListReturningEngine
 
 
@@ -129,62 +130,6 @@ class TestInstruction:
 
         sweep_iter.reset_iteration()
         assert sweep_iter.get_current_sweep_iteration() == []
-
-    def test_instruction_limit(self):
-        qie = EchoEngine()
-        with pytest.raises(ValueError):
-            qie.validate(
-                [
-                    Pulse(
-                        PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
-                        PulseShapeType.SQUARE,
-                        0,
-                    )
-                    for _ in range(201000)
-                ]
-            )
-
-    def test_instruction_limit_ignored_by_flag(self):
-        hw = get_default_echo_hardware()
-        qie = EchoEngine(model=hw)
-
-        invalid_pulse = [
-            Pulse(
-                PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
-                PulseShapeType.SQUARE,
-                width=MaxPulseLength + 1e-09,
-            )
-        ]
-
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
-        qie.validate(invalid_pulse)
-
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = False
-        with pytest.raises(ValueError):
-            qie.validate(invalid_pulse)
-
-    def test_instruction_limit_variable_ignored_by_flag(self):
-        hw = get_default_echo_hardware()
-        qubit = hw.qubits[0]
-        qie = EchoEngine(model=hw)
-
-        widths = [i * MaxPulseLength for i in np.arange(0.5, 2.01, 0.5)]
-        builder = (
-            get_builder(hw)
-            .sweep(SweepValue("width", widths))
-            .pulse(
-                qubit.get_drive_channel(),
-                width=Variable("width"),
-                shape=PulseShapeType.SQUARE,
-            )
-        )
-
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = True
-        qie.validate(builder.instructions)
-
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = False
-        with pytest.raises(ValueError):
-            qie.validate(builder.instructions)
 
     def test_no_entanglement(self):
         hw = get_default_echo_hardware(2)
@@ -661,3 +606,122 @@ class TestInstructionBlocks:
             hw.get_qubit(0),
             hw.get_qubit(2),
         ]
+
+
+class TestInstructionValidation:
+    hw = get_default_echo_hardware()
+
+    def test_instruction_limit_ignored_by_flag(self, mocker, monkeypatch):
+        qie = EchoEngine()
+        mocker.patch.object(qie, "_model_exists", return_value=None)
+        inst_len = 201000
+        instructions = [
+            Pulse(
+                PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
+                PulseShapeType.SQUARE,
+                0,
+            )
+            for _ in range(inst_len)
+        ]
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "MAX_INSTRUCTION_LENGTH", True
+        )
+        with pytest.raises(ValueError, match=rf".* {inst_len} .*"):
+            qie.validate(instructions)
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "MAX_INSTRUCTION_LENGTH", False
+        )
+        qie.validate(instructions)
+
+    def test_pulse_duration_limit_ignored_by_flag(self, monkeypatch):
+        qie = EchoEngine(model=self.hw)
+
+        invalid_pulse = [
+            Pulse(
+                PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
+                PulseShapeType.SQUARE,
+                width=MaxPulseLength + 1e-09,
+            )
+        ]
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "PULSE_DURATION_LIMITS", False
+        )
+        qie.validate(invalid_pulse)
+
+        monkeypatch.setattr(qatconfig.INSTRUCTION_VALIDATION, "PULSE_DURATION_LIMITS", True)
+        with pytest.raises(ValueError, match=rf".* {invalid_pulse[0].duration} .*"):
+            qie.validate(invalid_pulse)
+
+    def test_pulse_duration_limit_variable_ignored_by_flag(self, monkeypatch):
+        qubit = self.hw.qubits[0]
+        qie = EchoEngine(model=self.hw)
+
+        widths = [i * MaxPulseLength for i in np.arange(0.5, 2.01, 0.5)]
+        builder = (
+            get_builder(self.hw)
+            .sweep(SweepValue("width", widths))
+            .pulse(
+                qubit.get_drive_channel(),
+                width=Variable("width"),
+                shape=PulseShapeType.SQUARE,
+            )
+        )
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "PULSE_DURATION_LIMITS", False
+        )
+        qie.validate(builder.instructions)
+
+        monkeypatch.setattr(qatconfig.INSTRUCTION_VALIDATION, "PULSE_DURATION_LIMITS", True)
+        with pytest.raises(ValueError):
+            qie.validate(builder.instructions)
+
+    def test_acquire_channel_check_ignored_by_flag(self, monkeypatch):
+        qie = EchoEngine(model=self.hw)
+
+        invalid_acquire = [
+            Acquire(
+                PulseChannel("", PhysicalChannel("", 1, PhysicalBaseband("", 1))),
+            )
+        ]
+
+        monkeypatch.setattr(qatconfig.INSTRUCTION_VALIDATION, "ACQUIRE_CHANNEL", False)
+        qie.validate(invalid_acquire)
+
+        monkeypatch.setattr(qatconfig.INSTRUCTION_VALIDATION, "ACQUIRE_CHANNEL", True)
+        with pytest.raises(
+            ValueError, match=rf"{invalid_acquire[0].channel.physical_channel}"
+        ):
+            qie.validate(invalid_acquire)
+
+    def test_mid_circuit_measurement_check_ignored_by_flag(self, monkeypatch):
+        qie = get_test_execution_engine(model=self.hw)
+
+        qubit_0 = self.hw.get_qubit(0)
+        qubit_1 = self.hw.get_qubit(1)
+
+        builder = (
+            get_builder(self.hw)
+            .X(qubit_0, np.pi / 2.0)
+            .cnot(qubit_0, qubit_1)
+            .measure(qubit_0, output_variable="mid")
+            .synchronize([qubit_0, qubit_1])
+            .cnot(qubit_0, qubit_1)
+            .X(qubit_1, np.pi / 2.0)
+            .measure(qubit_0, output_variable="end")
+            .synchronize([qubit_0, qubit_1])
+        )
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "NO_MID_CIRCUIT_MEASUREMENT", False
+        )
+        qie.validate(builder.instructions)
+
+        monkeypatch.setattr(
+            qatconfig.INSTRUCTION_VALIDATION, "NO_MID_CIRCUIT_MEASUREMENT", True
+        )
+        with pytest.raises(ValueError, match=r"Mid-circuit"):
+            qie.validate(builder.instructions)
