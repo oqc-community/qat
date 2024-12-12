@@ -51,8 +51,10 @@ jobs:
         if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
         run: poetry install --sync --with dev
 
-      - name: Formatting tests
+      - name: Static analysis tests
         run: |
+          poetry run jupytext --sync --pipe black notebooks/scripts/*.py && git diff --exit-code
+          poetry run nbstripout --verify --extra-keys="metadata.kernelspec" notebooks/ipynb/*.ipynb
           poetry run black --check .
           poetry run isort --check .
           poetry run autoflake --check .

@@ -43,6 +43,16 @@ Once both of these are installed run this in the root folder to install all the 
 |
 
 ----------------------
+Notebooks
+----------------------
+
+We use `jupytext https://jupytext.readthedocs.io/en/latest/` to store notebooks in both 'percent' format .py scripts (in notebooks/scripts) and .ipynb jupyter notebooks (in notebooks/ipynb). 
+
+For developers, the notebooks should be synced automatically by pre-commit (which you need to install, see above) and verified automatically in the GitHub pipeline.
+They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with 
+`poetry run jupytext --sync --pipe black notebooks/scripts/*.py`.
+
+----------------------
 Roadmap
 ----------------------
 

@@ -51,7 +51,7 @@ semver = "^3.0.2"
 frozendict = "^2.4.6"
 
 [tool.poetry.group.dev.dependencies]
-black = ">=24.3.0"
+black = {extras = ["jupyter"], version = "^24.10.0"}
 pip-audit = "^2.7.3"
 coverage = ">=6.3.2"
 pytest = "^8.3.2"
@@ -63,6 +63,8 @@ docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 pytest-benchmark = "^4.0.0"
 jinja2 = "^3.1.4"
+jupytext = "^1.16.4"
+nbstripout = "^0.8.1"
 
 [tool.poetry.group.licenses]
 optional = true
@@ -146,3 +148,10 @@ format-code = "poetry_scripts:format_code"
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
+
+[tool.jupytext.formats]
+"notebooks/ipynb/" = "ipynb"
+"notebooks/scripts/" = "py:percent"
+
+[tool.jupytext]
+notebook_metadata_filter = "-kernelspec"
