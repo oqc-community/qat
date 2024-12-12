@@ -233,6 +233,13 @@ to enable pre-commit checks.</p>
 <div class="line"><br /></div>
 </div>
 </section>
+<section id="notebooks">
+<h1>Notebooks<a class="headerlink" href="#notebooks" title="Link to this heading"></a></h1>
+<p>We use <cite>jupytext https://jupytext.readthedocs.io/en/latest/</cite> to store notebooks in both ‘percent’ format .py scripts (in notebooks/scripts) and .ipynb jupyter notebooks (in notebooks/ipynb).</p>
+<p>For developers, the notebooks should be synced automatically by pre-commit (which you need to install, see above) and verified automatically in the GitHub pipeline.
+They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with
+<cite>poetry run jupytext –sync –pipe black notebooks/scripts/*.py</cite>.</p>
+</section>
 <section id="roadmap">
 <h1>Roadmap<a class="headerlink" href="#roadmap" title="Link to this heading"></a></h1>
 <p>We’re currently working on a some significant refactors, we’ll be sharing more on this and our future plans soon.</p>
