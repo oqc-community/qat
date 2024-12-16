@@ -1,0 +1,7 @@
+qat.utils.ir\_converter module
+==============================
+
+.. automodule:: qat.utils.ir_converter
+   :members:
+   :undoc-members:
+   :show-inheritance:

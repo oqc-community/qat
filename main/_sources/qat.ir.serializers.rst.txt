@@ -1,0 +1,7 @@
+qat.ir.serializers module
+=========================
+
+.. automodule:: qat.ir.serializers
+   :members:
+   :undoc-members:
+   :show-inheritance:

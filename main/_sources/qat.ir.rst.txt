@@ -12,5 +12,10 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.ir.instruction_list
+   qat.ir.instructions
+   qat.ir.measure
    qat.ir.pass_base
    qat.ir.result_base
+   qat.ir.serializers
+   qat.ir.waveforms

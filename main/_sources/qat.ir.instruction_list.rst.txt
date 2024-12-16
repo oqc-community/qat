@@ -1,0 +1,7 @@
+qat.ir.instruction\_list module
+===============================
+
+.. automodule:: qat.ir.instruction_list
+   :members:
+   :undoc-members:
+   :show-inheritance:
