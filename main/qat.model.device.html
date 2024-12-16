@@ -214,17 +214,114 @@
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.AcquirePulseChannel.acquire">
+<span class="sig-name descname"><span class="pre">acquire</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CalibratableAcquire]</span></em><a class="headerlink" href="#qat.model.device.AcquirePulseChannel.acquire" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.AcquirePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.AcquirePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.AcquirePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibratableAcquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.CalibratableAcquire" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.delay">
+<span class="sig-name descname"><span class="pre">delay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CalibratablePositiveFloat</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.delay" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.sync">
+<span class="sig-name descname"><span class="pre">sync</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.sync" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.use_weights">
+<span class="sig-name descname"><span class="pre">use_weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.use_weights" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[list[float]]</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.weights" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratableAcquire.width">
+<span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CalibratablePositiveFloat</span></em><a class="headerlink" href="#qat.model.device.CalibratableAcquire.width" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibratablePulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.CalibratablePulse" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.amp">
+<span class="sig-name descname"><span class="pre">amp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.amp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.amp_setup">
+<span class="sig-name descname"><span class="pre">amp_setup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.amp_setup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.drag">
+<span class="sig-name descname"><span class="pre">drag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.drag" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.phase">
+<span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.phase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.rise">
+<span class="sig-name descname"><span class="pre">rise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.rise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PulseShapeType</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.shape" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CalibratablePulse.width">
+<span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CalibratablePositiveFloat</span></em><a class="headerlink" href="#qat.model.device.CalibratablePulse.width" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.model.device.Component">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.Component" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel" title="qat.utils.pydantic.WarnOnExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarnOnExtraFieldsModel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
 <p>Base class for any logical object which can act as a target of a quantum action
 - a Qubit or various channels for a simple example.</p>
 <dl class="field-list simple">
@@ -243,7 +340,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Component.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Component.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Component.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -269,9 +366,14 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.CrossResonanceCancellationPulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CrossResonanceCancellationPulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CrossResonanceCancellationPulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CrossResonanceCancellationPulseChannel.x_pi_2_pulse">
+<span class="sig-name descname"><span class="pre">x_pi_2_pulse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CalibratablePulse]</span></em><a class="headerlink" href="#qat.model.device.CrossResonanceCancellationPulseChannel.x_pi_2_pulse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -290,9 +392,14 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.CrossResonancePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CrossResonancePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.CrossResonancePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.CrossResonancePulseChannel.zx_pi_4_pulse">
+<span class="sig-name descname"><span class="pre">zx_pi_4_pulse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CalibratablePulse]</span></em><a class="headerlink" href="#qat.model.device.CrossResonancePulseChannel.zx_pi_4_pulse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -306,9 +413,14 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.DrivePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.DrivePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.DrivePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.DrivePulseChannel.x_pi_2_pulse">
+<span class="sig-name descname"><span class="pre">x_pi_2_pulse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CalibratablePulse]</span></em><a class="headerlink" href="#qat.model.device.DrivePulseChannel.x_pi_2_pulse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -322,7 +434,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.FreqShiftPulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.FreqShiftPulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.FreqShiftPulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -331,14 +443,14 @@ validated to form a valid model.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.device.MeasureAcquirePulseChannel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MeasureAcquirePulseChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.MeasureAcquirePulseChannel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.model.device.PulseChannel" title="qat.model.device.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.model.device.MeasurePulseChannel" title="qat.model.device.MeasurePulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasurePulseChannel</span></code></a>, <a class="reference internal" href="#qat.model.device.AcquirePulseChannel" title="qat.model.device.AcquirePulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquirePulseChannel</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.MeasureAcquirePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.MeasureAcquirePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.MeasureAcquirePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -353,8 +465,13 @@ validated to form a valid model.</p>
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.MeasurePulseChannel.measure_pulse">
+<span class="sig-name descname"><span class="pre">measure_pulse</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CalibratablePulse]</span></em><a class="headerlink" href="#qat.model.device.MeasurePulseChannel.measure_pulse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.MeasurePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.MeasurePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.MeasurePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -391,7 +508,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PhysicalBaseband.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PhysicalBaseband.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PhysicalBaseband.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -406,12 +523,7 @@ validated to form a valid model.</p>
 <dt>Attributes:</dt><dd><p>baseband: The physical baseband.</p>
 <p>sample_time: The rate at which the pulse is sampled.
 block_size: The number of samples within a single block.
-phase_iq_offset: Deviation of the phase difference of the I</p>
-<blockquote>
-<div><p>and Q components from 90° due to imperfections
-in the mixing of the LO and unmodulated signal.</p>
-</div></blockquote>
-<p>bias: The bias in voltages V_I / V_Q for the I and Q components.</p>
+bias: The bias in voltages V_I / V_Q for the I and Q components.</p>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -435,14 +547,9 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PhysicalChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PhysicalChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PhysicalChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.device.PhysicalChannel.phase_iq_offset">
-<span class="sig-name descname"><span class="pre">phase_iq_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span></em><a class="headerlink" href="#qat.model.device.PhysicalChannel.phase_iq_offset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PhysicalChannel.sample_time">
@@ -461,7 +568,8 @@ validated to form a valid model.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.model.device.PulseChannel.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.physical_channel">¶</a> – Physical channel that carries the pulse.</p></li>
 <li><p><span class="target" id="qat.model.device.PulseChannel.params.frequency"></span><strong>frequency</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.frequency">¶</a> – Frequency of the pulse.</p></li>
-<li><p><span class="target" id="qat.model.device.PulseChannel.params.bias"></span><strong>bias</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.bias">¶</a> – Mean value of the signal, quantifies offset relative to zero mean.</p></li>
+<li><p><span class="target" id="qat.model.device.PulseChannel.params.imbalance"></span><strong>imbalance</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.imbalance">¶</a> – Ratio between I and Q AC voltage that is sent out of the FPGA.</p></li>
+<li><p><span class="target" id="qat.model.device.PulseChannel.params.phase_iq_offset"></span><strong>phase_iq_offset</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.phase_iq_offset">¶</a> – Phase offset between the I and Q plane for AC voltage that is send out the FPGA.</p></li>
 <li><p><span class="target" id="qat.model.device.PulseChannel.params.scale"></span><strong>scale</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.scale">¶</a> – Scale factor for mapping the voltage of the pulse to frequencies.</p></li>
 <li><p><span class="target" id="qat.model.device.PulseChannel.params.fixed_if"></span><strong>fixed_if</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PulseChannel.params.fixed_if">¶</a> – Flag which determines if the intermediate frequency is fixed.</p></li>
 </ul>
@@ -471,11 +579,6 @@ validated to form a valid model.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.device.PulseChannel.bias">
-<span class="sig-name descname"><span class="pre">bias</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.bias" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PulseChannel.fixed_if">
 <span class="sig-name descname"><span class="pre">fixed_if</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.fixed_if" title="Link to this definition"></a></dt>
@@ -487,10 +590,20 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.PulseChannel.imbalance">
+<span class="sig-name descname"><span class="pre">imbalance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.imbalance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.PulseChannel.phase_iq_offset">
+<span class="sig-name descname"><span class="pre">phase_iq_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span></em><a class="headerlink" href="#qat.model.device.PulseChannel.phase_iq_offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PulseChannel.scale">
@@ -502,7 +615,7 @@ validated to form a valid model.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.device.PulseChannelSet">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseChannelSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.PulseChannelSet" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.WarnOnExtraFieldsModel" title="qat.utils.pydantic.WarnOnExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarnOnExtraFieldsModel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
 <p>Encapsulates a set of pulse channels.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
@@ -515,7 +628,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.PulseChannelSet.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PulseChannelSet.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.PulseChannelSet.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -532,6 +645,7 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.model.device.Qubit.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical qubit.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.pulse_channels">¶</a> – The pulse channels for controlling the qubit.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.resonator"></span><strong>resonator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.resonator">¶</a> – The measure device of the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.x_pi_2_pulse"></span><strong>x_pi_2_pulse</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.x_pi_2_pulse">¶</a> – Calibrated parameters for the X(pi/2) pulse.</p></li>
 </ul>
 </dd>
 </dl>
@@ -541,7 +655,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Qubit.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Qubit.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -592,7 +706,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.QubitPulseChannels.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.QubitPulseChannels.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.QubitPulseChannels.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -623,6 +737,8 @@ validated to form a valid model.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.model.device.Resonator.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical resonator.</p></li>
 <li><p><span class="target" id="qat.model.device.Resonator.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.pulse_channels">¶</a> – The pulse channels for controlling the resonator.</p></li>
+<li><p><span class="target" id="qat.model.device.Resonator.params.measure_pulse"></span><strong>measure_pulse</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.measure_pulse">¶</a> – Calibrated parameters for the measure pulse on the resonator.</p></li>
+<li><p><span class="target" id="qat.model.device.Resonator.params.acquire"></span><strong>acquire</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.acquire">¶</a> – Calibrated parameters for the acquire instruction.</p></li>
 </ul>
 </dd>
 </dl>
@@ -632,7 +748,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Resonator.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Resonator.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.Resonator.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -668,7 +784,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.ResonatorPulseChannels.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.ResonatorPulseChannels.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.ResonatorPulseChannels.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
@@ -684,7 +800,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.SecondStatePulseChannel.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.SecondStatePulseChannel.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">True,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.device.SecondStatePulseChannel.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
