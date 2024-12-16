@@ -9,12 +9,12 @@ from semver import Version
 
 from qat.model.device import Qubit
 from qat.model.hardware_base import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
-from qat.utils.pydantic import WarnOnExtraFieldsModel
+from qat.utils.pydantic import NoExtraFieldsModel
 
 VERSION = Version(0, 0, 1)
 
 
-class LogicalHardwareModel(WarnOnExtraFieldsModel):
+class LogicalHardwareModel(NoExtraFieldsModel):
     """Models a hardware with a given connectivity.
 
     :param version: Semantic version of the hardware model.
@@ -106,7 +106,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def validate_connectivity(self):
 
         # Check if all qubits exist in physical connectivity.
-        if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity
+        if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity.
             assert (
                 self.qubits.keys() == self.physical_connectivity.keys()
             ), f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."

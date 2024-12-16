@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from qat.model.convert_legacy import convert_legacy_hw_to_pydantic
+from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.purr.compiler.devices import ChannelType
 
 from tests.qat.utils.hardware_models import (
@@ -31,20 +31,24 @@ def get_echo_hw_pair(n_qubits, seed=42):
     hw_legacy_echo = apply_setup_to_echo_hardware(
         qubit_count=n_qubits, connectivity=logical_connectivity
     )
-    hw_pyd_echo = convert_legacy_hw_to_pydantic(hw_legacy_echo)
+    hw_pyd_echo = convert_legacy_echo_hw_to_pydantic(hw_legacy_echo)
     return (hw_pyd_echo, hw_legacy_echo)
 
 
 def validate_pulse_channel(pyd_pulse_channel, legacy_pulse_channel):
     assert pyd_pulse_channel.frequency == legacy_pulse_channel.frequency
-    assert pyd_pulse_channel.bias == legacy_pulse_channel.bias
+    assert pyd_pulse_channel.imbalance == legacy_pulse_channel.physical_channel.imbalance
+    assert (
+        pyd_pulse_channel.phase_iq_offset
+        == legacy_pulse_channel.physical_channel.phase_offset
+    )
     assert pyd_pulse_channel.scale == legacy_pulse_channel.scale
     assert pyd_pulse_channel.fixed_if == legacy_pulse_channel.fixed_if
 
 
 @pytest.mark.parametrize("n_qubits", [0, 1, 2, 4, 32, 64])
 @pytest.mark.parametrize("seed", [1, 2, 3, 4])
-class TestLegacyHardwareModelConversion:
+class TestEchoHardwareModelConversion:
     def test_physical_baseband(self, n_qubits, seed):
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
 
@@ -90,8 +94,6 @@ class TestLegacyHardwareModelConversion:
             ):
                 assert pyd_phys_ch.sample_time == leg_phys_ch.sample_time
                 assert pyd_phys_ch.block_size == leg_phys_ch.block_size
-                assert pyd_phys_ch.phase_iq_offset == leg_phys_ch.phase_offset
-                assert pyd_phys_ch.bias == leg_phys_ch.imbalance
 
     def test_1q_pulse_channels(self, n_qubits, seed):
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
@@ -151,8 +153,15 @@ class TestLegacyHardwareModelConversion:
         assert len(pyd_hw.qubits) == len(leg_hw.qubits)
         assert len(pyd_hw.qubits) == len(leg_hw.resonators)
 
-        for qubit_connectivity in leg_hw.qubit_direction_couplings:
-            # assert logical_connectivity
-            print("qconn:", qubit_connectivity)
+        leg_coupling_directions = [
+            qubit_coupling.direction for qubit_coupling in leg_hw.qubit_direction_couplings
+        ]
+        assert set(pyd_hw.logical_connectivity_quality.keys()) == set(
+            leg_coupling_directions
+        )
 
-        # assert False
+        for leg_coupling_direction in leg_hw.qubit_direction_couplings:
+            assert (
+                leg_coupling_direction.quality
+                == pyd_hw.logical_connectivity_quality[leg_coupling_direction.direction]
+            )

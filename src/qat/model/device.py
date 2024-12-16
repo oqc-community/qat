@@ -7,10 +7,11 @@ import numpy as np
 from pydantic import Field, field_validator, model_validator
 
 from qat.model.hardware_base import CalibratablePositiveFloat, FrozenDict, QubitId
-from qat.utils.pydantic import WarnOnExtraFieldsModel
+from qat.purr.compiler.devices import PulseShapeType
+from qat.utils.pydantic import NoExtraFieldsModel
 
 
-class Component(WarnOnExtraFieldsModel):
+class Component(NoExtraFieldsModel):
     """
     Base class for any logical object which can act as a target of a quantum action
     - a Qubit or various channels for a simple example.
@@ -88,9 +89,6 @@ class PhysicalChannel(Component):
 
         sample_time: The rate at which the pulse is sampled.
         block_size: The number of samples within a single block.
-        phase_iq_offset: Deviation of the phase difference of the I
-                         and Q components from 90° due to imperfections
-                         in the mixing of the LO and unmodulated signal.
         bias: The bias in voltages V_I / V_Q for the I and Q components.
     """
 
@@ -98,7 +96,6 @@ class PhysicalChannel(Component):
 
     sample_time: CalibratablePositiveFloat = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
-    phase_iq_offset: float | complex = 0.0 + 0.0j
     bias: float | complex = 0.0 + 0.0j
 
 
@@ -108,27 +105,50 @@ class PulseChannel(Component):
 
     :param physical_channel: Physical channel that carries the pulse.
     :param frequency: Frequency of the pulse.
-    :param bias: Mean value of the signal, quantifies offset relative to zero mean.
+    :param imbalance: Ratio between I and Q AC voltage that is sent out of the FPGA.
+    :param phase_iq_offset: Phase offset between the I and Q plane for AC voltage that is send out the FPGA.
     :param scale: Scale factor for mapping the voltage of the pulse to frequencies.
     :param fixed_if: Flag which determines if the intermediate frequency is fixed.
     """
 
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
-    bias: float | complex = 0.0 + 0.0j
+    imbalance: float | complex = 0.0 + 0.0j
+    phase_iq_offset: float | complex = 0.0 + 0.0j
     scale: float | complex = 1.0 + 0.0j
     fixed_if: bool = False
 
 
-class MeasurePulseChannel(PulseChannel): ...
+class CalibratablePulse(NoExtraFieldsModel):
+    shape: PulseShapeType = "gaussian"
+    width: CalibratablePositiveFloat = 100e-09
+    amp: float = 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5)
+    phase: float = 0.0
+    drag: float = 0.0
+    rise: float = 0.0
+    amp_setup: float = 0.0
 
 
-class DrivePulseChannel(PulseChannel): ...
+class CalibratableAcquire(NoExtraFieldsModel):
+    delay: CalibratablePositiveFloat = 180e-08
+    width: CalibratablePositiveFloat = 1e-06
+    sync: bool = True
+    weights: Optional[list[float]] = []
+    use_weights: bool = False
 
 
-class AcquirePulseChannel(PulseChannel): ...
+class DrivePulseChannel(PulseChannel):
+    x_pi_2_pulse: Optional[CalibratablePulse] = None
 
 
-class MeasureAcquirePulseChannel(PulseChannel): ...
+class MeasurePulseChannel(PulseChannel):
+    measure_pulse: Optional[CalibratablePulse] = None
+
+
+class AcquirePulseChannel(PulseChannel):
+    acquire: Optional[CalibratableAcquire] = None
+
+
+class MeasureAcquirePulseChannel(MeasurePulseChannel, AcquirePulseChannel): ...
 
 
 class SecondStatePulseChannel(PulseChannel): ...
@@ -139,6 +159,7 @@ class FreqShiftPulseChannel(PulseChannel): ...
 
 class CrossResonancePulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
+    zx_pi_4_pulse: Optional[CalibratablePulse] = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
@@ -146,12 +167,13 @@ class CrossResonancePulseChannel(PulseChannel):
 
 class CrossResonanceCancellationPulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
+    x_pi_2_pulse: Optional[CalibratablePulse] = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
 
 
-class PulseChannelSet(WarnOnExtraFieldsModel):
+class PulseChannelSet(NoExtraFieldsModel):
     """
     Encapsulates a set of pulse channels.
     """
@@ -199,6 +221,8 @@ class Resonator(Component):
 
     :param physical_channel: The physical channel that carries the pulses to the physical resonator.
     :param pulse_channels: The pulse channels for controlling the resonator.
+    :param measure_pulse: Calibrated parameters for the measure pulse on the resonator.
+    :param acquire: Calibrated parameters for the acquire instruction.
     """
 
     physical_channel: PhysicalChannel
@@ -245,6 +269,7 @@ class Qubit(Component):
     :param physical_channel: The physical channel that carries the pulses to the physical qubit.
     :param pulse_channels: The pulse channels for controlling the qubit.
     :param resonator: The measure device of the qubit.
+    :param x_pi_2_pulse: Calibrated parameters for the X(pi/2) pulse.
     """
 
     physical_channel: PhysicalChannel

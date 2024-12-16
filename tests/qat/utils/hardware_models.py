@@ -130,7 +130,9 @@ def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardw
             scale=0.0,
         )
         qubit_left.add_coupled_qubit(qubit_right)
-        hw.qubit_direction_couplings.append(QubitCoupling(connection))
+        hw.qubit_direction_couplings.append(
+            QubitCoupling(direction=connection, quality=random.Random().uniform(0.0, 1.0))
+        )
 
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True
