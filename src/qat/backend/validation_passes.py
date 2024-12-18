@@ -1,6 +1,4 @@
-from compiler_config.config import CompilerConfig
-
-from qat.ir.pass_base import QatIR, ValidationPass
+from qat.ir.pass_base import QatIR, ValidationPass, get_compiler_config
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -65,14 +63,12 @@ class NCOFrequencyVariability(ValidationPass):
 
 
 class HardwareConfigValidity(ValidationPass):
-    def __init__(
-        self, hardware_model: QuantumHardwareModel, compiler_config: CompilerConfig
-    ):
+    def __init__(self, hardware_model: QuantumHardwareModel):
         self.hardware_model = hardware_model
-        self.compiler_config = compiler_config
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        self.compiler_config.validate(self.hardware_model)
+        compiler_config = get_compiler_config(args, kwargs)
+        compiler_config.validate(self.hardware_model)
 
 
 # TODO - bring in stuff from verification.py in here in the form of a pass (or a bunch of passes)

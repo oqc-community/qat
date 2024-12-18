@@ -1,6 +1,7 @@
 import pytest
 
 from qat import QAT
+from qat.pipelines import DefaultCompile, DefaultExecute, DefaultPostProcessing
 from qat.purr.compiler.frontends import QASMFrontend
 
 from benchmarks.utils.helpers import load_experiments, load_qasm
@@ -20,7 +21,15 @@ class TestPipeline:
         if mode == "Legacy":
             run = lambda: QASMFrontend().parse(circuit, hw)
         else:
-            run = lambda: QAT(hw).compile(circuit)
+            qat = QAT()
+            qat.add_pipeline(
+                "test",
+                compile_pipeline=DefaultCompile(hw),
+                execute_pipeline=DefaultExecute(hw),
+                postprocess_pipeline=DefaultPostProcessing(hw),
+                engine=hw.create_engine(),
+            )
+            run = lambda: qat.compile(circuit, pipeline="test")
         benchmark(run)
         assert True
 
@@ -32,6 +41,14 @@ class TestPipeline:
         if mode == "Legacy":
             run = lambda: QASMFrontend().execute(builder, hw)
         else:
-            run = lambda: QAT(hw).execute(builder)
+            qat = QAT()
+            qat.add_pipeline(
+                "test",
+                compile_pipeline=DefaultCompile(hw),
+                execute_pipeline=DefaultExecute(hw),
+                postprocess_pipeline=DefaultPostProcessing(hw),
+                engine=hw.create_engine(),
+            )
+            run = lambda: qat.execute(builder, pipeline="test")
         benchmark(run)
         assert True

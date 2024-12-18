@@ -1,0 +1,25 @@
+MAX_REPEATS_LIMIT: 10
+PIPELINES:
+- name: rtcs
+  compile: qat.pipelines.DefaultCompile
+  execute: qat.pipelines.DefaultExecute
+  postprocess: qat.pipelines.DefaultPostProcessing
+  hardware:
+    hardware_type: rtcs
+  default: false
+- name: echo
+  compile: qat.pipelines.DefaultCompile
+  execute: qat.pipelines.DefaultExecute
+  postprocess: qat.pipelines.DefaultPostProcessing
+  hardware:
+    qubit_count: 8
+    hardware_type: echo
+  default: true
+- name: qiskit8
+  compile: qat.pipelines.DefaultCompile
+  execute: qat.pipelines.DefaultExecute
+  postprocess: qat.pipelines.DefaultPostProcessing
+  hardware:
+    qubit_count: 8
+    hardware_type: qiskit
+  default: false

@@ -28,23 +28,22 @@ class InstructionValidation(ValidationPass):
     Extracted from QuantumExecutionEngine.validate()
     """
 
+    def __init__(
+        self,
+        engine: QuantumExecutionEngine,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.engine = engine
+
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        engine = next((a for a in args if isinstance(a, QuantumExecutionEngine)), None)
-
-        if not engine:
-            engine = kwargs.get("engine", None)
-
-        if not engine or not isinstance(engine, QuantumExecutionEngine):
-            raise ValueError(
-                f"Expected to find an instance of {QuantumExecutionEngine} in arguments list, but got {engine} instead"
-            )
-
         instruction_length = len(builder.instructions)
-        if instruction_length > engine.max_instruction_len:
+        if instruction_length > self.engine.max_instruction_len:
             raise ValueError(
                 f"Program too large to be run in a single block on current hardware. "
                 f"{instruction_length} instructions."
@@ -92,20 +91,21 @@ class ReadoutValidation(ValidationPass):
     Extracted from LiveDeviceEngine.validate()
     """
 
+    def __init__(
+        self,
+        hardware: QuantumHardwareModel,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.hardware = hardware
+
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        model = next((a for a in args if isinstance(a, QuantumHardwareModel)), None)
-
-        if not model:
-            model = kwargs.get("model", None)
-
-        if not model or not isinstance(model, QuantumHardwareModel):
-            raise ValueError(
-                f"Expected to find an instance of {QuantumHardwareModel} in arguments list, but got {model} instead"
-            )
+        model = self.hardware
 
         if not isinstance(model, LiveHardwareModel):
             return

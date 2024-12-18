@@ -30,6 +30,9 @@ docs/source/*
 !docs/source/changelog.rst
 !docs/source/qat-logo.png
 
+# Jupyter
+**/.ipynb_checkpoints/*
+
 # VS Code
 .vscode
 

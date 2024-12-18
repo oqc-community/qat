@@ -12,6 +12,7 @@ from compiler_config.config import (
 )
 
 from qat.core import QAT
+from qat.pipelines import DefaultCompile, DefaultExecute, DefaultPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.frontends import QIRFrontend
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
@@ -236,8 +237,18 @@ class TestQATParity:
             hardware=hardware_model,
             compiler_config=compiler_config,
         )
-        qat_ib, qat_metrics = QAT(hardware_model).compile(
-            qasm_file_string, compiler_config=compiler_config
+
+        qat = QAT()
+        qat.add_pipeline(
+            "test",
+            compile_pipeline=DefaultCompile(hardware_model),
+            execute_pipeline=DefaultExecute(hardware_model),
+            postprocess_pipeline=DefaultPostProcessing(hardware_model),
+            engine=hardware_model.create_engine(),
+        )
+
+        qat_ib, qat_metrics = qat.compile(
+            qasm_file_string, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_ib.instructions == qat_ib.instructions
         assert purr_metrics.optimized_circuit == qat_metrics.optimized_circuit
@@ -264,8 +275,17 @@ class TestQATParity:
             hardware=hardware_model,
             compiler_config=compiler_config,
         )
-        qat_ib, qat_metrics = QAT(hardware_model).compile(
-            qasm_file_string, compiler_config=compiler_config
+
+        qat = QAT()
+        qat.add_pipeline(
+            "test",
+            compile_pipeline=DefaultCompile(hardware_model),
+            execute_pipeline=DefaultExecute(hardware_model),
+            postprocess_pipeline=DefaultPostProcessing(hardware_model),
+            engine=hardware_model.create_engine(),
+        )
+        qat_ib, qat_metrics = qat.compile(
+            qasm_file_string, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_ib.instructions == qat_ib.instructions
         assert purr_metrics.optimized_circuit == qat_metrics.optimized_circuit
@@ -294,8 +314,18 @@ class TestQATParity:
             hardware=hardware_model,
             compiler_config=compiler_config,
         )
-        qat_ib, qat_metrics = QAT(hardware_model).compile(
-            qir_file_string, compiler_config=compiler_config
+
+        qat = QAT()
+        qat.add_pipeline(
+            "test",
+            compile_pipeline=DefaultCompile(hardware_model),
+            execute_pipeline=DefaultExecute(hardware_model),
+            postprocess_pipeline=DefaultPostProcessing(hardware_model),
+            engine=hardware_model.create_engine(),
+        )
+
+        qat_ib, qat_metrics = qat.compile(
+            qir_file_string, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_ib.instructions == qat_ib.instructions
         assert purr_metrics.optimized_circuit == qat_metrics.optimized_circuit
@@ -327,8 +357,22 @@ class TestQATParity:
         purr_res, purr_metrics = QIRFrontend().execute(
             instructions, hardware=hardware_model, compiler_config=compiler_config
         )
-        qat_res, qat_metrics = QAT(hardware_model).execute(
-            instructions, compiler_config=compiler_config
+
+        qat = QAT()
+        qat.add_pipeline(
+            "test",
+            compile_pipeline=DefaultCompile(hardware_model),
+            execute_pipeline=DefaultExecute(hardware_model),
+            postprocess_pipeline=DefaultPostProcessing(hardware_model),
+            engine=hardware_model.create_engine(),
+        )
+
+        qat_res, qat_metrics = qat.execute(
+            instructions, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_res == qat_res
         assert purr_metrics.as_dict() == qat_metrics.as_dict()
+
+
+class TestQATPipelineSetup:
+    pass

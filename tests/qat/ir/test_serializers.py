@@ -3,6 +3,7 @@ from compiler_config.config import CompilerConfig, Tket, TketOptimizations
 
 from qat.core import QAT
 from qat.ir.serializers import LegacyIRSerializer
+from qat.pipelines import DefaultCompile, DefaultExecute, DefaultPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import Instruction, InstructionBlock, Variable
 
@@ -73,8 +74,17 @@ class TestLegacySerialization:
         monkeypatch.setattr(Instruction, "__eq__", equivalent_array)
         monkeypatch.setattr(InstructionBlock, "__eq__", equivalent_array)
         monkeypatch.setattr(Variable, "__eq__", equivalent_array)
-        qat = QAT(hardware_model)
-        qat_ib, _ = qat.compile(str(source_file), compiler_config=compiler_config)
+        qat = QAT()
+        qat.add_pipeline(
+            "test",
+            compile_pipeline=DefaultCompile(hardware_model),
+            execute_pipeline=DefaultExecute(hardware_model),
+            postprocess_pipeline=DefaultPostProcessing(hardware_model),
+            engine=hardware_model.create_engine(),
+        )
+        qat_ib, _ = qat.compile(
+            str(source_file), compiler_config=compiler_config, pipeline="test"
+        )
         serializer = LegacyIRSerializer(hardware_model)
         blob = serializer.serialize(qat_ib)
         new_qat_ib = serializer.deserialize(blob)

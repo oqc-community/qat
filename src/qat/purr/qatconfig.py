@@ -1,11 +1,18 @@
 import warnings
-from typing import Literal, Optional
+from typing import Literal, Optional, Tuple, Type
 
+import yaml
 from compiler_config.config import CompilerConfig
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 from qiskit_aer import AerSimulator
 
+from qat.coreconfig import PipelineDescription
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -104,7 +111,10 @@ class QatConfig(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_prefix="QAT_", env_nested_delimiter="_", validate_assignment=True
+        env_prefix="QAT_",
+        env_nested_delimiter="_",
+        validate_assignment=True,
+        yaml_file="qatconfig.yaml",
     )
     MAX_REPEATS_LIMIT: Optional[int] = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
@@ -137,6 +147,35 @@ class QatConfig(BaseSettings):
     SIMULATION: QatSimulationConfig = QatSimulationConfig()
     """Options for QATs simulation backends."""
 
+    PIPELINES: list[PipelineDescription] = []
+
+    @field_validator("PIPELINES")
+    @classmethod
+    def one_default(cls, v):
+        if len(v) == 0:
+            return v
+        num_defaults = sum(pipe.default for pipe in v)
+        if not num_defaults == 1:
+            raise ValueError(
+                f"Exactly one pipeline must have default: true (found {num_defaults})"
+            )
+        return v
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            init_settings,
+            env_settings,
+            YamlConfigSettingsSource(settings_cls),
+        )
+
     def validate(self, compiler_config: CompilerConfig):
         """_summary_
 
@@ -147,6 +186,12 @@ class QatConfig(BaseSettings):
             raise ValueError(
                 f"Number of shots {compiler_config.repeats} exceeds the maximum amount of {self.MAX_REPEATS_LIMIT}."
             )
+
+    @staticmethod
+    def from_yaml(filename: str):
+        with open(filename) as f:
+            blob = yaml.safe_load(f)
+        return QatConfig(**blob)
 
 
 qatconfig = QatConfig()

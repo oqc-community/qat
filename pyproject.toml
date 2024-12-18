@@ -114,6 +114,7 @@ target-version = ["py310", "py311", "py312"]
 addopts = [
     "--import-mode=importlib", "--doctest-modules"
 ]
+testpaths = ['src', 'tests']
 filterwarnings = [
     # Set warnings to raise errors in pytest runs.
     "error",

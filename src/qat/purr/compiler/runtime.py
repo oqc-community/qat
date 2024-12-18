@@ -281,8 +281,8 @@ class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
             PassManager()
             | PhaseOptimisation()
             | PostProcessingOptimisation()
-            | InstructionValidation()
-            | ReadoutValidation()
+            | InstructionValidation(self.engine)
+            | ReadoutValidation(self.engine.model)
         )
 
     def _common_execute(
