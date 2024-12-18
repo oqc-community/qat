@@ -27,4 +27,6 @@ Submodules
    :maxdepth: 4
 
    qat.core
+   qat.coreconfig
+   qat.pipelines
    qat.qat
