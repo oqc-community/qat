@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from qat.backend.validation_passes import HardwareConfigValidity
 from qat.compiler.analysis_passes import InputAnalysis
 from qat.compiler.transform_passes import (

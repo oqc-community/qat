@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Union

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from typing import List, Union
 
 from pydantic import BaseModel, Field

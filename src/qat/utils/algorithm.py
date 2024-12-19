@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 def stable_partition(iterable, unary_pred):
     """
     A brute force implementation of the C++ STL stable_partition algorithm. Instead of in-place

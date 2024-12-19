@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 class Constants:
     MAX_GAIN_SIZE = pow(2, 16) - 1
     """Max size of gain in Q1ASM programs."""

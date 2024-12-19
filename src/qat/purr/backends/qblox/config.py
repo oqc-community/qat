@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List

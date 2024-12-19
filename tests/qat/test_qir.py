@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import base64
 from os.path import abspath, dirname, join
 from unittest import mock

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import pytest
 from compiler_config.config import Qasm2Optimizations, TketOptimizations
 from pytket.architecture import Architecture, RingArch
