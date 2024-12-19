@@ -5,6 +5,7 @@ from typing import Dict, List
 
 from attr import dataclass
 from compiler_config.config import (
+    CompilerConfig,
     Languages,
     Qiskit,
     QiskitOptimizations,
@@ -16,7 +17,7 @@ from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
-from qat.ir.pass_base import QatIR, TransformPass, get_compiler_config
+from qat.ir.pass_base import QatIR, TransformPass
 from qat.ir.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -131,8 +132,14 @@ class InputOptimisation(TransformPass):
         super().__init__(*args, **kwargs)
         self.hardware = hardware
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        compiler_config = get_compiler_config(args, kwargs)
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
         optimisation_result = InputOptimisationResult()
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
@@ -193,8 +200,14 @@ class Parse(TransformPass):
     def __init__(self, hardware: QuantumHardwareModel):
         self.hardware = hardware
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        compiler_config = get_compiler_config(args, kwargs)
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
         builder = self.hardware.create_builder()

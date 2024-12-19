@@ -148,7 +148,7 @@ class QAT:
         metrics.enable(compiler_config.metrics)
         compilation_results = ResultManager()
         ir = QatIR(program)
-        pipeline.run(ir, compilation_results, compiler_config)
+        pipeline.run(ir, compilation_results, compiler_config=compiler_config)
         metrics.record_metric(
             MetricsType.OptimizedCircuit,
             compilation_results.lookup_by_type(InputOptimisationResult).optimised_circuit,
@@ -183,7 +183,7 @@ class QAT:
         execute_pipeline.run(
             ir,
             execution_results,
-            compiler_config,
+            compiler_config=compiler_config,
         )
 
         engine = self._get_engine(engine, pipeline)
@@ -215,7 +215,7 @@ class QAT:
         postprocess_pipeline.run(
             ir,
             execution_results,
-            compiler_config,
+            compiler_config=compiler_config,
             mapping=index_mapping,
         )
         return ir.value, metrics

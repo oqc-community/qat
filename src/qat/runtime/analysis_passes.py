@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from qat.ir.pass_base import AnalysisPass, QatIR, get_compiler_config
+from compiler_config.config import CompilerConfig
+
+from qat.ir.pass_base import AnalysisPass, QatIR
 from qat.ir.result_base import ResultInfoMixin, ResultManager
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.compiler.builders import InstructionBuilder
@@ -14,8 +16,14 @@ class CalibrationAnalysisResult(ResultInfoMixin):
 
 
 class CalibrationAnalysis(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        compiler_config = get_compiler_config(args, kwargs)
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")

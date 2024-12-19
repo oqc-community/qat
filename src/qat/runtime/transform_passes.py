@@ -1,9 +1,9 @@
 from typing import Dict
 
 import numpy
-from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
+from compiler_config.config import CompilerConfig, ErrorMitigationConfig, ResultsFormatting
 
-from qat.ir.pass_base import QatIR, TransformPass, get_compiler_config
+from qat.ir.pass_base import QatIR, TransformPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -14,13 +14,19 @@ from qat.purr.compiler.runtime import _binary_count
 class ResultTransform(TransformPass):
     """Extracted from legacy QuantumRuntime._transform_results()."""
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
         """
         Transform the raw results into the format that we've been asked to provide. Look
         at individual transformation documentation for descriptions on what they do.
         """
         # TODO: Consider the suggested implementation of a results type.
-        compiler_config = get_compiler_config(args, kwargs)
 
         format_flags = (
             compiler_config.results_format or ResultsFormatting.DynamicStructureReturn
@@ -85,9 +91,14 @@ class ErrorMitigation(TransformPass):
         self.hardware_model = hardware_model
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, *args, mapping: Dict[str, str], **kwargs
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        mapping: Dict[str, str],
+        compiler_config: CompilerConfig,
+        **kwargs,
     ):
-        compiler_config = get_compiler_config(args, kwargs)
         error_mitigation = compiler_config.error_mitigation
 
         if error_mitigation is None or error_mitigation == ErrorMitigationConfig.Empty:

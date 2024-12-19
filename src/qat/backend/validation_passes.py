@@ -1,4 +1,6 @@
-from qat.ir.pass_base import QatIR, ValidationPass, get_compiler_config
+from compiler_config.config import CompilerConfig
+
+from qat.ir.pass_base import QatIR, ValidationPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -66,8 +68,14 @@ class HardwareConfigValidity(ValidationPass):
     def __init__(self, hardware_model: QuantumHardwareModel):
         self.hardware_model = hardware_model
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        compiler_config = get_compiler_config(args, kwargs)
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
         compiler_config.validate(self.hardware_model)
 
 

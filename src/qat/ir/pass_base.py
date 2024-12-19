@@ -2,24 +2,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Union
 
-from compiler_config.config import CompilerConfig
-
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.utils.logger import get_default_logger
-
-
-def get_compiler_config(args, kw_args):
-    """To be replaced with a keyword argument on the relevant passes"""
-    compiler_config = kw_args.get("compiler_config", None)
-    if compiler_config is not None:
-        return compiler_config
-
-    compiler_config = next(
-        (a for a in args if isinstance(a, CompilerConfig)), CompilerConfig()
-    )
-    return compiler_config
-
 
 log = get_default_logger()
 
