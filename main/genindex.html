@@ -66,6 +66,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_list.html">qat.ir.instruction_list module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.serializers.html">qat.ir.serializers module</a></li>
@@ -472,7 +473,11 @@
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation">ApplyReadoutMitigation (class in qat.purr.compiler.error_mitigation.readout_mitigation)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.are_enabled">are_enabled() (CompilationMetrics method)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.are_enabled">(MetricsManager method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.are_metrics_enabled">are_metrics_enabled() (MetricsMixin method)</a>
 </li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.args">args (PostProcessing attribute)</a>
@@ -480,7 +485,11 @@
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.arguments_type">arguments_type() (RemoteCalibration method)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.as_dict">as_dict() (CompilationMetrics method)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.as_dict">(MetricsManager method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Assign">Assign (class in qat.ir.instructions)</a>
 
       <ul>
@@ -1262,10 +1271,20 @@
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter.emit_packages">emit_packages() (NewQbloxEmitter method)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.enable">enable() (CompilationMetrics method)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enable">(MetricsManager method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.ENABLE_METADATA">ENABLE_METADATA (QiskitSimulationConfig attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.enable_metrics">enable_metrics() (MetricsMixin method)</a>
+      <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enable_metrics">enable_metrics() (MetricsManager method)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.enable_metrics">(MetricsMixin method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enabled_metrics">enabled_metrics (MetricsManager attribute)</a>
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.IterBound.end">end (IterBound attribute)</a>
 
@@ -1696,7 +1715,11 @@
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.get_metric">get_metric() (CompilationMetrics method)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.get_metric">(MetricsManager method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_model">get_model() (in module qat.purr.compiler.runtime)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_phase_arguments">get_nco_phase_arguments() (in module qat.purr.backends.qblox.codegen)</a>
@@ -2400,7 +2423,11 @@
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.MEGA">MEGA (Scale attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.merge">merge() (CompilationMetrics method)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.merge">(MetricsManager method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.merge_builder">merge_builder() (InstructionBuilder method)</a>
 
       <ul>
@@ -2408,6 +2435,8 @@
 </li>
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.METHOD">METHOD (QiskitSimulationConfig attribute)</a>
+</li>
+      <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager">MetricsManager (class in qat.ir.metrics_base)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin">MetricsMixin (class in qat.purr.compiler.metrics)</a>
 </li>
@@ -2519,6 +2548,8 @@
         <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureData.model_config">(MeasureData attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.model_config">(MeasurePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.model_config">(MetricsManager attribute)</a>
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel.model_config">(NoExtraFieldsModel attribute)</a>
 </li>
@@ -2638,6 +2669,8 @@
         <li><a href="qat.ir.instructions.html#module-qat.ir.instructions">qat.ir.instructions</a>
 </li>
         <li><a href="qat.ir.measure.html#module-qat.ir.measure">qat.ir.measure</a>
+</li>
+        <li><a href="qat.ir.metrics_base.html#module-qat.ir.metrics_base">qat.ir.metrics_base</a>
 </li>
         <li><a href="qat.ir.pass_base.html#module-qat.ir.pass_base">qat.ir.pass_base</a>
 </li>
@@ -2957,17 +2990,25 @@
       <li><a href="qat.purr.compiler.optimisers.html#qat.purr.compiler.optimisers.DefaultOptimizers.optimize_qasm">optimize_qasm() (DefaultOptimizers method)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_circuit">optimized_circuit (CompilationMetrics attribute)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.optimized_circuit">(MetricsManager attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_instruction_count">optimized_instruction_count (CompilationMetrics attribute)</a>
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.optimized_instruction_count">(MetricsManager attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.OPTIONS">OPTIONS (QiskitSimulationConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.OR">OR (Opcode attribute)</a>
 </li>
-      <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.PulseType.OTHER">OTHER (PulseType attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.PulseType.OTHER">OTHER (PulseType attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AttConfig.out0">out0 (AttConfig attribute)</a>
 
       <ul>
@@ -3523,6 +3564,13 @@
 
       <ul>
         <li><a href="qat.ir.measure.html#module-qat.ir.measure">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir.metrics_base
+
+      <ul>
+        <li><a href="qat.ir.metrics_base.html#module-qat.ir.metrics_base">module</a>
 </li>
       </ul></li>
       <li>
@@ -4204,6 +4252,8 @@
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.record_metric">record_metric() (CompilationMetrics method)</a>
 
       <ul>
+        <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.record_metric">(MetricsManager method)</a>
+</li>
         <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.record_metric">(MetricsMixin method)</a>
 </li>
       </ul></li>
@@ -5099,6 +5149,8 @@
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.RestrictedQasm2Parser.validate">(RestrictedQasm2Parser method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.validate_all_fields_exist">validate_all_fields_exist() (MetricsManager class method)</a>
+</li>
       <li><a href="qat.model.hardware_base.html#qat.model.hardware_base.validate_calibratable_positive_float">validate_calibratable_positive_float() (in module qat.model.hardware_base)</a>
 </li>
       <li><a href="qat.model.hardware_base.html#qat.model.hardware_base.validate_calibratable_unit_interval">validate_calibratable_unit_interval() (in module qat.model.hardware_base)</a>
@@ -5143,10 +5195,10 @@
 </li>
       <li><a href="qat.model.hardware_base.html#qat.model.hardware_base.PydDictBase.values">values() (PydDictBase method)</a>
 </li>
-      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.var_type">var_type (Variable attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.var_type">var_type (Variable attribute)</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable">Variable (class in qat.ir.instructions)</a>
 
       <ul>
