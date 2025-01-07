@@ -15,6 +15,7 @@ from qat.backend.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
@@ -365,11 +366,12 @@ class TestNewQbloxEmitter(InvokerMixin):
         builder = resonator_spect(model, qubit_indices, num_points)
         ir = QatIR(builder)
         res_mgr = ResultManager()
+        met_mgr = MetricsManager()
         engine = model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr, model, engine)
 
-        self.run_pass_pipeline(ir, res_mgr, model)
+        self.run_pass_pipeline(ir, res_mgr, met_mgr, model)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
         packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
@@ -409,9 +411,10 @@ class TestNewQbloxEmitter(InvokerMixin):
         builder = qubit_spect(model, qubit_indices, num_points)
         ir = QatIR(builder)
         res_mgr = ResultManager()
+        met_mgr = MetricsManager()
         engine = model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr, model, engine)
 
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
@@ -426,7 +429,7 @@ class TestNewQbloxEmitter(InvokerMixin):
         injectors = DeviceInjectors(static_dus)
         try:
             injectors.inject()
-            self.run_pass_pipeline(ir, res_mgr, model)
+            self.run_pass_pipeline(ir, res_mgr, met_mgr, model)
 
             packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
             assert len(packages) == 2 * len(qubit_indices)

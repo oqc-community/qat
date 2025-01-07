@@ -62,7 +62,7 @@ isort = "^5.13.2"
 docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 pytest-benchmark = "^4.0.0"
-jinja2 = "^3.1.4"
+jinja2 = "^3.1.5"
 jupytext = "^1.16.4"
 nbstripout = "^0.8.1"
 

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import pytest
 
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import AnalysisPass, PassManager, QatIR, TransformPass, ValidationPass
 from qat.ir.result_base import ResultInfoMixin, ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -37,7 +38,9 @@ class DummyValidation(ValidationPass):
 
 
 class DummyTransform(TransformPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         builder = ir.value
         builder.instructions = builder.instructions[::-1]
 
@@ -46,6 +49,7 @@ def test_pass_manager():
     model = get_default_echo_hardware()
     builder = resonator_spect(model)
     res_mgr = ResultManager()
+    met_mgr = MetricsManager()
     ir = QatIR(builder)
     pipline = PassManager() | DummyValidation() | DummyTransform() | DummyAnalysis()
 
@@ -53,11 +57,11 @@ def test_pass_manager():
     assert not isinstance(InvalidInstruction(), Instruction)
     builder.add(InvalidInstruction())
     with pytest.raises(ValueError):
-        pipline.run(ir, res_mgr)
+        pipline.run(ir, res_mgr, met_mgr)
 
     builder = resonator_spect(model)
     ir = QatIR(builder)
-    pipline.run(ir, res_mgr)
+    pipline.run(ir, res_mgr, met_mgr)
 
     # Get the analysis result
     dummy_result: DummyResult = res_mgr.lookup_by_type(DummyResult)

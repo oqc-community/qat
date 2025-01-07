@@ -2,9 +2,9 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from typing import Optional
 
-from compiler_config.config import CompilerConfig, MetricsType
+from compiler_config.config import CompilerConfig
 
-from qat.compiler.transform_passes import InputOptimisationResult
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -13,7 +13,6 @@ from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import get_cl2qu_index_mapping
-from qat.purr.compiler.metrics import CompilationMetrics
 from qat.purr.compiler.runtime import get_runtime
 from qat.purr.qatconfig import QatConfig
 from qat.qat import QATInput
@@ -144,16 +143,13 @@ class QAT:
 
         # TODO: Improve metrics and config handling
         compiler_config = compiler_config or CompilerConfig()
-        metrics = CompilationMetrics()
-        metrics.enable(compiler_config.metrics)
+        metrics_manager = MetricsManager(compiler_config.metrics)
         compilation_results = ResultManager()
         ir = QatIR(program)
-        pipeline.run(ir, compilation_results, compiler_config=compiler_config)
-        metrics.record_metric(
-            MetricsType.OptimizedCircuit,
-            compilation_results.lookup_by_type(InputOptimisationResult).optimised_circuit,
+        pipeline.run(
+            ir, compilation_results, metrics_manager, compiler_config=compiler_config
         )
-        return ir.value, metrics
+        return ir.value, metrics_manager
 
     def execute(
         self,
@@ -176,13 +172,13 @@ class QAT:
         compiler_config = compiler_config or CompilerConfig()
         execution_results = ResultManager()
 
-        metrics = CompilationMetrics()
-        metrics.enable(compiler_config.metrics)
+        metrics_manager = MetricsManager(compiler_config.metrics)
 
         ir = QatIR(builder)
         execute_pipeline.run(
             ir,
             execution_results,
+            metrics_manager,
             compiler_config=compiler_config,
         )
 
@@ -195,10 +191,6 @@ class QAT:
         ).calibration_executables
         active_runtime = get_runtime(engine.model)
         active_runtime.run_quantum_executable(calibrations)
-
-        metrics.record_metric(
-            MetricsType.OptimizedInstructionCount, len(builder.instructions)
-        )
 
         results = engine.execute(
             builder.instructions,
@@ -215,7 +207,8 @@ class QAT:
         postprocess_pipeline.run(
             ir,
             execution_results,
+            metrics_manager,
             compiler_config=compiler_config,
             mapping=index_mapping,
         )
-        return ir.value, metrics
+        return ir.value, metrics_manager

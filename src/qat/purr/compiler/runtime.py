@@ -16,6 +16,7 @@ from compiler_config.config import (
 from qat import qatconfig
 from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingOptimisation
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import (
@@ -302,7 +303,8 @@ class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
             )
 
         res_mgr = ResultManager()
-        self.run_pass_pipeline(QatIR(builder), res_mgr, self.model, self.engine)
+        met_mgr = MetricsManager()
+        self.run_pass_pipeline(QatIR(builder), res_mgr, met_mgr, self.model, self.engine)
         results = fexecute(builder)
         results = self._transform_results(results, results_format, repeats)
         return self._apply_error_mitigation(results, builder, error_mitigation)

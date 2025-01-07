@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Union
 
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.utils.logger import get_default_logger
@@ -24,7 +25,9 @@ class PassConcept(ABC):
     """
 
     @abstractmethod
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         pass
 
 
@@ -39,10 +42,12 @@ class PassModel(PassConcept):
     def __init__(self, pass_obj):
         self._pass = pass_obj
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         if not isinstance(ir, QatIR):
             raise ValueError(f"Expected QatIR got {type(ir)}")
-        return self._pass.run(ir, res_mgr, *args, **kwargs)
+        return self._pass.run(ir, res_mgr, met_mgr, *args, **kwargs)
 
 
 class PassInfoMixin(ABC):
@@ -68,7 +73,9 @@ class AnalysisPass(PassInfoMixin):
     The IR is imperatively left intact.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         pass
 
 
@@ -77,7 +84,9 @@ class TransformPass(PassInfoMixin):
     Base class for all passes that mutate the QatIR in-place.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         pass
 
 
@@ -90,7 +99,9 @@ class ValidationPass(PassInfoMixin):
     It can change according to circumstances.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         pass
 
 
@@ -140,9 +151,11 @@ class PassManager(PassInfoMixin):
     def __init__(self):
         self.passes: List[PassModel] = []
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         for p in self.passes:
-            p.run(ir, res_mgr, *args, **kwargs)
+            p.run(ir, res_mgr, met_mgr, *args, **kwargs)
 
     def add(self, pass_obj):
         self.passes.append(PassModel(pass_obj))
@@ -169,5 +182,9 @@ class InvokerMixin(ABC):
     def build_pass_pipeline(self, *args, **kwargs) -> PassManager:
         pass
 
-    def run_pass_pipeline(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        return self.build_pass_pipeline(*args, **kwargs).run(ir, res_mgr, *args, **kwargs)
+    def run_pass_pipeline(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
+        return self.build_pass_pipeline(*args, **kwargs).run(
+            ir, res_mgr, met_mgr, *args, **kwargs
+        )

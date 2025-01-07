@@ -9,6 +9,7 @@ from attr import dataclass
 from compiler_config.config import (
     CompilerConfig,
     Languages,
+    MetricsType,
     Qiskit,
     QiskitOptimizations,
     Tket,
@@ -19,6 +20,7 @@ from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import QatIR, TransformPass
 from qat.ir.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -44,7 +46,9 @@ class PhaseOptimisation(TransformPass):
     Extracted from QuantumExecutionEngine.optimize()
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
@@ -77,6 +81,9 @@ class PhaseOptimisation(TransformPass):
                 optimized_instructions.append(instruction)
 
         builder.instructions = optimized_instructions
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, len(optimized_instructions)
+        )
 
 
 class PostProcessingOptimisation(TransformPass):
@@ -85,7 +92,9 @@ class PostProcessingOptimisation(TransformPass):
     Better pass name/id ?
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+    ):
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
@@ -115,6 +124,9 @@ class PostProcessingOptimisation(TransformPass):
                 ):
                     discarded.append(pp)
         builder.instructions = [val for val in builder.instructions if val not in discarded]
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, len(builder.instructions)
+        )
 
 
 @dataclass
@@ -138,6 +150,7 @@ class InputOptimisation(TransformPass):
         self,
         ir: QatIR,
         res_mgr: ResultManager,
+        met_mgr: MetricsManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
@@ -149,12 +162,14 @@ class InputOptimisation(TransformPass):
         if compiler_config.optimizations is None:
             compiler_config.optimizations = get_optimizer_config(language)
         if language in (Languages.Qasm2, Languages.Qasm3):
-            program = self.run_qasm_optimisation(program, compiler_config.optimizations)
+            program = self.run_qasm_optimisation(
+                program, compiler_config.optimizations, met_mgr
+            )
             optimisation_result.optimised_circuit = program
         ir.value = program
         res_mgr.add(optimisation_result)
 
-    def run_qasm_optimisation(self, qasm_string, optimizations, *args, **kwargs):
+    def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
         """Extracted from DefaultOptimizers.optimize_qasm"""
 
         if (
@@ -175,7 +190,7 @@ class InputOptimisation(TransformPass):
                 qasm_string, optimizations.qiskit_optimizations
             )
 
-        # self.record_metric(MetricsType.OptimizedCircuit, qasm_string)
+        met_mgr.record_metric(MetricsType.OptimizedCircuit, qasm_string)
         return qasm_string
 
     def run_qiskit_optimization(self, qasm_string, level):

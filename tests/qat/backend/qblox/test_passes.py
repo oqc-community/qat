@@ -13,6 +13,7 @@ from qat.backend.analysis_passes import (
     TriageResult,
 )
 from qat.backend.transform_passes import RepeatSanitisation, ScopeSanitisation
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -27,6 +28,7 @@ class TestAnalysisPasses:
     def test_precodegen_pass(self):
         model = get_default_echo_hardware()
         res_mgr = ResultManager()
+        met_mgr = MetricsManager()
         builder = resonator_spect(model)
 
         pipeline = (
@@ -40,7 +42,7 @@ class TestAnalysisPasses:
             | PreCodegenPass()
         )
 
-        pipeline.run(QatIR(builder), res_mgr, model)
+        pipeline.run(QatIR(builder), res_mgr, met_mgr, model)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         target_map = triage_result.target_map
@@ -55,6 +57,7 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
+        met_mgr = MetricsManager()
 
         (
             PassManager()
@@ -62,7 +65,7 @@ class TestAnalysisPasses:
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
-        ).run(QatIR(builder), res_mgr)
+        ).run(QatIR(builder), res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
