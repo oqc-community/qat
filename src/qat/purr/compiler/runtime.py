@@ -304,7 +304,7 @@ class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
 
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        self.run_pass_pipeline(QatIR(builder), res_mgr, met_mgr, self.model, self.engine)
+        self.run_pass_pipeline(QatIR(builder), res_mgr, met_mgr)
         results = fexecute(builder)
         results = self._transform_results(results, results_format, repeats)
         return self._apply_error_mitigation(results, builder, error_mitigation)

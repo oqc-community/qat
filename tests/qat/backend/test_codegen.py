@@ -350,7 +350,7 @@ class TestNewQbloxEmitter(InvokerMixin):
     def build_pass_pipeline(self, *args, **kwargs):
         return (
             PassManager()
-            | RepeatSanitisation()
+            | RepeatSanitisation(self.model)
             | ScopeSanitisation()
             | ReturnSanitisation()
             | DesugaringPass()
@@ -367,14 +367,14 @@ class TestNewQbloxEmitter(InvokerMixin):
         ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        engine = model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
 
-        self.run_pass_pipeline(ir, res_mgr, met_mgr, model)
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
         assert len(packages) == len(qubit_indices)
 
         for index in qubit_indices:
@@ -412,9 +412,10 @@ class TestNewQbloxEmitter(InvokerMixin):
         ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        engine = model.create_engine()
+        self.model = model
+        model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr, model, engine)
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
@@ -429,9 +430,9 @@ class TestNewQbloxEmitter(InvokerMixin):
         injectors = DeviceInjectors(static_dus)
         try:
             injectors.inject()
-            self.run_pass_pipeline(ir, res_mgr, met_mgr, model)
+            self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
-            packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+            packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
             assert len(packages) == 2 * len(qubit_indices)
 
             for index in qubit_indices:

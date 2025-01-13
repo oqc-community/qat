@@ -4,7 +4,7 @@ import itertools
 
 import numpy as np
 
-from qat.ir.pass_base import QatIR, TransformPass
+from qat.ir.pass_base import QatIR, TransformPass, get_hardware_model
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -46,6 +46,9 @@ class ScopeSanitisation(TransformPass):
 
 
 class RepeatSanitisation(TransformPass):
+    def __init__(self, model: QuantumHardwareModel = None):
+        self.model = model
+
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Fixes repeat instructions if any with default values from the HW model
@@ -56,15 +59,7 @@ class RepeatSanitisation(TransformPass):
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        model = next((a for a in args if isinstance(a, QuantumHardwareModel)), None)
-
-        if not model:
-            model = kwargs.get("model", None)
-
-        if not model or not isinstance(model, QuantumHardwareModel):
-            raise ValueError(
-                f"Expected to find an instance of {QuantumHardwareModel} in arguments list, but got {model} instead"
-            )
+        model = self.model or get_hardware_model(args, kwargs)
 
         repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
         if repeats:

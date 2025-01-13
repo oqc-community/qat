@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+from contextlib import nullcontext as does_not_raise
 from copy import deepcopy
 
 import numpy as np
+import pytest
 
 from qat.backend.analysis_passes import (
     BindingPass,
@@ -25,15 +27,22 @@ from tests.qat.utils.builder_nuggets import resonator_spect
 
 
 class TestAnalysisPasses:
-    def test_precodegen_pass(self):
-        model = get_default_echo_hardware()
+    @pytest.mark.parametrize(
+        "init_model, run_model, context",
+        [
+            (None, get_default_echo_hardware(), pytest.warns(DeprecationWarning)),
+            (hw := get_default_echo_hardware(), hw, does_not_raise()),
+            (get_default_echo_hardware(), None, does_not_raise()),
+        ],
+    )
+    def test_precodegen_pass(self, init_model, run_model, context):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        builder = resonator_spect(model)
+        builder = resonator_spect(init_model or run_model)
 
         pipeline = (
             PassManager()
-            | RepeatSanitisation()
+            | RepeatSanitisation(init_model)
             | ScopeSanitisation()
             | TriagePass()
             | BindingPass()
@@ -42,7 +51,11 @@ class TestAnalysisPasses:
             | PreCodegenPass()
         )
 
-        pipeline.run(QatIR(builder), res_mgr, met_mgr, model)
+        with context:
+            if run_model:
+                pipeline.run(QatIR(builder), res_mgr, met_mgr, run_model)
+            else:
+                pipeline.run(QatIR(builder), res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         target_map = triage_result.target_map

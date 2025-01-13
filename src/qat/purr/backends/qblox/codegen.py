@@ -18,6 +18,7 @@ from qat.backend.analysis_passes import (
 )
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.graph import ControlFlowGraph
+from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
 from qat.ir.result_base import ResultManager
 from qat.purr.backends.qblox.config import SequencerConfig
@@ -1133,9 +1134,9 @@ class NewQbloxEmitter(InvokerMixin):
         return PassManager() | PreCodegenPass() | CFGPass()
 
     def emit_packages(
-        self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+        self, builder: InstructionBuilder, res_mgr: ResultManager, met_mgr: MetricsManager
     ) -> List[QbloxPackage]:
-        self.run_pass_pipeline(builder, res_mgr, *args, **kwargs)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
