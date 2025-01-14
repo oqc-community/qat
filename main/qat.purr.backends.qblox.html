@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.purr.backends.qblox.analysis_passes module" href="qat.purr.backends.qblox.analysis_passes.html" />
+    <link rel="next" title="qat.purr.backends.qblox.algorithm module" href="qat.purr.backends.qblox.algorithm.html" />
     <link rel="prev" title="qat.purr.backends.calibrations.remote module" href="qat.purr.backends.calibrations.remote.html" /> 
 </head>
 
@@ -91,13 +91,21 @@
 </ul>
 </li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html">qat.purr.backends.qblox.validation_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
 </li>
@@ -213,11 +221,70 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html#qat.purr.backends.qblox.algorithm.stable_partition"><code class="docutils literal notranslate"><span class="pre">stable_partition()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass"><code class="docutils literal notranslate"><span class="pre">BindingPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound"><code class="docutils literal notranslate"><span class="pre">BindingPass.extract_iter_bound()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass.run"><code class="docutils literal notranslate"><span class="pre">BindingPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult"><code class="docutils literal notranslate"><span class="pre">BindingResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult.iter_bound_results"><code class="docutils literal notranslate"><span class="pre">BindingResult.iter_bound_results</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult.rw_results"><code class="docutils literal notranslate"><span class="pre">BindingResult.rw_results</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult.scoping_results"><code class="docutils literal notranslate"><span class="pre">BindingResult.scoping_results</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGPass"><code class="docutils literal notranslate"><span class="pre">CFGPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGPass.run"><code class="docutils literal notranslate"><span class="pre">CFGPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGResult"><code class="docutils literal notranslate"><span class="pre">CFGResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGResult.cfg"><code class="docutils literal notranslate"><span class="pre">CFGResult.cfg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound"><code class="docutils literal notranslate"><span class="pre">IterBound</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.count"><code class="docutils literal notranslate"><span class="pre">IterBound.count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.end"><code class="docutils literal notranslate"><span class="pre">IterBound.end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.start"><code class="docutils literal notranslate"><span class="pre">IterBound.start</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.step"><code class="docutils literal notranslate"><span class="pre">IterBound.step</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass"><code class="docutils literal notranslate"><span class="pre">QbloxLegalisationPass</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps"><code class="docutils literal notranslate"><span class="pre">QbloxLegalisationPass.freq_as_steps()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps"><code class="docutils literal notranslate"><span class="pre">QbloxLegalisationPass.phase_as_steps()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run"><code class="docutils literal notranslate"><span class="pre">QbloxLegalisationPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ReadWriteResult"><code class="docutils literal notranslate"><span class="pre">ReadWriteResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ReadWriteResult.reads"><code class="docutils literal notranslate"><span class="pre">ReadWriteResult.reads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ReadWriteResult.writes"><code class="docutils literal notranslate"><span class="pre">ReadWriteResult.writes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ScopingResult"><code class="docutils literal notranslate"><span class="pre">ScopingResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ScopingResult.scope2symbols"><code class="docutils literal notranslate"><span class="pre">ScopingResult.scope2symbols</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ScopingResult.symbol2scopes"><code class="docutils literal notranslate"><span class="pre">ScopingResult.symbol2scopes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TILegalisationPass"><code class="docutils literal notranslate"><span class="pre">TILegalisationPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.decompose_freq"><code class="docutils literal notranslate"><span class="pre">TILegalisationPass.decompose_freq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run"><code class="docutils literal notranslate"><span class="pre">TILegalisationPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriagePass"><code class="docutils literal notranslate"><span class="pre">TriagePass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriagePass.run"><code class="docutils literal notranslate"><span class="pre">TriagePass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult"><code class="docutils literal notranslate"><span class="pre">TriageResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.acquire_map"><code class="docutils literal notranslate"><span class="pre">TriageResult.acquire_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.assigns"><code class="docutils literal notranslate"><span class="pre">TriageResult.assigns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map"><code class="docutils literal notranslate"><span class="pre">TriageResult.pp_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.returns"><code class="docutils literal notranslate"><span class="pre">TriageResult.returns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.rp_map"><code class="docutils literal notranslate"><span class="pre">TriageResult.rp_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.sweeps"><code class="docutils literal notranslate"><span class="pre">TriageResult.sweeps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.target_map"><code class="docutils literal notranslate"><span class="pre">TriageResult.target_map</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -302,6 +369,16 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.calculate_duration"><code class="docutils literal notranslate"><span class="pre">calculate_duration()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_phase_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_phase_arguments()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_set_frequency_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_set_frequency_arguments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal"><code class="docutils literal notranslate"><span class="pre">DfsTraversal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.clear"><code class="docutils literal notranslate"><span class="pre">DfsTraversal.clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.enter"><code class="docutils literal notranslate"><span class="pre">DfsTraversal.enter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.exit"><code class="docutils literal notranslate"><span class="pre">DfsTraversal.exit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.run"><code class="docutils literal notranslate"><span class="pre">DfsTraversal.run()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a><ul>
@@ -542,6 +619,26 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock"><code class="docutils literal notranslate"><span class="pre">BasicBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.head"><code class="docutils literal notranslate"><span class="pre">BasicBlock.head()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.is_empty"><code class="docutils literal notranslate"><span class="pre">BasicBlock.is_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.iterator"><code class="docutils literal notranslate"><span class="pre">BasicBlock.iterator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.tail"><code class="docutils literal notranslate"><span class="pre">BasicBlock.tail()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.get_or_create_edge"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.get_or_create_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.get_or_create_node"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.get_or_create_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.in_edges"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.in_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.in_nbrs"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.in_nbrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.out_edges"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.out_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.out_nbrs"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph.out_nbrs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.Flow"><code class="docutils literal notranslate"><span class="pre">Flow</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode"><code class="docutils literal notranslate"><span class="pre">Opcode</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ACQUIRE"><code class="docutils literal notranslate"><span class="pre">Opcode.ACQUIRE</span></code></a></li>
@@ -648,6 +745,126 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager"><code class="docutils literal notranslate"><span class="pre">MetricsManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.are_enabled"><code class="docutils literal notranslate"><span class="pre">MetricsManager.are_enabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.as_dict"><code class="docutils literal notranslate"><span class="pre">MetricsManager.as_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.enable"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.enable_metrics"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enable_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.enabled_metrics"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enabled_metrics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.get_metric"><code class="docutils literal notranslate"><span class="pre">MetricsManager.get_metric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.merge"><code class="docutils literal notranslate"><span class="pre">MetricsManager.merge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.model_config"><code class="docutils literal notranslate"><span class="pre">MetricsManager.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_circuit"><code class="docutils literal notranslate"><span class="pre">MetricsManager.optimized_circuit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count"><code class="docutils literal notranslate"><span class="pre">MetricsManager.optimized_instruction_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.record_metric"><code class="docutils literal notranslate"><span class="pre">MetricsManager.record_metric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.validate_all_fields_exist"><code class="docutils literal notranslate"><span class="pre">MetricsManager.validate_all_fields_exist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass"><code class="docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass.run"><code class="docutils literal notranslate"><span class="pre">AnalysisPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin.run_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.run_pass_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassConcept"><code class="docutils literal notranslate"><span class="pre">PassConcept</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassConcept.run"><code class="docutils literal notranslate"><span class="pre">PassConcept.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassInfoMixin"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassManager"><code class="docutils literal notranslate"><span class="pre">PassManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassManager.add"><code class="docutils literal notranslate"><span class="pre">PassManager.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassManager.run"><code class="docutils literal notranslate"><span class="pre">PassManager.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassModel"><code class="docutils literal notranslate"><span class="pre">PassModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassModel.run"><code class="docutils literal notranslate"><span class="pre">PassModel.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR"><code class="docutils literal notranslate"><span class="pre">QatIR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR.value"><code class="docutils literal notranslate"><span class="pre">QatIR.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.TransformPass"><code class="docutils literal notranslate"><span class="pre">TransformPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.TransformPass.run"><code class="docutils literal notranslate"><span class="pre">TransformPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.ValidationPass"><code class="docutils literal notranslate"><span class="pre">ValidationPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.ValidationPass.run"><code class="docutils literal notranslate"><span class="pre">ValidationPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.get_hardware_model"><code class="docutils literal notranslate"><span class="pre">get_hardware_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultConcept"><code class="docutils literal notranslate"><span class="pre">ResultConcept</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.value()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager"><code class="docutils literal notranslate"><span class="pre">ResultManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.add"><code class="docutils literal notranslate"><span class="pre">ResultManager.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.lookup_by_type"><code class="docutils literal notranslate"><span class="pre">ResultManager.lookup_by_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.results"><code class="docutils literal notranslate"><span class="pre">ResultManager.results</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.update"><code class="docutils literal notranslate"><span class="pre">ResultManager.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultModel"><code class="docutils literal notranslate"><span class="pre">ResultModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultModel.value"><code class="docutils literal notranslate"><span class="pre">ResultModel.value</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass"><code class="docutils literal notranslate"><span class="pre">DesugaringPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass.run"><code class="docutils literal notranslate"><span class="pre">DesugaringPass.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PostProcessingOptimisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation.run"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ScopeSanitisation"><code class="docutils literal notranslate"><span class="pre">ScopeSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ScopeSanitisation.run"><code class="docutils literal notranslate"><span class="pre">ScopeSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html">qat.purr.backends.qblox.validation_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation.run"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_acquisitions"><code class="docutils literal notranslate"><span class="pre">plot_acquisitions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_packages"><code class="docutils literal notranslate"><span class="pre">plot_packages()</span></code></a></li>
@@ -664,7 +881,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.purr.backends.calibrations.remote.html" class="btn btn-neutral float-left" title="qat.purr.backends.calibrations.remote module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.purr.backends.qblox.analysis_passes.html" class="btn btn-neutral float-right" title="qat.purr.backends.qblox.analysis_passes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.purr.backends.qblox.algorithm.html" class="btn btn-neutral float-right" title="qat.purr.backends.qblox.algorithm module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
