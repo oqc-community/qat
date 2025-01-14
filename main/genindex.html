@@ -98,6 +98,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
@@ -610,14 +611,14 @@
 </li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.BlackmanWaveform">BlackmanWaveform (class in qat.purr.compiler.waveforms)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.block_size">block_size (PhysicalChannel attribute)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size">(PulseChannel property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.block_time">block_time (PhysicalChannel property)</a>
 
       <ul>
@@ -634,6 +635,8 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.build_generated_name">build_generated_name() (in module qat.purr.compiler.instructions)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_hardware_model_from_config_csv">build_hardware_model_from_config_csv() (in module qat.purr.backends.qblox.loader)</a>
+</li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.build_lucy_hardware">build_lucy_hardware() (in module qat.purr.backends.live)</a>
 </li>
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline">build_pass_pipeline() (InvokerMixin method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin.build_pass_pipeline">[1]</a>
@@ -649,6 +652,10 @@
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_physical_channel_buffers">build_physical_channel_buffers() (QuantumExecutionEngine method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_pulse_channel_buffers">build_pulse_channel_buffers() (QuantumExecutionEngine method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qcm_rf_config">build_qcm_rf_config() (in module qat.purr.backends.qblox.loader)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qrm_rf_config">build_qrm_rf_config() (in module qat.purr.backends.qblox.loader)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.build_qubit">build_qubit() (in module qat.purr.compiler.devices)</a>
 
@@ -2800,6 +2807,8 @@
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#module-qat.purr.backends.qblox.live">qat.purr.backends.qblox.live</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.loader.html#module-qat.purr.backends.qblox.loader">qat.purr.backends.qblox.loader</a>
+</li>
         <li><a href="qat.purr.backends.qblox.metrics_base.html#module-qat.purr.backends.qblox.metrics_base">qat.purr.backends.qblox.metrics_base</a>
 </li>
         <li><a href="qat.purr.backends.qblox.pass_base.html#module-qat.purr.backends.qblox.pass_base">qat.purr.backends.qblox.pass_base</a>
@@ -3887,6 +3896,13 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.backends.qblox.loader
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.loader.html#module-qat.purr.backends.qblox.loader">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.backends.qblox.metrics_base
 
       <ul>
@@ -3998,6 +4014,8 @@
         <li><a href="qat.purr.compiler.emitter.html#module-qat.purr.compiler.emitter">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.error_mitigation
 
@@ -4005,8 +4023,6 @@
         <li><a href="qat.purr.compiler.error_mitigation.html#module-qat.purr.compiler.error_mitigation">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.error_mitigation.readout_mitigation
 
