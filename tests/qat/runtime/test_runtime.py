@@ -1,9 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import AnalysisPass, QatIR, TransformPass, ValidationPass
-from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import (
+    AnalysisPass,
+    QatIR,
+    TransformPass,
+    ValidationPass,
+)
+from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.runtime import NewQuantumRuntime
 
 from tests.qat.utils.builder_nuggets import resonator_spect

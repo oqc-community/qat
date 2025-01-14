@@ -5,25 +5,26 @@ from typing import Dict, List
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.backend.analysis_passes import (
+from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
+from qat.purr.backends.live_devices import ControlHardware
+from qat.purr.backends.qblox.algorithm import stable_partition
+from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
+    QbloxLegalisationPass,
     TILegalisationPass,
     TriagePass,
     TriageResult,
 )
-from qat.backend.transform_passes import (
+from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
+from qat.purr.backends.qblox.result_base import ResultManager
+from qat.purr.backends.qblox.transform_passes import (
     DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
-from qat.ir.result_base import ResultManager
-from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
-from qat.purr.backends.live_devices import ControlHardware
-from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
-from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
 from qat.purr.backends.utilities import get_axis_map
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import (
@@ -42,7 +43,6 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.runtime import NewQuantumRuntime
 from qat.purr.utils.logging_utils import log_duration
-from qat.utils.algorithm import stable_partition
 
 
 class QbloxLiveHardwareModel(LiveHardwareModel):

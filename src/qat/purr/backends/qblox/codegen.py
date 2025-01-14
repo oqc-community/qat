@@ -8,7 +8,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from qat.backend.analysis_passes import (
+from qat.purr.backends.qblox.analysis_passes import (
     BindingResult,
     CFGPass,
     CFGResult,
@@ -16,14 +16,14 @@ from qat.backend.analysis_passes import (
     ReadWriteResult,
     TriageResult,
 )
-from qat.backend.codegen_base import DfsTraversal
-from qat.backend.graph import ControlFlowGraph
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
-from qat.ir.result_base import ResultManager
+from qat.purr.backends.qblox.codegen_base import DfsTraversal
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
+from qat.purr.backends.qblox.graph import ControlFlowGraph
 from qat.purr.backends.qblox.ir import Opcode, Sequence, SequenceBuilder
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
+from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType

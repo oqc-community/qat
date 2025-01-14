@@ -14,11 +14,17 @@ from compiler_config.config import (
 )
 
 from qat import qatconfig
-from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingOptimisation
-from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import InvokerMixin, PassManager, QatIR
-from qat.ir.result_base import ResultManager
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
+from qat.purr.backends.qblox.result_base import ResultManager
+from qat.purr.backends.qblox.transform_passes import (
+    PhaseOptimisation,
+    PostProcessingOptimisation,
+)
+from qat.purr.backends.qblox.validation_passes import (
+    InstructionValidation,
+    ReadoutValidation,
+)
 from qat.purr.compiler.builders import (
     FluidBuilderWrapper,
     InstructionBuilder,

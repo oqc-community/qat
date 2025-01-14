@@ -6,21 +6,21 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from qat.backend.analysis_passes import (
+from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
     BindingResult,
     IterBound,
+    QbloxLegalisationPass,
     TILegalisationPass,
     TriagePass,
     TriageResult,
 )
-from qat.backend.transform_passes import RepeatSanitisation, ScopeSanitisation
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import PassManager, QatIR
-from qat.ir.result_base import ResultManager
-from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.backends.qblox.analysis_passes import QbloxLegalisationPass
 from qat.purr.backends.qblox.codegen import PreCodegenPass, PreCodegenResult
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import PassManager, QatIR
+from qat.purr.backends.qblox.result_base import ResultManager
+from qat.purr.backends.qblox.transform_passes import RepeatSanitisation, ScopeSanitisation
 from qat.purr.compiler.instructions import DeviceUpdate
 
 from tests.qat.utils.builder_nuggets import resonator_spect
