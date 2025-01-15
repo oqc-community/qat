@@ -21,6 +21,8 @@ from qat.purr.backends.qblox.device import (
     QbloxPhysicalBaseband,
     QbloxPhysicalChannel,
 )
+from qat.purr.backends.qblox.execution import CompositeControlHardware
+from qat.purr.backends.qblox.instrument_base import InstrumentModel, LeafInstrument
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
@@ -224,3 +226,22 @@ def build_hardware_model_from_config_csv(file_path: str):
     # calibration_file_path = f"{os.path.splitext(os.path.basename(file_path))[0]}"
     # model.save_calibration_to_file(calibration_file_path, use_cwd=True)
     return model
+
+
+def parse_control_hardware(clusters_csv: str):
+    """
+    Builds a ControlHardware object wrapping an arbitrary fleet of Qblox clusters defined as CSV
+    """
+
+    if not os.path.exists(clusters_csv):
+        raise ValueError(f"File '{clusters_csv}' not found!")
+
+    with open(clusters_csv) as f:
+        reader = csv.DictReader(f)
+        clusters = [InstrumentModel.model_validate(row) for row in reader]
+
+    control_hardware = CompositeControlHardware()
+    for cluster in clusters:
+        control_hardware.add(LeafInstrument(cluster))
+
+    return control_hardware
