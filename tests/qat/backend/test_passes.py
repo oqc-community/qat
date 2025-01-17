@@ -149,7 +149,14 @@ class TestAnalysisPasses:
             iter_bound_result = binding_result.iter_bound_results[target]
 
             assert len(scoping_result.scope2symbols) == len(sweeps) + len(repeats)
+
             sweeps = [inst for inst in instructions if isinstance(inst, Sweep)]
+            device_updates = set(
+                inst
+                for inst in instructions
+                if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
+            )
+            acquires = [inst for inst in instructions if isinstance(inst, Acquire)]
             end_sweeps = [inst for inst in instructions if isinstance(inst, EndSweep)]
 
             iter_bounds = {
@@ -157,6 +164,12 @@ class TestAnalysisPasses:
                 for inst in sweeps
                 for name, value in inst.variables.items()
             }
+
+            for inst in sweeps:
+                iter_name = f"sweep_{hash(inst)}"
+                count = len(next(iter(inst.variables.values())))
+                iter_bounds[iter_name] = IterBound(start=1, step=1, end=count, count=count)
+
             for inst in repeats:
                 name = f"repeat_{hash(inst)}"
                 iter_bounds[name] = IterBound(
@@ -180,19 +193,21 @@ class TestAnalysisPasses:
                     assert scope[1] in end_sweeps + end_repeats
                 assert symbol in iter_bounds
 
-            device_updates = set(
-                inst
-                for inst in instructions
-                if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
-            )
-            acquires = set(inst for inst in instructions if isinstance(inst, Acquire))
-            assert set(rw_result.reads.keys()) == {
-                inst.value.name for inst in device_updates
-            }
-            for inst in acquires:
-                assert inst.output_variable in set(rw_result.writes.keys())
+            if device_updates:
+                assert {inst.value.name for inst in device_updates} <= set(
+                    rw_result.reads.keys()
+                )
+
+            if acquires:
+                assert {f"acquire_{hash(inst)}" for inst in acquires} <= set(
+                    rw_result.reads.keys()
+                )
+
             for name in iter_bounds:
-                assert name in set(rw_result.writes.keys())
+                # name is read => name is writen to
+                assert (name not in set(rw_result.reads.keys())) or (
+                    name in set(rw_result.writes.keys())
+                )
 
     def test_ti_legalisation_pass(self):
         model = get_default_echo_hardware()

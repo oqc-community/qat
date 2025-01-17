@@ -137,7 +137,7 @@ class TestQbloxEmitter:
         assert not pkg.sequence.waveforms
         assert qubit.pulse_measure["shape"] == PulseShapeType.SQUARE
         assert (
-            f"set_awg_offs {i_offs_steps},0\nwait {int(delay*1e9)}\nacquire 0,R0,{measure_width}\nset_awg_offs 0,0"
+            f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay*1e9)}\nacquire 0,R0,{measure_width}\nset_awg_offs 0,0"
             in pkg.sequence.program
         )
 

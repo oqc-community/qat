@@ -4,6 +4,8 @@ import itertools
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
+from functools import reduce
+from operator import mul
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -246,11 +248,19 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
+                    iter_name = f"sweep_{hash(inst)}"
+                    count = len(next(iter(inst.variables.values())))
+                    scoping_result.scope2symbols[scope].add(iter_name)
+                    scoping_result.symbol2scopes[iter_name].append(scope)
+                    iter_bound_result[iter_name] = IterBound(
+                        start=1, step=1, end=count, count=count
+                    )
+                    rw_result.writes[iter_name].append(inst)
+
                     for name, value in inst.variables.items():
                         scoping_result.scope2symbols[scope].add(name)
                         scoping_result.symbol2scopes[name].append(scope)
                         iter_bound_result[name] = self.extract_iter_bound(value)
-                        rw_result.writes[name].append(inst)
                 elif isinstance(inst, Repeat):
                     stack.append(inst)
                     scope = (inst, None)
@@ -260,14 +270,14 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
-                    name = f"repeat_{hash(inst)}"
+                    iter_name = f"repeat_{hash(inst)}"
                     count = inst.repeat_count
-                    scoping_result.scope2symbols[scope].add(name)
-                    scoping_result.symbol2scopes[name].append(scope)
-                    iter_bound_result[name] = IterBound(
+                    scoping_result.scope2symbols[scope].add(iter_name)
+                    scoping_result.symbol2scopes[iter_name].append(scope)
+                    iter_bound_result[iter_name] = IterBound(
                         start=1, step=1, end=count, count=count
                     )
-                    rw_result.writes[name].append(inst)
+                    rw_result.writes[iter_name].append(inst)
                 elif isinstance(inst, (EndSweep, EndRepeat)):
                     delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
                     try:
@@ -294,19 +304,45 @@ class BindingPass(AnalysisPass):
                             (delimiter, inst) if s == scope else s for s in scopes
                         ]
                 elif isinstance(inst, Acquire):
-                    rw_result.writes[inst.output_variable].append(inst)
+                    sweeps = [
+                        (s, iter_bound_result[next(iter(s.variables.keys()))].count)
+                        for s in stack
+                        if isinstance(s, Sweep)
+                    ]
+
+                    # Acquisition mem addressing
+                    iter_name = f"acquire_{hash(inst)}"
+
+                    # An acquire reads the "memory index"
+                    rw_result.reads[iter_name].append(inst)
+
+                    if sweeps:
+                        loop_nest_size = reduce(mul, [c for (_, c) in sweeps], 1)
+                        iter_bound_result[iter_name] = IterBound(
+                            start=0, step=1, end=loop_nest_size, count=loop_nest_size
+                        )
+
+                        # Innermost sweep writes to the "memory index"
+                        innermost_sweep, _ = sweeps[-1]
+                        rw_result.writes[iter_name].append(innermost_sweep)
                 elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
-                    if not (
-                        inst.value.name in scoping_result.symbol2scopes
-                        and [
-                            (s, e)
-                            for (s, e) in scoping_result.symbol2scopes[inst.value.name]
-                            if s in stack
-                        ]
-                    ):
+                    defining_sweep = next(
+                        (
+                            s
+                            for s in stack[::-1]
+                            if isinstance(s, Sweep) and inst.value.name in s.variables
+                        ),
+                        None,
+                    )
+                    if not defining_sweep:
                         raise ValueError(
                             f"Variable {inst.value} referenced but no prior declaration found in target {target}"
                         )
+
+                    # Only the defining sweep writes to variable, but only on the target in question !!
+                    rw_result.writes[inst.value.name].append(defining_sweep)
+
+                    # A DeviceUpdate reads the variable named "inst.value.name"
                     rw_result.reads[inst.value.name].append(inst)
             if stack:
                 raise ValueError(
@@ -366,6 +402,8 @@ class TILegalisationPass(AnalysisPass):
                 raise NotImplementedError(
                     f"Unsupported processing of {attribute} for instruction {inst}"
                 )
+        elif isinstance(inst, Acquire):
+            return bound
         else:
             raise NotImplementedError(
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
@@ -494,6 +532,16 @@ class QbloxLegalisationPass(AnalysisPass):
                 raise NotImplementedError(
                     f"Unsupported processing of {attribute} for instruction {inst}"
                 )
+        elif isinstance(inst, Acquire):
+            num_bins = bound.count
+            if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+                raise ValueError(
+                    f"""
+                    Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                    Please reduce number of points
+                    """
+                )
+            legal_bound = bound
         else:
             raise NotImplementedError(
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"

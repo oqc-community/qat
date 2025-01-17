@@ -4,7 +4,7 @@ from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import Dict, List
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
@@ -14,6 +14,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     CFGResult,
     IterBound,
     ReadWriteResult,
+    ScopingResult,
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen_base import DfsTraversal
@@ -35,6 +36,7 @@ from qat.purr.compiler.instructions import (
     DeviceUpdate,
     FrequencyShift,
     Id,
+    Instruction,
     MeasurePulse,
     PhaseReset,
     PhaseShift,
@@ -449,31 +451,34 @@ class QbloxContext:
         return acq_index
 
     def _binned_acquisition(
-        self, delay, acq_index, num_samples, pulse_shape, i_steps, q_steps, i_index, q_index
+        self,
+        delay,
+        acq_index,
+        num_samples,
+        pulse_shape,
+        i_steps,
+        q_steps,
+        i_index,
+        q_index,
     ):
-        capped_num_samples = min(num_samples, Constants.MAX_WAIT_TIME)
         flight_nanos = int(delay * 1e9)
-        capped_flight_nanos = min(flight_nanos, Constants.MAX_WAIT_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self._wait_seconds(delay)
+            self.sequence_builder.upd_param(flight_nanos)
             self.sequence_builder.acquire(
                 acq_index,
                 self._repeat_reg,
-                capped_num_samples,
+                num_samples,
             )
-            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
-            self.sequence_builder.play(i_index, q_index, capped_flight_nanos)
-            self._wait_seconds((flight_nanos - capped_flight_nanos) / 1e9)
+            self.sequence_builder.play(i_index, q_index, flight_nanos)
             self.sequence_builder.acquire(
                 acq_index,
                 self._repeat_reg,
-                capped_num_samples,
+                num_samples,
             )
-            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
 
     def id(self):
         self.sequence_builder.nop()
@@ -505,13 +510,13 @@ class QbloxContext:
             )
             self.sequence_builder.set_awg_offs(i_offs_steps, q_offs_steps)
             self.sequence_builder.upd_param(max_duration)
-            self._wait_seconds((num_samples - max_duration) / 1e9)
+            self._wait_nanoseconds(num_samples - max_duration)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             i_index, q_index = self._register_waveform(waveform, target, pulse)
             self.sequence_builder.play(i_index, q_index, max_duration)
-            self._wait_seconds((num_samples - max_duration) / 1e9)
+            self._wait_nanoseconds(num_samples - max_duration)
 
         self._duration = self._duration + waveform.duration
         self._timeline = np.append(self._timeline, pulse)
@@ -645,11 +650,19 @@ class AllocationManager:
 class NewQbloxContext:
     def __init__(
         self,
+        scoping_result: ScopingResult,
         rw_result: ReadWriteResult,
         iter_bounds: Dict[str, IterBound],
         alloc_mgr: AllocationManager,
     ):
-        self.rw_result = rw_result
+        self.scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = (
+            scoping_result.scope2symbols
+        )
+        self.symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = (
+            scoping_result.symbol2scopes
+        )
+        self.reads: Dict[str, List[QuantumInstruction]] = rw_result.reads
+        self.writes: Dict[str, List[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr
 
@@ -822,7 +835,8 @@ class NewQbloxContext:
         return i_index, q_index
 
     def _register_acquisition(self, acquire: Acquire):
-        num_bins = self.iter_bounds[acquire.output_variable].count
+        name = f"acquire_{hash(acquire)}"
+        num_bins = self.iter_bounds[name].count
         acq_index = self._acq_index
         self.sequence_builder.add_acquisition(acquire.output_variable, acq_index, num_bins)
         self._acq_index = acq_index + 1
@@ -840,31 +854,24 @@ class NewQbloxContext:
         i_index,
         q_index,
     ):
-        capped_num_samples = min(num_samples, Constants.MAX_WAIT_TIME)
         flight_nanos = int(delay * 1e9)
-        capped_flight_nanos = min(flight_nanos, Constants.MAX_WAIT_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self._wait_seconds(delay)
+            self.sequence_builder.upd_param(flight_nanos)
             self.sequence_builder.acquire(
                 acq_index,
                 bin_reg,
-                capped_num_samples,
+                num_samples,
             )
-            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
-            self.sequence_builder.add(bin_reg, 1, bin_reg)
         else:
-            self.sequence_builder.play(i_index, q_index, capped_flight_nanos)
-            self._wait_seconds((flight_nanos - capped_flight_nanos) / 1e9)
+            self.sequence_builder.play(i_index, q_index, flight_nanos)
             self.sequence_builder.acquire(
                 acq_index,
                 bin_reg,
-                capped_num_samples,
+                num_samples,
             )
-            self._wait_seconds((num_samples - capped_num_samples) / 1e9)
-            self.sequence_builder.add(bin_reg, 1, bin_reg)
 
     def id(self):
         self.sequence_builder.nop()
@@ -896,13 +903,13 @@ class NewQbloxContext:
             )
             self.sequence_builder.set_awg_offs(i_offs_steps, q_offs_steps)
             self.sequence_builder.upd_param(max_duration)
-            self._wait_seconds((num_samples - max_duration) / 1e9)
+            self._wait_nanoseconds(num_samples - max_duration)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             i_index, q_index = self._register_waveform(waveform, target, pulse)
             self.sequence_builder.play(i_index, q_index, max_duration)
-            self._wait_seconds((num_samples - max_duration) / 1e9)
+            self._wait_nanoseconds(num_samples - max_duration)
 
         self._duration = self._duration + waveform.duration
         self._timeline = np.append(self._timeline, pulse)
@@ -916,7 +923,8 @@ class NewQbloxContext:
             return
 
         acq_index = self._register_acquisition(acquire)
-        bin_reg = self.alloc_mgr.registers[acquire.output_variable]
+        name = f"acquire_{hash(acquire)}"
+        bin_reg = self.alloc_mgr.registers[name]
         self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
             acquire
         )
@@ -1016,24 +1024,24 @@ class NewQbloxContext:
 
     @staticmethod
     def enter_repeat(inst: Repeat, contexts: Dict):
-        name = f"repeat_{hash(inst)}"
+        iter_name = f"repeat_{hash(inst)}"
         for context in contexts.values():
-            register = context.alloc_mgr.registers[name]
-            label = context.alloc_mgr.labels[name]
-            bound = context.iter_bounds[name]
-
+            register = context.alloc_mgr.registers[iter_name]
+            bound = context.iter_bounds[iter_name]
             context.sequence_builder.move(bound.start, register)
+
+            label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.label(label)
             context.sequence_builder.reset_ph()
             context.sequence_builder.upd_param(Constants.GRID_TIME)
 
     @staticmethod
     def exit_repeat(inst: Repeat, contexts: Dict):
-        name = f"repeat_{hash(inst)}"
+        iter_name = f"repeat_{hash(inst)}"
         for context in contexts.values():
-            register = context.alloc_mgr.registers[name]
-            label = context.alloc_mgr.labels[name]
-            bound = context.iter_bounds[name]
+            register = context.alloc_mgr.registers[iter_name]
+            label = context.alloc_mgr.labels[iter_name]
+            bound = context.iter_bounds[iter_name]
 
             context._wait_seconds(inst.repetition_period)
             context.sequence_builder.add(register, bound.step, register)
@@ -1042,14 +1050,9 @@ class NewQbloxContext:
 
     @staticmethod
     def enter_sweep(inst: Sweep, contexts: Dict):
-        for target, context in contexts.items():
-            iter_name = f"sweep_{hash(inst)}"
-
-            register = context.alloc_mgr.registers[iter_name]
-            bound = context.iter_bounds[iter_name]
-            context.sequence_builder.move(bound.start, register)
-
-            var_names = [n for n in inst.variables if n in context.rw_result.reads]
+        iter_name = f"sweep_{hash(inst)}"
+        for context in contexts.values():
+            var_names = [n for n in inst.variables if n in context.reads] + [iter_name]
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -1060,20 +1063,17 @@ class NewQbloxContext:
 
     @staticmethod
     def exit_sweep(inst: Sweep, contexts: Dict):
+        iter_name = f"sweep_{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for n in inst.variables if n in context.rw_result.reads]
-
+            var_names = [n for (n, insts) in context.writes.items() if inst in insts]
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
                 context.sequence_builder.add(register, bound.step, register)
+                context.sequence_builder.nop()
 
-            iter_name = f"sweep_{hash(inst)}"
             register = context.alloc_mgr.registers[iter_name]
             bound = context.iter_bounds[iter_name]
-            context.sequence_builder.add(register, bound.step, register)
-            context.sequence_builder.nop()
-
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
@@ -1142,15 +1142,19 @@ class NewQbloxEmitter(InvokerMixin):
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
 
+        scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
         rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bounds: Dict[PulseChannel, Dict[str, IterBound]] = (
+        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
             binding_result.iter_bound_results
         )
         alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
         contexts = {
             t: NewQbloxContext(
-                rw_result=rw_results[t], iter_bounds=iter_bounds[t], alloc_mgr=alloc_mgrs[t]
+                scoping_result=scoping_results[t],
+                rw_result=rw_results[t],
+                iter_bounds=iter_bound_results[t],
+                alloc_mgr=alloc_mgrs[t],
             )
             for t in triage_result.target_map
         }
@@ -1200,32 +1204,6 @@ class QbloxCFGWalker(DfsTraversal):
                                 "Found a MeasurePulse but no Acquire instruction followed"
                             )
 
-                        # TODO - Move to a dedicated pass on the cfg (batching or ctrl-hw related)
-                        num_bins = 1
-                        for block in self._entered:
-                            head = block.head()
-                            if isinstance(head, Sweep):
-                                name = next(
-                                    (n for n in context.iter_bounds if n in head.variables),
-                                    f"sweep_{hash(head)}",
-                                )
-                                iter_bound = context.iter_bounds[name]
-                                num_bins *= iter_bound.count
-                            elif isinstance(head, Repeat):
-                                name = f"repeat_{hash(head)}"
-                                iter_bound = context.iter_bounds[name]
-                                num_bins *= iter_bound.count
-
-                        if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
-                            raise ValueError(
-                                f"""
-                                Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
-                                Please reduce number of points or number of shots
-                                """
-                            )
-                        context.iter_bounds[next_inst.output_variable] = IterBound(
-                            start=0, step=1, end=num_bins, count=num_bins
-                        )
                         context.measure_acquire(inst, next_inst, target)
                     elif isinstance(inst, Waveform):
                         context.waveform(inst, target)

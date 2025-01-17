@@ -21,7 +21,6 @@ from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
 from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.qblox.transform_passes import (
-    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
@@ -175,7 +174,6 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             | RepeatSanitisation(self.model)
             | ScopeSanitisation()
             | ReturnSanitisation()
-            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
@@ -215,41 +213,16 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
                 triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
                 acquire_map = triage_result.acquire_map
-                pp_map = triage_result.pp_map
                 sweeps = triage_result.sweeps
-
-                def create_sweep_iterator():
-                    switerator = SweepIterator()
-                    for sweep in sweeps:
-                        switerator.add_sweep(sweep)
-                    return switerator
+                loop_nest_shape = tuple(
+                    len(next(iter(s.variables.values()))) for s in sweeps
+                )
 
                 results = {}
                 for t, acquires in acquire_map.items():
-                    switerator = create_sweep_iterator()
                     for acq in acquires:
-                        big_response = playback_results[acq.output_variable]
-                        sweep_splits = np.split(big_response, switerator.length)
-                        switerator.reset_iteration()
-                        while not switerator.is_finished():
-                            # just to advance iteration, no need for injection
-                            # TODO - A generic loop nest model. Sth similar to SweepIterator but does not mixin injection stuff
-                            switerator.do_sweep([])
-                            response = sweep_splits[switerator.current_iteration]
-                            response_axis = get_axis_map(acq.mode, response)
-                            for pp in pp_map[acq.output_variable]:
-                                response, response_axis = self.run_post_processing(
-                                    pp, response, response_axis
-                                )
-                                handle = results.setdefault(
-                                    acq.output_variable,
-                                    np.empty(
-                                        switerator.get_results_shape(response.shape),
-                                        response.dtype,
-                                    ),
-                                )
-                                switerator.insert_result_at_sweep_position(handle, response)
-
+                        response = playback_results[acq.output_variable]
+                        results[acq.output_variable] = response.reshape(loop_nest_shape)
                 results = self._process_results(results, triage_result)
                 results = self._process_assigns(results, triage_result)
 
