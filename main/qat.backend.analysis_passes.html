@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.backend.codegen_base module" href="qat.backend.codegen_base.html" />
-    <link rel="prev" title="qat.backend package" href="qat.backend.html" /> 
+    <link rel="prev" title="qat.backend.waveform_v1.executable module" href="qat.backend.waveform_v1.executable.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,6 +52,11 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
+</ul>
+</li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.backend.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.graph.html">qat.backend.graph module</a></li>
@@ -166,6 +171,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.transform_passes.html">qat.runtime.transform_passes module</a></li>
 </ul>
 </li>
@@ -285,6 +291,35 @@ sure their usage is consistent and meaningful.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.CFGResult.cfg">
 <span class="sig-name descname"><span class="pre">cfg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.backend.graph.html#qat.backend.graph.ControlFlowGraph" title="qat.backend.graph.ControlFlowGraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlFlowGraph</span></code></a></em><a class="headerlink" href="#qat.backend.analysis_passes.CFGResult.cfg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.IntermediateFrequencyAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.IntermediateFrequencyAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>Adapted from <cite>LiveDeviceEngine.build_baseband_frequencies</cite>.</p>
+<p>Retrieves intermediate frequencies for all physical channels if they exist,
+and validates that pulse channels that share the same physical channel cannot
+have differing fixed frequencies. This pass should always follow a TriagePass,
+as information of pulse channels are needed.</p>
+<p>TODO: determine if this pass should be split into an analysis and validation
+pass.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.IntermediateFrequencyAnalysis.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.IntermediateFrequencyAnalysis.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.IntermediateFrequencyResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.IntermediateFrequencyResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin" title="qat.ir.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.IntermediateFrequencyResult.frequencies">
+<span class="sig-name descname"><span class="pre">frequencies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel" title="qat.purr.compiler.devices.PhysicalChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.IntermediateFrequencyResult.frequencies" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -418,6 +453,53 @@ carries meaning for the variable and materialises its intention.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysis</span></span><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>Analyses the durations and timings of instructions for backends that do not natively
+support synchronization across channels.</p>
+<p>During code generation for a given backend, it is often the case that we need to know the
+exactly clock cycles that instructions start, and the duration they happen for. For
+most instructions, this is trivial and is often part of the instruction’s definition.
+However, this is less clear for the <cite>Synchronize</cite> instruction, which aims to bring all
+targeted channels to the same clock cycle. Calculating this requires knowledge of
+how much time has elapsed up until this point. Once this is known, delays can be added
+to all other channels to bring them in sync.</p>
+<p>This pass calculates the timings of each instruction by first calculating the timings of
+non-synchronize instructions, and then iteratively adapting for each <cite>Synchronize</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysis.calculate_non_sync_durations">
+<span class="sig-name descname"><span class="pre">calculate_non_sync_durations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">triage_results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysis.calculate_non_sync_durations" title="Link to this definition"></a></dt>
+<dd><p>Calculates the durations for each instruction that is not a synchronize. Durations
+are rounded to be integer multiples of pulse channel sample times.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysis.calculate_sync_durations">
+<span class="sig-name descname"><span class="pre">calculate_sync_durations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">triage_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysis.calculate_sync_durations" title="Link to this definition"></a></dt>
+<dd><p>Using the durations from all instructions that are not synchronize, this will
+incrementely determine the time for each sweep for each targeted pulse channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysis.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysis.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysisResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimelineAnalysisResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">durations=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysisResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin" title="qat.ir.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TimelineAnalysisResult.durations">
+<span class="sig-name descname"><span class="pre">durations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.TimelineAnalysisResult.durations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.TriagePass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriagePass</span></span><a class="headerlink" href="#qat.backend.analysis_passes.TriagePass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
@@ -435,7 +517,7 @@ legacy code.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.TriageResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TriageResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syncs=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.analysis_passes.TriageResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin" title="qat.ir.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.TriageResult.acquire_map">
@@ -468,6 +550,11 @@ legacy code.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.analysis_passes.TriageResult.syncs">
+<span class="sig-name descname"><span class="pre">syncs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.TriageResult.syncs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.analysis_passes.TriageResult.target_map">
 <span class="sig-name descname"><span class="pre">target_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.backend.analysis_passes.TriageResult.target_map" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -481,7 +568,7 @@ legacy code.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.backend.html" class="btn btn-neutral float-left" title="qat.backend package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.backend.waveform_v1.executable.html" class="btn btn-neutral float-left" title="qat.backend.waveform_v1.executable module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.backend.codegen_base.html" class="btn btn-neutral float-right" title="qat.backend.codegen_base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
