@@ -98,7 +98,9 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html">qat.purr.backends.qblox.instrument_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
@@ -248,7 +250,18 @@
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.AcquireMode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.AcquireMode" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>An enumeration.</p>
+<p>The <cite>AcquireMode</cite> is used to specify the type of acquisition at the level of the control
+hardware.</p>
+<p>Note that different backends will only allow selected acquisition modes.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>RAW</cite>: Returns the time-series acquisition data for each shot</p></li>
+<li><p><cite>SCOPE</cite>: Returns the time-series acquisition data where each point is averaged over</p></li>
+</ul>
+<p>the number of shots
+- <cite>INTEGRATOR</cite>: Down-conversion and integration of the acquisition data has occurred on
+the hardware so that a single data point is returned for each shot</p>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.AcquireMode.INTEGRATOR">
 <span class="sig-name descname"><span class="pre">INTEGRATOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'integrator'</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.AcquireMode.INTEGRATOR" title="Link to this definition"></a></dt>
@@ -524,7 +537,19 @@ unit.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PostProcessType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PostProcessType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>An enumeration.</p>
+<p><cite>PostProcessType</cite> is used in a <cite>PostProcessing</cite> instruction to determine how readouts
+should be processed. It describes a type of classical post-processing:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>DOWN_CONVERT</cite>: Down-converts the readout measurement, should only be used along the</p></li>
+</ul>
+<p>axis <cite>ProcessAxis.TIME</cite>.
+- <cite>MEAN</cite>: Takes an average over the given axis.
+- <cite>LINEAR_MAP_COMPLEX_TO_REAL</cite>: Maps the (complex) measured value onto a (real)
+z-projection using a supplied linear mapping.
+- <cite>DISCRIMINATE</cite>: Converts a z-projection to a classical bit by comparison with a
+supplied discrimination threshold.</p>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE">
 <span class="sig-name descname"><span class="pre">DISCRIMINATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'discriminate'</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE" title="Link to this definition"></a></dt>
@@ -569,7 +594,16 @@ happen in the FPGA’s or a software post-process.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.ProcessAxis">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProcessAxis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.ProcessAxis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>An enumeration.</p>
+<p><cite>ProcessAxis</cite> is used during classical post-processing of readouts. It specifies the axis
+which the post-processing should occur on. Often used in conjunction with the
+<cite>AcquireMode</cite> to determine the correct method for post-processing.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>TIME</cite>: Instructs the post-processing to be performed over the time-series data</p></li>
+</ul>
+<p>returned from a readout.
+- <cite>SEQUENCE</cite>: Instructs the post-processing to be performed over the shots.</p>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.ProcessAxis.SEQUENCE">
 <span class="sig-name descname"><span class="pre">SEQUENCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sequence'</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.ProcessAxis.SEQUENCE" title="Link to this definition"></a></dt>

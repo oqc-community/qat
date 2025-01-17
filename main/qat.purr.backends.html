@@ -98,7 +98,9 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html">qat.purr.backends.qblox.instrument_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
@@ -308,10 +310,22 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxResonator"><code class="docutils literal notranslate"><span class="pre">QbloxResonator</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.CompositeControlHardware"><code class="docutils literal notranslate"><span class="pre">CompositeControlHardware</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware"><code class="docutils literal notranslate"><span class="pre">LeafControlHardware</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock"><code class="docutils literal notranslate"><span class="pre">BasicBlock</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph"><code class="docutils literal notranslate"><span class="pre">ControlFlowGraph</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.Flow"><code class="docutils literal notranslate"><span class="pre">Flow</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html">qat.purr.backends.qblox.instrument_base module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument"><code class="docutils literal notranslate"><span class="pre">CompositeInstrument</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept"><code class="docutils literal notranslate"><span class="pre">InstrumentConcept</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel"><code class="docutils literal notranslate"><span class="pre">InstrumentModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.LeafInstrument"><code class="docutils literal notranslate"><span class="pre">LeafInstrument</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a><ul>
@@ -332,6 +346,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_hardware_model_from_config_csv"><code class="docutils literal notranslate"><span class="pre">build_hardware_model_from_config_csv()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qcm_rf_config"><code class="docutils literal notranslate"><span class="pre">build_qcm_rf_config()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qrm_rf_config"><code class="docutils literal notranslate"><span class="pre">build_qrm_rf_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.parse_control_hardware"><code class="docutils literal notranslate"><span class="pre">parse_control_hardware()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a><ul>

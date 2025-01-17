@@ -19,7 +19,9 @@ Submodules
    qat.purr.backends.qblox.config
    qat.purr.backends.qblox.constants
    qat.purr.backends.qblox.device
+   qat.purr.backends.qblox.execution
    qat.purr.backends.qblox.graph
+   qat.purr.backends.qblox.instrument_base
    qat.purr.backends.qblox.ir
    qat.purr.backends.qblox.live
    qat.purr.backends.qblox.loader
