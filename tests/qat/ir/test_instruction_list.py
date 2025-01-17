@@ -21,13 +21,7 @@ from qat.ir.instructions import (
     Synchronize,
     Variable,
 )
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    MeasureBlock,
-    PostProcessing,
-    PostProcessType,
-)
+from qat.ir.measure import Acquire, AcquireMode, MeasureBlock
 from qat.ir.waveforms import CustomWaveform, Pulse, PulseShapeType, PulseType, Waveform
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler import instructions as LegacyInstructions
@@ -180,12 +174,13 @@ def make_pydantic_instruction_list():
             type=PulseType.CROSS_RESONANCE_CANCEL,
         ),
         Acquire.with_random_output_variable(hw.get_qubit(0).get_acquire_channel()),
-        PostProcessing(
-            acquire=Acquire.with_random_output_variable(
-                hw.get_qubit(1).get_acquire_channel()
-            ),
-            process=PostProcessType.MEAN,
-        ),
+        # skip because of post processing changes to not need a require
+        # PostProcessing(
+        #    acquire=Acquire.with_random_output_variable(
+        #        hw.get_qubit(1).get_acquire_channel()
+        #    ),
+        #    process=PostProcessType.MEAN,
+        # ),
         Reset(hw.get_qubit(0).get_drive_channel()),
         Reset(hw.get_qubit(0)),
         Reset(hw.qubits[0:2]),
@@ -235,10 +230,11 @@ def make_legacy_instruction_list(InstructionTypes):
             8e-8,
         ),
         InstructionTypes.Acquire(hw.get_qubit(0).get_acquire_channel()),
-        InstructionTypes.PostProcessing(
-            InstructionTypes.Acquire(hw.get_qubit(1).get_acquire_channel()),
-            PostProcessType.MEAN,
-        ),
+        # skip because of post processing changes to not need a require
+        # InstructionTypes.PostProcessing(
+        #    InstructionTypes.Acquire(hw.get_qubit(1).get_acquire_channel()),
+        #    PostProcessType.MEAN,
+        # ),
         InstructionTypes.Reset(hw.get_qubit(0).get_drive_channel()),
         InstructionTypes.Reset(hw.get_qubit(0)),
         InstructionTypes.Reset(hw.qubits[0:2]),

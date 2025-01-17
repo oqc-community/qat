@@ -14,8 +14,10 @@ from compiler_config.config import InlineResultsProcessing
 from qat.backend.graph import ControlFlowGraph
 from qat.ir.pass_base import AnalysisPass, QatIR, ResultManager
 from qat.ir.result_base import ResultInfoMixin
+from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -30,6 +32,7 @@ from qat.purr.compiler.instructions import (
     ResultsProcessing,
     Return,
     Sweep,
+    Synchronize,
     Variable,
 )
 
@@ -39,6 +42,7 @@ class TriageResult(ResultInfoMixin):
     sweeps: List[Sweep] = field(default_factory=list)
     returns: List[Return] = field(default_factory=list)
     assigns: List[Assign] = field(default_factory=list)
+    syncs: List[Dict[PulseChannel, int]] = field(default_factory=list)
     target_map: Dict[PulseChannel, List[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
@@ -82,6 +86,10 @@ class TriagePass(AnalysisPass):
         for inst in builder.instructions:
             # Dissect by target
             if isinstance(inst, QuantumInstruction):
+                if isinstance(inst, Synchronize):
+                    result.syncs.append(
+                        {qt: len(result.target_map[qt]) for qt in inst.quantum_targets}
+                    )
                 for qt in inst.quantum_targets:
                     if isinstance(qt, Acquire):
                         for aqt in qt.quantum_targets:
@@ -580,3 +588,157 @@ class LifetimePass(AnalysisPass):
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         pass
+
+
+@dataclass
+class TimelineAnalysisResult(ResultInfoMixin):
+    durations: Dict[PulseChannel, List[int]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+
+
+class TimelineAnalysis(AnalysisPass):
+    """
+    Analyses the durations and timings of instructions for backends that do not natively
+    support synchronization across channels.
+
+    During code generation for a given backend, it is often the case that we need to know the
+    exactly clock cycles that instructions start, and the duration they happen for. For
+    most instructions, this is trivial and is often part of the instruction's definition.
+    However, this is less clear for the `Synchronize` instruction, which aims to bring all
+    targeted channels to the same clock cycle. Calculating this requires knowledge of
+    how much time has elapsed up until this point. Once this is known, delays can be added
+    to all other channels to bring them in sync.
+
+    This pass calculates the timings of each instruction by first calculating the timings of
+    non-synchronize instructions, and then iteratively adapting for each `Synchronize`.
+    """
+
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        durations = self.calculate_non_sync_durations(triage_results)
+        durations = self.calculate_sync_durations(triage_results, durations)
+
+        result = TimelineAnalysisResult()
+        result.durations = {
+            chan: self._durations_as_samples(chan, dur) for chan, dur in durations.items()
+        }
+
+        res_mgr.add(result)
+
+    def calculate_non_sync_durations(self, triage_results: TriageResult):
+        """
+        Calculates the durations for each instruction that is not a synchronize. Durations
+        are rounded to be integer multiples of pulse channel sample times.
+        """
+        target_map = triage_results.target_map
+        durations = {}
+        for channel in target_map:
+            channel_durations = np.array(
+                [
+                    (
+                        inst.duration
+                        if isinstance(inst, QuantumInstruction)
+                        and not isinstance(inst, Synchronize)
+                        else 0
+                    )
+                    for inst in target_map[channel]
+                ]
+            )
+            durations[channel] = self._round_durations_with_samples(
+                channel.physical_channel, channel_durations
+            )
+        return durations
+
+    def calculate_sync_durations(
+        self, triage_results: TriageResult, durations: Dict[PulseChannel, List[float]]
+    ):
+        """
+        Using the durations from all instructions that are not synchronize, this will
+        incrementely determine the time for each sweep for each targeted pulse channel.
+        """
+        syncs = triage_results.syncs
+        for sync in syncs:
+            current_durations = {
+                chan: np.sum(durations[chan][: sync[chan]]) for chan in sync
+            }
+            sync_time = max(current_durations.values())
+            for chan, current_duration in current_durations.items():
+                durations[chan][sync[chan]] = sync_time - current_duration
+        return durations
+
+    @staticmethod
+    def _round_durations_with_samples(channel: PhysicalChannel, durations: List[float]):
+        """
+        The time given by an instruction must be in integer multiples of pulse channel
+        sample times. This function returns durations as the next largest multiple.
+        """
+
+        block_numbers = np.ceil(np.round(durations / channel.block_time, decimals=4))
+        return block_numbers * channel.block_time
+
+    @staticmethod
+    def _durations_as_samples(channel: PhysicalChannel, durations: List[float]):
+        """
+        Converts a list of durations into a number of samples.
+        """
+
+        block_numbers = np.ceil(
+            np.round(durations / channel.block_time, decimals=4)
+        ).astype(np.int64)
+        return block_numbers * channel.block_size
+
+
+@dataclass
+class IntermediateFrequencyResult(ResultInfoMixin):
+    frequencies: Dict[PhysicalChannel, float]
+
+
+class IntermediateFrequencyAnalysis(AnalysisPass):
+    """
+    Adapted from `LiveDeviceEngine.build_baseband_frequencies`.
+
+    Retrieves intermediate frequencies for all physical channels if they exist,
+    and validates that pulse channels that share the same physical channel cannot
+    have differing fixed frequencies. This pass should always follow a TriagePass,
+    as information of pulse channels are needed.
+
+    TODO: determine if this pass should be split into an analysis and validation
+    pass.
+    """
+
+    def __init__(self, model: QuantumHardwareModel):
+        self.model = model
+
+    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        baseband_freqs = {}
+        baseband_freqs_fixed_if = {}
+        for pulse_channel in triage_results.target_map:
+            if pulse_channel.fixed_if:
+                baseband_freq = (
+                    pulse_channel.frequency
+                    - UPCONVERT_SIGN * pulse_channel.baseband_if_frequency
+                )
+                if (
+                    baseband_freqs_fixed_if.get(pulse_channel.physical_channel, False)
+                    and baseband_freqs[pulse_channel.physical_channel] != baseband_freq
+                ):
+                    raise ValueError(
+                        "Cannot fix the frequency for two pulse channels of different "
+                        "frequencies on the same physical channel!"
+                    )
+                baseband_freqs[pulse_channel.physical_channel] = baseband_freq
+                baseband_freqs_fixed_if[pulse_channel.physical_channel] = (
+                    pulse_channel.fixed_if
+                )
+            else:
+                if (
+                    pulse_channel.physical_channel not in baseband_freqs_fixed_if
+                    or not baseband_freqs_fixed_if[pulse_channel.physical_channel]
+                ):
+                    baseband_freqs_fixed_if[pulse_channel.physical_channel] = (
+                        pulse_channel.fixed_if
+                    )
+
+        res_mgr.add(IntermediateFrequencyResult(frequencies=baseband_freqs))

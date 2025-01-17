@@ -46,9 +46,9 @@ class TestPostProcessing:
     def test_initiate(self, pp):
         chan = self.model.get_qubit(0).get_acquire_channel()
         acquire = Acquire(chan)
-        inst = PostProcessing(acquire=acquire, process=pp)
+        inst = PostProcessing(output_variable=acquire.output_variable, process=pp)
         assert inst.process == pp
-        assert inst.acquire == acquire
+        assert inst.output_variable == acquire.output_variable
 
 
 class TestMeasureBlock:

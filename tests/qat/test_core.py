@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from random import random
 
+import numpy as np
 import pytest
 from compiler_config.config import (
     CompilerConfig,
@@ -13,9 +14,11 @@ from compiler_config.config import (
     TketOptimizations,
 )
 
+from qat.backend.waveform_v1.codegen import WaveformV1Emitter
 from qat.core import QAT
 from qat.pipelines import DefaultCompile, DefaultExecute, DefaultPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QIRFrontend
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.purr.compiler.instructions import (
@@ -374,6 +377,48 @@ class TestQATParity:
         )
         assert purr_res == qat_res
         assert purr_metrics.as_dict() == qat_metrics.as_dict()
+
+    @pytest.mark.parametrize("source_file", execution_files, ids=short_file_name)
+    def test_qat_codegen(self, request, source_file: str, hardware_model, compiler_config):
+        ir, _ = self.purr_compile(
+            request,
+            str(source_file),
+            hardware=hardware_model,
+            compiler_config=compiler_config,
+        )
+        executable = WaveformV1Emitter(hardware_model).emit(ir)
+
+        engine = hardware_model.create_engine()
+        qatfile = InstructionEmitter().emit(ir.instructions, hardware_model)
+        position_map = engine.create_duration_timeline(qatfile.instructions)
+        buffers = engine.build_pulse_channel_buffers(position_map)
+        buffers = engine.build_physical_channel_buffers(buffers)
+        acquires = engine.build_acquire_list(position_map)
+
+        assert buffers.keys() == executable.channel_data.keys()
+        for key in buffers:
+            purr_buffer = buffers[key]
+            qat_buffer = executable.channel_data[key].buffer
+            assert len(purr_buffer) == len(qat_buffer)
+            if len(purr_buffer) > 0:
+                assert np.all(purr_buffer == qat_buffer)
+
+        # Acquires require more care: purr organizes acquires by pulse channel. We have
+        # made a purposeful choice in the experimental code to organize by physical channel.
+        # Lets make sure these match up
+        for acquire_purr in acquires.values():
+            if len(acquire_purr) == 0:
+                continue
+            assert len(acquire_purr) == 1
+            acquire_purr = acquire_purr[0]
+            acquire = executable.channel_data[
+                acquire_purr.physical_channel.full_id()
+            ].acquires
+            assert len(acquire) == 1
+            acquire = acquire[0]
+            assert acquire_purr.samples == acquire.length
+            assert acquire_purr.start == acquire.position
+            assert acquire_purr.mode == acquire.mode
 
 
 class TestQATPipelineSetup:

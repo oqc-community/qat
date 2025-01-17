@@ -120,6 +120,11 @@ class Assign(Instruction):
     name: str
     value: Any
 
+    @classmethod
+    def _from_legacy(cls, legacy_assign):
+        # private as we dont want to support this in the long-term
+        return cls(name=legacy_assign.name, value=legacy_assign.value)
+
     def __repr__(self):
         return f"{self.name} = {str(self.value)}"
 
@@ -264,6 +269,13 @@ class ResultsProcessing(Instruction):
     inst: Literal["ResultsProcessing"] = "ResultsProcessing"
     variable: str
     results_processing: InlineResultsProcessing
+
+    @classmethod
+    def _from_legacy(cls, legacy_rp):
+        # private as we dont want to support this in the long-term
+        return cls(
+            variable=legacy_rp.variable, results_processing=legacy_rp.results_processing
+        )
 
     def __repr__(self):
         return f"{self.variable}: {str(self.results_processing.name)}"

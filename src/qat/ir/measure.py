@@ -102,23 +102,28 @@ class PostProcessing(Instruction):
     """
 
     inst: Literal["PostProcessing"] = "PostProcessing"
-    acquire: Acquire
+    output_variable: Optional[str] = None
     process: PostProcessType
     axes: List[ProcessAxis] = []
     args: List[Any] = []
     result_needed: bool = False
 
-    @property
-    def output_variable(self):
-        return self.acquire.output_variable
+    @classmethod
+    def _from_legacy(cls, legacy_pp):
+        # private as we dont want to support this in the long-term
+        return cls(
+            output_variable=legacy_pp.output_variable,
+            process=legacy_pp.process,
+            axes=legacy_pp.axes,
+            args=legacy_pp.args,
+            result_needed=legacy_pp.result_needed,
+        )
 
     def __repr__(self):
         axis = ",".join([axi.value for axi in self.axes])
         args = f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
         output_var = f"->{self.output_variable}" if self.output_variable is not None else ""
-        return (
-            f"{self.process.value} {self.acquire.output_variable}{args}{axis}{output_var}"
-        )
+        return f"{self.process.value} {self.output_variable}{args}{axis}{output_var}"
 
     @field_validator("axes", mode="before")
     @classmethod
