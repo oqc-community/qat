@@ -294,7 +294,8 @@ class QbloxControlHardware(ControlHardware):
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        sequencer.get_acquisition_status(timeout=1)
+                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
+                        sequencer.get_acquisition_status(timeout=60)
                         acquisitions = sequencer.get_acquisitions()
 
                         for acq_name, acq in acquisitions.items():
