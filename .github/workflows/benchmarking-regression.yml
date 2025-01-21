@@ -104,17 +104,15 @@ jobs:
               comment.body.includes("Performance Regression Tests")
             )
             
-            if (context.payload.pull_request.head.repo.full_name !== 'oqc-community/qat') {
-              console.log('Not attempting to write comment on fork.');
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
             } else {
-              if (botComment) {
-                await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: botComment.id,
-                  body: output
-                })
-              } else {
+              if (!process.env.SUMMARY.includes("No performance regressions detected.")){
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

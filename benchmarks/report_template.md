@@ -1,5 +1,7 @@
 #### Performance Regression Tests
-Performance changes detected in the following benchmarks: {% if not tests %} none {% else %}
+{% if not tests %}
+No performance regressions detected.
+{% else %}
 | Test | Main Exec Time (s) | PR Exec Time (s) | Slow-down | Status |
 | ------- | ------ | ------ | ------ | ------ |
 {% for name, test in tests.items() -%}
