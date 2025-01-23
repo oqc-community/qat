@@ -1,0 +1,191 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import abc
+import warnings
+from typing import Dict, List, Optional
+
+import numpy as np
+
+from qat.ir.pass_base import PassManager
+from qat.purr.compiler.instructions import AcquireMode
+from qat.purr.qatconfig import qatconfig
+from qat.runtime import NativeEngine
+from qat.runtime.executables import AcquireDataStruct
+from qat.runtime.transform_passes import (
+    AssignResultsTransform,
+    InlineResultsProcessingTransform,
+    PostProcessingTransform,
+)
+
+
+class BaseRuntime(abc.ABC):
+
+    def __init__(
+        self,
+        engine: NativeEngine,
+        results_pipeline: Optional[PassManager] = None,
+        startup_engine: bool = False,
+    ):
+        """
+        Provides a Base class to build on for runtimes of varying complexities.
+
+        :param engine: The execution engine for a target backend.
+        :type engine: NativeEngine
+        :param results_pipeline: Optionally provided a pipeline for results processing. If not
+        provided, a default pipeline is provided.
+        :type results_pipeline: Optional[PassManager]
+        :param startup_engine: Instruct the engine to connect to the backend on startup?
+        :type startup_engine: bool
+        """
+        if not isinstance(engine, NativeEngine):
+            raise ValueError(
+                f"The engine provided has type {type(engine)}, which is not a NativeEngine."
+            )
+        self.engine = engine
+
+        if not results_pipeline:
+            results_pipeline = self.default_pipeline()
+        self.results_pipeline = results_pipeline
+
+        # TODO: is logic needed here?
+        if startup_engine:
+            self.engine.startup()
+
+    @abc.abstractmethod
+    def execute(package, *args): ...
+
+    def default_pipeline(self):
+        return (
+            PassManager()
+            | PostProcessingTransform()
+            | InlineResultsProcessingTransform()
+            | AssignResultsTransform()
+        )
+
+    @staticmethod
+    def number_of_batches(total_shots: int, shots_per_batch: int):
+        """
+        Calculates the number of shot batches to execute.
+
+        When the total number of shots exceeds the capabilities of the backend, we can execute
+        a number of batches with a subset of the shots. This number of shots should be
+        calculated during compilation, and included in the executable. This method calculates
+        number of batches to execute.
+
+        In the instance that the total number of shots cannot be batched into a whole number
+        of the compiled shots, the runtime will execute more shots than required. If results
+        are returned from the hardware per shot, then we can simply trim the results down to
+        the required amount of shots. However, this cannot be done if the post-processing over
+        the shots is done on the hardware. In this case, the program will be executed for
+        `ceil(total_shots / shots_per_batch) * shots_per_batch` shots.
+
+        If the compiled number of shots is zero, then it is assumed all shots can be achieved
+        in a single batch.
+        """
+
+        if not isinstance(total_shots, int) and total_shots < 0:
+            raise ValueError("The number of shots must be a non-negative integer.")
+
+        if not isinstance(shots_per_batch, int) and (shots_per_batch < 0):
+            raise ValueError(
+                "The shots per batch must be a positive integer, or `0` to indicate to use the "
+                "`total_shots`."
+            )
+
+        if shots_per_batch == 0:
+            return 1
+
+        number_of_batches = int(np.ceil(total_shots / shots_per_batch))
+
+        if total_shots % shots_per_batch != 0:
+            warnings.warn(
+                f"Cannot batch {total_shots} into whole batches of {shots_per_batch}."
+                "SCOPE acquisitions will be done with a total of "
+                f"{shots_per_batch*number_of_batches}."
+            )
+        return number_of_batches
+
+    @staticmethod
+    def validate_max_shots(shots: int):
+        """
+        TODO: determine if this should be a pass.
+        """
+        if shots > qatconfig.MAX_REPEATS_LIMIT:
+            raise ValueError(
+                f"Number of shots {shots} exceeds the maximum amount of "
+                f"{qatconfig.MAX_REPEATS_LIMIT}."
+            )
+
+    def __enter__(self):
+        self.engine.startup()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.engine.shutdown()
+
+
+class ResultsAggregator:
+
+    def __init__(self, acquires: List[AcquireDataStruct]):
+        """
+        Aggregates the acquisition results from batching of shots.
+
+        :param acquires: List of acquires to be collected.
+        :type acquires: List[AcquireDataStruct]
+        """
+        self._results = {}
+        for acquire in acquires:
+            match acquire.mode:
+                case AcquireMode.RAW:
+                    result = np.zeros((0, acquire.length))
+                case AcquireMode.INTEGRATOR:
+                    result = np.zeros(0)
+                case AcquireMode.SCOPE:
+                    result = np.zeros(acquire.length)
+
+            self._results[acquire.output_variable] = {
+                "mode": acquire.mode,
+                "result": result,
+                "batches": 0,
+            }
+
+    def update(self, new_results: Dict[str, np.ndarray]):
+        """
+        Add a batch of results.
+
+        For `AcquireMode.RAW` and `AcquireMode.INTEGRATOR`, this means to append the new
+        results. For `AcquireMode.SCOPE`, results are accumulated as a sum.
+        """
+        for output_variable, new_result in new_results.items():
+            result = self._results[output_variable]
+            result["batches"] += 1
+            match result["mode"]:
+                case AcquireMode.RAW:
+                    result["result"] = np.concatenate(
+                        (result["result"], new_result), axis=0
+                    )
+                case AcquireMode.INTEGRATOR:
+                    result["result"] = np.concatenate((result["result"], new_result))
+                case AcquireMode.SCOPE:
+                    result["result"] += new_result
+
+    def results(self, max_shots: Optional[int] = None):
+        """
+        Returns the results normalized in an appropiate way.
+
+        For `AcquireMode.SCOPE`, results are averaged over batches. For `AcquireMode.RAW` or
+        `AcquireMode.INTEGRATOR`, a truncated amount of `max_shots` shots are returned. If
+        `None`, then returns all shots.
+        """
+
+        normalized_results = {}
+        for output_variable, result in self._results.items():
+            match result["mode"]:
+                case AcquireMode.RAW:
+                    normalized_result = result["result"][0:max_shots, :]
+                case AcquireMode.INTEGRATOR:
+                    normalized_result = result["result"][0:max_shots]
+                case AcquireMode.SCOPE:
+                    normalized_result = result["result"] / result["batches"]
+            normalized_results[output_variable] = normalized_result
+        return normalized_results

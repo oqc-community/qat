@@ -1,16 +1,144 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import Dict
+from typing import Dict, List
 
-import numpy
-from compiler_config.config import CompilerConfig, ErrorMitigationConfig, ResultsFormatting
+import numpy as np
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    InlineResultsProcessing,
+    ResultsFormatting,
+)
 
 from qat.ir.pass_base import QatIR, TransformPass
-from qat.ir.result_base import ResultManager
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import is_generated_name
-from qat.purr.compiler.runtime import _binary_count
+from qat.purr.compiler.instructions import IndexAccessor, Variable, is_generated_name
+from qat.runtime.executables import Executable
+from qat.runtime.post_processing import apply_post_processing, get_axis_map
+from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list
+
+
+class PostProcessingTransform(TransformPass):
+
+    def run(self, results: QatIR, *args, package: Executable, **kwargs):
+        """
+        Uses the post-processing instructions from the executable package to process the
+        results from the engine.
+
+        The backend will return the results in a format that depends on the specified
+        `AquireMode`. However, it is often the case results need to be returned in an explicit
+        format, e.g., as discriminated bits. To achieve this, extra software post-processing
+        is needed.
+
+        The post-processing that appears here is the same as the post-processing
+        responsibilities taken on by the `QuantumExecutionEngine` in the `purr` stack.
+
+        :param results: Results to be processed.
+        :type results: QatIR
+        :param package: The executable program containing post-processing information.
+        :type package: Executable
+
+        TODO: Change argument from QatIR with changes to the pass manager (maybe its own
+        object?)
+        """
+
+        results = results.value
+        for acquire in package.acquires:
+            response = results[acquire.output_variable]
+
+            # Starting from all axes, we iterate through each post-processing, keeping track
+            # of what axes remain as we go
+            response_axes = get_axis_map(acquire.mode, response)
+            for pp in package.post_processing.get(acquire.output_variable, []):
+                response, response_axes = apply_post_processing(response, pp, response_axes)
+            results[acquire.output_variable] = response
+
+
+class InlineResultsProcessingTransform(TransformPass):
+
+    def run(self, results: QatIR, *args, package: Executable, **kwargs):
+        """
+        Uses `InlineResultsProcessing` instructions from the executable package to format the
+        acquired results in the desired format.
+
+        :param results: Results to be processed.
+        :type results: QatIR
+        :param package: The executable program containing the results-processing information.
+        :type package: Executable
+
+        TODO: change argument type from QatIR
+        TODO: clean up imported utility
+        """
+
+        results = results.value
+        for output_variable in results:
+            target_values = results[output_variable]
+
+            # TODO: ResultProcessing sanitisation and validation passes
+            rp = package.results_processing.get(
+                output_variable, InlineResultsProcessing.Experiment
+            )
+
+            if InlineResultsProcessing.Raw in rp and InlineResultsProcessing.Binary in rp:
+                raise ValueError(
+                    f"Raw and Binary processing attempted to be applied to {output_variable}. "
+                    "Only one should be selected."
+                )
+
+            # Strip numpy arrays if we're set to do so.
+            if InlineResultsProcessing.NumpyArrays not in rp:
+                target_values = numpy_array_to_list(target_values)
+
+            # Transform to various formats if required.
+            if InlineResultsProcessing.Binary in rp:
+                target_values = binary_average(target_values)
+
+            results[output_variable] = target_values
+
+
+class AssignResultsTransform(TransformPass):
+
+    def run(self, results: QatIR, *args, package: Executable, **kwargs):
+        """
+        Extracted from `purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
+
+        As assigns are classical instructions they are not processed as a part of the
+        quantum execution (right now).
+        Read through the results dictionary and perform the assigns directly, return the
+        results.
+
+        :param results: Results to be processed.
+        :type results: QatIR
+        :param package: The executable program containing the results-processing information.
+        :type package: Executable
+
+        TODO: change argument type from QatIR
+        TODO: refactor
+        """
+
+        def recurse_arrays(results_map, value):
+            """Recurse through assignment lists and fetch values in sequence."""
+            if isinstance(value, List):
+                return [recurse_arrays(results_map, val) for val in value]
+            elif isinstance(value, Variable):
+                if value.name not in results_map:
+                    raise ValueError(
+                        f"Attempt to assign variable that doesn't exist {value.name}."
+                    )
+
+                if isinstance(value, IndexAccessor):
+                    return results_map[value.name][value.index]
+                else:
+                    return results_map[value.name]
+            else:
+                return value
+
+        res = results.value
+        assigns = dict(res)
+        for assign in package.assigns:
+            assigns[assign.name] = recurse_arrays(assigns, assign.value)
+        results.value = {key: assigns[key] for key in package.returns}
 
 
 class ResultTransform(TransformPass):
@@ -19,7 +147,6 @@ class ResultTransform(TransformPass):
     def run(
         self,
         ir: QatIR,
-        res_mgr: ResultManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
@@ -60,14 +187,14 @@ class ResultTransform(TransformPass):
                     return list(simplify_target.values())[0]
                 else:
                     squashed_results = list(simplify_target.values())
-                    if all(isinstance(val, numpy.ndarray) for val in squashed_results):
-                        return numpy.array(squashed_results)
+                    if all(isinstance(val, np.ndarray) for val in squashed_results):
+                        return np.array(squashed_results)
                     return squashed_results
             else:
                 return simplify_target
 
         if ResultsFormatting.BinaryCount in format_flags:
-            results = {key: _binary_count(val, repeats) for key, val in results.items()}
+            results = {key: binary_count(val, repeats) for key, val in results.items()}
 
         def squash_binary(value):
             if isinstance(value, int):
@@ -95,7 +222,6 @@ class ErrorMitigation(TransformPass):
     def run(
         self,
         ir: QatIR,
-        res_mgr: ResultManager,
         *args,
         mapping: Dict[str, str],
         compiler_config: CompilerConfig,
