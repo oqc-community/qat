@@ -6,6 +6,15 @@ qat.runtime package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.runtime.engines
+   qat.runtime.runtimes
+
 Submodules
 ----------
 
@@ -14,4 +23,6 @@ Submodules
 
    qat.runtime.analysis_passes
    qat.runtime.executables
+   qat.runtime.post_processing
+   qat.runtime.results_processing
    qat.runtime.transform_passes

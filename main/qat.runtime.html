@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.runtime.analysis_passes module" href="qat.runtime.analysis_passes.html" />
+    <link rel="next" title="qat.runtime.engines package" href="qat.runtime.engines.html" />
     <link rel="prev" title="qat.purr.qatconfig module" href="qat.purr.qatconfig.html" /> 
 </head>
 
@@ -170,8 +170,20 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.html">qat.runtime.engines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.engines.echo.html">qat.runtime.engines.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.engines.native.html">qat.runtime.engines.native module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.html">qat.runtime.runtimes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.simple.html">qat.runtime.runtimes.simple module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.transform_passes.html">qat.runtime.transform_passes module</a></li>
 </ul>
 </li>
@@ -224,6 +236,43 @@
 
   <section id="module-qat.runtime">
 <span id="qat-runtime-package"></span><h1>qat.runtime package<a class="headerlink" href="#module-qat.runtime" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.runtime.engines.html">qat.runtime.engines package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.engines.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.engines.echo.html">qat.runtime.engines.echo module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.echo.html#qat.runtime.engines.echo.EchoEngine"><code class="docutils literal notranslate"><span class="pre">EchoEngine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.echo.html#qat.runtime.engines.echo.process_readout"><code class="docutils literal notranslate"><span class="pre">process_readout()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.engines.native.html">qat.runtime.engines.native module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine"><code class="docutils literal notranslate"><span class="pre">NativeEngine</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.runtime.runtimes.html">qat.runtime.runtimes package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.runtimes.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime"><code class="docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.ResultsAggregator"><code class="docutils literal notranslate"><span class="pre">ResultsAggregator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.runtimes.simple.html">qat.runtime.runtimes.simple module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime"><code class="docutils literal notranslate"><span class="pre">SimpleRuntime</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -269,9 +318,38 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_processing"><code class="docutils literal notranslate"><span class="pre">apply_post_processing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.discriminate"><code class="docutils literal notranslate"><span class="pre">discriminate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.down_convert"><code class="docutils literal notranslate"><span class="pre">down_convert()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.get_axis_map"><code class="docutils literal notranslate"><span class="pre">get_axis_map()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.linear_map_complex_to_real"><code class="docutils literal notranslate"><span class="pre">linear_map_complex_to_real()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.mean"><code class="docutils literal notranslate"><span class="pre">mean()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary"><code class="docutils literal notranslate"><span class="pre">binary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_average"><code class="docutils literal notranslate"><span class="pre">binary_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_count"><code class="docutils literal notranslate"><span class="pre">binary_count()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.complex_to_binary"><code class="docutils literal notranslate"><span class="pre">complex_to_binary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.numpy_array_to_list"><code class="docutils literal notranslate"><span class="pre">numpy_array_to_list()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.runtime.transform_passes.html">qat.runtime.transform_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.AssignResultsTransform"><code class="docutils literal notranslate"><span class="pre">AssignResultsTransform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.AssignResultsTransform.run"><code class="docutils literal notranslate"><span class="pre">AssignResultsTransform.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation"><code class="docutils literal notranslate"><span class="pre">ErrorMitigation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation.run"><code class="docutils literal notranslate"><span class="pre">ErrorMitigation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.InlineResultsProcessingTransform"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessingTransform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.InlineResultsProcessingTransform.run"><code class="docutils literal notranslate"><span class="pre">InlineResultsProcessingTransform.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.PostProcessingTransform"><code class="docutils literal notranslate"><span class="pre">PostProcessingTransform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.PostProcessingTransform.run"><code class="docutils literal notranslate"><span class="pre">PostProcessingTransform.run()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ResultTransform"><code class="docutils literal notranslate"><span class="pre">ResultTransform</span></code></a><ul>
@@ -291,7 +369,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.purr.qatconfig.html" class="btn btn-neutral float-left" title="qat.purr.qatconfig module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.runtime.analysis_passes.html" class="btn btn-neutral float-right" title="qat.runtime.analysis_passes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.runtime.engines.html" class="btn btn-neutral float-right" title="qat.runtime.engines package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
