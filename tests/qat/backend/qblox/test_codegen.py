@@ -394,6 +394,8 @@ class TestNewQbloxEmitter(InvokerMixin):
             for sweep in triage_result.sweeps:
                 assert f"sweep_{hash(sweep)}_0" in acquire_pkg.sequence.program
 
+            assert "wait_sync" in acquire_pkg.sequence.program
+
             if measure_pulse.shape == PulseShapeType.SQUARE:
                 assert not acquire_pkg.sequence.waveforms
                 assert "play" not in acquire_pkg.sequence.program
@@ -452,6 +454,8 @@ class TestNewQbloxEmitter(InvokerMixin):
 
                 assert not drive_pkg.sequence.acquisitions
 
+                assert "wait_sync" in drive_pkg.sequence.program
+
                 if drive_pulse.shape == PulseShapeType.SQUARE:
                     assert not drive_pkg.sequence.waveforms
                     assert "play" not in drive_pkg.sequence.program
@@ -477,6 +481,8 @@ class TestNewQbloxEmitter(InvokerMixin):
                 )
 
                 assert acquire_pkg.sequence.acquisitions
+
+                assert "wait_sync" in acquire_pkg.sequence.program
 
                 if measure_pulse.shape == PulseShapeType.SQUARE:
                     assert not acquire_pkg.sequence.waveforms

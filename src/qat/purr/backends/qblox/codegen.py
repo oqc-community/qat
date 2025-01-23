@@ -282,7 +282,6 @@ class QbloxContext:
         self.sequence_builder.set_mrk(3)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
         self.sequence_builder.move(0, self._repeat_reg)
-        self.sequence_builder.nop()
         self.sequence_builder.label(self._repeat_label)
         self.sequence_builder.reset_ph()
         self.sequence_builder.upd_param(Constants.GRID_TIME)
@@ -1034,6 +1033,7 @@ class NewQbloxContext:
             context.sequence_builder.label(label)
             context.sequence_builder.reset_ph()
             context.sequence_builder.upd_param(Constants.GRID_TIME)
+            context.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
     def exit_repeat(inst: Repeat, contexts: Dict):
