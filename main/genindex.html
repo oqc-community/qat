@@ -93,6 +93,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
@@ -100,13 +101,12 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.instrument_base.html">qat.purr.backends.qblox.instrument_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
@@ -349,7 +349,7 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ADD">ADD (Opcode attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.add">add() (CompositeInstrument method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.add">add() (CompositeInstrument method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.add">(InstructionBuilder method)</a>
@@ -453,13 +453,13 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.add_weight">add_weight() (SequenceBuilder method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel.address">address (InstrumentModel attribute)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.address">address (InstrumentModel attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ADDRESS">ADDRESS (Opcode attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult.alloc_mgrs">alloc_mgrs (PreCodegenResult attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.allocate_resources">allocate_resources() (LeafControlHardware method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.allocate_resources">allocate_resources() (LeafExecutor method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">(QbloxControlHardware method)</a>
@@ -691,10 +691,10 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN">BLACKMAN (PulseShapeType attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.BlackmanFunction">BlackmanFunction (class in qat.purr.backends.utilities)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.BlackmanFunction">BlackmanFunction (class in qat.purr.backends.utilities)</a>
+</li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.BlackmanWaveform">BlackmanWaveform (class in qat.purr.compiler.waveforms)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.block_size">block_size (PhysicalChannel attribute)</a>
@@ -727,8 +727,6 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.build_generated_name">build_generated_name() (in module qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_hardware_model_from_config_csv">build_hardware_model_from_config_csv() (in module qat.purr.backends.qblox.loader)</a>
-</li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.build_lucy_hardware">build_lucy_hardware() (in module qat.purr.backends.live)</a>
 </li>
       <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline">build_pass_pipeline() (InvokerMixin method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin.build_pass_pipeline">[1]</a>
@@ -746,10 +744,6 @@
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_physical_channel_buffers">build_physical_channel_buffers() (QuantumExecutionEngine method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_pulse_channel_buffers">build_pulse_channel_buffers() (QuantumExecutionEngine method)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qcm_rf_config">build_qcm_rf_config() (in module qat.purr.backends.qblox.loader)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.build_qrm_rf_config">build_qrm_rf_config() (in module qat.purr.backends.qblox.loader)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.build_qubit">build_qubit() (in module qat.purr.compiler.devices)</a>
 
@@ -906,13 +900,13 @@
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.close">close() (BasicLogger method)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.close">(CompositeInstrument method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.close">(CompositeInstrument method)</a>
 </li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.close">(CompositeLogger method)</a>
 </li>
         <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.close">(Instrument method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.close">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.close">(InstrumentConcept method)</a>
 </li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.close">(LogFolder method)</a>
 </li>
@@ -937,12 +931,12 @@
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.code">(CompositeLogger method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.CompositeControlHardware.collect">collect() (CompositeControlHardware method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor.collect">collect() (CompositeExecutor method)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.collect">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.collect">(InstrumentConcept method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.collect">(LeafControlHardware method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.collect">(LeafExecutor method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics">CompilationMetrics (class in qat.purr.compiler.metrics)</a>
@@ -965,9 +959,9 @@
 </li>
       <li><a href="qat.model.device.html#qat.model.device.Component">Component (class in qat.model.device)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.CompositeControlHardware">CompositeControlHardware (class in qat.purr.backends.qblox.execution)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor">CompositeExecutor (class in qat.purr.backends.qblox.execution.executor)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument">CompositeInstrument (class in qat.purr.backends.qblox.instrument_base)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument">CompositeInstrument (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger">CompositeLogger (class in qat.purr.utils.logger)</a>
 </li>
@@ -1031,14 +1025,14 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.connect">connect() (CompositeInstrument method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.connect">connect() (CompositeInstrument method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.connect">(Instrument method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.connect">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.connect">(InstrumentConcept method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.connect">(LeafControlHardware method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.connect">(LeafExecutor method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.connect">(QbloxControlHardware method)</a>
 </li>
@@ -1052,6 +1046,8 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.connection">connection (SequencerConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig">ConnectionConfig (class in qat.purr.backends.qblox.config)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.connections">connections (QRPairModel attribute)</a>
 </li>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.Connectivity">Connectivity (class in qat.purr.backends.echo)</a>
 </li>
@@ -1373,14 +1369,14 @@
 </li>
       <li><a href="qat.model.hardware_base.html#qat.model.hardware_base.ValidatedSet.discard">discard() (ValidatedSet method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.disconnect">disconnect() (CompositeInstrument method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.disconnect">disconnect() (CompositeInstrument method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.disconnect">(Instrument method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.disconnect">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.disconnect">(InstrumentConcept method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.disconnect">(LeafControlHardware method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.disconnect">(LeafExecutor method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.disconnect">(QbloxControlHardware method)</a>
 </li>
@@ -2095,7 +2091,7 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel.id">id (InstrumentModel attribute)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.id">id (InstrumentModel attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.id">id() (NewQbloxContext method)</a>
 
@@ -2161,6 +2157,8 @@
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.merge_builder.params.index">(qat.purr.compiler.builders.InstructionBuilder.merge_builder parameter)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.index">(QRPairModel attribute)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.IndexAccessor">IndexAccessor (class in qat.ir.instructions)</a>
@@ -2261,7 +2259,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.install">install() (LeafControlHardware method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.install">install() (LeafExecutor method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.install">(QbloxControlHardware method)</a>
@@ -2315,9 +2313,9 @@
 </li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument">Instrument (class in qat.purr.backends.live_devices)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept">InstrumentConcept (class in qat.purr.backends.qblox.instrument_base)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept">InstrumentConcept (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel">InstrumentModel (class in qat.purr.backends.qblox.instrument_base)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel">InstrumentModel (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SquareWeightAcq.integration_length">integration_length (SquareWeightAcq attribute)</a>
 </li>
@@ -2451,6 +2449,8 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.label">label (QRPairModel attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.label">label() (SequenceBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.labels">labels (AllocationManager attribute)</a>
@@ -2463,9 +2463,9 @@
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.Lucy.Latest">Latest (Lucy attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware">LeafControlHardware (class in qat.purr.backends.qblox.execution)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor">LeafExecutor (class in qat.purr.backends.qblox.execution.executor)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.LeafInstrument">LeafInstrument (class in qat.purr.backends.qblox.instrument_base)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.LeafInstrument">LeafInstrument (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
       <li><a href="qat.utils.ir_converter.html#qat.utils.ir_converter.IRConverter.legacy_to_pydantic_instructions">legacy_to_pydantic_instructions() (IRConverter method)</a>
 </li>
@@ -2507,10 +2507,12 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.load_default_gates">load_default_gates() (Qasm3ParserBase method)</a>
 </li>
-      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
+      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.load_executor">load_executor() (in module qat.purr.backends.qblox.loader)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig">LoConfig (class in qat.purr.backends.qblox.config)</a>
@@ -2565,7 +2567,7 @@
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.logs_path">logs_path (BasicLogger property)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.lookup_by_name">lookup_by_name() (CompositeInstrument method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.lookup_by_name">lookup_by_name() (CompositeInstrument method)</a>
 </li>
       <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.lookup_by_type">lookup_by_type() (ResultManager method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.lookup_by_type">[1]</a>
 </li>
@@ -2860,7 +2862,7 @@
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.model_config">(InstructionValidationConfig attribute)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel.model_config">(InstrumentModel attribute)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.model_config">(InstrumentModel attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.model_config">(Jump attribute)</a>
 </li>
@@ -2909,6 +2911,8 @@
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatSimulationConfig.model_config">(QatSimulationConfig attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_config">(QiskitSimulationConfig attribute)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.model_config">(QRPairModel attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.model_config">(QuantumInstruction attribute)</a>
 </li>
@@ -3063,9 +3067,11 @@
 </li>
         <li><a href="qat.purr.backends.qblox.execution.html#module-qat.purr.backends.qblox.execution">qat.purr.backends.qblox.execution</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.graph.html#module-qat.purr.backends.qblox.graph">qat.purr.backends.qblox.graph</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#module-qat.purr.backends.qblox.execution.executor">qat.purr.backends.qblox.execution.executor</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#module-qat.purr.backends.qblox.instrument_base">qat.purr.backends.qblox.instrument_base</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#module-qat.purr.backends.qblox.execution.instrument_base">qat.purr.backends.qblox.execution.instrument_base</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.graph.html#module-qat.purr.backends.qblox.graph">qat.purr.backends.qblox.graph</a>
 </li>
         <li><a href="qat.purr.backends.qblox.ir.html#module-qat.purr.backends.qblox.ir">qat.purr.backends.qblox.ir</a>
 </li>
@@ -3074,6 +3080,8 @@
         <li><a href="qat.purr.backends.qblox.loader.html#module-qat.purr.backends.qblox.loader">qat.purr.backends.qblox.loader</a>
 </li>
         <li><a href="qat.purr.backends.qblox.metrics_base.html#module-qat.purr.backends.qblox.metrics_base">qat.purr.backends.qblox.metrics_base</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.model_base.html#module-qat.purr.backends.qblox.model_base">qat.purr.backends.qblox.model_base</a>
 </li>
         <li><a href="qat.purr.backends.qblox.pass_base.html#module-qat.purr.backends.qblox.pass_base">qat.purr.backends.qblox.pass_base</a>
 </li>
@@ -3235,7 +3243,7 @@
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Assign.name">(Assign attribute)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentModel.name">(InstrumentModel attribute)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.name">(InstrumentModel attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label.name">(Label attribute)</a>
 </li>
@@ -3514,8 +3522,6 @@
         <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend.parse_and_execute">(QIRFrontend method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.parse_control_hardware">parse_control_hardware() (in module qat.purr.backends.qblox.loader)</a>
-</li>
       <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse.parse_qir">parse_qir() (Parse method)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.AbstractParser.parser_language">parser_language() (AbstractParser method)</a>
@@ -3654,12 +3660,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.play">play() (SequenceBuilder method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.CompositeControlHardware.playback">playback() (CompositeControlHardware method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor.playback">playback() (CompositeExecutor method)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.playback">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.playback">(InstrumentConcept method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.playback">(LeafControlHardware method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.playback">(LeafExecutor method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_acquisitions">plot_acquisitions() (in module qat.purr.backends.qblox.visualisation)</a>
@@ -3913,6 +3919,16 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Q1asmInstruction">Q1asmInstruction (class in qat.purr.backends.qblox.ir)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_cluster">q_cluster (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_freq">q_freq (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_freq12">q_freq12 (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_output">q_output (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_slot_idx">q_slot_idx (QRPairModel attribute)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser">Qasm2Parser (class in qat.purr.integrations.qasm)</a>
 </li>
@@ -4271,17 +4287,24 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.backends.qblox.execution.executor
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#module-qat.purr.backends.qblox.execution.executor">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.purr.backends.qblox.execution.instrument_base
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#module-qat.purr.backends.qblox.execution.instrument_base">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.backends.qblox.graph
 
       <ul>
         <li><a href="qat.purr.backends.qblox.graph.html#module-qat.purr.backends.qblox.graph">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.purr.backends.qblox.instrument_base
-
-      <ul>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#module-qat.purr.backends.qblox.instrument_base">module</a>
 </li>
       </ul></li>
       <li>
@@ -4310,6 +4333,13 @@
 
       <ul>
         <li><a href="qat.purr.backends.qblox.metrics_base.html#module-qat.purr.backends.qblox.metrics_base">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.purr.backends.qblox.model_base
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.model_base.html#module-qat.purr.backends.qblox.model_base">module</a>
 </li>
       </ul></li>
       <li>
@@ -4424,6 +4454,8 @@
         <li><a href="qat.purr.compiler.error_mitigation.html#module-qat.purr.compiler.error_mitigation">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.error_mitigation.readout_mitigation
 
@@ -4431,8 +4463,6 @@
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#module-qat.purr.compiler.error_mitigation.readout_mitigation">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.execution
 
@@ -4791,6 +4821,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper">QrmRfConfigHelper (class in qat.purr.backends.qblox.config)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel">QRPairModel (class in qat.purr.backends.qblox.model_base)</a>
+</li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity">Quantity (class in qat.purr.integrations.features)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_barrier">quantum_barrier() (Qasm3Parser method)</a>
@@ -4853,6 +4885,8 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id">qubit_id (OperatorInfo attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.qubit_physical_channel_id">qubit_physical_channel_id() (QRPairModel method)</a>
+</li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">qubit_with_index() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QubitCoupling">QubitCoupling (class in qat.purr.compiler.devices)</a>
@@ -4880,6 +4914,16 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.R">R() (QiskitBuilder method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.r_cluster">r_cluster (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.r_freq">r_freq (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.r_input">r_input (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.r_output">r_output (QRPairModel attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.r_slot_idx">r_slot_idx (QRPairModel attribute)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.random">random() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
@@ -4937,7 +4981,7 @@
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration">RemoteCalibration (class in qat.purr.compiler.runtime)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.CompositeInstrument.remove">remove() (CompositeInstrument method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.remove">remove() (CompositeInstrument method)</a>
 
       <ul>
         <li><a href="qat.model.hardware_base.html#qat.model.hardware_base.ValidatedSet.remove">(ValidatedSet method)</a>
@@ -5035,6 +5079,8 @@
         <li><a href="qat.model.device.html#qat.model.device.Qubit.resonator">(Qubit attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.resonator_physical_channel_id">resonator_physical_channel_id() (QRPairModel method)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels">ResonatorPulseChannels (class in qat.model.device)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resonators">resonators (QuantumHardwareModel property)</a>
@@ -5117,6 +5163,8 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ResultsProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ResultTransform">ResultTransform (class in qat.runtime.transform_passes)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Return">Return (class in qat.ir.instructions)</a>
@@ -5125,8 +5173,6 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Return">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_">return_ (QatFile property)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>
@@ -5941,12 +5987,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">UPDATE_PARAMETERS (Opcode attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.CompositeControlHardware.upload">upload() (CompositeControlHardware method)</a>
+      <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor.upload">upload() (CompositeExecutor method)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.instrument_base.html#qat.purr.backends.qblox.instrument_base.InstrumentConcept.upload">(InstrumentConcept method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.upload">(InstrumentConcept method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.execution.html#qat.purr.backends.qblox.execution.LeafControlHardware.upload">(LeafControlHardware method)</a>
+        <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.upload">(LeafExecutor method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.upsample_rate_path0">upsample_rate_path0 (AwgConfig attribute)</a>
