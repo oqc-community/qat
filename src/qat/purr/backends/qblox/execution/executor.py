@@ -20,7 +20,7 @@ from qat.purr.backends.qblox.config import (
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
-from qat.purr.backends.qblox.instrument_base import (
+from qat.purr.backends.qblox.execution.instrument_base import (
     CompositeInstrument,
     InstrumentModel,
     LeafInstrument,
@@ -32,7 +32,7 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class LeafControlHardware(LeafInstrument):
+class LeafExecutor(LeafInstrument):
     def __init__(self, model: InstrumentModel, dummy_cfg: Dict = None):
         super().__init__(model)
         self.dummy_cfg = dummy_cfg
@@ -94,11 +94,11 @@ class LeafControlHardware(LeafInstrument):
 
         return qblox_config
 
-    def _reset_io(self, modules=None):
+    def _reset_io(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
-        modules = modules or self._driver.get_connected_modules().values()
+        modules = self._resources.keys() or self._driver.get_connected_modules().values()
 
         for m in modules:
             log.info(f"Resetting sequencer connections for module {m.slot_idx}")
@@ -125,7 +125,7 @@ class LeafControlHardware(LeafInstrument):
                 self._driver.close()
                 self.is_connected = False
             except BaseException as e:
-                log.warning(f"Failed to close instrument ID: {str(self)}\n{str(e)}")
+                log.warning(f"Failed to close instrument {str(self)}\n{str(e)}")
 
     def install(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
         """
@@ -178,7 +178,7 @@ class LeafControlHardware(LeafInstrument):
 
                 self.install(package, module, sequencer)
         except BaseException as e:
-            self._reset_io(self._resources.keys())
+            self._reset_io()
             raise e
 
     def playback(self):
@@ -215,7 +215,8 @@ class LeafControlHardware(LeafInstrument):
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        sequencer.get_acquisition_status(timeout=1)
+                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
+                        sequencer.get_acquisition_status(timeout=60)
                         acquisitions = sequencer.get_acquisitions()
 
                         for acq_name, acq in acquisitions.items():
@@ -246,7 +247,7 @@ class LeafControlHardware(LeafInstrument):
         return results
 
 
-class CompositeControlHardware(CompositeInstrument):
+class CompositeExecutor(CompositeInstrument):
     def upload(self, packages: List[QbloxPackage]):
         for comp in self.components.values():
             comp.upload(packages)

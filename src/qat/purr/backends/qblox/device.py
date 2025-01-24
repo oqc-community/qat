@@ -184,11 +184,11 @@ class QbloxControlHardware(ControlHardware):
 
         return qblox_config
 
-    def _reset_io(self, modules=None):
+    def _reset_io(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
-        modules = modules or self._driver.get_connected_modules().values()
+        modules = self._resources.keys() or self._driver.get_connected_modules().values()
 
         for m in modules:
             log.info(f"Resetting sequencer connections for module {m.slot_idx}")
@@ -270,7 +270,7 @@ class QbloxControlHardware(ControlHardware):
 
                 self.install(package, module, sequencer)
         except BaseException as e:
-            self._reset_io(self._resources.keys())
+            self._reset_io()
             raise e
 
     def start_playback(self, repetitions: int, repetition_time: float):
