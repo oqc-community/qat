@@ -19,9 +19,9 @@ from qat.model.device import (
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
-from qat.model.hardware_base import FrozenDict
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView
+from qat.utils.pydantic import FrozenDict
 
 
 def convert_legacy_echo_hw_to_pydantic(legacy_hw):

@@ -12,13 +12,14 @@ from qat.model.device import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
+    QubitId,
     QubitPulseChannels,
     Resonator,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
-from qat.model.hardware_base import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
 from qat.model.hardware_model import PhysicalHardwareModel
+from qat.utils.pydantic import CalibratableUnitInterval, FrozenDict, FrozenSet
 
 
 class PhysicalHardwareModelBuilder:

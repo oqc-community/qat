@@ -7,15 +7,44 @@ from pydantic import ValidationError
 
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import (
+    CalibratableAcquire,
+    CalibratablePulse,
     CrossResonanceCancellationPulseChannel,
     CrossResonancePulseChannel,
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
+    PulseShapeType,
     Qubit,
     QubitPulseChannels,
     Resonator,
 )
+
+
+class TestCalibratable:
+    @pytest.mark.parametrize("pulse_shape_type", PulseShapeType)
+    def test_calibratable_pulse_enum(self, pulse_shape_type):
+        pulse1 = CalibratablePulse(shape=pulse_shape_type)
+        pulse2 = CalibratablePulse(shape=pulse_shape_type.value)
+        assert pulse1 == pulse2
+
+    @pytest.mark.parametrize("invalid_pulse_shape_type", ["invalid_shape", 123, 0.0])
+    def test_invalid_calibratable_pulse_enum(self, invalid_pulse_shape_type):
+        with pytest.raises(ValidationError):
+            CalibratablePulse(shape=invalid_pulse_shape_type)
+
+    @pytest.mark.parametrize("invalid_width", ["invalid_width", -0.001, -5])
+    def test_invalid_width(self, invalid_width):
+        with pytest.raises(ValidationError):
+            CalibratablePulse(width=invalid_width)
+
+        with pytest.raises(ValidationError):
+            CalibratableAcquire(width=invalid_width)
+
+    @pytest.mark.parametrize("invalid_delay", ["invalid_delay", -0.001, -5])
+    def test_invalid_width(self, invalid_delay):
+        with pytest.raises(ValidationError):
+            CalibratableAcquire(width=invalid_delay)
 
 
 @pytest.mark.parametrize("seed", [21, 22, 23, 24])

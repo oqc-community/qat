@@ -8,9 +8,13 @@ from typing import Optional
 import numpy as np
 from pydantic import Field, field_validator, model_validator
 
-from qat.model.hardware_base import CalibratablePositiveFloat, FrozenDict, QubitId
 from qat.purr.compiler.devices import PulseShapeType
-from qat.utils.pydantic import NoExtraFieldsModel
+from qat.utils.pydantic import (
+    CalibratablePositiveFloat,
+    FrozenDict,
+    NoExtraFieldsModel,
+    NonNegativeInt,
+)
 
 
 class Component(NoExtraFieldsModel):
@@ -121,8 +125,8 @@ class PulseChannel(Component):
 
 
 class CalibratablePulse(NoExtraFieldsModel):
-    shape: PulseShapeType = "gaussian"
-    width: CalibratablePositiveFloat = 100e-09
+    shape: PulseShapeType = PulseShapeType.GAUSSIAN
+    width: CalibratablePositiveFloat = Field(default=100e-09, ge=0)
     amp: float = 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5)
     phase: float = 0.0
     drag: float = 0.0
@@ -131,23 +135,30 @@ class CalibratablePulse(NoExtraFieldsModel):
 
 
 class CalibratableAcquire(NoExtraFieldsModel):
-    delay: CalibratablePositiveFloat = 180e-08
-    width: CalibratablePositiveFloat = 1e-06
+    delay: CalibratablePositiveFloat = Field(default=180e-08, ge=0)
+    width: CalibratablePositiveFloat = Field(default=1e-06, ge=0)
     sync: bool = True
-    weights: Optional[list[float]] = []
+    weights: Optional[list[float, complex]] = []
     use_weights: bool = False
 
 
 class DrivePulseChannel(PulseChannel):
-    x_pi_2_pulse: Optional[CalibratablePulse] = None
+    x_pi_2_pulse: CalibratablePulse = Field(
+        default=CalibratablePulse(
+            shape=PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 3.0
+        ),
+        frozen=True,
+    )
 
 
 class MeasurePulseChannel(PulseChannel):
-    measure_pulse: Optional[CalibratablePulse] = None
+    measure_pulse: CalibratablePulse = Field(
+        default=CalibratablePulse(width=1e-06), frozen=True
+    )
 
 
 class AcquirePulseChannel(PulseChannel):
-    acquire: Optional[CalibratableAcquire] = None
+    acquire: CalibratableAcquire = Field(default=CalibratableAcquire(), frozen=True)
 
 
 class MeasureAcquirePulseChannel(MeasurePulseChannel, AcquirePulseChannel): ...
@@ -159,9 +170,17 @@ class SecondStatePulseChannel(PulseChannel): ...
 class FreqShiftPulseChannel(PulseChannel): ...
 
 
+QubitId = NonNegativeInt
+
+
 class CrossResonancePulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
-    zx_pi_4_pulse: Optional[CalibratablePulse] = None
+    zx_pi_4_pulse: CalibratablePulse = Field(
+        default=CalibratablePulse(
+            shape=PulseShapeType.SOFT_SQUARE, width=125e-9, rise=10e-9, amp=1e6
+        ),
+        frozen=True,
+    )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
@@ -169,7 +188,6 @@ class CrossResonancePulseChannel(PulseChannel):
 
 class CrossResonanceCancellationPulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
-    x_pi_2_pulse: Optional[CalibratablePulse] = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
@@ -263,6 +281,16 @@ class QubitPulseChannels(PulseChannelSet):
         ), f"Mismatch between auxiliary qubit ids for cross resonance and cross resonance cancellation channels."
         return self
 
+    @property
+    def all_pulse_channels(self):
+        return [
+            self.drive,
+            self.second_state,
+            self.freq_shift,
+            *self.cross_resonance_channels.values(),
+            *self.cross_resonance_cancellation_channels.values(),
+        ]
+
 
 class Qubit(Component):
     """
@@ -277,3 +305,10 @@ class Qubit(Component):
     physical_channel: PhysicalChannel
     pulse_channels: QubitPulseChannels
     resonator: Resonator
+
+    mean_z_map_args: list[float] = Field(max_length=2, default=[1.0, 0.0])
+    discriminator: float = 0.0
+
+    @property
+    def all_pulse_channels(self):
+        return self.pulse_channels.all_pulse_channels

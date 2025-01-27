@@ -51,7 +51,6 @@ class ProcessAxis(Enum):
     `ProcessAxis` is used during classical post-processing of readouts. It specifies the axis
     which the post-processing should occur on. Often used in conjunction with the
     `AcquireMode` to determine the correct method for post-processing.
-
         - `TIME`: Instructs the post-processing to be performed over the time-series data
         returned from a readout.
         - `SEQUENCE`: Instructs the post-processing to be performed over the shots.
@@ -349,7 +348,7 @@ class Pulse(Waveform):
 
     def __repr__(self):
         return (
-            f"pulse {self.channel.full_id()},{self.shape.value},{self.amp},"
+            f"pulse {self.channel.full_id()},{self.shape},{self.amp},"
             f"{self.phase},{self.width},{self.drag},{self.rise}"
         )
 

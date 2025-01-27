@@ -4,12 +4,12 @@ import random
 
 import pytest
 
-from qat.model.hardware_base import (
+from qat.model.device import QubitId
+from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     CalibratableUnitInterval,
     FrozenDict,
     FrozenSet,
-    QubitId,
     ValidatedDict,
     ValidatedSet,
 )
@@ -28,16 +28,20 @@ class TestValidatedContainer:
             s.add(invalid_value)
 
     def test_validated_qubitid_set(self, seed):
-        s = ValidatedSet[QubitId](set())
+        s = ValidatedSet[QubitId]()
 
         valid_value = 64
         s.add(valid_value)
 
-        invalid_value = random.Random(seed).uniform(1e-03, 9e-03)
+        invalid_value = -1  # Qubit indices are assumed to start at 0.
         with pytest.raises(ValueError):
             s.add(invalid_value)
 
-        with pytest.raises(ValueError):
+        invalid_type = random.Random(seed).uniform(1e-03, 9e-03)
+        with pytest.raises(TypeError):  # Type is float and should be int.
+            s.add(invalid_type)
+
+        with pytest.raises(TypeError):
             s.add("a")
 
     def test_validated_calibratable_dict(self, seed):
@@ -53,6 +57,12 @@ class TestValidatedContainer:
 
         with pytest.raises(ValueError):
             d.update({2: invalid_value})
+
+        with pytest.raises(TypeError):
+            d[2] = "a"
+
+        with pytest.raises(TypeError):
+            d.update({2: "a"})
 
 
 @pytest.mark.parametrize("seed", [10, 11, 12, 13])

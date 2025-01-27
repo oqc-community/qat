@@ -6,6 +6,7 @@ from copy import deepcopy
 
 import networkx as nx
 
+from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalBaseband,
@@ -80,6 +81,13 @@ def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
         connectivity=logical_connectivity, seed=seed
     )
     return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
+
+
+def generate_hw_model(n_qubits, seed=42):
+    physical_connectivity, _, _ = generate_connectivity_data(n_qubits, n_qubits, seed=seed)
+
+    builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity)
+    return builder.model
 
 
 def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardwareModel:

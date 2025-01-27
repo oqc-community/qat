@@ -4,9 +4,10 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.waveform_v1.codegen import WaveformV1Emitter
-from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType, ProcessAxis
+from qat.ir.measure import PostProcessing
 from qat.ir.pass_base import QatIR
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.runtime import EchoEngine
 from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
 from qat.runtime.transform_passes import (
@@ -23,24 +24,24 @@ class TestPostProcessingTransform:
         pp_instructions = [
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.DOWN_CONVERT,
+                process_type="down_convert",
                 axes=[ProcessAxis.TIME],
                 args=[0.0, 1e-9],
             ),
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.MEAN,
+                process_type="mean",
                 axes=[ProcessAxis.TIME],
             ),
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                process_type=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
                 axes=[ProcessAxis.SEQUENCE],
                 args=[-2.54, 1.1],
             ),
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.DISCRIMINATE,
+                process_type=PostProcessType.DISCRIMINATE,
                 axes=[ProcessAxis.SEQUENCE],
                 args=[1.6],
             ),
@@ -66,13 +67,13 @@ class TestPostProcessingTransform:
         pp_instructions = [
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                process_type=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
                 axes=[ProcessAxis.SEQUENCE],
                 args=[-2.54, 1.1],
             ),
             PostProcessing(
                 output_variable="test",
-                process=PostProcessType.DISCRIMINATE,
+                process_type=PostProcessType.DISCRIMINATE,
                 axes=[ProcessAxis.SEQUENCE],
                 args=[1.6],
             ),

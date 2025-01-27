@@ -2,97 +2,59 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Set, Union
+from typing import Any, List, Literal, Optional
 
 import numpy as np
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 
-from qat.ir.instructions import Instruction, QuantumInstruction, Synchronize, Variable
-from qat.ir.waveforms import Pulse, PulseType, Waveform
-from qat.purr.compiler.devices import PulseChannel, Qubit
+from qat.ir.instructions import (
+    Instruction,
+    QuantumInstruction,
+    QuantumInstructionBlock,
+    Synchronize,
+)
+from qat.ir.waveforms import Pulse
+from qat.model.device import QubitId
 
 # The following things from legacy instructions are unchanged, so just import for now.
-from qat.purr.compiler.instructions import (
-    AcquireMode,
-    PostProcessType,
-    ProcessAxis,
-    build_generated_name,
-)
-from qat.purr.utils.logger import get_default_logger
+from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
+from qat.utils.pydantic import ValidatedSet
 
 
-# previously also inheritted QuantumComponent: I do not know why...
-# might need adding back later
 class Acquire(QuantumInstruction):
     inst: Literal["Acquire"] = "Acquire"
+    targets: ValidatedSet[str] = Field(max_length=1)
     suffix_incrementor: int = 0
-    time: Union[float, Variable] = 1e-6
-    mode: AcquireMode = AcquireMode.RAW
-    output_variable: str = None
-    delay: Optional[float] = None
-    filter: Optional[Pulse] = None
+    duration: float = 1e-6
+    mode: AcquireMode = AcquireMode.INTEGRATOR
+    delay: Optional[float] = 0.0
+    filter: Optional[Pulse] = Field(default=None)
+    output_variable: str | None = None
 
     @property
-    def duration(self):
-        return self.time
+    def pulse_channel(self):
+        return next(iter(self.targets))
 
     @property
-    def channel(self):
-        return self.targets
-
-    def __repr__(self):
-        out_var = f"->{self.output_variable}" if self.output_variable else ""
-        mode = f",{self.mode.value}" if self.mode is not None else ""
-        return f"acquire {self.channel},{self.time}{mode}{out_var}"
+    def target(self):
+        return next(iter(self.targets))
 
     @field_validator("filter", mode="before")
     @classmethod
     def _validate_filter(cls, filter, info: ValidationInfo):
-        if filter == None:
-            return filter
+        duration = info.data["duration"]
 
-        time = info.data["time"]
-        if isinstance(time, Variable):
-            get_default_logger.warning(f"Filter cannot be applied when time is variable.")
-            return None
+        if filter:
+            if filter.duration == 0:  # < 0 condition already tested in `Waveform`
+                raise ValueError(f"Filter duration cannot be equal to zero.")
 
-        if not isinstance(filter, Pulse):
-            raise ValueError("Filter must be a Waveform.")
-
-        if filter.duration < 0:
-            raise ValueError(
-                f"Filter duration {filter.duration} cannot be less than or equal to zero."
-            )
-
-        if not np.isclose(filter.duration, time, atol=1e-9):
-            raise ValueError(
-                f"Filter duration '{filter.duration}' must be equal to Acquire "
-                f"duration '{time}'."
-            )
+            if not np.isclose(filter.duration, duration, atol=1e-9):
+                raise ValueError(
+                    f"Filter duration '{filter.duration}' must be equal to Acquire "
+                    f"duration '{duration}'."
+                )
 
         return filter
-
-    @classmethod
-    def with_random_output_variable(
-        cls,
-        target: PulseChannel,
-        time: Union[float, Variable] = 1e-6,
-        mode: AcquireMode = AcquireMode.RAW,
-        output_variable: str = None,
-        delay: float = None,
-        filter: Pulse = None,
-        existing_names=None,
-    ):
-        if not output_variable:
-            output_variable = build_generated_name(existing_names, target.full_id())
-        return Acquire(
-            targets=target,
-            time=time,
-            mode=mode,
-            output_variable=output_variable,
-            delay=delay,
-            filter=filter,
-        )
 
 
 class PostProcessing(Instruction):
@@ -103,7 +65,7 @@ class PostProcessing(Instruction):
 
     inst: Literal["PostProcessing"] = "PostProcessing"
     output_variable: Optional[str] = None
-    process: PostProcessType
+    process_type: PostProcessType
     axes: List[ProcessAxis] = []
     args: List[Any] = []
     result_needed: bool = False
@@ -113,170 +75,53 @@ class PostProcessing(Instruction):
         # private as we dont want to support this in the long-term
         return cls(
             output_variable=legacy_pp.output_variable,
-            process=legacy_pp.process,
+            process_type=legacy_pp.process.value,
             axes=legacy_pp.axes,
             args=legacy_pp.args,
             result_needed=legacy_pp.result_needed,
         )
 
-    def __repr__(self):
-        axis = ",".join([axi.value for axi in self.axes])
-        args = f",{','.join(str(arg) for arg in self.args)}" if len(self.args) > 0 else ","
-        output_var = f"->{self.output_variable}" if self.output_variable is not None else ""
-        return f"{self.process.value} {self.output_variable}{args}{axis}{output_var}"
-
     @field_validator("axes", mode="before")
     @classmethod
-    def _axes_as_list(cls, axes):
+    def _axes_as_list(cls, axes=None):
         if axes:
-            return axes if isinstance(axes, List) else [axes]
+            return axes if isinstance(axes, list) else [axes]
         return []
 
 
-class MeasureData(BaseModel):
-    mode: AcquireMode
-    output_variable: Optional[str] = None
-    measure: Pulse
-    acquire: Acquire
-    duration: float
-    targets: List[str] = None
-
-
-class MeasureBlock(Instruction):
-    """Groups multiple qubit measurements together."""
+class MeasureBlock(QuantumInstructionBlock):
+    """
+    Encapsulates a measurement of a single (or multiple) qubit(s).
+    It should only contain instructions that are associated with a
+    measurement such as a measure pulse, an acquire or a synchronize.
+    """
 
     inst: Literal["MeasureBlock"] = "MeasureBlock"
-    target_dict: Dict[str, MeasureData] = {}
-    existing_names: Optional[Set[str]] = set()
-    duration: float = 0.0
+    qubit_targets: ValidatedSet[QubitId] = ValidatedSet()
+    _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = (
+        Synchronize,
+        Pulse,
+        Acquire,
+    )
 
-    @property
-    def instructions(self):
-        instructions = [Synchronize(self.pulse_channel_targets)]
-        for val in self.target_dict.values():
-            instructions.extend([val.measure, val.acquire])
-        instructions.append(Synchronize(self.pulse_channel_targets))
-        return instructions
+    def add(self, *instructions: QuantumInstruction):
+        self._validate_instruction(*instructions)
+        for instruction in instructions:
+            if isinstance(instruction, Acquire):
+                self._duration_per_target[instruction.target] += instruction.delay
+            QuantumInstructionBlock.add(self, instruction)
 
-    @property
-    def targets(self):
-        return list(self.target_dict.keys())
+    def _validate_instruction(self, *instructions: QuantumInstruction):
+        for instruction in instructions:
+            if not isinstance(instruction, self._valid_instructions):
+                raise TypeError(
+                    f"Instruction {instruction} not suitable for `MeasureBlock`. Instruction type should be in {self._valid_instructions}."
+                )
+            elif isinstance(instruction, Pulse) and instruction.type.value != "measure":
+                raise TypeError(f"Pulse {instruction} is not a measure pulse.")
 
-    @property
-    def pulse_channel_targets(self):
-        targets = []
-        for target in self.target_dict.values():
-            targets.extend(target.targets)
-        return targets
-
-    def get_acquires(self, targets: Union[Qubit, List[Qubit]]):
-        if not isinstance(targets, list):
-            targets = [targets]
-        targets = [t.full_id() if isinstance(t, Qubit) else t for t in targets]
-        return [self.target_dict[qt].acquire for qt in targets]
-
-    @staticmethod
-    def create_block(
-        qubit: Union[Qubit, List[Qubit]],
-        mode: AcquireMode,
-        output_variables: str = None,
-        existing_names=set(),
-    ):
-        """
-        Initiate a measure block by specifying a qubit / a list of qubits and an acquire
-        mode.
-        """
-        measure_block = MeasureBlock(existing_names=existing_names)
-        measure_block.add_measurements(qubit, mode, output_variables)
-        return measure_block
-
-    def add_measurements(
-        self,
-        targets: Union[Qubit, List[Qubit]],
-        mode: AcquireMode,
-        output_variables: Union[str, List[str]] = None,
-        existing_names: Set[str] = None,
-    ):
-        """
-        Adds qubits to the measure block.
-
-        In the future, we should consider moving this to e.g. the Instruction Builder.
-        """
-        targets = [targets] if not isinstance(targets, List) else targets
-        invalid_items = [target for target in targets if not isinstance(target, Qubit)]
-        if len(invalid_items) > 0:
-            invalid_items_str = ",".join([str(item) for item in invalid_items])
-            raise ValueError(f"The following items are not Qubits: {invalid_items_str}")
-
-        if len((duplicates := [t for t in targets if t.full_id() in self.targets])) > 0:
-            raise ValueError(
-                "Target can only be measured once in a 'MeasureBlock'. "
-                f"Duplicates: {duplicates}"
-            )
-
-        if not isinstance(output_variables, list):
-            output_variables = [] if output_variables is None else [output_variables]
-        if (num_out_vars := len(output_variables)) == 0:
-            output_variables = [None] * len(targets)
-        elif num_out_vars != len(targets):
-            raise ValueError(
-                f"Unsupported number of `output_variables`: {num_out_vars}, "
-                f"must be `None` or match numer of targets: {len(targets)}."
-            )
-
-        for target, output_variable in zip(targets, output_variables):
-            meas, acq = self._generate_measure_acquire(
-                target, mode, output_variable, existing_names
-            )
-            duration = max(meas.duration, acq.delay + acq.duration)
-            self.target_dict[target.full_id()] = MeasureData(
-                mode=mode,
-                output_variable=output_variable,
-                measure=meas,
-                acquire=acq,
-                duration=duration,
-                targets=[pc.full_id() for pc in target.pulse_channels.values()],
-            )
-            self.duration = max(self.duration, duration)
-
-    def _generate_measure_acquire(self, qubit, mode, output_variable, existing_names):
-        measure_channel = qubit.get_measure_channel()
-        acquire_channel = qubit.get_acquire_channel()
-        existing_names = existing_names or self.existing_names
-        weights = (
-            qubit.measure_acquire.get("weights", None)
-            if qubit.measure_acquire.get("use_weights", False)
-            else None
-        )
-
-        measure_instruction = Pulse(
-            targets=measure_channel,
-            waveform=Waveform(**qubit.pulse_measure),
-            type=PulseType.MEASURE,
-        )
-        acquire_instruction = Acquire.with_random_output_variable(
-            acquire_channel,
-            time=(
-                qubit.pulse_measure["width"]
-                if qubit.measure_acquire["sync"]
-                else qubit.measure_acquire["width"]
-            ),
-            mode=mode,
-            output_variable=output_variable,
-            existing_names=existing_names,
-            delay=qubit.measure_acquire["delay"],
-            filter=weights,
-        )
-
-        return [
-            measure_instruction,
-            acquire_instruction,
-        ]
-
-    def __repr__(self):
-        target_strings = []
-        for q, d in self.target_dict.items():
-            out_var = f"->{d.output_variable}" if d.output_variable is not None else ""
-            mode = f":{d.mode.value}" if d.mode is not None else ""
-            target_strings.append(f"{q}{mode}{out_var}")
-        return f"Measure {', '.join(target_strings)}"
+    @model_validator(mode="before")
+    def validate_targets(cls, data, field_name="qubit_targets"):
+        data = super().validate_targets(data, field_name="targets")
+        data = super().validate_targets(data, field_name="qubit_targets")
+        return data

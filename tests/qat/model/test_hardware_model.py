@@ -286,7 +286,7 @@ class Test_HW_Connectivity:
             logical_connectivity[q] = (invalid_value, invalid_value)
 
             with pytest.raises(ValueError):
-                hw = PhysicalHardwareModelBuilder(
+                PhysicalHardwareModelBuilder(
                     physical_connectivity=physical_connectivity,
                     logical_connectivity=logical_connectivity,
                     logical_connectivity_quality=logical_connectivity_quality,

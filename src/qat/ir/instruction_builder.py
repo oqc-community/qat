@@ -1,0 +1,606 @@
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from typing import Union
+
+import numpy as np
+
+from qat.ir.instructions import (
+    Delay,
+    FrequencyShift,
+    Instruction,
+    InstructionBlock,
+    PhaseReset,
+    PhaseShift,
+    Repeat,
+    Reset,
+    Return,
+    Synchronize,
+)
+from qat.ir.measure import (
+    Acquire,
+    AcquireMode,
+    MeasureBlock,
+    PostProcessing,
+    PostProcessType,
+    ProcessAxis,
+)
+from qat.ir.waveforms import CustomWaveform, Pulse, PulseType, Waveform
+from qat.model.device import DrivePulseChannel, PulseChannel, Qubit
+from qat.model.hardware_model import PhysicalHardwareModel
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
+
+
+class InstructionBuilder(ABC):
+    def __init__(
+        self,
+        hardware_model: PhysicalHardwareModel,
+        instructions: list[Instruction] = [],
+    ):
+        self.hw = hardware_model
+        self._qubit_index_by_uuid = {
+            qubit.uuid: idx for (idx, qubit) in hardware_model.qubits.items()
+        }
+        self._ir = InstructionBlock(instructions=instructions)
+
+    @abstractmethod
+    def X(
+        self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
+    ): ...
+
+    @abstractmethod
+    def Y(
+        self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
+    ): ...
+
+    @abstractmethod
+    def Z(
+        self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
+    ): ...
+
+    @abstractmethod
+    def U(
+        self,
+        target: Qubit,
+        theta: float,
+        phi: float,
+        lamb: float,
+        pulse_channel: PulseChannel = None,
+    ): ...
+
+    @abstractmethod
+    def swap(self, target: Qubit, destination: Qubit): ...
+
+    def had(self, target: Qubit):
+        return [*self.Z(target), *self.Y(target, theta=np.pi / 2.0)]
+
+    def SX(self, target: Qubit):
+        return self.X(target, theta=np.pi / 2.0)
+
+    def SXdg(self, target: Qubit):
+        return self.X(target, theta=-(np.pi / 2.0))
+
+    def S(self, target: Qubit):
+        return self.Z(target, theta=np.pi / 2.0)
+
+    def Sdg(self, target: Qubit):
+        return self.Z(target, theta=-(np.pi / 2))
+
+    def T(self, target: Qubit):
+        return self.Z(target, theta=np.pi / 4.0)
+
+    def Tdg(self, target: Qubit):
+        return self.Z(target, -(np.pi / 4.0))
+
+    @abstractmethod
+    def controlled(
+        self, controllers: Union[Qubit, list[Qubit]], builder: InstructionBuilder
+    ): ...
+
+    def cX(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+        return self.controlled(controllers, self.X(target, theta=theta))
+
+    def cY(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+        return self.controlled(controllers, self.Y(target, theta=theta))
+
+    def cZ(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+        return self.controlled(controllers, self.Z(target, theta=theta))
+
+    def cnot(self, control: Union[Qubit, list[Qubit]], target: Qubit):
+        return self.cX(control, target, theta=np.pi)
+
+    @abstractmethod
+    def ccnot(self, controllers: list[Qubit], target: Qubit): ...
+
+    def cswap(
+        self, controllers: Union[Qubit, list[Qubit]], target: Qubit, destination: Qubit
+    ):
+        return self.controlled(controllers, self.swap(target, destination))
+
+    @abstractmethod
+    def ECR(self, control: Qubit, target: Qubit): ...
+
+    def repeat(self, repeat_count: int, repetition_period: float = None):
+        return self.add(
+            Repeat(repeat_count=repeat_count, repetition_period=repetition_period)
+        )
+
+    def returns(self, variables: list[str] = None):
+        """Add return statement."""
+        return self.add(Return(variables=variables))
+
+    def reset(self, qubits: Qubit | list[Qubit] | set[Qubit]):
+        return self.add([*Reset(targets=qubits), *PhaseReset(targets=qubits)])
+
+    def add(self, *instructions: Instruction, flatten: bool = False):
+        """
+        Add one or more instruction(s) into this builder. All methods should use this
+        instead of accessing the instructions tree directly as it deals with composite instructions.
+        """
+        self._ir.add(*instructions, flatten=flatten)
+
+        return self
+
+    @staticmethod
+    def constrain(angle: float):
+        """
+        Constrain the rotation angle to avoid redundant rotations around the Bloch sphere.
+        """
+        return (angle + np.pi) % (2 * np.pi) - np.pi
+
+    @classmethod
+    def _check_identity_operation(cls, f):
+        """
+        Wrapper method to constrain the rotation angle and to determine whether to avoid redundant rotations around the Bloch sphere.
+        """
+
+        def wrapper(self, target, theta=np.pi, pulse_channel=None):
+            theta = self.constrain(theta)
+            return [] if np.isclose(theta, 0) else f(self, target, theta, pulse_channel)
+
+        return wrapper
+
+    @property
+    def number_of_instructions(self):
+        return self._ir.number_of_instructions
+
+
+class QuantumInstructionBuilder(InstructionBuilder):
+    @InstructionBuilder._check_identity_operation
+    def X(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
+        """
+        Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
+
+        :param target: The qubit to be rotated.
+        :param theta: The applied rotation angle.
+        :param pulse_channel: The pulse channel the pulses get sent to.
+        """
+        if np.isclose(theta, np.pi / 2.0):
+            return self.add(*self._hw_X_pi_2(target, pulse_channel))
+        elif np.isclose(theta, -np.pi / 2.0):
+            return self.add(
+                *self._hw_Z(target, theta=np.pi, pulse_channel=pulse_channel),
+                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
+                *self._hw_Z(target, theta=np.pi, pulse_channel=pulse_channel),
+            )
+        return self.U(
+            target,
+            theta=theta,
+            phi=-np.pi / 2.0,
+            lamb=np.pi / 2.0,
+            pulse_channel=pulse_channel,
+        )
+
+    @InstructionBuilder._check_identity_operation
+    def Y(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
+        """
+        Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
+
+        :param target: The qubit to be rotated.
+        :param theta: The applied rotation angle.
+        :param pulse_channel: The pulse channel the pulses get sent to.
+        """
+        if np.isclose(theta, np.pi / 2.0):
+            return self.add(
+                *self._hw_Z(target, theta=-np.pi / 2.0, pulse_channel=pulse_channel),
+                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
+                *self._hw_Z(target, theta=np.pi / 2.0, pulse_channel=pulse_channel),
+            )
+        elif np.isclose(theta, -np.pi / 2.0):
+            return self.add(
+                *self._hw_Z(target, theta=np.pi / 2.0, pulse_channel=pulse_channel),
+                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
+                *self._hw_Z(target, theta=-np.pi / 2.0, pulse_channel=pulse_channel),
+            )
+        return self.U(target, theta=theta, phi=0.0, lamb=0.0, pulse_channel=pulse_channel)
+
+    @InstructionBuilder._check_identity_operation
+    def Z(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
+        """
+        Adds a virtual gate that rotates the reference frame of the qubit with a phase `theta`
+        to the builder.
+
+        :param target: The qubit to be rotated.
+        :param theta: The applied rotation angle.
+        """
+        if pulse_channel:
+            log.warning(
+                "Pulse channel in Z-gate will be ignored in the `QuantumInstructionBuilder`."
+            )
+
+        return self.add(*self._hw_Z(target=target, theta=theta))
+
+    def U(
+        self,
+        target: Qubit,
+        theta: float,
+        phi: float,
+        lamb: float,
+        pulse_channel: PulseChannel = None,
+    ):
+        """
+        Adds an arbitrary rotation around the Bloch sphere with 3 Euler angles
+        to the builder (see https://doi.org/10.48550/arXiv.1707.03429).
+
+        :param target: The qubit to be rotated.
+        :param theta: Rotation angle.
+        :param phi: Rotation angle.
+        :param lamb: Rotation angle.
+        :param pulse_channel: The pulse channel the pulses get sent to.
+        """
+        theta = self.constrain(theta)
+        return self.add(
+            *self._hw_Z(target, theta=lamb + np.pi, pulse_channel=pulse_channel),
+            *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
+            *self._hw_Z(target, theta=np.pi - theta, pulse_channel=pulse_channel),
+            *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
+            *self._hw_Z(target, theta=phi, pulse_channel=pulse_channel),
+        )
+
+    def ZX(self, target1: Qubit, target2: Qubit, theta: float = np.pi / 4.0):
+        """
+        Adds a two-qubit interaction gate exp(-i \theta Z x X) to the builder.
+
+        :param target1: The qubit to which Z gets applied to.
+        :param target2: The qubit to which X gets applied to.
+        :param theta: The applied rotation angle.
+        """
+        theta = self.constrain(theta)
+        if np.isclose(theta, 0):
+            return []
+
+        target1_id = self._qubit_index_by_uuid[target1.uuid]
+        target2_id = self._qubit_index_by_uuid[target2.uuid]
+
+        cr_pulse_channel = target1.pulse_channels.cross_resonance_channels[target2_id]
+        cr_cancellation_pulse_channel = (
+            target2.pulse_channels.cross_resonance_cancellation_channels[target1_id]
+        )
+
+        if np.isclose(theta, np.pi / 4.0):
+            return self.add(*self._hw_ZX_pi_4(target1, target2))
+        elif np.isclose(theta, -np.pi / 4.0):
+            return self.add(
+                PhaseShift(targets=cr_pulse_channel.uuid, phase=np.pi),
+                PhaseShift(targets=cr_cancellation_pulse_channel.uuid, phase=np.pi),
+                *self._hw_ZX_pi_4(target1, target2),
+                PhaseShift(targets=cr_pulse_channel.uuid, phase=np.pi),
+                PhaseShift(targets=cr_cancellation_pulse_channel.uuid, phase=np.pi),
+            )
+        else:
+            raise NotImplementedError(
+                "Generic ZX gate not implemented yet! Please use `theta` = pi/4 or -pi/4."
+            )
+
+    def _hw_X_pi_2(self, target: Qubit, pulse_channel: DrivePulseChannel = None):
+        pulse_channel = pulse_channel or target.pulse_channels.drive
+        pulse_waveform = Waveform(**pulse_channel.x_pi_2_pulse.model_dump())
+
+        return [
+            Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform, type=PulseType.DRIVE)
+        ]
+
+    def _hw_Z(
+        self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
+    ):
+        # Rotate drive pulse channel of the qubit.
+        pulse_channel = pulse_channel or target.pulse_channels.drive
+        instr_collection = [PhaseShift(targets=pulse_channel.uuid, phase=theta)]
+        # Rotate all cross resonance (cancellation) pulse channels pertaining to the qubit.
+        qubit_id = self._qubit_index_by_uuid[target.uuid]
+        if isinstance(pulse_channel, DrivePulseChannel):
+            for (
+                coupled_qubit_id,
+                crc_pulse_channel,
+            ) in target.pulse_channels.cross_resonance_cancellation_channels.items():
+                coupled_qubit = self.hw.qubit_with_index(coupled_qubit_id)
+
+                cr_pulse_channel = coupled_qubit.pulse_channels.cross_resonance_channels[
+                    qubit_id
+                ]
+
+                instr_collection.append(
+                    PhaseShift(targets=cr_pulse_channel.uuid, phase=theta)
+                )
+                instr_collection.append(
+                    PhaseShift(targets=crc_pulse_channel.uuid, phase=theta)
+                )
+
+        return instr_collection
+
+    def _hw_ZX_pi_4(self, target1: Qubit, target2: Qubit):
+        target1_id = self._qubit_index_by_uuid[target1.uuid]
+        target2_id = self._qubit_index_by_uuid[target2.uuid]
+
+        target1_pulse_channel = target1.pulse_channels.cross_resonance_channels[target2_id]
+        target2_pulse_channel = (
+            target2.pulse_channels.cross_resonance_cancellation_channels[target1_id]
+        )
+
+        if target1_pulse_channel is None or target2_pulse_channel is None:
+            raise ValueError(
+                f"Tried to perform cross resonance on {str(target2)} "
+                f"that isn't linked to {str(target1)}."
+            )
+
+        pulse = target1_pulse_channel.zx_pi_4_pulse.model_dump()
+        if pulse is None:
+            raise ValueError(
+                f"No `zx_pi_4_pulse` available on {target1} with index {target1_id}."
+            )
+
+        return [
+            Synchronize(targets=[target1_pulse_channel.uuid, target2_pulse_channel.uuid]),
+            Pulse(
+                targets=target1_pulse_channel.uuid,
+                type=PulseType.CROSS_RESONANCE,
+                waveform=Waveform(**pulse),
+            ),
+            Pulse(
+                targets=target2_pulse_channel.uuid,
+                type=PulseType.CROSS_RESONANCE_CANCEL,
+                waveform=Waveform(**pulse),
+            ),
+        ]
+
+    def _generate_measure_acquire(
+        self, target: Qubit, mode: AcquireMode, output_variable: str = None
+    ):
+        # Measure-related info.
+        measure_channel = target.resonator.pulse_channels.measure
+        measure_instruction = Pulse(
+            targets=measure_channel.uuid,
+            waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+            type=PulseType.MEASURE,
+        )
+
+        # Acquire-related info.
+        acquire_channel = target.resonator.pulse_channels.acquire
+        acquire_duration = (
+            measure_channel.measure_pulse.width
+            if acquire_channel.acquire.sync
+            else acquire_channel.acquire.width
+        )
+
+        if acquire_channel.acquire.use_weights is False:
+            filter = Pulse(
+                waveform=CustomWaveform(samples=acquire_channel.acquire.weights),
+                duration=acquire_duration,
+            )
+        else:
+            filter = None
+
+        acquire_instruction = Acquire(
+            targets=acquire_channel.uuid,
+            duration=acquire_duration,
+            mode=mode,
+            delay=acquire_channel.acquire.delay,
+            filter=filter,
+            output_variable=output_variable,
+        )
+
+        return [
+            measure_instruction,
+            acquire_instruction,
+        ]
+
+    def measure(
+        self,
+        targets: Qubit | set[Qubit],
+        mode: AcquireMode = AcquireMode.INTEGRATOR,
+        output_variable: str = None,
+        sync_qubits: bool = True,
+    ) -> QuantumInstructionBuilder:
+        """
+        Measure one or more qubits.
+
+        :param targets: The qubit(s) to be measured.
+        :param mode: The type of acquisition at the level of the control hardware.
+        :param sync_qubits: Flag determining whether to align the measurements of all
+                            qubits in `targets` or not. Sync between qubits is on by default.
+        """
+        if isinstance(targets, Qubit):
+            targets = [targets]
+
+        target_ids = {self._qubit_index_by_uuid[target.uuid] for target in targets}
+        target_ids = MeasureBlock.validate_targets(
+            {"qubit_targets": target_ids}, field_name="qubit_targets"
+        )["qubit_targets"]
+
+        measure_block = MeasureBlock(qubit_targets=target_ids)
+
+        all_pulse_channels = [
+            pc.uuid for qubit in targets for pc in qubit.all_pulse_channels
+        ]
+
+        if sync_qubits:
+            # Sync pulse channels of all pulse channels.
+            measure_block.add(Synchronize(targets=all_pulse_channels))
+
+        for qubit in targets:
+            if not sync_qubits:
+                qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
+                measure_block.add(Synchronize(targets=qubit_pulse_channels))
+
+            # Measure and acquire instructions for the qubit.
+            measure, acquire = self._generate_measure_acquire(
+                qubit, mode=mode, output_variable=output_variable
+            )
+            duration = max(measure.duration, acquire.delay + acquire.duration)
+            print(measure.duration, acquire.delay + acquire.duration)
+            measure_block.add(measure, acquire)
+            measure_block.duration = max(measure_block.duration, duration)
+
+            if not sync_qubits:
+                qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
+                measure_block.add(Synchronize(targets=qubit_pulse_channels))
+
+        # Sync pulse channels of all pulse channels after measurement.
+        if sync_qubits:
+            measure_block.add(Synchronize(targets=all_pulse_channels))
+
+        return self.add(measure_block)
+
+    def post_processing(
+        self,
+        acquire: Acquire,
+        process_type: PostProcessType,
+        target: Qubit,
+        axes: list[ProcessAxis] = None,
+        args=None,
+    ):
+        # Default the mean z-map args if none supplied.
+        if args is None or not any(args):
+            if process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                args = target.mean_z_map_args
+
+            elif process_type == PostProcessType.DISCRIMINATE:
+                args = [target.discriminator]
+
+            elif process_type == PostProcessType.DOWN_CONVERT:
+                resonator = target.resonator
+                phys_channel = resonator.physical_channel
+                bb = phys_channel.baseband
+                measure_pulse_ch = resonator.pulse_channels.measure
+
+                if measure_pulse_ch.fixed_if:
+                    args = [bb.if_frequency, phys_channel.sample_time]
+                else:
+                    args = [
+                        measure_pulse_ch.frequency - bb.frequency,
+                        phys_channel.sample_time,
+                    ]
+
+        return self.add(
+            PostProcessing(
+                acquire_mode=acquire.mode, process_type=process_type, axes=axes, args=args
+            )
+        )
+
+    def cnot(self, control: Qubit, target: Qubit):
+        self.ECR(control, target)
+        self.X(control)
+        self.Z(control, theta=-np.pi / 2)
+        self.X(target, theta=-np.pi / 2)
+        return self
+
+    def ECR(self, control: Qubit, target: Qubit):
+        if not isinstance(control, Qubit) or not isinstance(target, Qubit):
+            raise ValueError("The quantum targets of the ECR node must be qubits!")
+
+        target_id = self._qubit_index_by_uuid[target.uuid]
+
+        pulse_channels = [
+            control.pulse_channels.drive,
+            control.pulse_channels.cross_resonance_channels[target_id],
+            control.pulse_channels.cross_resonance_cancellation_channels[target_id],
+            target.pulse_channels.drive,
+        ]
+
+        sync_instruction = Synchronize(pulse_channels)
+        instructions = [sync_instruction]
+        instructions.extend(self._get_ZX(control, target, theta=np.pi / 4.0))
+        instructions.append(sync_instruction)
+        instructions.extend(self._get_X(control, theta=np.pi))
+        instructions.append(sync_instruction)
+        instructions.extend(self._get_ZX(control, target, theta=-np.pi / 4.0))
+        instructions.append(sync_instruction)
+
+        return self.add(*instructions)
+
+    def swap(self, target: Qubit, destination: Qubit):
+        raise NotImplementedError("Not available on this hardware model.")
+
+    def pulse(self, **kwargs):
+        return self.add(Pulse(**kwargs))
+
+    def acquire(
+        self,
+        target: Qubit,
+        delay: float = 1e-06,
+        **kwargs,
+    ):
+        pulse_channel = target.resonator.pulse_channels.acquire
+
+        if delay is None:
+            kwargs["delay"] = pulse_channel.acquire.delay
+
+        return self.add(Acquire(targets=pulse_channel.uuid, **kwargs))
+
+    def delay(self, target: Qubit | PulseChannel, time: float):
+        pulse_channel = target.pulse_channels.drive if isinstance(target, Qubit) else target
+        return self.add(Delay(targets=pulse_channel.uuid, time=time))
+
+    def synchronize(self, targets: Union[Qubit, list[Qubit]]):
+        targets = targets if isinstance(targets, list) else [targets]
+
+        pulse_channel_ids = set()
+        for target in targets:
+            # TODO: At some point, we might want to implement (pulse channel)
+            # getters at the qubit level just for the sake of conveniency.
+            pulse_channel_ids.add(target.resonator.pulse_channels.acquire.uuid)
+            pulse_channel_ids.add(target.resonator.pulse_channels.measure.uuid)
+            qubit_pulse_channel_ids = [
+                pulse_channel.uuid for pulse_channel in target.all_pulse_channels
+            ]
+            pulse_channel_ids.add(*qubit_pulse_channel_ids)
+
+        return self.add(Synchronize(targets=pulse_channel_ids))
+
+    def controlled(
+        self, controllers: Union[Qubit, list[Qubit]], builder: InstructionBuilder
+    ):
+        raise NotImplementedError("Not available on this hardware model.")
+
+    def ccnot(self, controllers: list[Qubit], target: Qubit):
+        raise NotImplementedError("Not available on this hardware model.")
+
+    @InstructionBuilder._check_identity_operation
+    def phase_shift(self, target: Qubit | PulseChannel, phase: float):
+        if isinstance(target, Qubit):
+            return self.add(
+                PhaseShift(targets=target.pulse_channels.drive.uuid, phase=phase)
+            )
+        elif isinstance(target, PulseChannel):
+            return self.add(PhaseShift(targets=target.uuid, phase=phase))
+        else:
+            raise TypeError(
+                "Please provide a target that is either a `Qubit` or a `PulseChannel`."
+            )
+
+    @InstructionBuilder._check_identity_operation
+    def frequency_shift(self, target: Qubit, frequency):
+        if isinstance(target, Qubit):
+            return self.add(
+                FrequencyShift(
+                    targets=target.pulse_channels.drive.uuid, frequency=frequency
+                )
+            )
+        elif isinstance(target, PulseChannel):
+            return self.add(FrequencyShift(targets=target.uuid, frequency=frequency))
+        else:
+            raise TypeError(
+                "Please provide a target that is either a `Qubit` or a `PulseChannel`."
+            )

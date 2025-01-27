@@ -52,7 +52,7 @@ def apply_post_processing(
     :Type axes: Dict[ProcessAxis, Int]
     """
 
-    match post_processing.process:
+    match post_processing.process_type:
         case PostProcessType.DOWN_CONVERT:
             _validate_down_convert_axis(post_processing.axes)
             return down_convert(response, axes, *post_processing.args)
@@ -64,7 +64,7 @@ def apply_post_processing(
             return discriminate(response, axes, post_processing.args[0])
 
     raise NotImplementedError(
-        f"Post processing type {post_processing.process} not implemented."
+        f"Post processing type {post_processing.process_type} not implemented."
     )
 
 

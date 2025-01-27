@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from itertools import chain, product
+import random
+from itertools import product
 
 import numpy as np
 import pytest
@@ -11,62 +12,81 @@ from qat.ir.instructions import (
     Assign,
     Delay,
     FrequencyShift,
-    Jump,
-    Label,
-    PhaseReset,
+    Instruction,
+    InstructionBlock,
     PhaseShift,
     QuantumInstruction,
+    QuantumInstructionBlock,
     Repeat,
-    Reset,
     ResultsProcessing,
     Return,
-    Synchronize,
-    Variable,
 )
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.utils.logger import LoggerLevel
+
+from tests.qat.utils.hardware_models import generate_hw_model
 
 
-class TestVariable:
+class TestInstructionBlock:
+    def test_single_instruction(self):
+        instr = Instruction()
+        c_from_list = InstructionBlock(instructions=[instr])
+        c_from_instr = InstructionBlock(instructions=instr)
 
-    @pytest.mark.parametrize(
-        ["type", "val", "change"],
-        [(float, 0.1, 0.2), (str, "clark", "kent"), (float, None, 0.1), (float, 0.1, None)],
-    )
-    def test_assign(self, type, val, change):
-        var = Variable(name="test", var_type=type, value=val)
-        assert var.value == val
-        var.value = change
-        assert var.value == change
+        assert c_from_list.number_of_instructions == c_from_instr.number_of_instructions
+        assert instr.number_of_instructions == c_from_list.number_of_instructions
+        assert instr.number_of_instructions == 1
 
-    @pytest.mark.parametrize(
-        ["type", "val", "change"],
-        [
-            (float, 0.1, "kent"),
-            (str, "clark", 0.2),
-            (str, 0.1, "kent"),
-            (float, "clark", 0.2),
-        ],
-    )
-    def test_wrong_type_raises_value_error(self, type, val, change):
-        with pytest.raises(ValueError):
-            var = Variable(name="test", var_type=type, value=val)
-            var.value = change
+    def test_number_of_instructions(self):
+        c = InstructionBlock()
 
-    @pytest.mark.parametrize(["val", "change"], [(0.1, "kent"), ("clark", 0.2)])
-    def test_no_var_type(self, val, change):
-        var = Variable(name="test", value=val)
-        assert var.value == val
-        var.value = change
-        assert var.value == change
+        ref_number_of_instructions = 0
+        # Test with a random composite isntruction with max. depth = 2.
+        # This fits our needs for now, but can be expanded later into
+        # a more elaborate randomly generated composite pattern.
+        while c.number_of_instructions < 20:
+            new_instr = random.choices(
+                [Instruction(), InstructionBlock()], weights=[0.5, 0.5]
+            )[0]
+            if isinstance(new_instr, InstructionBlock):
+                k = random.randint(1, 3)
+                leaves = [Instruction()] * k
+                new_instr.add(*leaves)
+                ref_number_of_instructions += k
+            else:
+                ref_number_of_instructions += 1
 
-    def test_auto_name(self):
-        var = Variable.with_random_name(value=0.2)
-        assert isinstance(var.name, str)
-        assert var.value == 0.2
+            c.add(new_instr)
+
+        assert c.number_of_instructions == ref_number_of_instructions
+
+    @pytest.mark.parametrize("k", list(range(0, 5)))
+    def test_flatten(self, k):
+        c_sub = InstructionBlock()
+
+        instructions = [Instruction()] * k
+        c_sub.add(*instructions)
+
+        c_flatten = InstructionBlock()
+        c_flatten.add(c_sub, flatten=True)
+        assert len(c_flatten.instructions) == k
+
+        c_composite = InstructionBlock()
+        c_composite.add(c_sub, flatten=False)
+        assert len(c_composite.instructions) == 1
+
+        assert c_flatten.number_of_instructions == c_composite.number_of_instructions
+
+    def test_ordering(self):
+        comp_instr = InstructionBlock()
+
+        instructions = [Instruction(), PhaseShift(), Delay(), FrequencyShift()]
+        comp_instr.add(*instructions)
+
+        for instr, ref_instr in zip(comp_instr, instructions):
+            assert instr == ref_instr
 
 
 class TestRepeat:
-
     @pytest.mark.parametrize(
         ["repeat_count", "repetition_period"], product([0, 10, 1024], [10, None])
     )
@@ -93,35 +113,16 @@ class TestReturn:
         inst = Return(variables=vars)
         assert inst.variables == vars
 
-    @pytest.mark.parametrize(
-        "vars", [0.4, ["test", 0.4], Variable(name="test", var_type=float, value=0.4)]
-    )
+    @pytest.mark.parametrize("vars", [0.4, ["test", 0.4]])
     def test_wrong_input(self, vars):
         with pytest.raises(ValidationError):
             Return(variables=vars)
 
 
-class TestLabel:
-    def test_name_gen(self):
-        lbl = Label.with_random_name()
-        assert isinstance(lbl.name, str)
-
-    @pytest.mark.parametrize("name", [4, 3.14, None])
-    def test_validation(self, name):
-        with pytest.raises(ValidationError):
-            Label(name=name)
-
-
-class TestJump:
-    @pytest.mark.parametrize("name", ["test", Label.with_random_name()])
-    def test_jump(self, name):
-        inst = Jump(target=name)
-        assert isinstance(inst.target, str)
-
-
 class TestResults:
-    @pytest.mark.parametrize("res_processing", InlineResultsProcessing)
-    def test_res_processing(self, res_processing):
+    @pytest.mark.parametrize("res_processing_option", [1, 2, 3, 4, 5])
+    def test_res_processing(self, res_processing_option):
+        res_processing = InlineResultsProcessing(res_processing_option)
         inst = ResultsProcessing(variable="test", results_processing=res_processing)
         assert inst.variable == "test"
         assert inst.results_processing == res_processing
@@ -132,213 +133,148 @@ class TestResults:
             ResultsProcessing(variable="test", results_processing=res_processing)
 
 
+hw_model = generate_hw_model(4)
+qubits = [qubit.uuid for qubit in hw_model.qubits.values()]
+pulse_channels = [
+    pulse_channel.uuid
+    for qubit in hw_model.qubits.values()
+    for pulse_channel in qubit.all_pulse_channels
+]
+
+
 class TestQuantumInstruction:
-    model = get_default_echo_hardware()
+    def test_create_single_qubit_target(self):
+        for target in qubits:
+            inst = QuantumInstruction(targets=target)
+            assert inst.targets == {target}
 
-    def test_create_single_target(self):
-        targets = chain(
-            self.model.basebands,
-            self.model.physical_channels,
-            self.model.pulse_channels,
-            self.model.quantum_devices,
-        )
-        for target in targets:
-            inst = QuantumInstruction(target)
-            assert inst.targets == target
+    def test_create_single_pulse_channel_target(self):
+        for target in pulse_channels:
+            inst = QuantumInstruction(targets=target)
+            assert inst.targets == {target}
 
-    def test_create_multiple_targets(self):
-        targets = [
-            list(self.model.basebands),
-            list(self.model.physical_channels),
-            list(self.model.pulse_channels),
-            list(self.model.quantum_devices),
-        ]
-        # Try with different target types
-        targets.append([lst[0] for lst in targets])
+    def test_create_multiple_qubit_targets(self):
+        inst = QuantumInstruction(targets=qubits)
+        assert len(inst.targets) == len(qubits)
 
-        for target_list in targets:
-            inst = QuantumInstruction(target_list)
-            for target in inst.targets:
-                assert target in target_list
+    def test_create_multiple_pulse_channel_targets(self):
+        inst = QuantumInstruction(targets=pulse_channels)
+        assert len(inst.targets) == len(pulse_channels)
+
+    def test_list_to_set_removes_redundancy(self, caplog):
+        with caplog.at_level(LoggerLevel.WARNING.value):
+            inst = QuantumInstruction(targets=["test", "test"])
+            assert "Duplicates have been removed" in caplog.text
+        assert inst.targets == set(["test"])
 
     @pytest.mark.parametrize(
         "targets", [2, np.array([1.0, 2.0]), [2, np.array([1.0, 2.0])]]
     )
     def test_wrong_targets_yield_validation_error(self, targets):
-        with pytest.raises(ValidationError):
-            QuantumInstruction(targets)
+        with pytest.raises((ValidationError, TypeError)):
+            QuantumInstruction(targets=targets)
 
-    def test_list_to_set_removes_redundancy(self):
-        inst = QuantumInstruction(["test", "test"])
-        assert inst.targets == set(["test"])
+
+class TestQuantumInstructionBlock:
+    @pytest.mark.parametrize("seed", [21, 22, 23, 24])
+    def test_duration(self, seed):
+        block = QuantumInstructionBlock()
+        instructions = [
+            QuantumInstruction(
+                targets="t1", duration=random.Random(seed).uniform(1e-08, 1e-02)
+            ),
+            QuantumInstruction(
+                targets="t1", duration=random.Random(seed + 1).uniform(1e-08, 1e-02)
+            ),
+            QuantumInstruction(
+                targets="t1", duration=random.Random(seed + 2).uniform(1e-08, 1e-02)
+            ),
+            QuantumInstruction(targets="t2", duration=1e-09),
+        ]
+        block.add(*instructions)
+
+        assert (
+            block.duration
+            == instructions[0].duration
+            + instructions[1].duration
+            + instructions[2].duration
+        )
+        assert (
+            block._duration_per_target["t1"]
+            == instructions[0].duration
+            + instructions[1].duration
+            + instructions[2].duration
+        )
+        assert block._duration_per_target["t2"] == instructions[3].duration
+
+    def test_targets(self):
+        block = QuantumInstructionBlock()
+        instructions = [QuantumInstruction(targets="t1"), QuantumInstruction(targets="t2")]
+        block.add(*instructions)
+        assert block.targets == {"t1", "t2"}
+
+        block.add(QuantumInstruction(targets="t2"))
+        assert block.targets == {"t1", "t2"}
+
+        extra_instructions = [
+            QuantumInstruction(targets="t1"),
+            QuantumInstruction(targets="t3"),
+            QuantumInstruction(targets="t4"),
+        ]
+        block.add(*extra_instructions)
+        assert block.targets == {"t1", "t2", "t3", "t4"}
 
 
 class TestPhaseShift:
-    model = get_default_echo_hardware()
-
-    @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(model.pulse_channels.values(), [0.0, -np.pi, 0.235, np.random.rand()]),
-    )
-    def test_initiation(self, chan, val):
-        inst = PhaseShift(chan, phase=val)
-        assert inst.channel == chan.full_id()
+    @pytest.mark.parametrize("pulse_channel", pulse_channels)
+    @pytest.mark.parametrize("val", [0.0, -np.pi, 0.235, np.random.rand()])
+    def test_initiation(self, pulse_channel, val):
+        inst = PhaseShift(targets=pulse_channel, phase=val)
+        assert inst.target == pulse_channel
         assert inst.phase == val
 
     @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(
-            model.physical_channels.values(), [3, 0.0, -np.pi, 0.235, np.random.rand()]
-        ),
+        ["pulse_channel", "val"],
+        product(pulse_channels, [1j, "pi"]),
     )
-    def test_invalid_pulse_channel_raises_value_error(self, chan, val):
-        with pytest.raises(ValueError):
-            PhaseShift(chan, phase=val)
-
-    @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(model.pulse_channels.values(), [1j, "pi"]),
-    )
-    def test_invalid_phase_raises_validation_error(self, chan, val):
+    def test_invalid_phase_raises_validation_error(self, pulse_channel, val):
         with pytest.raises(ValidationError):
-            PhaseShift(chan, phase=val)
+            PhaseShift(targets=pulse_channel, phase=val)
 
 
 class TestFrequencyShift:
-    model = get_default_echo_hardware()
-
     @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(model.pulse_channels.values(), [0.0, -np.pi, 0.235, np.random.rand()]),
+        ["pulse_channel", "val"],
+        product(pulse_channels, [0.0, -np.pi, 0.235, np.random.rand()]),
     )
-    def test_initiation(self, chan, val):
-        inst = FrequencyShift(chan, frequency=val)
-        assert inst.channel == chan.full_id()
+    def test_initiation(self, pulse_channel, val):
+        inst = FrequencyShift(targets=pulse_channel, frequency=val)
+        assert inst.target == pulse_channel
         assert inst.frequency == val
 
     @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(
-            model.physical_channels.values(), [3, 0.0, -np.pi, 0.235, np.random.rand()]
-        ),
+        ["pulse_channel", "val"],
+        product(pulse_channels, [1j, "pi"]),
     )
-    def test_validation_pulse_channel(self, chan, val):
-        with pytest.raises(ValueError):
-            FrequencyShift(chan, frequency=val)
-
-    @pytest.mark.parametrize(
-        ["chan", "val"],
-        product(model.pulse_channels.values(), [1j, "pi"]),
-    )
-    def test_validation_phase(self, chan, val):
+    def test_validation_phase(self, pulse_channel, val):
         with pytest.raises(ValidationError):
-            FrequencyShift(chan, frequency=val)
+            FrequencyShift(targets=pulse_channel, frequency=val)
 
 
 class TestDelay:
-    model = get_default_echo_hardware()
-
     @pytest.mark.parametrize(
         ["target", "delay"],
         product(
-            [
-                model.get_qubit(0),
-                list(model.pulse_channels.values())[0],
-            ],
+            [hw_model.qubit_with_index(0).uuid, pulse_channels[0]],
             [0.0, 8e-8, 5.6e-7],
         ),
     )
     def test_targets(self, target, delay):
-        inst = Delay(target, time=delay)
-        assert inst.targets == target.full_id()
-        assert inst.time == delay
+        inst = Delay(targets=target, duration=delay)
+        assert inst.targets == {target}
         assert inst.duration == delay
 
     @pytest.mark.parametrize("delay", [-1, -1e-8, "pi"])
     def test_validation(self, delay):
         with pytest.raises(ValidationError):
-            Delay(self.model.get_qubit(0), time=delay)
-
-
-# Syncrhonize and PhaseReset are similar in that they just collect unique pulse channels.
-# can be tested together
-@pytest.mark.parametrize("instruction", [Synchronize, PhaseReset])
-class TestSynchronizePhaseReset:
-    model = get_default_echo_hardware()
-
-    @pytest.mark.parametrize(
-        "targets",
-        [
-            list(model.pulse_channels.values())[0],
-            list(model.pulse_channels.values())[0:2],
-        ],
-    )
-    def test_pulse_channels(self, instruction, targets):
-        inst = instruction(targets)
-        assert len(inst.targets) == len(targets) if isinstance(targets, list) else 1
-
-    @pytest.mark.parametrize(
-        "targets",
-        [0, [0, 1, 2]],
-    )
-    def test_qubits(self, instruction, targets):
-        if not isinstance(targets, list):
-            targets = self.model.get_qubit(targets)
-        else:
-            targets = [self.model.get_qubit(i) for i in targets]
-        inst = instruction(targets)
-        targets = targets if isinstance(targets, list) else [targets]
-        len_targets = sum([len(target.pulse_channels) for target in targets])
-        assert len_targets == len(inst.targets)
-        target_ids = [
-            chan.full_id() for target in targets for chan in target.pulse_channels.values()
-        ]
-        for target_id in target_ids:
-            assert target_id in inst.targets
-
-    def test_add_instruction(self, instruction):
-        inst1 = instruction(self.model.get_qubit(0))
-        inst2 = instruction(self.model.get_qubit(1))
-        inst3 = inst1 + inst2
-        targets = inst1.targets
-        targets.update(inst2.targets)
-        assert inst3.targets == targets
-
-    def test_add_target(self, instruction):
-        inst = instruction(self.model.get_qubit(0))
-        inst = inst + self.model.get_qubit(1)
-        inst2 = instruction([self.model.get_qubit(0), self.model.get_qubit(1)])
-        assert inst.targets == inst2.targets
-
-    @pytest.mark.parametrize("target", ["test", 2.54, ["test", 2.54]])
-    def test_add_validation(self, instruction, target):
-        inst = instruction(self.model.get_qubit(0))
-        with pytest.raises(ValueError):
-            inst += target
-
-    def test_iadd(self, instruction):
-        inst = instruction(self.model.get_qubit(0))
-        inst2 = inst + self.model.get_qubit(1)
-        inst += self.model.get_qubit(1)
-        assert inst.targets == inst2.targets
-
-
-class TestReset:
-    model = get_default_echo_hardware()
-
-    def test_single_qubit(self):
-        inst = Reset(self.model.get_qubit(0))
-        assert inst.targets == set([self.model.get_qubit(0).get_drive_channel().full_id()])
-
-    def test_multiple_qubits(self):
-        inst = Reset(self.model.qubits[0:2])
-        assert inst.targets == set(
-            [
-                self.model.get_qubit(0).get_drive_channel().full_id(),
-                self.model.get_qubit(1).get_drive_channel().full_id(),
-            ]
-        )
-
-    def test_wrong_target(self):
-        with pytest.raises(ValueError):
-            Reset(self.model.get_qubit(0).measure_device)
+            Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)

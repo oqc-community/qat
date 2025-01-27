@@ -18,7 +18,7 @@ from qat.runtime.post_processing import (
 class TestApplyPostProcessing:
 
     def test_invalid_pp_type_raises_not_implemented_error(self):
-        pp = PostProcessing(output_variable="test", process=PostProcessType.MUL)
+        pp = PostProcessing(output_variable="test", process_type=PostProcessType.MUL)
         with pytest.raises(NotImplementedError):
             apply_post_processing({}, pp, {})
 
@@ -32,7 +32,7 @@ class TestApplyPostProcessing:
     )
     def test_down_convert_on_wrong_axes_raises_value_error(self, axes):
         pp = PostProcessing(
-            output_variable="test", process=PostProcessType.DOWN_CONVERT, axes=axes
+            output_variable="test", process_type=PostProcessType.DOWN_CONVERT, axes=axes
         )
         with pytest.raises(ValueError):
             apply_post_processing({}, pp, {})

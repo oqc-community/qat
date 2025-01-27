@@ -1,128 +1,212 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-import pytest
-from pydantic import ValidationError
+from typing import Literal
 
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    MeasureBlock,
-    PostProcessing,
-    PostProcessType,
-)
+import numpy as np
+import pytest
+from pydantic import Field, ValidationError
+
+from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse, PulseShapeType, Waveform
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.device import QubitId
+from qat.purr.compiler.instructions import PostProcessType
+from qat.utils.pydantic import ValidatedSet
+
+from tests.qat.utils.hardware_models import generate_hw_model
+
+model = generate_hw_model(4)
+qubits = [qubit for qubit in model.qubits.values()]
+qubits_uuid = [qubit.uuid for qubit in qubits]
 
 
 class TestAcquire:
-    model = get_default_echo_hardware()
-
     def test_initiate(self):
-        chan = self.model.get_qubit(0).get_acquire_channel()
-        inst = Acquire(chan)
-        assert inst.time == 1e-6
-        assert inst.targets == chan.full_id()
+        acquire_channel = qubits[0].resonator.pulse_channels.acquire
+        inst = Acquire(targets=acquire_channel.uuid)
+        assert inst.duration == 1e-6
+        assert list(inst.targets)[0] == acquire_channel.uuid  # We only supplied one target.
 
     def test_filter(self):
-        chan = self.model.get_qubit(0).get_acquire_channel()
+        acquire_channel = qubits[0].resonator.pulse_channels.acquire
         filter = Pulse(
-            targets=chan, waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=1e-6)
+            targets=acquire_channel.uuid,
+            waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=1e-6),
         )
-        inst = Acquire(chan, time=1e-6, filter=filter)
+        inst = Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
         assert inst.filter == filter
 
     @pytest.mark.parametrize("time", [0, 5e-7, 1.01e-6, 2e-6])
     def test_filter_validation(self, time):
-        chan = self.model.get_qubit(0).get_acquire_channel()
-        filter = Pulse(chan, waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=time))
+        acquire_channel = qubits[0].resonator.pulse_channels.acquire
+        filter = Pulse(
+            targets=acquire_channel.uuid,
+            waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=time),
+        )
         with pytest.raises(ValidationError):
-            inst = Acquire(chan, time=1e-6, filter=filter)
+            Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
+
+    @pytest.mark.parametrize("qubit_idx", list(model.qubits.keys()))
+    def test_output_variable(self, qubit_idx):
+        acquire_channel = qubits[qubit_idx].resonator.pulse_channels.acquire
+        output_variable = f"Q{qubit_idx}"
+
+        acq = Acquire(
+            targets=acquire_channel.uuid, duration=1e-6, output_variable=output_variable
+        )
+        assert acq.output_variable == output_variable
+
+        acq.output_variable = "new_output_var"
+        assert acq.output_variable == "new_output_var"
+
+    def test_invalid_output_variable(self):
+        with pytest.raises(ValidationError):
+            Acquire(targets="mock", output_variable=123)
+
+        with pytest.raises(ValidationError):
+            Acquire(targets="mock", output_variable=1.23)
+
+        with pytest.raises(ValidationError):
+            Acquire(targets="mock", output_variable=["output_var"])
 
 
 class TestPostProcessing:
-    model = get_default_echo_hardware()
+    @pytest.mark.parametrize("pp_type", PostProcessType)
+    def test_change_pp(self, pp_type):
+        inst = PostProcessing(process_type=pp_type)
 
-    @pytest.mark.parametrize("pp", PostProcessType)
-    def test_initiate(self, pp):
-        chan = self.model.get_qubit(0).get_acquire_channel()
-        acquire = Acquire(chan)
-        inst = PostProcessing(output_variable=acquire.output_variable, process=pp)
-        assert inst.process == pp
-        assert inst.output_variable == acquire.output_variable
+        new_pp_type = PostProcessType.MUL
+        inst.process_type = new_pp_type
+        assert inst.process_type == PostProcessType.MUL
+
+    @pytest.mark.parametrize("pp_type", PostProcessType)
+    def test_enum_name_vs_value(self, pp_type):
+        inst1 = PostProcessing(process_type=pp_type)
+        inst2 = PostProcessing(process_type=pp_type.value)
+
+        assert inst1.process_type == inst2.process_type
+
+        with pytest.raises(ValidationError):
+            inst1.process_type = "invalid"
+
+        with pytest.raises(ValidationError):
+            inst2.process_type = "invalid"
 
 
 class TestMeasureBlock:
-    # Tests are extracted and modified from test_instructions.py
+    def test_init_single_target(self):
+        target = list(model.qubits.keys())[0]
 
-    @pytest.mark.parametrize("mode", list(AcquireMode))
-    @pytest.mark.parametrize("num_qubits", [1, 3])
-    def test_create_simple_measure_block(self, num_qubits, mode):
-        hw = get_default_echo_hardware()
-        targets = hw.qubits[:num_qubits]
+        mb = MeasureBlock(qubit_targets=target)
+        assert list(mb.qubit_targets)[0] == target
 
-        mb = MeasureBlock.create_block(targets, mode)
-        assert isinstance(mb, MeasureBlock)
-        assert mb.targets == [t.full_id() for t in targets]
-        assert mb.target_dict[targets[0].full_id()].mode == mode
+        with pytest.raises(ValidationError):
+            MeasureBlock(qubit_targets=qubits_uuid)
 
-    @pytest.mark.parametrize("out_vars", [None, "c"])
-    @pytest.mark.parametrize("num_qubits", [1, 3])
-    def test_create_measure_block_with_output_variables(self, num_qubits, out_vars):
-        hw = get_default_echo_hardware()
-        targets = hw.qubits[:num_qubits]
+    def test_init_multiple_targets(self):
+        targets = list(model.qubits.keys())
 
-        if isinstance(out_vars, str):
-            out_vars = [f"{out_vars}[{i}]" for i in range(num_qubits)]
+        mb = MeasureBlock(qubit_targets=targets)
+        assert mb.qubit_targets == targets
 
-        mb = MeasureBlock.create_block(
-            targets, AcquireMode.INTEGRATOR, output_variables=out_vars
+        with pytest.raises(ValidationError):
+            MeasureBlock(qubit_targets=qubits_uuid)
+
+    def test_add_instruction(self):
+        qubit_id = list(model.qubits.keys())[0]
+        qubit = model.qubits[qubit_id]
+        measure_channel = qubit.resonator.pulse_channels.measure
+        acquire_channel = qubit.resonator.pulse_channels.acquire
+
+        mb = MeasureBlock(qubit_targets=qubit_id)
+        mb.add(
+            Pulse(
+                waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                duration=1e-03,
+                targets=measure_channel.uuid,
+                type="measure",
+            )
         )
-        expected = out_vars or [None] * num_qubits
-        assert [val.output_variable for val in mb.target_dict.values()] == expected
+        assert mb.number_of_instructions == 1
 
-    def test_add_to_measure_block(self):
-        hw = get_default_echo_hardware()
-        targets = [hw.qubits[0], hw.qubits[-1]]
-        modes = [AcquireMode.INTEGRATOR, AcquireMode.SCOPE]
-        out_vars = ["c[0]", "b[1]"]
-        mb = MeasureBlock.create_block(
-            targets[0],
-            modes[0],
-            output_variables=out_vars[:1],
-        )
-        assert mb.targets == [t.full_id() for t in hw.qubits[:1]]
-        mb.add_measurements(targets[1], modes[1], output_variables=out_vars[1])
-        assert mb.targets == [t.full_id() for t in targets]
-        assert [val.mode for val in mb.target_dict.values()] == modes
-        assert [val.output_variable for val in mb.target_dict.values()] == out_vars
+        mb.add(Acquire(targets=acquire_channel.uuid, duration=1e-09))
+        assert mb.number_of_instructions == 2
 
-    def test_cannot_add_duplicate_to_measure_block(self):
-        hw = get_default_echo_hardware()
-        targets = [hw.qubits[0], hw.qubits[-1]]
-        out_vars = ["c[0]", "b[1]"]
-        mb = MeasureBlock.create_block(
-            targets,
-            AcquireMode.INTEGRATOR,
-            output_variables=out_vars,
-        )
-        assert mb.targets == [t.full_id() for t in targets]
-        with pytest.raises(ValueError):
-            mb.add_measurements(targets[1], AcquireMode.INTEGRATOR)
+    def add_invalid_instruction(self):
+        qubit_id = list(model.qubits.keys())[0]
+        qubit = model.qubits[qubit_id]
+        measure_channel = qubit.resonator.pulse_channels.measure
 
-    def test_measure_block_duration(self):
-        hw = get_default_echo_hardware()
-        target = hw.qubits[0]
-        mb = MeasureBlock.create_block([], AcquireMode.RAW)
-        assert mb.duration == 0.0
-        mb.add_measurements(target, AcquireMode.INTEGRATOR)
-        acq = mb.get_acquires(target)[0]
-        assert mb.duration > 0
-        assert mb.duration == pytest.approx(acq.delay + acq.duration)
-        mb.duration = 1
-        assert mb.duration == 1
+        mb = MeasureBlock(qubit_targets=qubit_id)
 
-    def test_get_acquires(self):
-        hw = get_default_echo_hardware()
-        mb = MeasureBlock.create_block(hw.qubits, AcquireMode.INTEGRATOR)
-        acquires = mb.get_acquires(hw.qubits)
-        assert all([isinstance(acq, Acquire) for acq in acquires])
+        with pytest.raises(TypeError):
+            mb.add(
+                Pulse(
+                    waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                    duration=1e-03,
+                    targets=measure_channel.uuid,
+                    type="drive",
+                )
+            )
+
+        with pytest.raises(TypeError):
+            mb.add(PhaseShift())
+
+    def test_custom_measure_block(self):
+        class AdditionalQuantumInstructionBlock(QuantumInstructionBlock):
+            qubit_targets: ValidatedSet[QubitId] = Field(max_length=1)
+
+            @property
+            def target(self):
+                return next(iter(self.targets))
+
+        class CustomMeasureBlock(MeasureBlock):
+            _valid_instructions: Literal[
+                (Synchronize, Pulse, Acquire, AdditionalQuantumInstructionBlock)
+            ] = (Synchronize, Pulse, Acquire, AdditionalQuantumInstructionBlock)
+
+        qubit_indices = list(model.qubits.keys())
+        custom_mb = CustomMeasureBlock(qubit_targets=qubit_indices)
+
+        max_duration = 0.0
+        for qubit_idx, qubit in model.qubits.items():
+            qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
+            measure_channel = qubit.resonator.pulse_channels.measure
+            acquire_channel = qubit.resonator.pulse_channels.acquire
+            # Synchronise all pulse channels within a qubit.
+            custom_mb.add(Synchronize(targets=qubit_pulse_channels))
+            # Some dummy additional instruction block in the measure block.
+            additional_block = AdditionalQuantumInstructionBlock(
+                qubit_targets={qubit_idx},
+                instructions=[
+                    PhaseShift(targets={qubit.pulse_channels.drive.uuid}, phase=np.pi / 2),
+                    PhaseReset(targets={qubit.pulse_channels.drive.uuid}),
+                ],
+            )
+
+            custom_mb.add(additional_block)
+            # Standard measure and acquire.
+            measure = Pulse(
+                waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                duration=1e-03,
+                targets=measure_channel.uuid,
+                type="measure",
+            )
+            custom_mb.add(measure)
+
+            acquire = Acquire(targets=acquire_channel.uuid, duration=1e-09)
+            custom_mb.add(acquire)
+            # Synchronise all pulse channels within a qubit after measurement.
+            custom_mb.add(Synchronize(targets=qubit_pulse_channels))
+
+            duration = max(measure.duration, acquire.duration + acquire.delay)
+            max_duration = max(max_duration, duration)
+
+        assert custom_mb.duration == duration
+
+        found_additional_block = False
+        for instr in custom_mb.instructions:
+            if isinstance(instr, AdditionalQuantumInstructionBlock):
+                found_additional_block = True
+
+        assert found_additional_block

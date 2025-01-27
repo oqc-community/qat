@@ -9,9 +9,13 @@ from pydantic import Field, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
-from qat.model.device import Qubit
-from qat.model.hardware_base import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
-from qat.utils.pydantic import NoExtraFieldsModel
+from qat.model.device import Qubit, QubitId
+from qat.utils.pydantic import (
+    CalibratableUnitInterval,
+    FrozenDict,
+    FrozenSet,
+    NoExtraFieldsModel,
+)
 
 VERSION = Version(0, 0, 1)
 
