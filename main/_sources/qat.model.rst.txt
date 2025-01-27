@@ -15,5 +15,4 @@ Submodules
    qat.model.builder
    qat.model.convert_legacy
    qat.model.device
-   qat.model.hardware_base
    qat.model.hardware_model

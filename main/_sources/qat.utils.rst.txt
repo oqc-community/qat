@@ -13,5 +13,4 @@ Submodules
    :maxdepth: 4
 
    qat.utils.algorithm
-   qat.utils.ir_converter
    qat.utils.pydantic
