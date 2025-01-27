@@ -145,10 +145,7 @@ markers = [
 
 [tool.poetry.scripts]
 format-code = "scripts.poetry_scripts:format_code"
-
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
+generate-report =  "scripts.ci.generate_report:main"
 
 [tool.jupytext.formats]
 "notebooks/ipynb/" = "ipynb"
