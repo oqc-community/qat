@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import Dict, List
+from typing import List
 
 import numpy as np
 from compiler_config.config import (
@@ -11,9 +11,11 @@ from compiler_config.config import (
 )
 
 from qat.ir.pass_base import QatIR, TransformPass
+from qat.ir.result_base import ResultManager
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import IndexAccessor, Variable, is_generated_name
+from qat.runtime.analysis_passes import IndexMappingResult
 from qat.runtime.executables import Executable
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
 from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list
@@ -222,16 +224,18 @@ class ErrorMitigation(TransformPass):
     def run(
         self,
         ir: QatIR,
+        res_mgr: ResultManager,
         *args,
-        mapping: Dict[str, str],
         compiler_config: CompilerConfig,
         **kwargs,
     ):
+
         error_mitigation = compiler_config.error_mitigation
 
         if error_mitigation is None or error_mitigation == ErrorMitigationConfig.Empty:
             return
 
+        mapping = res_mgr.lookup_by_type(IndexMappingResult).mapping
         results = ir.value
 
         # TODO: add support for multiple registers

@@ -3,10 +3,11 @@
 import numpy as np
 import pytest
 
+from qat.backend.waveform_v1 import EchoEngine
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
-from qat.runtime import BaseRuntime, EchoEngine, ResultsAggregator
+from qat.runtime import BaseRuntime, ResultsAggregator
 from qat.runtime.executables import AcquireDataStruct
 
 

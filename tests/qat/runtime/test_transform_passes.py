@@ -3,12 +3,11 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.backend.waveform_v1.codegen import WaveformV1Emitter
+from qat.backend.waveform_v1 import EchoEngine, WaveformV1Emitter
 from qat.ir.measure import PostProcessing
 from qat.ir.pass_base import QatIR
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
-from qat.runtime import EchoEngine
 from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
 from qat.runtime.transform_passes import (
     AssignResultsTransform,

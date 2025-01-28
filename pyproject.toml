@@ -105,6 +105,7 @@ profile = "black"
 line_length = 92
 known_first_party = ["qat"]
 known_local_folder = ["tests", "benchmarks"]
+extend_skip = ["__init__.py"]
 
 [tool.black]
 line-length = 92

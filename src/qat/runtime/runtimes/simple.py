@@ -36,6 +36,7 @@ class SimpleRuntime(BaseRuntime):
         package: Executable,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
+        **kwargs,
     ):
         """
         Fully execute a package against the hardware with batching of shots and results post-
@@ -68,5 +69,5 @@ class SimpleRuntime(BaseRuntime):
 
         # TODO: Remove QatIR with changes to pass manager
         results = QatIR(results)
-        self.results_pipeline.run(results, res_mgr, met_mgr, package=package)
+        self.results_pipeline.run(results, res_mgr, met_mgr, package=package, **kwargs)
         return results.value

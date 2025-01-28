@@ -5,11 +5,11 @@ from copy import copy
 import numpy as np
 import pytest
 
+from qat.backend.waveform_v1 import EchoEngine
 from qat.backend.waveform_v1.codegen import WaveformV1Emitter
 from qat.ir.pass_base import QatIR
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode
-from qat.runtime import EchoEngine
 
 
 class TestEchoEngine:

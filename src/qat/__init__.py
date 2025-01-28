@@ -13,4 +13,4 @@ from qat.qat import (
     fetch_frontend,
 )
 
-from qat.core import QAT  # isort: skip
+from qat.core import QAT

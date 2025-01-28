@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import numpy as np
 
-from qat.backend.waveform_v1.executable import WaveformV1Executable
+from qat.backend.waveform_v1 import WaveformV1Executable
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime import NativeEngine
