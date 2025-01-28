@@ -53,6 +53,10 @@
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.engines.html">qat.backend.waveform_v1.engines package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.engines.echo.html">qat.backend.waveform_v1.engines.echo module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
 </ul>
@@ -169,12 +173,12 @@
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.runtime package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.html">qat.runtime.engines package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.runtime.engines.echo.html">qat.runtime.engines.echo module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.engines.native.html">qat.runtime.engines.native module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.html">qat.runtime.runtimes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.legacy.html">qat.runtime.runtimes.legacy module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.simple.html">qat.runtime.runtimes.simple module</a></li>
 </ul>
 </li>
@@ -239,11 +243,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qat.runtime.engines.html">qat.runtime.engines package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.runtime.engines.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.runtime.engines.echo.html">qat.runtime.engines.echo module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.echo.html#qat.runtime.engines.echo.EchoEngine"><code class="docutils literal notranslate"><span class="pre">EchoEngine</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.echo.html#qat.runtime.engines.echo.process_readout"><code class="docutils literal notranslate"><span class="pre">process_readout()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.engines.native.html">qat.runtime.engines.native module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine"><code class="docutils literal notranslate"><span class="pre">NativeEngine</span></code></a></li>
 </ul>
@@ -257,6 +256,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime"><code class="docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.ResultsAggregator"><code class="docutils literal notranslate"><span class="pre">ResultsAggregator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.runtimes.legacy.html">qat.runtime.runtimes.legacy module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime"><code class="docutils literal notranslate"><span class="pre">LegacyRuntime</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.runtimes.simple.html">qat.runtime.runtimes.simple module</a><ul>
@@ -281,6 +284,17 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.CalibrationAnalysisResult"><code class="docutils literal notranslate"><span class="pre">CalibrationAnalysisResult</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.CalibrationAnalysisResult.calibration_executables"><code class="docutils literal notranslate"><span class="pre">CalibrationAnalysisResult.calibration_executables</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis"><code class="docutils literal notranslate"><span class="pre">IndexMappingAnalysis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.run"><code class="docutils literal notranslate"><span class="pre">IndexMappingAnalysis.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.var_to_physical_channel_executable"><code class="docutils literal notranslate"><span class="pre">IndexMappingAnalysis.var_to_physical_channel_executable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.var_to_physical_channel_qat_ir"><code class="docutils literal notranslate"><span class="pre">IndexMappingAnalysis.var_to_physical_channel_qat_ir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.var_to_qubit_map"><code class="docutils literal notranslate"><span class="pre">IndexMappingAnalysis.var_to_qubit_map()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingResult"><code class="docutils literal notranslate"><span class="pre">IndexMappingResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingResult.mapping"><code class="docutils literal notranslate"><span class="pre">IndexMappingResult.mapping</span></code></a></li>
 </ul>
 </li>
 </ul>
