@@ -321,6 +321,14 @@ class Test_HW_Connectivity:
         with pytest.raises(ValidationError):
             PhysicalHardwareModel(**blob)
 
+    def test_default_logical_topology(self, n_qubits, seed):
+        physical_connectivity = random_connectivity(n_qubits, seed=seed)
+        hw = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity).model
+
+        hw.logical_connectivity == physical_connectivity
+        for quality in hw.logical_connectivity_quality.values():
+            assert quality == 1.0
+
 
 @pytest.mark.parametrize("seed", [500, 501, 502])
 @pytest.mark.parametrize("n_removed_qubits", [1, 2, 3, 4])

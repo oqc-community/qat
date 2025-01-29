@@ -303,7 +303,7 @@ class Qubit(Component):
     """
 
     physical_channel: PhysicalChannel
-    pulse_channels: QubitPulseChannels
+    pulse_channels: QubitPulseChannels = Field(frozen=True, default=QubitPulseChannels())
     resonator: Resonator
 
     mean_z_map_args: list[float] = Field(max_length=2, default=[1.0, 0.0])

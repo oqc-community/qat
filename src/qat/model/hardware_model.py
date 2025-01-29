@@ -83,10 +83,6 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             logical_connectivity = deepcopy(data["physical_connectivity"])
             data["logical_connectivity"] = logical_connectivity
 
-        return data
-
-    @model_validator(mode="before")
-    def default_logical_connectivity_quality(cls, data):
         if not data.get("logical_connectivity_quality", None):
             logical_connectivity_quality = {}
 
