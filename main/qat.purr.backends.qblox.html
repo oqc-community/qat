@@ -115,7 +115,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html">qat.purr.backends.qblox.validation_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
 </li>
@@ -150,6 +149,8 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
@@ -351,6 +352,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.delay"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.delay()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.device_update()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.duration"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.durations"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.durations</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_repeat"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.enter_repeat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.enter_sweep()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.epilogue"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.epilogue()</span></code></a></li>
@@ -413,7 +415,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage.timeline"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.timeline</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.calculate_duration"><code class="docutils literal notranslate"><span class="pre">calculate_duration()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_phase_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_phase_arguments()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_set_frequency_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_set_frequency_arguments()</span></code></a></li>
 </ul>
@@ -905,14 +906,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass.run"><code class="docutils literal notranslate"><span class="pre">DesugaringPass.run()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingOptimisation</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PostProcessingOptimisation.run()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation.run()</span></code></a></li>
 </ul>
@@ -923,17 +916,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ScopeSanitisation"><code class="docutils literal notranslate"><span class="pre">ScopeSanitisation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ScopeSanitisation.run"><code class="docutils literal notranslate"><span class="pre">ScopeSanitisation.run()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html">qat.purr.backends.qblox.validation_passes module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation.run"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation.run()</span></code></a></li>
 </ul>
 </li>
 </ul>

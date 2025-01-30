@@ -36,5 +36,4 @@ Submodules
    qat.purr.backends.qblox.pass_base
    qat.purr.backends.qblox.result_base
    qat.purr.backends.qblox.transform_passes
-   qat.purr.backends.qblox.validation_passes
    qat.purr.backends.qblox.visualisation

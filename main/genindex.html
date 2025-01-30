@@ -112,7 +112,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.validation_passes.html">qat.purr.backends.qblox.validation_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
 </li>
@@ -147,6 +146,8 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
@@ -786,12 +787,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.cal_block">cal_block() (Qasm3Parser method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.calculate_duration">calculate_duration() (in module qat.purr.backends.qblox.codegen)</a>
-
-      <ul>
-        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.calculate_duration">(in module qat.purr.compiler.instructions)</a>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.calculate_duration">calculate_duration() (in module qat.purr.compiler.instructions)</a>
 </li>
-      </ul></li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TimelineAnalysis.calculate_non_sync_durations">calculate_non_sync_durations() (TimelineAnalysis method)</a>
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TimelineAnalysis.calculate_sync_durations">calculate_sync_durations() (TimelineAnalysis method)</a>
@@ -1360,14 +1357,14 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DeviceUpdate">DeviceUpdate (class in qat.purr.compiler.instructions)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.codegen_base.html#qat.backend.codegen_base.DfsTraversal">DfsTraversal (class in qat.backend.codegen_base)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal">(class in qat.purr.backends.qblox.codegen_base)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.disable">disable() (InstructionValidationConfig method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.DISABLE_PULSE_DURATION_LIMITS">DISABLE_PULSE_DURATION_LIMITS (QatConfig property)</a>
@@ -1460,8 +1457,12 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.duration">(Waveform property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TimelineAnalysisResult.durations">durations (TimelineAnalysisResult attribute)</a>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.durations">durations (NewQbloxContext property)</a>
+
+      <ul>
+        <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.TimelineAnalysisResult.durations">(TimelineAnalysisResult attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -2299,7 +2300,7 @@
       <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation">InstructionValidation (class in qat.compiler.validation_passes)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation">(class in qat.purr.backends.qblox.validation_passes)</a>
+        <li><a href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.InstructionValidation">(class in qat.purr.compiler.validation_passes)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig">InstructionValidationConfig (class in qat.purr.qatconfig)</a>
@@ -3064,8 +3065,6 @@
 </li>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#module-qat.purr.backends.qblox.transform_passes">qat.purr.backends.qblox.transform_passes</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.validation_passes.html#module-qat.purr.backends.qblox.validation_passes">qat.purr.backends.qblox.validation_passes</a>
-</li>
         <li><a href="qat.purr.backends.qblox.visualisation.html#module-qat.purr.backends.qblox.visualisation">qat.purr.backends.qblox.visualisation</a>
 </li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#module-qat.purr.backends.qiskit_simulator">qat.purr.backends.qiskit_simulator</a>
@@ -3111,6 +3110,10 @@
         <li><a href="qat.purr.compiler.optimisers.html#module-qat.purr.compiler.optimisers">qat.purr.compiler.optimisers</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#module-qat.purr.compiler.runtime">qat.purr.compiler.runtime</a>
+</li>
+        <li><a href="qat.purr.compiler.transform_passes.html#module-qat.purr.compiler.transform_passes">qat.purr.compiler.transform_passes</a>
+</li>
+        <li><a href="qat.purr.compiler.validation_passes.html#module-qat.purr.compiler.validation_passes">qat.purr.compiler.validation_passes</a>
 </li>
         <li><a href="qat.purr.compiler.waveforms.html#module-qat.purr.compiler.waveforms">qat.purr.compiler.waveforms</a>
 </li>
@@ -3568,7 +3571,7 @@
       <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation">PhaseOptimisation (class in qat.compiler.transform_passes)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation">(class in qat.purr.backends.qblox.transform_passes)</a>
+        <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset">PhaseReset (class in qat.ir.instructions)</a>
@@ -3689,10 +3692,10 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation">PostProcessingOptimisation (class in qat.compiler.transform_passes)</a>
+      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.compiler.transform_passes)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation">(class in qat.purr.backends.qblox.transform_passes)</a>
+        <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
       <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.PostProcessingTransform">PostProcessingTransform (class in qat.runtime.transform_passes)</a>
@@ -4341,13 +4344,6 @@
 </li>
       </ul></li>
       <li>
-    qat.purr.backends.qblox.validation_passes
-
-      <ul>
-        <li><a href="qat.purr.backends.qblox.validation_passes.html#module-qat.purr.backends.qblox.validation_passes">module</a>
-</li>
-      </ul></li>
-      <li>
     qat.purr.backends.qblox.visualisation
 
       <ul>
@@ -4431,8 +4427,6 @@
         <li><a href="qat.purr.compiler.error_mitigation.html#module-qat.purr.compiler.error_mitigation">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.error_mitigation.readout_mitigation
 
@@ -4440,6 +4434,8 @@
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#module-qat.purr.compiler.error_mitigation.readout_mitigation">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.execution
 
@@ -4508,6 +4504,20 @@
 
       <ul>
         <li><a href="qat.purr.compiler.runtime.html#module-qat.purr.compiler.runtime">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.purr.compiler.transform_passes
+
+      <ul>
+        <li><a href="qat.purr.compiler.transform_passes.html#module-qat.purr.compiler.transform_passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.purr.compiler.validation_passes
+
+      <ul>
+        <li><a href="qat.purr.compiler.validation_passes.html#module-qat.purr.compiler.validation_passes">module</a>
 </li>
       </ul></li>
       <li>
@@ -4914,7 +4924,7 @@
       <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation">ReadoutValidation (class in qat.compiler.validation_passes)</a>
 
       <ul>
-        <li><a href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation">(class in qat.purr.backends.qblox.validation_passes)</a>
+        <li><a href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.ReadoutValidation">(class in qat.purr.compiler.validation_passes)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ReadWriteResult.reads">reads (ReadWriteResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ReadWriteResult.reads">[1]</a>
@@ -5266,7 +5276,7 @@
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation.run">(InputOptimisation method)</a>
 </li>
-        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation.run">(InstructionValidation method)</a>, <a href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.InstructionValidation.run">[1]</a>
+        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation.run">(InstructionValidation method)</a>, <a href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.InstructionValidation.run">[1]</a>
 </li>
         <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.IntermediateFrequencyAnalysis.run">(IntermediateFrequencyAnalysis method)</a>
 </li>
@@ -5286,9 +5296,9 @@
 </li>
         <li><a href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel.run">(PassModel method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassModel.run">[1]</a>
 </li>
-        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run">(PhaseOptimisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PhaseOptimisation.run">[1]</a>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run">(PhaseOptimisation method)</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation.run">[1]</a>
 </li>
-        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingOptimisation.run">(PostProcessingOptimisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.PostProcessingOptimisation.run">[1]</a>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingSanitisation.run">(PostProcessingSanitisation method)</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run">[1]</a>
 </li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.PostProcessingTransform.run">(PostProcessingTransform method)</a>
 </li>
@@ -5302,7 +5312,7 @@
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock.run">(QuantumExecutableBlock method)</a>
 </li>
-        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation.run">(ReadoutValidation method)</a>, <a href="qat.purr.backends.qblox.validation_passes.html#qat.purr.backends.qblox.validation_passes.ReadoutValidation.run">[1]</a>
+        <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation.run">(ReadoutValidation method)</a>, <a href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.ReadoutValidation.run">[1]</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.run">(RemoteCalibration method)</a>
 </li>

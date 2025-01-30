@@ -34,4 +34,6 @@ Submodules
    qat.purr.compiler.metrics
    qat.purr.compiler.optimisers
    qat.purr.compiler.runtime
+   qat.purr.compiler.transform_passes
+   qat.purr.compiler.validation_passes
    qat.purr.compiler.waveforms
