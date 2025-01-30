@@ -83,3 +83,31 @@ def qubit_spect(model, qubit_indices=None, num_points=None):
 
     builder.repeat(1000, 500e-6)
     return builder
+
+
+def t1(model, qubit_indices=None, num_points=None, width=None):
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 100
+    width = width or 500e-6
+
+    time = np.linspace(0.0, width, num_points)
+    var_name = "t"
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    builder.sweep(SweepValue(var_name, time))
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        qubit.get_drive_channel().scale = 1.0e-8 + 0.0j
+        qubit.get_second_state_channel().scale = 1.0e-8 + 0.0j
+
+        builder.X(qubit, np.pi)
+        builder.delay(qubit, Variable(var_name))
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_z(qubit, output_variable=f"Q{index}")
+
+    return builder

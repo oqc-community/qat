@@ -13,7 +13,7 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect
+from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, t1
 
 log = get_default_logger()
 
@@ -247,5 +247,12 @@ class TestQbloxLiveEngineAdapter:
         runtime = model.create_runtime()
         runtime.engine.enable_hax = True
         builder = qubit_spect(model)
+        results = runtime.execute(builder)
+        assert results is not None
+
+    def test_t1(self, model):
+        runtime = model.create_runtime()
+        runtime.engine.enable_hax = True
+        builder = t1(model)
         results = runtime.execute(builder)
         assert results is not None

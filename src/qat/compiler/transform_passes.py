@@ -86,7 +86,7 @@ class PhaseOptimisation(TransformPass):
         )
 
 
-class PostProcessingOptimisation(TransformPass):
+class PostProcessingSanitisation(TransformPass):
     """
     Extracted from LiveDeviceEngine.optimize()
     Better pass name/id ?

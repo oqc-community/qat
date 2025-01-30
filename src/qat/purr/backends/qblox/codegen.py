@@ -4,7 +4,7 @@ from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -48,6 +48,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
     Variable,
     Waveform,
+    calculate_duration,
 )
 from qat.purr.utils.logger import get_default_logger
 
@@ -76,39 +77,6 @@ def get_nco_set_frequency_arguments(frequency_hz: float) -> int:
         )
 
     return frequency_steps
-
-
-def calculate_duration(instruction, return_samples: bool = True):
-    """
-    Calculates the duration of the instruction. The duration is either in nanoseconds
-    or in number of samples.
-    """
-    target_channels = [
-        target for target in instruction.quantum_targets if isinstance(target, PulseChannel)
-    ]
-    if not any(target_channels):
-        return 0
-
-    # TODO: Allow for multiple pulse channel targets.
-    if len(target_channels) > 1 and not isinstance(instruction, PhaseReset):
-        log.warning(
-            f"Attempted to calculate duration of {str(instruction)} that has multiple"
-            f" target channels. We're arbitrarily using the duration of the first channel "
-            f"to calculate instruction duration."
-        )
-
-    pc = target_channels[0].physical_channel
-    block_size = pc.block_size
-    block_time = pc.block_time
-    block_number = np.ceil(
-        round(instruction.duration / block_time, 4)
-    )  # round to remove floating point errors
-    if return_samples:
-        calc_sample = block_number * block_size
-    else:
-        calc_sample = block_number * block_time
-
-    return calc_sample
 
 
 @dataclass
@@ -483,14 +451,11 @@ class QbloxContext:
         self.sequence_builder.nop()
 
     def delay(self, inst: Delay):
-        self._wait_seconds(inst.duration)
-
-        if inst.duration <= 0:
-            return
-
-        self._duration = self._duration + inst.duration
-        num_samples = int(calculate_duration(inst))
-        self._timeline = np.append(self._timeline, [0] * num_samples)
+        if inst.duration > 0:
+            self._wait_seconds(inst.duration)
+            self._duration = self._duration + inst.duration
+            num_samples = int(calculate_duration(inst))
+            self._timeline = np.append(self._timeline, [0] * num_samples)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         pulse = self._evaluate_waveform(waveform, target)
@@ -571,13 +536,13 @@ class QbloxContext:
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
+        # TODO - For now, enable only logical time padding
+        # TODO - Enable when finer grained SYNC groups are supported
         max_duration = max([cxt.duration for cxt in contexts.values()])
         for target in inst.quantum_targets:
             cxt = contexts[target]
             delay_time = max_duration - cxt.duration
             cxt.delay(Delay(target, delay_time))
-            # TODO - For now, enable only logical time padding
-            # TODO - Enable when finer grained SYNC groups are supported
             # cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
@@ -669,7 +634,7 @@ class NewQbloxContext:
         self.sequencer_config = SequencerConfig()
 
         self._duration: int = 0
-        self._timeline: np.ndarray = np.empty(0, dtype=complex)
+        self._durations: List[Union[float, str]] = []
 
         self._num_hw_avg = 1  # Technically disabled
         self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
@@ -695,6 +660,10 @@ class NewQbloxContext:
     @property
     def duration(self):
         return self._duration
+
+    @property
+    def durations(self):
+        return self._durations
 
     def is_empty(self):
         """
@@ -727,7 +696,7 @@ class NewQbloxContext:
 
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
+        return QbloxPackage(target, sequence, self.sequencer_config)
 
     def _wait_seconds(self, duration: float):
         if duration <= 0:
@@ -876,14 +845,31 @@ class NewQbloxContext:
         self.sequence_builder.nop()
 
     def delay(self, inst: Delay):
-        self._wait_seconds(inst.duration)
+        value = inst.duration
+        if isinstance(value, Variable):
+            register = self.alloc_mgr.registers[value.name]
 
-        if inst.duration <= 0:
-            return
+            temp_reg = self.alloc_mgr.reg_alloc("temp")
+            self.sequence_builder.move(register, temp_reg)
+            self.sequence_builder.nop()
 
-        self._duration = self._duration + inst.duration
-        num_samples = int(calculate_duration(inst))
-        self._timeline = np.append(self._timeline, [0] * num_samples)
+            exit_label = f"delay_{hash(inst)}_exit"
+            self.sequence_builder.label("batch")
+            self.sequence_builder.jlt(temp_reg, Constants.GRID_TIME, exit_label)
+            self.sequence_builder.jlt(temp_reg, Constants.MAX_WAIT_TIME, "remainder")
+            self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+            self.sequence_builder.sub(temp_reg, Constants.MAX_WAIT_TIME, temp_reg)
+            self.sequence_builder.nop()
+            self.sequence_builder.jge(temp_reg, Constants.MAX_WAIT_TIME, "batch")
+            self.sequence_builder.label("remainder")
+            self.sequence_builder.wait(temp_reg)
+            self.sequence_builder.label(exit_label)
+
+            self._durations.append(register)
+        elif inst.duration > 0:
+            self._wait_seconds(inst.duration)
+            self._duration = self._duration + inst.duration
+            self._durations.append(inst.duration)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         pulse = self._evaluate_waveform(waveform, target)
@@ -911,7 +897,7 @@ class NewQbloxContext:
             self._wait_nanoseconds(num_samples - max_duration)
 
         self._duration = self._duration + waveform.duration
-        self._timeline = np.append(self._timeline, pulse)
+        self._durations.append(waveform.duration)
 
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
@@ -964,18 +950,18 @@ class NewQbloxContext:
                 )
 
         self._duration = self._duration + measure.duration
-        self._timeline = np.append(self._timeline, pulse)
+        self._durations.append(measure.duration)
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
-        max_duration = max([cxt.duration for cxt in contexts.values()])
+        # max_duration = max([cxt.duration for cxt in contexts.values()])
         for target in inst.quantum_targets:
             cxt = contexts[target]
-            delay_time = max_duration - cxt.duration
-            cxt.delay(Delay(target, delay_time))
+            # delay_time = max_duration - cxt.duration
+            # cxt.delay(Delay(target, delay_time))
             # TODO - For now, enable only logical time padding
             # TODO - Enable when finer grained SYNC groups are supported
-            # cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+            cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
     def reset_phase(inst: PhaseReset, contexts: Dict):
@@ -1134,9 +1120,9 @@ class NewQbloxEmitter(InvokerMixin):
         return PassManager() | PreCodegenPass() | CFGPass()
 
     def emit_packages(
-        self, builder: InstructionBuilder, res_mgr: ResultManager, met_mgr: MetricsManager
+        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager
     ) -> List[QbloxPackage]:
-        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)

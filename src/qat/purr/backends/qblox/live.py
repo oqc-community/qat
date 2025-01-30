@@ -38,6 +38,7 @@ from qat.purr.compiler.instructions import (
     DeviceUpdate,
     IndexAccessor,
     Instruction,
+    PostProcessType,
     Variable,
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
@@ -214,6 +215,7 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                 triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
                 acquire_map = triage_result.acquire_map
                 sweeps = triage_result.sweeps
+                pp_map = triage_result.pp_map
                 loop_nest_shape = tuple(
                     len(next(iter(s.variables.values()))) for s in sweeps
                 )
@@ -222,6 +224,12 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                 for t, acquires in acquire_map.items():
                     for acq in acquires:
                         response = playback_results[acq.output_variable]
+                        response_axis = {}
+                        for pp in pp_map[acq.output_variable]:
+                            if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                                response, _ = self.run_post_processing(
+                                    pp, response, response_axis
+                                )
                         results[acq.output_variable] = response.reshape(loop_nest_shape)
                 results = self._process_results(results, triage_result)
                 results = self._process_assigns(results, triage_result)

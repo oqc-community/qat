@@ -6,7 +6,7 @@ from qat.compiler.transform_passes import (
     InputOptimisation,
     Parse,
     PhaseOptimisation,
-    PostProcessingOptimisation,
+    PostProcessingSanitisation,
 )
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.ir.pass_base import PassManager
@@ -40,7 +40,7 @@ def DefaultExecute(hardware_model, engine=None):
         | HardwareConfigValidity(hardware_model)
         | CalibrationAnalysis()
         | PhaseOptimisation()
-        | PostProcessingOptimisation()
+        | PostProcessingSanitisation()
         | InstructionValidation(engine)
         | ReadoutValidation(hardware_model)
     )
@@ -72,7 +72,7 @@ def EchoCompile(model):
         | HardwareConfigValidity(model)
         | CalibrationAnalysis()
         | PhaseOptimisation()
-        | PostProcessingOptimisation()
+        | PostProcessingSanitisation()
         | ReadoutValidation(model)
     )
 

@@ -16,7 +16,7 @@ from qat.backend.analysis_passes import (
 from qat.backend.transform_passes import RepeatSanitisation, ReturnSanitisation
 from qat.backend.validation_passes import FrequencyValidation, NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
-from qat.compiler.transform_passes import PostProcessingOptimisation
+from qat.compiler.transform_passes import PostProcessingSanitisation
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
 from qat.ir.pass_base import InvokerMixin, MetricsManager, PassManager, QatIR
@@ -117,7 +117,7 @@ class WaveformV1Emitter(InvokerMixin):
             PassManager()
             | RepeatSanitisation(self.model)
             | ReturnSanitisation()
-            | PostProcessingOptimisation()
+            | PostProcessingSanitisation()
             | FrequencyValidation(self.model)
             | NoAcquireWeightsValidation()
             | TriagePass()

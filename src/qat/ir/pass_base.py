@@ -133,7 +133,7 @@ class PassManager(PassInfoMixin):
     specified, the pass manager is best modelled as a DAG that acts as a pass itself. In doing so, it runs
     a sequence of (composite or leaf) passes over some unit of IR and aggregates results from them.
 
-    Result aggregation (in general) can be achieved via side effects or simply return values. We adopted
+    Result aggregation (in general) can be achieved via return values or side effects. We adopted
     the latter approach where a ResultManager is passed in as argument. The rationale behind this choice
     is two-fold:
 

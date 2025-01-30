@@ -20,6 +20,7 @@ from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
+    Delay,
     DeviceUpdate,
     EndRepeat,
     EndSweep,
@@ -32,6 +33,7 @@ from qat.purr.compiler.instructions import (
     Return,
     Sweep,
     Variable,
+    calculate_duration,
 )
 
 
@@ -344,6 +346,26 @@ class BindingPass(AnalysisPass):
 
                     # A DeviceUpdate reads the variable named "inst.value.name"
                     rw_result.reads[inst.value.name].append(inst)
+                elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
+                    defining_sweep = next(
+                        (
+                            s
+                            for s in stack[::-1]
+                            if isinstance(s, Sweep) and inst.duration.name in s.variables
+                        ),
+                        None,
+                    )
+                    if not defining_sweep:
+                        raise ValueError(
+                            f"Variable {inst.duration} referenced but no prior declaration found in target {target}"
+                        )
+
+                    # Only the defining sweep writes to variable, but only on the target in question !!
+                    rw_result.writes[inst.duration.name].append(defining_sweep)
+
+                    # A Delay reads the variable named "inst.duration.name"
+                    rw_result.reads[inst.duration.name].append(inst)
+
             if stack:
                 raise ValueError(
                     f"Unbalanced scopes. Found orphans {stack} in target {target}"
@@ -404,6 +426,13 @@ class TILegalisationPass(AnalysisPass):
                 )
         elif isinstance(inst, Acquire):
             return bound
+        elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
+            return IterBound(
+                start=calculate_duration(Delay(inst.quantum_targets, bound.start)),
+                step=calculate_duration(Delay(inst.quantum_targets, bound.step)),
+                end=calculate_duration(Delay(inst.quantum_targets, bound.end)),
+                count=bound.count,
+            )
         else:
             raise NotImplementedError(
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
@@ -448,14 +477,12 @@ class TILegalisationPass(AnalysisPass):
                     legal_bound = self._legalise_bound(name, bound_result[name], inst)
                     read_bounds[name].add(legal_bound)
 
-            for name, bound in bound_result.items():
-                if name in read_bounds:
-                    bound_set = read_bounds[name]
-                    if len(bound_set) > 1:
-                        raise ValueError(
-                            f"Ambiguous bounds for variable {name} in target {target}"
-                        )
-                    legal_bound_result[name] = next(iter(bound_set))
+            for name, bound_set in read_bounds.items():
+                if len(bound_set) > 1:
+                    raise ValueError(
+                        f"Ambiguous bounds for variable {name} in target {target}"
+                    )
+                legal_bound_result[name] = next(iter(bound_set))
 
             # TODO: the proper way is to produce a new result and invalidate the old one
             binding_result.iter_bound_results[target] = legal_bound_result
@@ -542,6 +569,8 @@ class QbloxLegalisationPass(AnalysisPass):
                     """
                 )
             legal_bound = bound
+        elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
+            legal_bound = bound  # TODO - probably shift up by some minimum
         else:
             raise NotImplementedError(
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"

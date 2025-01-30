@@ -41,7 +41,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect
+from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, t1
 
 log = get_default_logger()
 
@@ -496,3 +496,18 @@ class TestNewQbloxEmitter(InvokerMixin):
                     assert "upd_param" not in acquire_pkg.sequence.program
         finally:
             injectors.revert()
+
+    @pytest.mark.parametrize("num_points", [100])
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_t1(self, model, num_points, qubit_indices):
+        builder = t1(model, qubit_indices, num_points)
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        assert len(packages) == 2 * len(qubit_indices)
