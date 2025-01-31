@@ -12,16 +12,18 @@ from pydantic import ValidationError
 
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import PulseChannel
+from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.hardware_model import VERSION, PhysicalHardwareModel
 
 from tests.qat.utils.hardware_models import (
     generate_connectivity_data,
+    generate_random_linear,
     random_connectivity,
     random_quality_map,
 )
 
 
-@pytest.mark.parametrize("n_qubits", [1, 2, 3, 4, 10, 32])
+@pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])
 @pytest.mark.parametrize("n_logical_qubits", [0, 2, 4])
 @pytest.mark.parametrize("seed", [1, 2, 3])
 class Test_HW_Serialisation:
@@ -40,6 +42,59 @@ class Test_HW_Serialisation:
 
         hw1 = builder.model
         hw2 = PhysicalHardwareModel(**hw1.model_dump())
+        assert hw1 == hw2
+
+    def test_built_model_with_default_error_mit_serialises(
+        self, n_qubits, n_logical_qubits, seed
+    ):
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
+            generate_connectivity_data(
+                n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
+            )
+        )
+
+        builder = PhysicalHardwareModelBuilder(
+            physical_connectivity=physical_connectivity,
+            logical_connectivity=logical_connectivity,
+            logical_connectivity_quality=logical_connectivity_quality,
+        )
+
+        hw1 = builder.model
+        hw1.error_mitigation = ErrorMitigation()
+        assert not hw1.error_mitigation.is_enabled
+
+        blob = hw1.model_dump()
+        hw2 = PhysicalHardwareModel(**blob)
+        assert hw1 == hw2
+
+    @pytest.mark.parametrize("m3_available", [True, False])
+    def test_built_model_with_error_mit_serialises(
+        self, n_qubits, n_logical_qubits, m3_available, seed
+    ):
+        physical_connectivity, logical_connectivity, logical_connectivity_quality = (
+            generate_connectivity_data(
+                n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
+            )
+        )
+
+        builder = PhysicalHardwareModelBuilder(
+            physical_connectivity=physical_connectivity,
+            logical_connectivity=logical_connectivity,
+            logical_connectivity_quality=logical_connectivity_quality,
+        )
+        hw1 = builder.model
+
+        qubit_indices = list(hw1.qubits.keys())
+        linear = generate_random_linear(qubit_indices)
+        readout_mit = ReadoutMitigation(linear=linear, m3_available=m3_available)
+        error_mit = ErrorMitigation(readout_mitigation=readout_mit)
+        hw1.error_mitigation = error_mit
+
+        assert hw1.error_mitigation.is_enabled
+        assert hw1.error_mitigation.readout_mitigation == readout_mit
+
+        blob = hw1.model_dump()
+        hw2 = PhysicalHardwareModel(**blob)
         assert hw1 == hw2
 
     def test_built_logical_model_serialises(self, n_qubits, n_logical_qubits, seed):

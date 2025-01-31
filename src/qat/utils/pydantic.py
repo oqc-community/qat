@@ -8,6 +8,7 @@ from typing import Annotated, TypeVar, get_args
 
 import numpy as np
 from frozendict import frozendict
+from numpydantic import NDArray, Shape
 from pydantic import AfterValidator, BaseModel, ConfigDict, RootModel
 from pydantic_core import core_schema
 
@@ -70,6 +71,17 @@ def validate_calibratable_unit_interval(value: CalibratableUnitInterval):
 CalibratableUnitInterval = Annotated[
     float,
     AfterValidator(validate_calibratable_unit_interval),
+]
+
+
+def validate_calibratable_unit_interval_array(array: CalibratableUnitInterval2x2Array):
+    if np.any(array > 1) or np.any(array < 0):
+        raise ValueError(f"Given array elements must be in the interval [0, 1].")
+    return array
+
+
+CalibratableUnitInterval2x2Array = Annotated[
+    NDArray[Shape["2, 2"], float], AfterValidator(validate_calibratable_unit_interval_array)
 ]
 
 

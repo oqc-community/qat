@@ -2,9 +2,10 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import itertools as it
 import random
-from copy import deepcopy
+from collections import defaultdict
 
 import networkx as nx
+import numpy as np
 
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.purr.compiler.devices import (
@@ -63,11 +64,12 @@ def random_quality_map(connectivity, seed=42):
 
 
 def pick_subconnectivity(connectivity, n, seed=42):
-    sub_connectivity = deepcopy(connectivity)
     sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
+    sub_connectivity = defaultdict(set)
     for qubit in sub_qubits:
-        popped_node = sub_connectivity[qubit].pop()
-        sub_connectivity[popped_node].remove(qubit)
+        for connected_qubit in connectivity[qubit]:
+            if qubit not in sub_connectivity[connected_qubit]:
+                sub_connectivity[qubit].add(connected_qubit)
 
     return sub_connectivity
 
@@ -147,3 +149,12 @@ def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardw
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True
     return hw
+
+
+def generate_random_linear(qubit_indices):
+    output = {}
+    for index in qubit_indices:
+        random_0 = random.random()
+        random_1 = random.random()
+        output[index] = np.array([[random_0, 1 - random_1], [1 - random_0, random_1]])
+    return output

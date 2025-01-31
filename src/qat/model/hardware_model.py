@@ -10,6 +10,7 @@ from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
 from qat.model.device import Qubit, QubitId
+from qat.model.error_mitigation import ErrorMitigation
 from qat.utils.pydantic import (
     CalibratableUnitInterval,
     FrozenDict,
@@ -66,6 +67,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     :param physical_connectivity: The connectivities of the physical qubits on the QPU (undirected graph).
     :param logical_connectivity: The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of `physical_connectivity`.
     :param logical_connectivity_quality: Quality of the connections between the qubits.
+    :param error_mitigation: Error mitigation strategy for this hardware model.
     """
 
     qubits: FrozenDict[QubitId, Qubit]
@@ -76,6 +78,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     logical_connectivity_quality: FrozenDict[
         tuple[QubitId, QubitId], CalibratableUnitInterval
     ]
+    error_mitigation: ErrorMitigation = ErrorMitigation()
 
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):
@@ -164,6 +167,17 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                     raise IndexError(
                         f"The coupling ({q1_index}, {q2_index}) is not present in `logical_connectivity_quality`."
                     )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_error_mitigation(self):
+        if self.error_mitigation.is_enabled and self.error_mitigation.qubits != list(
+            self.qubits.keys()
+        ):
+            raise ValueError(
+                "Please provide an error mitigation strategy for all qubits in the hardware model."
+            )
 
         return self
 
