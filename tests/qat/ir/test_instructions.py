@@ -102,6 +102,21 @@ class TestAssign:
         assert inst.name == "test"
         assert inst.value == 1
 
+    @pytest.mark.parametrize(
+        "inst",
+        [
+            Assign(name="test", value=["test1", "test2", "test3"]),
+            Assign(name="test", value=["test1", "test2", ["test3", "test4"]]),
+            Assign(name="test", value=("test1", 2)),
+            Assign(name="test", value=[("test1", 1), ("test1", 2)]),
+            Assign(name="test", value=[("test1", 1), ("test2", 2), "test3"]),
+        ],
+    )
+    def test_serialization_round_trip(self, inst):
+        blob = inst.model_dump()
+        new_inst = Assign(**blob)
+        assert inst == new_inst
+
 
 class TestReturn:
     def test_single_return(self):

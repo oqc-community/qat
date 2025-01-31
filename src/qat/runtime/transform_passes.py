@@ -14,7 +14,7 @@ from qat.ir.pass_base import QatIR, TransformPass
 from qat.ir.result_base import ResultManager
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import IndexAccessor, Variable, is_generated_name
+from qat.purr.compiler.instructions import is_generated_name
 from qat.runtime.analysis_passes import IndexMappingResult
 from qat.runtime.executables import Executable
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
@@ -120,16 +120,10 @@ class AssignResultsTransform(TransformPass):
             """Recurse through assignment lists and fetch values in sequence."""
             if isinstance(value, List):
                 return [recurse_arrays(results_map, val) for val in value]
-            elif isinstance(value, Variable):
-                if value.name not in results_map:
-                    raise ValueError(
-                        f"Attempt to assign variable that doesn't exist {value.name}."
-                    )
-
-                if isinstance(value, IndexAccessor):
-                    return results_map[value.name][value.index]
-                else:
-                    return results_map[value.name]
+            elif isinstance(value, tuple):
+                return results_map[value[0]][value[1]]
+            elif isinstance(value, str):
+                return results_map[value]
             else:
                 return value
 

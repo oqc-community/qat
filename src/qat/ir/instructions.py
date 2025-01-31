@@ -10,6 +10,9 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 from pydantic import Field, field_validator, model_validator
 
+# The following things from legacy instructions are unchanged, so just import for now.
+from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
+from qat.purr.compiler.instructions import Variable as LegacyVariable
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import NoExtraFieldsModel, ValidatedList, ValidatedSet
 
@@ -68,8 +71,27 @@ class Repeat(Instruction):
 
 class Assign(Instruction):
     """
-    Assigns the variable 'x' the value 'y'. This can be performed as a part of running
-    on the QPU or by a post-processing pass.
+    Assigns a value to a variable.
+
+    This is used to assign some value (e.g. the results from an acquisition) to a variable.
+    In the legacy instructions, `Assign` could be given a `Variable` that declares the value
+    as another variable. It could also be given more complex structures, should as a list of
+    `Variables`, or an `IndexAccessor`. For example, this could be used to assign each of the
+    qubit acquisitions to a single register,
+
+    ```
+        c = [
+            Qubit 1 measurements,
+            Qubit 2 measurements,
+            ...
+        ]
+    ```
+
+    In general, declarations and allocations could be improved in future iterations, and
+    functionality may change with improvements to the front end. For now, `Assign` has been
+    adapted to support the required front end behaviour. The value is allowed to be a list
+    (with recurssions supported) of strings that declare what Variable to point to, or a tuple
+    for `IndexAccessor`.
     """
 
     # set as any for now... not sure what the restrictions would be here
@@ -80,7 +102,17 @@ class Assign(Instruction):
     @classmethod
     def _from_legacy(cls, legacy_assign):
         # private as we dont want to support this in the long-term
-        return cls(name=legacy_assign.name, value=legacy_assign.value)
+
+        def recursively_strip(value):
+            if isinstance(value, list):
+                return [recursively_strip(val) for val in value]
+            elif isinstance(value, LegacyIndexAccessor):
+                return (value.name, value.index)
+            elif isinstance(value, LegacyVariable):
+                return value.name
+            return value
+
+        return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
 
 
 class Return(Instruction):
