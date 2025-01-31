@@ -245,38 +245,21 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.simple.SimpleRuntime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime" title="qat.runtime.runtimes.base.BaseRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></p>
 <p>A Runtime for the complete execution of packages without sweeps.</p>
-<p>The SimpleRuntime handles the complete execution for simple programs that are free
-from sweeps (with exceptions of sweeps that have been lowered to the hardware). This
+<p>The <a class="reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime" title="qat.runtime.runtimes.simple.SimpleRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleRuntime</span></code></a> handles the complete execution for simple programs that are
+free from sweeps (with exceptions of sweeps that have been lowered to the hardware). This
 includes batching of shots, executing the program on the backend, and any software
 post-processing that cannot be achieved in the backend. The runtime must be provided
-with a <cite>NativeEngine</cite> that is capable of executing the desired programs.</p>
+with a <code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code> that is capable of executing the desired programs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.engine">¶</a> (<a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine" title="qat.runtime.engines.native.NativeEngine"><em>NativeEngine</em></a>) – The execution engine for a target backend.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a>]</span>) – Optionally provide a pipeline for results processing. If not</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><em>PassManager</em></a><em>, </em><em>optional</em>) – Optionally provided a pipeline for results processing. If not
+provided, a default pipeline is provided.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.startup_engine"></span><strong>startup_engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.startup_engine">¶</a> (<em>bool</em>) – Instruct the engine to connect to the backend on startup?</p></li>
 </ul>
 </dd>
 </dl>
-<p>provided, a default pipeline is chosen.
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.results_pipeline: Optional[PassManager]
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>
-:param _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: Instruct the engine to connect to the backend on startup?
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: bool</p>
-<p>Provides a Base class to build on for runtimes of varying complexities.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.engine">¶</a> (<a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine" title="qat.runtime.engines.native.NativeEngine"><em>NativeEngine</em></a>) – The execution engine for a target backend.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.params.results_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a>]</span>) – Optionally provided a pipeline for results processing. If not</p></li>
-</ul>
-</dd>
-</dl>
-<p>provided, a default pipeline is provided.
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.results_pipeline: Optional[PassManager]
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>
-:param _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: Instruct the engine to connect to the backend on startup?
-:type _sphinx_paramlinks_qat.runtime.runtimes.simple.SimpleRuntime.startup_engine: bool</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.runtimes.simple.SimpleRuntime.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute" title="Link to this definition"></a></dt>
@@ -286,9 +269,12 @@ processing.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute.params.package">¶</a> (<a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><em>Executable</em></a>) – The executable program.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.execute.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute.params.res_mgr">¶</a> (<em>Optional</em><em>[</em><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager" title="qat.ir.result_base.ResultManager"><em>ResultManager</em></a><em>]</em>) – Optionally provide a results manager to save pass information.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.execute.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute.params.met_mgr">¶</a> (<em>Optional</em><em>[</em><em>MetricManager</em><em>]</em>) – Optionally provide a metric manager to save pass information.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.execute.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute.params.res_mgr">¶</a> (<a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager" title="qat.ir.result_base.ResultManager"><em>ResultManager</em></a><em>, </em><em>optional</em>) – Optionally provide a results manager to save pass information.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.simple.SimpleRuntime.execute.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.simple.SimpleRuntime.execute.params.met_mgr">¶</a> (<a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager" title="qat.ir.metrics_base.MetricsManager"><em>MetricsManager</em></a><em>, </em><em>optional</em>) – Optionally provide a metric manager to save pass information.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Execution results.</p>
 </dd>
 </dl>
 </dd></dl>

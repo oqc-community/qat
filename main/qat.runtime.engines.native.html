@@ -244,8 +244,14 @@
 <dt class="sig sig-object py" id="qat.runtime.engines.native.NativeEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NativeEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.engines.native.NativeEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>NativeEngines act as an interface between some target backend and an executable. They
-are used to connect to the backend (if applicable), and execute and return the results.</p>
+<p><a class="reference internal" href="#qat.runtime.engines.native.NativeEngine" title="qat.runtime.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a> acts as an interface between some target backend and an executable.
+They are used to connect to the backend (if applicable), and execute and return the
+results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.engines.native.NativeEngine.params.startup"></span><strong>startup</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.engines.native.NativeEngine.params.startup">¶</a> (<em>bool</em>) – Start up the engine on instantiation?</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.engines.native.NativeEngine.execute">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.engines.native.NativeEngine.execute" title="Link to this definition"></a></dt>

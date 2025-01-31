@@ -254,18 +254,7 @@ the circuit progresses.</p>
 <li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformContext.params.total_duration"></span><strong>total_duration</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformContext.params.total_duration">¶</a> (<em>int</em>) – The lifetime of the pulse channel in number of samples.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Meth<span class="colon">:</span></dt>
-<dd class="field-even"><p><cite>process_pulse</cite>, used to implement <cite>Pulse</cite> instruction, generates the pulse</p>
-</dd>
-<dt class="field-odd">Meth<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>process_phaseshift</cite>, used to implement the <cite>PhaseShift</cite> instruction, changes</p>
-</dd>
 </dl>
-<p>the phase of the pulse channel
-:meth: <cite>process_phasereset</cite>, used to implement the <cite>PhaseReset</cite> instruction, resets
-the phase to zero.
-:meth: <cite>process_delay</cite>, used to implement the <cite>Delay</cite> and <cite>Synchronize</cite> instructions,
-does nothing on the channel for a given number of samples.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformContext.buffer">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">buffer</span></span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformContext.buffer" title="Link to this definition"></a></dt>
@@ -299,14 +288,7 @@ does nothing on the channel for a given number of samples.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformContext.process_pulse">
 <span class="sig-name descname"><span class="pre">process_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformContext.process_pulse" title="Link to this definition"></a></dt>
-<dd><p>I don’t really like that we deal with this here: to me, analysing and manipulating
-waveforms feels like a core problem that deserves its own module. Beyond cleaning
-up waveforms beyond the efforts that have begun in the pydantic instructions, we could
-have a “WaveformGenerator” object that deals with calculating the discretized
-waveforms.</p>
-<p>This would also be an opportunity to introducing caching of waveforms, so
-we dont recalculate the same waveform multiple times…</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformContext.process_reset">
@@ -320,17 +302,11 @@ we dont recalculate the same waveform multiple times…</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Emitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Emitter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin" title="qat.ir.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
 <p>Code generation for backends that only require the explicit waveforms.</p>
-<p>The emitter is used to convert QatIR into a <cite>WaveformV1Executable</cite>.</p>
+<p>The emitter is used to convert <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> into a <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Emitter.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Emitter.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – As the emitter is used to generate code for some targeted backend,</p>
-</dd>
-</dl>
-<p>the hardware model is needed for context-aware compilation.
-:type _sphinx_paramlinks_qat.backend.waveform_v1.codegen.WaveformV1Emitter.model: QuantumHardwareModel</p>
-<dl class="field-list simple">
-<dt class="field-odd">Meth<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>emit</cite>, used to generate the code for a particular QatIR package.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Emitter.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Emitter.params.model">¶</a> (<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><em>QuantumHardwareModel</em></a>) – As the emitter is used to generate code for some
+targeted backend. The hardware model is needed for context-aware compilation.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -356,7 +332,7 @@ we dont recalculate the same waveform multiple times…</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Emitter.emit">
 <span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Emitter.emit" title="Link to this definition"></a></dt>
-<dd><p>Compiles QatIR into a WaveformV1Executable.</p>
+<dd><p>Compiles <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> into a <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code>.</p>
 <p>Translates pulse instructions into explicit waveforms at the required times, and
 combines them across pulse channels to give a composite waveform on the necessary
 physical channels. Deals with low-level details such as pulse scheduling and phase

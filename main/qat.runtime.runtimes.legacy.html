@@ -250,15 +250,12 @@ stack.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.engine">¶</a> (<a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine" title="qat.purr.compiler.execution.QuantumExecutionEngine"><em>QuantumExecutionEngine</em></a>) – The execution engine for a target backend.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a>]</span>) – Optionally provided a pipeline for results processing. If not</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><em>PassManager</em></a><em>, </em><em>optional</em>) – Optionally provided a pipeline for results processing. If not
+provided, a default pipeline is provided.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.startup_engine"></span><strong>startup_engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.startup_engine">¶</a> (<em>bool</em>) – Instruct the engine to connect to the backend on startup?</p></li>
 </ul>
 </dd>
 </dl>
-<p>provided, a default pipeline is provided.
-:type _sphinx_paramlinks_qat.runtime.runtimes.legacy.LegacyRuntime.results_pipeline: Optional[PassManager]
-:type _sphinx_paramlinks_qat.runtime.runtimes.legacy.LegacyRuntime.startup_engine: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>
-:param _sphinx_paramlinks_qat.runtime.runtimes.legacy.LegacyRuntime.startup_engine: Instruct the engine to connect to the backend on startup?
-:type _sphinx_paramlinks_qat.runtime.runtimes.legacy.LegacyRuntime.startup_engine: bool</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute" title="Link to this definition"></a></dt>
@@ -266,10 +263,13 @@ stack.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The program as QatIR</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.res_mgr">¶</a> (<em>Optional</em><em>[</em><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager" title="qat.ir.result_base.ResultManager"><em>ResultManager</em></a><em>]</em>) – Optionally provide a results manager to save pass information.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.met_mgr">¶</a> (<em>Optional</em><em>[</em><em>MetricManager</em><em>]</em>) – Optionally provide a metric manager to save pass information.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The program as QatIR.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.res_mgr">¶</a> (<a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager" title="qat.ir.result_base.ResultManager"><em>ResultManager</em></a><em>, </em><em>optional</em>) – Optionally provide a results manager to save pass information.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.met_mgr">¶</a> (<a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager" title="qat.ir.metrics_base.MetricsManager"><em>MetricsManager</em></a><em>, </em><em>optional</em>) – Optionally provide a metric manager to save pass information.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Execution results.</p>
 </dd>
 </dl>
 </dd></dl>

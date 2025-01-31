@@ -267,18 +267,23 @@
 <dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass" title="qat.ir.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Determines a mapping from classical bit registers to qubits.</p>
 <p>Searches through the acquires of the package and determines their associated qubit.
-Also looks for classical registers of the form <cite>&lt;clreg_name&gt;[&lt;clreg_index&gt;]</cite>.</p>
-<p>Supports both <cite>Executable</cite> packages and <cite>QatIR</cite>.</p>
-<p>TODO: searching for classical registers feels a little shaky. Guessing their are changes
-to make at a higher level to faciliate improvements here.
-TODO: support with pydantic instructions and hardware.
-TODO: should the output_variable -&gt; qubit mapping be separate from the classical register
-extraction? The former might be useful for a compiliation analysis pass. Only used here
-right not, so let’s worry about this later.</p>
+Also looks for classical registers of the form <code class="code docutils literal notranslate"><span class="pre">&lt;clreg_name&gt;[&lt;clreg_index&gt;]</span></code>.</p>
+<p>Supports both <code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code> packages and <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.analysis_passes.IndexMappingAnalysis.params.QuantumHardwareModel"></span><strong>QuantumHardwareModel</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.analysis_passes.IndexMappingAnalysis.params.QuantumHardwareModel">¶</a> – The hardware model.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.analysis_passes.IndexMappingAnalysis.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.analysis_passes.IndexMappingAnalysis.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.analysis_passes.IndexMappingAnalysis.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.analysis_passes.IndexMappingAnalysis.run.params.package">¶</a> (<a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><em>Executable</em></a>) – The executable program containing the results-processing
+information.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.analysis_passes.IndexMappingAnalysis.var_to_physical_channel_executable">

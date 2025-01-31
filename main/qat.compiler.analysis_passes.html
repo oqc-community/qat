@@ -256,18 +256,25 @@ compilation (as opposed to runtime). Batching as described above would result in
 needing to compile two separate programs. Instead, it makes more sense to batch the shots
 as three lots of 1334 shots, which gives a total of 4002 shots. The extra two shots can
 just be discarded at run time.</p>
+<p>Instantiate the pass with a hardware model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.compiler.analysis_passes.BatchedShots.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.compiler.analysis_passes.BatchedShots.params.model">¶</a> (<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><em>QuantumHardwareModel</em></a>) – The hardware model that contains the total number of shots.</p>
+<dd class="field-odd"><p><span class="target" id="qat.compiler.analysis_passes.BatchedShots.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.compiler.analysis_passes.BatchedShots.params.model">¶</a> (<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><em>QuantumHardwareModel</em></a>) – The hardware model that contains the total number
+of shots.</p>
 </dd>
 </dl>
-<p>TODO: replace the hardware model with whatever structures will contain the allowed number
-of shots in the future.
-TODO: determine if this should be fused with <cite>RepeatSanitisation</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.compiler.analysis_passes.BatchedShots.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.analysis_passes.BatchedShots.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.compiler.analysis_passes.BatchedShots.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.compiler.analysis_passes.BatchedShots.run.params.ir">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> wrapped in <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p></li>
+<li><p><span class="target" id="qat.compiler.analysis_passes.BatchedShots.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.compiler.analysis_passes.BatchedShots.run.params.res_mgr">¶</a> (<a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager" title="qat.ir.result_base.ResultManager"><em>ResultManager</em></a>) – The result manager to store the analysis results.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

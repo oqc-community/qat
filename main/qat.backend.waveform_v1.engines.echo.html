@@ -245,19 +245,31 @@
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.engines.echo.EchoEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.engines.echo.EchoEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine" title="qat.runtime.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a></p>
-<p>The EchoEngine is a minimal execution engine primarily used for testing the compilation
-pipeline. It is not connected to any backend such as live hardware or a simulator, and
-just simply “echos” back the buffers.</p>
-<p>Currently only accepts <cite>WaveformV1Executables</cite>, but this may be changed in the future.</p>
-<p>NativeEngines act as an interface between some target backend and an executable. They
-are used to connect to the backend (if applicable), and execute and return the results.</p>
+<p>The <a class="reference internal" href="#qat.backend.waveform_v1.engines.echo.EchoEngine" title="qat.backend.waveform_v1.engines.echo.EchoEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></a> is a minimal execution engine primarily used for testing the
+compilation pipeline. It is not connected to any backend such as live hardware or a
+simulator, and just simply “echos” back the buffers.</p>
+<p>Currently only accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executables</span></code>, but this may be changed in the
+future.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.engines.echo.EchoEngine.params.startup"></span><strong>startup</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.engines.echo.EchoEngine.params.startup">¶</a> (<em>bool</em>) – Start up the engine on instantiation?</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.engines.echo.EchoEngine.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.engines.echo.EchoEngine.execute" title="Link to this definition"></a></dt>
-<dd><p>Executes a compiled instruction executable and returns results that are processed
-according to the acquires.</p>
-<p>The engine is expected to return the results as a dictionary with the output variables
-as keys. This may be changed in future iterations.</p>
+<dd><p>Execute a <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.engines.echo.EchoEngine.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.engines.echo.EchoEngine.execute.params.package">¶</a> (<a class="reference internal" href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><em>WaveformV1Executable</em></a>) – The compiled executable.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Execution results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, np.ndarray]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -276,10 +288,10 @@ as keys. This may be changed in future iterations.</p>
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.engines.echo.process_readout">
 <span class="sig-name descname"><span class="pre">process_readout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.engines.echo.process_readout" title="Link to this definition"></a></dt>
 <dd><p>Processes a single readout into the expected format for a given acquire mode.</p>
-<p>For <cite>AcquireMode.RAW</cite>, this means repeating the readout for a given number of shots.
-The <cite>AcquireMode.INTEGRATOR</cite> emulates the averaging on hardware by taking the mean;
-note that this does not currently include down scaling. Finally, the <cite>AcquireMode.SCOPE</cite>
-simply returns the readout back in its current form.</p>
+<p>For <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.RAW</span></code>, this means repeating the readout for a given number of
+shots. The <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code> emulates the averaging on hardware by
+taking the mean; note that this does not currently include down scaling. Finally, the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.SCOPE</span></code> simply returns the readout back in its current form.</p>
 </dd></dl>
 
 </section>
