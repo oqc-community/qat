@@ -11,12 +11,11 @@ from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
 
 class WaveformV1ChannelData(ChannelData):
     """
-    Contains the channel data for a waveform executable.
+    Contains the channel data for a :class:`WaveformV1Executable`.
 
     Stores the waveforms and acqusitions needed for execution. No control flow is possible.
 
-    :param buffer: The waveform to be sent at each sample.
-    :type buffer: np.ndarray
+    :param np.ndarray buffer: The waveform to be sent at each sample.
     :param baseband_frequency: The frequency to be set for the baseband.
     :type baseband_frequency: Optional[float]
     :param acquires: Acquire information needed for readouts.
@@ -67,7 +66,7 @@ class WaveformV1ChannelData(ChannelData):
 
 class WaveformV1Executable(Executable):
     """
-    A `WaveformV1Executable` is an executable used in early iterations of QAT.
+    A :class:`WaveformV1Executable` is an executable used in early iterations of QAT.
 
     This type of executable is composed of explicit waveforms that are compiled for each
     pulse channel, and summed to provide the waveform "buffer" for each physical channel.
@@ -76,12 +75,11 @@ class WaveformV1Executable(Executable):
     is provided.
 
     :param channel_data: Stores the data required by the control hardware for each pulse
-    channel.
+        channel.
     :type channel_data: dict[str, WaveformV1ChannelData]
-    :param shots: The number of times the program is executed.
-    :type shots: int
-    :param repetition_time: The amount of time to wait between shots for the QPU to reset.
-    :type repetition_time: float
+    :param int shots: The number of times the program is executed.
+    :param float repetition_time: The amount of time to wait between shots for the QPU to
+        reset.
     :param post_processing: Contains the post-processing information for each acquisition.
     :type post_processing: Dict[str, List[PostProcessing]]
     :param results_processing: Contains the information for how results should be formatted.
@@ -90,10 +88,6 @@ class WaveformV1Executable(Executable):
     :type assigns: List[Assign]
     :param returns: Which acqusitions/variables should be returned.
     :type returns: List[str]
-
-    :meth: `.serialize`, serialize the model as a JSON blob.
-    :meth: `.deserialize`, class method for deserializing a JSON blob.
-    :meth: `acquires`, returns all the acquires from each channel as a list.
     """
 
     channel_data: dict[str, WaveformV1ChannelData]

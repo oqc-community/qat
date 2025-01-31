@@ -9,11 +9,15 @@ from qat.runtime.executables import Executable
 
 
 class NativeEngine(abc.ABC):
+    """
+    :class:`NativeEngine` acts as an interface between some target backend and an executable.
+    They are used to connect to the backend (if applicable), and execute and return the
+    results.
+    """
 
     def __init__(self, startup: bool = False):
         """
-        NativeEngines act as an interface between some target backend and an executable. They
-        are used to connect to the backend (if applicable), and execute and return the results.
+        :param bool startup: Start up the engine on instantiation?
         """
 
         if startup:

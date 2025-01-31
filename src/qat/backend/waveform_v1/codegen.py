@@ -44,13 +44,10 @@ class WaveformV1Emitter(InvokerMixin):
         """
         Code generation for backends that only require the explicit waveforms.
 
-        The emitter is used to convert QatIR into a `WaveformV1Executable`.
+        The emitter is used to convert :class:`QatIR` into a :class:`WaveformV1Executable`.
 
-        :param model: As the emitter is used to generate code for some targeted backend,
-        the hardware model is needed for context-aware compilation.
-        :type model: QuantumHardwareModel
-
-        :meth: `emit`, used to generate the code for a particular QatIR package.
+        :param QuantumHardwareModel model: As the emitter is used to generate code for some
+            targeted backend. The hardware model is needed for context-aware compilation.
         """
         self.model = model
 
@@ -62,7 +59,7 @@ class WaveformV1Emitter(InvokerMixin):
         upconvert: bool = True,
     ) -> WaveformV1Executable:
         """
-        Compiles QatIR into a WaveformV1Executable.
+        Compiles :class:`QatIR` into a :class:`WaveformV1Executable`.
 
         Translates pulse instructions into explicit waveforms at the required times, and
         combines them across pulse channels to give a composite waveform on the necessary
@@ -230,18 +227,8 @@ class WaveformContext:
         This can be considered to be the dynamical state of a pulse channel which evolves as
         the circuit progresses.
 
-        :param pulse_channel: The pulse channel that this is modelling.
-        :type pulse_channel: PulseChannel
-        :param total_duration: The lifetime of the pulse channel in number of samples.
-        :type total_duration: int
-
-        :meth: `process_pulse`, used to implement `Pulse` instruction, generates the pulse
-        :meth: `process_phaseshift`, used to implement the `PhaseShift` instruction, changes
-        the phase of the pulse channel
-        :meth: `process_phasereset`, used to implement the `PhaseReset` instruction, resets
-        the phase to zero.
-        :meth: `process_delay`, used to implement the `Delay` and `Synchronize` instructions,
-        does nothing on the channel for a given number of samples.
+        :param PulseChannel pulse_channel: The pulse channel that this is modelling.
+        :param int total_duration: The lifetime of the pulse channel in number of samples.
         """
         self.pulse_channel = pulse_channel
         self._buffer = np.zeros(total_duration, dtype=np.complex128)
@@ -263,16 +250,6 @@ class WaveformContext:
         samples: int,
         do_upconvert: bool = True,
     ):
-        """
-        I don't really like that we deal with this here: to me, analysing and manipulating
-        waveforms feels like a core problem that deserves its own module. Beyond cleaning
-        up waveforms beyond the efforts that have begun in the pydantic instructions, we could
-        have a "WaveformGenerator" object that deals with calculating the discretized
-        waveforms.
-
-        This would also be an opportunity to introducing caching of waveforms, so
-        we dont recalculate the same waveform multiple times...
-        """
         dt = self.pulse_channel.sample_time
         length = samples * dt
         centre = length / 2.0

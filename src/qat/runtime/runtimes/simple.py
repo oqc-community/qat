@@ -16,19 +16,11 @@ class SimpleRuntime(BaseRuntime):
     """
     A Runtime for the complete execution of packages without sweeps.
 
-    The SimpleRuntime handles the complete execution for simple programs that are free
-    from sweeps (with exceptions of sweeps that have been lowered to the hardware). This
+    The :class:`SimpleRuntime` handles the complete execution for simple programs that are
+    free from sweeps (with exceptions of sweeps that have been lowered to the hardware). This
     includes batching of shots, executing the program on the backend, and any software
     post-processing that cannot be achieved in the backend. The runtime must be provided
-    with a `NativeEngine` that is capable of executing the desired programs.
-
-    :param engine: The execution engine for a target backend.
-    :type engine: NativeEngine
-    :param results_pipeline: Optionally provide a pipeline for results processing. If not
-    provided, a default pipeline is chosen.
-    :type results_pipeline: Optional[PassManager]
-    :param startup_engine: Instruct the engine to connect to the backend on startup?
-    :type startup_engine: bool
+    with a :class:`NativeEngine` that is capable of executing the desired programs.
     """
 
     def execute(
@@ -42,12 +34,12 @@ class SimpleRuntime(BaseRuntime):
         Fully execute a package against the hardware with batching of shots and results post-
         processing.
 
-        :param package: The executable program.
-        :type package: Executable
+        :param Executable package: The executable program.
         :param res_mgr: Optionally provide a results manager to save pass information.
-        :type res_mgr: Optional[ResultManager]
+        :type res_mgr: ResultManager, optional
         :param met_mgr: Optionally provide a metric manager to save pass information.
-        :type met_mgr: Optional[MetricManager]
+        :type met_mgr: MetricsManager, optional
+        :returns: Execution results.
         """
 
         if res_mgr == None:

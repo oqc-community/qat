@@ -19,6 +19,16 @@ from qat.runtime.transform_passes import (
 
 
 class BaseRuntime(abc.ABC):
+    """
+    Provides a Base class to build on for runtimes of varying complexities.
+
+    A runtime provides the means to execute quantum programs. It can take on various
+    responsibilities, including interfacing the execution engine and post-processing of
+    results. Runtimes are designed to fit a specific purpose. For example, the
+    :class:`SimpleRuntime` provides the means to execute already compiled programs
+    :class:`Executable`. In the future, there will be support for
+    hybrid runtimes that take on both compilation and execution responsibilities.
+    """
 
     def __init__(
         self,
@@ -27,15 +37,11 @@ class BaseRuntime(abc.ABC):
         startup_engine: bool = False,
     ):
         """
-        Provides a Base class to build on for runtimes of varying complexities.
-
-        :param engine: The execution engine for a target backend.
-        :type engine: NativeEngine
+        :param NativeEngine engine: The execution engine for a target backend.
         :param results_pipeline: Optionally provided a pipeline for results processing. If not
-        provided, a default pipeline is provided.
-        :type results_pipeline: Optional[PassManager]
-        :param startup_engine: Instruct the engine to connect to the backend on startup?
-        :type startup_engine: bool
+            provided, a default pipeline is provided.
+        :type results_pipeline: PassManager, optional
+        :param bool startup_engine: Instruct the engine to connect to the backend on startup?
         """
         if not isinstance(engine, NativeEngine):
             raise ValueError(
@@ -77,10 +83,14 @@ class BaseRuntime(abc.ABC):
         are returned from the hardware per shot, then we can simply trim the results down to
         the required amount of shots. However, this cannot be done if the post-processing over
         the shots is done on the hardware. In this case, the program will be executed for
-        `ceil(total_shots / shots_per_batch) * shots_per_batch` shots.
+        :code:`ceil(total_shots / shots_per_batch) * shots_per_batch` shots.
 
         If the compiled number of shots is zero, then it is assumed all shots can be achieved
         in a single batch.
+
+        :param int total_shots: The total number of shots to execute.
+        :param int shots_per_batch: The compiled number of shots that can be executed in a
+            single batch.
         """
 
         if not isinstance(total_shots, int) and total_shots < 0:
@@ -107,9 +117,7 @@ class BaseRuntime(abc.ABC):
 
     @staticmethod
     def validate_max_shots(shots: int):
-        """
-        TODO: determine if this should be a pass.
-        """
+        # TODO: determine if this should be a pass.
         if shots > qatconfig.MAX_REPEATS_LIMIT:
             raise ValueError(
                 f"Number of shots {shots} exceeds the maximum amount of "
@@ -125,10 +133,13 @@ class BaseRuntime(abc.ABC):
 
 
 class ResultsAggregator:
+    """
+    Aggregates the acquisition results from batching of shots.
+    """
 
     def __init__(self, acquires: List[AcquireDataStruct]):
         """
-        Aggregates the acquisition results from batching of shots.
+        Begin the aggregation of results for a list of acquisitions.
 
         :param acquires: List of acquires to be collected.
         :type acquires: List[AcquireDataStruct]
@@ -153,8 +164,9 @@ class ResultsAggregator:
         """
         Add a batch of results.
 
-        For `AcquireMode.RAW` and `AcquireMode.INTEGRATOR`, this means to append the new
-        results. For `AcquireMode.SCOPE`, results are accumulated as a sum.
+        For :attr:`AcquireMode.RAW` and :attr:`AcquireMode.INTEGRATOR`, this means
+        to append the new results. For :attr:`AcquireMode.SCOPE`, results are accumulated
+        as a sum.
         """
         for output_variable, new_result in new_results.items():
             result = self._results[output_variable]
@@ -173,9 +185,10 @@ class ResultsAggregator:
         """
         Returns the results normalized in an appropiate way.
 
-        For `AcquireMode.SCOPE`, results are averaged over batches. For `AcquireMode.RAW` or
-        `AcquireMode.INTEGRATOR`, a truncated amount of `max_shots` shots are returned. If
-        `None`, then returns all shots.
+        For :attr:`AcquireMode.SCOPE`, results are averaged over batches. For
+        :attr:`AcquireMode.RAW` or :attr:`AcquireMode.INTEGRATOR`, a truncated
+        amount of :code:`max_shots` shots are returned. If :code:`None`, then returns all
+        shots.
         """
 
         normalized_results = {}

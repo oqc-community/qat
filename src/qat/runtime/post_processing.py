@@ -12,13 +12,18 @@ from qat.purr.compiler.instructions import AcquireMode, PostProcessType, Process
 UPCONVERT_SIGN = 1.0
 
 
-def get_axis_map(mode: AcquireMode, response: np.ndarray):
+def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, int]:
     """
     Given the acquisition mode, determine what each axis corresponds to.
 
     The way the results are returned are defined by the acquisition mode: this could be
     averaged over shots, averaged over time, or neither. We must determine how to unpack
     the results.
+
+    :param AcquireMode mode: The acqusition mode.
+    :param np.ndarray response: The response returned by the backend.
+    :returns: A dictionary containing the axis index for each type of :class:`ProcessAxis`.
+    :rtype: Dict[ProcessAxis, int]
     """
 
     match mode:
@@ -40,16 +45,15 @@ def apply_post_processing(
     """
     Applies software post processing to the results.
 
-    Uses the information in the `PostProcessing` instruction to determine what method to
-    apply.
+    Uses the information in the :class:`PostProcessing` instruction to determine what method
+    to  apply.
 
-    :param response: Readout results from an execution engine.
-    :type response: np.ndarray
-    :param post_processing: The post processing instruction.
-    :type post_processing: PostProcessing
+    :param np.ndarray response: Readout results from an execution engine.
+    :param PostProcessing post_processing: The post processing instruction.
     :param axes: A dictionary containing which axes contain the shots and which contain time
-    series.
-    :Type axes: Dict[ProcessAxis, Int]
+        series.
+    :type axes: dict[ProcessAxis, Int]
+    :returns: The processed results as an array and the axis map.
     """
 
     match post_processing.process_type:
@@ -78,17 +82,15 @@ def down_convert(
     Down-conversion of the readout signal.
 
     If down-conversion of the readout signal is not done on the hardware, is can be done via
-    software using this method. Can only be done over the `ProcessAxis.TIME` axis.
+    software using this method. Can only be done over the :attr:`ProcessAxis.TIME` axis.
 
-    :param response: Readout results from an execution engine.
-    :type response: np.ndarray
+    :param np.ndarray response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
-    series.
-    :type axes: Dict[ProcessAxis, Int]
-    :param frequency: Down-conversion frequency
-    :type float:
-    :param dt: The sampling rate for the readout
-    :type dt: float
+        series.
+    :type axes: dict[ProcessAxis, Int]
+    :param float frequency: Down-conversion frequency
+    :param float dt: The sampling rate for the readout
+    :returns: The processed results as an array and the axis map.
     """
 
     axis = axes[ProcessAxis.TIME]
@@ -113,13 +115,13 @@ def mean(
     """
     Calculates the mean over the given axes.
 
-    :param response: Readout results from an execution engine.
-    :type response: np.ndarray
+    :param np.ndarray response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
-    series.
-    :type axes: Dict[ProcessAxis, Int]
+        series.
+    :type axes: dict[ProcessAxis, Int]
     :param target_axes: Which axis or axes should the mean be done over?
-    :type target_axes: Union[ProcessAxis, List[ProcessAxis]]
+    :type target_axes: Union[ProcessAxis, list[ProcessAxis]]
+    :returns: The processed results as an array and the axis map.
     """
 
     target_axes = target_axes if isinstance(target_axes, list) else [target_axes]
@@ -138,17 +140,13 @@ def linear_map_complex_to_real(
     """
     Maps complex values onto a real z-projection using a provided linear mapping.
 
-    For some sample `x`, returns `np.real(m*x+c)`.
-
-    :param response: Readout results from an execution engine.
-    :type response: np.ndarray
+    :param np.ndarray response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
-    series.
-    :type axes: Dict[ProcessAxis, Int]
-    :param multiplier: Coeffecient for the linear map.
-    :type m: numbers.Number
-    :param constant: Constant for the linear map.
-    :type c: numbers.Number
+        series.
+    :type axes: dict[ProcessAxis, Int]
+    :param numbers.Number multiplier: Coeffecient for the linear map.
+    :param numbers.Number constant: Constant for the linear map.
+    :returns: The processed results as an array and the axis map.
     """
 
     return np.real(multiplier * response + constant), axes
@@ -159,13 +157,12 @@ def discriminate(response: np.ndarray, axes: Dict[ProcessAxis, int], threshold: 
     Discriminates a real value to a classical bit by comparison to a supplied
     discrimination threshold.
 
-    :param response: Readout results from an execution engine.
-    :type response: np.ndarray
+    :param np.ndarray response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
-    series.
-    :type axes: Dict[ProcessAxis, Int]
-    :param threshold: The supplied discrimination threshold.
-    :type threshold: float
+        series.
+    :type axes: dict[ProcessAxis, Int]
+    :param float threshold: The supplied discrimination threshold.
+    :returns: The processed results as an array and the axis map.
     """
     return 2 * (response > threshold) - 1, axes
 

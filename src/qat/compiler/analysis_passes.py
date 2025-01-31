@@ -93,16 +93,18 @@ class BatchedShots(AnalysisPass):
     needing to compile two separate programs. Instead, it makes more sense to batch the shots
     as three lots of 1334 shots, which gives a total of 4002 shots. The extra two shots can
     just be discarded at run time.
-
-    :param model: The hardware model that contains the total number of shots.
-    :type model: QuantumHardwareModel
-
-    TODO: replace the hardware model with whatever structures will contain the allowed number
-    of shots in the future.
-    TODO: determine if this should be fused with `RepeatSanitisation`.
     """
 
     def __init__(self, model: QuantumHardwareModel):
+        """
+        Instantiate the pass with a hardware model.
+
+        :param QuantumHardwareModel model: The hardware model that contains the total number
+            of shots.
+        """
+        # TODO: replace the hardware model with whatever structures will contain the allowed
+        # number of shots in the future.
+        # TODO: determine if this should be fused with `RepeatSanitisation`.
         self.model = model
 
     def run(
@@ -112,6 +114,10 @@ class BatchedShots(AnalysisPass):
         *args,
         **kwargs,
     ):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        :param ResultManager res_mgr: The result manager to store the analysis results.
+        """
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")

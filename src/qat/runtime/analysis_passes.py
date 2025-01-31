@@ -48,19 +48,21 @@ class IndexMappingAnalysis(AnalysisPass):
     Determines a mapping from classical bit registers to qubits.
 
     Searches through the acquires of the package and determines their associated qubit.
-    Also looks for classical registers of the form `<clreg_name>[<clreg_index>]`.
+    Also looks for classical registers of the form :code:`<clreg_name>[<clreg_index>]`.
 
-    Supports both `Executable` packages and `QatIR`.
-
-    TODO: searching for classical registers feels a little shaky. Guessing their are changes
-    to make at a higher level to faciliate improvements here.
-    TODO: support with pydantic instructions and hardware.
-    TODO: should the output_variable -> qubit mapping be separate from the classical register
-    extraction? The former might be useful for a compiliation analysis pass. Only used here
-    right not, so let's worry about this later.
+    Supports both :class:`Executable` packages and :class:`QatIR`.
     """
 
     def __init__(self, model: QuantumHardwareModel):
+        """
+        :param QuantumHardwareModel: The hardware model.
+        """
+        # TODO: searching for classical registers feels a little shaky. Guessing there are
+        # changes to make at a higher level to faciliate improvements here.
+        # TODO: support with pydantic instructions and hardware.
+        # TODO: should the output_variable -> qubit mapping be separate from the classical
+        # register extraction? The former might be useful for a compiliation analysis pass.
+        # Only used here right now, so let's worry about this later.
         self.model = model
 
     def run(
@@ -71,6 +73,10 @@ class IndexMappingAnalysis(AnalysisPass):
         package: Union[QatIR, Executable],
         **kwargs,
     ):
+        """
+        :param Executable package: The executable program containing the results-processing
+            information.
+        """
         # Determine a mapping from output variable - > qubit index.
         if isinstance(package, Executable):
             var_to_channel_map = self.var_to_physical_channel_executable(package)

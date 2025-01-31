@@ -18,15 +18,11 @@ class AcquireDataStruct(BaseModel):
 
     Depending on the target backend, not all information might be needed.
 
-    :param length: A readout is performed for some given time which translates to a number of
-    discrete samples.
-    :type length: int
-    :param position: The sample which a readout starts.
-    :type position: int
-    :param mode: The acqusition mode used by the hardware to carry out the readout.
-    :type mode: AcquireMode
-    :param output_variable: The name of the variable to save the result to.
-    :type output_variable: str
+    :param int length: A readout is performed for some given time which translates to a
+        number of discrete samples.
+    :param int position: The sample which a readout starts.
+    :param AcquireMode mode: The acqusition mode used by the hardware to carry out the readout.
+    :param str output_variable: The name of the variable to save the result to.
     """
 
     length: int
@@ -52,33 +48,27 @@ class ChannelData(BaseModel):
 
 class Executable(BaseModel):
     """
-    `Executables` are instruction packages that will be sent to a backend (either physical
-    control hardware or a simulator).
+    :class:`Executables` are instruction packages that will be sent to a backend (either
+    physical control hardware or a simulator).
 
     This class serves as a base model that can be inherited to define a complete instruction
     package tailored to a particular backend.
 
     :param channel_data: Stores the data required by the control hardware for each pulse
-    channel.
+        channel.
     :type channel_data: dict[str, ChannelData]
-    :param shots: The number of times the program is executed.
-    :type shots: int
-    :param compiled_shots: When the required number of shots exceeds the allowed amount by the
-    target backend, shots can be batched into groups. This states how many shots to do in each
-    batch.
-    :type compiled_shots: int
+    :param int shots: The number of times the program is executed.
+    :param int compiled_shots: When the required number of shots exceeds the allowed amount by
+        the target backend, shots can be batched into groups. This states how many shots to do
+        in each batch.
     :param post_processing: Contains the post-processing information for each acquisition.
-    :type post_processing: Dict[str, List[PostProcessing]]
+    :type post_processing: dict[str, List[PostProcessing]]
     :param results_processing: Contains the information for how results should be formatted.
-    :type results_processing: Dict[str, InlineResultsProcessing]
+    :type results_processing: dict[str, InlineResultsProcessing]
     :param assigns: Assigns results to given variables.
-    :type assigns: List[Assign]
+    :type assigns: list[Assign]
     :param returns: Which acqusitions/variables should be returned.
-    :type returns: List[str]
-
-    :meth: `.serialize`, serialize the model as a JSON blob.
-    :meth: `.deserialize`, class method for deserializing a JSON blob.
-    :meth: `acquires`, returns all the acquires from each channel as a list.
+    :type returns: list[str]
     """
 
     # TODO: The way we separate post processing, results processing and assigns implies a
@@ -101,7 +91,7 @@ class Executable(BaseModel):
         return self.model_dump_json(indent=indent, exclude_none=True)
 
     @classmethod
-    def deserialize(cls, blob):
+    def deserialize(cls, blob: str):
         """
         Instantiates a executable from a JSON blob.
         """
@@ -110,8 +100,7 @@ class Executable(BaseModel):
     @property
     def acquires(self) -> List[AcquireDataStruct]:
         """
-        Signature method for retrieving all acquires from an executable, used in
-        post-processing.
+        Retrieves all assigns from each channel.
         """
         acquires = []
         for channel in self.channel_data.values():

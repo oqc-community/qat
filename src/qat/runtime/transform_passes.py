@@ -22,28 +22,29 @@ from qat.runtime.results_processing import binary_average, binary_count, numpy_a
 
 
 class PostProcessingTransform(TransformPass):
+    """
+    Uses the post-processing instructions from the executable package to process the
+    results from the engine.
+
+    The backend will return the results in a format that depends on the specified
+    :class:`AcquireMode`. However, it is often the case results need to be returned in an
+    explicit format, e.g., as discriminated bits. To achieve this, extra software
+    post-processing is needed.
+
+    The post-processing that appears here is the same as the post-processing
+    responsibilities taken on by the :class:`QuantumExecutionEngine` in
+    :mod:`qat.purr.compiler.execution`.
+    """
 
     def run(self, results: QatIR, *args, package: Executable, **kwargs):
+        """Run the pass.
+
+        :param QatIR results: Results to be processed.
+        :param Executable package: The executable program containing post-processing
+            information.
         """
-        Uses the post-processing instructions from the executable package to process the
-        results from the engine.
-
-        The backend will return the results in a format that depends on the specified
-        `AquireMode`. However, it is often the case results need to be returned in an explicit
-        format, e.g., as discriminated bits. To achieve this, extra software post-processing
-        is needed.
-
-        The post-processing that appears here is the same as the post-processing
-        responsibilities taken on by the `QuantumExecutionEngine` in the `purr` stack.
-
-        :param results: Results to be processed.
-        :type results: QatIR
-        :param package: The executable program containing post-processing information.
-        :type package: Executable
-
-        TODO: Change argument from QatIR with changes to the pass manager (maybe its own
-        object?)
-        """
+        # TODO: Change argument from QatIR with changes to the pass manager (maybe its own
+        # object?)
 
         results = results.value
         for acquire in package.acquires:
@@ -58,21 +59,19 @@ class PostProcessingTransform(TransformPass):
 
 
 class InlineResultsProcessingTransform(TransformPass):
+    """
+    Uses :class:`InlineResultsProcessing` instructions from the executable package to format
+    the acquired results in the desired format.
+    """
 
     def run(self, results: QatIR, *args, package: Executable, **kwargs):
         """
-        Uses `InlineResultsProcessing` instructions from the executable package to format the
-        acquired results in the desired format.
-
-        :param results: Results to be processed.
-        :type results: QatIR
-        :param package: The executable program containing the results-processing information.
-        :type package: Executable
-
-        TODO: change argument type from QatIR
-        TODO: clean up imported utility
+        :param QatIR results: Results to be processed.
+        :param Executable package: The executable program containing the results-processing
+            information.
         """
-
+        # TODO: change argument type from QatIR
+        # TODO: clean up imported utility
         results = results.value
         for output_variable in results:
             target_values = results[output_variable]
@@ -100,25 +99,23 @@ class InlineResultsProcessingTransform(TransformPass):
 
 
 class AssignResultsTransform(TransformPass):
+    """
+    Extracted from :meth:`purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
+
+    As assigns are classical instructions they are not processed as a part of the quantum
+    execution (right now). Read through the results dictionary and perform the assigns
+    directly, return the results.
+    """
 
     def run(self, results: QatIR, *args, package: Executable, **kwargs):
         """
-        Extracted from `purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
-
-        As assigns are classical instructions they are not processed as a part of the
-        quantum execution (right now).
-        Read through the results dictionary and perform the assigns directly, return the
-        results.
-
-        :param results: Results to be processed.
-        :type results: QatIR
-        :param package: The executable program containing the results-processing information.
-        :type package: Executable
-
-        TODO: change argument type from QatIR
-        TODO: refactor
+        :param QatIR results: Results to be processed.
+        :param Executable package: The executable program containing the results-processing
+            information.
         """
 
+        # TODO: change argument type from QatIR
+        # TODO: refactor
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
             if isinstance(value, List):

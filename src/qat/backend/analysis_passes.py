@@ -632,16 +632,21 @@ class TimelineAnalysis(AnalysisPass):
     During code generation for a given backend, it is often the case that we need to know the
     exactly clock cycles that instructions start, and the duration they happen for. For
     most instructions, this is trivial and is often part of the instruction's definition.
-    However, this is less clear for the `Synchronize` instruction, which aims to bring all
-    targeted channels to the same clock cycle. Calculating this requires knowledge of
+    However, this is less clear for the :class:`Synchronize` instruction, which aims to bring
+    all targeted channels to the same clock cycle. Calculating this requires knowledge of
     how much time has elapsed up until this point. Once this is known, delays can be added
     to all other channels to bring them in sync.
 
     This pass calculates the timings of each instruction by first calculating the timings of
-    non-synchronize instructions, and then iteratively adapting for each `Synchronize`.
+    non-synchronize instructions, and then iteratively adapting for each :class:`Synchronize`.
     """
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        :param ResultManager res_mgr: The result manager to store the analysis results.
+        """
+
         triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
         durations = self.calculate_non_sync_durations(triage_results)
         durations = self.calculate_sync_durations(triage_results, durations)
@@ -723,21 +728,31 @@ class IntermediateFrequencyResult(ResultInfoMixin):
 
 class IntermediateFrequencyAnalysis(AnalysisPass):
     """
-    Adapted from `LiveDeviceEngine.build_baseband_frequencies`.
+    Adapted from :meth:`qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies`.
 
     Retrieves intermediate frequencies for all physical channels if they exist,
     and validates that pulse channels that share the same physical channel cannot
-    have differing fixed frequencies. This pass should always follow a TriagePass,
+    have differing fixed frequencies. This pass should always follow a :class:`TriagePass`,
     as information of pulse channels are needed.
-
-    TODO: determine if this pass should be split into an analysis and validation
-    pass.
     """
 
     def __init__(self, model: QuantumHardwareModel):
+        """
+        Instantiate the pass with a hardware model.
+
+        :param QuantumHardwareModel model: The hardware model.
+        """
+
+        # TODO: determine if this pass should be split into an analysis and validation
+        # pass.
         self.model = model
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        :param ResultManager res_mgr: The result manager to store the analysis results.
+        """
+
         triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
         baseband_freqs = {}
         baseband_freqs_fixed_if = {}

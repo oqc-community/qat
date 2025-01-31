@@ -89,21 +89,27 @@ class FrequencyValidation(ValidationPass):
     """
     This validation pass checks two things:
 
-        a) Frequency shifts do not move the frequency of a pulse channel outside of its
-        allowed range.
-        b) Frequency shifts do not occur on pulse channels that have a fixed IF, or share a
-        physical channel with a pulse channel that has a fixed IF.
-
-    :param model: The quantum hardware model.
-    :type: QuantumHardwareModel
-
-    TODO: replace with new hardware models as our refactors mature.
+    #. Frequency shifts do not move the frequency of a pulse channel outside of its
+       allowed range.
+    #. Frequency shifts do not occur on pulse channels that have a fixed IF, or share a
+       physical channel with a pulse channel that has a fixed IF.
     """
 
     def __init__(self, model: QuantumHardwareModel):
+        """
+        Instantiate the pass with a hardware model.
+
+        :param QuantumHardwareModel model: The hardware model.
+        """
+
+        # TODO: replace with new hardware models as our refactors mature.
         self.model = model
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: QatIR, *args, **kwargs):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        """
+
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
@@ -146,11 +152,14 @@ class FrequencyValidation(ValidationPass):
 
 class NoAcquireWeightsValidation(ValidationPass):
     """
-    Some backends do not support `Acquire` instructions that contain weights. This pass can be
-    used to validate that this is the case.
+    Some backends do not support :class:`Acquire` instructions that contain weights. This
+    pass can be used to validate that this is the case.
     """
 
     def run(self, ir: QatIR, *args, **kwargs):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        """
 
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
@@ -167,11 +176,14 @@ class NoAcquireWeightsValidation(ValidationPass):
 
 class NoMultipleAcquiresValidation(ValidationPass):
     """
-    Some backends do not support multiple acquires on the same channel. This validation pass
-    should be used to verify this.
+    Some backends do not support multiple :class:`Acquire` instructions on the same channel.
+    This validation pass should be used to verify this.
     """
 
     def run(self, ir: QatIR, *args, **kwargs):
+        """
+        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
+        """
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
