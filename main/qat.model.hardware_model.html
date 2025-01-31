@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.purr package" href="qat.purr.html" />
-    <link rel="prev" title="qat.model.device module" href="qat.model.device.html" /> 
+    <link rel="prev" title="qat.model.error_mitigation module" href="qat.model.error_mitigation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -88,6 +88,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.model.hardware_model module</a></li>
 </ul>
 </li>
@@ -291,6 +292,7 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity">¶</a> – The connectivities of the physical qubits on the QPU (undirected graph).</p></li>
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity">¶</a> – The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of <cite>physical_connectivity</cite>.</p></li>
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity_quality"></span><strong>logical_connectivity_quality</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity_quality">¶</a> – Quality of the connections between the qubits.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.error_mitigation"></span><strong>error_mitigation</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.error_mitigation">¶</a> – Error mitigation strategy for this hardware model.</p></li>
 </ul>
 </dd>
 </dl>
@@ -301,6 +303,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.default_logical_connectivity">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_logical_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.default_logical_connectivity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.error_mitigation">
+<span class="sig-name descname"><span class="pre">error_mitigation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ErrorMitigation</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.error_mitigation" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -360,6 +367,11 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation">
+<span class="sig-name descname"><span class="pre">validate_error_mitigation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_physical_connectivity_symmetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physical_connectivity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -373,7 +385,7 @@ validated to form a valid model.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.model.device.html" class="btn btn-neutral float-left" title="qat.model.device module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.model.error_mitigation.html" class="btn btn-neutral float-left" title="qat.model.error_mitigation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.purr.html" class="btn btn-neutral float-right" title="qat.purr package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

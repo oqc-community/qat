@@ -15,4 +15,5 @@ Submodules
    qat.model.builder
    qat.model.convert_legacy
    qat.model.device
+   qat.model.error_mitigation
    qat.model.hardware_model

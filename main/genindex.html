@@ -85,6 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
 </ul>
 </li>
@@ -1559,11 +1560,19 @@
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.error">error() (CompositeLogger method)</a>
 </li>
-      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.error_mitigation">error_mitigation (QuantumExecutionEngine property)</a>
-</li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ErrorMitigation">ErrorMitigation (class in qat.purr.compiler.hardware_models)</a>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.error_mitigation">error_mitigation (PhysicalHardwareModel attribute)</a>
 
       <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.params.error_mitigation">(qat.model.hardware_model.PhysicalHardwareModel parameter)</a>
+</li>
+        <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.error_mitigation">(QuantumExecutionEngine property)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation">ErrorMitigation (class in qat.model.error_mitigation)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ErrorMitigation">(class in qat.purr.compiler.hardware_models)</a>
+</li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation">(class in qat.runtime.transform_passes)</a>
 </li>
       </ul></li>
@@ -2369,6 +2378,8 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.is_empty">(QbloxContext method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.is_enabled">is_enabled (ErrorMitigation property)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.is_finished">is_finished() (SweepIterator method)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.is_generated_name">is_generated_name() (in module qat.purr.compiler.instructions)</a>
@@ -2487,6 +2498,12 @@
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.LifetimePass">LifetimePass (class in qat.backend.analysis_passes)</a>
 </li>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.params.linear">linear (qat.model.error_mitigation.ReadoutMitigation parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.linear">(ReadoutMitigation attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL">LINEAR_MAP_COMPLEX_TO_REAL (PostProcessType attribute)</a>
 </li>
       <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.linear_map_complex_to_real">linear_map_complex_to_real() (in module qat.runtime.post_processing)</a>
@@ -2507,10 +2524,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.loader.html#qat.purr.backends.qblox.loader.load_executor">load_executor() (in module qat.purr.backends.qblox.loader)</a>
 </li>
-      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig">LoConfig (class in qat.purr.backends.qblox.config)</a>
@@ -2587,6 +2604,12 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.params.m3_available">m3_available (qat.model.error_mitigation.ReadoutMitigation parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.m3_available">(ReadoutMitigation attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.macq">macq (ChannelType attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.makeRecord">makeRecord() (BasicLogger method)</a>
@@ -2842,6 +2865,8 @@
 </li>
         <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.model_config">(DrivePulseChannel attribute)</a>
 </li>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.model_config">(ErrorMitigation attribute)</a>
+</li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.model_config">(Executable attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.model_config">(FreqShiftPulseChannel attribute)</a>
@@ -2915,6 +2940,8 @@
         <li><a href="qat.model.device.html#qat.model.device.Qubit.model_config">(Qubit attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.model_config">(QubitPulseChannels attribute)</a>
+</li>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.model_config">(ReadoutMitigation attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Repeat.model_config">(Repeat attribute)</a>
 </li>
@@ -3024,6 +3051,8 @@
         <li><a href="qat.model.convert_legacy.html#module-qat.model.convert_legacy">qat.model.convert_legacy</a>
 </li>
         <li><a href="qat.model.device.html#module-qat.model.device">qat.model.device</a>
+</li>
+        <li><a href="qat.model.error_mitigation.html#module-qat.model.error_mitigation">qat.model.error_mitigation</a>
 </li>
         <li><a href="qat.model.hardware_model.html#module-qat.model.hardware_model">qat.model.hardware_model</a>
 </li>
@@ -4163,6 +4192,13 @@
 </li>
       </ul></li>
       <li>
+    qat.model.error_mitigation
+
+      <ul>
+        <li><a href="qat.model.error_mitigation.html#module-qat.model.error_mitigation">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.model.hardware_model
 
       <ul>
@@ -4907,12 +4943,16 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.QubitRegister">QubitRegister (class in qat.purr.integrations.qasm)</a>
 </li>
-      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubits">qubits (PhysicalHardwareModel attribute)</a>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.qubits">qubits (ErrorMitigation property)</a>
 
       <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubits">(PhysicalHardwareModel attribute)</a>
+</li>
         <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.params.qubits">(qat.model.hardware_model.PhysicalHardwareModel parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits">(QuantumHardwareModel property)</a>
+</li>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.qubits">(ReadoutMitigation property)</a>
 </li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.qubits">(Section attribute)</a>
 </li>
@@ -4945,8 +4985,18 @@
 </li>
       <li><a href="qat.compiler.analysis_passes.html#qat.compiler.analysis_passes.InputAnalysisResult.raw_input">raw_input (InputAnalysisResult attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ReadoutMitigation">ReadoutMitigation (class in qat.purr.compiler.hardware_models)</a>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.readout_mitigation">readout_mitigation (ErrorMitigation attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.params.readout_mitigation">(qat.model.error_mitigation.ErrorMitigation parameter)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation">ReadoutMitigation (class in qat.model.error_mitigation)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ReadoutMitigation">(class in qat.purr.compiler.hardware_models)</a>
+</li>
+      </ul></li>
       <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation">ReadoutValidation (class in qat.compiler.validation_passes)</a>
 
       <ul>
@@ -5179,10 +5229,10 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.results_processing">(ResultsProcessing attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.results_processing">results_processing() (InstructionBuilder method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.results_processing">results_processing() (InstructionBuilder method)</a>
+</li>
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.ResultsAggregator">ResultsAggregator (class in qat.runtime.runtimes.base)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing">ResultsProcessing (class in qat.ir.instructions)</a>
@@ -6083,6 +6133,8 @@
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval">validate_calibratable_unit_interval() (in module qat.utils.pydantic)</a>
 </li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval_array">validate_calibratable_unit_interval_array() (in module qat.utils.pydantic)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.validate_channels_qubit_mapping">validate_channels_qubit_mapping() (QubitPulseChannels class method)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity">validate_connectivity() (PhysicalHardwareModel method)</a>
@@ -6093,9 +6145,13 @@
 </li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.validate_duration">validate_duration() (Pulse class method)</a>
 </li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation">validate_error_mitigation() (PhysicalHardwareModel method)</a>
+</li>
       <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges">validate_frequency_ranges() (FrequencyValidation static method)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.validate_input_array">validate_input_array() (in module qat.purr.backends.utilities)</a>
+</li>
+      <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.validate_linear">validate_linear() (ReadoutMitigation class method)</a>
 </li>
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.validate_max_shots">validate_max_shots() (BaseRuntime static method)</a>
 </li>
@@ -6131,10 +6187,10 @@
         <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultModel.value">(ResultModel property)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultModel.value">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value">[1]</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values">values() (PydDictBase method)</a>
