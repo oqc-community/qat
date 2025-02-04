@@ -3,10 +3,12 @@
 from typing import List
 
 import numpy as np
-from compiler_config.config import CompilerConfig
+from compiler_config.config import CompilerConfig, ErrorMitigationConfig, ResultsFormatting
 
+from qat import qatconfig
 from qat.ir.pass_base import QatIR, ValidationPass
 from qat.ir.result_base import ResultManager
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -83,6 +85,43 @@ class HardwareConfigValidity(ValidationPass):
         **kwargs,
     ):
         compiler_config.validate(self.hardware_model)
+
+
+class PydHardwareConfigValidity(ValidationPass):
+    def __init__(self, hardware_model: PydHardwareModel):
+        self.hardware_model = hardware_model
+
+    def run(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
+        self._validate_shots(compiler_config)
+        self._validate_error_mitigation(self.hardware_model, compiler_config)
+
+    def _validate_shots(self, compiler_config: CompilerConfig):
+        if compiler_config.repeats > qatconfig.MAX_REPEATS_LIMIT:
+            raise ValueError(
+                f"Number of shots in compiler config {compiler_config.repeats} exceeds max number of shots {qatconfig.MAX_REPEATS_LIMIT}."
+            )
+
+    def _validate_error_mitigation(
+        self, hardware_model: PydHardwareModel, compiler_config: CompilerConfig
+    ):
+        if (
+            compiler_config.error_mitigation
+            and compiler_config.error_mitigation != ErrorMitigationConfig.Empty
+        ):
+            if not hardware_model.error_mitigation.is_enabled:
+                raise ValueError("Error mitigation not calibrated on this hardware model.")
+
+            if ResultsFormatting.BinaryCount not in compiler_config.results_format:
+                raise ValueError(
+                    "BinaryCount format required for readout error mitigation."
+                )
 
 
 class FrequencyValidation(ValidationPass):

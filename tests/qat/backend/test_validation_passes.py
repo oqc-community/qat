@@ -3,19 +3,28 @@
 
 import numpy as np
 import pytest
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+)
 
+from qat import qatconfig
 from qat.backend.validation_passes import (
     FrequencyValidation,
     NCOFrequencyVariability,
     NoAcquireWeightsValidation,
     NoMultipleAcquiresValidation,
+    PydHardwareConfigValidity,
 )
 from qat.ir.pass_base import QatIR
 from qat.ir.result_base import ResultManager
+from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import Pulse, PulseShapeType
 
 from tests.qat.utils.builder_nuggets import resonator_spect
+from tests.qat.utils.hardware_models import generate_hw_model, generate_random_linear
 
 
 class TestValidationPasses:
@@ -218,3 +227,63 @@ class TestNoMultipleAcquiresValidation:
         builder.acquire(measure_channel, delay=0.0)
         with pytest.raises(NotImplementedError):
             NoMultipleAcquiresValidation().run(QatIR(builder), res_mgr)
+
+
+# Test passes for the Pydantic hardware model.
+
+
+class TestPydHardwareConfigValidity:
+
+    def test_max_shot_limit_exceeded(self):
+        hw_model = generate_hw_model(n_qubits=8)
+        comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT + 1)
+        ir = QatIR("test")
+        res_mgr = ResultManager()
+
+        with pytest.raises(ValueError):
+            PydHardwareConfigValidity(hw_model).run(
+                ir, res_mgr, compiler_config=comp_config
+            )
+
+        comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT)
+        PydHardwareConfigValidity(hw_model).run(ir, res_mgr, compiler_config=comp_config)
+
+    @pytest.mark.parametrize("n_qubits", [2, 4, 8, 32, 64])
+    def test_error_mitigation(self, n_qubits):
+        hw_model = generate_hw_model(n_qubits=n_qubits)
+        comp_config = CompilerConfig(
+            repeats=10,
+            error_mitigation=ErrorMitigationConfig.LinearMitigation,
+            results_format=QuantumResultsFormat().binary_count(),
+        )
+        ir = QatIR("test")
+        res_mgr = ResultManager()
+
+        # Error mitigation not enabled in hw model.
+        with pytest.raises(ValueError):
+            PydHardwareConfigValidity(hw_model).run(
+                ir, res_mgr, compiler_config=comp_config
+            )
+
+        qubit_indices = list(hw_model.qubits.keys())
+        linear = generate_random_linear(qubit_indices)
+        readout_mit = ReadoutMitigation(linear=linear)
+        hw_model.error_mitigation = ErrorMitigation(readout_mitigation=readout_mit)
+        comp_config = CompilerConfig(
+            repeats=10,
+            error_mitigation=ErrorMitigationConfig.LinearMitigation,
+            results_format=QuantumResultsFormat().binary(),
+        )
+
+        # Error mitigation only works with binary count as results format.
+        with pytest.raises(ValueError):
+            PydHardwareConfigValidity(hw_model).run(
+                ir, res_mgr, compiler_config=comp_config
+            )
+
+        comp_config = CompilerConfig(
+            repeats=10,
+            error_mitigation=ErrorMitigationConfig.LinearMitigation,
+            results_format=QuantumResultsFormat().binary_count(),
+        )
+        PydHardwareConfigValidity(hw_model).run(ir, res_mgr, compiler_config=comp_config)
