@@ -9,6 +9,7 @@ from qat.compiler.analysis_passes import InputAnalysis
 from qat.compiler.transform_passes import Parse
 from qat.ir.pass_base import QatIR, ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.instructions import CrossResonancePulse
 
 from tests.qat.qasm_utils import get_qasm2
 
@@ -71,7 +72,7 @@ class TestWaveformV1Emitter:
         pulse_channels[0].frequency = 1e8
         pulse_channels[1].frequency = 2e8
         builder = model.create_builder()
-        builder.delay(pulse_channels[0], 8e-8)
+        builder.X(pulse_channels[0])
 
         # this should work as the second channel has no action
         ir = QatIR(builder)
@@ -79,7 +80,11 @@ class TestWaveformV1Emitter:
         emitter.emit(ir)
 
         # now add an instruction to the second channel, and check it raises an error...
-        builder.delay(pulse_channels[1], 8e-8)
+        builder.add(
+            CrossResonancePulse(
+                pulse_channels[1], **model.get_qubit(0).pulse_hw_zx_pi_4["Q1"]
+            )
+        )
         ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
         with pytest.raises(ValueError):

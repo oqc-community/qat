@@ -30,12 +30,14 @@ from qat.ir.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import (
     Acquire,
+    Delay,
     DeviceUpdate,
     EndRepeat,
     EndSweep,
     Repeat,
     Return,
     Sweep,
+    Synchronize,
     Variable,
 )
 
@@ -67,8 +69,8 @@ class TestAnalysisPasses:
 
         target_map = result.target_map
         assert isinstance(target_map, Dict)
-        assert len(target_map) == 3 + 2 * 3
-        assert qubit.get_drive_channel() in target_map
+        assert len(target_map) == 2
+        assert qubit.get_drive_channel() not in target_map
         assert qubit.get_measure_channel() in target_map
         assert qubit.get_acquire_channel() in target_map
 
@@ -275,16 +277,22 @@ class TestTimelineAnalysis:
         # construct a builder with non-rounded times
         model = get_default_echo_hardware()
         pulse_channel = next(iter(model.pulse_channels.values()))
-        builder = model.create_builder()
         block_time = pulse_channel.block_time
         block_size = pulse_channel.block_size
-        builder.delay(pulse_channel, 0.9 * block_time)
-        builder.delay(pulse_channel, 1.1 * block_time)
 
         # execute the timeline pass
         res_mgr = ResultManager()
-        ir = QatIR(builder)
-        TriagePass().run(ir, res_mgr)
+        res_mgr.add(
+            TriageResult(
+                target_map={
+                    pulse_channel: [
+                        Delay(pulse_channel, 0.9 * block_time),
+                        Delay(pulse_channel, 1.1 * block_time),
+                    ]
+                }
+            )
+        )
+        ir = QatIR("Not needed")
         TimelineAnalysis().run(ir, res_mgr)
         res = res_mgr.lookup_by_type(TimelineAnalysisResult)
 
@@ -307,16 +315,17 @@ class TestTimelineAnalysis:
             pulse_channel.physical_channel.sample_time = sample_time
 
         # create some mock data to test sync
-        builder = model.create_builder()
-        builder.delay(pulse_channels[0], 2 * sample_time)
-        builder.delay(pulse_channels[1], 3 * sample_time)
-        builder.delay(pulse_channels[2], sample_time)
-        builder.synchronize(pulse_channels)
+        target_map = {}
+        sync = Synchronize(pulse_channels)
+        syncs = {}
+        for ch, samples in zip(pulse_channels, [2, 3, 1]):
+            target_map[ch] = [(Delay(ch, samples * sample_time)), sync]
+            syncs[ch] = 1
 
         # execute the timeline pass
         res_mgr = ResultManager()
-        ir = QatIR(builder)
-        TriagePass().run(ir, res_mgr)
+        res_mgr.add(TriageResult(target_map=target_map, syncs=[syncs]))
+        ir = QatIR("Not needed")
         TimelineAnalysis().run(ir, res_mgr)
         res = res_mgr.lookup_by_type(TimelineAnalysisResult)
 
@@ -342,14 +351,18 @@ class TestIntermediateFrequencyAnalysis:
         pulse_channel_2.frequency = pulse_channel_1.frequency + 1e8
 
         # some dummy data just to test the IFs
-        builder = model.create_builder()
-        builder.delay(pulse_channel_1, 8e-8)
-        builder.delay(pulse_channel_2, 1.6e-7)
+        res_mgr = ResultManager()
+        res_mgr.add(
+            TriageResult(
+                target_map={
+                    pulse_channel_1: [Delay(pulse_channel_1, 8e-8)],
+                    pulse_channel_2: [Delay(pulse_channel_2, 1.6e-7)],
+                }
+            )
+        )
+        ir = QatIR("Not needed")
 
         # run the pass: should pass
-        res_mgr = ResultManager()
-        ir = QatIR(builder)
-        TriagePass().run(ir, res_mgr)
         IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
         # fix IF for one channel: should pass
@@ -379,14 +392,18 @@ class TestIntermediateFrequencyAnalysis:
         pulse_channel_2.frequency = pulse_channel_1.frequency
 
         # some dummy data just to test the IFs
-        builder = model.create_builder()
-        builder.delay(pulse_channel_1, 8e-8)
-        builder.delay(pulse_channel_2, 1.6e-7)
+        res_mgr = ResultManager()
+        res_mgr.add(
+            TriageResult(
+                target_map={
+                    pulse_channel_1: [Delay(pulse_channel_1, 8e-8)],
+                    pulse_channel_2: [Delay(pulse_channel_2, 1.6e-7)],
+                }
+            )
+        )
+        ir = QatIR("Not needed")
 
         # run the pass
-        res_mgr = ResultManager()
-        ir = QatIR(builder)
-        TriagePass().run(ir, res_mgr)
         IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
     def test_fixed_if_returns_frequencies(self):
@@ -403,14 +420,18 @@ class TestIntermediateFrequencyAnalysis:
         pulse_channel_2.fixed_if = False  # test this isn't saved
 
         # some dummy data just to test the IF
-        builder = model.create_builder()
-        builder.delay(pulse_channel_1, 8e-8)
-        builder.delay(pulse_channel_2, 1.6e-7)
+        res_mgr = ResultManager()
+        res_mgr.add(
+            TriageResult(
+                target_map={
+                    pulse_channel_1: [Delay(pulse_channel_1, 8e-8)],
+                    pulse_channel_2: [Delay(pulse_channel_2, 1.6e-7)],
+                }
+            )
+        )
+        ir = QatIR("Not needed")
 
         # run the pass
-        res_mgr = ResultManager()
-        ir = QatIR(builder)
-        TriagePass().run(ir, res_mgr)
         IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
         res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
         assert pulse_channel_1.physical_channel in res.frequencies

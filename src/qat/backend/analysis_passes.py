@@ -84,6 +84,7 @@ class TriagePass(AnalysisPass):
                 else:
                     targets.update(inst.quantum_targets)
 
+        active_targets = set()
         result = TriageResult()
         for inst in builder.instructions:
             # Dissect by target
@@ -98,10 +99,10 @@ class TriagePass(AnalysisPass):
                             result.target_map[aqt].append(inst)
                     else:
                         result.target_map[qt].append(inst)
-            elif isinstance(inst, Sweep):
-                for t in targets:
-                    result.target_map[t].append(inst)
-            else:
+            elif isinstance(inst, Sweep | EndSweep | Repeat | EndRepeat):
+                # TODO: Find a better way to handle scopes with the new instructions
+                # Would a `ControlFlowInstruction` class be useful?
+                # Are `Label` and `Jump` instructions needed here as well?
                 for t in targets:
                     result.target_map[t].append(inst)
 
@@ -120,7 +121,11 @@ class TriagePass(AnalysisPass):
             # Acquisition by target
             elif isinstance(inst, Acquire):
                 for t in inst.quantum_targets:
+                    active_targets.add(t)
                     result.acquire_map[t].append(inst)
+
+            elif isinstance(inst, Pulse):
+                active_targets.add(inst.channel)
 
             # Post-processing by output variable
             elif isinstance(inst, PostProcessing):
@@ -141,6 +146,7 @@ class TriagePass(AnalysisPass):
             result.rp_map[missing_var] = ResultsProcessing(
                 missing_var, InlineResultsProcessing.Experiment
             )
+        result.target_map = {target: result.target_map[target] for target in active_targets}
 
         res_mgr.add(result)
 
@@ -692,7 +698,9 @@ class TimelineAnalysis(AnalysisPass):
         syncs = triage_results.syncs
         for sync in syncs:
             current_durations = {
-                chan: np.sum(durations[chan][: sync[chan]]) for chan in sync
+                chan: np.sum(durations[chan][: sync[chan]])
+                for chan in sync
+                if chan in durations
             }
             sync_time = max(current_durations.values())
             for chan, current_duration in current_durations.items():
