@@ -13,4 +13,5 @@ Submodules
    :maxdepth: 4
 
    qat.utils.algorithm
+   qat.utils.graphs
    qat.utils.pydantic
