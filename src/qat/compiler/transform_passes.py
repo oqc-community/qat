@@ -5,7 +5,6 @@ import tempfile
 from numbers import Number
 from typing import Dict, List
 
-from attr import dataclass
 from compiler_config.config import (
     CompilerConfig,
     Languages,
@@ -21,9 +20,9 @@ from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import QatIR, TransformPass
-from qat.ir.result_base import ResultInfoMixin, ResultManager
+from qat.passes.metrics_base import MetricsManager
+from qat.passes.pass_base import TransformPass
+from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -43,20 +42,29 @@ from qat.purr.integrations.tket import run_tket_optimizations
 
 
 class PhaseOptimisation(TransformPass):
-    """
-    Extracted from QuantumExecutionEngine.optimize()
+    """Iterates through the list of instructions and compresses contiguous
+    :class:`PhaseShift` instructions.
+
+    Extracted from :meth:`qat.purr.compiler.execution.QuantumExecutionEngine.optimize`.
     """
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
 
         accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: List[Instruction] = []
-        for instruction in builder.instructions:
+        for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
             ):
@@ -81,26 +89,35 @@ class PhaseOptimisation(TransformPass):
             else:
                 optimized_instructions.append(instruction)
 
-        builder.instructions = optimized_instructions
+        ir.instructions = optimized_instructions
         met_mgr.record_metric(
             MetricsType.OptimizedInstructionCount, len(optimized_instructions)
         )
+        return ir
 
 
 class PostProcessingSanitisation(TransformPass):
-    """
-    Extracted from LiveDeviceEngine.optimize()
-    Better pass name/id ?
+    """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
+    suitable for the acquisition mode, and removes them if not.
+
+    Extracted from :meth:`qat.purr.backends.live.LiveDeviceEngine.optimize`.
     """
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        _: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
 
-        pp_insts = [val for val in builder.instructions if isinstance(val, PostProcessing)]
+        pp_insts = [val for val in ir.instructions if isinstance(val, PostProcessing)]
         discarded = []
         for pp in pp_insts:
             if pp.acquire.mode == AcquireMode.SCOPE:
@@ -124,39 +141,39 @@ class PostProcessingSanitisation(TransformPass):
                     and len(pp.axes) <= 1
                 ):
                     discarded.append(pp)
-        builder.instructions = [val for val in builder.instructions if val not in discarded]
-        met_mgr.record_metric(
-            MetricsType.OptimizedInstructionCount, len(builder.instructions)
-        )
-
-
-@dataclass
-class InputOptimisationResult(ResultInfoMixin):
-    optimised_circuit: str = None
+        ir.instructions = [val for val in ir.instructions if val not in discarded]
+        met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(ir.instructions))
+        return ir
 
 
 class InputOptimisation(TransformPass):
     """Run third party optimisation passes on the incoming QASM."""
 
-    def __init__(
-        self,
-        hardware: QuantumHardwareModel,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    def __init__(self, hardware: QuantumHardwareModel, *args, **kwargs):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model is used in TKET optimisations.
+        """
         self.hardware = hardware
 
     def run(
         self,
-        ir: QatIR,
+        program: str,
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
     ):
-        optimisation_result = InputOptimisationResult()
+        """
+        :param program: The program as a string (e.g. QASM or QIR), or filepath to the
+            program.
+        :param res_mgr: The results manager to look-up the :class:`InputAnalysisResults`.
+        :param met_mgr: The metrics manager to save the optimised circuit.
+        :param compiler_config: The compiler config should be provided by a keyword
+            argument.
+        """
+
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
         program = input_results.raw_input
@@ -166,9 +183,7 @@ class InputOptimisation(TransformPass):
             program = self.run_qasm_optimisation(
                 program, compiler_config.optimizations, met_mgr
             )
-            optimisation_result.optimised_circuit = program
-        ir.value = program
-        res_mgr.add(optimisation_result)
+        return program
 
     def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
         """Extracted from DefaultOptimizers.optimize_qasm"""
@@ -239,23 +254,36 @@ class PydInputOptimisation(InputOptimisation):
 
 
 class Parse(TransformPass):
+    """Parses the QASM/QIR input into IR."""
+
     def __init__(self, hardware: QuantumHardwareModel):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model is required to create Qat IR.
+        """
         self.hardware = hardware
 
     def run(
         self,
-        ir: QatIR,
+        program: str,
         res_mgr: ResultManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
     ):
+        """
+        :param program: The program as a string (e.g. QASM or QIR), or filepath to the
+            program.
+        :param res_mgr: The results manager to look-up the :class:`InputAnalysisResults`.
+        :param compiler_config: The compiler config should be provided by a keyword
+            argument.
+        """
         input_results = res_mgr.lookup_by_type(InputAnalysisResult)
         language = input_results.language
         builder = self.hardware.create_builder()
         parser = None
         if language == Languages.QIR:
-            builder = self.parse_qir(ir.value, compiler_config)
+            builder = self.parse_qir(program, compiler_config)
         elif language == Languages.Qasm2:
             parser = CloudQasmParser()
         elif language == Languages.Qasm3:
@@ -263,8 +291,9 @@ class Parse(TransformPass):
         if parser is not None:
             if compiler_config.results_format.format is not None:
                 parser.results_format = compiler_config.results_format.format
-            builder = parser.parse(builder, ir.value)
-        ir.value = (
+            builder = parser.parse(builder, program)
+
+        return (
             self.hardware.create_builder()
             .repeat(compiler_config.repeats, compiler_config.repetition_period)
             .add(builder)

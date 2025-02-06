@@ -5,8 +5,7 @@ import numpy as np
 import pytest
 
 from qat.compiler.analysis_passes import BatchedShots, BatchedShotsResult
-from qat.ir.pass_base import QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 
 
@@ -20,7 +19,7 @@ class TestBatchedShots:
         builder.repeat(shots)
         batch_pass = BatchedShots(model)
         res_mgr = ResultManager()
-        batch_pass.run(QatIR(builder), res_mgr)
+        batch_pass.run(builder, res_mgr)
         batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
         assert batch_res.total_shots == shots
         assert batch_res.batched_shots == shots
@@ -30,7 +29,7 @@ class TestBatchedShots:
         builder = model.create_builder()
         batch_pass = BatchedShots(model)
         res_mgr = ResultManager()
-        batch_pass.run(QatIR(builder), res_mgr)
+        batch_pass.run(builder, res_mgr)
         batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
         assert batch_res.total_shots == model.default_repeat_count
         assert batch_res.batched_shots == model.default_repeat_count
@@ -43,7 +42,7 @@ class TestBatchedShots:
         builder.repeat(shots)
         batch_pass = BatchedShots(model)
         res_mgr = ResultManager()
-        batch_pass.run(QatIR(builder), res_mgr)
+        batch_pass.run(builder, res_mgr)
         batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
         assert batch_res.total_shots == shots
         assert batch_res.batched_shots <= shots

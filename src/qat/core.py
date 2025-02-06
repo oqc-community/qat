@@ -5,9 +5,9 @@ from typing import Optional, Union
 from compiler_config.config import CompilerConfig
 
 from qat.backend.waveform_v1 import EchoEngine, WaveformV1Emitter
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import PassManager, QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.metrics_base import MetricsManager
+from qat.passes.pass_base import PassManager
+from qat.passes.result_base import ResultManager
 from qat.pipelines import DefaultRuntime
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -214,16 +214,15 @@ class QAT:
         compiler_config = compiler_config or CompilerConfig()
         metrics_manager = MetricsManager(compiler_config.metrics)
         compilation_results = ResultManager()
-        ir = QatIR(program)
-        compilation_pipeline.run(
-            ir, compilation_results, metrics_manager, compiler_config=compiler_config
+        ir = compilation_pipeline.run(
+            program, compilation_results, metrics_manager, compiler_config=compiler_config
         )
 
         # TODO: adopt pass-based emitter
         if emitter := self._get_emitter(emitter, pipeline):
             package = emitter.emit(ir)
         else:
-            package = ir.value
+            package = ir
 
         return package, metrics_manager
 
@@ -254,10 +253,7 @@ class QAT:
         pp_results = ResultManager()
         metrics_manager = MetricsManager(compiler_config.metrics)
 
-        if isinstance(package, InstructionBuilder):
-            package = QatIR(package)
-
-        execute_pipeline.run(
+        package = execute_pipeline.run(
             package,
             execution_results,
             metrics_manager,

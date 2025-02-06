@@ -9,8 +9,8 @@ from typing import Union
 import numpy as np
 from compiler_config.config import Languages
 
-from qat.ir.pass_base import AnalysisPass, QatIR, ResultManager
-from qat.ir.result_base import ResultInfoMixin
+from qat.passes.pass_base import AnalysisPass, ResultManager
+from qat.passes.result_base import ResultInfoMixin
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Repeat
@@ -28,22 +28,29 @@ class InputAnalysisResult(ResultInfoMixin):
 
 
 class InputAnalysis(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    """Determines the language of the input circuit."""
+
+    def run(self, program: str, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param program: A circuit (e.g. QASM or QIR) or the file path for a circuit.
+        :param res_mgr: The results manager to save the analysis.
+        """
+
         result = InputAnalysisResult()
-        path_or_str = ir.value
-        if isinstance(path_or_str, bytes) and path_or_str.startswith(b"BC"):
+        if isinstance(program, bytes) and program.startswith(b"BC"):
             result.language = Languages.QIR
-            result.raw_input = path_or_str
-        elif path_regex.match(path_or_str) is not None:
-            result.language, result.raw_input = self._process_path_string(path_or_str)
+            result.raw_input = program
+        elif path_regex.match(program) is not None:
+            result.language, result.raw_input = self._process_path_string(program)
         else:
             result.language, result.raw_input = (
-                self._process_string(path_or_str),
-                path_or_str,
+                self._process_string(program),
+                program,
             )
         res_mgr.add(result)
         if result.language is Languages.Empty:
             raise ValueError("Unable to determine input language.")
+        return program
 
     def _process_path_string(self, path_string):
         path = Path(path_string)
@@ -77,52 +84,41 @@ class BatchedShotsResult(ResultInfoMixin):
 
 
 class BatchedShots(AnalysisPass):
-    """
-    Determines how shots should be grouped when the total number exceeds that maximum allowed.
+    """Determines how shots should be grouped when the total number exceeds that maximum
+    allowed.
 
-    The target backend might have an allowed number of shots that can be executed by a single
-    execution call. To execute a number of shots greater than this value, shots can be
-    batched, with each batch executed by its own "execute" call on the backend. For example,
-    if the maximum number of shots for a backend is 2000, but you required 4000 shots, then
-    this could be done as [2000, 2000] shots.
+    The target backend might have an allowed number of shots that can be executed by a
+    single execution call. To execute a number of shots greater than this value, shots can
+    be batched, with each batch executed by its own "execute" call on the backend. For
+    example, if the maximum number of shots for a backend is 2000, but you required 4000
+    shots, then this could be done as [2000, 2000] shots.
 
     Now consider the more complex scenario where  4001 shots are required. Clearly this can
     be done in three batches. While it is tempting to do this in batches of [2000, 2000, 1],
     for some backends, specification of the number of shots can only be achieved at
     compilation (as opposed to runtime). Batching as described above would result in us
-    needing to compile two separate programs. Instead, it makes more sense to batch the shots
-    as three lots of 1334 shots, which gives a total of 4002 shots. The extra two shots can
-    just be discarded at run time.
+    needing to compile two separate programs. Instead, it makes more sense to batch the
+    shots as three lots of 1334 shots, which gives a total of 4002 shots. The extra two
+    shots can just be discarded at run time.
     """
 
     def __init__(self, model: QuantumHardwareModel):
-        """
-        Instantiate the pass with a hardware model.
+        """Instantiate the pass with a hardware model.
 
-        :param QuantumHardwareModel model: The hardware model that contains the total number
-            of shots.
+        :param model: The hardware model that contains the total number of shots.
         """
         # TODO: replace the hardware model with whatever structures will contain the allowed
         # number of shots in the future.
         # TODO: determine if this should be fused with `RepeatSanitisation`.
         self.model = model
 
-    def run(
-        self,
-        ir: QatIR,
-        res_mgr: ResultManager,
-        *args,
-        **kwargs,
-    ):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
-        :param ResultManager res_mgr: The result manager to store the analysis results.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
         """
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         if len(repeats) > 0:
             shots = repeats[0].repeat_count
         else:
@@ -138,3 +134,4 @@ class BatchedShots(AnalysisPass):
         else:
             shots_per_batch = int(np.ceil(shots / num_batches))
         res_mgr.add(BatchedShotsResult(total_shots=shots, batched_shots=shots_per_batch))
+        return ir

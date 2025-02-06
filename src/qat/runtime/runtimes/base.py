@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from qat.ir.pass_base import PassManager
+from qat.passes.pass_base import PassManager
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
 from qat.runtime import NativeEngine
@@ -19,8 +19,7 @@ from qat.runtime.transform_passes import (
 
 
 class BaseRuntime(abc.ABC):
-    """
-    Provides a Base class to build on for runtimes of varying complexities.
+    """Provides a Base class to build on for runtimes of varying complexities.
 
     A runtime provides the means to execute quantum programs. It can take on various
     responsibilities, including interfacing the execution engine and post-processing of
@@ -38,10 +37,11 @@ class BaseRuntime(abc.ABC):
     ):
         """
         :param NativeEngine engine: The execution engine for a target backend.
-        :param results_pipeline: Optionally provided a pipeline for results processing. If not
-            provided, a default pipeline is provided.
+        :param results_pipeline: Optionally provided a pipeline for results processing. If
+            not provided, a default pipeline is provided.
         :type results_pipeline: PassManager, optional
-        :param bool startup_engine: Instruct the engine to connect to the backend on startup?
+        :param bool startup_engine: Instruct the engine to connect to the backend on
+            startup?
         """
         if not isinstance(engine, NativeEngine):
             raise ValueError(
@@ -70,8 +70,7 @@ class BaseRuntime(abc.ABC):
 
     @staticmethod
     def number_of_batches(total_shots: int, shots_per_batch: int):
-        """
-        Calculates the number of shot batches to execute.
+        """Calculates the number of shot batches to execute.
 
         When the total number of shots exceeds the capabilities of the backend, we can execute
         a number of batches with a subset of the shots. This number of shots should be
@@ -133,13 +132,10 @@ class BaseRuntime(abc.ABC):
 
 
 class ResultsAggregator:
-    """
-    Aggregates the acquisition results from batching of shots.
-    """
+    """Aggregates the acquisition results from batching of shots."""
 
     def __init__(self, acquires: List[AcquireDataStruct]):
-        """
-        Begin the aggregation of results for a list of acquisitions.
+        """Begin the aggregation of results for a list of acquisitions.
 
         :param acquires: List of acquires to be collected.
         :type acquires: List[AcquireDataStruct]
@@ -161,8 +157,7 @@ class ResultsAggregator:
             }
 
     def update(self, new_results: Dict[str, np.ndarray]):
-        """
-        Add a batch of results.
+        """Add a batch of results.
 
         For :attr:`AcquireMode.RAW` and :attr:`AcquireMode.INTEGRATOR`, this means
         to append the new results. For :attr:`AcquireMode.SCOPE`, results are accumulated
@@ -182,8 +177,7 @@ class ResultsAggregator:
                     result["result"] += new_result
 
     def results(self, max_shots: Optional[int] = None):
-        """
-        Returns the results normalized in an appropiate way.
+        """Returns the results normalized in an appropiate way.
 
         For :attr:`AcquireMode.SCOPE`, results are averaged over batches. For
         :attr:`AcquireMode.RAW` or :attr:`AcquireMode.INTEGRATOR`, a truncated

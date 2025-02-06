@@ -3,7 +3,7 @@
 import pytest
 from compiler_config.config import MetricsType
 
-from qat.ir.metrics_base import MetricsManager
+from qat.passes.metrics_base import MetricsManager
 
 
 @pytest.mark.parametrize("flag", [*[mt for mt in MetricsType], MetricsType.Default])

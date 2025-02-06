@@ -19,8 +19,8 @@ from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1
 from qat.compiler.transform_passes import PostProcessingSanitisation
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
-from qat.ir.pass_base import InvokerMixin, MetricsManager, PassManager, QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.pass_base import InvokerMixin, MetricsManager, PassManager
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -41,10 +41,10 @@ from qat.runtime.executables import AcquireDataStruct
 
 class WaveformV1Emitter(InvokerMixin):
     def __init__(self, model: QuantumHardwareModel):
-        """
-        Code generation for backends that only require the explicit waveforms.
+        """Code generation for backends that only require the explicit waveforms.
 
-        The emitter is used to convert :class:`QatIR` into a :class:`WaveformV1Executable`.
+        The emitter is used to convert IR as a :class:`InstructionBuilder` into a
+        :class:`WaveformV1Executable`.
 
         :param QuantumHardwareModel model: As the emitter is used to generate code for some
             targeted backend. The hardware model is needed for context-aware compilation.
@@ -53,13 +53,12 @@ class WaveformV1Emitter(InvokerMixin):
 
     def emit(
         self,
-        ir: QatIR,
+        ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         upconvert: bool = True,
     ) -> WaveformV1Executable:
-        """
-        Compiles :class:`QatIR` into a :class:`WaveformV1Executable`.
+        """Compiles :class:`InstructionBuilder` into a :class:`WaveformV1Executable`.
 
         Translates pulse instructions into explicit waveforms at the required times, and
         combines them across pulse channels to give a composite waveform on the necessary
@@ -68,7 +67,6 @@ class WaveformV1Emitter(InvokerMixin):
         """
         res_mgr = res_mgr if res_mgr else ResultManager()
         met_mgr = met_mgr if met_mgr else MetricsManager()
-        ir = self._validate_input_ir(ir)
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
         triage_res: TriageResult = res_mgr.lookup_by_type(TriageResult)
         timeline_res: TimelineAnalysisResult = res_mgr.lookup_by_type(
@@ -89,7 +87,7 @@ class WaveformV1Emitter(InvokerMixin):
 
         # TODO: adjust the existing validation/transformation Repeat passes, or add an
         # analysis pass to determine the repeats?
-        repeat = [inst for inst in ir.value.instructions if isinstance(inst, Repeat)][0]
+        repeat = [inst for inst in ir.instructions if isinstance(inst, Repeat)][0]
         returns = []
         for _return in triage_res.returns:
             returns.extend(_return.variables)
@@ -121,14 +119,6 @@ class WaveformV1Emitter(InvokerMixin):
             | TimelineAnalysis()
             | IntermediateFrequencyAnalysis(self.model)
         )
-
-    def _validate_input_ir(self, ir):
-        if isinstance(ir, InstructionBuilder):
-            return QatIR(ir)
-        if isinstance(ir, QatIR):
-            if isinstance(ir.value, InstructionBuilder):
-                return ir
-        raise ValueError(f"Expected InstructionBuilder, got {type(ir).__name__}")
 
     @staticmethod
     def create_pulse_channel_buffer(
@@ -221,8 +211,7 @@ class WaveformV1Emitter(InvokerMixin):
 class WaveformContext:
 
     def __init__(self, pulse_channel: PulseChannel, total_duration: int):
-        """
-        Used for waveform code generation for a particular pulse channel.
+        """Used for waveform code generation for a particular pulse channel.
 
         This can be considered to be the dynamical state of a pulse channel which evolves as
         the circuit progresses.

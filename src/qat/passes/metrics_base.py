@@ -13,7 +13,11 @@ snake_cased_flags = [
 
 
 class MetricsManager(BaseModel):
-    """Pydantic version based on qat.purr.compiler.metrics.py elements."""
+    """Stores useful intermediary metrics that are generated during compilation, such as an
+    optimised circuit or the instruction count.
+
+    Pydantic version based on :mod:`qat.purr.compiler.metrics` elements.
+    """
 
     enabled_metrics: Optional[MetricsType] = Field(
         default=MetricsType.Default, repr=False, exclude=True
@@ -32,15 +36,20 @@ class MetricsManager(BaseModel):
             )
         return value
 
-    def __init__(
-        self, enabled_metrics: Optional[MetricsType] = MetricsType.Default, **kwargs
-    ):
+    def __init__(self, enabled_metrics: MetricsType = MetricsType.Default, **kwargs):
+        """
+        :param enabled_metrics: Which metrics to enable? Default,
+            :attr:`MetricsType.Default.`"""
+
         super().__init__(enabled_metrics=enabled_metrics, **kwargs)
 
-    def enable(self, enabled_metrics: MetricsType, overwrite=False):
-        """
-        Enable these sets of metrics for collection. If overwrite is True then the
-        passed-in values will overwrite existing ones.
+    def enable(self, enabled_metrics: MetricsType, overwrite: bool = False):
+        """Enable these sets of metrics for collection.
+
+        :param enabled_metrics: Which metrics to enable? Default,
+            :attr:`MetricsType.Default`.
+        :param overwrite: If true, overwrite these metrics with a new collection.
+            If false, just enable them in the current collection. Default, true.
         """
         if enabled_metrics is None:
             return
@@ -50,12 +59,15 @@ class MetricsManager(BaseModel):
         else:
             self.enabled_metrics = self.enabled_metrics | enabled_metrics
 
-    def enable_metrics(self, enabled_metrics=None, overwrite=True):
-        """
-        Enables the set of metrics in the current collection. If overwrite is set to
-        true, or there are no compilation metrics it'll create a new collection, if
-        overwrite is false it'll enable these metrics in the currently-active
-        collection.
+    def enable_metrics(
+        self, enabled_metrics: MetricsType = MetricsType.Default, overwrite: bool = True
+    ):
+        """Enables the set of metrics in the current collection.
+
+        :param enabled_metrics: Which metrics to enable? Default,
+            :attr:`MetricsType.Default`.
+        :param overwrite: If true, overwrite these metrics with a new collection.
+            If false, just enable them in the current collection. Default, true.
         """
         if enabled_metrics is None:
             # log.warning("Attempted to enable metrics with no value. Defaulting.")

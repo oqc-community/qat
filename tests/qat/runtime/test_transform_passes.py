@@ -5,7 +5,6 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.waveform_v1 import EchoEngine, WaveformV1Emitter
 from qat.ir.measure import PostProcessing
-from qat.ir.pass_base import QatIR
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
@@ -52,10 +51,7 @@ class TestPostProcessingTransform:
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )
-        # TODO: remove QatIR after pipeline changes
-        result = QatIR(mock_readout)
-        PostProcessingTransform().run(result, package=package)
-        result = result.value
+        result = PostProcessingTransform().run(mock_readout, package=package)
         assert len(result) == 1
         assert "test" in result
         assert np.shape((result["test"])) == (1000,)
@@ -84,10 +80,7 @@ class TestPostProcessingTransform:
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )
-        # TODO: remove QatIR after pipeline changes
-        result = QatIR(mock_readout)
-        PostProcessingTransform().run(result, package=package)
-        result = result.value
+        result = PostProcessingTransform().run(mock_readout, package=package)
         assert len(result) == 1
         assert "test" in result
         assert np.shape((result["test"])) == (1000,)
@@ -103,9 +96,8 @@ class TestInlineResultsProcessingTransform:
         builder.results_processing("test", InlineResultsProcessing.Program)
         package = WaveformV1Emitter(model).emit(builder)
         engine = EchoEngine()
-        results = QatIR(engine.execute(package))
+        results = engine.execute(package)
         InlineResultsProcessingTransform().run(results, package=package)
-        results = results.value
         assert isinstance(results["test"], int)
 
     def test_run_results_processing_with_experiment(self):
@@ -116,9 +108,8 @@ class TestInlineResultsProcessingTransform:
         builder.results_processing("test", InlineResultsProcessing.Experiment)
         package = WaveformV1Emitter(model).emit(builder)
         engine = EchoEngine()
-        results = QatIR(engine.execute(package))
+        results = engine.execute(package)
         InlineResultsProcessingTransform().run(results, package=package)
-        results = results.value
         assert isinstance(results["test"], np.ndarray)
         assert len(results["test"]) == 254
 
@@ -134,8 +125,7 @@ class TestAssignResultsTransform:
         builder.returns("q0")
         package = WaveformV1Emitter(model).emit(builder)
         engine = EchoEngine()
-        results = QatIR(engine.execute(package))
-        AssignResultsTransform().run(results, package=package)
-        results = results.value
+        results = engine.execute(package)
+        results = AssignResultsTransform().run(results, package=package)
         assert "q0" in results
         assert "q1" not in results

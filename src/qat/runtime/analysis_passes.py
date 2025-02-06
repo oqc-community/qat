@@ -6,8 +6,8 @@ from typing import Dict, List, Union
 
 from compiler_config.config import CompilerConfig
 
-from qat.ir.pass_base import AnalysisPass, QatIR
-from qat.ir.result_base import ResultInfoMixin, ResultManager
+from qat.passes.pass_base import AnalysisPass
+from qat.passes.result_base import ResultInfoMixin, ResultManager
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -24,18 +24,15 @@ class CalibrationAnalysisResult(ResultInfoMixin):
 class CalibrationAnalysis(AnalysisPass):
     def run(
         self,
-        ir: QatIR,
+        ir: InstructionBuilder,
         res_mgr: ResultManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
     ):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         cal_blocks = [find_calibration(arg) for arg in compiler_config.active_calibrations]
         res_mgr.add(CalibrationAnalysisResult(cal_blocks))
+        return ir
 
 
 @dataclass
@@ -44,19 +41,16 @@ class IndexMappingResult(ResultInfoMixin):
 
 
 class IndexMappingAnalysis(AnalysisPass):
-    """
-    Determines a mapping from classical bit registers to qubits.
+    """Determines a mapping from classical bit registers to qubits.
 
     Searches through the acquires of the package and determines their associated qubit.
     Also looks for classical registers of the form :code:`<clreg_name>[<clreg_index>]`.
 
-    Supports both :class:`Executable` packages and :class:`QatIR`.
+    Supports both :class:`Executable` packages and :class:`InstructionBuilder`.
     """
 
     def __init__(self, model: QuantumHardwareModel):
-        """
-        :param QuantumHardwareModel: The hardware model.
-        """
+        """:param model: The hardware model is needed for the qubit mapping."""
         # TODO: searching for classical registers feels a little shaky. Guessing there are
         # changes to make at a higher level to faciliate improvements here.
         # TODO: support with pydantic instructions and hardware.
@@ -67,15 +61,17 @@ class IndexMappingAnalysis(AnalysisPass):
 
     def run(
         self,
-        _: QatIR,
+        acquisitions: Dict[str, any],
         res_mgr: ResultManager,
         *args,
-        package: Union[QatIR, Executable],
+        package: Union[InstructionBuilder, Executable],
         **kwargs,
     ):
         """
-        :param Executable package: The executable program containing the results-processing
-            information.
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param res_mgr: The results manager to save the mapping.
+        :param package: The executable program containing the results-processing
+            information should be passed as a keyword argument.
         """
         # Determine a mapping from output variable - > qubit index.
         if isinstance(package, Executable):
@@ -92,6 +88,7 @@ class IndexMappingAnalysis(AnalysisPass):
                 var_to_qubit_map[result.group(2)] = var_to_qubit_map.pop(var)
 
         res_mgr.add(IndexMappingResult(mapping=var_to_qubit_map))
+        return acquisitions
 
     @staticmethod
     def var_to_physical_channel_executable(package: Executable) -> Dict[str, str]:
@@ -102,9 +99,9 @@ class IndexMappingAnalysis(AnalysisPass):
         return mapping
 
     @staticmethod
-    def var_to_physical_channel_qat_ir(package: QatIR) -> Dict[str, str]:
+    def var_to_physical_channel_qat_ir(package: InstructionBuilder) -> Dict[str, str]:
         mapping: Dict[str, str] = {}
-        for instruction in package.value.instructions:
+        for instruction in package.instructions:
             if not isinstance(instruction, Acquire):
                 continue
             mapping[instruction.output_variable] = instruction.channel.physical_channel_id

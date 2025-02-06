@@ -2,9 +2,10 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from typing import Optional
 
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import PassManager, QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.metrics_base import MetricsManager
+from qat.passes.pass_base import PassManager
+from qat.passes.result_base import ResultManager
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.runtime import BaseRuntime
 
@@ -23,10 +24,11 @@ class LegacyRuntime(BaseRuntime):
     ):
         """
         :param QuantumExecutionEngine engine: The execution engine for a target backend.
-        :param results_pipeline: Optionally provided a pipeline for results processing. If not
-            provided, a default pipeline is provided.
+        :param results_pipeline: Optionally provided a pipeline for results processing. If
+            not provided, a default pipeline is provided.
         :type results_pipeline: PassManager, optional
-        :param bool startup_engine: Instruct the engine to connect to the backend on startup?
+        :param bool startup_engine: Instruct the engine to connect to the backend on
+            startup?
         """
         if not isinstance(engine, QuantumExecutionEngine):
             raise ValueError(
@@ -45,19 +47,16 @@ class LegacyRuntime(BaseRuntime):
 
     def execute(
         self,
-        package: QatIR,
+        package: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         **kwargs,
     ):
-        """
-        Fully execute QatIR against the hardware using a legacy execution engines.
+        """Fully execute QatIR against the hardware using a legacy execution engines.
 
-        :param QatIR package: The program as QatIR.
+        :param package: The program as an instruction builder.
         :param res_mgr: Optionally provide a results manager to save pass information.
-        :type res_mgr: ResultManager, optional
         :param met_mgr: Optionally provide a metric manager to save pass information.
-        :type met_mgr: MetricsManager, optional
         :returns: Execution results.
         """
 
@@ -66,9 +65,8 @@ class LegacyRuntime(BaseRuntime):
         if met_mgr == None:
             met_mgr = MetricsManager()
 
-        results = self.engine.execute(package.value.instructions)
+        acquisitions = self.engine.execute(package.instructions)
 
-        # TODO: Remove QatIR with changes to pass manager
-        results = QatIR(results)
-        self.results_pipeline.run(results, res_mgr, met_mgr, package=package, **kwargs)
-        return results.value
+        return self.results_pipeline.run(
+            acquisitions, res_mgr, met_mgr, package=package, **kwargs
+        )

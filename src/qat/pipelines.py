@@ -9,7 +9,7 @@ from qat.compiler.transform_passes import (
     PostProcessingSanitisation,
 )
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
-from qat.ir.pass_base import PassManager
+from qat.passes.pass_base import PassManager
 from qat.runtime import LegacyRuntime, NativeEngine, SimpleRuntime
 from qat.runtime.analysis_passes import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.transform_passes import (

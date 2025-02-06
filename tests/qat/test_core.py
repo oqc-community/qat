@@ -506,7 +506,7 @@ class TestQatEchoPipelines:
 
         purr_results, _ = self.core.execute(ir, pipeline="legacy")
         echo_results, _ = self.core.execute(package, pipeline="new")
-
         assert purr_results.keys() == echo_results.keys()
+
         for key in purr_results.keys():
             assert purr_results[key] == echo_results[key]

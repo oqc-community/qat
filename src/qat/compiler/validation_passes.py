@@ -6,8 +6,8 @@ from typing import List
 import numpy as np
 
 from qat import qatconfig
-from qat.ir.pass_base import QatIR, ValidationPass
-from qat.ir.result_base import ResultManager
+from qat.passes.pass_base import ValidationPass
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
@@ -26,32 +26,29 @@ from qat.purr.compiler.instructions import (
 
 
 class InstructionValidation(ValidationPass):
-    """
-    Extracted from QuantumExecutionEngine.validate()
+    """Validates instructions against the hardware.
+
+    Extracted from :mod:`qat.purr.compiler.execution.QuantumExecutionEngine.validate`.
     """
 
-    def __init__(
-        self,
-        engine: QuantumExecutionEngine,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    def __init__(self, engine: QuantumExecutionEngine, *args, **kwargs):
+        """
+        :param engine: The engine contains information about the hardware, such as
+            instruction limits.
+        """
         self.engine = engine
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
-        instruction_length = len(builder.instructions)
+        instruction_length = len(ir.instructions)
         if instruction_length > self.engine.max_instruction_len:
             raise ValueError(
                 f"Program too large to be run in a single block on current hardware. "
                 f"{instruction_length} instructions."
             )
 
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, Acquire) and not inst.channel.acquire_allowed:
                 raise ValueError(
                     f"Cannot perform an acquire on the physical channel with id "
@@ -74,7 +71,7 @@ class InstructionValidation(ValidationPass):
                         iter(
                             [
                                 sw.variables[duration.name]
-                                for sw in builder.instructions
+                                for sw in ir.instructions
                                 if isinstance(sw, Sweep)
                                 and duration.name in sw.variables.keys()
                             ]
@@ -86,12 +83,17 @@ class InstructionValidation(ValidationPass):
                                 f"Max Waveform width is {MaxPulseLength} s "
                                 f"given: {values} s"
                             )
+        return ir
 
 
 class ReadoutValidation(ValidationPass):
+    """Validates that there are no mid-circuit measurements, and that the post-processing
+    instructions do not have an invalid sequence.
+
+    Extracted from :meth:`qat.purr.backends.live.LiveDeviceEngine.validate`.
     """
-    Extracted from LiveDeviceEngine.validate()
-    """
+
+    # TODO: break this down into smaller passes!
 
     def __init__(
         self,
@@ -99,22 +101,22 @@ class ReadoutValidation(ValidationPass):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        """
+        :param hardware: The hardware model is needed to check for mid-circuit measurments.
+        """
         self.hardware = hardware
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         model = self.hardware
 
         if not isinstance(model, LiveHardwareModel):
-            return
+            return ir
 
         consumed_qubits: List[str] = []
         chanbits_map = {}
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, PostProcessing):
                 if (
                     inst.acquire.mode == AcquireMode.SCOPE
@@ -169,8 +171,9 @@ class ReadoutValidation(ValidationPass):
                         raise ValueError(
                             "Mid-circuit measurements currently unable to be used."
                         )
+        return ir
 
 
 class QasmValidation(ValidationPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         pass

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 from compiler_config.config import (
@@ -10,8 +10,8 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
-from qat.ir.pass_base import QatIR, TransformPass
-from qat.ir.result_base import ResultManager
+from qat.passes.pass_base import TransformPass
+from qat.passes.result_base import ResultManager
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import is_generated_name
@@ -22,8 +22,7 @@ from qat.runtime.results_processing import binary_average, binary_count, numpy_a
 
 
 class PostProcessingTransform(TransformPass):
-    """
-    Uses the post-processing instructions from the executable package to process the
+    """Uses the post-processing instructions from the executable package to process the
     results from the engine.
 
     The backend will return the results in a format that depends on the specified
@@ -36,45 +35,41 @@ class PostProcessingTransform(TransformPass):
     :mod:`qat.purr.compiler.execution`.
     """
 
-    def run(self, results: QatIR, *args, package: Executable, **kwargs):
-        """Run the pass.
-
-        :param QatIR results: Results to be processed.
-        :param Executable package: The executable program containing post-processing
-            information.
+    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        # TODO: Change argument from QatIR with changes to the pass manager (maybe its own
-        # object?)
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param package: The executable program containing the results-processing
+            information should be passed as a keyword argument.
+        """
 
-        results = results.value
         for acquire in package.acquires:
-            response = results[acquire.output_variable]
+            response = acquisitions[acquire.output_variable]
 
             # Starting from all axes, we iterate through each post-processing, keeping track
             # of what axes remain as we go
             response_axes = get_axis_map(acquire.mode, response)
             for pp in package.post_processing.get(acquire.output_variable, []):
                 response, response_axes = apply_post_processing(response, pp, response_axes)
-            results[acquire.output_variable] = response
+            acquisitions[acquire.output_variable] = response
+
+        return acquisitions
 
 
 class InlineResultsProcessingTransform(TransformPass):
-    """
-    Uses :class:`InlineResultsProcessing` instructions from the executable package to format
-    the acquired results in the desired format.
+    """Uses :class:`InlineResultsProcessing` instructions from the executable package to
+    format the acquired results in the desired format.
     """
 
-    def run(self, results: QatIR, *args, package: Executable, **kwargs):
+    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        :param QatIR results: Results to be processed.
-        :param Executable package: The executable program containing the results-processing
-            information.
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param package: The executable program containing the results-processing
+            information should be passed as a keyword argument.
         """
-        # TODO: change argument type from QatIR
         # TODO: clean up imported utility
-        results = results.value
-        for output_variable in results:
-            target_values = results[output_variable]
+
+        for output_variable in acquisitions:
+            target_values = acquisitions[output_variable]
 
             # TODO: ResultProcessing sanitisation and validation passes
             rp = package.results_processing.get(
@@ -83,8 +78,8 @@ class InlineResultsProcessingTransform(TransformPass):
 
             if InlineResultsProcessing.Raw in rp and InlineResultsProcessing.Binary in rp:
                 raise ValueError(
-                    f"Raw and Binary processing attempted to be applied to {output_variable}. "
-                    "Only one should be selected."
+                    "Raw and Binary processing attempted to be applied to "
+                    f"{output_variable}. Only one should be selected."
                 )
 
             # Strip numpy arrays if we're set to do so.
@@ -95,26 +90,28 @@ class InlineResultsProcessingTransform(TransformPass):
             if InlineResultsProcessing.Binary in rp:
                 target_values = binary_average(target_values)
 
-            results[output_variable] = target_values
+            acquisitions[output_variable] = target_values
+
+        return acquisitions
 
 
 class AssignResultsTransform(TransformPass):
-    """
-    Extracted from :meth:`purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
+    """Processes :class:`Assign` instructions.
 
     As assigns are classical instructions they are not processed as a part of the quantum
     execution (right now). Read through the results dictionary and perform the assigns
     directly, return the results.
+
+    Extracted from :meth:`purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
     """
 
-    def run(self, results: QatIR, *args, package: Executable, **kwargs):
+    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        :param QatIR results: Results to be processed.
-        :param Executable package: The executable program containing the results-processing
-            information.
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param package: The executable program containing the results-processing
+            information should be passed as a keyword argument.
         """
 
-        # TODO: change argument type from QatIR
         # TODO: refactor
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
@@ -127,43 +124,41 @@ class AssignResultsTransform(TransformPass):
             else:
                 return value
 
-        res = results.value
-        assigns = dict(res)
+        assigns = dict(acquisitions)
         for assign in package.assigns:
             assigns[assign.name] = recurse_arrays(assigns, assign.value)
-        results.value = {key: assigns[key] for key in package.returns}
+        return {key: assigns[key] for key in package.returns}
 
 
 class ResultTransform(TransformPass):
-    """Extracted from legacy QuantumRuntime._transform_results()."""
+    """Transform the raw results into the format that we've been asked to provide. Look at
+    individual transformation documentation for descriptions on what they do.
+
+    Extracted from :meth:`qat.purr.compiler.runtime.QuantumRuntime._transform_results`.
+    """
 
     def run(
-        self,
-        ir: QatIR,
-        *args,
-        compiler_config: CompilerConfig,
-        **kwargs,
+        self, acquisitions: Dict[str, any], *args, compiler_config: CompilerConfig, **kwargs
     ):
         """
-        Transform the raw results into the format that we've been asked to provide. Look
-        at individual transformation documentation for descriptions on what they do.
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param compiler_config: The compiler config is needed to know how to process the
+            results, and should be provided as a keyword argument.
         """
-        # TODO: Consider the suggested implementation of a results type.
+        # TODO: should the needed information in the compiler config be processed (in a
+        # compilation pass) so that its not here. My opinion is that the compiler config
+        # shouldn't make it to runtime.
 
         format_flags = (
             compiler_config.results_format or ResultsFormatting.DynamicStructureReturn
         )
         repeats = compiler_config.repeats or 1000
 
-        results = ir.value
-
-        if len(results) == 0:
-            ir.value = []
-            return
+        if len(acquisitions) == 0:
+            return []
 
         def simplify_results(simplify_target):
-            """
-            To facilitate backwards compatability and being able to run low-level
+            """To facilitate backwards compatability and being able to run low-level
             experiments alongside quantum programs we make some assumptions based upon
             form of the results.
 
@@ -187,7 +182,9 @@ class ResultTransform(TransformPass):
                 return simplify_target
 
         if ResultsFormatting.BinaryCount in format_flags:
-            results = {key: binary_count(val, repeats) for key, val in results.items()}
+            acquisitions = {
+                key: binary_count(val, repeats) for key, val in acquisitions.items()
+            }
 
         def squash_binary(value):
             if isinstance(value, int):
@@ -196,49 +193,60 @@ class ResultTransform(TransformPass):
                 return "".join([str(val) for val in value])
 
         if ResultsFormatting.SquashBinaryResultArrays in format_flags:
-            results = {key: squash_binary(val) for key, val in results.items()}
+            acquisitions = {key: squash_binary(val) for key, val in acquisitions.items()}
 
         # Dynamic structure return is an ease-of-use flag to strip things that you know
         # your use-case won't use, such as variable names and nested lists.
         if ResultsFormatting.DynamicStructureReturn in format_flags:
-            results = simplify_results(results)
-
-        ir.value = results
+            acquisitions = simplify_results(acquisitions)
+        return acquisitions
 
 
 class ErrorMitigation(TransformPass):
-    """Extracted from legacy QuantumRuntime._apply_error_mitigation()."""
+    """Applies readout error mitigation to the results.
+
+    Extracted from :meth:`qat.purr.compiler.runtime.QuantumRuntime._apply_error_mitigation`.
+    """
 
     def __init__(self, hardware_model: QuantumHardwareModel):
+        """
+        :param hardware_model: The hardware model contains the error mitigation properties.
+        """
         self.hardware_model = hardware_model
 
     def run(
         self,
-        ir: QatIR,
+        acquisitions: Dict[str, any],
         res_mgr: ResultManager,
         *args,
         compiler_config: CompilerConfig,
         **kwargs,
     ):
-
+        """
+        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param res_mgr: The results manager is needed to look up the qubit-to-variable
+            mapping.
+        :param compiler_config: The compiler config is needed to know how to apply error
+            mitigaiton, and should be provided as a keyword argument.
+        """
         error_mitigation = compiler_config.error_mitigation
 
         if error_mitigation is None or error_mitigation == ErrorMitigationConfig.Empty:
-            return
+            return acquisitions
 
         mapping = res_mgr.lookup_by_type(IndexMappingResult).mapping
-        results = ir.value
 
         # TODO: add support for multiple registers
         # TODO: reconsider results length
-        if len(results) > 1:
+        if len(acquisitions) > 1:
             raise ValueError(
-                "Cannot have multiple registers in conjunction with readout error mitigation."
+                "Cannot have multiple registers in conjunction with readout error "
+                "mitigation."
             )
 
         for mitigator in get_readout_mitigation(error_mitigation):
-            new_result = mitigator.apply_error_mitigation(
-                results, mapping, self.hardware_model
+            new_acquisitions = mitigator.apply_error_mitigation(
+                acquisitions, mapping, self.hardware_model
             )
-            results[mitigator.name] = new_result
-        ir.value = results  # TODO: new results object
+            acquisitions[mitigator.name] = new_acquisitions
+        return acquisitions

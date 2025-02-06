@@ -17,9 +17,8 @@ from qat.backend.validation_passes import (
     NoMultipleAcquiresValidation,
     PydHardwareConfigValidity,
 )
-from qat.ir.pass_base import QatIR
-from qat.ir.result_base import ResultManager
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import Pulse, PulseShapeType
 
@@ -32,18 +31,17 @@ class TestValidationPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
-        ir = QatIR(builder)
 
-        NCOFrequencyVariability().run(ir, res_mgr, model)
+        NCOFrequencyVariability().run(builder, res_mgr, model)
 
         channel = next(iter(model.pulse_channels.values()))
         channel.fixed_if = True
 
         with pytest.raises(ValueError):
-            NCOFrequencyVariability().run(ir, res_mgr, model)
+            NCOFrequencyVariability().run(builder, res_mgr, model)
 
         channel.fixed_if = False
-        NCOFrequencyVariability().run(ir, res_mgr, model)
+        NCOFrequencyVariability().run(builder, res_mgr, model)
 
 
 class TestFrequencyValidation:
@@ -85,7 +83,7 @@ class TestFrequencyValidation:
         self.set_frequency_range(channel, 1e9, 1e9)
         builder = self.model.create_builder()
         builder.frequency_shift(channel, freq)
-        FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+        FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("freq", [-1e9, 1e9])
     def test_raises_value_error_when_freq_shift_out_of_range(self, freq):
@@ -94,7 +92,7 @@ class TestFrequencyValidation:
         builder = self.model.create_builder()
         builder.frequency_shift(channel, freq)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+            FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("freq", [-2e8, 2e8])
     def test_moves_out_and_in_raises_value_error(self, freq):
@@ -104,7 +102,7 @@ class TestFrequencyValidation:
         builder.frequency_shift(channel, freq)
         builder.frequency_shift(channel, -freq)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+            FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_no_value_error_for_two_channels_same_physical_channel(self, sign):
@@ -120,7 +118,7 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[0], sign * 3e8)
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4e8)
-        FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+        FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_same_physical_channel(self, sign):
@@ -137,7 +135,7 @@ class TestFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 5e8)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+            FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_no_value_error_for_two_channels_different_physical_channel(self, sign):
@@ -149,7 +147,7 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[1], sign * 1e8)
         builder.frequency_shift(channels[0], sign * 3e8)
         builder.frequency_shift(channels[1], sign * 4e8)
-        FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+        FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_different_physical_channel(self, sign):
@@ -162,7 +160,7 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[0], sign * 7e8)
         builder.frequency_shift(channels[1], sign * 4e8)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+            FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     def test_fixed_if_raises_not_implemented_error(self):
         channels = self.get_two_pulse_channels_from_different_physical_channels()
@@ -171,14 +169,14 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[0], 1e8)
         builder.frequency_shift(channels[1], 1e8)
         with pytest.raises(NotImplementedError):
-            FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+            FrequencyValidation(self.model).run(builder, self.res_mgr)
 
     def test_fixed_if_does_not_affect_other_channel(self):
         channels = self.get_two_pulse_channels_from_different_physical_channels()
         builder = self.model.create_builder()
         channels[0].fixed_if = True
         builder.frequency_shift(channels[1], 1e8)
-        FrequencyValidation(self.model).run(QatIR(builder), self.res_mgr)
+        FrequencyValidation(self.model).run(builder, self.res_mgr)
 
 
 class TestNoAcquireWeightsValidation:
@@ -193,7 +191,7 @@ class TestNoAcquireWeightsValidation:
             channel, delay=0.0, filter=Pulse(channel, PulseShapeType.SQUARE, 1e-6)
         )
         with pytest.raises(NotImplementedError):
-            NoAcquireWeightsValidation().run(QatIR(builder), res_mgr)
+            NoAcquireWeightsValidation().run(builder, res_mgr)
 
 
 class TestNoMultipleAcquiresValidation:
@@ -207,12 +205,12 @@ class TestNoMultipleAcquiresValidation:
         builder.acquire(channel, delay=0.0)
 
         # Test should run as there is only one acquire
-        NoMultipleAcquiresValidation().run(QatIR(builder), res_mgr)
+        NoMultipleAcquiresValidation().run(builder, res_mgr)
 
         # Add another acquire and test it breaks it
         builder.acquire(channel, delay=0.0)
         with pytest.raises(NotImplementedError):
-            NoMultipleAcquiresValidation().run(QatIR(builder), res_mgr)
+            NoMultipleAcquiresValidation().run(builder, res_mgr)
 
     def test_multiple_acquires_that_share_physical_channel_raises_error(self):
         model = get_default_echo_hardware()
@@ -226,7 +224,7 @@ class TestNoMultipleAcquiresValidation:
         builder.acquire(acquire_channel, delay=0.0)
         builder.acquire(measure_channel, delay=0.0)
         with pytest.raises(NotImplementedError):
-            NoMultipleAcquiresValidation().run(QatIR(builder), res_mgr)
+            NoMultipleAcquiresValidation().run(builder, res_mgr)
 
 
 # Test passes for the Pydantic hardware model.
@@ -237,7 +235,7 @@ class TestPydHardwareConfigValidity:
     def test_max_shot_limit_exceeded(self):
         hw_model = generate_hw_model(n_qubits=8)
         comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT + 1)
-        ir = QatIR("test")
+        ir = "test"
         res_mgr = ResultManager()
 
         with pytest.raises(ValueError):
@@ -256,7 +254,7 @@ class TestPydHardwareConfigValidity:
             error_mitigation=ErrorMitigationConfig.LinearMitigation,
             results_format=QuantumResultsFormat().binary_count(),
         )
-        ir = QatIR("test")
+        ir = "test"
         res_mgr = ResultManager()
 
         # Error mitigation not enabled in hw model.

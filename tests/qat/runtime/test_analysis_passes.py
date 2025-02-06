@@ -2,8 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.ir.measure import AcquireMode
-from qat.ir.pass_base import QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.runtime.analysis_passes import IndexMappingAnalysis, IndexMappingResult
 from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
@@ -19,8 +18,7 @@ class TestIndexMappingAnalysis:
         builder.acquire(chan1, output_variable="test0", delay=0.0)
         builder.acquire(chan1, output_variable="test1", delay=0.0)
         builder.acquire(chan2, output_variable="test2", delay=0.0)
-        ir = QatIR(builder)
-        return model, ir
+        return model, builder
 
     def create_executable(self):
         model = get_default_echo_hardware(2)

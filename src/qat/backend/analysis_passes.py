@@ -12,8 +12,8 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.graph import ControlFlowGraph
-from qat.ir.pass_base import AnalysisPass, QatIR, ResultManager
-from qat.ir.result_base import ResultInfoMixin
+from qat.passes.pass_base import AnalysisPass, ResultManager
+from qat.passes.result_base import ResultInfoMixin
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
@@ -58,22 +58,23 @@ class TriageResult(ResultInfoMixin):
 
 
 class TriagePass(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    """
+    Builds a view of instructions per quantum target AOT.
+
+    Builds selections of instructions useful for subsequent analysis/transform passes, for
+    code generation, and post-playback steps.
+
+    This is equivalent to the :class:`QatFile` and simplifies the duration timeline creation
+    in the legacy code.
+    """
+
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        Builds a view of instructions per quantum target AOT.
-        Builds selections of instructions useful for subsequent analysis/transform passes,
-        for code generation, and post-playback steps.
-
-        This is equivalent to the QatFile and simplifies the duration timeline creation in
-        legacy code.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         targets = set()
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, QuantumInstruction):
                 if isinstance(inst, PostProcessing):
                     for qt in inst.quantum_targets:
@@ -86,7 +87,7 @@ class TriagePass(AnalysisPass):
 
         active_targets = set()
         result = TriageResult()
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             # Dissect by target
             if isinstance(inst, QuantumInstruction):
                 if isinstance(inst, Synchronize):
@@ -150,6 +151,8 @@ class TriagePass(AnalysisPass):
 
         res_mgr.add(result)
 
+        return ir
+
 
 @dataclass
 class ScopingResult:
@@ -191,15 +194,28 @@ class BindingResult(ResultInfoMixin):
 
 
 class BindingPass(AnalysisPass):
+    """
+    Builds binding of variables, instructions, and a view of variables from/to scopes.
+
+    Variables are implicitly declared in sweep instructions and are ultimately read from
+    quantum instructions. Thus, every iteration variable is associated to all the scopes it
+    is declared in.
+
+    Values of the iteration variable are abstract and don't mean anything. In this pass, we
+    only extract  the bound and associate it to the name variable. Further analysis is
+    required on read sites to make sure their usage is consistent and meaningful.
+    """
+
     @staticmethod
     def extract_iter_bound(value: Union[List, np.ndarray]):
         """
-        Given a sequence of numbers (typically having been generated from np.linspace()), figure out
-        if the numbers are linearly/evenly spaced, in which case returns an IterBound instance holding
-        the start, step, end, and count of the numbers in the array, or else fail.
+        Given a sequence of numbers (typically having been generated from
+        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced,
+        in which case returns an IterBound instance holding the start, step, end, and count
+        of the numbers in the array, or else fail.
 
-        In the future, we might be interested in relaxing this condition and return "interpolated"
-        evenly spaced approximation of the input sequence.
+        In the future, we might be interested in relaxing this condition and return
+        "interpolated" evenly spaced approximation of the input sequence.
         """
 
         if value is None:
@@ -226,21 +242,11 @@ class BindingPass(AnalysisPass):
 
         return IterBound(start, step, end, count)
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        Builds binding of variables, instructions, and a view of variables from/to scopes.
-
-        Variables are implicitly declared in sweep instructions and are ultimately read from quantum
-        instructions. Thus, every iteration variable is associated to all the scopes it is declared in.
-
-        Values of the iteration variable are abstract and don't mean anything. In this pass, we only extract
-        the bound and associate it to the name variable. Further analysis is required on read sites to make
-        sure their usage is consistent and meaningful.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
@@ -385,9 +391,33 @@ class BindingPass(AnalysisPass):
                 )
 
         res_mgr.add(result)
+        return ir
 
 
 class TILegalisationPass(AnalysisPass):
+    """
+    An instruction is legal if it has a direct equivalent in the programming model
+    implemented by the control stack. The notion of "legal" is highly determined by the
+    hardware features of the control stack as well as its programming model. Control stacks
+    such as Qblox have a direct ISA-level representation for basic RF instructions such as
+    frequency and phase manipulation, arithmetic instructions such as add,  and branching
+    instructions such as jump.
+
+    This pass performs target-independent legalisation. The goal here is to understand how
+    variables are used and legalise their bounds. Furthermore, analysis in this pass is
+    fundamentally based on QAT semantics and must be kept target-agnostic so that it can be
+    reused among backends.
+
+    Particularly in QAT:
+    #. A sweep instruction is illegal because it specifies unclear iteration semantics.
+    #. Device updates/assigns in general are illegal because they are bound to a sweep
+       instruction via a variable. In fact, a variable (implicitly defined by a Sweep
+       instruction) remains obscure until a "read" (usually on the instruction builder or on
+       the hardware model) (typically from a DeviceUpdate instruction) is encountered where
+       its intent becomes clear. We say that a DeviceUpdate carries meaning for the variable
+       and materialises its intention.
+    """
+
     @staticmethod
     def decompose_freq(frequency: float, target: PulseChannel):
         if target.fixed_if:  # NCO freq constant
@@ -451,30 +481,11 @@ class TILegalisationPass(AnalysisPass):
                 f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
             )
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        An instruction is legal if it has a direct equivalent in the programming model implemented by the control
-        stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
-        as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
-        RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
-        and branching instructions such as jump.
-
-        This pass performs target-independent legalisation. The goal here is to understand how variables
-        are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-        semantics and must be kept target-agnostic so that it can be reused among backends.
-
-        Particularly in QAT:
-            1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-            2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
-        via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
-        until a "read" (usually on the instruction builder or on the hardware model) (typically from
-        a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
-        carries meaning for the variable and materialises its intention.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
@@ -499,6 +510,7 @@ class TILegalisationPass(AnalysisPass):
 
             # TODO: the proper way is to produce a new result and invalidate the old one
             binding_result.iter_bound_results[target] = legal_bound_result
+        return ir
 
 
 @dataclass
@@ -507,14 +519,16 @@ class CFGResult(ResultInfoMixin):
 
 
 class CFGPass(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
+        """
 
         result = CFGResult()
-        self._build_cfg(builder, result.cfg)
+        self._build_cfg(ir, result.cfg)
         res_mgr.add(result)
+        return ir
 
     def _build_cfg(self, builder: InstructionBuilder, cfg: ControlFlowGraph):
         """
@@ -619,7 +633,7 @@ class LifetimePass(AnalysisPass):
     With this in mind, this pass spits out a colored interference graph that will be used by the code generator.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         pass
 
 
@@ -631,8 +645,7 @@ class TimelineAnalysisResult(ResultInfoMixin):
 
 
 class TimelineAnalysis(AnalysisPass):
-    """
-    Analyses the durations and timings of instructions for backends that do not natively
+    """Analyses the durations and timings of instructions for backends that do not natively
     support synchronization across channels.
 
     During code generation for a given backend, it is often the case that we need to know the
@@ -647,10 +660,10 @@ class TimelineAnalysis(AnalysisPass):
     non-synchronize instructions, and then iteratively adapting for each :class:`Synchronize`.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
-        :param ResultManager res_mgr: The result manager to store the analysis results.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
         """
 
         triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
@@ -663,12 +676,12 @@ class TimelineAnalysis(AnalysisPass):
         }
 
         res_mgr.add(result)
+        return ir
 
     def calculate_non_sync_durations(self, triage_results: TriageResult):
-        """
-        Calculates the durations for each instruction that is not a synchronize. Durations
-        are rounded to be integer multiples of pulse channel sample times.
-        """
+        """Calculates the durations for each instruction that is not a synchronize.
+        Durations are rounded to be integer multiples of pulse channel sample times."""
+
         target_map = triage_results.target_map
         durations = {}
         for channel in target_map:
@@ -691,10 +704,8 @@ class TimelineAnalysis(AnalysisPass):
     def calculate_sync_durations(
         self, triage_results: TriageResult, durations: Dict[PulseChannel, List[float]]
     ):
-        """
-        Using the durations from all instructions that are not synchronize, this will
-        incrementely determine the time for each sweep for each targeted pulse channel.
-        """
+        """Using the durations from all instructions that are not synchronize, this will
+        incrementely determine the time for each sweep for each targeted pulse channel."""
         syncs = triage_results.syncs
         for sync in syncs:
             current_durations = {
@@ -709,10 +720,8 @@ class TimelineAnalysis(AnalysisPass):
 
     @staticmethod
     def _round_durations_with_samples(channel: PhysicalChannel, durations: List[float]):
-        """
-        The time given by an instruction must be in integer multiples of pulse channel
-        sample times. This function returns durations as the next largest multiple.
-        """
+        """The time given by an instruction must be in integer multiples of pulse channel
+        sample times. This function returns durations as the next largest multiple."""
 
         block_numbers = np.ceil(np.round(durations / channel.block_time, decimals=4))
         return block_numbers * channel.block_time
@@ -748,17 +757,17 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
         """
         Instantiate the pass with a hardware model.
 
-        :param QuantumHardwareModel model: The hardware model.
+        :param model: The hardware model.
         """
 
         # TODO: determine if this pass should be split into an analysis and validation
         # pass.
         self.model = model
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
-        :param QatIR ir: The :class:`InstructionBuilder` wrapped in :class:`QatIR`.
-        :param ResultManager res_mgr: The result manager to store the analysis results.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
         """
 
         triage_results: TriageResult = res_mgr.lookup_by_type(TriageResult)
@@ -792,3 +801,4 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
                     )
 
         res_mgr.add(IntermediateFrequencyResult(frequencies=baseband_freqs))
+        return ir

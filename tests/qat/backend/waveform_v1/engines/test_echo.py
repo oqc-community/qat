@@ -7,7 +7,6 @@ import pytest
 
 from qat.backend.waveform_v1 import EchoEngine
 from qat.backend.waveform_v1.codegen import WaveformV1Emitter
-from qat.ir.pass_base import QatIR
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode
 
@@ -34,7 +33,7 @@ class TestEchoEngine:
             delay=measure_acquire["delay"],
             time=measure_acquire["width"],
         )
-        package = WaveformV1Emitter(model).emit(QatIR(builder))
+        package = WaveformV1Emitter(model).emit(builder)
 
         # Test the shapes and values match up
         engine = EchoEngine()
@@ -86,7 +85,7 @@ class TestEchoEngine:
             delay=measure_acquire["delay"],
             time=2 * measure_acquire["width"],
         )
-        package = WaveformV1Emitter(model).emit(QatIR(builder))
+        package = WaveformV1Emitter(model).emit(builder)
 
         # Test the shapes and values match up
         engine = EchoEngine()
@@ -134,7 +133,7 @@ class TestEchoEngine:
                 delay=measure_acquire["delay"],
                 time=measure_acquire["width"],
             )
-        package = WaveformV1Emitter(model).emit(QatIR(builder))
+        package = WaveformV1Emitter(model).emit(builder)
 
         # Test the shapes and values match up
         engine = EchoEngine()

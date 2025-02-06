@@ -2,38 +2,13 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
 import pytest
-from compiler_config.config import CompilerConfig
 
 from qat.backend.waveform_v1.codegen import WaveformV1Emitter, WaveformV1Executable
-from qat.compiler.analysis_passes import InputAnalysis
-from qat.compiler.transform_passes import Parse
-from qat.ir.pass_base import QatIR, ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import CrossResonancePulse
 
-from tests.qat.qasm_utils import get_qasm2
-
 
 class TestWaveformV1Emitter:
-
-    def test_input_validation(self):
-        model = get_default_echo_hardware()
-        emitter = WaveformV1Emitter(model)
-
-        # Test cases that shouldn't work
-        qasm = get_qasm2("ecr.qasm")
-        with pytest.raises(ValueError):
-            emitter.emit(qasm)
-        ir = QatIR(qasm)
-        with pytest.raises(ValueError):
-            emitter.emit(ir)
-
-        # Test cases that should work
-        res_mgr = ResultManager()
-        InputAnalysis().run(ir, res_mgr)
-        Parse(model).run(ir, res_mgr, compiler_config=CompilerConfig())
-        emitter.emit(ir)
-        emitter.emit(ir.value)
 
     def test_frequency_shift_raises_value_error_when_outside_allowed_range(self):
         # Set the maximum frequency so that we can trigger the error
@@ -42,10 +17,9 @@ class TestWaveformV1Emitter:
         pc.physical_channel.pulse_channel_max_frequency = pc.frequency + 1e8
         builder = model.create_builder()
         builder.frequency_shift(pc, 2e8)
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
         with pytest.raises(ValueError):
-            emitter.emit(ir)
+            emitter.emit(builder)
 
     def test_frequency_shift_raises_value_error_when_on_fixed_IF(self):
         # Fix the IR on a channel
@@ -54,10 +28,9 @@ class TestWaveformV1Emitter:
         pc.fixed_if = True
         builder = model.create_builder()
         builder.frequency_shift(pc, 1e8)
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
         with pytest.raises(NotImplementedError):
-            emitter.emit(ir)
+            emitter.emit(builder)
 
     def test_if_pass_raises_value_error(self):
         # Fix the IR on two pulse channels that share a physical channel, with diff freqs
@@ -75,9 +48,8 @@ class TestWaveformV1Emitter:
         builder.X(pulse_channels[0])
 
         # this should work as the second channel has no action
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
-        emitter.emit(ir)
+        emitter.emit(builder)
 
         # now add an instruction to the second channel, and check it raises an error...
         builder.add(
@@ -85,27 +57,24 @@ class TestWaveformV1Emitter:
                 pulse_channels[1], **model.get_qubit(0).pulse_hw_zx_pi_4["Q1"]
             )
         )
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
         with pytest.raises(ValueError):
-            emitter.emit(ir)
+            emitter.emit(builder)
 
     def test_repeats_when_given(self):
         model = get_default_echo_hardware()
         builder = model.create_builder()
         builder.repeat(512, 1e-4)
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
-        executable = emitter.emit(ir)
+        executable = emitter.emit(builder)
         assert executable.shots == 512
         assert executable.repetition_time == 1e-4
 
     def test_repeats_when_not_given(self):
         model = get_default_echo_hardware()
         builder = model.create_builder()
-        ir = QatIR(builder)
         emitter = WaveformV1Emitter(model)
-        executable = emitter.emit(ir)
+        executable = emitter.emit(builder)
         assert executable.shots == model.default_repeat_count
         assert executable.repetition_time == model.default_repetition_period
 

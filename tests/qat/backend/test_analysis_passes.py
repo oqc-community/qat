@@ -25,8 +25,7 @@ from qat.backend.analysis_passes import (
 from qat.backend.graph import ControlFlowGraph
 from qat.backend.transform_passes import ReturnSanitisation, ScopeSanitisation
 from qat.backend.validation_passes import ReturnSanitisationValidation
-from qat.ir.pass_base import QatIR
-from qat.ir.result_base import ResultManager
+from qat.passes.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -52,10 +51,9 @@ class TestAnalysisPasses:
         builder = resonator_spect(model, [index])
 
         res_mgr = ResultManager()
-        ir = QatIR(builder)
-        ReturnSanitisation().run(ir, res_mgr)
-        ReturnSanitisationValidation().run(ir, res_mgr)
-        TriagePass().run(ir, res_mgr)
+        ReturnSanitisation().run(builder, res_mgr)
+        ReturnSanitisationValidation().run(builder, res_mgr)
+        TriagePass().run(builder, res_mgr)
         result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         assert result
         assert result.sweeps
@@ -114,7 +112,6 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
         res_mgr = ResultManager()
-        ir = QatIR(builder)
 
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
         end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
@@ -126,9 +123,9 @@ class TestAnalysisPasses:
         assert len(end_repeats) == 0
 
         with pytest.raises(ValueError):
-            BindingPass().run(ir, res_mgr)
+            BindingPass().run(builder, res_mgr)
 
-        ScopeSanitisation().run(ir, res_mgr)
+        ScopeSanitisation().run(builder, res_mgr)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
         end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
         repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
@@ -138,8 +135,8 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 1
 
-        TriagePass().run(ir, res_mgr)
-        BindingPass().run(ir, res_mgr)
+        TriagePass().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
@@ -213,16 +210,15 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
-        ir = QatIR(builder)
 
-        ScopeSanitisation().run(ir, res_mgr)
-        TriagePass().run(ir, res_mgr)
-        BindingPass().run(ir, res_mgr)
+        ScopeSanitisation().run(builder, res_mgr)
+        TriagePass().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        TILegalisationPass().run(ir, res_mgr)
+        TILegalisationPass().run(builder, res_mgr)
 
         legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
@@ -260,10 +256,9 @@ class TestAnalysisPasses:
         model = get_default_echo_hardware()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
-        ir = QatIR(builder)
 
-        ScopeSanitisation().run(ir, res_mgr)
-        CFGPass().run(ir, res_mgr)
+        ScopeSanitisation().run(builder, res_mgr)
+        CFGPass().run(builder, res_mgr)
         result: CFGResult = res_mgr.lookup_by_type(CFGResult)
         assert result.cfg
         assert result.cfg is not ControlFlowGraph()
@@ -292,8 +287,7 @@ class TestTimelineAnalysis:
                 }
             )
         )
-        ir = QatIR("Not needed")
-        TimelineAnalysis().run(ir, res_mgr)
+        TimelineAnalysis().run(None, res_mgr)
         res = res_mgr.lookup_by_type(TimelineAnalysisResult)
 
         # check the results are as expected
@@ -325,8 +319,7 @@ class TestTimelineAnalysis:
         # execute the timeline pass
         res_mgr = ResultManager()
         res_mgr.add(TriageResult(target_map=target_map, syncs=[syncs]))
-        ir = QatIR("Not needed")
-        TimelineAnalysis().run(ir, res_mgr)
+        TimelineAnalysis().run(None, res_mgr)
         res = res_mgr.lookup_by_type(TimelineAnalysisResult)
 
         # check the results are as expected
@@ -360,24 +353,23 @@ class TestIntermediateFrequencyAnalysis:
                 }
             )
         )
-        ir = QatIR("Not needed")
 
         # run the pass: should pass
-        IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+        IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
         # fix IF for one channel: should pass
         pulse_channel_1.fixed_if = True
-        IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+        IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
         # fix IF for one channel: should pass
         pulse_channel_1.fixed_if = False
         pulse_channel_2.fixed_if = True
-        IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+        IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
         # fix IF for both channels: should fail
         pulse_channel_1.fixed_if = True
         with pytest.raises(ValueError):
-            IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+            IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
     def test_same_frequencies_with_fixed_if_passes(self):
         model = get_default_echo_hardware()
@@ -401,10 +393,9 @@ class TestIntermediateFrequencyAnalysis:
                 }
             )
         )
-        ir = QatIR("Not needed")
 
         # run the pass
-        IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+        IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
     def test_fixed_if_returns_frequencies(self):
         model = get_default_echo_hardware()
@@ -429,10 +420,9 @@ class TestIntermediateFrequencyAnalysis:
                 }
             )
         )
-        ir = QatIR("Not needed")
 
         # run the pass
-        IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
+        IntermediateFrequencyAnalysis(model).run(None, res_mgr)
         res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
         assert pulse_channel_1.physical_channel in res.frequencies
         assert pulse_channel_2.physical_channel not in res.frequencies

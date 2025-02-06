@@ -4,10 +4,11 @@ from dataclasses import dataclass
 
 import pytest
 
-from qat.ir.metrics_base import MetricsManager
-from qat.ir.pass_base import AnalysisPass, PassManager, QatIR, TransformPass, ValidationPass
-from qat.ir.result_base import ResultInfoMixin, ResultManager
+from qat.passes.metrics_base import MetricsManager
+from qat.passes.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
+from qat.passes.result_base import ResultInfoMixin, ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction, Repeat, Sweep
 
 from tests.qat.utils.builder_nuggets import resonator_spect
@@ -23,26 +24,32 @@ class DummyResult(ResultInfoMixin):
 
 
 class DummyAnalysis(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         result = DummyResult()
         result.num_instructions = len(builder.instructions)
         res_mgr.add(result)
+        return builder
 
 
 class DummyValidation(ValidationPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        for inst in ir.value.instructions:
+    def run(self, builder: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        for inst in builder.instructions:
             if not isinstance(inst, Instruction):
                 raise ValueError(f"{inst} is not an valid instruction")
+        return builder
 
 
 class DummyTransform(TransformPass):
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        builder: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
         builder.instructions = builder.instructions[::-1]
+        return builder
 
 
 def test_pass_manager():
@@ -50,18 +57,16 @@ def test_pass_manager():
     builder = resonator_spect(model)
     res_mgr = ResultManager()
     met_mgr = MetricsManager()
-    ir = QatIR(builder)
     pipline = PassManager() | DummyValidation() | DummyTransform() | DummyAnalysis()
 
     # Add an invalid instruction
     assert not isinstance(InvalidInstruction(), Instruction)
     builder.add(InvalidInstruction())
     with pytest.raises(ValueError):
-        pipline.run(ir, res_mgr, met_mgr)
+        pipline.run(builder, res_mgr, met_mgr)
 
     builder = resonator_spect(model)
-    ir = QatIR(builder)
-    pipline.run(ir, res_mgr, met_mgr)
+    pipline.run(builder, res_mgr, met_mgr)
 
     # Get the analysis result
     dummy_result: DummyResult = res_mgr.lookup_by_type(DummyResult)

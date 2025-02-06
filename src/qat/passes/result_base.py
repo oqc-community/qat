@@ -10,20 +10,18 @@ log = get_default_logger()
 
 
 class ResultConcept(ABC):
-    """
-    Base class describing the abstraction of an analysis result.
+    """Base class describing the abstraction of an analysis result.
 
-    See ResultManager.
+    See :class:`ResultManager`.
     """
 
     pass
 
 
 class ResultModel(ResultConcept):
-    """
-    Wrapper for any result object typically produced by an analysis pass.
+    """Wrapper for any result object typically produced by an analysis pass.
 
-    See ResultManager.
+    See :class:`ResultManager`.
     """
 
     def __init__(self, res_obj):
@@ -39,10 +37,10 @@ class ResultModel(ResultConcept):
 
 
 class ResultInfoMixin(ABC):
-    """
-    Base mixin specifying result identification mechanism. A result has an id, name, and value.
+    """Base mixin specifying result identification mechanism. A result has an :attr:`id`,
+    :attr:`name`, and :attr:`value`.
 
-    See ResultManager.
+    See :class:`ResultManager`.
     """
 
     def id(self):
@@ -56,20 +54,21 @@ class ResultInfoMixin(ABC):
 
 
 class ResultManager:
-    """
-    Represents a collection of analysis results with caching and aggregation capabilities.
+    """Represents a collection of analysis results with caching and aggregation
+    capabilities.
 
-    Passes that merely compute analyses on the IR must not invalidate prior results. Passes that mutate
-    any IR units are likely to invalidate predecessor results.
+    Passes that merely compute analyses on the IR must not invalidate prior results. Passes
+    that mutate any IR units are likely to invalidate predecessor results.
 
-    An analysis pass can produce 1 or more result objects. There is in theory a duality between passes
-    and the results they produce.
+    An analysis pass can produce 1 or more result objects. There is in theory a duality
+    between passes and the results they produce.
 
-    To keep things simple, the ResultManager is just a set of analysis results. Result identification is also
-    kept trivial where a UUID is used internally. Proper identification mechanism will be called upon
-    once we feel the need for a more sophisticated PassManager.
+    To keep things simple, the ResultManager is just a set of analysis results. Result
+    identification is also kept trivial where a UUID is used internally. Proper
+    identification mechanism will be called upon once we feel the need for a more
+    sophisticated :class:`PassManager`.
 
-    See PassManager.
+    See :class:`PassManager`.
     """
 
     def __init__(self):
@@ -80,16 +79,28 @@ class ResultManager:
         return self._results
 
     def update(self, other_res_mgr):
+        """Add the results from another results manager.
+
+        :param ResultManager other_res_mgr:
+        """
         if not isinstance(other_res_mgr, ResultManager):
             raise ValueError(
                 f"Invalid type, expected {ResultManager}, but got {type(other_res_mgr)}"
             )
         self._results.update(other_res_mgr._results)
 
-    def add(self, res_obj):
+    def add(self, res_obj: ResultInfoMixin):
+        """Add a results object to the manager.
+
+        :param res_obj: Results from a pass, typically an analysis pass.
+        """
         self._results.add(ResultModel(res_obj))
 
     def lookup_by_type(self, ty: type):
+        """Find a result by its type.
+
+        :param ty: The results type.
+        """
         found = [res.value for res in self._results if isinstance(res.value, ty)]
         if not found:
             raise ValueError(f"Could not find any results instances of {ty}")
