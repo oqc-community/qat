@@ -20,6 +20,7 @@ from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
+from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.metrics_base import MetricsManager
 from qat.ir.pass_base import QatIR, TransformPass
 from qat.ir.result_base import ResultInfoMixin, ResultManager
@@ -210,6 +211,30 @@ class InputOptimisation(TransformPass):
                 pass
                 # log.warning(f"Qiskit transpile pass failed. {str(ex)}")
 
+        return qasm_string
+
+
+class PydInputOptimisation(InputOptimisation):
+    def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
+        """Extracted from DefaultOptimizers.optimize_qasm"""
+
+        if (
+            isinstance(optimizations, Tket)
+            and optimizations.tket_optimizations != TketOptimizations.Empty
+        ):
+            qasm_string = run_pyd_tket_optimizations(
+                qasm_string, optimizations.tket_optimizations, self.hardware
+            )
+
+        if (
+            isinstance(optimizations, Qiskit)
+            and optimizations.qiskit_optimizations != QiskitOptimizations.Empty
+        ):
+            qasm_string = self.run_qiskit_optimization(
+                qasm_string, optimizations.qiskit_optimizations
+            )
+
+        met_mgr.record_metric(MetricsType.OptimizedCircuit, qasm_string)
         return qasm_string
 
 
