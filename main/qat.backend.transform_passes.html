@@ -78,9 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -90,6 +87,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.passes.html">qat.passes package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -244,28 +247,38 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.DesugaringPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DesugaringPass</span></span><a class="headerlink" href="#qat.backend.transform_passes.DesugaringPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Transforms syntactic sugars and implicit effects. Not that it applies here, but a classical
-example of a sugar syntax is the ternary expression “cond ? val1 : val2” which is nothing more
-than an if else in disguise.</p>
-<p>The goal of this pass is to desugar any syntactic and semantic sugars. One of these sugars
-is iteration constructs such as Sweep and Repeat.</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Transforms syntactic sugars and implicit effects. Not that it applies here, but a
+classical example of a sugar syntax is the ternary expression
+<code class="code docutils literal notranslate"><span class="pre">&quot;cond</span> <span class="pre">?</span> <span class="pre">val1</span> <span class="pre">:</span> <span class="pre">val2&quot;</span></code> which is nothing more than an if else in disguise.</p>
+<p>The goal of this pass is to desugar any syntactic and semantic sugars. One of these
+sugars is iteration constructs such as <code class="xref py py-class docutils literal notranslate"><span class="pre">Sweep</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.DesugaringPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.DesugaringPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.transform_passes.DesugaringPass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.transform_passes.DesugaringPass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.RepeatSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.RepeatSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Fixes repeat instructions if any with default values from the HW model.
+Adds a repeat instructions if none is found.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.RepeatSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.RepeatSanitisation.run" title="Link to this definition"></a></dt>
-<dd><p>Fixes repeat instructions if any with default values from the HW model
-Adds a repeat instructions if none is found</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.RepeatSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.transform_passes.RepeatSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.transform_passes.RepeatSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -273,25 +286,37 @@ Adds a repeat instructions if none is found</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.ReturnSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.backend.transform_passes.ReturnSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Squashes all <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code> instructions into a single one. Adds a <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code>
+with all acquisitions if none is found.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.ReturnSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.ReturnSanitisation.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.ReturnSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.transform_passes.ReturnSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.transform_passes.ReturnSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.ScopeSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.backend.transform_passes.ScopeSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Bubbles up all sweeps and repeats to the beginning of the list.
+Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.</p>
+<p>Intended for legacy existing builders and the relative order of instructions guarantees
+backwards compatibility.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.transform_passes.ScopeSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.ScopeSanitisation.run" title="Link to this definition"></a></dt>
-<dd><p>Bubbles up all sweeps and repeats to the beginning of the list.
-Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.</p>
-<p>Intended for legacy existing builders and the relative order of instructions guarantees backwards
-compatibility.</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.transform_passes.ScopeSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.transform_passes.ScopeSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.transform_passes.ScopeSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

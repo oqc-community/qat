@@ -78,9 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -90,6 +87,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.passes.html">qat.passes package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -244,20 +247,21 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.AssignResultsTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AssignResultsTransform</span></span><a class="headerlink" href="#qat.runtime.transform_passes.AssignResultsTransform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Extracted from <code class="xref py py-meth docutils literal notranslate"><span class="pre">purr.compiler.execution.QuantumExecutionEngine._process_assigns()</span></code>.</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Processes <code class="xref py py-class docutils literal notranslate"><span class="pre">Assign</span></code> instructions.</p>
 <p>As assigns are classical instructions they are not processed as a part of the quantum
 execution (right now). Read through the results dictionary and perform the assigns
 directly, return the results.</p>
+<p>Extracted from <code class="xref py py-meth docutils literal notranslate"><span class="pre">purr.compiler.execution.QuantumExecutionEngine._process_assigns()</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.AssignResultsTransform.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.AssignResultsTransform.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.AssignResultsTransform.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.transform_passes.AssignResultsTransform.run.params.results"></span><strong>results</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.AssignResultsTransform.run.params.results">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – Results to be processed.</p></li>
-<li><p><span class="target" id="qat.runtime.transform_passes.AssignResultsTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.AssignResultsTransform.run.params.package">¶</a> (<a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><em>Executable</em></a>) – The executable program containing the results-processing
-information.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.AssignResultsTransform.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.AssignResultsTransform.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the targeted backend.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.AssignResultsTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.AssignResultsTransform.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The executable program containing the results-processing
+information should be passed as a keyword argument.</p></li>
 </ul>
 </dd>
 </dl>
@@ -268,30 +272,47 @@ information.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.ErrorMitigation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ErrorMitigation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.ErrorMitigation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Extracted from legacy QuantumRuntime._apply_error_mitigation().</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Applies readout error mitigation to the results.</p>
+<p>Extracted from <code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.compiler.runtime.QuantumRuntime._apply_error_mitigation()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.transform_passes.ErrorMitigation.params.hardware_model"></span><strong>hardware_model</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ErrorMitigation.params.hardware_model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model contains the error mitigation properties.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.ErrorMitigation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.ErrorMitigation.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.ErrorMitigation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.transform_passes.ErrorMitigation.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ErrorMitigation.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the targeted backend.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.ErrorMitigation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ErrorMitigation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.passes.result_base.html#qat.passes.result_base.ResultManager" title="qat.passes.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The results manager is needed to look up the qubit-to-variable
+mapping.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.ErrorMitigation.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ErrorMitigation.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler config is needed to know how to apply error
+mitigaiton, and should be provided as a keyword argument.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.InlineResultsProcessingTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InlineResultsProcessingTransform</span></span><a class="headerlink" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Uses <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code> instructions from the executable package to format
-the acquired results in the desired format.</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Uses <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code> instructions from the executable package to
+format the acquired results in the desired format.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.InlineResultsProcessingTransform.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.results"></span><strong>results</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.results">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – Results to be processed.</p></li>
-<li><p><span class="target" id="qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.package">¶</a> (<a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><em>Executable</em></a>) – The executable program containing the results-processing
-information.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the targeted backend.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.InlineResultsProcessingTransform.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The executable program containing the results-processing
+information should be passed as a keyword argument.</p></li>
 </ul>
 </dd>
 </dl>
@@ -302,7 +323,7 @@ information.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.PostProcessingTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingTransform</span></span><a class="headerlink" href="#qat.runtime.transform_passes.PostProcessingTransform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Uses the post-processing instructions from the executable package to process the
 results from the engine.</p>
 <p>The backend will return the results in a format that depends on the specified
@@ -314,14 +335,13 @@ responsibilities taken on by the <code class="xref py py-class docutils literal 
 <a class="reference internal" href="qat.purr.compiler.execution.html#module-qat.purr.compiler.execution" title="qat.purr.compiler.execution"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.purr.compiler.execution</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.PostProcessingTransform.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.PostProcessingTransform.run" title="Link to this definition"></a></dt>
-<dd><p>Run the pass.</p>
-<dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.PostProcessingTransform.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.transform_passes.PostProcessingTransform.run.params.results"></span><strong>results</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.PostProcessingTransform.run.params.results">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – Results to be processed.</p></li>
-<li><p><span class="target" id="qat.runtime.transform_passes.PostProcessingTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.PostProcessingTransform.run.params.package">¶</a> (<a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><em>Executable</em></a>) – The executable program containing post-processing
-information.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.PostProcessingTransform.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.PostProcessingTransform.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the targeted backend.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.PostProcessingTransform.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.PostProcessingTransform.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The executable program containing the results-processing
+information should be passed as a keyword argument.</p></li>
 </ul>
 </dd>
 </dl>
@@ -332,13 +352,22 @@ information.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.ResultTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultTransform</span></span><a class="headerlink" href="#qat.runtime.transform_passes.ResultTransform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass" title="qat.ir.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Extracted from legacy QuantumRuntime._transform_results().</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Transform the raw results into the format that we’ve been asked to provide. Look at
+individual transformation documentation for descriptions on what they do.</p>
+<p>Extracted from <code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.compiler.runtime.QuantumRuntime._transform_results()</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.transform_passes.ResultTransform.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.ResultTransform.run" title="Link to this definition"></a></dt>
-<dd><p>Transform the raw results into the format that we’ve been asked to provide. Look
-at individual transformation documentation for descriptions on what they do.</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.transform_passes.ResultTransform.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.transform_passes.ResultTransform.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ResultTransform.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the targeted backend.</p></li>
+<li><p><span class="target" id="qat.runtime.transform_passes.ResultTransform.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.transform_passes.ResultTransform.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler config is needed to know how to process the
+results, and should be provided as a keyword argument.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

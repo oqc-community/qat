@@ -16,6 +16,7 @@ Subpackages
    qat.compiler
    qat.ir
    qat.model
+   qat.passes
    qat.purr
    qat.runtime
    qat.utils

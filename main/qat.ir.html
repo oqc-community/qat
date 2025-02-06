@@ -78,9 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -90,6 +87,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.passes.html">qat.passes package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -426,88 +429,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.output_variable"><code class="docutils literal notranslate"><span class="pre">PostProcessing.output_variable</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.process_type"><code class="docutils literal notranslate"><span class="pre">PostProcessing.process_type</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.result_needed"><code class="docutils literal notranslate"><span class="pre">PostProcessing.result_needed</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager"><code class="docutils literal notranslate"><span class="pre">MetricsManager</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.are_enabled"><code class="docutils literal notranslate"><span class="pre">MetricsManager.are_enabled()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.as_dict"><code class="docutils literal notranslate"><span class="pre">MetricsManager.as_dict()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enable"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enable()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enable_metrics"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enable_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.enabled_metrics"><code class="docutils literal notranslate"><span class="pre">MetricsManager.enabled_metrics</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.get_metric"><code class="docutils literal notranslate"><span class="pre">MetricsManager.get_metric()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.merge"><code class="docutils literal notranslate"><span class="pre">MetricsManager.merge()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.model_config"><code class="docutils literal notranslate"><span class="pre">MetricsManager.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.optimized_circuit"><code class="docutils literal notranslate"><span class="pre">MetricsManager.optimized_circuit</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.optimized_instruction_count"><code class="docutils literal notranslate"><span class="pre">MetricsManager.optimized_instruction_count</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.record_metric"><code class="docutils literal notranslate"><span class="pre">MetricsManager.record_metric()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.metrics_base.html#qat.ir.metrics_base.MetricsManager.validate_all_fields_exist"><code class="docutils literal notranslate"><span class="pre">MetricsManager.validate_all_fields_exist()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass"><code class="docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.AnalysisPass.run"><code class="docutils literal notranslate"><span class="pre">AnalysisPass.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin"><code class="docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.build_pass_pipeline()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.InvokerMixin.run_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">InvokerMixin.run_pass_pipeline()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept"><code class="docutils literal notranslate"><span class="pre">PassConcept</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassConcept.run"><code class="docutils literal notranslate"><span class="pre">PassConcept.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.id()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">PassInfoMixin.name()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager"><code class="docutils literal notranslate"><span class="pre">PassManager</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.add"><code class="docutils literal notranslate"><span class="pre">PassManager.add()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager.run"><code class="docutils literal notranslate"><span class="pre">PassManager.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel"><code class="docutils literal notranslate"><span class="pre">PassModel</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassModel.run"><code class="docutils literal notranslate"><span class="pre">PassModel.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR"><code class="docutils literal notranslate"><span class="pre">QatIR</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR.value"><code class="docutils literal notranslate"><span class="pre">QatIR.value</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass"><code class="docutils literal notranslate"><span class="pre">TransformPass</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.TransformPass.run"><code class="docutils literal notranslate"><span class="pre">TransformPass.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass"><code class="docutils literal notranslate"><span class="pre">ValidationPass</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass.run"><code class="docutils literal notranslate"><span class="pre">ValidationPass.run()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.get_hardware_model"><code class="docutils literal notranslate"><span class="pre">get_hardware_model()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultConcept"><code class="docutils literal notranslate"><span class="pre">ResultConcept</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.id"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.id()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.name"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.name()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultInfoMixin.value"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin.value()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager"><code class="docutils literal notranslate"><span class="pre">ResultManager</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.add"><code class="docutils literal notranslate"><span class="pre">ResultManager.add()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.lookup_by_type"><code class="docutils literal notranslate"><span class="pre">ResultManager.lookup_by_type()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.results"><code class="docutils literal notranslate"><span class="pre">ResultManager.results</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultManager.update"><code class="docutils literal notranslate"><span class="pre">ResultManager.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultModel"><code class="docutils literal notranslate"><span class="pre">ResultModel</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.result_base.html#qat.ir.result_base.ResultModel.value"><code class="docutils literal notranslate"><span class="pre">ResultModel.value</span></code></a></li>
 </ul>
 </li>
 </ul>

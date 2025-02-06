@@ -15,7 +15,4 @@ Submodules
    qat.ir.instruction_builder
    qat.ir.instructions
    qat.ir.measure
-   qat.ir.metrics_base
-   qat.ir.pass_base
-   qat.ir.result_base
    qat.ir.waveforms

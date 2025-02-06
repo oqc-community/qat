@@ -78,9 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -90,6 +87,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.passes.html">qat.passes package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -244,7 +247,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.FrequencyValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyValidation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.FrequencyValidation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
 <p>This validation pass checks two things:</p>
 <ol class="arabic simple">
 <li><p>Frequency shifts do not move the frequency of a pulse channel outside of its
@@ -255,7 +258,7 @@ physical channel with a pulse channel that has a fixed IF.</p></li>
 <p>Instantiate the pass with a hardware model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.params.model">¶</a> (<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><em>QuantumHardwareModel</em></a>) – The hardware model.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -263,7 +266,7 @@ physical channel with a pulse channel that has a fixed IF.</p></li>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.FrequencyValidation.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.run.params.ir">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> wrapped in <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -271,41 +274,74 @@ physical channel with a pulse channel that has a fixed IF.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_frequency_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqshifts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validates that a pulse channel remains within its allowed frequency range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges.params.targets"></span><strong>targets</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges.params.targets">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span>) – List of pulse channels to validate.</p></li>
+<li><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges.params.freqshifts"></span><strong>freqshifts</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.validate_frequency_ranges.params.freqshifts">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift" title="qat.purr.compiler.instructions.FrequencyShift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyShift</span></code></a>]</span>) – List of frequency shift instructions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.FrequencyValidation.validate_no_freqshifts_on_fixed_if">
 <span class="sig-name descname"><span class="pre">validate_no_freqshifts_on_fixed_if</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.FrequencyValidation.validate_no_freqshifts_on_fixed_if" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validates that frequency shifts do not occur on pulse channels with fixed IFs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.FrequencyValidation.validate_no_freqshifts_on_fixed_if.params.targets"></span><strong>targets</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.FrequencyValidation.validate_no_freqshifts_on_fixed_if.params.targets">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span>) – List of pulse channels to validate.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.HardwareConfigValidity">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareConfigValidity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.HardwareConfigValidity" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Validates the <code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code> against the hardware model.</p>
+<p>Instantiate the pass with a hardware model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.HardwareConfigValidity.params.hardware_model"></span><strong>hardware_model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.HardwareConfigValidity.params.hardware_model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.HardwareConfigValidity.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.HardwareConfigValidity.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.HardwareConfigValidity.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.HardwareConfigValidity.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.HardwareConfigValidity.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The config containing compilation settings provided as a
+keyword argument.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NCOFrequencyVariability">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NCOFrequencyVariability</span></span><a class="headerlink" href="#qat.backend.validation_passes.NCOFrequencyVariability" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NCOFrequencyVariability.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NCOFrequencyVariability.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NCOFrequencyVariability.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.NCOFrequencyVariability.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.NCOFrequencyVariability.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoAcquireWeightsValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoAcquireWeightsValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.NoAcquireWeightsValidation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
 <p>Some backends do not support <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions that contain weights. This
 pass can be used to validate that this is the case.</p>
 <dl class="py method">
@@ -313,7 +349,7 @@ pass can be used to validate that this is the case.</p>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NoAcquireWeightsValidation.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.NoAcquireWeightsValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.NoAcquireWeightsValidation.run.params.ir">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> wrapped in <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.NoAcquireWeightsValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.NoAcquireWeightsValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -323,15 +359,15 @@ pass can be used to validate that this is the case.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoMultipleAcquiresValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoMultipleAcquiresValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
-<p>Some backends do not support multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions on the same channel.
-This validation pass should be used to verify this.</p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Some backends do not support multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions on the same
+channel. This validation pass should be used to verify this.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoMultipleAcquiresValidation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.NoMultipleAcquiresValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation.run.params.ir">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.QatIR" title="qat.ir.pass_base.QatIR"><em>QatIR</em></a>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> wrapped in <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.NoMultipleAcquiresValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -341,10 +377,17 @@ This validation pass should be used to verify this.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.PydHardwareConfigValidity">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydHardwareConfigValidity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.PydHardwareConfigValidity" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Validates the <code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code> against the hardware model.</p>
+<p>Instantiate the pass with a hardware model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.PydHardwareConfigValidity.params.hardware_model"></span><strong>hardware_model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.PydHardwareConfigValidity.params.hardware_model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.PydHardwareConfigValidity.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.PydHardwareConfigValidity.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.PydHardwareConfigValidity.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -352,11 +395,16 @@ This validation pass should be used to verify this.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.RepeatSanitisationValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisationValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.RepeatSanitisationValidation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Checks if the builder has a <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code> instruction and warns if none exists.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.RepeatSanitisationValidation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.RepeatSanitisationValidation.run" title="Link to this definition"></a></dt>
-<dd><p>Checks if the builder has a repeat instruction and warns if none exists.</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.RepeatSanitisationValidation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.RepeatSanitisationValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.RepeatSanitisationValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -364,11 +412,16 @@ This validation pass should be used to verify this.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.ReturnSanitisationValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisationValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.ReturnSanitisationValidation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.ValidationPass" title="qat.ir.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Validates that the IR has a <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code> instruction.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.ReturnSanitisationValidation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.ReturnSanitisationValidation.run" title="Link to this definition"></a></dt>
-<dd><p>Every builder must have a single return instruction</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.ReturnSanitisationValidation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.validation_passes.ReturnSanitisationValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.validation_passes.ReturnSanitisationValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

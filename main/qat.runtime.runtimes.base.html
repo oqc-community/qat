@@ -78,9 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.metrics_base.html">qat.ir.metrics_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.pass_base.html">qat.ir.pass_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.result_base.html">qat.ir.result_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -90,6 +87,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.passes.html">qat.passes package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -257,9 +260,10 @@ hybrid runtimes that take on both compilation and execution responsibilities.</p
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.runtime.runtimes.base.BaseRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.base.BaseRuntime.params.engine">¶</a> (<a class="reference internal" href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine" title="qat.runtime.engines.native.NativeEngine"><em>NativeEngine</em></a>) – The execution engine for a target backend.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.base.BaseRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.base.BaseRuntime.params.results_pipeline">¶</a> (<a class="reference internal" href="qat.ir.pass_base.html#qat.ir.pass_base.PassManager" title="qat.ir.pass_base.PassManager"><em>PassManager</em></a><em>, </em><em>optional</em>) – Optionally provided a pipeline for results processing. If not
-provided, a default pipeline is provided.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.base.BaseRuntime.params.startup_engine"></span><strong>startup_engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.base.BaseRuntime.params.startup_engine">¶</a> (<em>bool</em>) – Instruct the engine to connect to the backend on startup?</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.base.BaseRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.base.BaseRuntime.params.results_pipeline">¶</a> (<a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager" title="qat.passes.pass_base.PassManager"><em>PassManager</em></a><em>, </em><em>optional</em>) – Optionally provided a pipeline for results processing. If
+not provided, a default pipeline is provided.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.base.BaseRuntime.params.startup_engine"></span><strong>startup_engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.base.BaseRuntime.params.startup_engine">¶</a> (<em>bool</em>) – Instruct the engine to connect to the backend on
+startup?</p></li>
 </ul>
 </dd>
 </dl>
