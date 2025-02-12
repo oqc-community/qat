@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 import json
 import os
 from dataclasses import asdict
@@ -120,42 +121,44 @@ class QbloxControlHardware(ControlHardware):
 
     def __init__(
         self,
-        dev_id: str = None,
-        name: str = None,
+        dev_id: str,
+        name: str,
         address: str = None,
         dummy_cfg: Dict = None,
     ):
-        super().__init__(id_=dev_id or os.environ.get("QBLOX_DEV_ID"))
-        self.name = name or os.environ.get("QBLOX_DEV_NAME")
-        self.address = address or os.environ.get("QBLOX_DEV_IP")
+        super().__init__(id_=dev_id)
+        self.name = name
+        self.address = address
         self.dummy_cfg = dummy_cfg
+
         self.dump_sequence = False
         self.plot_packages = False
         self.plot_acquisitions = False
+
         self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
 
-    def allocate_resources(self, packages: List[QbloxPackage]):
-        for pkg in packages:
-            target = pkg.target
-            module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
-            module: Module = self._driver.modules[module_id]
-            allocations = self._resources.setdefault(module, {})
-            if target not in allocations:
-                total = set(target.physical_channel.config.sequencers.keys())
-                allocated = set([seq.seq_idx for seq in allocations.values()])
+    def allocate_resources(self, package: QbloxPackage):
+        target = package.target
+        module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
+        module: Module = self._driver.modules[module_id]
+        allocations = self._resources.setdefault(module, {})
+        sequencer = allocations.get(target, None)
+        if not sequencer:
+            total = set(target.physical_channel.config.sequencers.keys())
+            allocated = set([seq.seq_idx for seq in allocations.values()])
 
-                available = total - allocated
-                if not available:
-                    raise ValueError(f"No more available sequencers on module {module}")
-                sequencer: Sequencer = module.sequencers[next(iter(available))]
-                allocations[target] = sequencer
+            available = total - allocated
+            if not available:
+                raise ValueError(f"No more available sequencers on module {module}")
+            sequencer: Sequencer = module.sequencers[next(iter(available))]
+            allocations[target] = sequencer
 
-        return self._resources
+        return module, sequencer
 
     def _delete_acquisitions(self, sequencer):
         sequencer.delete_acquisition_data(all=True)
 
-    def _prepare_config(self, package: QbloxPackage, sequencer: Sequencer):
+    def configure(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
         if package.target.fixed_if:  # NCO freq constant
             nco_freq = package.target.baseband_if_frequency
             lo_freq = package.target.frequency - nco_freq
@@ -182,7 +185,17 @@ class QbloxControlHardware(ControlHardware):
             pkg_seq_config.square_weight_acq.integration_length
         )
 
-        return qblox_config
+        log.debug(f"Configuring module {module}, sequencer {sequencer}")
+        if module.is_qcm_type:
+            if module.is_rf_type:
+                QcmRfConfigHelper(qblox_config).configure(module, sequencer)
+            else:
+                QcmConfigHelper(qblox_config).configure(module, sequencer)
+        elif module.is_qrm_type:
+            if module.is_rf_type:
+                QrmRfConfigHelper(qblox_config).configure(module, sequencer)
+            else:
+                QrmConfigHelper(qblox_config).configure(module, sequencer)
 
     def _reset_io(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
@@ -219,56 +232,26 @@ class QbloxControlHardware(ControlHardware):
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
 
-    def install(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
-        """
-        Installs and configures the package on the given (module, sequencer) resource.
-        Nominally follows resource allocation, but also serves for adhoc package installations
-        that aren't necessarily tied to any automatic resource allocation.
-        """
-
-        log.debug(f"Configuring module {module}, sequencer {sequencer}")
-        config = self._prepare_config(package, sequencer)
-        if module.is_qcm_type:
-            if module.is_rf_type:
-                QcmRfConfigHelper(config).configure(module, sequencer)
-            else:
-                QcmConfigHelper(config).configure(module, sequencer)
-        elif module.is_qrm_type:
-            if module.is_rf_type:
-                QrmRfConfigHelper(config).configure(module, sequencer)
-            else:
-                QrmConfigHelper(config).configure(module, sequencer)
-
-        sequence = asdict(package.sequence)
-        log.debug(f"Uploading sequence to {module}, sequencer {sequencer}")
-        sequencer.sequence(sequence)
-
-        return module, sequencer
-
-    def set_data(self, qblox_packages: List[QbloxPackage]):
-        self._resources.clear()
-        self.allocate_resources(qblox_packages)
-
+    def set_data(self, packages: List[QbloxPackage]):
         if self.plot_packages:
-            plot_packages(qblox_packages)
+            plot_packages(packages)
+
+        if self.dump_sequence:
+            for pkg in packages:
+                filename = f"schedules/target_{pkg.target.id}_@_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+                with open(filename, "w") as f:
+                    f.write(json.dumps(asdict(pkg.sequence)))
+
+        self._resources.clear()
 
         try:
-            for package in qblox_packages:
-                module, sequencer = next(
-                    (
-                        (m, t2s[package.target])
-                        for m, t2s in self._resources.items()
-                        if m.slot_idx == package.target.physical_channel.slot_idx
-                    )
-                )
-
-                if self.dump_sequence:
-                    filename = f"schedules/target_{package.target.id}_module_{module.slot_idx}_sequencer_{sequencer.seq_idx}_@_{datetime.utcnow().strftime('%m-%d-%Y_%H%M%S')}.json"
-                    os.makedirs(os.path.dirname(filename), exist_ok=True)
-                    with open(filename, "w") as f:
-                        f.write(json.dumps(asdict(package.sequence)))
-
-                self.install(package, module, sequencer)
+            for pkg in packages:
+                module, sequencer = self.allocate_resources(pkg)
+                self.configure(pkg, module, sequencer)
+                sequence = asdict(pkg.sequence)
+                log.debug(f"Uploading sequence to {module}, sequencer {sequencer}")
+                sequencer.sequence(sequence)
         except BaseException as e:
             self._reset_io()
             raise e
@@ -384,13 +367,13 @@ class DummyQbloxControlHardware(QbloxControlHardware):
         sequencer.delete_dummy_scope_acquisition_data()
         sequencer.delete_dummy_binned_acquisition_data()
 
-    def set_data(self, qblox_packages: List[QbloxPackage]):
-        super().set_data(qblox_packages)
+    def set_data(self, packages: List[QbloxPackage]):
+        super().set_data(packages)
 
         # Stage Scope and Acquisition data
         for module, allocations in self._resources.items():
             if module.is_qrm_type:
                 for target, sequencer in allocations.items():
-                    package = next((pkg for pkg in qblox_packages if pkg.target == target))
+                    package = next((pkg for pkg in packages if pkg.target == target))
                     self._setup_dummy_scope_acq_data(module, sequencer, package.sequence)
                     self._setup_dummy_binned_acq_data(module, sequencer, package.sequence)
