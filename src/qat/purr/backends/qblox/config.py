@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List
@@ -144,13 +145,9 @@ class GainConfig:
 
 @dataclass
 class ScopeAcqConfig:
-    sequencer_select: int = None
-    trigger_mode_path0: str = None  # Enum: {‘sequencer’, ‘level’}
-    trigger_mode_path1: str = None  # Enum: {‘sequencer’, ‘level’}
-    trigger_level_path0: float = None
-    trigger_level_path1: float = None
-    avg_mode_en_path0: bool = None
-    avg_mode_en_path1: bool = None
+    trigger_mode: str = None
+    trigger_level: float = None
+    avg_mode_en: bool = None
 
 
 @dataclass
@@ -161,7 +158,9 @@ class ModuleConfig:
     lo: LoConfig = field(default_factory=lambda: LoConfig())
     attenuation: AttConfig = field(default_factory=lambda: AttConfig())
     gain: GainConfig = field(default_factory=lambda: GainConfig())
-    scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
+    scope_acq_seq_idx: int = None
+    i_scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
+    q_scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
 
 
 @dataclass
@@ -311,20 +310,23 @@ class QcmRfConfigHelper(QcmConfigHelper):
 
 
 class QrmConfigHelper(QbloxConfigHelper):
-    def configure(self, module, sequencer):
-        super().configure(module, sequencer)
+    def configure_scope_acq(self, module: Module, config):
+        if config.scope_acq_seq_idx:
+            module.scope_acq_sequencer_select(config.scope_acq_seq_idx)
 
-        # TODO - make these settings dynamic
-        module.scope_acq_sequencer_select(sequencer.seq_idx)
-        module.scope_acq_trigger_mode_path0("sequencer")
-        module.scope_acq_trigger_mode_path1("sequencer")
+        if config.i_scope_acq.trigger_mode:
+            module.scope_acq_trigger_mode_path0(config.i_scope_acq.trigger_mode)
+        if config.i_scope_acq.trigger_level:
+            module.scope_acq_trigger_level_path0(config.i_scope_acq.trigger_level)
+        if config.i_scope_acq.avg_mode_en:
+            module.scope_acq_avg_mode_en_path0(config.i_scope_acq.avg_mode_en)
 
-    def configure_scope_acq(self, module, config):
-        scope_acq = config.scope_acq
-        if scope_acq.avg_mode_en_path0:
-            module.scope_acq_avg_mode_en_path0(scope_acq.avg_mode_en_path0)
-        if scope_acq.avg_mode_en_path1:
-            module.scope_acq_avg_mode_en_path1(scope_acq.avg_mode_en_path1)
+        if config.q_scope_acq.trigger_mode:
+            module.scope_acq_trigger_mode_path1(config.q_scope_acq.trigger_mode)
+        if config.q_scope_acq.trigger_level:
+            module.scope_acq_trigger_level_path1(config.q_scope_acq.trigger_level)
+        if config.q_scope_acq.avg_mode_en:
+            module.scope_acq_avg_mode_en_path1(config.q_scope_acq.avg_mode_en)
 
 
 class QrmRfConfigHelper(QrmConfigHelper):

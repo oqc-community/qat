@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
@@ -497,6 +498,10 @@ class QbloxContext:
         self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
             acquire
         )
+        target.physical_channel.config.module.i_scope_acq.trigger_mode = "sequencer"
+        target.physical_channel.config.module.i_scope_acq.avg_mode_en = True
+        target.physical_channel.config.module.q_scope_acq.trigger_mode = "sequencer"
+        target.physical_channel.config.module.q_scope_acq.avg_mode_en = True
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -913,6 +918,10 @@ class NewQbloxContext:
         self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
             acquire
         )
+        target.physical_channel.config.module.i_scope_acq.trigger_mode = "sequencer"
+        target.physical_channel.config.module.i_scope_acq.avg_mode_en = True
+        target.physical_channel.config.module.q_scope_acq.trigger_mode = "sequencer"
+        target.physical_channel.config.module.q_scope_acq.avg_mode_en = True
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None

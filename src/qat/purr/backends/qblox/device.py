@@ -33,6 +33,7 @@ from qat.purr.compiler.devices import (
     Qubit,
     Resonator,
 )
+from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -155,9 +156,6 @@ class QbloxControlHardware(ControlHardware):
 
         return module, sequencer
 
-    def _delete_acquisitions(self, sequencer):
-        sequencer.delete_acquisition_data(all=True)
-
     def configure(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
         if package.target.fixed_if:  # NCO freq constant
             nco_freq = package.target.baseband_if_frequency
@@ -175,6 +173,9 @@ class QbloxControlHardware(ControlHardware):
             module_config.lo.out1_freq = lo_freq
         if module_config.lo.out0_in0_en:
             module_config.lo.out0_in0_freq = lo_freq
+
+        if module.is_qrm_type:
+            module_config.scope_acq_seq_idx = sequencer.seq_idx
 
         # Sequencer config from the HwM
         hwm_seq_config = qblox_config.sequencers[sequencer.seq_idx]
@@ -260,7 +261,7 @@ class QbloxControlHardware(ControlHardware):
         if not any(self._resources):
             raise ValueError("No resources allocated. Install packages first")
 
-        results = {}
+        results = {AcquireMode.SCOPE: {}, AcquireMode.INTEGRATOR: {}}
         try:
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -281,22 +282,28 @@ class QbloxControlHardware(ControlHardware):
                         sequencer.get_acquisition_status(timeout=60)
                         acquisitions = sequencer.get_acquisitions()
 
-                        for acq_name, acq in acquisitions.items():
+                        for acq_name in acquisitions:
                             sequencer.store_scope_acquisition(acq_name)
 
-                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                            results[acq_name] = (
-                                i + 1j * q
-                            ) / sequencer.integration_length_acq()
-
+                        acquisitions = sequencer.get_acquisitions()  # (re)fetch after store
                         if self.plot_acquisitions:
                             plot_acquisitions(
-                                sequencer.get_acquisitions(),  # (re)fetch after store
+                                acquisitions,
                                 integration_length=sequencer.integration_length_acq(),
                             )
 
-                        self._delete_acquisitions(sequencer)
+                        for acq_name, acq in acquisitions.items():
+                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
+                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
+                            results[AcquireMode.INTEGRATOR][acq_name] = (
+                                i + 1j * q
+                            ) / sequencer.integration_length_acq()
+
+                            i = np.array(acq["acquisition"]["scope"]["path0"]["data"])
+                            q = np.array(acq["acquisition"]["scope"]["path1"]["data"])
+                            results[AcquireMode.SCOPE][acq_name] = i + 1j * q
+
+                        sequencer.delete_acquisition_data(all=True)
         finally:
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -327,21 +334,18 @@ class DummyQbloxControlHardware(QbloxControlHardware):
             dummy_data = reduce(
                 lambda a, b: a + b, [a["data"] for a in sequence.waveforms.values()]
             )
-            dummy_data = [(z, z) for z in dummy_data / np.linalg.norm(dummy_data)]
+            norm = np.linalg.norm(dummy_data)
+            i_val = min(dummy_data) / norm
+            q_val = max(dummy_data) / norm
         else:
             playback_pattern = regex.compile(
                 "set_awg_offs( +)([0-9]+),([0-9]+)\nupd_param( +)([0-9]+)"
             )
             match = next(playback_pattern.finditer(sequence.program))
-            i_steps, q_steps = int(match.group(2)), int(match.group(3))
-            num_samples = int(match.group(5))
-            dummy_data = [
-                (
-                    i_steps / (Constants.MAX_OFFSET_SIZE // 2),
-                    q_steps / (Constants.MAX_OFFSET_SIZE // 2),
-                )
-            ] * num_samples
+            i_val = int(match.group(2)) / (Constants.MAX_OFFSET_SIZE // 2)
+            q_val = int(match.group(3)) / (Constants.MAX_OFFSET_SIZE // 2)
 
+        dummy_data = [(i_val, q_val)] * Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(
             data=dummy_data, out_of_range=(False, False), avg_cnt=(1, 1)
         )

@@ -1,9 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 import numpy as np
 
 from qat.purr.compiler.devices import PulseShapeType
-from qat.purr.compiler.instructions import SweepValue, Variable
+from qat.purr.compiler.instructions import (
+    Acquire,
+    AcquireMode,
+    MeasurePulse,
+    SweepValue,
+    Variable,
+)
 from qat.purr.compiler.runtime import get_builder
 
 
@@ -110,4 +117,38 @@ def t1(model, qubit_indices=None, num_points=None, width=None):
         qubit = model.get_qubit(index)
         builder.measure_mean_z(qubit, output_variable=f"Q{index}")
 
+    return builder
+
+
+def scope_acq(model, qubit_indices=None, do_X=False):
+    qubit_indices = qubit_indices or [0]
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    if do_X:
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+            qubit.get_drive_channel().scale = 1.0e-8 + 0.0j
+
+            builder.add(model.get_gate_X(qubit, np.pi, qubit.get_drive_channel()))
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        measure_pulse = qubit.pulse_measure
+        measure_acquire = qubit.measure_acquire
+        width = (
+            measure_pulse["width"] if measure_acquire["sync"] else measure_acquire["width"]
+        )
+        builder.add(MeasurePulse(qubit.get_measure_channel(), **measure_pulse))
+        builder.add(
+            Acquire(
+                qubit.get_acquire_channel(),
+                output_variable=f"Q{index}",
+                mode=AcquireMode.SCOPE,
+                filter=None,
+                delay=measure_acquire["delay"],
+                time=width,
+            )
+        )
     return builder

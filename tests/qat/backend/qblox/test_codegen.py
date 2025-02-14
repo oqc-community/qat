@@ -41,7 +41,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, t1
+from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, scope_acq, t1
 
 log = get_default_logger()
 
@@ -343,6 +343,18 @@ class TestQbloxEmitter:
                 assert "play" in acquire_pkg.sequence.program
                 assert "set_awg_offs" not in acquire_pkg.sequence.program
                 assert "upd_param" not in acquire_pkg.sequence.program
+
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_scope_acquisition(self, model, qubit_indices):
+        builder = scope_acq(model, qubit_indices)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+        assert len(packages) == len(qubit_indices)
+
+        builder = scope_acq(model, qubit_indices, do_X=True)
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+        assert len(packages) == 2 * len(qubit_indices)
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from typing import Dict, List
 
@@ -134,7 +134,7 @@ class QbloxLiveEngine(LiveDeviceEngine):
                         "Multiple acquisitions are not supported on the same channel in one sweep step"
                     )
                 for aq in aqs:
-                    response = playback_results[aq.output_variable]
+                    response = playback_results[aq.mode][aq.output_variable]
                     response_axis = get_axis_map(aq.mode, response)
                     for pp in package.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(
@@ -204,9 +204,7 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
             with log_duration("QPU returned results in {} seconds."):
                 self.model.control_hardware.set_data(packages)
-                playback_results: Dict[str, np.ndarray] = (
-                    self.model.control_hardware.start_playback(None, None)
-                )
+                playback_results = self.model.control_hardware.start_playback(None, None)
 
                 # Post execution step needs a lot of work
                 # TODO - Robust batching analysis (as a pass !)
@@ -223,7 +221,7 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                 results = {}
                 for t, acquires in acquire_map.items():
                     for acq in acquires:
-                        response = playback_results[acq.output_variable]
+                        response = playback_results[acq.mode][acq.output_variable]
                         response_axis = {}
                         for pp in pp_map[acq.output_variable]:
                             if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:

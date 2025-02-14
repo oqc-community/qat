@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.live import (
     NewQbloxLiveEngine,
     QbloxLiveEngine,
@@ -13,22 +14,23 @@ from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, t1
+from tests.qat.utils.builder_nuggets import qubit_spect, resonator_spect, scope_acq, t1
 
 log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngine:
-    def test_measure_amp_sweep(self, model):
+
+    @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
+    def test_measure_amp_sweep(self, model, amp):
         engine = model.create_engine()
         q0 = model.get_qubit(0)
 
-        for amp in [0.1, 0.2, 0.3]:
-            q0.pulse_measure["amp"] = amp
-            builder = get_builder(model).measure(q0).repeat(10000)
-            results, _ = execute_instructions(engine, builder)
-            assert results is not None
+        q0.pulse_measure["amp"] = amp
+        builder = get_builder(model).measure(q0).repeat(10000)
+        results, _ = execute_instructions(engine, builder)
+        assert results is not None
 
     def test_measure_freq_sweep(self, model):
         engine = model.create_engine()
@@ -226,6 +228,20 @@ class TestQbloxLiveEngine:
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
+
+    def test_scope_acq(self, model):
+        qubit_indices = [0]
+        engine = model.create_engine()
+        builder = scope_acq(model, qubit_indices)
+
+        results, _ = execute_instructions(engine, builder)
+        assert results is not None
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (
+                1,
+                Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+            )
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
