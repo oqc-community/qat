@@ -614,9 +614,7 @@
         <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.auxiliary_qubit">(CrossResonancePulseChannel attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path0">avg_mode_en_path0 (ScopeAcqConfig attribute)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path1">avg_mode_en_path1 (ScopeAcqConfig attribute)</a>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en">avg_mode_en (ScopeAcqConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.awg">awg (SequencerConfig attribute)</a>
 </li>
@@ -1017,8 +1015,6 @@
       <ul>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.configure">(QbloxControlHardware method)</a>
 </li>
-        <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.configure">(QrmConfigHelper method)</a>
-</li>
       </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq">configure_acq() (QrmRfConfigHelper method)</a>
 </li>
@@ -1050,14 +1046,14 @@
       </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_nco">configure_nco() (QbloxConfigHelper method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_offset">configure_offset() (QcmRfConfigHelper method)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_offset">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq">configure_scope_acq() (QrmConfigHelper method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_sequencer">configure_sequencer() (QbloxConfigHelper method)</a>
@@ -2176,6 +2172,8 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.i_scope_acq">i_scope_acq (ModuleConfig attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id">Id (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.id">id (InstrumentModel attribute)</a>
@@ -2332,14 +2330,14 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData.instruction">instruction (PositionData attribute)</a>
 
       <ul>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.instruction">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.INSTRUCTION_VALIDATION">INSTRUCTION_VALIDATION (QatConfig attribute)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock">InstructionBlock (class in qat.ir.instructions)</a>
@@ -4105,6 +4103,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_output">q_output (QRPairModel attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.q_scope_acq">q_scope_acq (ModuleConfig attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_slot_idx">q_slot_idx (QRPairModel attribute)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser">Qasm2Parser (class in qat.purr.integrations.qasm)</a>
@@ -5697,7 +5697,7 @@
 </li>
       <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.ScopingResult.scope2symbols">scope2symbols (ScopingResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ScopingResult.scope2symbols">[1]</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.scope_acq">scope_acq (ModuleConfig attribute)</a>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.scope_acq_seq_idx">scope_acq_seq_idx (ModuleConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig">ScopeAcqConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
@@ -5748,8 +5748,6 @@
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder">SequenceBuilder (class in qat.purr.backends.qblox.ir)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage.sequencer_config">sequencer_config (QbloxPackage attribute)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.sequencer_select">sequencer_select (ScopeAcqConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig">SequencerConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
@@ -6215,13 +6213,9 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.trigger_invert">trigger_invert (ThresholdedAcqConfig attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path0">trigger_level_path0 (ScopeAcqConfig attribute)</a>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level">trigger_level (ScopeAcqConfig attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_level_path1">trigger_level_path1 (ScopeAcqConfig attribute)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path0">trigger_mode_path0 (ScopeAcqConfig attribute)</a>
-</li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode_path1">trigger_mode_path1 (ScopeAcqConfig attribute)</a>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.trigger_mode">trigger_mode (ScopeAcqConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.trigger_threshold_inverts">trigger_threshold_inverts (SequencerConfig attribute)</a>
 </li>
