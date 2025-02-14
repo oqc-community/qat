@@ -186,6 +186,14 @@ class PydSetBase(RootModel[set[V]]):
         else:
             raise NotImplemented(f"Unsupported processing for {self} and {other}.")
 
+    def __and__(self, other: PydSetBase):
+        if isinstance(other, PydSetBase):
+            return self.root.__and__(other.root)
+        elif isinstance(other, set):
+            return self.root.__and__(other)
+        else:
+            raise NotImplemented(f"Unsupported processing for {self} and {other}.")
+
     def __len__(self):
         return self.root.__len__()
 

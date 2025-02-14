@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable
-from typing import Any, List, Literal, Optional
+from typing import Any, List, Literal, Optional, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 from pydantic import Field, field_validator, model_validator
+
+from qat.model.device import QubitId
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
@@ -33,6 +35,14 @@ class Instruction(NoExtraFieldsModel):
     def number_of_instructions(self):
         return 1
 
+    @property
+    def head(self):
+        return self
+
+    @property
+    def tail(self):
+        return self
+
 
 class InstructionBlock(Instruction, Iterable):
     inst: Literal["InstructionBlock"] = "InstructionBlock"
@@ -52,10 +62,23 @@ class InstructionBlock(Instruction, Iterable):
 
     @property
     def number_of_instructions(self):
-        n = 0
-        for instr in self:
-            n += instr.number_of_instructions
-        return n
+        return sum(1 for _ in self)
+
+    @property
+    def head(self):
+        if self.number_of_instructions:
+            return self.instructions[0]
+        raise IndexError(
+            f"Cannot access first element of an empty `{self.__class__.__name__}`."
+        )
+
+    @property
+    def tail(self):
+        if self.number_of_instructions:
+            return self.instructions[-1]
+        raise IndexError(
+            f"Cannot access last element of an empty `{self.__class__.__name__}`."
+        )
 
 
 class Repeat(Instruction):
@@ -257,3 +280,12 @@ class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
     inst: Literal["Reset"] = "Reset"
+    targets: ValidatedSet[str] = Field(max_length=0, default=ValidatedSet[str](set()))
+    qubit_targets: Union[QubitId, set[QubitId]]
+
+    @model_validator(mode="after")
+    def validate_targets(self):
+        if isinstance(self.qubit_targets, int):
+            self.qubit_targets = set({self.qubit_targets})
+
+        return self

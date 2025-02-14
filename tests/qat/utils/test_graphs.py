@@ -78,10 +78,7 @@ class TestToshiko:
 
     @pytest.mark.parametrize("k", [1, 2, 3, 4, 8, 10])
     def test_defective_toshiko(self, k):
-        print(toshiko_edges)
-
         defective_edges = list(random.choices(toshiko_edges, k=len(toshiko_edges) - k))
-        print(defective_edges)
 
         legacy_subgraphs = get_coupling_subgraphs(defective_edges)
         nx_subgraphs_nodes, nx_subgraphs_edges = get_connected_subgraphs(defective_edges)

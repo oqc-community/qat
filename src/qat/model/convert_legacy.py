@@ -29,6 +29,10 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
     logical_connectivity = defaultdict(set)
 
     for qubit in legacy_hw.qubits:
+        # Add topology of qubit
+        coupled_q_indices = [q.index for q in qubit.coupled_qubits]
+        logical_connectivity[qubit.index].update(coupled_q_indices)
+
         # Physical baseband
         phys_bb_q = qubit.physical_channel.baseband
         new_phys_bb_q = PhysicalBaseband(
@@ -65,6 +69,9 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
             phase_iq_offset=phys_channel_r.phase_offset,
             measure_pulse=CalibratablePulse(**qubit.pulse_measure),
         )
+
+        if qubit.measure_acquire["weights"] is None:
+            qubit.measure_acquire["weights"] = []
 
         acquire_pulse_channel = qubit.measure_device.get_pulse_channel(ChannelType.acquire)
         new_acquire_pulse_channel = AcquirePulseChannel(
@@ -153,8 +160,6 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
                     new_cross_resonance_cancellation_pulse_channels[aux_qubit] = (
                         new_crc_pulse_channel
                     )
-
-                logical_connectivity[qubit.index].add(aux_qubit)
 
         new_cross_resonance_pulse_channels = FrozenDict(new_cross_resonance_pulse_channels)
 

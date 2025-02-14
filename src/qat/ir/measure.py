@@ -125,3 +125,11 @@ class MeasureBlock(QuantumInstructionBlock):
         data = super().validate_targets(data, field_name="targets")
         data = super().validate_targets(data, field_name="qubit_targets")
         return data
+
+
+acq_mode_process_axis = {
+    ProcessAxis.SEQUENCE: AcquireMode.INTEGRATOR,
+    ProcessAxis.TIME: AcquireMode.SCOPE,
+    "sequence": AcquireMode.INTEGRATOR,
+    "time": AcquireMode.SCOPE,
+}

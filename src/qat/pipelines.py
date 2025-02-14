@@ -31,6 +31,11 @@ def DefaultCompile(hardware_model):
     )
 
 
+def DefaultPydCompile(hardware_model):
+    pipeline = PassManager()
+    return pipeline | InputAnalysis()
+
+
 def DefaultExecute(hardware_model, engine=None):
     if engine is None:
         engine = hardware_model.create_engine()

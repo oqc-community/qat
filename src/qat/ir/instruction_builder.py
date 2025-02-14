@@ -4,8 +4,10 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import numpy as np
+from compiler_config.config import InlineResultsProcessing
 
 from qat.ir.instructions import (
+    Assign,
     Delay,
     FrequencyShift,
     Instruction,
@@ -14,6 +16,7 @@ from qat.ir.instructions import (
     PhaseShift,
     Repeat,
     Reset,
+    ResultsProcessing,
     Return,
     Synchronize,
 )
@@ -24,9 +27,10 @@ from qat.ir.measure import (
     PostProcessing,
     PostProcessType,
     ProcessAxis,
+    acq_mode_process_axis,
 )
 from qat.ir.waveforms import CustomWaveform, Pulse, PulseType, Waveform
-from qat.model.device import DrivePulseChannel, PulseChannel, Qubit
+from qat.model.device import DrivePulseChannel, PulseChannel, Qubit, QubitId
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
@@ -74,7 +78,7 @@ class InstructionBuilder(ABC):
     def swap(self, target: Qubit, destination: Qubit): ...
 
     def had(self, target: Qubit):
-        return [*self.Z(target), *self.Y(target, theta=np.pi / 2.0)]
+        return self.Z(target).Y(target, theta=np.pi / 2.0)
 
     def SX(self, target: Qubit):
         return self.X(target, theta=np.pi / 2.0)
@@ -129,10 +133,25 @@ class InstructionBuilder(ABC):
 
     def returns(self, variables: list[str] = None):
         """Add return statement."""
+        variables = variables if variables is not None else []
         return self.add(Return(variables=variables))
 
     def reset(self, qubits: Qubit | list[Qubit] | set[Qubit]):
-        return self.add([*Reset(targets=qubits), *PhaseReset(targets=qubits)])
+        if isinstance(qubits, list):
+            qubits = set(qubits)
+        elif isinstance(qubits, Qubit):
+            qubits = set({qubits})
+
+        qubit_ids = {self._qubit_index_by_uuid[qubit.uuid] for qubit in qubits}
+        pc_ids = {pc.uuid for qubit in qubits for pc in qubit.all_pulse_channels}
+
+        return self.add(Reset(qubit_targets=qubit_ids), PhaseReset(targets=pc_ids))
+
+    def assign(self, name: str, value):
+        return self.add(Assign(name=name, value=value))
+
+    def results_processing(self, variable: str, res_format: InlineResultsProcessing):
+        return self.add(ResultsProcessing(variable=variable, results_processing=res_format))
 
     def add(self, *instructions: Instruction, flatten: bool = False):
         """
@@ -140,8 +159,15 @@ class InstructionBuilder(ABC):
         instead of accessing the instructions tree directly as it deals with composite instructions.
         """
         self._ir.add(*instructions, flatten=flatten)
-
         return self
+
+    def __add__(self, other: QuantumInstructionBuilder):
+        if isinstance(other, InstructionBuilder):
+            self.add(other.instructions)
+        else:
+            raise TypeError(
+                "Only another `{self.__class__.__name__}` can be added to this builder."
+            )
 
     @staticmethod
     def constrain(angle: float):
@@ -161,6 +187,10 @@ class InstructionBuilder(ABC):
             return [] if np.isclose(theta, 0) else f(self, target, theta, pulse_channel)
 
         return wrapper
+
+    @property
+    def instructions(self):
+        return self._ir.instructions
 
     @property
     def number_of_instructions(self):
@@ -305,6 +335,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def _hw_Z(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
     ):
+        if theta == 0:
+            return []
+        print(target)
+        print(self._qubit_index_by_uuid)
         # Rotate drive pulse channel of the qubit.
         pulse_channel = pulse_channel or target.pulse_channels.drive
         instr_collection = [PhaseShift(targets=pulse_channel.uuid, phase=theta)]
@@ -449,7 +483,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 qubit, mode=mode, output_variable=output_variable
             )
             duration = max(measure.duration, acquire.delay + acquire.duration)
-            print(measure.duration, acquire.delay + acquire.duration)
             measure_block.add(measure, acquire)
             measure_block.duration = max(measure_block.duration, duration)
 
@@ -463,16 +496,143 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return self.add(measure_block)
 
+    def measure_single_shot_z(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ):
+        """
+        Measure a single qubit along the z-axis.
+
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable:
+        """
+        return (
+            self.measure(target, acq_mode_process_axis[axis], output_variable)
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+            )
+        )
+
+    def measure_single_shot_signal(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ):
+        return (
+            self.measure(target, acq_mode_process_axis[axis], output_variable)
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            )
+        )
+
+    def measure_mean_z(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ):
+        return (
+            self.measure(target, acq_mode_process_axis[axis], output_variable)
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+            )
+        )
+
+    def measure_mean_signal(self, target: Qubit, output_variable: str = None):
+        return (
+            self.measure(
+                target, acq_mode_process_axis[ProcessAxis.SEQUENCE], output_variable
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
+            )
+        )
+
+    def measure_scope_mode(self, target: Qubit, output_variable: str = None):
+        return (
+            self.measure(target, acq_mode_process_axis[ProcessAxis.TIME], output_variable)
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
+            )
+        )
+
+    def measure_single_shot_binned(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ):
+        return (
+            self.measure(target, acq_mode_process_axis[axis], output_variable)
+            .post_processing(
+                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            )
+            .post_processing(
+                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+            )
+            .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
+        )
+
+    def _find_valid_measure_block(self, target_ids: QubitId | set[QubitId]):
+        """
+        Finds the previous :class:`MeasureBlock` where the given qubits are not measured yet.
+
+        :param target_ids: The indices of the qubits to be measured.
+        """
+        for instruction in reversed(self.instructions):
+            if isinstance(instruction, MeasureBlock) and not any(
+                target_ids & instruction.qubit_targets
+            ):
+                instruction.qubit_targets.update(target_ids)
+                return instruction
+        return None
+
     def post_processing(
         self,
-        acquire: Acquire,
-        process_type: PostProcessType,
         target: Qubit,
-        axes: list[ProcessAxis] = None,
+        output_variable: str,
+        process_type: PostProcessType,
+        axes: Union[ProcessAxis, list[ProcessAxis]] = [],
         args=None,
     ):
+        args = args if args is not None else []
+
         # Default the mean z-map args if none supplied.
-        if args is None or not any(args):
+        if not any(args):
             if process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
                 args = target.mean_z_map_args
 
@@ -493,9 +653,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         phys_channel.sample_time,
                     ]
 
+        axes = axes if isinstance(axes, list) else [axes]
+
         return self.add(
             PostProcessing(
-                acquire_mode=acquire.mode, process_type=process_type, axes=axes, args=args
+                output_variable=output_variable,
+                process_type=process_type,
+                axes=axes,
+                args=args,
             )
         )
 
@@ -512,23 +677,28 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         target_id = self._qubit_index_by_uuid[target.uuid]
 
+        if not control.pulse_channels.cross_resonance_channels.get(target_id, None):
+            raise ValueError(
+                f"Qubits {self._qubit_index_by_uuid[control.uuid]} and {target_id} are not coupled."
+            )
+
         pulse_channels = [
-            control.pulse_channels.drive,
-            control.pulse_channels.cross_resonance_channels[target_id],
-            control.pulse_channels.cross_resonance_cancellation_channels[target_id],
-            target.pulse_channels.drive,
+            control.pulse_channels.drive.uuid,
+            control.pulse_channels.cross_resonance_channels[target_id].uuid,
+            control.pulse_channels.cross_resonance_cancellation_channels[target_id].uuid,
+            target.pulse_channels.drive.uuid,
         ]
+        sync_instruction = Synchronize(targets=pulse_channels)
 
-        sync_instruction = Synchronize(pulse_channels)
-        instructions = [sync_instruction]
-        instructions.extend(self._get_ZX(control, target, theta=np.pi / 4.0))
-        instructions.append(sync_instruction)
-        instructions.extend(self._get_X(control, theta=np.pi))
-        instructions.append(sync_instruction)
-        instructions.extend(self._get_ZX(control, target, theta=-np.pi / 4.0))
-        instructions.append(sync_instruction)
-
-        return self.add(*instructions)
+        return (
+            self.add(sync_instruction)
+            .ZX(control, target, theta=np.pi / 4.0)
+            .add(sync_instruction)
+            .X(control, theta=np.pi)
+            .add(sync_instruction)
+            .ZX(control, target, theta=-np.pi / 4.0)
+            .add(sync_instruction)
+        )
 
     def swap(self, target: Qubit, destination: Qubit):
         raise NotImplementedError("Not available on this hardware model.")

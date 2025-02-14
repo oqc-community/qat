@@ -20,6 +20,8 @@ from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
+from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import TransformPass
 from qat.passes.result_base import ResultManager
@@ -320,3 +322,60 @@ class Parse(TransformPass):
             finally:
                 os.remove(fp.name)
         return quantum_builder
+
+
+class PydParse(TransformPass):
+    def __init__(self, hw_model: PydHardwareModel):
+        self.hw_model = hw_model
+
+    def run(
+        self,
+        program: str,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
+        input_results = res_mgr.lookup_by_type(InputAnalysisResult)
+        language = input_results.language
+        builder = QuantumInstructionBuilder(self.hw_model)
+        parser = None
+        if language == Languages.QIR:
+            builder = self.parse_qir(program, compiler_config)
+        elif language == Languages.Qasm2:
+            raise NotImplementedError(f"Language {Languages.Qasm2} not implemented yet.")
+            # parser = CloudQasmParser()
+        elif language == Languages.Qasm3:
+            raise NotImplementedError(f"Language {Languages.Qasm3} not implemented yet.")
+            # parser = Qasm3Parser()
+        if parser is not None:
+            if compiler_config.results_format.format is not None:
+                parser.results_format = compiler_config.results_format.format
+            builder = parser.parse(builder, program)
+        return (
+            QuantumInstructionBuilder(self.hw_model)
+            .repeat(compiler_config.repeats, compiler_config.repetition_period)
+            .__add__(builder)
+        )
+
+    def parse_qir(self, qir_string, compiler_config):
+        """Extracted from QIRFrontend"""
+        # TODO: Resolve circular import
+        from qat.frontend.qir_parser import QIRParser
+
+        # TODO: Remove need for saving to file before parsing
+        suffix = ".bc" if isinstance(qir_string, bytes) else ".ll"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
+            if suffix == ".ll":
+                fp.write(qir_string.encode())
+            else:
+                fp.write(qir_string)
+            fp.close()
+            try:
+                parser = QIRParser(self.hw_model)
+                if compiler_config.results_format.format is not None:
+                    parser.results_format = compiler_config.results_format.format
+                builder = parser.parse(fp.name)
+            finally:
+                os.remove(fp.name)
+        return builder

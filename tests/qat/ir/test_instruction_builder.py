@@ -1,11 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+import random
+
 import numpy as np
 import pytest
 
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import PhaseShift, Synchronize
-from qat.ir.measure import Acquire, AcquireMode, MeasureBlock
+from qat.ir.measure import (
+    Acquire,
+    AcquireMode,
+    MeasureBlock,
+    PostProcessing,
+    ProcessAxis,
+    acq_mode_process_axis,
+)
 from qat.ir.waveforms import Pulse
 from qat.model.device import QubitId
 from qat.utils.pydantic import ValidatedSet
@@ -59,11 +68,21 @@ class TestPauliGates:
             target=hw_model.qubit_with_index(qubit_index), theta=theta
         )
 
-        # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
-        # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 3.
-        ref_number_of_instructions = (
-            1 * 2 + 1 * 3 + len(hw_model.logical_connectivity[qubit_index]) * 2 * 3
-        )
+        if pauli_gate == "X":
+            number_of_z = 3
+        elif pauli_gate == "Y":
+            number_of_z = 2
+
+        if builder.constrain(theta):
+            # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * `number_of_z``.
+            ref_number_of_instructions = (
+                1 * 2
+                + 1 * number_of_z
+                + len(hw_model.logical_connectivity[qubit_index]) * 2 * number_of_z
+            )
+        else:
+            ref_number_of_instructions = 1
         assert builder.number_of_instructions == ref_number_of_instructions
 
         phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
@@ -74,6 +93,22 @@ class TestPauliGates:
         ]
         assert len(phase_shifts) == ref_number_of_instructions - 2
         assert len(x_pi_2_pulses) == 2
+
+    @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
+    def test_unitary_gate_single_angle(self, qubit_index, seed):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.U(
+            target=hw_model.qubit_with_index(qubit_index),
+            theta=random.Random(seed).uniform(0.01, np.pi - 0.01),
+            phi=random.Random(seed + 1).uniform(0.01, np.pi - 0.01),
+            lamb=random.Random(seed + 2).uniform(0.01, np.pi - 0.01),
+        )
+
+        ref_number_of_instructions = (
+            1 * 2 + 1 * 3 + len(hw_model.logical_connectivity[qubit_index]) * 2 * 3
+        )  # 2 drive pulses, 3 phase shifts for drive ch + 6 phase shifts per coupling
+
+        assert builder.number_of_instructions == ref_number_of_instructions
 
     @pytest.mark.parametrize("theta", [-np.pi / 2, np.pi / 2])
     def test_Y_pi_2(self, qubit_index, theta):
@@ -237,8 +272,8 @@ class TestMeasure:
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit_indices = list(range(hw_model.number_of_qubits))
 
-        for qubit_index in qubit_indices:
-            builder.measure(targets=qubit_index, mode=mode)
+        for qubit in hw_model.qubits.values():
+            builder.measure(targets=qubit, mode=mode)
 
         number_of_measure_blocks = 0
         # Looping over `builder._instructions` would result in
@@ -268,16 +303,14 @@ class TestMeasure:
 
         assert number_of_measure_blocks == hw_model.number_of_qubits
 
-
-@pytest.mark.parametrize("acquire_mode", AcquireMode)
-class TestMeasure:
+    @pytest.mark.parametrize("mode", list(AcquireMode))
     @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
-    def test_single_qubit_measurement(self, qubit_index, acquire_mode):
+    def test_single_qubit_measurement(self, qubit_index, mode):
         qubit = hw_model.qubit_with_index(qubit_index)
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         builder.X(target=qubit)
-        builder.measure(targets=qubit, mode=acquire_mode)
+        builder.measure(targets=qubit, mode=mode)
 
         measure_block = None
         for composite_instr in builder._ir.instructions:
@@ -298,20 +331,67 @@ class TestMeasure:
         )
         assert (
             isinstance(acquire := measure_block.instructions[2], Acquire)
-            and measure_block.instructions[2].mode == acquire_mode
+            and measure_block.instructions[2].mode == mode
         )
 
         assert measure_block.duration == max(
             measure.duration, acquire.duration + acquire.delay
         )
 
-    def test_multi_qubit_measurement_no_qubit_sync(self, acquire_mode):
+    @pytest.mark.parametrize("axis", list(ProcessAxis))
+    @pytest.mark.parametrize(
+        ("measure_method", "pp_length"),
+        (
+            ["measure_single_shot_z", 3],
+            ["measure_single_shot_signal", 2],
+            ["measure_mean_z", 4],
+            ["measure_mean_signal", 3],
+            ["measure_scope_mode", 2],
+            ["measure_single_shot_binned", 4],
+        ),
+    )
+    def test_single_qubit_measurement_with_pp(self, axis, measure_method, pp_length):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit_indices = list(range(hw_model.number_of_qubits))
+
+        for q_idx, q in hw_model.qubits.items():
+            if measure_method == "measure_mean_signal":
+                getattr(builder, measure_method)(target=q, output_variable=str(q_idx))
+                ref_mode = AcquireMode.INTEGRATOR
+            elif measure_method == "measure_scope_mode":
+                getattr(builder, measure_method)(target=q, output_variable=str(q_idx))
+                ref_mode = AcquireMode.SCOPE
+            else:
+                getattr(builder, measure_method)(
+                    target=q, axis=axis, output_variable=str(q_idx)
+                )
+                ref_mode = acq_mode_process_axis[axis]
+
+        measure_blocks_per_qubit = [0 for _ in qubit_indices]
+        pps_per_qubit = [0 for _ in qubit_indices]
+        for instruction in builder._ir.instructions:
+            if isinstance(instruction, MeasureBlock):
+                for q_idx in instruction.qubit_targets:
+                    measure_blocks_per_qubit[q_idx] += 1
+
+                for acq in instruction:
+                    if isinstance(acq, Acquire):
+                        assert acq.mode == ref_mode
+
+            if isinstance(instruction, PostProcessing):
+                pps_per_qubit[int(instruction.output_variable)] += 1
+
+        assert measure_blocks_per_qubit == [1] * len(qubit_indices)
+        assert pps_per_qubit == [pp_length] * len(qubit_indices)
+
+    @pytest.mark.parametrize("mode", list(AcquireMode))
+    def test_multi_qubit_measurement_no_qubit_sync(self, mode):
         qubits = list(hw_model.qubits.values())
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         for qubit in qubits:
             builder.X(target=qubit)
-        builder.measure(targets=qubits, mode=acquire_mode, sync_qubits=False)
+        builder.measure(targets=qubits, mode=mode, sync_qubits=False)
 
         measure_block = None
         for composite_instr in builder._ir.instructions:
@@ -332,13 +412,14 @@ class TestMeasure:
 
         assert measure_block.duration == max_duration
 
-    def test_multi_qubit_measurement_qubit_sync(self, acquire_mode):
+    @pytest.mark.parametrize("mode", list(AcquireMode))
+    def test_multi_qubit_measurement_qubit_sync(self, mode):
         qubits = list(hw_model.qubits.values())
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         for qubit in qubits:
             builder.X(target=qubit)
-        builder.measure(targets=qubits, mode=acquire_mode, sync_qubits=True)
+        builder.measure(targets=qubits, mode=mode, sync_qubits=True)
 
         measure_block = None
         for composite_instr in builder._ir.instructions:

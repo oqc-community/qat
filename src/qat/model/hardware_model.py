@@ -119,7 +119,8 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         # Check if logical connectivity is subset of physical connectivity.
         for qubit_index in self.logical_connectivity:
             if (
-                not self.logical_connectivity[qubit_index]
+                self.logical_connectivity[qubit_index]
+                and not self.logical_connectivity[qubit_index]
                 <= self.physical_connectivity[qubit_index]
             ):
                 raise ValueError(
