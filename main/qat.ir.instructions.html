@@ -364,6 +364,11 @@ validated to form a valid model.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.instructions.Instruction.head">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.head" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.instructions.Instruction.inst">
 <span class="sig-name descname"><span class="pre">inst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal['Instruction']</span></em><a class="headerlink" href="#qat.ir.instructions.Instruction.inst" title="Link to this definition"></a></dt>
@@ -380,6 +385,11 @@ validated to form a valid model.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.number_of_instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.instructions.Instruction.tail">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.Instruction.tail" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -393,6 +403,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.add" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.head">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">head</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.head" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -414,6 +429,11 @@ validated to form a valid model.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.number_of_instructions">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.number_of_instructions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.instructions.InstructionBlock.tail">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tail</span></span><a class="headerlink" href="#qat.ir.instructions.InstructionBlock.tail" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -622,6 +642,21 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.instructions.Reset.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.instructions.Reset.qubit_targets">
+<span class="sig-name descname"><span class="pre">qubit_targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[QubitId,</span> <span class="pre">set[QubitId]]</span></em><a class="headerlink" href="#qat.ir.instructions.Reset.qubit_targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.instructions.Reset.targets">
+<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ValidatedSet[str]</span></em><a class="headerlink" href="#qat.ir.instructions.Reset.targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instructions.Reset.validate_targets">
+<span class="sig-name descname"><span class="pre">validate_targets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Reset.validate_targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
