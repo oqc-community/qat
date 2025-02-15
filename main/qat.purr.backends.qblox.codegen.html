@@ -288,19 +288,32 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ContextMixin</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.clear" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.create_package">
+<span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.create_package" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.is_empty" title="Link to this definition"></a></dt>
+<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
+This is temporary and criteria will change with more features coming in</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoping_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.clear" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.create_package">
-<span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.create_package" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="qat.purr.backends.qblox.codegen.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextMixin</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.delay">
 <span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.delay" title="Link to this definition"></a></dt>
@@ -350,13 +363,6 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.id">
 <span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.is_empty">
-<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.is_empty" title="Link to this definition"></a></dt>
-<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-This is temporary and criteria will change with more features coming in</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.measure_acquire">
@@ -465,12 +471,7 @@ Computes useful information in the form of attributes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.clear" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="qat.purr.backends.qblox.codegen.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextMixin</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.create_package">
 <span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.create_package" title="Link to this definition"></a></dt>
@@ -490,13 +491,6 @@ Computes useful information in the form of attributes.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.id">
 <span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.is_empty">
-<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.is_empty" title="Link to this definition"></a></dt>
-<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-This is temporary and criteria will change with more features coming in</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">
