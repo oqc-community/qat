@@ -117,7 +117,7 @@ class SequenceBuilder:
             raise ValueError(f"An acquisition named {name} already exists")
         self.acquisitions[name] = {"index": index, "num_bins": num_bins}
 
-    def add_weight(self, name: str, index: int, data: np.ndarray):
+    def add_weight(self, name: str, index: int, data: List[float]):
         if name in self.weights:
             raise ValueError(f"A weight named {name} already exists")
         self.weights[name] = {"index": index, "data": data}
@@ -217,8 +217,8 @@ class SequenceBuilder:
         self,
         acq: int,
         bin: Union[int, str],
-        weight_i: int,
-        weight_q: int,
+        weight_i: Union[int, str],
+        weight_q: Union[int, str],
         duration: int,
     ):
         return self._add_instruction(

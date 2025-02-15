@@ -284,7 +284,7 @@ class CustomPulse(Waveform):
     def __init__(
         self,
         quantum_target: "PulseChannel",
-        samples: List[np.complex],
+        samples: List[np.complex],  # FIXME - List <> np.ndarray confusion
         ignore_channel_scale: bool = False,
     ):
         super().__init__(quantum_target)

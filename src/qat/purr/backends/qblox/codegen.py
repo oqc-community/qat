@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-
+from abc import ABC
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
@@ -88,6 +88,178 @@ class QbloxPackage:
     timeline: np.ndarray = None
 
 
+class ContextMixin(ABC):
+    def __init__(self):
+        self.sequence_builder = SequenceBuilder()
+        self.sequencer_config = SequencerConfig()
+
+        self._num_hw_avg = 1  # Technically disabled
+        self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
+        self._wf_index: int = 0
+        self._acq_index: int = 0
+        self._wgt_index: int = 0
+
+        self._frequency: float = 0.0  # Keeps record of the frequency shift on the target
+
+    def create_package(self, target: PulseChannel):
+        sequence = self.sequence_builder.build()
+        return QbloxPackage(target, sequence, self.sequencer_config)
+
+    def is_empty(self):
+        """
+        Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
+        This is temporary and criteria will change with more features coming in
+        """
+        return not (
+            self.sequence_builder.waveforms
+            or self.sequence_builder.acquisitions
+            or [
+                inst
+                for inst in self.sequence_builder.q1asm_instructions
+                if inst.opcode
+                in [
+                    Opcode.PLAY,
+                    Opcode.SET_AWG_OFFSET,
+                    Opcode.SET_AWG_GAIN,
+                    Opcode.ACQUIRE,
+                    Opcode.ACQUIRE_TTL,
+                    Opcode.ACQUIRE_WEIGHED,
+                ]
+            ]
+        )
+
+    def clear(self):
+        self.sequence_builder.waveforms.clear()
+        self.sequence_builder.acquisitions.clear()
+        self.sequence_builder.weights.clear()
+        self.sequence_builder.q1asm_instructions.clear()
+
+    def _wait_seconds(self, duration: float):
+        if duration <= 0:
+            return
+
+        self._wait_nanoseconds(int(duration * 1e9))
+
+    def _wait_nanoseconds(self, duration: int):
+        if duration <= 0:
+            return
+
+        quotient = duration // Constants.MAX_WAIT_TIME
+        remainder = duration % Constants.MAX_WAIT_TIME
+        if quotient > Constants.LOOP_UNROLL_THRESHOLD:
+            with self._loop("wait_label", quotient):
+                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+        elif quotient >= 1:
+            for _ in range(quotient):
+                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+
+        if remainder > 0:
+            self.sequence_builder.wait(remainder)
+
+    def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
+        """
+        The waveform is evaluated as a 1d complex array. In QBlox, the Real and Imag parts of the pulse
+        represent the digital offset on the AWG. They both must be within range [-1, 1].
+        """
+
+        num_samples = int(calculate_duration(waveform, return_samples=True))
+        if num_samples < Constants.GRID_TIME:
+            if num_samples == 0:
+                log.warning(f"Empty pulse.")
+            else:
+                log.warning(
+                    f"""
+                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
+                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                    """
+                )
+            return None
+
+        dt = target.sample_time
+        length = num_samples * dt
+        centre = length / 2.0
+        t = np.linspace(
+            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=num_samples
+        )
+        pulse = evaluate_shape(waveform, t)
+        scale = target.scale
+        if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
+            scale = 1
+
+        pulse *= scale
+        pulse += target.bias
+
+        if ((pulse.real < -1) | (pulse.real > 1)).any():
+            raise ValueError(
+                "Voltage range for I exceeded. Make sure all I values are within the range [-1, 1]"
+            )
+        if ((pulse.imag < -1) | (pulse.imag > 1)).any():
+            raise ValueError(
+                "Voltage range for Q exceeded. Make sure all I values are within the range [-1, 1]"
+            )
+
+        if ((pulse.real > 0.3) | (pulse.imag > 0.3)).any():
+            log.warning(
+                """
+                Values above 0.3 will overdrive the mixer and  produce intermodulation distortion.
+                Consider adjusting attenuation instead.
+                """
+            )
+
+        return pulse
+
+    def _register_signal(self, waveform, target, data, name):
+        index = self.sequence_builder.lookup_waveform_by_data(data)
+        if index is not None:
+            log.debug(
+                f"Reusing signal {name} at index {index} for pulse {waveform} on channel {target}"
+            )
+        elif data.size > self._wf_memory:
+            raise ValueError(
+                f"No more waveform memory left for signal {name} of pulse {waveform} on channel {target}"
+            )
+        else:
+            wf_hash = hash(waveform)
+            wf_name = type(waveform).__name__
+            if isinstance(waveform, Pulse):
+                wf_name = waveform.shape.name
+
+            index = self._wf_index
+            self.sequence_builder.add_waveform(
+                f"{wf_name}_{wf_hash}_{name}", index, data.tolist()
+            )
+            self._wf_memory = self._wf_memory - data.size
+            self._wf_index = self._wf_index + 1
+
+        return index
+
+    def _register_waveform(self, waveform, target, data):
+        i_index = self._register_signal(waveform, target, data.real, "I")
+        q_index = self._register_signal(waveform, target, data.imag, "Q")
+        return i_index, q_index
+
+    @contextmanager
+    def _wrapper_pulse(
+        self,
+        delay_seconds,
+        pulse_shape,
+        i_steps,
+        q_steps,
+        i_index,
+        q_index,
+    ):
+        flight_nanos = int(delay_seconds * 1e9)
+        if pulse_shape == PulseShapeType.SQUARE:
+            self.sequence_builder.set_awg_offs(i_steps, q_steps)
+            self.sequence_builder.upd_param(flight_nanos)
+        else:
+            self.sequence_builder.play(i_index, q_index, flight_nanos)
+        yield
+        if pulse_shape == PulseShapeType.SQUARE:
+            self.sequence_builder.set_awg_offs(0, 0)
+            self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+
 class QbloxEmitter:
     def emit(self, qat_file: QatFile) -> List[QbloxPackage]:
         contexts: Dict[PulseChannel, QbloxContext] = {}
@@ -165,10 +337,9 @@ class QbloxEmitter:
         return qblox_contexts
 
 
-class QbloxContext:
+class QbloxContext(ContextMixin):
     def __init__(self, repeat: Repeat):
-        self.sequence_builder = SequenceBuilder()
-        self.sequencer_config = SequencerConfig()
+        super().__init__()
 
         self._repeat_count = repeat.repeat_count
         self._repeat_period = repeat.repetition_period
@@ -177,13 +348,6 @@ class QbloxContext:
 
         self._duration: int = 0
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
-
-        self._num_hw_avg = 1  # Technically disabled
-        self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
-        self._wf_index: int = 0
-        self._acq_index: int = 0
-
-        self._frequency: float = 0.0  # Keeps record of the frequency shift on the target
 
         self._registers: List[str] = sorted(
             f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
@@ -273,142 +437,15 @@ class QbloxContext:
     def duration(self):
         return self._duration
 
-    def is_empty(self):
-        """
-        Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-        This is temporary and criteria will change with more features coming in
-        """
-        return not (
-            self.sequence_builder.waveforms
-            or self.sequence_builder.acquisitions
-            or [
-                inst
-                for inst in self.sequence_builder.q1asm_instructions
-                if inst.opcode
-                in [
-                    Opcode.PLAY,
-                    Opcode.SET_AWG_OFFSET,
-                    Opcode.SET_AWG_GAIN,
-                    Opcode.ACQUIRE,
-                    Opcode.ACQUIRE_TTL,
-                    Opcode.ACQUIRE_WEIGHED,
-                ]
-            ]
-        )
-
-    def clear(self):
-        self.sequence_builder.waveforms.clear()
-        self.sequence_builder.acquisitions.clear()
-        self.sequence_builder.weights.clear()
-        self.sequence_builder.q1asm_instructions.clear()
-
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
         return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
-    def _wait_seconds(self, duration: float):
-        if duration <= 0:
-            return
-
-        self._wait_nanoseconds(int(duration * 1e9))
-
-    def _wait_nanoseconds(self, duration: int):
-        if duration <= 0:
-            return
-
-        quotient = duration // Constants.MAX_WAIT_TIME
-        remainder = duration % Constants.MAX_WAIT_TIME
-        if quotient > Constants.LOOP_UNROLL_THRESHOLD:
-            with self._loop("wait_label", quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-        elif quotient >= 1:
-            for _ in range(quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-
-        if remainder > 0:
-            self.sequence_builder.wait(remainder)
-
-    def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
-        """
-        The waveform is evaluated as a 1d complex array. In QBlox, the Real and Imag parts of the pulse
-        represent the digital offset on the AWG. They both must be within range [-1, 1].
-        """
-
-        num_samples = int(calculate_duration(waveform, return_samples=True))
-        if num_samples < Constants.GRID_TIME:
-            if num_samples == 0:
-                log.warning(f"Empty pulse.")
-            else:
-                log.warning(
-                    f"""
-                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                    """
-                )
-            return None
-
-        dt = target.sample_time
-        length = num_samples * dt
-        centre = length / 2.0
-        t = np.linspace(
-            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=num_samples
-        )
-        pulse = evaluate_shape(waveform, t)
-        scale = target.scale
-        if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
-            scale = 1
-
-        pulse *= scale
-        pulse += target.bias
-
-        if ((pulse.real < -1) | (pulse.real > 1)).any():
-            raise ValueError(
-                "Voltage range for I exceeded. Make sure all I values are within the range [-1, 1]"
-            )
-        if ((pulse.imag < -1) | (pulse.imag > 1)).any():
-            raise ValueError(
-                "Voltage range for Q exceeded. Make sure all I values are within the range [-1, 1]"
-            )
-
-        if ((pulse.real > 0.3) | (pulse.imag > 0.3)).any():
-            log.warning(
-                """
-                Values above 0.3 will overdrive the mixer and  produce intermodulation distortion.
-                Consider adjusting attenuation instead.
-                """
-            )
-
-        return pulse
-
-    def _register_signal(self, waveform, target, data, name):
-        index = self.sequence_builder.lookup_waveform_by_data(data)
-        if index is not None:
-            log.debug(
-                f"Reusing signal {name} at index {index} for pulse {waveform} on channel {target}"
-            )
-        elif data.size > self._wf_memory:
-            raise ValueError(
-                f"No more waveform memory left for signal {name} of pulse {waveform} on channel {target}"
-            )
-        else:
-            wf_hash = hash(waveform)
-            wf_name = type(waveform).__name__
-            if isinstance(waveform, Pulse):
-                wf_name = waveform.shape.name
-
-            index = self._wf_index
-            self.sequence_builder.add_waveform(
-                f"{wf_name}_{wf_hash}_{name}", index, data.tolist()
-            )
-            self._wf_memory = self._wf_memory - data.size
-            self._wf_index = self._wf_index + 1
-
-        return index
-
-    def _register_waveform(self, waveform, target, data):
-        i_index = self._register_signal(waveform, target, data.real, "I")
-        q_index = self._register_signal(waveform, target, data.imag, "Q")
-        return i_index, q_index
+    def _register_weight(self, name: str, weight: np.ndarray):
+        wgt_index = self._wgt_index
+        self.sequence_builder.add_weight(name, wgt_index, weight.tolist())
+        self._wgt_index = wgt_index + 1
+        return wgt_index
 
     def _register_acquisition(self, acquire: Acquire):
         acq_index = self._acq_index
@@ -417,36 +454,6 @@ class QbloxContext:
         )
         self._acq_index = acq_index + 1
         return acq_index
-
-    def _binned_acquisition(
-        self,
-        delay,
-        acq_index,
-        num_samples,
-        pulse_shape,
-        i_steps,
-        q_steps,
-        i_index,
-        q_index,
-    ):
-        flight_nanos = int(delay * 1e9)
-        if pulse_shape == PulseShapeType.SQUARE:
-            self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self.sequence_builder.upd_param(flight_nanos)
-            self.sequence_builder.acquire(
-                acq_index,
-                self._repeat_reg,
-                num_samples,
-            )
-            self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
-        else:
-            self.sequence_builder.play(i_index, q_index, flight_nanos)
-            self.sequence_builder.acquire(
-                acq_index,
-                self._repeat_reg,
-                num_samples,
-            )
 
     def id(self):
         self.sequence_builder.nop()
@@ -495,13 +502,8 @@ class QbloxContext:
             return
 
         acq_index = self._register_acquisition(acquire)
-        self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
-            acquire
-        )
-        target.physical_channel.config.module.i_scope_acq.trigger_mode = "sequencer"
-        target.physical_channel.config.module.i_scope_acq.avg_mode_en = True
-        target.physical_channel.config.module.q_scope_acq.trigger_mode = "sequencer"
-        target.physical_channel.config.module.q_scope_acq.avg_mode_en = True
+        acq_width = calculate_duration(acquire)
+        self.sequencer_config.square_weight_acq.integration_length = acq_width
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -511,30 +513,29 @@ class QbloxContext:
         else:
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
-        if self._num_hw_avg <= Constants.LOOP_UNROLL_THRESHOLD:
-            for _ in range(self._num_hw_avg):
-                self._binned_acquisition(
-                    acquire.delay,
-                    acq_index,
-                    pulse.size,
-                    measure.shape,
-                    i_steps,
-                    q_steps,
-                    i_index,
-                    q_index,
+        with self._wrapper_pulse(
+            acquire.delay, measure.shape, i_steps, q_steps, i_index, q_index
+        ):
+            if acquire.filter:
+                weight = acquire.filter.samples
+                wgt_i_index = self._register_weight(
+                    f"{acquire.output_variable}_weight_I", weight.real
                 )
-        else:
-            with self._loop("avg_label", self._num_hw_avg + 1):
-                self._binned_acquisition(
-                    acquire.delay,
-                    acq_index,
-                    pulse.size,
-                    measure.shape,
-                    i_steps,
-                    q_steps,
-                    i_index,
-                    q_index,
+                wgt_q_index = self._register_weight(
+                    f"{acquire.output_variable}_weight_Q", weight.imag
                 )
+
+                # TODO - silly convoluted way of using the `acquire_weighed` instruction
+                # TODO - simplify when Qblox supports more freedom of memory addressing
+                wgt_i_reg, wgt_q_reg = self._reg_alloc(), self._reg_alloc()
+                self.sequence_builder.move(wgt_i_index, wgt_i_reg)
+                self.sequence_builder.move(wgt_q_index, wgt_q_reg)
+
+                self.sequence_builder.acquire_weighed(
+                    acq_index, self._repeat_reg, wgt_i_reg, wgt_q_reg, acq_width
+                )
+            else:
+                self.sequence_builder.acquire(acq_index, self._repeat_reg, acq_width)
 
         self._duration = self._duration + measure.duration
         self._timeline = np.append(self._timeline, pulse)
@@ -616,7 +617,7 @@ class AllocationManager:
         return label
 
 
-class NewQbloxContext:
+class NewQbloxContext(ContextMixin):
     def __init__(
         self,
         scoping_result: ScopingResult,
@@ -624,6 +625,7 @@ class NewQbloxContext:
         iter_bounds: Dict[str, IterBound],
         alloc_mgr: AllocationManager,
     ):
+        super().__init__()
         self.scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = (
             scoping_result.scope2symbols
         )
@@ -635,18 +637,8 @@ class NewQbloxContext:
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr
 
-        self.sequence_builder = SequenceBuilder()
-        self.sequencer_config = SequencerConfig()
-
         self._duration: int = 0
         self._durations: List[Union[float, str]] = []
-
-        self._num_hw_avg = 1  # Technically disabled
-        self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
-        self._wf_index: int = 0
-        self._acq_index: int = 0
-
-        self._frequency: float = 0.0  # Keeps record of the frequency shift on the target
 
     @contextmanager
     def _loop(self, label: str, iter_count: int = 1):
@@ -670,143 +662,6 @@ class NewQbloxContext:
     def durations(self):
         return self._durations
 
-    def is_empty(self):
-        """
-        Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-        This is temporary and criteria will change with more features coming in
-        """
-        return not (
-            self.sequence_builder.waveforms
-            or self.sequence_builder.acquisitions
-            or [
-                inst
-                for inst in self.sequence_builder.q1asm_instructions
-                if inst.opcode
-                in [
-                    Opcode.PLAY,
-                    Opcode.SET_AWG_OFFSET,
-                    Opcode.SET_AWG_GAIN,
-                    Opcode.ACQUIRE,
-                    Opcode.ACQUIRE_TTL,
-                    Opcode.ACQUIRE_WEIGHED,
-                ]
-            ]
-        )
-
-    def clear(self):
-        self.sequence_builder.waveforms.clear()
-        self.sequence_builder.acquisitions.clear()
-        self.sequence_builder.weights.clear()
-        self.sequence_builder.q1asm_instructions.clear()
-
-    def create_package(self, target: PulseChannel):
-        sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config)
-
-    def _wait_seconds(self, duration: float):
-        if duration <= 0:
-            return
-
-        self._wait_nanoseconds(int(duration * 1e9))
-
-    def _wait_nanoseconds(self, duration: int):
-        if duration <= 0:
-            return
-
-        quotient = duration // Constants.MAX_WAIT_TIME
-        remainder = duration % Constants.MAX_WAIT_TIME
-        if quotient > Constants.LOOP_UNROLL_THRESHOLD:
-            with self._loop("wait_label", quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-        elif quotient >= 1:
-            for _ in range(quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-
-        if remainder > 0:
-            self.sequence_builder.wait(remainder)
-
-    def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
-        """
-        The waveform is evaluated as a 1d complex array. In QBlox, the Real and Imag parts of the pulse
-        represent the digital offset on the AWG. They both must be within range [-1, 1].
-        """
-
-        num_samples = int(calculate_duration(waveform, return_samples=True))
-        if num_samples < Constants.GRID_TIME:
-            if num_samples == 0:
-                log.warning(f"Empty pulse.")
-            else:
-                log.warning(
-                    f"""
-                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                    """
-                )
-            return None
-
-        dt = target.sample_time
-        length = num_samples * dt
-        centre = length / 2.0
-        t = np.linspace(
-            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=num_samples
-        )
-        pulse = evaluate_shape(waveform, t)
-        scale = target.scale
-        if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
-            scale = 1
-
-        pulse *= scale
-        pulse += target.bias
-
-        if ((pulse.real < -1) | (pulse.real > 1)).any():
-            raise ValueError(
-                "Voltage range for I exceeded. Make sure all I values are within the range [-1, 1]"
-            )
-        if ((pulse.imag < -1) | (pulse.imag > 1)).any():
-            raise ValueError(
-                "Voltage range for Q exceeded. Make sure all I values are within the range [-1, 1]"
-            )
-
-        if ((pulse.real > 0.3) | (pulse.imag > 0.3)).any():
-            log.warning(
-                """
-                Values above 0.3 will overdrive the mixer and  produce intermodulation distortion.
-                Consider adjusting attenuation instead.
-                """
-            )
-
-        return pulse
-
-    def _register_signal(self, waveform, target, data, name):
-        index = self.sequence_builder.lookup_waveform_by_data(data)
-        if index is not None:
-            log.debug(
-                f"Reusing signal {name} at index {index} for pulse {waveform} on channel {target}"
-            )
-        elif data.size > self._wf_memory:
-            raise ValueError(
-                f"No more waveform memory left for signal {name} of pulse {waveform} on channel {target}"
-            )
-        else:
-            wf_hash = hash(waveform)
-            wf_name = type(waveform).__name__
-            if isinstance(waveform, Pulse):
-                wf_name = waveform.shape.name
-
-            index = self._wf_index
-            self.sequence_builder.add_waveform(
-                f"{wf_name}_{wf_hash}_{name}", index, data.tolist()
-            )
-            self._wf_memory = self._wf_memory - data.size
-            self._wf_index = self._wf_index + 1
-
-        return index
-
-    def _register_waveform(self, waveform, target, data):
-        i_index = self._register_signal(waveform, target, data.real, "I")
-        q_index = self._register_signal(waveform, target, data.imag, "Q")
-        return i_index, q_index
-
     def _register_acquisition(self, acquire: Acquire):
         name = f"acquire_{hash(acquire)}"
         num_bins = self.iter_bounds[name].count
@@ -814,37 +669,6 @@ class NewQbloxContext:
         self.sequence_builder.add_acquisition(acquire.output_variable, acq_index, num_bins)
         self._acq_index = acq_index + 1
         return acq_index
-
-    def _binned_acquisition(
-        self,
-        delay,
-        acq_index,
-        bin_reg,
-        num_samples,
-        pulse_shape,
-        i_steps,
-        q_steps,
-        i_index,
-        q_index,
-    ):
-        flight_nanos = int(delay * 1e9)
-        if pulse_shape == PulseShapeType.SQUARE:
-            self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self.sequence_builder.upd_param(flight_nanos)
-            self.sequence_builder.acquire(
-                acq_index,
-                bin_reg,
-                num_samples,
-            )
-            self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
-        else:
-            self.sequence_builder.play(i_index, q_index, flight_nanos)
-            self.sequence_builder.acquire(
-                acq_index,
-                bin_reg,
-                num_samples,
-            )
 
     def id(self):
         self.sequence_builder.nop()
@@ -915,13 +739,8 @@ class NewQbloxContext:
         acq_index = self._register_acquisition(acquire)
         name = f"acquire_{hash(acquire)}"
         bin_reg = self.alloc_mgr.registers[name]
-        self.sequencer_config.square_weight_acq.integration_length = calculate_duration(
-            acquire
-        )
-        target.physical_channel.config.module.i_scope_acq.trigger_mode = "sequencer"
-        target.physical_channel.config.module.i_scope_acq.avg_mode_en = True
-        target.physical_channel.config.module.q_scope_acq.trigger_mode = "sequencer"
-        target.physical_channel.config.module.q_scope_acq.avg_mode_en = True
+        acq_width = calculate_duration(acquire)
+        self.sequencer_config.square_weight_acq.integration_length = acq_width
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -931,32 +750,10 @@ class NewQbloxContext:
         else:
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
-        if self._num_hw_avg <= Constants.LOOP_UNROLL_THRESHOLD:
-            for _ in range(self._num_hw_avg):
-                self._binned_acquisition(
-                    acquire.delay,
-                    acq_index,
-                    bin_reg,
-                    pulse.size,
-                    measure.shape,
-                    i_steps,
-                    q_steps,
-                    i_index,
-                    q_index,
-                )
-        else:
-            with self._loop("avg_label", self._num_hw_avg + 1):
-                self._binned_acquisition(
-                    acquire.delay,
-                    acq_index,
-                    bin_reg,
-                    pulse.size,
-                    measure.shape,
-                    i_steps,
-                    q_steps,
-                    i_index,
-                    q_index,
-                )
+        with self._wrapper_pulse(
+            acquire.delay, measure.shape, i_steps, q_steps, i_index, q_index
+        ):
+            self.sequence_builder.acquire(acq_index, bin_reg, acq_width)
 
         self._duration = self._duration + measure.duration
         self._durations.append(measure.duration)

@@ -33,6 +33,7 @@ from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.execution import DeviceInjectors
 from qat.purr.compiler.instructions import (
     Acquire,
+    CustomPulse,
     DeviceUpdate,
     MeasurePulse,
     Pulse,
@@ -114,7 +115,6 @@ class TestQbloxEmitter:
         assert measure_channel == acquire_channel
 
         time = 7.5e-6
-        measure_width = int(qubit.pulse_measure["width"] * 1e9)
         i_offs_steps = int(qubit.pulse_measure["amp"] * (Constants.MAX_OFFSET_SIZE // 2))
         delay = qubit.measure_acquire["delay"]
 
@@ -137,7 +137,7 @@ class TestQbloxEmitter:
         assert not pkg.sequence.waveforms
         assert qubit.pulse_measure["shape"] == PulseShapeType.SQUARE
         assert (
-            f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay*1e9)}\nacquire 0,R0,{measure_width}\nset_awg_offs 0,0"
+            f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay*1e9)}\nacquire 0,R0,{int(time * 1e9)}\nset_awg_offs 0,0"
             in pkg.sequence.program
         )
 
@@ -351,10 +351,32 @@ class TestQbloxEmitter:
         packages = QbloxEmitter().emit(qat_file)
         assert len(packages) == len(qubit_indices)
 
+        acquire_pkg = next((pkg for pkg in packages))
+        assert "weighed_acquire" not in acquire_pkg.sequence.program
+
         builder = scope_acq(model, qubit_indices, do_X=True)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
         packages = QbloxEmitter().emit(qat_file)
         assert len(packages) == 2 * len(qubit_indices)
+
+        # Enable weights
+        builder = scope_acq(model, qubit_indices)
+
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            num_samples = int(qubit.measure_acquire["width"] * 1e9)
+            acquire = next(
+                (inst for inst in builder.instructions if isinstance(inst, Acquire))
+            )
+            weights = np.random.rand(num_samples) + 1j * np.random.rand(num_samples)
+            qubit.measure_acquire["weights"] = weights
+            acquire.filter = CustomPulse(acquire.channel, weights)
+
+        qat_file = InstructionEmitter().emit(builder.instructions, model)
+        packages = QbloxEmitter().emit(qat_file)
+
+        acquire_pkg = next((pkg for pkg in packages))
+        assert "acquire_weighed" in acquire_pkg.sequence.program
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

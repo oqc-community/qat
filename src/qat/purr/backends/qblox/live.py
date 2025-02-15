@@ -6,6 +6,7 @@ from typing import Dict, List
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat.model.device import PulseChannel
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.backends.qblox.algorithm import stable_partition
@@ -25,7 +26,7 @@ from qat.purr.backends.qblox.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.purr.backends.utilities import get_axis_map
+from qat.purr.backends.utilities import PositionData, SimpleAcquire, get_axis_map
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import (
     DeviceInjectors,
@@ -34,6 +35,7 @@ from qat.purr.compiler.execution import (
     _numpy_array_to_list,
 )
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     DeviceUpdate,
     IndexAccessor,
@@ -79,6 +81,28 @@ class QbloxLiveEngine(LiveDeviceEngine):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
         self.model.control_hardware.disconnect()
+
+    def build_acquire_list(self, position_map: Dict[PulseChannel, List[PositionData]]):
+        buffers = {}
+        for pulse_channel, positions in position_map.items():
+            buffer = buffers.setdefault(pulse_channel.full_id(), [])
+            for pos in positions:
+                if isinstance(pos.instruction, Acquire):
+                    samples = pos.end - pos.start
+                    buffer.append(
+                        SimpleAcquire(
+                            pos.start,
+                            samples,
+                            pos.instruction.output_variable,
+                            pulse_channel,
+                            pulse_channel.physical_channel,
+                            pos.instruction.mode,
+                            pos.instruction.delay,
+                            pos.instruction,
+                        )
+                    )
+
+        return buffers
 
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
         """

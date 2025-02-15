@@ -174,8 +174,13 @@ class QbloxControlHardware(ControlHardware):
         if module_config.lo.out0_in0_en:
             module_config.lo.out0_in0_freq = lo_freq
 
+        # TODO - Move these settings to the configuration helper
         if module.is_qrm_type:
-            module_config.scope_acq_seq_idx = sequencer.seq_idx
+            module.scope_acq_sequencer_select(sequencer.seq_idx)
+            module.scope_acq_trigger_mode_path0("sequencer")
+            module.scope_acq_avg_mode_en_path0(True)
+            module.scope_acq_trigger_mode_path1("sequencer")
+            module.scope_acq_avg_mode_en_path1(True)
 
         # Sequencer config from the HwM
         hwm_seq_config = qblox_config.sequencers[sequencer.seq_idx]
@@ -292,6 +297,10 @@ class QbloxControlHardware(ControlHardware):
                                 integration_length=sequencer.integration_length_acq(),
                             )
 
+                        start, end = 0, max(
+                            sequencer.integration_length_acq(),
+                            Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                        )
                         for acq_name, acq in acquisitions.items():
                             i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
                             q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
@@ -301,7 +310,7 @@ class QbloxControlHardware(ControlHardware):
 
                             i = np.array(acq["acquisition"]["scope"]["path0"]["data"])
                             q = np.array(acq["acquisition"]["scope"]["path1"]["data"])
-                            results[AcquireMode.SCOPE][acq_name] = i + 1j * q
+                            results[AcquireMode.SCOPE][acq_name] = (i + 1j * q)[start:end]
 
                         sequencer.delete_acquisition_data(all=True)
         finally:
