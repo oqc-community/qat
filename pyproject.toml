@@ -1,27 +1,38 @@
-[tool.poetry]
+[project]
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
 version = "2.5.1"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
-documentation = "https://oqc-community.github.io/qat"
+license = "BSD-3-Clause"
+dynamic = ["dependencies"]
 authors = [
-    "Hamid El Maazouz <helmaazouz@oxfordquantumcircuits.com>",
-    "Harry Waring <hwaring@oxfordquantumcircuits.com>",
-    "Jamie Friel <jfriel@oxfordquantumcircuits.com>",
-    "John Dumbell <jdumbell@oxfordquantumcircuits.com>",
-    "Kajsa Eriksson Rosenqvist <keriksson.rosenqvist@oxfordquantumcircuits.com>",
-    "Norbert Deak <ndeak@oxfordquantumcircuits.com>",
-    "Owen Arnold <oarnold@oxfordquantumcircuits.com>",
-    "Benjamin Sach <bsach@oxfordquantumcircuits.com>",
-    "Daria Van Hende <dvanhende@oxfordquantumcircuits.com>",
-    "Luke Causer <lcauser@oxfordquantumcircuits.com>"
+    { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
+    { name = "Harry Waring", email = "hwaring@oqc.tech" },
+    { name = "Jamie Friel", email = "jfriel@oqc.tech" },
+    { name = "John Dumbell", email = "jdumbell@oqc.tech" },
+    { name = "Kajsa Eriksson Rosenqvist", email = "keriksson.rosenqvist@oqc.tech" },
+    { name = "Owen Arnold", email = "oarnold@oqc.tech" },
+    { name = "Benjamin Sach", email = "bsach@oqc.tech" },
+    { name = "Daria Van Hende", email = "dvanhende@oqc.tech" },
+    { name = "Luke Causer", email = "lcauser@oqc.tech" },
 ]
+
+[project.urls]
+repository = "https://github.com/oqc-community/qat"
+documentation = "https://oqc-community.github.io/qat/main/index.html"
+homepage = "https://oqc.tech/"
+
+[tool.poetry]
+requires-poetry = ">=2.0"
 packages = [
     { include = "qat", from = "src/" }
 ]
-license = "BSD-3-Clause"
+
+[tool.poetry.scripts]
+format-code = "scripts.poetry_scripts:format_code"
+generate-report =  "scripts.ci.generate_report:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -90,7 +101,7 @@ sphinx-paramlinks = "^0.6.0"
 sphinx-multiversion = "^0.2.4"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.autoflake]
@@ -144,10 +155,6 @@ filterwarnings = [
 markers = [
   "ab_test",
 ]
-
-[tool.poetry.scripts]
-format-code = "scripts.poetry_scripts:format_code"
-generate-report =  "scripts.ci.generate_report:main"
 
 [tool.jupytext.formats]
 "notebooks/ipynb/" = "ipynb"
