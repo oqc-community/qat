@@ -6,6 +6,7 @@ version = "2.5.1"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 license = "BSD-3-Clause"
+requires-python = ">=3.10,<3.13"
 dynamic = ["dependencies"]
 authors = [
     { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
@@ -35,7 +36,6 @@ format-code = "scripts.poetry_scripts:format_code"
 generate-report =  "scripts.ci.generate_report:main"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
 numpy = ">=1.26.4"
 networkx = ">=2.5"
 matplotlib = "^3.3.2"
@@ -94,15 +94,41 @@ twine = "^4.0.2"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.0.0"
-sphinx-rtd-theme = { version = "^1.3.0", allow-prereleases = true }
-sphinx-autodoc-typehints = "^1.24.0"
+sphinx = "^8.0.0"
+sphinx-rtd-theme = { version = "^3.0.0" }
+sphinx-autodoc-typehints = "^3.0.0"
 sphinx-paramlinks = "^0.6.0"
 sphinx-multiversion = "^0.2.4"
+sphinx-pyproject = "^0.3.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.sphinx-pyproject]
+copyright = "2025, Oxford Quantum Circuits Ltd"
+add_module_names = false
+autoclass_content = "both"
+extensions = [
+    "sphinx_multiversion",
+    "sphinx_rtd_theme",
+    "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
+    "sphinx_paramlinks",
+]
+templates_path = ["_templates"]
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
+html_logo = "qat-logo.png"
+html_theme_options.logo_only = false
+html_theme_options.prev_next_buttons_location = "bottom"
+html_theme_options.style_external_links = false
+html_theme_options.vcs_pageview_mode = ""
+html_theme_options.collapse_navigation = false
+html_theme_options.sticky_navigation = true
+html_theme_options.navigation_depth=6
+html_theme_options.includehidden=true
+html_theme_options.titles_only=false
 
 [tool.autoflake]
 remove-all-unused-imports = true
