@@ -17,6 +17,7 @@ from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 from qat.purr.backends.live_devices import ControlHardware, Instrument, LivePhysicalBaseband
 from qat.purr.backends.qblox.codegen import QbloxPackage
 from qat.purr.backends.qblox.config import (
+    ModuleConfig,
     QbloxConfig,
     QcmConfigHelper,
     QcmRfConfigHelper,
@@ -166,7 +167,8 @@ class QbloxControlHardware(ControlHardware):
 
         qblox_config = package.target.physical_channel.config
 
-        module_config = qblox_config.module
+        # Customise Module config
+        module_config: ModuleConfig = qblox_config.module
         if module_config.lo.out0_en:
             module_config.lo.out0_freq = lo_freq
         if module_config.lo.out1_en:
@@ -174,34 +176,38 @@ class QbloxControlHardware(ControlHardware):
         if module_config.lo.out0_in0_en:
             module_config.lo.out0_in0_freq = lo_freq
 
-        # TODO - Move these settings to the configuration helper
-        if module.is_qrm_type:
-            module.scope_acq_sequencer_select(sequencer.seq_idx)
-            module.scope_acq_trigger_mode_path0("sequencer")
-            module.scope_acq_avg_mode_en_path0(True)
-            module.scope_acq_trigger_mode_path1("sequencer")
-            module.scope_acq_avg_mode_en_path1(True)
+        module_config.scope_acq.sequencer_select = sequencer.seq_idx
+        module_config.scope_acq.trigger_mode_path0 = "sequencer"
+        module_config.scope_acq.avg_mode_en_path0 = True
+        module_config.scope_acq.trigger_mode_path1 = "sequencer"
+        module_config.scope_acq.avg_mode_en_path1 = True
 
-        # Sequencer config from the HwM
-        hwm_seq_config = qblox_config.sequencers[sequencer.seq_idx]
-        # Sequencer config from QAT IR
-        pkg_seq_config = package.sequencer_config
-        hwm_seq_config.nco.freq = nco_freq
-        hwm_seq_config.square_weight_acq.integration_length = (
-            pkg_seq_config.square_weight_acq.integration_length
+        # Customise Sequencer config
+        sequencer_config = qblox_config.sequencers[sequencer.seq_idx]
+        sequencer_config.nco.freq = nco_freq
+        sequencer_config.square_weight_acq.integration_length = (
+            package.sequencer_config.square_weight_acq.integration_length
         )
 
         log.debug(f"Configuring module {module}, sequencer {sequencer}")
         if module.is_qcm_type:
             if module.is_rf_type:
-                QcmRfConfigHelper(qblox_config).configure(module, sequencer)
+                QcmRfConfigHelper(module_config, sequencer_config).configure(
+                    module, sequencer
+                )
             else:
-                QcmConfigHelper(qblox_config).configure(module, sequencer)
+                QcmConfigHelper(module_config, sequencer_config).configure(
+                    module, sequencer
+                )
         elif module.is_qrm_type:
             if module.is_rf_type:
-                QrmRfConfigHelper(qblox_config).configure(module, sequencer)
+                QrmRfConfigHelper(module_config, sequencer_config).configure(
+                    module, sequencer
+                )
             else:
-                QrmConfigHelper(qblox_config).configure(module, sequencer)
+                QrmConfigHelper(module_config, sequencer_config).configure(
+                    module, sequencer
+                )
 
     def _reset_io(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
@@ -297,7 +303,7 @@ class QbloxControlHardware(ControlHardware):
                                 integration_length=sequencer.integration_length_acq(),
                             )
 
-                        start, end = 0, max(
+                        start, end = 0, min(
                             sequencer.integration_length_acq(),
                             Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
                         )

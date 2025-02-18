@@ -237,11 +237,13 @@ class TestQbloxLiveEngine:
         results, _ = execute_instructions(engine, builder)
         assert results is not None
         for index in qubit_indices:
-            assert f"Q{index}" in results
-            assert results[f"Q{index}"].shape == (
-                1,
+            qubit = model.get_qubit(index)
+            acq_width = min(
+                qubit.measure_acquire["width"] * 1e9,
                 Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
             )
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (1, acq_width)
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

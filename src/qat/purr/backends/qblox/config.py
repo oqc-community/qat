@@ -173,78 +173,81 @@ class QbloxConfig:
 
 
 class QbloxConfigHelper(ABC):
-    def __init__(self, config: QbloxConfig = None):
-        self.config = config or QbloxConfig()
+    def __init__(self, module_config: ModuleConfig, sequencer_config: SequencerConfig):
+        self.sequencer_config = sequencer_config
+        self.module_config = module_config
 
     def configure(self, module: Module, sequencer: Sequencer):
-        self.configure_module(module, self.config.module)
-        self.configure_sequencer(sequencer, self.config.sequencers[sequencer.seq_idx])
+        self.configure_module(module)
+        self.configure_sequencer(sequencer)
 
     @abstractmethod
-    def configure_module(self, module: Module, config: ModuleConfig):
+    def configure_module(self, module: Module):
         pass
 
     @abstractmethod
-    def configure_sequencer(self, sequencer: Sequencer, config: SequencerConfig):
+    def configure_sequencer(self, sequencer: Sequencer):
         pass
 
-    def configure_connection(self, sequencer: Sequencer, config: SequencerConfig):
-        if config.connection:
-            sequencer.connect_sequencer(*config.connection.bulk_value)
+    def configure_connection(self, sequencer: Sequencer):
+        if self.sequencer_config.connection.bulk_value:
+            sequencer.connect_sequencer(*self.sequencer_config.connection.bulk_value)
 
-    def configure_nco(self, sequencer: Sequencer, config: SequencerConfig):
-        if config.nco.freq:
-            sequencer.nco_freq(config.nco.freq)
-        if config.nco.prop_delay_comp_en:
-            sequencer.nco_prop_delay_comp_en(config.nco.prop_delay_comp_en)
-        if config.nco.prop_delay_comp:
-            sequencer.nco_prop_delay_comp(config.nco.prop_delay_comp)
-        if config.nco.phase_offs:
-            sequencer.nco_phase_offs(config.nco.phase_offs)
+    def configure_nco(self, sequencer: Sequencer):
+        if self.sequencer_config.nco.freq:
+            sequencer.nco_freq(self.sequencer_config.nco.freq)
+        if self.sequencer_config.nco.prop_delay_comp_en:
+            sequencer.nco_prop_delay_comp_en(self.sequencer_config.nco.prop_delay_comp_en)
+        if self.sequencer_config.nco.prop_delay_comp:
+            sequencer.nco_prop_delay_comp(self.sequencer_config.nco.prop_delay_comp)
+        if self.sequencer_config.nco.phase_offs:
+            sequencer.nco_phase_offs(self.sequencer_config.nco.phase_offs)
 
-    def configure_awg(self, sequencer: Sequencer, config: SequencerConfig):
-        if config.awg.mod_en:
-            sequencer.mod_en_awg(config.awg.mod_en)
-        if config.awg.gain_path0:
-            sequencer.gain_awg_path0(config.awg.gain_path0)
-        if config.awg.gain_path1:
-            sequencer.gain_awg_path1(config.awg.gain_path1)
-        if config.awg.offset_path0:
-            sequencer.offset_awg_path0(config.awg.offset_path0)
-        if config.awg.offset_path1:
-            sequencer.offset_awg_path1(config.awg.offset_path1)
+    def configure_awg(self, sequencer: Sequencer):
+        if self.sequencer_config.awg.mod_en:
+            sequencer.mod_en_awg(self.sequencer_config.awg.mod_en)
+        if self.sequencer_config.awg.gain_path0:
+            sequencer.gain_awg_path0(self.sequencer_config.awg.gain_path0)
+        if self.sequencer_config.awg.gain_path1:
+            sequencer.gain_awg_path1(self.sequencer_config.awg.gain_path1)
+        if self.sequencer_config.awg.offset_path0:
+            sequencer.offset_awg_path0(self.sequencer_config.awg.offset_path0)
+        if self.sequencer_config.awg.offset_path1:
+            sequencer.offset_awg_path1(self.sequencer_config.awg.offset_path1)
 
-        if config.awg.cont_mode_en_path0:
-            sequencer.cont_mode_en_awg_path0(config.awg.cont_mode_en_path0)
-        if config.awg.cont_mode_en_path1:
-            sequencer.cont_mode_en_awg_path1(config.awg.cont_mode_en_path1)
-        if config.awg.cont_mode_waveform_idx_path0:
+        if self.sequencer_config.awg.cont_mode_en_path0:
+            sequencer.cont_mode_en_awg_path0(self.sequencer_config.awg.cont_mode_en_path0)
+        if self.sequencer_config.awg.cont_mode_en_path1:
+            sequencer.cont_mode_en_awg_path1(self.sequencer_config.awg.cont_mode_en_path1)
+        if self.sequencer_config.awg.cont_mode_waveform_idx_path0:
             sequencer.cont_mode_waveform_idx_awg_path0(
-                config.awg.cont_mode_waveform_idx_path0
+                self.sequencer_config.awg.cont_mode_waveform_idx_path0
             )
-        if config.awg.cont_mode_waveform_idx_path1:
+        if self.sequencer_config.awg.cont_mode_waveform_idx_path1:
             sequencer.cont_mode_waveform_idx_awg_path1(
-                config.awg.cont_mode_waveform_idx_path1
+                self.sequencer_config.awg.cont_mode_waveform_idx_path1
             )
 
-        if config.awg.cont_mode_en_path0:
-            sequencer.cont_mode_en_awg_path0(config.awg.cont_mode_en_path0)
-        if config.awg.cont_mode_en_path1:
-            sequencer.cont_mode_en_awg_path1(config.awg.cont_mode_en_path1)
-        if config.awg.cont_mode_waveform_idx_path0:
+        if self.sequencer_config.awg.cont_mode_en_path0:
+            sequencer.cont_mode_en_awg_path0(self.sequencer_config.awg.cont_mode_en_path0)
+        if self.sequencer_config.awg.cont_mode_en_path1:
+            sequencer.cont_mode_en_awg_path1(self.sequencer_config.awg.cont_mode_en_path1)
+        if self.sequencer_config.awg.cont_mode_waveform_idx_path0:
             sequencer.cont_mode_waveform_idx_awg_path0(
-                config.awg.cont_mode_waveform_idx_path0
+                self.sequencer_config.awg.cont_mode_waveform_idx_path0
             )
-        if config.awg.cont_mode_waveform_idx_path1:
+        if self.sequencer_config.awg.cont_mode_waveform_idx_path1:
             sequencer.cont_mode_waveform_idx_awg_path1(
-                config.awg.cont_mode_waveform_idx_path1
+                self.sequencer_config.awg.cont_mode_waveform_idx_path1
             )
 
-    def configure_mixer(self, sequencer: Sequencer, config: SequencerConfig):
-        if config.mixer.phase_offset:
-            sequencer.mixer_corr_phase_offset_degree(config.mixer.phase_offset)
-        if config.mixer.gain_ratio:
-            sequencer.mixer_corr_gain_ratio(config.mixer.gain_ratio)
+    def configure_mixer(self, sequencer: Sequencer):
+        if self.sequencer_config.mixer.phase_offset:
+            sequencer.mixer_corr_phase_offset_degree(
+                self.sequencer_config.mixer.phase_offset
+            )
+        if self.sequencer_config.mixer.gain_ratio:
+            sequencer.mixer_corr_gain_ratio(self.sequencer_config.mixer.gain_ratio)
 
     def calibrate_mixer(self, module: Module, sequencer: Sequencer):
         """
@@ -255,10 +258,10 @@ class QbloxConfigHelper(ABC):
         self.calibrate_sideband(sequencer)
 
     @abstractmethod
-    def calibrate_lo_leakage(self, module):
+    def calibrate_lo_leakage(self, module: Module):
         pass
 
-    def calibrate_sideband(self, sequencer):
+    def calibrate_sideband(self, sequencer: Sequencer):
         sequencer.sideband_cal()
         sequencer.arm_sequencer()
         sequencer.start_sequencer()
@@ -269,99 +272,107 @@ class QcmConfigHelper(QbloxConfigHelper):
 
 
 class QcmRfConfigHelper(QcmConfigHelper):
-    def configure_module(self, module, config):
-        self.configure_lo(module, config)
-        self.configure_attenuation(module, config)
-        self.configure_offset(module, config)
+    def configure_module(self, module: Module):
+        self.configure_lo(module)
+        self.configure_attenuation(module)
+        self.configure_offset(module)
 
-    def configure_sequencer(self, sequencer, config):
-        self.configure_connection(sequencer, config)
-        self.configure_nco(sequencer, config)
-        self.configure_awg(sequencer, config)
-        self.configure_mixer(sequencer, config)
+    def configure_sequencer(self, sequencer: Sequencer):
+        self.configure_connection(sequencer)
+        self.configure_nco(sequencer)
+        self.configure_awg(sequencer)
+        self.configure_mixer(sequencer)
 
-    def configure_lo(self, module, config):
-        if config.lo.out0_en:
-            module.out0_lo_en(config.lo.out0_en)  # Switch the LO 0 on
-        if config.lo.out0_freq:
-            module.out0_lo_freq(config.lo.out0_freq)
-        if config.lo.out1_en:
-            module.out1_lo_en(config.lo.out1_en)  # Switch the LO 1 on
-        if config.lo.out1_freq:
-            module.out1_lo_freq(config.lo.out1_freq)
+    def configure_lo(self, module: Module):
+        if self.module_config.lo.out0_en:
+            module.out0_lo_en(self.module_config.lo.out0_en)  # Switch the LO 0 on
+        if self.module_config.lo.out0_freq:
+            module.out0_lo_freq(self.module_config.lo.out0_freq)
+        if self.module_config.lo.out1_en:
+            module.out1_lo_en(self.module_config.lo.out1_en)  # Switch the LO 1 on
+        if self.module_config.lo.out1_freq:
+            module.out1_lo_freq(self.module_config.lo.out1_freq)
 
-    def configure_attenuation(self, module, config):
-        if config.attenuation.out0:
-            module.out0_att(config.attenuation.out0)
-        if config.attenuation.out1:
-            module.out1_att(config.attenuation.out1)
+    def configure_attenuation(self, module: Module):
+        if self.module_config.attenuation.out0:
+            module.out0_att(self.module_config.attenuation.out0)
+        if self.module_config.attenuation.out1:
+            module.out1_att(self.module_config.attenuation.out1)
 
-    def configure_offset(self, module, config):
-        if config.offset.out0_path0:
-            module.out0_offset_path0(config.offset.out0_path0)
-        if config.offset.out0_path1:
-            module.out0_offset_path1(config.offset.out0_path1)
-        if config.offset.out1_path0:
-            module.out1_offset_path0(config.offset.out1_path0)
-        if config.offset.out1_path1:
-            module.out1_offset_path1(config.offset.out1_path1)
+    def configure_offset(self, module: Module):
+        if self.module_config.offset.out0_path0:
+            module.out0_offset_path0(self.module_config.offset.out0_path0)
+        if self.module_config.offset.out0_path1:
+            module.out0_offset_path1(self.module_config.offset.out0_path1)
+        if self.module_config.offset.out1_path0:
+            module.out1_offset_path0(self.module_config.offset.out1_path0)
+        if self.module_config.offset.out1_path1:
+            module.out1_offset_path1(self.module_config.offset.out1_path1)
 
-    def calibrate_lo_leakage(self, module):
+    def calibrate_lo_leakage(self, module: Module):
         module.out0_lo_cal()
         module.out1_lo_cal()
 
 
 class QrmConfigHelper(QbloxConfigHelper):
-    def configure_scope_acq(self, module, config):
-        scope_acq = config.scope_acq
+    def configure_scope_acq(self, module: Module):
+        scope_acq = self.module_config.scope_acq
+        if scope_acq.sequencer_select:
+            module.scope_acq_sequencer_select(scope_acq.sequencer_select)
+        if scope_acq.trigger_mode_path0:
+            module.scope_acq_trigger_mode_path0(scope_acq.trigger_mode_path0)
         if scope_acq.avg_mode_en_path0:
             module.scope_acq_avg_mode_en_path0(scope_acq.avg_mode_en_path0)
+        if scope_acq.trigger_mode_path1:
+            module.scope_acq_trigger_mode_path1(scope_acq.trigger_mode_path1)
         if scope_acq.avg_mode_en_path1:
             module.scope_acq_avg_mode_en_path1(scope_acq.avg_mode_en_path1)
 
 
 class QrmRfConfigHelper(QrmConfigHelper):
-    def configure_module(self, module, config):
-        self.configure_lo(module, config)
-        self.configure_attenuation(module, config)
-        self.configure_offset(module, config)
-        self.configure_scope_acq(module, config)
+    def configure_module(self, module: Module):
+        self.configure_lo(module)
+        self.configure_attenuation(module)
+        self.configure_offset(module)
+        self.configure_scope_acq(module)
 
-    def configure_sequencer(self, sequencer, config):
-        self.configure_connection(sequencer, config)
-        self.configure_nco(sequencer, config)
-        self.configure_awg(sequencer, config)
-        self.configure_mixer(sequencer, config)
-        self.configure_acq(sequencer, config)
+    def configure_sequencer(self, sequencer: Sequencer):
+        self.configure_connection(sequencer)
+        self.configure_nco(sequencer)
+        self.configure_awg(sequencer)
+        self.configure_mixer(sequencer)
+        self.configure_acq(sequencer)
 
-    def configure_lo(self, module, config):
-        if config.lo.out0_in0_en:
-            module.out0_in0_lo_en(config.lo.out0_in0_en)  # Switch the LO on
-        if config.lo.out0_in0_freq:
-            module.out0_in0_lo_freq(config.lo.out0_in0_freq)
+    def configure_lo(self, module: Module):
+        if self.module_config.lo.out0_in0_en:
+            module.out0_in0_lo_en(self.module_config.lo.out0_in0_en)  # Switch the LO on
+        if self.module_config.lo.out0_in0_freq:
+            module.out0_in0_lo_freq(self.module_config.lo.out0_in0_freq)
 
-    def configure_attenuation(self, module, config):
-        if config.attenuation.out0:
-            module.out0_att(config.attenuation.out0)
-        if config.attenuation.in0:
-            module.in0_att(config.attenuation.in0)
+    def configure_attenuation(self, module: Module):
+        if self.module_config.attenuation.out0:
+            module.out0_att(self.module_config.attenuation.out0)
+        if self.module_config.attenuation.in0:
+            module.in0_att(self.module_config.attenuation.in0)
 
-    def configure_offset(self, module, config):
-        if config.offset.out0_path0:
-            module.out0_offset_path0(config.offset.out0_path0)
-        if config.offset.out0_path1:
-            module.out0_offset_path1(config.offset.out0_path1)
-        if config.offset.in0_path0:
-            module.in0_offset_path0(config.offset.in0_path0)
-        if config.offset.in0_path1:
-            module.in0_offset_path1(config.offset.in0_path1)
+    def configure_offset(self, module: Module):
+        if self.module_config.offset.out0_path0:
+            module.out0_offset_path0(self.module_config.offset.out0_path0)
+        if self.module_config.offset.out0_path1:
+            module.out0_offset_path1(self.module_config.offset.out0_path1)
+        if self.module_config.offset.in0_path0:
+            module.in0_offset_path0(self.module_config.offset.in0_path0)
+        if self.module_config.offset.in0_path1:
+            module.in0_offset_path1(self.module_config.offset.in0_path1)
 
-    def configure_acq(self, sequencer, config):
+    def configure_acq(self, sequencer: Sequencer):
         # Square weight integration
-        if config.demod_en_acq:
-            sequencer.demod_en_acq(config.demod_en_acq)
-        if config.square_weight_acq.integration_length:
-            sequencer.integration_length_acq(config.square_weight_acq.integration_length)
+        if self.sequencer_config.demod_en_acq:
+            sequencer.demod_en_acq(self.sequencer_config.demod_en_acq)
+        if self.sequencer_config.square_weight_acq.integration_length:
+            sequencer.integration_length_acq(
+                self.sequencer_config.square_weight_acq.integration_length
+            )
 
-    def calibrate_lo_leakage(self, module):
+    def calibrate_lo_leakage(self, module: Module):
         module.out0_in0_lo_cal()

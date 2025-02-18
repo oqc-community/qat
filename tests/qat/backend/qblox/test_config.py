@@ -13,7 +13,6 @@ from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 from qat.purr.backends.qblox.codegen import QbloxEmitter, calculate_duration
 from qat.purr.backends.qblox.config import (
     ModuleConfig,
-    QbloxConfig,
     QcmConfigHelper,
     QcmRfConfigHelper,
     QrmConfigHelper,
@@ -164,7 +163,6 @@ class TestMixerConfig(TestQbloxConfigMixin):
     def test_qcm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
         module_config = ModuleConfig()
         seq_idx, sequencer_config = 0, SequencerConfig()
-        config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
@@ -180,7 +178,7 @@ class TestMixerConfig(TestQbloxConfigMixin):
 
         self.setup_qcm_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
-        QcmConfigHelper(config).configure(module, sequencer)
+        QcmConfigHelper(module_config, sequencer_config).configure(module, sequencer)
 
         assert module.out0_offset() == module_config.offset.out0
         assert module.out1_offset() == module_config.offset.out1
@@ -196,7 +194,6 @@ class TestMixerConfig(TestQbloxConfigMixin):
     ):
         module_config = ModuleConfig()
         seq_idx, sequencer_config = 0, SequencerConfig()
-        config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
@@ -208,7 +205,7 @@ class TestMixerConfig(TestQbloxConfigMixin):
 
         self.setup_qcm_rf_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
-        QcmRfConfigHelper(config).configure(module, sequencer)
+        QcmRfConfigHelper(module_config, sequencer_config).configure(module, sequencer)
 
         assert module.out0_offset_path0() == module_config.offset.out0_path0
         assert module.out0_offset_path1() == module_config.offset.out0_path1
@@ -223,7 +220,6 @@ class TestMixerConfig(TestQbloxConfigMixin):
     def test_qrm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
         module_config = ModuleConfig()
         seq_idx, sequencer_config = 0, SequencerConfig()
-        config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
@@ -239,7 +235,7 @@ class TestMixerConfig(TestQbloxConfigMixin):
 
         self.setup_qrm_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
-        QrmConfigHelper(config).configure(module, sequencer)
+        QrmConfigHelper(module_config, sequencer_config).configure(module, sequencer)
 
         assert module.out0_offset() == module_config.offset.out0
         assert module.out1_offset() == module_config.offset.out1
@@ -255,7 +251,6 @@ class TestMixerConfig(TestQbloxConfigMixin):
     ):
         module_config = ModuleConfig()
         seq_idx, sequencer_config = 0, SequencerConfig()
-        config = QbloxConfig(module=module_config, sequencers={seq_idx: sequencer_config})
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
@@ -267,7 +262,7 @@ class TestMixerConfig(TestQbloxConfigMixin):
 
         self.setup_qrm_rf_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
-        QrmRfConfigHelper(config).configure(module, sequencer)
+        QrmRfConfigHelper(module_config, sequencer_config).configure(module, sequencer)
 
         assert module.out0_offset_path0() == module_config.offset.out0_path0
         assert module.out0_offset_path1() == module_config.offset.out0_path1
