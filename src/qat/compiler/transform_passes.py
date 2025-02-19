@@ -40,7 +40,7 @@ from qat.purr.compiler.instructions import (
     Pulse,
 )
 from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
-from qat.purr.integrations.tket import run_tket_optimizations
+from qat.purr.integrations.tket import run_tket_optimizations_qasm
 
 
 class PhaseOptimisation(TransformPass):
@@ -194,7 +194,7 @@ class InputOptimisation(TransformPass):
             isinstance(optimizations, Tket)
             and optimizations.tket_optimizations != TketOptimizations.Empty
         ):
-            qasm_string = run_tket_optimizations(
+            qasm_string = run_tket_optimizations_qasm(
                 qasm_string, optimizations.tket_optimizations, self.hardware
             )
 

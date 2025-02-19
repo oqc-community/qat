@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 from compiler_config.config import (
+    InlineResultsProcessing,
     MetricsType,
     OptimizationConfig,
     Qiskit,
@@ -13,7 +14,10 @@ from qiskit.transpiler import TranspilerError
 
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.metrics import MetricsMixin
-from qat.purr.integrations.tket import run_tket_optimizations
+from qat.purr.integrations.tket import (
+    run_tket_optimizations_qasm,
+    run_tket_optimizations_qir,
+)
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -37,7 +41,7 @@ class DefaultOptimizers(MetricsMixin):
                 isinstance(optimizations, Tket)
                 and optimizations.tket_optimizations != TketOptimizations.Empty
             ):
-                qasm_string = run_tket_optimizations(
+                qasm_string = run_tket_optimizations_qasm(
                     qasm_string, optimizations.tket_optimizations, hardware
                 )
 
@@ -53,6 +57,20 @@ class DefaultOptimizers(MetricsMixin):
 
             self.record_metric(MetricsType.OptimizedCircuit, qasm_string)
             return qasm_string
+
+    def optimize_qir(
+        self,
+        qir_string: str,
+        hardware: QuantumHardwareModel,
+        optimizations: OptimizationConfig,
+        results_format: InlineResultsProcessing = None,
+    ):
+        """Run TKET optimizers on QIR input, returning the circuit as a QASM file."""
+        with log_duration("QIR optimization took {} seconds."):
+            builder = run_tket_optimizations_qir(
+                qir_string, optimizations.tket_optimizations, hardware, results_format
+            )
+        return builder
 
     def run_qiskit_optimization(self, qasm_string, level):
         """

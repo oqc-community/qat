@@ -6,7 +6,13 @@ import tempfile
 from typing import Tuple
 
 import regex
-from compiler_config.config import CompilerConfig, Languages, get_optimizer_config
+from compiler_config.config import (
+    CompilerConfig,
+    Languages,
+    Tket,
+    TketOptimizations,
+    get_optimizer_config,
+)
 
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
@@ -94,15 +100,33 @@ class QIRFrontend(LanguageFrontend):
         metrics = CompilationMetrics()
         metrics.enable(compiler_config.metrics)
 
-        parser = QIRParser(hardware)
         if compiler_config.optimizations is None:
             compiler_config.optimizations = get_optimizer_config(Languages.QIR)
 
-        if compiler_config.results_format.format is not None:
-            parser.results_format = compiler_config.results_format.format
+        with log_duration("Compilation completed, took {} seconds."):
+            log.info(f"Processing QIR  as parser and {str(hardware)} as hardware.")
 
-        quantum_builder = parser.parse(path_or_str)
-        return self._build_instructions(quantum_builder, hardware, compiler_config), metrics
+            optimizations = compiler_config.optimizations
+            if (
+                isinstance(optimizations, Tket)
+                and optimizations.tket_optimizations != TketOptimizations.Empty
+            ):
+                quantum_builder = DefaultOptimizers(metrics).optimize_qir(
+                    path_or_str,
+                    get_model(hardware),
+                    compiler_config.optimizations,
+                    compiler_config.results_format.format,
+                )
+            else:
+                parser = QIRParser(
+                    hardware, results_format=compiler_config.results_format.format
+                )
+                quantum_builder = parser.parse(path_or_str)
+
+            return (
+                self._build_instructions(quantum_builder, hardware, compiler_config),
+                metrics,
+            )
 
     def parse(
         self, path_or_str: str, hardware=None, compiler_config: CompilerConfig = None

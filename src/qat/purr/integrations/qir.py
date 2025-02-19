@@ -34,13 +34,14 @@ class QIRParser:
         self,
         hardware: Union[QuantumHardwareModel, InstructionExecutionEngine],
         builder=None,
+        results_format=None,
     ):
         if isinstance(hardware, InstructionExecutionEngine):
             hardware = hardware.model
 
         self.hardware: QuantumHardwareModel = hardware
         self.builder: InstructionBuilder = builder or get_builder(hardware)
-        self.results_format = InlineResultsProcessing.Program
+        self.results_format = results_format or InlineResultsProcessing.Program
         self.result_variables = []
 
     def _get_qubit(self, id_: int):
@@ -100,6 +101,12 @@ class QIRParser:
 
     def z(self, qubit: int):
         self.builder.Z(self._get_qubit(qubit))
+
+    def returns(self, result_name=None):
+        self.builder.returns(result_name)
+
+    def assign(self, name, value):
+        self.builder.assign(name, value)
 
     def process_instructions(self, instructions):
         for inst in instructions:
@@ -219,10 +226,10 @@ class QIRParser:
                 else:
                     result_name = "_".join(potential_names)
 
-                self.builder.assign(result_name, [val[0] for val in self.result_variables])
-                self.builder.returns(result_name)
+                self.assign(result_name, [val[0] for val in self.result_variables])
+                self.returns(result_name)
             else:
-                self.builder.returns()
+                self.returns()
 
             complete_builder = self.builder
             self.builder = get_builder(self.hardware)

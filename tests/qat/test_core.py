@@ -69,6 +69,7 @@ skip_qasm3 = [
 skip_qir = [
     "teleportchain.ll",
     "bell_qir_measure.bc",
+    "cudaq-ghz.ll",  # test is designed to fail for no TKET optims
 ]
 
 
@@ -312,6 +313,10 @@ class TestQATParity:
         self, request, qir_file: str, hardware_model, compiler_config, monkeypatch
     ):
         """Test that the same instructions are generated with both stacks."""
+
+        # skip if using Tket placement
+        if request.node.callspec._idlist[2] != TketOptimizations.Empty:
+            pytest.skip()
 
         monkeypatch.setattr(Instruction, "__eq__", equivalent_vars)
         monkeypatch.setattr(Variable, "__eq__", equivalent_vars)

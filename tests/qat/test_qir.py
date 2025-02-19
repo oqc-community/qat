@@ -6,7 +6,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from compiler_config.config import CompilerConfig
+from compiler_config.config import CompilerConfig, Tket
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
@@ -45,8 +45,11 @@ class TestQIR:
             get_default_echo_hardware(2),
         )
 
-    def test_qir_bell(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_qir_bell(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.squash_binary_result_arrays()
         results = execute_qir(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
@@ -63,7 +66,6 @@ class TestQIR:
             get_test_file_path(ProgramFileType.QIR, "basic_cudaq.ll"),
             get_default_echo_hardware(6),
         )
-
         assert results.get("r00000") == [0]
 
     @pytest.mark.skip("Needs full runtime.")
@@ -106,32 +108,44 @@ class TestQIR:
         builder = parser.parse(_get_qir_path("generator-bell.ll"))
         assert len(builder.instructions) == 96
 
-    def test_common_entrypoint_file(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_common_entrypoint_file(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         results = execute(
             _get_qir_path("generator-bell.ll"), get_default_echo_hardware(4), config
         )
         assert results == {"00": 1000}
 
-    def test_common_entrypoint_string(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_common_entrypoint_string(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         results = execute(
             _get_contents("generator-bell.ll"), get_default_echo_hardware(4), config
         )
         assert results == {"00": 1000}
 
-    def test_common_entrypoint_bitcode(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_common_entrypoint_bitcode(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         program = _get_contents("base64_bitcode_ghz")
         program = base64.b64decode(program)
         results = execute(program, get_default_echo_hardware(4), config)
         assert results == {"0": 1000}
 
-    def test_invalid_QIR(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_invalid_QIR(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         with pytest.raises(ValueError):
             execute("", get_default_echo_hardware(4), config)
@@ -219,8 +233,11 @@ class TestQIR:
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
     )
-    def test_qir_bell_binary_count(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_qir_bell_binary_count(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         results = execute_qir(_get_qir_path("generator-bell.ll"), compiler_config=config)
         assert len(results) == 4
@@ -232,8 +249,11 @@ class TestQIR:
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
     )
-    def test_qir_out_of_order_measure_declaration(self):
-        config = CompilerConfig()
+    @pytest.mark.parametrize(
+        "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
+    )
+    def test_qir_out_of_order_measure_declaration(self, optim_config):
+        config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         results = execute_qir(
             _get_qir_path("out_of_order_measure.ll"), compiler_config=config
@@ -278,3 +298,21 @@ class TestQIR:
 
         with pytest.raises(TypeError):
             execute_qir(qat_input=builder.instructions)
+
+    def test_cudaq_ghz(self):
+        """Tests routing via Tket qubit placement gives a program that executes."""
+        config = CompilerConfig(optimizations=Tket().disable())
+        config.results_format.binary_count()
+        with pytest.raises(ValueError):
+            results = execute_qir(
+                _get_qir_path("cudaq-ghz.ll"), get_default_echo_hardware(10), config
+            )
+
+        config = CompilerConfig(optimizations=Tket().minimum())
+        config.results_format.binary_count()
+        results = execute_qir(
+            _get_qir_path("cudaq-ghz.ll"), get_default_echo_hardware(10), config
+        )
+        res = next(iter(results.values()))
+        assert len(res) == 1
+        assert "000" in res

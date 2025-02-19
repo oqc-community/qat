@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
+import numpy as np
 import pytest
 from compiler_config.config import Qasm2Optimizations, TketOptimizations
+from pytket import Circuit
 from pytket.architecture import Architecture, RingArch
 
+from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.compiler.devices import Qubit
+from qat.purr.compiler.instructions import PhaseShift
 from qat.purr.integrations.tket import (
     TketBuilder,
     TketQasmParser,
+    TketToQatIRConverter,
     get_coupling_subgraphs,
     optimize_circuit,
 )
@@ -94,3 +100,47 @@ class TestTketOptimization:
 
     def test_full_peephole(self):
         assert self._run_random(TketOptimizations.FullPeepholeOptimise)
+
+
+class TestTketToQatIRConverter:
+
+    def test_get_qubit(self):
+        model = get_default_echo_hardware(10)
+        converter = TketToQatIRConverter(model)
+        for i in range(10):
+            qubit = converter.get_qubit(i)
+            assert isinstance(qubit, Qubit)
+            assert qubit.index == i
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            ("0.5", 0.5),
+            ("1/2", 0.5),
+            ("0", 0.0),
+            ("0.254", 0.254),
+            ("1", 1.0),
+            ("-4/3", -4 / 3),
+        ],
+    )
+    def test_convert_parameter(self, params):
+        np.isclose(TketToQatIRConverter.convert_parameter(params[0]), params[1] * np.pi)
+
+    def test_basic_commands(self):
+        model = get_default_echo_hardware(10)
+        converter = TketToQatIRConverter(model)
+        circ = Circuit(2).Ry(4 / 3, 0).Rx(0.254 / np.pi, 1).Rz(1 / 2, 1).CX(1, 0).ECR(0, 1)
+        builder = converter.convert(circ)
+        direct_builder = model.create_builder()
+        q0 = model.get_qubit(0)
+        q1 = model.get_qubit(1)
+        direct_builder.Y(q0, 4 * np.pi / 3).X(q1, 0.254).Z(q1, np.pi / 2).cnot(q1, q0).ECR(
+            q0, q1
+        )
+        for i, inst in enumerate(builder.instructions):
+            assert type(inst) == type(direct_builder.instructions[i])
+            if isinstance(inst, PhaseShift):
+                assert np.isclose(
+                    inst.phase % (2 * np.pi),
+                    direct_builder.instructions[i].phase % (2 * np.pi),
+                )
