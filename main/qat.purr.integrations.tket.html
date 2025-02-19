@@ -17,6 +17,7 @@
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -286,6 +287,118 @@ as the API is a little too different.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketQIRParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser" title="qat.purr.integrations.qir.QIRParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">QIRParser</span></code></a></p>
+<p>QIR parser than turns circuits into Tket structures.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.assign">
+<span class="sig-name descname"><span class="pre">assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.assign" title="Link to this definition"></a></dt>
+<dd><p>Assigns are dealt with upon converting back to QatIR.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.builder">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.builder" title="Link to this definition"></a></dt>
+<dd><p>Returns the circuit and variables for where results are stored in Qat IR.</p>
+<p>This property overwrites the “builder” in the <code class="xref py py-class docutils literal notranslate"><span class="pre">QIRParser</span></code> so that the circuit
+and output variables are returned in its place.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.ccx">
+<span class="sig-name descname"><span class="pre">ccx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.ccx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.cx">
+<span class="sig-name descname"><span class="pre">cx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.cx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.cz">
+<span class="sig-name descname"><span class="pre">cz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.cz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.h">
+<span class="sig-name descname"><span class="pre">h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.h" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.mz">
+<span class="sig-name descname"><span class="pre">mz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.mz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.normalize_parameter">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.normalize_parameter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.reset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.returns">
+<span class="sig-name descname"><span class="pre">returns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.returns" title="Link to this definition"></a></dt>
+<dd><p>Returns are dealt with upon converting back to QatIR.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.rx">
+<span class="sig-name descname"><span class="pre">rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.rx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.ry">
+<span class="sig-name descname"><span class="pre">ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.ry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.rz">
+<span class="sig-name descname"><span class="pre">rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.rz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.s">
+<span class="sig-name descname"><span class="pre">s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.s" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.s_adj">
+<span class="sig-name descname"><span class="pre">s_adj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.s_adj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.t">
+<span class="sig-name descname"><span class="pre">t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.t" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.t_adj">
+<span class="sig-name descname"><span class="pre">t_adj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.t_adj" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.x">
+<span class="sig-name descname"><span class="pre">x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.x" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.y">
+<span class="sig-name descname"><span class="pre">y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.y" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQIRParser.z">
+<span class="sig-name descname"><span class="pre">z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.z" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.integrations.tket.TketQasmParser">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketQasmParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_result_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketQasmParser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser" title="qat.purr.integrations.qasm.Qasm2Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm2Parser</span></code></a></p>
@@ -350,6 +463,40 @@ more mature.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketToQatIRConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Converts a Tket circuit into Qat IR.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter.convert" title="Link to this definition"></a></dt>
+<dd><p>Converts a Tket circuit into Qat IR, adding any necesarry assigns and returns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.integrations.tket.TketToQatIRConverter.convert.params.circuit"></span><strong>circuit</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.TketToQatIRConverter.convert.params.circuit">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circuit</span></code></span>) – Program as a Tket circuit.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.TketToQatIRConverter.convert.params.result_format"></span><strong>result_format</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.TketToQatIRConverter.convert.params.result_format">¶</a> – Specifies how measurement results are formatted.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter.convert_parameter">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter.convert_parameter" title="Link to this definition"></a></dt>
+<dd><p>A parameter stored in a Tket operation is in units of <span class="math notranslate nohighlight">\(\pi\)</span>. Parameters
+are returned as a string, sometimes in fractional form: we need to convert it to an
+absolute value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter.get_qubit">
+<span class="sig-name descname"><span class="pre">get_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter.get_qubit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.integrations.tket.apply_default_transforms">
 <span class="sig-name descname"><span class="pre">apply_default_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.apply_default_transforms" title="Link to this definition"></a></dt>
@@ -380,14 +527,64 @@ this returns a list of connected subgraphs</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.integrations.tket.run_tket_optimizations">
-<span class="sig-name descname"><span class="pre">run_tket_optimizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.run_tket_optimizations" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_tket_optimizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.run_tket_optimizations" title="Link to this definition"></a></dt>
 <dd><p>Runs tket-based optimizations and modifications. Routing will always happen no
 matter the level.</p>
 <p>Will run optimizations in sections if a full suite fails until a minimal subset of
 passing optimizations is found.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations.params.circ"></span><strong>circ</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations.params.circ">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circuit</span></code></span>) – Tket circuit to optimize. The source file must be already parsed to a
+TKET circuit.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations.params.opts"></span><strong>opts</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations.params.opts">¶</a> – Specifies which TKET optimizations to run.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations.params.hardware"></span><strong>hardware</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations.params.hardware">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is used for routing and placement purposes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Circuit</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.run_tket_optimizations_qasm">
+<span class="sig-name descname"><span class="pre">run_tket_optimizations_qasm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.run_tket_optimizations_qasm" title="Link to this definition"></a></dt>
+<dd><p>Runs tket-based optimizations and modifications. Routing will always happen no
+matter the level.</p>
+<p>Will run optimizations in sections if a full suite fails until a minimal subset of
+passing optimizations is found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qasm.params.qasm_string"></span><strong>qasm_string</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qasm.params.qasm_string">¶</a> – The circuit as a QASM string.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qasm.params.opts"></span><strong>opts</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qasm.params.opts">¶</a> – Specifies which TKET optimizations to run.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qasm.params.hardware"></span><strong>hardware</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qasm.params.hardware">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is used for routing and placement purposes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.purr.integrations.tket.run_tket_optimizations_qir">
+<span class="sig-name descname"><span class="pre">run_tket_optimizations_qir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.run_tket_optimizations_qir" title="Link to this definition"></a></dt>
+<dd><p>Runs tket-based optimizations and modifications. Routing will always happen no
+matter the level.</p>
+<p>Will run optimizations in sections if a full suite fails until a minimal subset of
+passing optimizations is found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qir.params.file_or_str"></span><strong>file_or_str</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qir.params.file_or_str">¶</a> – The QIR program as a string, or its file path.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qir.params.opts"></span><strong>opts</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qir.params.opts">¶</a> – Specifies which TKET optimizations to run.</p></li>
+<li><p><span class="target" id="qat.purr.integrations.tket.run_tket_optimizations_qir.params.hardware"></span><strong>hardware</strong><a class="paramlink headerlink reference internal" href="#qat.purr.integrations.tket.run_tket_optimizations_qir.params.hardware">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is used for routing and placement purposes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
