@@ -468,6 +468,12 @@ more mature.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TketToQatIRConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Converts a Tket circuit into Qat IR.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This converter is only intended to be used to convert a TKET circuit into QAT IR
+after being parsed from QIR. It does not account for multiple quantum and classical
+registers, and might give undesired behaviour if used outside of this use case.</p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter.convert">
 <span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter.convert" title="Link to this definition"></a></dt>
@@ -493,7 +499,8 @@ absolute value.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.integrations.tket.TketToQatIRConverter.get_qubit">
 <span class="sig-name descname"><span class="pre">get_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.integrations.tket.TketToQatIRConverter.get_qubit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Maps a Tket logical qubit index onto a physical qubit.</p>
+</dd></dl>
 
 </dd></dl>
 
