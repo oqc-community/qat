@@ -316,7 +316,13 @@ class TketQIRParser(QIRParser):
 
 
 class TketToQatIRConverter:
-    """Converts a Tket circuit into Qat IR."""
+    """Converts a Tket circuit into Qat IR.
+
+    .. warning::
+        This converter is only intended to be used to convert a TKET circuit into QAT IR
+        after being parsed from QIR. It does not account for multiple quantum and classical
+        registers, and might give undesired behaviour if used outside of this use case.
+    """
 
     def __init__(self, model: QuantumHardwareModel):
         self.model = model
@@ -324,7 +330,8 @@ class TketToQatIRConverter:
         self.output_variables = []
 
     def get_qubit(self, index: int):
-        return self.model.get_qubit(index)
+        """Maps a Tket logical qubit index onto a physical qubit."""
+        return self.model.qubits[index]
 
     @staticmethod
     def convert_parameter(arg: str):

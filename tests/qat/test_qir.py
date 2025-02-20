@@ -301,18 +301,25 @@ class TestQIR:
 
     def test_cudaq_ghz(self):
         """Tests routing via Tket qubit placement gives a program that executes."""
+        model = get_default_echo_hardware(10)
         config = CompilerConfig(optimizations=Tket().disable())
         config.results_format.binary_count()
         with pytest.raises(ValueError):
-            results = execute_qir(
-                _get_qir_path("cudaq-ghz.ll"), get_default_echo_hardware(10), config
-            )
+            results = execute_qir(_get_qir_path("cudaq-ghz.ll"), model, config)
 
         config = CompilerConfig(optimizations=Tket().minimum())
         config.results_format.binary_count()
-        results = execute_qir(
-            _get_qir_path("cudaq-ghz.ll"), get_default_echo_hardware(10), config
-        )
+        results = execute_qir(_get_qir_path("cudaq-ghz.ll"), model, config)
         res = next(iter(results.values()))
         assert len(res) == 1
         assert "000" in res
+
+    def test_tket_with_shifted_indices(self):
+        """Tests routing via Tket qubit placement gives a program that executes."""
+        model = get_jagged_echo_hardware(2)
+
+        config = CompilerConfig(optimizations=Tket().minimum())
+        config.results_format.binary_count()
+        results = execute_qir(_get_qir_path("generator-bell.ll"), model, config)
+        assert len(results) == 1
+        assert "00" in results
