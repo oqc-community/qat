@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+from random import seed
+
 import pytest
 from compiler_config.config import Qasm2Optimizations
 from numpy import array, random
@@ -43,13 +45,9 @@ class TestQiskitBackend:
             results = runtime.execute(builder)
             assert len(results) > 0
 
-    @pytest.mark.parametrize(
-        "hardware",
-        [
-            get_default_qiskit_hardware(35),
-        ],
-    )
-    def test_coupled_qasm_hardware(self, hardware):
+    def test_coupled_qasm_hardware(self):
+        seed(4)
+        hardware = get_default_qiskit_hardware(35)
         builder = self.parse_and_apply_optimiziations(hardware, "15qb.qasm")
         runtime = hardware.create_runtime()
         results = runtime.execute(builder)
