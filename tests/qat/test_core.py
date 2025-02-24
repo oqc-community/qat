@@ -9,9 +9,11 @@ import pytest
 from compiler_config.config import (
     CompilerConfig,
     ErrorMitigationConfig,
+    Languages,
     QuantumResultsFormat,
     Tket,
     TketOptimizations,
+    get_optimizer_config,
 )
 
 from qat import QAT
@@ -314,9 +316,17 @@ class TestQATParity:
     ):
         """Test that the same instructions are generated with both stacks."""
 
-        # skip if using Tket placement
-        if request.node.callspec._idlist[2] != TketOptimizations.Empty:
-            pytest.skip()
+        # Tket placement is not yet supported for QIR in the experimental stack: we need to
+        # infer from the compiler config which optimizations will be performed and skip if
+        # placement is happening.
+        if not compiler_config or not compiler_config.optimizations:
+            optim_config = get_optimizer_config(Languages.QIR)
+        else:
+            optim_config = compiler_config.optimizations
+        if isinstance(optim_config, Tket) and TketOptimizations.Empty not in optim_config:
+            pytest.skip(
+                "QIR with placement is not yet implemented in the experimental stack."
+            )
 
         monkeypatch.setattr(Instruction, "__eq__", equivalent_vars)
         monkeypatch.setattr(Variable, "__eq__", equivalent_vars)
