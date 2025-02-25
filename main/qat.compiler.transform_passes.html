@@ -262,6 +262,29 @@
   <section id="module-qat.compiler.transform_passes">
 <span id="qat-compiler-transform-passes-module"></span><h1>qat.compiler.transform_passes module<a class="headerlink" href="#module-qat.compiler.transform_passes" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.EchoAcquireSanitisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoAcquireSanitisation</span></span><a class="headerlink" href="#qat.compiler.transform_passes.EchoAcquireSanitisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Changes <cite>AcquireMode.INTEGRATOR</cite> acquisitions to <cite>AcquireMode.RAW</cite>.</p>
+<p>The legacy echo engine expects the acquisition mode to be either <cite>RAW</cite> or <cite>SCOPE</cite>.
+While the actual execution can process <cite>INTEGRATOR</cite> by treating it as <cite>RAW</cite>, they are
+typically santitised the runtime using <code class="xref py py-meth docutils literal notranslate"><span class="pre">EchoEngine.optimize()</span></code>. If not done in the
+new pipelines, it will conflict with <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessingSantisiation</span></code>, and return the
+wrong results. The new echo engine supports all acquisition modes, so this is not a
+problem here.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.compiler.transform_passes.EchoAcquireSanitisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.EchoAcquireSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.compiler.transform_passes.EchoAcquireSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.compiler.transform_passes.EchoAcquireSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.compiler.transform_passes.InputOptimisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InputOptimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.compiler.transform_passes.InputOptimisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.TransformPass" title="qat.passes.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
