@@ -75,7 +75,7 @@ docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 pytest-benchmark = "^4.0.0"
 jinja2 = "^3.1.5"
-jupytext = "^1.16.4"
+jupytext = "1.16.7"
 nbstripout = "^0.8.1"
 
 [tool.poetry.group.licenses]
@@ -144,6 +144,7 @@ line_length = 92
 known_first_party = ["qat"]
 known_local_folder = ["tests", "benchmarks"]
 extend_skip = ["__init__.py"]
+extend_skip_glob = ["notebooks/**"]
 
 [tool.black]
 line-length = 92

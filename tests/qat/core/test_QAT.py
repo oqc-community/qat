@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import re
 from pathlib import Path
 from random import random
+from typing import Dict
 
 import numpy as np
 import pytest
@@ -16,16 +17,20 @@ from compiler_config.config import (
     get_optimizer_config,
 )
 
+import qat.pipelines.echo
 from qat import QAT
-from qat.backend.waveform_v1 import EchoEngine, WaveformV1Emitter
-from qat.pipelines import (
-    DefaultCompile,
-    DefaultExecute,
-    DefaultPostProcessing,
-    EchoCompile,
-    EchoExecute,
-    EchoPostProcessing,
-)
+from qat.backend.fallthrough import FallthroughBackend
+from qat.backend.waveform_v1 import EchoEngine, WaveformV1Backend
+from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1.engines.echo import EchoEngine
+from qat.core.config import PipelineImportDescription
+from qat.core.pipeline import Pipeline
+from qat.core.qat import QAT
+from qat.frontend.frontends import DefaultFrontend, FallthroughFrontend
+from qat.middleend.middleends import FallthroughMiddleend
+from qat.passes.pass_base import PassManager
+from qat.pipelines.echo import get_pipeline as get_echo_pipeline
+from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QIRFrontend
@@ -39,10 +44,14 @@ from qat.purr.compiler.instructions import (
     Return,
     Variable,
 )
+from qat.purr.qatconfig import QatConfig
 from qat.qat import _return_or_build, fetch_frontend
 from qat.runtime import LegacyRuntime, SimpleRuntime
+from qat.runtime.engines.native import NativeEngine
+from qat.runtime.executables import Executable
+from qat.runtime.runtimes.simple import SimpleRuntime
 
-dir_path = Path(__file__).parent
+dir_path = Path(__file__).parent.parent
 
 
 # Files that are not expected to pass tests are skipped.
@@ -254,18 +263,24 @@ class TestQATParity:
             compiler_config=compiler_config,
         )
 
-        qat = QAT()
-        qat.add_pipeline(
-            "test",
-            compile_pipeline=DefaultCompile(hardware_model),
-            execute_pipeline=DefaultExecute(hardware_model),
-            postprocess_pipeline=DefaultPostProcessing(hardware_model),
-            engine=hardware_model.create_engine(),
+        pipe = Pipeline(
+            name="test",
+            frontend=DefaultFrontend(hardware_model),
+            middleend=FallthroughMiddleend(),
+            backend=FallthroughBackend(),
+            runtime=LegacyRuntime(
+                engine=hardware_model.create_engine(), results_pipeline=PassManager()
+            ),
+            model=hardware_model,
         )
 
-        qat_ib, qat_metrics = qat.compile(
+        q = QAT()
+        q.pipelines.add(pipe)
+
+        qat_ib, qat_metrics = q.compile(
             qasm_file_string, compiler_config=compiler_config, pipeline="test"
         )
+
         assert purr_ib.instructions == qat_ib.instructions
         assert purr_metrics.optimized_circuit == qat_metrics.optimized_circuit
 
@@ -292,15 +307,20 @@ class TestQATParity:
             compiler_config=compiler_config,
         )
 
-        qat = QAT()
-        qat.add_pipeline(
-            "test",
-            compile_pipeline=DefaultCompile(hardware_model),
-            execute_pipeline=DefaultExecute(hardware_model),
-            postprocess_pipeline=DefaultPostProcessing(hardware_model),
-            engine=hardware_model.create_engine(),
+        pipe = Pipeline(
+            name="test",
+            frontend=DefaultFrontend(hardware_model),
+            middleend=FallthroughMiddleend(),
+            backend=FallthroughBackend(),
+            runtime=LegacyRuntime(
+                engine=hardware_model.create_engine(), results_pipeline=PassManager()
+            ),
+            model=hardware_model,
         )
-        qat_ib, qat_metrics = qat.compile(
+
+        q = QAT()
+        q.pipelines.add(pipe)
+        qat_ib, qat_metrics = q.compile(
             qasm_file_string, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_ib.instructions == qat_ib.instructions
@@ -343,16 +363,20 @@ class TestQATParity:
             compiler_config=compiler_config,
         )
 
-        qat = QAT()
-        qat.add_pipeline(
-            "test",
-            compile_pipeline=DefaultCompile(hardware_model),
-            execute_pipeline=DefaultExecute(hardware_model),
-            postprocess_pipeline=DefaultPostProcessing(hardware_model),
-            engine=hardware_model.create_engine(),
+        pipe = Pipeline(
+            name="test",
+            frontend=DefaultFrontend(hardware_model),
+            middleend=FallthroughMiddleend(),
+            backend=FallthroughBackend(),
+            runtime=LegacyRuntime(
+                engine=hardware_model.create_engine(), results_pipeline=PassManager()
+            ),
+            model=hardware_model,
         )
 
-        qat_ib, qat_metrics = qat.compile(
+        q = QAT()
+        q.pipelines.add(pipe)
+        qat_ib, qat_metrics = q.compile(
             qir_file_string, compiler_config=compiler_config, pipeline="test"
         )
         assert purr_ib.instructions == qat_ib.instructions
@@ -386,24 +410,151 @@ class TestQATParity:
             instructions, hardware=hardware_model, compiler_config=compiler_config
         )
 
-        qat = QAT()
-        qat.add_pipeline(
-            "test",
-            compile_pipeline=DefaultCompile(hardware_model),
-            execute_pipeline=DefaultExecute(hardware_model),
-            postprocess_pipeline=DefaultPostProcessing(hardware_model),
-            engine=hardware_model.create_engine(),
-        )
+        pipe = get_legacy_echo_pipeline(hardware_model, name="test")
+        pipe = pipe.model_copy(update={"frontend": FallthroughFrontend()})
 
-        qat_res, qat_metrics = qat.execute(
+        q = QAT()
+        q.pipelines.add(pipe)
+
+        pkg, comp_metrics = q.compile(
             instructions, compiler_config=compiler_config, pipeline="test"
         )
+
+        qat_res, _ = q.execute(pkg, compiler_config=compiler_config, pipeline="test")
+
         assert purr_res == qat_res
-        assert purr_metrics.as_dict() == qat_metrics.as_dict()
+        assert purr_metrics.as_dict() == comp_metrics.as_dict()
+
+
+class MockEngine(NativeEngine):
+    def execute(self, package: Executable) -> Dict[str, np.ndarray]:
+        return {}
+
+    def startup(self): ...
+    def shutdown(self): ...
+
+
+@pytest.fixture
+def echo_pipeline(qubit_count=32):
+    model = get_default_echo_hardware(qubit_count=qubit_count)
+    yield qat.pipelines.echo.get_pipeline(model)
+
+
+@pytest.fixture
+def fallthrough_pipeline(qubit_count=32):
+    model = get_default_echo_hardware(qubit_count=qubit_count)
+    yield Pipeline(
+        name="fallthrough",
+        frontend=FallthroughFrontend(),
+        middleend=FallthroughMiddleend(),
+        backend=FallthroughBackend(),
+        runtime=SimpleRuntime(engine=MockEngine()),
+        model=model,
+    )
 
 
 class TestQATPipelineSetup:
-    pass
+    def test_make_qat(self):
+        q = QAT()
+        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default == "echo32"
+        assert q.pipelines.get("default").name == "echo32"
+
+    def test_make_qatconfig_list(self):
+        pipelines = [
+            PipelineImportDescription(
+                name="echo8a", pipeline="qat.pipelines.echo.echo8", default=True
+            ),
+            PipelineImportDescription(name="echo16a", pipeline="qat.pipelines.echo.echo16"),
+            PipelineImportDescription(name="echo32a", pipeline="qat.pipelines.echo.echo32"),
+        ]
+        q = QAT(qatconfig=QatConfig(PIPELINES=pipelines))
+        assert set(q.pipelines.list()) == {"echo8a", "echo16a", "echo32a"}
+
+    def test_make_qatconfig_yaml(self):
+        qatconfig = QatConfig.from_yaml(dir_path / "files/qatconfig/pipelines.yaml")
+        q = QAT(qatconfig=qatconfig)
+        assert set(q.pipelines.list()) == {"echo8b", "echo16b", "echo32b"}
+
+    def test_FallthroughFrontend(self):
+        frontend = FallthroughFrontend()
+        assert frontend.model is None
+
+    def test_FallthroughMiddleend(self):
+        middleend = FallthroughMiddleend()
+        assert middleend.model is None
+
+    def test_FallthroughBackend(self):
+        backend = FallthroughBackend()
+        assert backend.model is None
+        assert backend.emit(ir="blah") == "blah"
+
+    def test_make_pipeline(self):
+        qubit_count = 32
+        model = get_default_echo_hardware(qubit_count=qubit_count)
+        frontend = FallthroughFrontend()
+        middleend = FallthroughMiddleend()
+        backend = WaveformV1Backend(model)
+        runtime = SimpleRuntime(engine=EchoEngine())
+
+        P = Pipeline(
+            name="default",
+            frontend=frontend,
+            middleend=middleend,
+            backend=backend,
+            runtime=runtime,
+            model=model,
+        )
+
+    def test_add_pipeline(self, echo_pipeline):
+        q = QAT()
+        q.pipelines.add(echo_pipeline)
+        assert echo_pipeline.name in q.pipelines.list()
+
+    def test_remove_pipeline(self, echo_pipeline):
+        q = QAT()
+        q.pipelines.add(echo_pipeline)
+        assert echo_pipeline.name in q.pipelines.list()
+        q.pipelines.remove(echo_pipeline)
+        assert not echo_pipeline.name in q.pipelines.list()
+
+    def test_add_pipeline_set_default(self, fallthrough_pipeline):
+        pipe1 = fallthrough_pipeline.model_copy(update={"name": "pipe1"})
+        pipe2 = fallthrough_pipeline.model_copy(update={"name": "pipe2"})
+        q = QAT()
+        q.pipelines.add(pipe1, default=True)
+        assert q.pipelines.default == pipe1.name
+        q.pipelines.add(pipe2)
+        assert q.pipelines.default == pipe1.name
+
+    def test_set_default(self, fallthrough_pipeline):
+        pipe1 = fallthrough_pipeline.model_copy(update={"name": "pipe1"})
+        pipe2 = fallthrough_pipeline.model_copy(update={"name": "pipe2"})
+        pipe3 = fallthrough_pipeline.model_copy(update={"name": "pipe3"})
+        q = QAT()
+        q.pipelines.add(pipe1)
+        q.pipelines.add(pipe2)
+        q.pipelines.add(pipe3)
+        q.pipelines.set_default("pipe1")
+        assert q.pipelines.default == "pipe1"
+        q.pipelines.set_default("pipe2")
+        assert q.pipelines.default == "pipe2"
+        q.pipelines.set_default("pipe1")
+        assert q.pipelines.default == "pipe1"
+
+    def test_compile(self, fallthrough_pipeline):
+        src = "test"
+        q = QAT()
+        q.pipelines.add(fallthrough_pipeline)
+        pkg, _ = q.compile(src, pipeline="fallthrough")
+        assert pkg == src
+
+    def test_execute(self, fallthrough_pipeline):
+        pkg = Executable()
+        q = QAT()
+        q.pipelines.add(fallthrough_pipeline)
+        res, _ = q.execute(pkg, pipeline="fallthrough")
+        assert res == {}
 
 
 class TestQatEchoPipelines:
@@ -423,25 +574,12 @@ class TestQatEchoPipelines:
     executables = {}
 
     def create_legacy_pipelines(self):
-        self.core.add_pipeline(
-            "legacy",
-            DefaultCompile(self.model),
-            DefaultExecute(self.model),
-            DefaultPostProcessing(self.model),
-            self.model.create_engine(),
-            LegacyRuntime,
-        )
+        pipe = get_legacy_echo_pipeline(self.model, "legacy")
+        self.core.pipelines.add(pipe)
 
     def create_new_pipelines(self):
-        self.core.add_pipeline(
-            "new",
-            EchoCompile(self.model),
-            EchoExecute(),
-            EchoPostProcessing(self.model),
-            EchoEngine(),
-            SimpleRuntime,
-            WaveformV1Emitter(self.model),
-        )
+        pipe = get_echo_pipeline(self.model, "new")
+        self.core.pipelines.add(pipe)
 
     def get_legacy_ir(self, request, qasm_file):
         if not self.core:

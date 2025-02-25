@@ -13,6 +13,7 @@ from qat.backend.analysis_passes import (
     TriagePass,
     TriageResult,
 )
+from qat.backend.base import BaseBackend
 from qat.backend.transform_passes import RepeatSanitisation, ReturnSanitisation
 from qat.backend.validation_passes import FrequencyValidation, NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
@@ -39,7 +40,7 @@ from qat.purr.compiler.instructions import (
 from qat.runtime.executables import AcquireDataStruct
 
 
-class WaveformV1Emitter(InvokerMixin):
+class WaveformV1Backend(BaseBackend, InvokerMixin):
     def __init__(self, model: QuantumHardwareModel):
         """Code generation for backends that only require the explicit waveforms.
 
@@ -57,6 +58,7 @@ class WaveformV1Emitter(InvokerMixin):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         upconvert: bool = True,
+        **kwargs,
     ) -> WaveformV1Executable:
         """Compiles :class:`InstructionBuilder` into a :class:`WaveformV1Executable`.
 

@@ -1,11 +1,11 @@
 MAX_REPEATS_LIMIT: 10
 PIPELINES:
-- name: echo8-alt
+- name: echo8b
   pipeline: qat.pipelines.echo.echo8
   default: false
-- name: echo16-alt
+- name: echo16b
   pipeline: qat.pipelines.echo.echo16
   default: true
-- name: echo32-alt
+- name: echo32b
   pipeline: qat.pipelines.echo.echo32
   default: false

@@ -3,7 +3,7 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.backend.waveform_v1 import EchoEngine, WaveformV1Emitter
+from qat.backend.waveform_v1 import EchoEngine, WaveformV1Backend
 from qat.ir.measure import PostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
@@ -94,7 +94,7 @@ class TestInlineResultsProcessingTransform:
         builder = model.create_builder()
         builder.measure_single_shot_binned(model.get_qubit(0), output_variable="test")
         builder.results_processing("test", InlineResultsProcessing.Program)
-        package = WaveformV1Emitter(model).emit(builder)
+        package = WaveformV1Backend(model).emit(builder)
         engine = EchoEngine()
         results = engine.execute(package)
         InlineResultsProcessingTransform().run(results, package=package)
@@ -106,7 +106,7 @@ class TestInlineResultsProcessingTransform:
         builder.repeat(254)
         builder.measure(model.get_qubit(0), output_variable="test")
         builder.results_processing("test", InlineResultsProcessing.Experiment)
-        package = WaveformV1Emitter(model).emit(builder)
+        package = WaveformV1Backend(model).emit(builder)
         engine = EchoEngine()
         results = engine.execute(package)
         InlineResultsProcessingTransform().run(results, package=package)
@@ -123,7 +123,7 @@ class TestAssignResultsTransform:
         builder.measure(model.get_qubit(0), output_variable="q0")
         builder.measure(model.get_qubit(0), output_variable="q1")
         builder.returns("q0")
-        package = WaveformV1Emitter(model).emit(builder)
+        package = WaveformV1Backend(model).emit(builder)
         engine = EchoEngine()
         results = engine.execute(package)
         results = AssignResultsTransform().run(results, package=package)

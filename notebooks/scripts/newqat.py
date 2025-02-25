@@ -20,11 +20,25 @@
 # %load_ext autoreload
 # %autoreload 2
 
+# %% [markdown]
+# Import QAT and instantiate a qat instance
+
 # %%
 from qat import QAT
 
+qat = QAT()
+
+# %% [markdown]
+# Default pipelines are setup by default...
+
 # %%
-prog = """
+qat.pipelines
+
+# %% [markdown]
+# Define a program...
+
+# %%
+src = """
 OPENQASM 3;
 bit[2] c;
 qubit[2] q;
@@ -32,42 +46,105 @@ h q;
 measure q -> c;
 """
 
-# %%
-qat = QAT("../qatconfig.eg.yaml")
-qat.set_default_pipeline("echo")
+# %% [markdown]
+# Compile it with the default pipeline...
 
 # %%
-inst, metrics = qat.compile(prog)
+pkg, metrics = qat.compile(src)
+
+# %% [markdown]
+# Execute the compiled program with the default pipeline...
+
+# %%
+res, metrics = qat.execute(pkg)
+res
+
+# %% [markdown]
+# Comile and execute a program with a different pipeline...
+
+# %%
+pkg, metrics = qat.compile(src, pipeline="echo16")
+res, metrics = qat.execute(pkg, pipeline="echo16")
+
+# %% [markdown]
+# QAT pipelines can also be configured with YAML...
+
+# %%
+qat = QAT(qatconfig="../qatconfig.eg.yaml")
+qat.pipelines
+
+# %% [markdown]
+# The yaml looks like this... (It's not very flexible yet it will be)
+
+# %%
+import pathlib
+import yaml
+
+
+print(yaml.dump(yaml.safe_load(pathlib.Path("../qatconfig.eg.yaml").read_text())))
+
+# %% [markdown]
+# Change the default pipeline
+
+# %%
+qat.pipelines.set_default("echo8-alt")
+inst, metrics = qat.compile(src)
 res, metrics = qat.execute(inst)
 res
 
-# %%
-qat.set_default_pipeline("rtcs")
-inst, metrics = qat.compile(prog)
-res, metrics = qat.execute(inst)
-res
+# %% [markdown]
+# Run a program as a one liner...
 
 # %%
-inst, metrics = qat.compile(prog, pipeline="echo")
-res, metrics = qat.execute(inst, pipeline="echo")
+res, metrics = qat.run(src)
 res
 
+# %% [markdown]
+# Make a custom pipeline
+
 # %%
-from qat.pipelines import DefaultCompile, DefaultExecute, DefaultPostProcessing
+from qat import Pipeline
+
+# %%
+from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1.engines.echo import EchoEngine
+from qat.frontend.frontends import DefaultFrontend
+from qat.middleend.middleends import DefaultMiddleend
 from qat.purr.backends.echo import get_default_echo_hardware
+from qat.runtime.runtimes.simple import SimpleRuntime
 
-echo16 = get_default_echo_hardware(qubit_count=16)
-
-# %%
-qat.add_pipeline(
-    "echo16",
-    compile_pipeline=DefaultCompile(echo16),
-    execute_pipeline=DefaultExecute(echo16),
-    postprocess_pipeline=DefaultPostProcessing(echo16),
-    engine=echo16.create_engine(),
+model = get_default_echo_hardware(qubit_count=16)
+P = Pipeline(
+    name="mycoolnewpipeline",
+    frontend=DefaultFrontend(model),
+    middleend=DefaultMiddleend(model),
+    backend=WaveformV1Backend(model),
+    runtime=SimpleRuntime(engine=EchoEngine()),
+    model=model,
 )
 
+
+# %% [markdown]
+# Compile and execute against the new pipeline
+
 # %%
-inst, metrics = qat.compile(prog, pipeline="echo16")
-res, metrics = qat.execute(inst, pipeline="echo16")
+pkg, metrics = qat.compile(src, pipeline=P)
+res, metrics = qat.execute(pkg, pipeline=P)
 res
+
+# %% [markdown]
+# Keep it around for later...
+
+# %%
+qat.pipelines.add(P)
+P.name
+
+# %% [markdown]
+# Now it's available by name
+
+# %%
+pkg, metrics = qat.compile(src, pipeline="mycoolnewpipeline")
+res, metrics = qat.execute(pkg, pipeline="mycoolnewpipeline")
+res
+
+# %%

@@ -14,7 +14,7 @@ from pydantic_settings import (
 )
 from qiskit_aer import AerSimulator
 
-from qat.coreconfig import PipelineDescription
+from qat.core.config import PipelineImportDescription
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -149,11 +149,14 @@ class QatConfig(BaseSettings):
     SIMULATION: QatSimulationConfig = QatSimulationConfig()
     """Options for QATs simulation backends."""
 
-    PIPELINES: list[PipelineDescription] = []
+    PIPELINES: list[PipelineImportDescription] | None = None
+    """ QAT Pipelines to add on start-up, None adds default pipelines"""
 
     @field_validator("PIPELINES")
     @classmethod
     def one_default(cls, v):
+        if v is None:
+            return v
         if len(v) == 0:
             return v
         num_defaults = sum(pipe.default for pipe in v)

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from qat.backend.waveform_v1 import EchoEngine
-from qat.backend.waveform_v1.codegen import WaveformV1Emitter
+from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.passes.pass_base import PassManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode
@@ -23,7 +23,7 @@ class TestSimpleRuntime:
         builder.repeat(shots)
         block, _ = builder._generate_measure_block(model.get_qubit(0), mode, "test")
         builder.add(block)
-        return WaveformV1Emitter(model).emit(builder)
+        return WaveformV1Backend(model).emit(builder)
 
     @pytest.mark.parametrize("shots", [0, 500, 1000, 1007, 2000])
     def test_execute_gives_correct_number_of_shots(self, shots):
@@ -46,7 +46,7 @@ class TestSimpleRuntime:
         builder.returns("qubit0")
 
         # Test with default pipeline
-        package = WaveformV1Emitter(model).emit(builder)
+        package = WaveformV1Backend(model).emit(builder)
         with SimpleRuntime(EchoEngine()) as runtime:
             results = runtime.execute(package)
         assert "qubit0" in results

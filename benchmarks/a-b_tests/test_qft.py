@@ -3,7 +3,7 @@
 import pytest
 
 from qat import QAT
-from qat.backend.waveform_v1 import WaveformV1Emitter, WaveformV1Executable
+from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Executable
 from qat.pipelines import EchoCompile, EchoExecute, EchoPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
@@ -42,7 +42,7 @@ class TestQFT:
                 execute_pipeline=EchoExecute(),
                 postprocess_pipeline=EchoPostProcessing(self.hw),
                 engine=EchoEngine(),
-                emitter=WaveformV1Emitter(self.hw),
+                emitter=WaveformV1Backend(self.hw),
             )
 
             def run():
@@ -72,7 +72,7 @@ class TestQFT:
                 execute_pipeline=EchoExecute(),
                 postprocess_pipeline=EchoPostProcessing(self.hw),
                 engine=EchoEngine(),
-                emitter=WaveformV1Emitter(self.hw),
+                emitter=WaveformV1Backend(self.hw),
             )
 
             package, _ = qat.compile(circuit, pipeline="test")

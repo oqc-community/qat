@@ -48,11 +48,11 @@ class ChannelData(BaseModel):
 
 class Executable(BaseModel):
     """
-    :class:`Executables` are instruction packages that will be sent to a backend (either
+    :class:`Executables` are instruction packages that will be sent to a target (either
     physical control hardware or a simulator).
 
     This class serves as a base model that can be inherited to define a complete instruction
-    package tailored to a particular backend.
+    package tailored to a particular target.
 
     :param channel_data: Stores the data required by the control hardware for each pulse
         channel.

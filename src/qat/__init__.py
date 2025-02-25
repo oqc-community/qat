@@ -13,4 +13,5 @@ from qat.qat import (
     fetch_frontend,
 )
 
-from qat.core import QAT
+from qat.core.qat import QAT
+from qat.core.pipeline import Pipeline
