@@ -21,7 +21,9 @@ Submodules
    :maxdepth: 4
 
    qat.backend.analysis_passes
+   qat.backend.base
    qat.backend.codegen_base
+   qat.backend.fallthrough
    qat.backend.graph
    qat.backend.transform_passes
    qat.backend.validation_passes

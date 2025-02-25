@@ -1,0 +1,7 @@
+qat.frontend.qir\_parser module
+===============================
+
+.. automodule:: qat.frontend.qir_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:

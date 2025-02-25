@@ -14,9 +14,13 @@ Subpackages
 
    qat.backend
    qat.compiler
+   qat.core
+   qat.frontend
    qat.ir
+   qat.middleend
    qat.model
    qat.passes
+   qat.pipelines
    qat.purr
    qat.runtime
    qat.utils
@@ -27,7 +31,4 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.core
-   qat.coreconfig
-   qat.pipelines
    qat.qat

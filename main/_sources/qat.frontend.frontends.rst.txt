@@ -1,0 +1,7 @@
+qat.frontend.frontends module
+=============================
+
+.. automodule:: qat.frontend.frontends
+   :members:
+   :undoc-members:
+   :show-inheritance:

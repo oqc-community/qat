@@ -1,0 +1,16 @@
+qat.frontend package
+====================
+
+.. automodule:: qat.frontend
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.frontend.frontends
+   qat.frontend.qir_parser

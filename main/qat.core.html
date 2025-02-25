@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.core module &mdash; qat-compiler 2.5.1 documentation</title>
+  <title>qat.core package &mdash; qat-compiler 2.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.coreconfig module" href="qat.coreconfig.html" />
-    <link rel="prev" title="qat.utils.pydantic module" href="qat.utils.pydantic.html" /> 
+    <link rel="next" title="qat.core.config module" href="qat.core.config.html" />
+    <link rel="prev" title="qat.compiler.validation_passes module" href="qat.compiler.validation_passes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -59,7 +59,9 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.analysis_passes.html">qat.backend.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.base.html">qat.backend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.fallthrough.html">qat.backend.fallthrough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.graph.html">qat.backend.graph module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.transform_passes.html">qat.backend.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.validation_passes.html">qat.backend.validation_passes module</a></li>
@@ -71,11 +73,26 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
 </ul>
 </li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">qat.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
@@ -90,6 +107,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.passes.metrics_base.html">qat.passes.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.passes.pass_base.html">qat.passes.pass_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.passes.result_base.html">qat.passes.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -197,9 +220,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">qat.core module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.coreconfig.html">qat.coreconfig module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
 </ul>
 </li>
@@ -226,7 +246,7 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="modules.html">src</a></li>
           <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
-      <li class="breadcrumb-item active">qat.core module</li>
+      <li class="breadcrumb-item active">qat.core package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/qat.core.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -239,38 +259,58 @@
 
 
   <section id="module-qat.core">
-<span id="qat-core-module"></span><h1>qat.core module<a class="headerlink" href="#module-qat.core" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.core.QAT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QAT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qatconfig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.QAT.add_pipeline">
-<span class="sig-name descname"><span class="pre">add_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compile_pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocess_pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT.add_pipeline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.QAT.compile">
-<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT.compile" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.QAT.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocess_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT.execute" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.QAT.remove_pipeline">
-<span class="sig-name descname"><span class="pre">remove_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT.remove_pipeline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.QAT.set_default_pipeline">
-<span class="sig-name descname"><span class="pre">set_default_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.QAT.set_default_pipeline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<span id="qat-core-package"></span><h1>qat.core package<a class="headerlink" href="#module-qat.core" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.default"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.default</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.model_config"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.name"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.pipeline"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.pipeline</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.backend"><code class="docutils literal notranslate"><span class="pre">Pipeline.backend</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.consistent_model"><code class="docutils literal notranslate"><span class="pre">Pipeline.consistent_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.from_description"><code class="docutils literal notranslate"><span class="pre">Pipeline.from_description()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.frontend"><code class="docutils literal notranslate"><span class="pre">Pipeline.frontend</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.middleend"><code class="docutils literal notranslate"><span class="pre">Pipeline.middleend</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.model"><code class="docutils literal notranslate"><span class="pre">Pipeline.model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.model_config"><code class="docutils literal notranslate"><span class="pre">Pipeline.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.name"><code class="docutils literal notranslate"><span class="pre">Pipeline.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.runtime"><code class="docutils literal notranslate"><span class="pre">Pipeline.runtime</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet"><code class="docutils literal notranslate"><span class="pre">PipelineSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.add"><code class="docutils literal notranslate"><span class="pre">PipelineSet.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.default"><code class="docutils literal notranslate"><span class="pre">PipelineSet.default</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.from_descriptions"><code class="docutils literal notranslate"><span class="pre">PipelineSet.from_descriptions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.get"><code class="docutils literal notranslate"><span class="pre">PipelineSet.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.list"><code class="docutils literal notranslate"><span class="pre">PipelineSet.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.remove"><code class="docutils literal notranslate"><span class="pre">PipelineSet.remove()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.set_default"><code class="docutils literal notranslate"><span class="pre">PipelineSet.set_default()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.qat.html#qat.core.qat.QAT"><code class="docutils literal notranslate"><span class="pre">QAT</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.qat.html#qat.core.qat.QAT.compile"><code class="docutils literal notranslate"><span class="pre">QAT.compile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.qat.html#qat.core.qat.QAT.execute"><code class="docutils literal notranslate"><span class="pre">QAT.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.qat.html#qat.core.qat.QAT.run"><code class="docutils literal notranslate"><span class="pre">QAT.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 </section>
 
 
@@ -278,8 +318,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.utils.pydantic.html" class="btn btn-neutral float-left" title="qat.utils.pydantic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.coreconfig.html" class="btn btn-neutral float-right" title="qat.coreconfig module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.compiler.validation_passes.html" class="btn btn-neutral float-left" title="qat.compiler.validation_passes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.core.config.html" class="btn btn-neutral float-right" title="qat.core.config module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
