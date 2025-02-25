@@ -1,0 +1,19 @@
+name: Tests on all OS's
+
+on:
+  schedule:
+    - cron: "0 23 * * MON-FRI"
+
+jobs:
+  unit-tests:
+    name: Units tests across multiple OS
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: true
+        matrix:
+            os: [ ubuntu-22.04, macos-latest, windows-latest ]
+            python: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/testing-action
