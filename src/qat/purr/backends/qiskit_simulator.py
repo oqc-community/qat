@@ -4,7 +4,11 @@ import re
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from compiler_config.config import ErrorMitigationConfig, ResultsFormatting
+from compiler_config.config import (
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+    ResultsFormatting,
+)
 from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import CheckMap
@@ -417,6 +421,19 @@ class QiskitRuntime(QuantumRuntime):
         results = self.engine.execute(builder)
         if qiskitconfig.ENABLE_METADATA:
             (results, metadata) = results
+
+        format_flags = (
+            results_format.transforms
+            if isinstance(results_format, QuantumResultsFormat)
+            else results_format
+        )
+        if format_flags == None or not ResultsFormatting.BinaryCount in format_flags:
+            log.warning(
+                "The results formatting `BinaryCount` was not found in the formatting "
+                "flags. Please note that the Qiskit runtime only currently supports "
+                "results returned as a binary count."
+            )
+
         results = self._apply_error_mitigation(
             results, builder.instructions, error_mitigation
         )

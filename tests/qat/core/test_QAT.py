@@ -37,6 +37,7 @@ from qat.purr.compiler.frontends import QIRFrontend
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.purr.compiler.instructions import (
     Acquire,
+    AcquireMode,
     Assign,
     Instruction,
     PostProcessing,
@@ -569,6 +570,7 @@ class TestQatEchoPipelines:
     """
 
     model = get_default_echo_hardware(32)
+    config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
     core: QAT = None
     legacy_ir = {}
     executables = {}
@@ -589,7 +591,7 @@ class TestQatEchoPipelines:
 
         key = request.node.callspec.id
         if key not in self.legacy_ir:
-            legacy_ir, _ = self.core.compile(str(qasm_file), pipeline="legacy")
+            legacy_ir, _ = self.core.compile(str(qasm_file), self.config, pipeline="legacy")
             self.legacy_ir[key] = legacy_ir
 
         return self.legacy_ir[key]
@@ -602,7 +604,7 @@ class TestQatEchoPipelines:
 
         key = request.node.callspec.id
         if key not in self.executables:
-            executable, _ = self.core.compile(str(qasm_file), pipeline="new")
+            executable, _ = self.core.compile(str(qasm_file), self.config, pipeline="new")
             self.executables[key] = executable
 
         return self.executables[key]
@@ -646,7 +648,12 @@ class TestQatEchoPipelines:
             acquire = acquire[0]
             assert acquire_purr.samples == acquire.length
             assert acquire_purr.start == acquire.position
-            assert acquire_purr.mode == acquire.mode
+
+            # the API for acquire modes and echo engines have drifted: `purr` converts
+            # INTEGRATOR -> RAW as it cannot deal with INTEGRATOR. new engines do not have
+            # this restriction.
+            assert acquire_purr.mode == AcquireMode.RAW
+            assert acquire.mode == acquire.mode.INTEGRATOR
 
     @pytest.mark.parametrize(
         "qasm_file",
@@ -657,8 +664,8 @@ class TestQatEchoPipelines:
         ir = self.get_legacy_ir(request, qasm_file)
         package = self.get_executable(request, qasm_file)
 
-        purr_results, _ = self.core.execute(ir, pipeline="legacy")
-        echo_results, _ = self.core.execute(package, pipeline="new")
+        purr_results, _ = self.core.execute(ir, self.config, pipeline="legacy")
+        echo_results, _ = self.core.execute(package, self.config, pipeline="new")
         assert purr_results.keys() == echo_results.keys()
 
         for key in purr_results.keys():

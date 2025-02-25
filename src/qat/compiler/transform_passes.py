@@ -29,6 +29,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     CustomPulse,
     Instruction,
@@ -95,6 +96,30 @@ class PhaseOptimisation(TransformPass):
         met_mgr.record_metric(
             MetricsType.OptimizedInstructionCount, len(optimized_instructions)
         )
+        return ir
+
+
+class EchoAcquireSanitisation(TransformPass):
+    """Changes `AcquireMode.INTEGRATOR` acquisitions to `AcquireMode.RAW`.
+
+    The legacy echo engine expects the acquisition mode to be either `RAW` or `SCOPE`.
+    While the actual execution can process `INTEGRATOR` by treating it as `RAW`, they are
+    typically santitised the runtime using :meth:`EchoEngine.optimize()`. If not done in the
+    new pipelines, it will conflict with :class:`PostProcessingSantisiation`, and return the
+    wrong results. The new echo engine supports all acquisition modes, so this is not a
+    problem here.
+    """
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        *args,
+        **kwargs,
+    ):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        for inst in [instr for instr in ir.instructions if isinstance(instr, Acquire)]:
+            if inst.mode == AcquireMode.INTEGRATOR:
+                inst.mode = AcquireMode.RAW
         return ir
 
 
