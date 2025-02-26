@@ -6,14 +6,6 @@ qat.backend.waveform\_v1 package
    :undoc-members:
    :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   qat.backend.waveform_v1.engines
-
 Submodules
 ----------
 

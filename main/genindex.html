@@ -47,10 +47,6 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.html">qat package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.engines.html">qat.backend.waveform_v1.engines package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.engines.echo.html">qat.backend.waveform_v1.engines.echo module</a></li>
-</ul>
-</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
 </ul>
@@ -74,6 +70,15 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.native.html">qat.engines.native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.zero.html">qat.engines.zero module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
@@ -194,10 +199,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.engines.html">qat.runtime.engines package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.runtime.engines.native.html">qat.runtime.engines.native module</a></li>
-</ul>
-</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.html">qat.runtime.runtimes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.legacy.html">qat.runtime.runtimes.legacy module</a></li>
@@ -318,6 +319,8 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing.acquire">acquire (PostProcessing property)</a>
 
       <ul>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.readout_shape.params.acquire">(qat.engines.zero.readout_shape parameter)</a>
+</li>
         <li><a href="qat.model.device.html#qat.model.device.Resonator.params.acquire">(qat.model.device.Resonator parameter)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.acquire">(ResonatorPulseChannels attribute)</a>
@@ -1573,7 +1576,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.EchoAcquireSanitisation">EchoAcquireSanitisation (class in qat.compiler.transform_passes)</a>
 </li>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine">EchoEngine (class in qat.backend.waveform_v1.engines.echo)</a>
+      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine">EchoEngine (class in qat.engines.waveform_v1.echo)</a>
 
       <ul>
         <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.EchoEngine">(class in qat.purr.backends.echo)</a>
@@ -1746,7 +1749,7 @@
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.execute">execute() (BaseRuntime method)</a>
 
       <ul>
-        <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine.execute">(EchoEngine method)</a>
+        <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.execute">(EchoEngine method)</a>
 </li>
         <li><a href="qat.qat.html#qat.qat.execute">(in module qat.qat)</a>
 </li>
@@ -1756,7 +1759,7 @@
 </li>
         <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.execute">(LegacyRuntime method)</a>
 </li>
-        <li><a href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine.execute">(NativeEngine method)</a>
+        <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.execute">(NativeEngine method)</a>
 </li>
         <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend.execute">(QASMFrontend method)</a>
 </li>
@@ -1773,6 +1776,8 @@
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.execute">(QuantumRuntime method)</a>
 </li>
         <li><a href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime.execute">(SimpleRuntime method)</a>
+</li>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.execute">(ZeroEngine method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.execute_instructions">execute_instructions() (in module qat.purr.compiler.runtime)</a>
@@ -3237,10 +3242,6 @@
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#module-qat.backend.waveform_v1.codegen">qat.backend.waveform_v1.codegen</a>
 </li>
-        <li><a href="qat.backend.waveform_v1.engines.html#module-qat.backend.waveform_v1.engines">qat.backend.waveform_v1.engines</a>
-</li>
-        <li><a href="qat.backend.waveform_v1.engines.echo.html#module-qat.backend.waveform_v1.engines.echo">qat.backend.waveform_v1.engines.echo</a>
-</li>
         <li><a href="qat.backend.waveform_v1.executable.html#module-qat.backend.waveform_v1.executable">qat.backend.waveform_v1.executable</a>
 </li>
         <li><a href="qat.compiler.html#module-qat.compiler">qat.compiler</a>
@@ -3258,6 +3259,16 @@
         <li><a href="qat.core.pipeline.html#module-qat.core.pipeline">qat.core.pipeline</a>
 </li>
         <li><a href="qat.core.qat.html#module-qat.core.qat">qat.core.qat</a>
+</li>
+        <li><a href="qat.engines.html#module-qat.engines">qat.engines</a>
+</li>
+        <li><a href="qat.engines.native.html#module-qat.engines.native">qat.engines.native</a>
+</li>
+        <li><a href="qat.engines.waveform_v1.html#module-qat.engines.waveform_v1">qat.engines.waveform_v1</a>
+</li>
+        <li><a href="qat.engines.waveform_v1.echo.html#module-qat.engines.waveform_v1.echo">qat.engines.waveform_v1.echo</a>
+</li>
+        <li><a href="qat.engines.zero.html#module-qat.engines.zero">qat.engines.zero</a>
 </li>
         <li><a href="qat.frontend.html#module-qat.frontend">qat.frontend</a>
 </li>
@@ -3443,10 +3454,6 @@
 </li>
         <li><a href="qat.runtime.analysis_passes.html#module-qat.runtime.analysis_passes">qat.runtime.analysis_passes</a>
 </li>
-        <li><a href="qat.runtime.engines.html#module-qat.runtime.engines">qat.runtime.engines</a>
-</li>
-        <li><a href="qat.runtime.engines.native.html#module-qat.runtime.engines.native">qat.runtime.engines.native</a>
-</li>
         <li><a href="qat.runtime.executables.html#module-qat.runtime.executables">qat.runtime.executables</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#module-qat.runtime.post_processing">qat.runtime.post_processing</a>
@@ -3542,7 +3549,7 @@
       </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.NANO">NANO (Scale attribute)</a>
 </li>
-      <li><a href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine">NativeEngine (class in qat.runtime.engines.native)</a>
+      <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine">NativeEngine (class in qat.engines.native)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.nco">nco (SequencerConfig attribute)</a>
 </li>
@@ -3786,9 +3793,11 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine.execute.params.package">package (qat.backend.waveform_v1.engines.echo.EchoEngine.execute parameter)</a>
+      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.execute.params.package">package (qat.engines.waveform_v1.echo.EchoEngine.execute parameter)</a>
 
       <ul>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.execute.params.package">(qat.engines.zero.ZeroEngine.execute parameter)</a>
+</li>
         <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.run.params.package">(qat.runtime.analysis_passes.IndexMappingAnalysis.run parameter)</a>
 </li>
         <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package">(qat.runtime.runtimes.legacy.LegacyRuntime.execute parameter)</a>
@@ -4014,6 +4023,8 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.post_processing">post_processing (Executable attribute)</a>
 
       <ul>
@@ -4024,8 +4035,6 @@
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_processing.params.post_processing">(qat.runtime.post_processing.apply_post_processing parameter)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.post_processing">post_processing() (InstructionBuilder method)</a>
 
       <ul>
@@ -4144,7 +4153,7 @@
         <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQasmParser.process_qreg">(TketQasmParser method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.process_readout">process_readout() (in module qat.backend.waveform_v1.engines.echo)</a>
+      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.process_readout">process_readout() (in module qat.engines.waveform_v1.echo)</a>
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.process_reset">process_reset() (LiveDeviceEngine method)</a>
 
@@ -4370,20 +4379,6 @@
 </li>
       </ul></li>
       <li>
-    qat.backend.waveform_v1.engines
-
-      <ul>
-        <li><a href="qat.backend.waveform_v1.engines.html#module-qat.backend.waveform_v1.engines">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.backend.waveform_v1.engines.echo
-
-      <ul>
-        <li><a href="qat.backend.waveform_v1.engines.echo.html#module-qat.backend.waveform_v1.engines.echo">module</a>
-</li>
-      </ul></li>
-      <li>
     qat.backend.waveform_v1.executable
 
       <ul>
@@ -4444,6 +4439,41 @@
 
       <ul>
         <li><a href="qat.core.qat.html#module-qat.core.qat">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.engines
+
+      <ul>
+        <li><a href="qat.engines.html#module-qat.engines">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.engines.native
+
+      <ul>
+        <li><a href="qat.engines.native.html#module-qat.engines.native">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.engines.waveform_v1
+
+      <ul>
+        <li><a href="qat.engines.waveform_v1.html#module-qat.engines.waveform_v1">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.engines.waveform_v1.echo
+
+      <ul>
+        <li><a href="qat.engines.waveform_v1.echo.html#module-qat.engines.waveform_v1.echo">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.engines.zero
+
+      <ul>
+        <li><a href="qat.engines.zero.html#module-qat.engines.zero">module</a>
 </li>
       </ul></li>
       <li>
@@ -4831,6 +4861,8 @@
         <li><a href="qat.purr.backends.utilities.html#module-qat.purr.backends.utilities">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.verification
 
@@ -4852,8 +4884,6 @@
         <li><a href="qat.purr.compiler.builders.html#module-qat.purr.compiler.builders">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler.caches
 
@@ -5090,20 +5120,6 @@
 
       <ul>
         <li><a href="qat.runtime.analysis_passes.html#module-qat.runtime.analysis_passes">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.runtime.engines
-
-      <ul>
-        <li><a href="qat.runtime.engines.html#module-qat.runtime.engines">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.runtime.engines.native
-
-      <ul>
-        <li><a href="qat.runtime.engines.native.html#module-qat.runtime.engines.native">module</a>
 </li>
       </ul></li>
       <li>
@@ -5396,6 +5412,8 @@
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.params.readout_mitigation">(qat.model.error_mitigation.ErrorMitigation parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.engines.zero.html#qat.engines.zero.readout_shape">readout_shape() (in module qat.engines.zero)</a>
+</li>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation">ReadoutMitigation (class in qat.model.error_mitigation)</a>
 
       <ul>
@@ -6115,23 +6133,27 @@
       <ul>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.readout_shape.params.shots">(qat.engines.zero.readout_shape parameter)</a>
+</li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.shots">(qat.runtime.executables.Executable parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.number_of_batches.params.shots_per_batch">shots_per_batch (qat.runtime.runtimes.base.BaseRuntime.number_of_batches parameter)</a>
 </li>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine.shutdown">shutdown() (EchoEngine method)</a>
+      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.shutdown">shutdown() (EchoEngine method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.shutdown">(InstructionExecutionEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
-        <li><a href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine.shutdown">(NativeEngine method)</a>
+        <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.shutdown">(NativeEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.shutdown">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.shutdown">(QbloxLiveEngine method)</a>
+</li>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.shutdown">(ZeroEngine method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -6222,24 +6244,28 @@
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.start_playback">(QbloxControlHardware method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine.params.startup">startup (qat.backend.waveform_v1.engines.echo.EchoEngine parameter)</a>
+      <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.params.startup">startup (qat.engines.native.NativeEngine parameter)</a>
 
       <ul>
-        <li><a href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine.params.startup">(qat.runtime.engines.native.NativeEngine parameter)</a>
+        <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.params.startup">(qat.engines.waveform_v1.echo.EchoEngine parameter)</a>
+</li>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.params.startup">(qat.engines.zero.ZeroEngine parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.waveform_v1.engines.echo.html#qat.backend.waveform_v1.engines.echo.EchoEngine.startup">startup() (EchoEngine method)</a>
+      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.startup">startup() (EchoEngine method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.startup">(InstructionExecutionEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.startup">(LiveDeviceEngine method)</a>
 </li>
-        <li><a href="qat.runtime.engines.native.html#qat.runtime.engines.native.NativeEngine.startup">(NativeEngine method)</a>
+        <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.startup">(NativeEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.startup">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.startup">(QbloxLiveEngine method)</a>
+</li>
+        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.startup">(ZeroEngine method)</a>
 </li>
       </ul></li>
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.params.startup_engine">startup_engine (qat.runtime.runtimes.base.BaseRuntime parameter)</a>
@@ -6943,6 +6969,8 @@
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQIRParser.z">z() (TketQIRParser method)</a>
 </li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.zero_at_edges">zero_at_edges (Waveform attribute)</a>
+</li>
+      <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine">ZeroEngine (class in qat.engines.zero)</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.ZX">ZX() (QuantumInstructionBuilder method)</a>
 </li>
