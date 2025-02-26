@@ -105,4 +105,4 @@ class Pulse(QuantumInstruction):
 
     @property
     def channel(self):
-        return self.targets
+        return next(iter(self.targets))
