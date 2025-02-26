@@ -3,9 +3,9 @@
 import numpy as np
 
 from qat.backend.waveform_v1 import WaveformV1Executable
+from qat.engines.native import NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
-from qat.runtime import NativeEngine
 
 log = get_default_logger()
 

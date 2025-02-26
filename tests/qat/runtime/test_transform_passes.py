@@ -3,7 +3,8 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.backend.waveform_v1 import EchoEngine, WaveformV1Backend
+from qat.backend.waveform_v1 import WaveformV1Backend
+from qat.engines.waveform_v1 import EchoEngine
 from qat.ir.measure import PostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis

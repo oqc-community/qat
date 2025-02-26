@@ -4,11 +4,11 @@ import pytest
 
 from qat import QAT
 from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Executable
+from qat.engines.waveform_v1 import EchoEngine
 from qat.pipelines import EchoCompile, EchoExecute, EchoPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.frontends import QASMFrontend
-from qat.runtime import EchoEngine
 
 
 def load_qasm(N):

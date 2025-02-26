@@ -107,7 +107,7 @@ from qat import Pipeline
 
 # %%
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
-from qat.backend.waveform_v1.engines.echo import EchoEngine
+from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend.frontends import DefaultFrontend
 from qat.middleend.middleends import DefaultMiddleend
 from qat.purr.backends.echo import get_default_echo_hardware

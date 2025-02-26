@@ -20,12 +20,13 @@ from compiler_config.config import (
 import qat.pipelines.echo
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
-from qat.backend.waveform_v1 import EchoEngine, WaveformV1Backend
+from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
-from qat.backend.waveform_v1.engines.echo import EchoEngine
 from qat.core.config import PipelineImportDescription
 from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
+from qat.engines import NativeEngine
+from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend.frontends import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.passes.pass_base import PassManager
@@ -48,7 +49,6 @@ from qat.purr.compiler.instructions import (
 from qat.purr.qatconfig import QatConfig
 from qat.qat import _return_or_build, fetch_frontend
 from qat.runtime import LegacyRuntime, SimpleRuntime
-from qat.runtime.engines.native import NativeEngine
 from qat.runtime.executables import Executable
 from qat.runtime.runtimes.simple import SimpleRuntime
 

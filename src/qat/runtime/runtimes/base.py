@@ -6,10 +6,10 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
+from qat.engines import NativeEngine
 from qat.passes.pass_base import PassManager
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
-from qat.runtime import NativeEngine
 from qat.runtime.executables import AcquireDataStruct
 from qat.runtime.transform_passes import (
     AssignResultsTransform,

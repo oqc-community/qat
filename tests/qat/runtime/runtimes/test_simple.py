@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from qat.backend.waveform_v1 import EchoEngine
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.engines.waveform_v1 import EchoEngine
 from qat.passes.pass_base import PassManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode
