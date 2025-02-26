@@ -1,0 +1,7 @@
+qat.compiler.decompositions.gates module
+========================================
+
+.. automodule:: qat.compiler.decompositions.gates
+   :members:
+   :undoc-members:
+   :show-inheritance:

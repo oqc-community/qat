@@ -1,0 +1,7 @@
+qat.compiler.decompositions.base module
+=======================================
+
+.. automodule:: qat.compiler.decompositions.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

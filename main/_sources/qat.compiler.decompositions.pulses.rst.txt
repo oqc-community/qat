@@ -1,0 +1,7 @@
+qat.compiler.decompositions.pulses module
+=========================================
+
+.. automodule:: qat.compiler.decompositions.pulses
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -17,10 +17,11 @@
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.frontend.frontends module" href="qat.frontend.frontends.html" />
+    <link rel="next" title="qat.frontend.circuit_builder module" href="qat.frontend.circuit_builder.html" />
     <link rel="prev" title="qat.engines.zero module" href="qat.engines.zero.html" /> 
 </head>
 
@@ -64,6 +65,17 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.decompositions.html">qat.compiler.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.base.html">qat.compiler.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.gates.html">qat.compiler.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.pulses.html">qat.compiler.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.gates.html">qat.compiler.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.gates.transform_passes.html">qat.compiler.gates.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.gates.validation_passes.html">qat.compiler.gates.validation_passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
@@ -85,14 +97,24 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -219,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
@@ -265,6 +288,38 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CNOT"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CNOT()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CPhase"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CPhase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CRx"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CRx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CRy"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CRy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CRz"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CRz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CX"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CX()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.ECR"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.ECR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Hadamard"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Hadamard()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Phase"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Phase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Rx"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Rx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Ry"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Ry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Rz"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Rz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.S"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.S()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.SWAP"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.SWAP()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Sdg"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Sdg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.T"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.T()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Tdg"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Tdg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.U"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.X"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.X()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Y"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Z"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.Z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.add"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.barrier"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.barrier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.emit"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.emit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.measure"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.measure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.reset"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.reset()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.BaseFrontend"><code class="docutils literal notranslate"><span class="pre">BaseFrontend</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.BaseFrontend.emit"><code class="docutils literal notranslate"><span class="pre">BaseFrontend.emit()</span></code></a></li>
@@ -319,7 +374,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.engines.zero.html" class="btn btn-neutral float-left" title="qat.engines.zero module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.frontend.frontends.html" class="btn btn-neutral float-right" title="qat.frontend.frontends module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.frontend.circuit_builder.html" class="btn btn-neutral float-right" title="qat.frontend.circuit_builder module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

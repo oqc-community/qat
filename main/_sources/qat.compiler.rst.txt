@@ -6,6 +6,15 @@ qat.compiler package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.compiler.decompositions
+   qat.compiler.gates
+
 Submodules
 ----------
 

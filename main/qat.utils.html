@@ -17,6 +17,7 @@
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -64,6 +65,17 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.compiler.html">qat.compiler package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.decompositions.html">qat.compiler.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.base.html">qat.compiler.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.gates.html">qat.compiler.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.decompositions.pulses.html">qat.compiler.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.gates.html">qat.compiler.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.gates.transform_passes.html">qat.compiler.gates.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.gates.validation_passes.html">qat.compiler.gates.validation_passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
@@ -85,14 +97,24 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -219,6 +241,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
@@ -332,6 +355,18 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval_array"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval_array()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative"><code class="docutils literal notranslate"><span class="pre">validate_non_negative()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateOperator"><code class="docutils literal notranslate"><span class="pre">StateOperator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateOperator.apply_gate"><code class="docutils literal notranslate"><span class="pre">StateOperator.apply_gate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateTensor"><code class="docutils literal notranslate"><span class="pre">StateTensor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateVector"><code class="docutils literal notranslate"><span class="pre">StateVector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateVector.apply_gate"><code class="docutils literal notranslate"><span class="pre">StateVector.apply_gate()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -1,0 +1,17 @@
+qat.compiler.decompositions package
+===================================
+
+.. automodule:: qat.compiler.decompositions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.compiler.decompositions.base
+   qat.compiler.decompositions.gates
+   qat.compiler.decompositions.pulses

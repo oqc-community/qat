@@ -1,0 +1,16 @@
+qat.compiler.gates package
+==========================
+
+.. automodule:: qat.compiler.gates
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.compiler.gates.transform_passes
+   qat.compiler.gates.validation_passes
