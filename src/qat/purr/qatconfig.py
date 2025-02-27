@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+import inspect
 import warnings
 from typing import Literal, Optional, Tuple, Type
 
 import yaml
 from compiler_config.config import CompilerConfig
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ImportString, field_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -15,6 +16,7 @@ from pydantic_settings import (
 from qiskit_aer import AerSimulator
 
 from qat.core.config import PipelineImportDescription
+from qat.extensions import QatExtension
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -151,6 +153,20 @@ class QatConfig(BaseSettings):
 
     PIPELINES: list[PipelineImportDescription] | None = None
     """ QAT Pipelines to add on start-up, None adds default pipelines"""
+
+    EXTENSIONS: list[ImportString] = []
+
+    @field_validator("EXTENSIONS")
+    def load_extensions(values):
+        for value in values:
+            if type(value) is type and issubclass(value, QatExtension):
+                value.load()
+            else:
+                name = inspect.getmodule(value).__name__
+                raise ValueError(
+                    f"extension '{name}' must be a valid QatExtension class, type is actually {type(value)}"
+                )
+        return values
 
     @field_validator("PIPELINES")
     @classmethod

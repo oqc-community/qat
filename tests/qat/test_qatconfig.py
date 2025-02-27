@@ -114,3 +114,36 @@ def test_validate_instructions(monkeypatch, mocker, runtime, validation):
 
     runtime.execute(builder)
     assert engine.validate.called == validation
+
+
+def test_extension_loads():
+    qatconfig = QatConfig(EXTENSIONS=["tests.qat.extensions.SomeExtension"])
+    from .extensions import SomeExtension, loaded_extensions
+
+    assert "SomeExtension" in loaded_extensions
+    assert SomeExtension in qatconfig.EXTENSIONS
+    loaded_extensions.clear()
+
+
+def test_extension_load_multiple():
+    qatconfig = QatConfig(
+        EXTENSIONS=[
+            "tests.qat.extensions.SomeExtension",
+            "tests.qat.extensions.AnotherExtension",
+        ]
+    )
+    from .extensions import AnotherExtension, SomeExtension, loaded_extensions
+
+    assert {"SomeExtension", "AnotherExtension"}.issubset(loaded_extensions)
+    assert {SomeExtension, AnotherExtension}.issubset(set(qatconfig.EXTENSIONS))
+    loaded_extensions.clear()
+
+
+def test_nonexistant_extension():
+    with pytest.raises(ValidationError):
+        QatConfig(EXTENSIONS=["tests.qat.doesntexist"])
+
+
+def test_extension_not_a_QatExtension():
+    with pytest.raises(ValidationError):
+        QatConfig(EXTENSIONS=["tests.qat.extensions.NotAnExtension"])
