@@ -1,0 +1,15 @@
+qat.runtime.legacy package
+==========================
+
+.. automodule:: qat.runtime.legacy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.runtime.legacy.transform_passes

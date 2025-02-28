@@ -72,6 +72,11 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.compiler.gates.validation_passes.html">qat.compiler.gates.validation_passes module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.compiler.legacy.html">qat.compiler.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.legacy.transform_passes.html">qat.compiler.legacy.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.compiler.legacy.validation_passes.html">qat.compiler.legacy.validation_passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.analysis_passes.html">qat.compiler.analysis_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.transform_passes.html">qat.compiler.transform_passes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.compiler.validation_passes.html">qat.compiler.validation_passes module</a></li>
@@ -220,6 +225,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.legacy.transform_passes.html">qat.runtime.legacy.transform_passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.runtimes.html">qat.runtime.runtimes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.base.html">qat.runtime.runtimes.base module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.runtimes.legacy.html">qat.runtime.runtimes.legacy module</a></li>
@@ -394,6 +403,12 @@
       <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.run.params.acquisitions">acquisitions (qat.runtime.analysis_passes.IndexMappingAnalysis.run parameter)</a>
 
       <ul>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run.params.acquisitions">(qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run parameter)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitSimplifyResults.run.params.acquisitions">(qat.runtime.legacy.transform_passes.QiskitSimplifyResults.run parameter)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitStripMetadata.run.params.acquisitions">(qat.runtime.legacy.transform_passes.QiskitStripMetadata.run parameter)</a>
+</li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.AssignResultsTransform.run.params.acquisitions">(qat.runtime.transform_passes.AssignResultsTransform.run parameter)</a>
 </li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation.run.params.acquisitions">(qat.runtime.transform_passes.ErrorMitigation.run parameter)</a>
@@ -1005,6 +1020,8 @@
 </li>
       <li><a href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder">CircuitBuilder (class in qat.frontend.circuit_builder)</a>
 </li>
+      <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.classical_to_quantum_mapping">classical_to_quantum_mapping() (QiskitErrorMitigation method)</a>
+</li>
       <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.clbit">clbit (Measure attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.cleanup">cleanup (qat.purr.utils.logger.LogFolder parameter)</a>
@@ -1078,9 +1095,13 @@
       <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.HardwareConfigValidity.run.params.compiler_config">compiler_config (qat.backend.validation_passes.HardwareConfigValidity.run parameter)</a>
 
       <ul>
+        <li><a href="qat.compiler.legacy.validation_passes.html#qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation.run.params.compiler_config">(qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation.run parameter)</a>
+</li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.InputOptimisation.run.params.compiler_config">(qat.compiler.transform_passes.InputOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse.run.params.compiler_config">(qat.compiler.transform_passes.Parse.run parameter)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run.params.compiler_config">(qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run parameter)</a>
 </li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation.run.params.compiler_config">(qat.runtime.transform_passes.ErrorMitigation.run parameter)</a>
 </li>
@@ -1669,7 +1690,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.EchoAcquireSanitisation">EchoAcquireSanitisation (class in qat.compiler.transform_passes)</a>
+      <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.EchoAcquireSanitisation">EchoAcquireSanitisation (class in qat.compiler.legacy.transform_passes)</a>
 </li>
       <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine">EchoEngine (class in qat.engines.waveform_v1.echo)</a>
 
@@ -2509,6 +2530,8 @@
         <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.index">(QRPairModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.index_pattern">index_pattern (QiskitErrorMitigation attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.IndexAccessor">IndexAccessor (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis">IndexMappingAnalysis (class in qat.runtime.analysis_passes)</a>
@@ -2686,6 +2709,8 @@
 </li>
         <li><a href="qat.ir.qat_ir.html#qat.ir.qat_ir.QatIR.instructions">(QatIR attribute)</a>
 </li>
+        <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper.instructions">(QiskitBuilderWrapper property)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
@@ -2770,7 +2795,11 @@
 </li>
         <li><a href="qat.compiler.gates.transform_passes.html#qat.compiler.gates.transform_passes.SquashCNOTs.run.params.ir">(qat.compiler.gates.transform_passes.SquashCNOTs.run parameter)</a>
 </li>
-        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.EchoAcquireSanitisation.run.params.ir">(qat.compiler.transform_passes.EchoAcquireSanitisation.run parameter)</a>
+        <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.EchoAcquireSanitisation.run.params.ir">(qat.compiler.legacy.transform_passes.EchoAcquireSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.QiskitInstructionsWrapper.run.params.ir">(qat.compiler.legacy.transform_passes.QiskitInstructionsWrapper.run parameter)</a>
+</li>
+        <li><a href="qat.compiler.legacy.validation_passes.html#qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation.run.params.ir">(qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation.run parameter)</a>
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run.params.ir">(qat.compiler.transform_passes.PhaseOptimisation.run parameter)</a>
 </li>
@@ -3621,6 +3650,12 @@
 </li>
         <li><a href="qat.compiler.gates.validation_passes.html#module-qat.compiler.gates.validation_passes">qat.compiler.gates.validation_passes</a>
 </li>
+        <li><a href="qat.compiler.legacy.html#module-qat.compiler.legacy">qat.compiler.legacy</a>
+</li>
+        <li><a href="qat.compiler.legacy.transform_passes.html#module-qat.compiler.legacy.transform_passes">qat.compiler.legacy.transform_passes</a>
+</li>
+        <li><a href="qat.compiler.legacy.validation_passes.html#module-qat.compiler.legacy.validation_passes">qat.compiler.legacy.validation_passes</a>
+</li>
         <li><a href="qat.compiler.transform_passes.html#module-qat.compiler.transform_passes">qat.compiler.transform_passes</a>
 </li>
         <li><a href="qat.compiler.validation_passes.html#module-qat.compiler.validation_passes">qat.compiler.validation_passes</a>
@@ -3846,6 +3881,10 @@
         <li><a href="qat.runtime.analysis_passes.html#module-qat.runtime.analysis_passes">qat.runtime.analysis_passes</a>
 </li>
         <li><a href="qat.runtime.executables.html#module-qat.runtime.executables">qat.runtime.executables</a>
+</li>
+        <li><a href="qat.runtime.legacy.html#module-qat.runtime.legacy">qat.runtime.legacy</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#module-qat.runtime.legacy.transform_passes">qat.runtime.legacy.transform_passes</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#module-qat.runtime.post_processing">qat.runtime.post_processing</a>
 </li>
@@ -4202,6 +4241,10 @@
         <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.execute.params.package">(qat.engines.zero.ZeroEngine.execute parameter)</a>
 </li>
         <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.run.params.package">(qat.runtime.analysis_passes.IndexMappingAnalysis.run parameter)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.classical_to_quantum_mapping.params.package">(qat.runtime.legacy.transform_passes.QiskitErrorMitigation.classical_to_quantum_mapping parameter)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run.params.package">(qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run parameter)</a>
 </li>
         <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.execute.params.package">(qat.runtime.runtimes.legacy.LegacyRuntime.execute parameter)</a>
 </li>
@@ -4864,6 +4907,27 @@
 </li>
       </ul></li>
       <li>
+    qat.compiler.legacy
+
+      <ul>
+        <li><a href="qat.compiler.legacy.html#module-qat.compiler.legacy">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.compiler.legacy.transform_passes
+
+      <ul>
+        <li><a href="qat.compiler.legacy.transform_passes.html#module-qat.compiler.legacy.transform_passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.compiler.legacy.validation_passes
+
+      <ul>
+        <li><a href="qat.compiler.legacy.validation_passes.html#module-qat.compiler.legacy.validation_passes">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.compiler.transform_passes
 
       <ul>
@@ -5381,8 +5445,6 @@
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#module-qat.purr.backends.realtime_chip_simulator">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.utilities
 
@@ -5390,6 +5452,8 @@
         <li><a href="qat.purr.backends.utilities.html#module-qat.purr.backends.utilities">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.verification
 
@@ -5657,6 +5721,20 @@
 </li>
       </ul></li>
       <li>
+    qat.runtime.legacy
+
+      <ul>
+        <li><a href="qat.runtime.legacy.html#module-qat.runtime.legacy">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.runtime.legacy.transform_passes
+
+      <ul>
+        <li><a href="qat.runtime.legacy.transform_passes.html#module-qat.runtime.legacy.transform_passes">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.runtime.post_processing
 
       <ul>
@@ -5806,13 +5884,25 @@
 </li>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder">QiskitBuilder (class in qat.purr.backends.qiskit_simulator)</a>
 </li>
+      <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper">QiskitBuilderWrapper (class in qat.purr.backends.qiskit_simulator)</a>
+</li>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine">QiskitEngine (class in qat.purr.backends.qiskit_simulator)</a>
+</li>
+      <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation">QiskitErrorMitigation (class in qat.runtime.legacy.transform_passes)</a>
 </li>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitHardwareModel">QiskitHardwareModel (class in qat.purr.backends.qiskit_simulator)</a>
 </li>
+      <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.QiskitInstructionsWrapper">QiskitInstructionsWrapper (class in qat.compiler.legacy.transform_passes)</a>
+</li>
+      <li><a href="qat.compiler.legacy.validation_passes.html#qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation">QiskitResultsFormatValidation (class in qat.compiler.legacy.validation_passes)</a>
+</li>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitRuntime">QiskitRuntime (class in qat.purr.backends.qiskit_simulator)</a>
 </li>
+      <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitSimplifyResults">QiskitSimplifyResults (class in qat.runtime.legacy.transform_passes)</a>
+</li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig">QiskitSimulationConfig (class in qat.purr.qatconfig)</a>
+</li>
+      <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitStripMetadata">QiskitStripMetadata (class in qat.runtime.legacy.transform_passes)</a>
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.QPUVersion">QPUVersion (class in qat.purr.backends.verification)</a>
 </li>
@@ -6290,12 +6380,12 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Return">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_">return_ (QatFile property)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.returns">returns (Executable attribute)</a>
 
       <ul>
@@ -6399,7 +6489,7 @@
 </li>
         <li><a href="qat.backend.codegen_base.html#qat.backend.codegen_base.DfsTraversal.run">(DfsTraversal method)</a>, <a href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.run">[1]</a>
 </li>
-        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.EchoAcquireSanitisation.run">(EchoAcquireSanitisation method)</a>
+        <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.EchoAcquireSanitisation.run">(EchoAcquireSanitisation method)</a>
 </li>
         <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ErrorMitigation.run">(ErrorMitigation method)</a>
 </li>
@@ -6456,6 +6546,16 @@
         <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.QatBackend.run">(QatBackend method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.run">(QbloxLegalisationPass method)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run">(QiskitErrorMitigation method)</a>
+</li>
+        <li><a href="qat.compiler.legacy.transform_passes.html#qat.compiler.legacy.transform_passes.QiskitInstructionsWrapper.run">(QiskitInstructionsWrapper method)</a>
+</li>
+        <li><a href="qat.compiler.legacy.validation_passes.html#qat.compiler.legacy.validation_passes.QiskitResultsFormatValidation.run">(QiskitResultsFormatValidation method)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitSimplifyResults.run">(QiskitSimplifyResults method)</a>
+</li>
+        <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitStripMetadata.run">(QiskitStripMetadata method)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock.run">(QuantumExecutableBlock method)</a>
 </li>

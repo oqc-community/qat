@@ -1,0 +1,16 @@
+qat.compiler.legacy package
+===========================
+
+.. automodule:: qat.compiler.legacy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.compiler.legacy.transform_passes
+   qat.compiler.legacy.validation_passes
