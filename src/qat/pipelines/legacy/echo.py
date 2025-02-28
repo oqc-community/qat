@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.validation_passes import HardwareConfigValidity
-from qat.compiler.legacy.transform_passes import EchoAcquireSanitisation
+from qat.compiler.legacy.transform_passes import IntegratorAcquireSanitisation
 from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.core.pipeline import Pipeline
@@ -29,7 +29,7 @@ def get_pipeline(model, name="legacy_echo") -> Pipeline:
         | HardwareConfigValidity(model)
         | CalibrationAnalysis()
         | PhaseOptimisation()
-        | EchoAcquireSanitisation()
+        | IntegratorAcquireSanitisation()
         | PostProcessingSanitisation()
         | InstructionValidation(engine)
         | ReadoutValidation(model)

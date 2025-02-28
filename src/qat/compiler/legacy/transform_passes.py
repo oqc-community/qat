@@ -6,10 +6,10 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Acquire, AcquireMode
 
 
-class EchoAcquireSanitisation(TransformPass):
+class IntegratorAcquireSanitisation(TransformPass):
     """Changes `AcquireMode.INTEGRATOR` acquisitions to `AcquireMode.RAW`.
 
-    The legacy echo engine expects the acquisition mode to be either `RAW` or `SCOPE`.
+    The legacy echo/RTCS engines expect the acquisition mode to be either `RAW` or `SCOPE`.
     While the actual execution can process `INTEGRATOR` by treating it as `RAW`, they are
     typically santitised the runtime using :meth:`EchoEngine.optimize()`. If not done in the
     new pipelines, it will conflict with :class:`PostProcessingSantisiation`, and return the
