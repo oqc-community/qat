@@ -6,7 +6,7 @@ from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import PassManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.execution import QuantumExecutionEngine
+from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.runtime import BaseRuntime
 
 
@@ -18,7 +18,7 @@ class LegacyRuntime(BaseRuntime):
 
     def __init__(
         self,
-        engine: QuantumExecutionEngine,
+        engine: InstructionExecutionEngine,
         results_pipeline: Optional[PassManager] = None,
         startup_engine: bool = False,
     ):
@@ -30,10 +30,10 @@ class LegacyRuntime(BaseRuntime):
         :param bool startup_engine: Instruct the engine to connect to the backend on
             startup?
         """
-        if not isinstance(engine, QuantumExecutionEngine):
+        if not isinstance(engine, InstructionExecutionEngine):
             raise ValueError(
                 f"The engine provided has type {type(engine)}, which is not a "
-                "`qat.purr.complier.execution.QuantumExecutionEngine`. Please use the "
+                "`qat.purr.complier.execution.InstructionExecutionEngine`. Please use the "
                 "`SimpleRuntime` for the refactored engines."
             )
         self.engine = engine

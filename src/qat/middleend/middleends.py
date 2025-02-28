@@ -41,7 +41,7 @@ class CustomMiddleend(BaseMiddleend):
         met_mgr: Optional[MetricsManager] = None,
         compiler_config: Optional[CompilerConfig] = None,
     ):
-        self.pipeline.run(ir, res_mgr, met_mgr, compiler_config=compiler_config)
+        ir = self.pipeline.run(ir, res_mgr, met_mgr, compiler_config=compiler_config)
         return ir
 
 

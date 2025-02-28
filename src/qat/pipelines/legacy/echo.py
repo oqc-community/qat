@@ -2,11 +2,8 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.validation_passes import HardwareConfigValidity
-from qat.compiler.transform_passes import (
-    EchoAcquireSanitisation,
-    PhaseOptimisation,
-    PostProcessingSanitisation,
-)
+from qat.compiler.legacy.transform_passes import EchoAcquireSanitisation
+from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.core.pipeline import Pipeline
 from qat.frontend.frontends import DefaultFrontend

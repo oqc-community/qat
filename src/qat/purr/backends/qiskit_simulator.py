@@ -448,3 +448,19 @@ class QiskitRuntime(QuantumRuntime):
                 else:
                     results = squashed_results
         return (results, metadata) if qiskitconfig.ENABLE_METADATA else results
+
+
+class QiskitBuilderWrapper:
+    """A wrapped around the Qiskit builder to smoothly integrate into the pipeline API.
+
+    A mismatch in the API between the :class:`QuantumExecutionEngine` and
+    :class:`QiskitEngine` means that we can't easily implement Qiskit into pipelines: this
+    is a little "hack" to make the API match.
+    """
+
+    def __init__(self, builder: QiskitBuilder):
+        self.builder = builder
+
+    @property
+    def instructions(self):
+        return self.builder
