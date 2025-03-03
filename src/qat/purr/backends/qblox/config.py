@@ -173,9 +173,13 @@ class QbloxConfig:
 
 
 class QbloxConfigHelper(ABC):
-    def __init__(self, module_config: ModuleConfig, sequencer_config: SequencerConfig):
-        self.sequencer_config = sequencer_config
-        self.module_config = module_config
+    def __init__(
+        self,
+        module_config: ModuleConfig = None,
+        sequencer_config: SequencerConfig = None,
+    ):
+        self.sequencer_config = sequencer_config or SequencerConfig()
+        self.module_config = module_config or SequencerConfig()
 
     def configure(self, module: Module, sequencer: Sequencer):
         self.configure_module(module)

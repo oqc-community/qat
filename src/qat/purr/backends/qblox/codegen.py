@@ -471,8 +471,8 @@ class QbloxContext(ContextMixin):
             log.warning("This pulse will be ignored.")
             return
 
-        num_samples = pulse.size
-        max_duration = min(num_samples, Constants.MAX_WAIT_TIME)
+        pulse_width = pulse.size
+        max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
         if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
             i_offs_steps = int(
                 pulse[0].real * (Constants.MAX_OFFSET_SIZE // 2)  # Signed integer
@@ -481,14 +481,14 @@ class QbloxContext(ContextMixin):
                 pulse[0].imag * (Constants.MAX_OFFSET_SIZE // 2)  # Signed integer
             )
             self.sequence_builder.set_awg_offs(i_offs_steps, q_offs_steps)
-            self.sequence_builder.upd_param(max_duration)
-            self._wait_nanoseconds(num_samples - max_duration)
+            self.sequence_builder.upd_param(max_width)
+            self._wait_nanoseconds(pulse_width - max_width)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             i_index, q_index = self._register_waveform(waveform, target, pulse)
-            self.sequence_builder.play(i_index, q_index, max_duration)
-            self._wait_nanoseconds(num_samples - max_duration)
+            self.sequence_builder.play(i_index, q_index, max_width)
+            self._wait_nanoseconds(pulse_width - max_width)
 
         self._duration = self._duration + waveform.duration
         self._timeline = np.append(self._timeline, pulse)
@@ -706,8 +706,8 @@ class NewQbloxContext(ContextMixin):
             log.warning("This pulse will be ignored.")
             return
 
-        num_samples = pulse.size
-        max_duration = min(num_samples, Constants.MAX_WAIT_TIME)
+        pulse_width = pulse.size
+        max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
         if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
             i_offs_steps = int(
                 pulse[0].real * (Constants.MAX_OFFSET_SIZE // 2)  # Signed integer
@@ -716,14 +716,14 @@ class NewQbloxContext(ContextMixin):
                 pulse[0].imag * (Constants.MAX_OFFSET_SIZE // 2)  # Signed integer
             )
             self.sequence_builder.set_awg_offs(i_offs_steps, q_offs_steps)
-            self.sequence_builder.upd_param(max_duration)
-            self._wait_nanoseconds(num_samples - max_duration)
+            self.sequence_builder.upd_param(max_width)
+            self._wait_nanoseconds(pulse_width - max_width)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
         else:
             i_index, q_index = self._register_waveform(waveform, target, pulse)
-            self.sequence_builder.play(i_index, q_index, max_duration)
-            self._wait_nanoseconds(num_samples - max_duration)
+            self.sequence_builder.play(i_index, q_index, max_width)
+            self._wait_nanoseconds(pulse_width - max_width)
 
         self._duration = self._duration + waveform.duration
         self._durations.append(waveform.duration)
