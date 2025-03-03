@@ -227,7 +227,7 @@ jobs:
         run: poetry install --sync --with dev
 
       - name: Generate report for pytest
-        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} qat-compiler
+        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} qat-compiler -v
 
       - name: Output to step summary
         id: report

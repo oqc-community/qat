@@ -35,6 +35,11 @@ No integration tests defined
 ```python
 {{case.message}}
 ```
+{% if verbose -%}
+```
+{{ case.verbose }}
+```
+{% endif -%}
 <br/>  
 
 {% endfor -%}
@@ -54,6 +59,11 @@ No integration tests defined
 ```python
 {{case.message}}
 ```
+{% if verbose -%}
+```
+{{ case.verbose }}
+```
+{% endif -%}
 <br/>  
 
 {% endfor -%}

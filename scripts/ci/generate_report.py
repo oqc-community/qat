@@ -16,6 +16,7 @@ def get_details(testsuite, os, python):
                 "classname": node.get("classname"),
                 "name": node.get("name"),
                 "message": node.find(tag).get("message"),
+                "verbose": node.find(tag).text,
                 "os": os,
                 "python": python,
             }
@@ -74,7 +75,7 @@ def get_reports(report_path):
     return summaries, all_details, success
 
 
-def generate_summary(report_path, repo_name, package):
+def generate_summary(report_path, repo_name, package, verbose):
     env = Environment(
         loader=FileSystemLoader("./scripts/ci/"), autoescape=select_autoescape()
     )
@@ -89,6 +90,7 @@ def generate_summary(report_path, repo_name, package):
             show_skipped=False,
             package=package,
             status=status,
+            verbose=verbose,
         ),
         success,
     )
@@ -103,9 +105,10 @@ def main():
     parser.add_argument("output_path")
     parser.add_argument("repo")
     parser.add_argument("package")
+    parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    summary, _ = generate_summary(args.report_path, args.repo, args.package)
+    summary, _ = generate_summary(args.report_path, args.repo, args.package, args.verbose)
 
     Path(args.output_path).write_text(summary)
 
