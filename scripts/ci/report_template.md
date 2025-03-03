@@ -23,6 +23,10 @@ No integration tests defined
 {% endif -%}
 
 {% if details.failure -%}
+<details>
+
+<Summary>Failure Report</Summary>
+
 #### Failures
 
 {% for case in details.failure -%}
@@ -34,9 +38,14 @@ No integration tests defined
 <br/>  
 
 {% endfor -%}
+</details>
 {% endif -%}
 
 {% if details.error -%}
+<details>
+
+<Summary>Error Report</Summary>
+
 #### Errors
 
 {% for case in details.error -%}
@@ -48,9 +57,14 @@ No integration tests defined
 <br/>  
 
 {% endfor -%}
+</details>
 {% endif -%}
 
 {% if details.skipped and show_skipped -%}
+<details>
+
+<Summary>Skipped Report</Summary>
+
 #### Skipped
 
 {% for case in details.skipped -%}
@@ -62,4 +76,5 @@ No integration tests defined
 <br/>  
 
 {% endfor -%}
+</details>
 {% endif -%}
