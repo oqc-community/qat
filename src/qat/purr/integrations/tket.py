@@ -304,7 +304,12 @@ class TketQIRParser(QIRParser):
         """Returns the circuit and variables for where results are stored in Qat IR.
 
         This property overwrites the "builder" in the :class:`QIRParser` so that the circuit
-        and output variables are returned in its place."""
+        and output variables are returned in its place. It also removes unused qubits which
+        can greatly increase the effectiveness of the placement of logical-to-physical
+        qubits.
+        """
+
+        self.circuit.remove_blank_wires()
         return self.circuit, self.result_variables
 
     @builder.setter
