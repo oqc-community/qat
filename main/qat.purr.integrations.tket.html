@@ -355,7 +355,9 @@ as the API is a little too different.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><a class="headerlink" href="#qat.purr.integrations.tket.TketQIRParser.builder" title="Link to this definition"></a></dt>
 <dd><p>Returns the circuit and variables for where results are stored in Qat IR.</p>
 <p>This property overwrites the “builder” in the <code class="xref py py-class docutils literal notranslate"><span class="pre">QIRParser</span></code> so that the circuit
-and output variables are returned in its place.</p>
+and output variables are returned in its place. It also removes unused qubits which
+can greatly increase the effectiveness of the placement of logical-to-physical
+qubits.</p>
 </dd></dl>
 
 <dl class="py method">
