@@ -22,6 +22,7 @@ Submodules
    :maxdepth: 4
 
    qat.runtime.analysis_passes
+   qat.runtime.connection
    qat.runtime.executables
    qat.runtime.post_processing
    qat.runtime.results_processing

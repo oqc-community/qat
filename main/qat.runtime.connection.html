@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.backends.qblox.device module &mdash; qat-compiler 2.5.1 documentation</title>
+  <title>qat.runtime.connection module &mdash; qat-compiler 2.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.purr.backends.qblox.graph module" href="qat.purr.backends.qblox.graph.html" />
-    <link rel="prev" title="qat.purr.backends.qblox.constants module" href="qat.purr.backends.qblox.constants.html" /> 
+    <link rel="next" title="qat.runtime.executables module" href="qat.runtime.executables.html" />
+    <link rel="prev" title="qat.runtime.analysis_passes module" href="qat.runtime.analysis_passes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -146,13 +146,13 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
 </ul>
 </li>
-<li class="toctree-l5 current"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
@@ -160,7 +160,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
-<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
@@ -227,7 +227,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.legacy.transform_passes.html">qat.runtime.legacy.transform_passes module</a></li>
 </ul>
@@ -239,7 +239,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
@@ -280,12 +280,10 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="modules.html">src</a></li>
           <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.backends.html">qat.purr.backends package</a></li>
-          <li class="breadcrumb-item"><a href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a></li>
-      <li class="breadcrumb-item active">qat.purr.backends.qblox.device module</li>
+          <li class="breadcrumb-item"><a href="qat.runtime.html">qat.runtime package</a></li>
+      <li class="breadcrumb-item active">qat.runtime.connection module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/qat.purr.backends.qblox.device.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/qat.runtime.connection.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -295,119 +293,112 @@
              
 
 
-  <section id="module-qat.purr.backends.qblox.device">
-<span id="qat-purr-backends-qblox-device-module"></span><h1>qat.purr.backends.qblox.device module<a class="headerlink" href="#module-qat.purr.backends.qblox.device" title="Link to this heading"></a></h1>
+  <section id="module-qat.runtime.connection">
+<span id="qat-runtime-connection-module"></span><h1>qat.runtime.connection module<a class="headerlink" href="#module-qat.runtime.connection" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.DummyQbloxControlHardware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DummyQbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.device.QbloxControlHardware" title="qat.purr.backends.qblox.device.QbloxControlHardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxControlHardware</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.DummyQbloxControlHardware.set_data">
-<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.DummyQbloxControlHardware.set_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxControlHardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dev_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.ControlHardware" title="qat.purr.backends.live_devices.ControlHardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">ControlHardware</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources">
-<span class="sig-name descname"><span class="pre">allocate_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.allocate_resources" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.configure">
-<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.configure" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.connect">
-<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.connect" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.disconnect">
-<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.disconnect" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.set_data">
-<span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.set_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxControlHardware.start_playback">
-<span class="sig-name descname"><span class="pre">start_playback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repetitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxControlHardware.start_playback" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalBaseband">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxPhysicalBaseband</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slot_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalBaseband" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.LivePhysicalBaseband" title="qat.purr.backends.live_devices.LivePhysicalBaseband"><code class="xref py py-class docutils literal notranslate"><span class="pre">LivePhysicalBaseband</span></code></a></p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxPhysicalChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseband</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imbalance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_allowed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel_min_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel_max_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel" title="qat.purr.compiler.devices.PhysicalChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalChannel</span></code></a></p>
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConnectionMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.connection.ConnectionMode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></p>
+<p>The connection mode can be used to specify how a Runtime should handle connections.</p>
+<p>The method for connection handling will depend in the context in which the Runtime is
+used. For example, if a user only requires to send jobs sporadically, then a connection
+that is created before execution and ended after execution might be desired. On the
+contrary, if there is a stream of frequent jobs, the connection likely wants to be held
+indefinitely.</p>
+<p>There are different flags that can be specified:
+#. <cite>ConnectionMode.CONNECT_BEFORE_EXECUTE</cite>: Specifies that the Runtime should attempt</p>
+<blockquote>
+<div><p>to connect the engine each time execute is called.</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.DISCONNECT_AFTER_EXECUTE</cite>: Specifies that the Runtime should attempt</dt><dd><p>to disconnect the engine after each execute.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>ConnectionMode.CONNECT_AT_BEGINNING</cite>: Specifies that the Runtime should attempt to</dt><dd><p>connect the engine as soon as its instantiated.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>ConnectionMode.DISCONNECT_AT_END</cite>: Specifies that the Runtime should attempt to</dt><dd><p>disconnect the engine when the Runtime is deleted (or at the end of a context
+manager).</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>Some predefined composite modes:
+#. <cite>ConnectionMode.MANUAL</cite>: Connection handling is done externally: the Runtime will</p>
+<blockquote>
+<div><p>make no attempt to manage it.</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.DEFAULT</cite>: The connection will be created before each execution and</dt><dd><p>disconnected immediately after the execution is complete.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>ConnectionMode.ALWAYS</cite>: A connection is created at instantiation of the Runtime,</dt><dd><p>and is kept throughout the lifetime of the Runtime. It will not try to connect at
+execution.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>ConnectionMode.ALWAYS_ON_EXECUTE</cite>: A connection is attempted each time execution is</dt><dd><p>called. However, the Runtime will not attempt to disconnect after execution is
+complete. This allows for external disconnection of the engine during e.g. idle
+periods, and for the connection to be restored when needed.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If a Runtime is not used with <cite>ConnectionMode.DEFAULT</cite> or
+<cite>ConnectionMode.ALWAYS_ON_EXECUTE</cite>, then external interference can cause undesired
+behaviour. Furthermore, the specifics of each mode might have slight variations
+depending on which Runtime is used (which should be well documented).</p>
+</div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel.baseband">
-<span class="sig-name descname"><span class="pre">baseband</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.device.QbloxPhysicalBaseband" title="qat.purr.backends.qblox.device.QbloxPhysicalBaseband"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxPhysicalBaseband</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel.baseband" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.ALWAYS">
+<span class="sig-name descname"><span class="pre">ALWAYS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.ALWAYS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel.build_qubit">
-<span class="sig-name descname"><span class="pre">build_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drive_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_state_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span> <span class="pre">+</span> <span class="pre">0j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_drive_if</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel.build_qubit" title="Link to this definition"></a></dt>
-<dd><p>Helper method tp build a qubit with assumed default values on the channels. Modelled after the live hardware.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel.build_resonator">
-<span class="sig-name descname"><span class="pre">build_resonator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resonator_id</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel.build_resonator" title="Link to this definition"></a></dt>
-<dd><p>Helper method to build a resonator with default channels.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel.config">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel.config" title="Link to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.ALWAYS_ON_EXECUTE">
+<span class="sig-name descname"><span class="pre">ALWAYS_ON_EXECUTE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.ALWAYS_ON_EXECUTE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxPhysicalChannel.slot_idx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">slot_idx</span></span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxPhysicalChannel.slot_idx" title="Link to this definition"></a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.CONNECT_AT_BEGINNING">
+<span class="sig-name descname"><span class="pre">CONNECT_AT_BEGINNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.CONNECT_AT_BEGINNING" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.CONNECT_BEFORE_EXECUTE">
+<span class="sig-name descname"><span class="pre">CONNECT_BEFORE_EXECUTE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.CONNECT_BEFORE_EXECUTE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxResonator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxResonator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxResonator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator" title="qat.purr.compiler.devices.Resonator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Resonator</span></code></a></p>
-<p>A hack around QBlox acquisition to use the same pulse channel
-for MeasurePulse and Acquire instructions.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxResonator.get_acquire_channel">
-<span class="sig-name descname"><span class="pre">get_acquire_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxResonator.get_acquire_channel" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.DEFAULT">
+<span class="sig-name descname"><span class="pre">DEFAULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.DEFAULT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.device.QbloxResonator.get_measure_channel">
-<span class="sig-name descname"><span class="pre">get_measure_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.device.QbloxResonator.get_measure_channel" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.DISCONNECT_AFTER_EXECUTE">
+<span class="sig-name descname"><span class="pre">DISCONNECT_AFTER_EXECUTE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.DISCONNECT_AFTER_EXECUTE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.DISCONNECT_AT_END">
+<span class="sig-name descname"><span class="pre">DISCONNECT_AT_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.DISCONNECT_AT_END" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.connection.ConnectionMode.MANUAL">
+<span class="sig-name descname"><span class="pre">MANUAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#qat.runtime.connection.ConnectionMode.MANUAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -418,8 +409,8 @@ for MeasurePulse and Acquire instructions.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.purr.backends.qblox.constants.html" class="btn btn-neutral float-left" title="qat.purr.backends.qblox.constants module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.purr.backends.qblox.graph.html" class="btn btn-neutral float-right" title="qat.purr.backends.qblox.graph module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.runtime.analysis_passes.html" class="btn btn-neutral float-left" title="qat.runtime.analysis_passes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.runtime.executables.html" class="btn btn-neutral float-right" title="qat.runtime.executables module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -448,7 +439,7 @@ for MeasurePulse and Acquire instructions.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Branches</dt>
-      <dd><a href="qat.purr.backends.qblox.device.html">main</a></dd>
+      <dd><a href="qat.runtime.connection.html">main</a></dd>
     </dl>
   </div>
 </div><script>

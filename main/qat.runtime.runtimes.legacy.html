@@ -239,6 +239,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
@@ -297,21 +298,32 @@
 <span id="qat-runtime-runtimes-legacy-module"></span><h1>qat.runtime.runtimes.legacy module<a class="headerlink" href="#module-qat.runtime.runtimes.legacy" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.runtimes.legacy.LegacyRuntime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LegacyRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LegacyRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_pipeline=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_mode=&lt;ConnectionMode.DEFAULT:</span> <span class="pre">3&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime" title="qat.runtime.runtimes.base.BaseRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></p>
-<p>A runtime that provides a wrapper around legacy engines for compatibility with the new
-stack.</p>
+<p>A runtime that provides a wrapper around legacy engines for compatibility with the
+new stack.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.engine">¶</a> (<a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine" title="qat.purr.compiler.execution.QuantumExecutionEngine"><em>QuantumExecutionEngine</em></a>) – The execution engine for a target backend.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline">¶</a> (<a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager" title="qat.passes.pass_base.PassManager"><em>PassManager</em></a><em>, </em><em>optional</em>) – Optionally provided a pipeline for results processing. If
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.engine">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine" title="qat.purr.compiler.execution.InstructionExecutionEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionExecutionEngine</span></code></a></span>) – The execution engine for a target backend.</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline"></span><strong>results_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.results_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager" title="qat.passes.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a>]</span>) – Optionally provided a pipeline for results processing. If
 not provided, a default pipeline is provided.</p></li>
-<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.startup_engine"></span><strong>startup_engine</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.startup_engine">¶</a> (<em>bool</em>) – Instruct the engine to connect to the backend on
-startup?</p></li>
+<li><p><span class="target" id="qat.runtime.runtimes.legacy.LegacyRuntime.params.connection_mode"></span><strong>connection_mode</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.runtimes.legacy.LegacyRuntime.params.connection_mode">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode" title="qat.runtime.connection.ConnectionMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionMode</span></code></a></span>) – Specifies how the connection is maintained.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.runtime.runtimes.legacy.LegacyRuntime.connect_engine">
+<span class="sig-name descname"><span class="pre">connect_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime.connect_engine" title="Link to this definition"></a></dt>
+<dd><p>Connect the engine according to the connection mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.runtime.runtimes.legacy.LegacyRuntime.disconnect_engine">
+<span class="sig-name descname"><span class="pre">disconnect_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime.disconnect_engine" title="Link to this definition"></a></dt>
+<dd><p>Disconnect the engine according to the connection mode.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.runtimes.legacy.LegacyRuntime.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.runtimes.legacy.LegacyRuntime.execute" title="Link to this definition"></a></dt>

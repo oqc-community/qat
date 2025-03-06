@@ -239,6 +239,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
@@ -297,18 +298,13 @@
 <span id="qat-engines-waveform-v1-echo-module"></span><h1>qat.engines.waveform_v1.echo module<a class="headerlink" href="#module-qat.engines.waveform_v1.echo" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a></p>
 <p>The <a class="reference internal" href="#qat.engines.waveform_v1.echo.EchoEngine" title="qat.engines.waveform_v1.echo.EchoEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></a> is a minimal execution engine primarily used for testing the
-compilation pipeline. It is not connected to any backend such as live hardware or a
-simulator, and just simply “echos” back the buffers.</p>
-<p>Currently only accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executables</span></code>, but this may be changed in the
-future.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.engines.waveform_v1.echo.EchoEngine.params.startup"></span><strong>startup</strong><a class="paramlink headerlink reference internal" href="#qat.engines.waveform_v1.echo.EchoEngine.params.startup">¶</a> (<em>bool</em>) – Start up the engine on instantiation?</p>
-</dd>
-</dl>
+compilation pipeline.</p>
+<p>It is not connected to any backend such as live hardware or a simulator, and just simply
+“echos” back the buffers. Currently only accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executables</span></code>, but
+this may be changed in the future.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine.execute" title="Link to this definition"></a></dt>
@@ -325,16 +321,6 @@ future.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine.shutdown" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine.startup">
-<span class="sig-name descname"><span class="pre">startup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine.startup" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

@@ -236,6 +236,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
@@ -555,6 +556,10 @@
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager">AllocationManager (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.allowed_methods">allowed_methods (QiskitSimulationConfig attribute)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.ALWAYS">ALWAYS (ConnectionMode attribute)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.ALWAYS_ON_EXECUTE">ALWAYS_ON_EXECUTE (ConnectionMode attribute)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.amount">amount (Quantity attribute)</a>
 </li>
@@ -1181,6 +1186,8 @@
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.connect">connect() (CompositeInstrument method)</a>
 
       <ul>
+        <li><a href="qat.engines.native.html#qat.engines.native.ConnectionMixin.connect">(ConnectionMixin method)</a>
+</li>
         <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.connect">(Instrument method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.connect">(InstrumentConcept method)</a>
@@ -1192,6 +1199,16 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.CONNECT_AT_BEGINNING">CONNECT_AT_BEGINNING (ConnectionMode attribute)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.CONNECT_BEFORE_EXECUTE">CONNECT_BEFORE_EXECUTE (ConnectionMode attribute)</a>
+</li>
+      <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.connect_engine">connect_engine() (BaseRuntime method)</a>
+
+      <ul>
+        <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.connect_engine">(LegacyRuntime method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.connect_to_instrument">connect_to_instrument() (DCBiasChannel method)</a>
 
       <ul>
@@ -1200,7 +1217,19 @@
       </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.connection">connection (SequencerConfig attribute)</a>
 </li>
+      <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.params.connection_mode">connection_mode (qat.runtime.runtimes.base.BaseRuntime parameter)</a>
+
+      <ul>
+        <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.params.connection_mode">(qat.runtime.runtimes.legacy.LegacyRuntime parameter)</a>
+</li>
+        <li><a href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime.params.connection_mode">(qat.runtime.runtimes.simple.SimpleRuntime parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig">ConnectionConfig (class in qat.purr.backends.qblox.config)</a>
+</li>
+      <li><a href="qat.engines.native.html#qat.engines.native.ConnectionMixin">ConnectionMixin (class in qat.engines.native)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode">ConnectionMode (class in qat.runtime.connection)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.connections">connections (QRPairModel attribute)</a>
 </li>
@@ -1482,6 +1511,8 @@
 </li>
       <li><a href="qat.compiler.decompositions.base.html#qat.compiler.decompositions.base.DecompositionBase">DecompositionBase (class in qat.compiler.decompositions.base)</a>
 </li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.DEFAULT">DEFAULT (ConnectionMode attribute)</a>
+</li>
       <li><a href="qat.core.config.html#qat.core.config.PipelineImportDescription.default">default (PipelineImportDescription attribute)</a>
 
       <ul>
@@ -1568,12 +1599,12 @@
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors">DeviceInjectors (class in qat.purr.compiler.execution)</a>
@@ -1597,6 +1628,8 @@
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.disconnect">disconnect() (CompositeInstrument method)</a>
 
       <ul>
+        <li><a href="qat.engines.native.html#qat.engines.native.ConnectionMixin.disconnect">(ConnectionMixin method)</a>
+</li>
         <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.Instrument.disconnect">(Instrument method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept.disconnect">(InstrumentConcept method)</a>
@@ -1604,6 +1637,16 @@
         <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.LeafExecutor.disconnect">(LeafExecutor method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.disconnect">(QbloxControlHardware method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.DISCONNECT_AFTER_EXECUTE">DISCONNECT_AFTER_EXECUTE (ConnectionMode attribute)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.DISCONNECT_AT_END">DISCONNECT_AT_END (ConnectionMode attribute)</a>
+</li>
+      <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.disconnect_engine">disconnect_engine() (BaseRuntime method)</a>
+
+      <ul>
+        <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.disconnect_engine">(LegacyRuntime method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE">DISCRIMINATE (PostProcessType attribute)</a>
@@ -2824,6 +2867,8 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated">(QuantumHardwareModel property)</a>
 </li>
       </ul></li>
+      <li><a href="qat.engines.native.html#qat.engines.native.ConnectionMixin.is_connected">is_connected (ConnectionMixin property)</a>
+</li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.BasicBlock.is_empty">is_empty() (BasicBlock method)</a>, <a href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.is_empty">[1]</a>
 
       <ul>
@@ -3081,6 +3126,8 @@
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.macq">macq (ChannelType attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.makeRecord">makeRecord() (BasicLogger method)</a>
+</li>
+      <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.MANUAL">MANUAL (ConnectionMode attribute)</a>
 </li>
       <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingResult.mapping">mapping (IndexMappingResult attribute)</a>
 </li>
@@ -3879,6 +3926,8 @@
         <li><a href="qat.runtime.html#module-qat.runtime">qat.runtime</a>
 </li>
         <li><a href="qat.runtime.analysis_passes.html#module-qat.runtime.analysis_passes">qat.runtime.analysis_passes</a>
+</li>
+        <li><a href="qat.runtime.connection.html#module-qat.runtime.connection">qat.runtime.connection</a>
 </li>
         <li><a href="qat.runtime.executables.html#module-qat.runtime.executables">qat.runtime.executables</a>
 </li>
@@ -5452,8 +5501,6 @@
         <li><a href="qat.purr.backends.utilities.html#module-qat.purr.backends.utilities">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.verification
 
@@ -5461,6 +5508,8 @@
         <li><a href="qat.purr.backends.verification.html#module-qat.purr.backends.verification">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.compiler
 
@@ -5711,6 +5760,13 @@
 
       <ul>
         <li><a href="qat.runtime.analysis_passes.html#module-qat.runtime.analysis_passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.runtime.connection
+
+      <ul>
+        <li><a href="qat.runtime.connection.html#module-qat.runtime.connection">module</a>
 </li>
       </ul></li>
       <li>
@@ -6888,30 +6944,24 @@
       </ul></li>
       <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.number_of_batches.params.shots_per_batch">shots_per_batch (qat.runtime.runtimes.base.BaseRuntime.number_of_batches parameter)</a>
 </li>
-      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.shutdown">shutdown() (EchoEngine method)</a>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.shutdown">shutdown() (InstructionExecutionEngine method)</a>
 
       <ul>
-        <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.shutdown">(InstructionExecutionEngine method)</a>
-</li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
-</li>
-        <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.shutdown">(NativeEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.shutdown">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.shutdown">(QbloxLiveEngine method)</a>
 </li>
-        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.shutdown">(ZeroEngine method)</a>
-</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime">SimpleRuntime (class in qat.runtime.runtimes.simple)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.SIMULATION">SIMULATION (QatConfig attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
@@ -7002,36 +7052,14 @@
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.start_playback">(QbloxControlHardware method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.params.startup">startup (qat.engines.native.NativeEngine parameter)</a>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.startup">startup() (InstructionExecutionEngine method)</a>
 
       <ul>
-        <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.params.startup">(qat.engines.waveform_v1.echo.EchoEngine parameter)</a>
-</li>
-        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.params.startup">(qat.engines.zero.ZeroEngine parameter)</a>
-</li>
-      </ul></li>
-      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.startup">startup() (EchoEngine method)</a>
-
-      <ul>
-        <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.startup">(InstructionExecutionEngine method)</a>
-</li>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.startup">(LiveDeviceEngine method)</a>
-</li>
-        <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.startup">(NativeEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.startup">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.startup">(QbloxLiveEngine method)</a>
-</li>
-        <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.startup">(ZeroEngine method)</a>
-</li>
-      </ul></li>
-      <li><a href="qat.runtime.runtimes.base.html#qat.runtime.runtimes.base.BaseRuntime.params.startup_engine">startup_engine (qat.runtime.runtimes.base.BaseRuntime parameter)</a>
-
-      <ul>
-        <li><a href="qat.runtime.runtimes.legacy.html#qat.runtime.runtimes.legacy.LegacyRuntime.params.startup_engine">(qat.runtime.runtimes.legacy.LegacyRuntime parameter)</a>
-</li>
-        <li><a href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime.params.startup_engine">(qat.runtime.runtimes.simple.SimpleRuntime parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateOperator">StateOperator (class in qat.utils.state_tensors)</a>

@@ -239,6 +239,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.analysis_passes.html">qat.runtime.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
@@ -295,40 +296,49 @@
   <section id="module-qat.engines.native">
 <span id="qat-engines-native-module"></span><h1>qat.engines.native module<a class="headerlink" href="#module-qat.engines.native" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.engines.native.NativeEngine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NativeEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.engines.native.ConnectionMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConnectionMixin</span></span><a class="headerlink" href="#qat.engines.native.ConnectionMixin" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p><a class="reference internal" href="#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a> acts as an interface between some target backend and an executable.
-They are used to connect to the backend (if applicable), and execute and return the
-results.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.engines.native.NativeEngine.params.startup"></span><strong>startup</strong><a class="paramlink headerlink reference internal" href="#qat.engines.native.NativeEngine.params.startup">¶</a> (<em>bool</em>) – Start up the engine on instantiation?</p>
-</dd>
-</dl>
+<p>Specifies a connection requirement for a <a class="reference internal" href="#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a>.</p>
+<p>Engines that execute on live hardware or a remote simulator might require a connection
+to the target to be established. This class is used to mix in connection capabilities.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.engines.native.ConnectionMixin.connect">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.ConnectionMixin.connect" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.engines.native.ConnectionMixin.disconnect">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.ConnectionMixin.disconnect" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.engines.native.ConnectionMixin.is_connected">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_connected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.engines.native.ConnectionMixin.is_connected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.engines.native.NativeEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NativeEngine</span></span><a class="headerlink" href="#qat.engines.native.NativeEngine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p><a class="reference internal" href="#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a> acts as an interface between some target backend and an
+executable. They are used to connect to the backend (if applicable), and execute and
+return the results.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.engines.native.NativeEngine.execute">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.execute" title="Link to this definition"></a></dt>
 <dd><p>Executes a compiled instruction executable and returns results that are processed
 according to the acquires.</p>
-<p>The engine is expected to return the results as a dictionary with the output variables
-as keys. This may be changed in future iterations.</p>
+<p>The engine is expected to return the results as a dictionary with the output
+variables as keys. This may be changed in future iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.engines.native.NativeEngine.shutdown">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.shutdown" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.engines.native.NativeEngine.startup">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">startup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.startup" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
