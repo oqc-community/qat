@@ -32,12 +32,6 @@ class ZeroEngine(NativeEngine):
             )
         return results
 
-    def startup(self):
-        log.info("Starting the ZeroEngine.")
-
-    def shutdown(self):
-        log.info("Shutting down the ZeroEngine.")
-
 
 def readout_shape(acquire: AcquireDataStruct, shots: int) -> tuple[int, ...]:
     """Generates the shape of the readout given the acquire information and number of shots.

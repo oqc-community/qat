@@ -11,13 +11,12 @@ log = get_default_logger()
 
 
 class EchoEngine(NativeEngine):
-    """
-    The :class:`EchoEngine` is a minimal execution engine primarily used for testing the
-    compilation pipeline. It is not connected to any backend such as live hardware or a
-    simulator, and just simply "echos" back the buffers.
+    """The :class:`EchoEngine` is a minimal execution engine primarily used for testing the
+    compilation pipeline.
 
-    Currently only accepts :class:`WaveformV1Executables`, but this may be changed in the
-    future.
+    It is not connected to any backend such as live hardware or a simulator, and just simply
+    "echos" back the buffers. Currently only accepts :class:`WaveformV1Executables`, but
+    this may be changed in the future.
     """
 
     def execute(self, package: WaveformV1Executable):
@@ -39,12 +38,6 @@ class EchoEngine(NativeEngine):
                     acquire.mode,
                 )
         return results
-
-    def startup(self):
-        log.info("Starting the echo engine.")
-
-    def shutdown(self):
-        log.info("Shutting down the echo engine.")
 
 
 def process_readout(readout: np.ndarray, shots: int, mode: AcquireMode):

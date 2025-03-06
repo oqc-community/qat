@@ -6,10 +6,11 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from qat.engines import NativeEngine
+from qat.engines import ConnectionMixin, NativeEngine
 from qat.passes.pass_base import PassManager
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
+from qat.runtime.connection import ConnectionMode
 from qat.runtime.executables import AcquireDataStruct
 from qat.runtime.transform_passes import (
     AssignResultsTransform,
@@ -25,37 +26,29 @@ class BaseRuntime(abc.ABC):
     responsibilities, including interfacing the execution engine and post-processing of
     results. Runtimes are designed to fit a specific purpose. For example, the
     :class:`SimpleRuntime` provides the means to execute already compiled programs
-    :class:`Executable`. In the future, there will be support for
-    hybrid runtimes that take on both compilation and execution responsibilities.
+    :class:`Executable`. In the future, there will be support for hybrid runtimes that take
+    on both compilation and execution responsibilities.
     """
 
     def __init__(
         self,
         engine: NativeEngine,
         results_pipeline: Optional[PassManager] = None,
-        startup_engine: bool = False,
+        connection_mode: ConnectionMode = ConnectionMode.DEFAULT,
     ):
         """
-        :param NativeEngine engine: The execution engine for a target backend.
+        :param engine: The execution engine for a target backend.
         :param results_pipeline: Optionally provided a pipeline for results processing. If
             not provided, a default pipeline is provided.
-        :type results_pipeline: PassManager, optional
-        :param bool startup_engine: Instruct the engine to connect to the backend on
-            startup?
+        :param connection_mode: Specifies how the connection is maintained.
         """
-        if not isinstance(engine, NativeEngine):
-            raise ValueError(
-                f"The engine provided has type {type(engine)}, which is not a NativeEngine."
-            )
         self.engine = engine
+        self.connection_mode = connection_mode
+        self.connect_engine(ConnectionMode.CONNECT_AT_BEGINNING)
 
         if not results_pipeline:
             results_pipeline = self.default_pipeline()
         self.results_pipeline = results_pipeline
-
-        # TODO: is logic needed here?
-        if startup_engine:
-            self.engine.startup()
 
     @abc.abstractmethod
     def execute(package, *args): ...
@@ -72,20 +65,20 @@ class BaseRuntime(abc.ABC):
     def number_of_batches(total_shots: int, shots_per_batch: int):
         """Calculates the number of shot batches to execute.
 
-        When the total number of shots exceeds the capabilities of the backend, we can execute
-        a number of batches with a subset of the shots. This number of shots should be
-        calculated during compilation, and included in the executable. This method calculates
-        number of batches to execute.
+        When the total number of shots exceeds the capabilities of the backend, we can
+        execute a number of batches with a subset of the shots. This number of shots should
+        be calculated during compilation, and included in the executable. This method
+        calculates number of batches to execute.
 
         In the instance that the total number of shots cannot be batched into a whole number
         of the compiled shots, the runtime will execute more shots than required. If results
         are returned from the hardware per shot, then we can simply trim the results down to
-        the required amount of shots. However, this cannot be done if the post-processing over
-        the shots is done on the hardware. In this case, the program will be executed for
-        :code:`ceil(total_shots / shots_per_batch) * shots_per_batch` shots.
+        the required amount of shots. However, this cannot be done if the post-processing
+        over the shots is done on the hardware. In this case, the program will be executed
+        for :code:`ceil(total_shots / shots_per_batch) * shots_per_batch` shots.
 
-        If the compiled number of shots is zero, then it is assumed all shots can be achieved
-        in a single batch.
+        If the compiled number of shots is zero, then it is assumed all shots can be
+        achieved in a single batch.
 
         :param int total_shots: The total number of shots to execute.
         :param int shots_per_batch: The compiled number of shots that can be executed in a
@@ -97,8 +90,8 @@ class BaseRuntime(abc.ABC):
 
         if not isinstance(shots_per_batch, int) and (shots_per_batch < 0):
             raise ValueError(
-                "The shots per batch must be a positive integer, or `0` to indicate to use the "
-                "`total_shots`."
+                "The shots per batch must be a positive integer, or `0` to indicate to use "
+                "the `total_shots`."
             )
 
         if shots_per_batch == 0:
@@ -123,12 +116,34 @@ class BaseRuntime(abc.ABC):
                 f"{qatconfig.MAX_REPEATS_LIMIT}."
             )
 
+    def connect_engine(self, flag: ConnectionMode) -> bool | None:
+        """Connect the engine according to the connection mode."""
+        if not isinstance(self.engine, ConnectionMixin):
+            return None
+
+        if flag in self.connection_mode:
+            if not self.engine.is_connected:
+                self.engine.connect()
+        return self.engine.is_connected
+
+    def disconnect_engine(self, flag: ConnectionMode) -> bool | None:
+        """Disconnect the engine according to the connection mode."""
+        if not isinstance(self.engine, ConnectionMixin):
+            return None
+
+        if flag in self.connection_mode:
+            if self.engine.is_connected:
+                self.engine.disconnect()
+        return self.engine.is_connected
+
+    def __del__(self):
+        self.disconnect_engine(ConnectionMode.DISCONNECT_AT_END)
+
     def __enter__(self):
-        self.engine.startup()
         return self
 
     def __exit__(self, *args, **kwargs):
-        self.engine.shutdown()
+        self.disconnect_engine(ConnectionMode.DISCONNECT_AT_END)
 
 
 class ResultsAggregator:

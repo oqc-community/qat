@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import abc
+from abc import ABC, abstractmethod
 from typing import Dict
 
 import numpy as np
@@ -8,37 +8,39 @@ import numpy as np
 from qat.runtime.executables import Executable
 
 
-class NativeEngine(abc.ABC):
-    """
-    :class:`NativeEngine` acts as an interface between some target backend and an executable.
-    They are used to connect to the backend (if applicable), and execute and return the
-    results.
-    """
+class NativeEngine(ABC):
+    """:class:`NativeEngine` acts as an interface between some target backend and an
+    executable. They are used to connect to the backend (if applicable), and execute and
+    return the results."""
 
-    def __init__(self, startup: bool = False):
-        """
-        :param bool startup: Start up the engine on instantiation?
-        """
-
-        if startup:
-            self.startup()
-
-    @abc.abstractmethod
-    def startup(self): ...
-
-    @abc.abstractmethod
-    def shutdown(self): ...
-
-    @abc.abstractmethod
+    @abstractmethod
     def execute(self, package: Executable) -> Dict[str, np.ndarray]:
-        """
-        Executes a compiled instruction executable and returns results that are processed
+        """Executes a compiled instruction executable and returns results that are processed
         according to the acquires.
 
-        The engine is expected to return the results as a dictionary with the output variables
-        as keys. This may be changed in future iterations.
+        The engine is expected to return the results as a dictionary with the output
+        variables as keys. This may be changed in future iterations.
         """
         ...
 
+
+class ConnectionMixin(ABC):
+    """Specifies a connection requirement for a :class:`NativeEngine`.
+
+    Engines that execute on live hardware or a remote simulator might require a connection
+    to the target to be established. This class is used to mix in connection capabilities.
+    """
+
+    @property
+    @abstractmethod
+    def is_connected(self) -> bool: ...
+
+    @abstractmethod
+    def connect(self): ...
+
+    @abstractmethod
+    def disconnect(self): ...
+
     def __del__(self):
-        self.shutdown()
+        if self.is_connected:
+            self.disconnect()

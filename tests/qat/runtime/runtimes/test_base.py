@@ -3,21 +3,27 @@
 import numpy as np
 import pytest
 
-from qat.engines.waveform_v1 import EchoEngine
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.engines import ConnectionMixin, NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
 from qat.runtime import BaseRuntime, ResultsAggregator
+from qat.runtime.connection import ConnectionMode
 from qat.runtime.executables import AcquireDataStruct
 
 
 class TestBaseRuntime:
 
-    def test_invalid_engine_raises_value_error(self, monkeypatch):
-        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
-        model = get_default_echo_hardware()
-        with pytest.raises(ValueError):
-            BaseRuntime(model)
+    class MockConnectedEngine(NativeEngine, ConnectionMixin):
+        is_connected: bool = False
+
+        def execute(self, *args):
+            pass
+
+        def connect(self):
+            self.is_connected = True
+
+        def disconnect(self):
+            self.is_connected = False
 
     @pytest.mark.parametrize("shots", [0, 254, 999, 1000, 1001, 2000, 2073])
     def test_number_of_batches_gives_correct_number_of_batches(self, shots):
@@ -40,30 +46,104 @@ class TestBaseRuntime:
             BaseRuntime.validate_max_shots(qat_max_shots + 1)
         BaseRuntime.validate_max_shots(qat_max_shots)
 
-    def test_context_manager(self, monkeypatch):
-        def set_connected(self, val):
-            self.connected = val
-
+    @pytest.mark.parametrize(
+        "mode", [ConnectionMode.CONNECT_AT_BEGINNING, ConnectionMode.ALWAYS]
+    )
+    def test_connect_on_startup_with_connect_at_beginning(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
-        monkeypatch.setattr(EchoEngine, "startup", lambda x: set_connected(x, True))
-        monkeypatch.setattr(EchoEngine, "shutdown", lambda x: set_connected(x, False))
+        engine = self.MockConnectedEngine()
+        assert engine.is_connected == False
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == True
 
-        # doesn't connect automatically
-        engine = EchoEngine()
-        assert not hasattr(engine, "connected")
+    @pytest.mark.parametrize(
+        "mode",
+        [ConnectionMode.ALWAYS_ON_EXECUTE, ConnectionMode.MANUAL, ConnectionMode.DEFAULT],
+    )
+    def test_connect_on_startup_without_connect_at_beginning(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        assert engine.is_connected == False
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == False
 
-        # doesn't connect with init
-        BaseRuntime(engine)
-        assert not hasattr(engine, "connected")
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            ConnectionMode.DISCONNECT_AT_END,
+            ConnectionMode.ALWAYS,
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+        ],
+    )
+    def test_disconnect_on_exit_with_disconnect_at_end(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        engine.connect()
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == True
+        del runtime
+        assert engine.is_connected == False
 
-        # connects with context manager
-        with BaseRuntime(engine):
-            assert hasattr(engine, "connected")
-            assert engine.connected == True
+    @pytest.mark.parametrize("mode", [ConnectionMode.MANUAL, ConnectionMode.DEFAULT])
+    def test_disconnect_on_exit_without_disconnect_at_end(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        engine.connect()
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == True
+        del runtime
+        assert engine.is_connected == True
 
-        # disconnects at the end
-        assert hasattr(engine, "connected")
-        assert engine.connected == False
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            ConnectionMode.CONNECT_BEFORE_EXECUTE,
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+            ConnectionMode.DEFAULT,
+        ],
+    )
+    def test_connect_with_connect_before_execute(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        assert engine.is_connected == False
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
+        assert engine.is_connected == True
+
+    @pytest.mark.parametrize("mode", [ConnectionMode.ALWAYS, ConnectionMode.MANUAL])
+    def test_connect_without_connect_before_execute(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        engine.disconnect()
+        assert engine.is_connected == False
+        runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
+        assert engine.is_connected == False
+
+    @pytest.mark.parametrize(
+        "mode", [ConnectionMode.DISCONNECT_AFTER_EXECUTE, ConnectionMode.DEFAULT]
+    )
+    def test_disconnect_with_disconnect_after_execute(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        engine.connect()
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == True
+        runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
+        assert engine.is_connected == False
+
+    @pytest.mark.parametrize(
+        "mode",
+        [ConnectionMode.ALWAYS, ConnectionMode.MANUAL, ConnectionMode.ALWAYS_ON_EXECUTE],
+    )
+    def test_disconnect_without_disconnect_after_execute(self, monkeypatch, mode):
+        monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
+        engine = self.MockConnectedEngine()
+        engine.connect()
+        runtime = BaseRuntime(engine, connection_mode=mode)
+        assert engine.is_connected == True
+        runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
+        assert engine.is_connected == True
 
 
 class TestResultsAggregator:
