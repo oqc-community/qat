@@ -104,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -249,8 +250,11 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -332,7 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.model_config"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.phase"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.phase</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.rise"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.rise</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.shape"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.shape</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.waveform_type"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.waveform_type</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.CalibratablePulse.width"><code class="docutils literal notranslate"><span class="pre">CalibratablePulse.width</span></code></a></li>
 </ul>
 </li>
@@ -395,6 +399,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannelSet"><code class="docutils literal notranslate"><span class="pre">PulseChannelSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannelSet.contains"><code class="docutils literal notranslate"><span class="pre">PulseChannelSet.contains()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannelSet.is_calibrated"><code class="docutils literal notranslate"><span class="pre">PulseChannelSet.is_calibrated</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannelSet.model_config"><code class="docutils literal notranslate"><span class="pre">PulseChannelSet.model_config</span></code></a></li>
 </ul>
@@ -422,6 +427,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator"><code class="docutils literal notranslate"><span class="pre">Resonator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator.all_pulse_channels"><code class="docutils literal notranslate"><span class="pre">Resonator.all_pulse_channels</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator.model_config"><code class="docutils literal notranslate"><span class="pre">Resonator.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator.physical_channel"><code class="docutils literal notranslate"><span class="pre">Resonator.physical_channel</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator.pulse_channels"><code class="docutils literal notranslate"><span class="pre">Resonator.pulse_channels</span></code></a></li>
@@ -429,6 +435,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.device.html#qat.model.device.ResonatorPulseChannels"><code class="docutils literal notranslate"><span class="pre">ResonatorPulseChannels</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.acquire"><code class="docutils literal notranslate"><span class="pre">ResonatorPulseChannels.acquire</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.all_pulse_channels"><code class="docutils literal notranslate"><span class="pre">ResonatorPulseChannels.all_pulse_channels</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.measure"><code class="docutils literal notranslate"><span class="pre">ResonatorPulseChannels.measure</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.model_config"><code class="docutils literal notranslate"><span class="pre">ResonatorPulseChannels.model_config</span></code></a></li>
 </ul>
@@ -474,6 +481,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.model_config"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.number_of_qubits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.physical_connectivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.quantum_devices"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.quantum_devices</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.qubit_with_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubits"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.qubits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel.validate_connectivity()</span></code></a></li>

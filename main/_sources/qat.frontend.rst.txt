@@ -15,3 +15,4 @@ Submodules
    qat.frontend.circuit_builder
    qat.frontend.frontends
    qat.frontend.qir_parser
+   qat.frontend.register

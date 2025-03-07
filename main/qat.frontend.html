@@ -105,6 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -250,8 +251,11 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -370,6 +374,35 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.x"><code class="docutils literal notranslate"><span class="pre">QIRParser.x()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.y"><code class="docutils literal notranslate"><span class="pre">QIRParser.y()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.z"><code class="docutils literal notranslate"><span class="pre">QIRParser.z()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.BitRegister"><code class="docutils literal notranslate"><span class="pre">BitRegister</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits"><code class="docutils literal notranslate"><span class="pre">BitRegister.bits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.BitRegister.contents"><code class="docutils literal notranslate"><span class="pre">BitRegister.contents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.BitRegister.model_config"><code class="docutils literal notranslate"><span class="pre">BitRegister.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue"><code class="docutils literal notranslate"><span class="pre">CregIndexValue</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.index"><code class="docutils literal notranslate"><span class="pre">CregIndexValue.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.model_config"><code class="docutils literal notranslate"><span class="pre">CregIndexValue.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.register_name"><code class="docutils literal notranslate"><span class="pre">CregIndexValue.register_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.value"><code class="docutils literal notranslate"><span class="pre">CregIndexValue.value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.variable"><code class="docutils literal notranslate"><span class="pre">CregIndexValue.variable</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.QubitRegister"><code class="docutils literal notranslate"><span class="pre">QubitRegister</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.QubitRegister.contents"><code class="docutils literal notranslate"><span class="pre">QubitRegister.contents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.QubitRegister.model_config"><code class="docutils literal notranslate"><span class="pre">QubitRegister.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.QubitRegister.qubits"><code class="docutils literal notranslate"><span class="pre">QubitRegister.qubits</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.Registers"><code class="docutils literal notranslate"><span class="pre">Registers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.Registers.classic"><code class="docutils literal notranslate"><span class="pre">Registers.classic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.Registers.model_config"><code class="docutils literal notranslate"><span class="pre">Registers.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.Registers.quantum"><code class="docutils literal notranslate"><span class="pre">Registers.quantum</span></code></a></li>
 </ul>
 </li>
 </ul>

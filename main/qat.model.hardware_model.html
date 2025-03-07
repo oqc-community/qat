@@ -104,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -249,8 +250,11 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -395,6 +399,13 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity">
 <span class="sig-name descname"><span class="pre">physical_connectivity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FrozenDict[QubitId,</span> <span class="pre">FrozenSet[QubitId]]</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.quantum_devices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quantum_devices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><span class="pre">Qubit</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qat.model.device.html#qat.model.device.Resonator" title="qat.model.device.Resonator"><span class="pre">Resonator</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.quantum_devices" title="Link to this definition"></a></dt>
+<dd><p>Returns all quantum (an)harmonic oscillator devices
+in this hardware model as a list.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">

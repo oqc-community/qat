@@ -105,6 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -250,8 +251,11 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -467,6 +471,13 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser"><code class="docutils literal notranslate"><span class="pre">QIRParser</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.BitRegister"><code class="docutils literal notranslate"><span class="pre">BitRegister</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.CregIndexValue"><code class="docutils literal notranslate"><span class="pre">CregIndexValue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.QubitRegister"><code class="docutils literal notranslate"><span class="pre">QubitRegister</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html#qat.frontend.register.Registers"><code class="docutils literal notranslate"><span class="pre">Registers</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -500,6 +511,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Return"><code class="docutils literal notranslate"><span class="pre">Return</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize"><code class="docutils literal notranslate"><span class="pre">Synchronize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a><ul>
@@ -514,9 +526,24 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.CustomWaveform"><code class="docutils literal notranslate"><span class="pre">CustomWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.BlackmanWaveform"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.CosWaveform"><code class="docutils literal notranslate"><span class="pre">CosWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.DragGaussianWaveform"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.ExtraSoftSquareWaveform"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.GaussianSquareWaveform"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.GaussianWaveform"><code class="docutils literal notranslate"><span class="pre">GaussianWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.GaussianZeroEdgeWaveform"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveform</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse"><code class="docutils literal notranslate"><span class="pre">Pulse</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.PulseType"><code class="docutils literal notranslate"><span class="pre">PulseType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.RoundedSquareWaveform"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform"><code class="docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SechWaveform"><code class="docutils literal notranslate"><span class="pre">SechWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SetupHoldWaveform"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SinWaveform"><code class="docutils literal notranslate"><span class="pre">SinWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SoftSquareWaveform"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SofterGaussianWaveform"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SofterSquareWaveform"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveform</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SquareWaveform"><code class="docutils literal notranslate"><span class="pre">SquareWaveform</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform"><code class="docutils literal notranslate"><span class="pre">Waveform</span></code></a></li>
 </ul>
 </li>
@@ -731,10 +758,25 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.convert_edges_into_connectivity_dict"><code class="docutils literal notranslate"><span class="pre">convert_edges_into_connectivity_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.generate_complete_connectivity"><code class="docutils literal notranslate"><span class="pre">generate_complete_connectivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.generate_cyclic_connectivity"><code class="docutils literal notranslate"><span class="pre">generate_cyclic_connectivity()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.get_connected_subgraphs"><code class="docutils literal notranslate"><span class="pre">get_connected_subgraphs()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.apply_setup_to_echo_hardware"><code class="docutils literal notranslate"><span class="pre">apply_setup_to_echo_hardware()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_connectivity_data"><code class="docutils literal notranslate"><span class="pre">generate_connectivity_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_hw_model"><code class="docutils literal notranslate"><span class="pre">generate_hw_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_random_linear"><code class="docutils literal notranslate"><span class="pre">generate_random_linear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.pick_subconnectivity"><code class="docutils literal notranslate"><span class="pre">pick_subconnectivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_connectivity"><code class="docutils literal notranslate"><span class="pre">random_connectivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_directed_connectivity"><code class="docutils literal notranslate"><span class="pre">random_directed_connectivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_quality_map"><code class="docutils literal notranslate"><span class="pre">random_quality_map()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel"><code class="docutils literal notranslate"><span class="pre">AllowExtraFieldsModel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict"><code class="docutils literal notranslate"><span class="pre">FrozenDict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet"><code class="docutils literal notranslate"><span class="pre">FrozenSet</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel"><code class="docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></li>
@@ -744,6 +786,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict"><code class="docutils literal notranslate"><span class="pre">ValidatedDict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList"><code class="docutils literal notranslate"><span class="pre">ValidatedList</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet"><code class="docutils literal notranslate"><span class="pre">ValidatedSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.find_all_subclasses"><code class="docutils literal notranslate"><span class="pre">find_all_subclasses()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.get_validator_from_annotated"><code class="docutils literal notranslate"><span class="pre">get_validator_from_annotated()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_positive_float"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_positive_float()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval()</span></code></a></li>
@@ -751,10 +794,35 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative"><code class="docutils literal notranslate"><span class="pre">validate_non_negative()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html#qat.utils.qasm.get_qasm_parser"><code class="docutils literal notranslate"><span class="pre">get_qasm_parser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html#qat.utils.qasm.qasm_from_file"><code class="docutils literal notranslate"><span class="pre">qasm_from_file()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateOperator"><code class="docutils literal notranslate"><span class="pre">StateOperator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateTensor"><code class="docutils literal notranslate"><span class="pre">StateTensor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateVector"><code class="docutils literal notranslate"><span class="pre">StateVector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction"><code class="docutils literal notranslate"><span class="pre">ComplexFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos"><code class="docutils literal notranslate"><span class="pre">Cos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction"><code class="docutils literal notranslate"><span class="pre">GaussianFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction"><code class="docutils literal notranslate"><span class="pre">NumericFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction"><code class="docutils literal notranslate"><span class="pre">SechFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin"><code class="docutils literal notranslate"><span class="pre">Sin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction"><code class="docutils literal notranslate"><span class="pre">SquareFunction</span></code></a></li>
 </ul>
 </li>
 </ul>

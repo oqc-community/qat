@@ -105,6 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -250,8 +251,11 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -304,10 +308,28 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.convert_edges_into_connectivity_dict"><code class="docutils literal notranslate"><span class="pre">convert_edges_into_connectivity_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.generate_complete_connectivity"><code class="docutils literal notranslate"><span class="pre">generate_complete_connectivity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.generate_cyclic_connectivity"><code class="docutils literal notranslate"><span class="pre">generate_cyclic_connectivity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.graphs.html#qat.utils.graphs.get_connected_subgraphs"><code class="docutils literal notranslate"><span class="pre">get_connected_subgraphs()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.apply_setup_to_echo_hardware"><code class="docutils literal notranslate"><span class="pre">apply_setup_to_echo_hardware()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_connectivity_data"><code class="docutils literal notranslate"><span class="pre">generate_connectivity_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_hw_model"><code class="docutils literal notranslate"><span class="pre">generate_hw_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_random_linear"><code class="docutils literal notranslate"><span class="pre">generate_random_linear()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.pick_subconnectivity"><code class="docutils literal notranslate"><span class="pre">pick_subconnectivity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_connectivity"><code class="docutils literal notranslate"><span class="pre">random_connectivity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_directed_connectivity"><code class="docutils literal notranslate"><span class="pre">random_directed_connectivity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_quality_map"><code class="docutils literal notranslate"><span class="pre">random_quality_map()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel"><code class="docutils literal notranslate"><span class="pre">AllowExtraFieldsModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel.model_config"><code class="docutils literal notranslate"><span class="pre">AllowExtraFieldsModel.model_config</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict"><code class="docutils literal notranslate"><span class="pre">FrozenDict</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.model_config"><code class="docutils literal notranslate"><span class="pre">FrozenDict.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.root"><code class="docutils literal notranslate"><span class="pre">FrozenDict.root</span></code></a></li>
@@ -361,11 +383,17 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.update"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.update()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.find_all_subclasses"><code class="docutils literal notranslate"><span class="pre">find_all_subclasses()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.get_validator_from_annotated"><code class="docutils literal notranslate"><span class="pre">get_validator_from_annotated()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_positive_float"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_positive_float()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval_array"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval_array()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative"><code class="docutils literal notranslate"><span class="pre">validate_non_negative()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.qasm.html#qat.utils.qasm.get_qasm_parser"><code class="docutils literal notranslate"><span class="pre">get_qasm_parser()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.qasm.html#qat.utils.qasm.qasm_from_file"><code class="docutils literal notranslate"><span class="pre">qasm_from_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a><ul>
@@ -376,6 +404,159 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateTensor"><code class="docutils literal notranslate"><span class="pre">StateTensor</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateVector"><code class="docutils literal notranslate"><span class="pre">StateVector</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateVector.apply_gate"><code class="docutils literal notranslate"><span class="pre">StateVector.apply_gate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.a0"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.a0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.a1"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.a1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.a2"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.a2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.derivative"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.eval"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.model_config"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.width"><code class="docutils literal notranslate"><span class="pre">BlackmanFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction"><code class="docutils literal notranslate"><span class="pre">ComplexFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction.derivative"><code class="docutils literal notranslate"><span class="pre">ComplexFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction.dt"><code class="docutils literal notranslate"><span class="pre">ComplexFunction.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction.eval"><code class="docutils literal notranslate"><span class="pre">ComplexFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction.model_config"><code class="docutils literal notranslate"><span class="pre">ComplexFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">ComplexFunction.model_post_init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos"><code class="docutils literal notranslate"><span class="pre">Cos</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.derivative"><code class="docutils literal notranslate"><span class="pre">Cos.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.eval"><code class="docutils literal notranslate"><span class="pre">Cos.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.frequency"><code class="docutils literal notranslate"><span class="pre">Cos.frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.internal_phase"><code class="docutils literal notranslate"><span class="pre">Cos.internal_phase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.model_config"><code class="docutils literal notranslate"><span class="pre">Cos.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos.model_post_init"><code class="docutils literal notranslate"><span class="pre">Cos.model_post_init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.beta"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.beta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.derivative"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.eval"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.model_config"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.width"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.zero_at_edges"><code class="docutils literal notranslate"><span class="pre">DragGaussianFunction.zero_at_edges</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.rise"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction"><code class="docutils literal notranslate"><span class="pre">GaussianFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.derivative"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.eval"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.k"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.k</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.model_config"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.rise"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.width"><code class="docutils literal notranslate"><span class="pre">GaussianFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.square_width"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.square_width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.std_dev</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.zero_at_edges"><code class="docutils literal notranslate"><span class="pre">GaussianSquareFunction.zero_at_edges</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.derivative"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.eval"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.model_config"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.std_dev</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.width"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction.zero_at_edges"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction.zero_at_edges</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction"><code class="docutils literal notranslate"><span class="pre">NumericFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.derivative"><code class="docutils literal notranslate"><span class="pre">NumericFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.model_config"><code class="docutils literal notranslate"><span class="pre">NumericFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">NumericFunction.model_post_init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.derivative"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.rise_time"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.rise_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.std_dev</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.step"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">RoundedSquareFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction"><code class="docutils literal notranslate"><span class="pre">SechFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.derivative"><code class="docutils literal notranslate"><span class="pre">SechFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.eval"><code class="docutils literal notranslate"><span class="pre">SechFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SechFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SechFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.width"><code class="docutils literal notranslate"><span class="pre">SechFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.amp"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.amp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.amp_setup"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.amp_setup</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.eval"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.rise"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.width"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin"><code class="docutils literal notranslate"><span class="pre">Sin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.derivative"><code class="docutils literal notranslate"><span class="pre">Sin.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.eval"><code class="docutils literal notranslate"><span class="pre">Sin.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.frequency"><code class="docutils literal notranslate"><span class="pre">Sin.frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.internal_phase"><code class="docutils literal notranslate"><span class="pre">Sin.internal_phase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.model_config"><code class="docutils literal notranslate"><span class="pre">Sin.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin.model_post_init"><code class="docutils literal notranslate"><span class="pre">Sin.model_post_init()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.rise"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">SoftSquareFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction.eval"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction.rise"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction.width"><code class="docutils literal notranslate"><span class="pre">SofterGaussianFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.rise"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.rise</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction"><code class="docutils literal notranslate"><span class="pre">SquareFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.derivative"><code class="docutils literal notranslate"><span class="pre">SquareFunction.derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.eval"><code class="docutils literal notranslate"><span class="pre">SquareFunction.eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SquareFunction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SquareFunction.model_post_init()</span></code></a></li>
 </ul>
 </li>
 </ul>

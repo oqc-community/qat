@@ -104,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul class="current">
@@ -249,8 +250,11 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
@@ -298,42 +302,167 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel" title="qat.utils.pydantic.AllowExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllowExtraFieldsModel</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.ir.waveforms.CustomWaveform">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CustomWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.CustomWaveform" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
-<p>Provide a list of amplitudes to define a custom waveform.</p>
+<dt class="sig sig-object py" id="qat.ir.waveforms.BlackmanWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlackmanWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.ir.waveforms.CustomWaveform.duration">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.CustomWaveform.duration" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.CustomWaveform.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.CustomWaveform.model_config" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.ir.waveforms.BlackmanWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.CustomWaveform.samples">
-<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.ir.waveforms.CustomWaveform.samples" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.ir.waveforms.BlackmanWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction" title="qat.utils.waveform.BlackmanFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackmanFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.CosWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CosWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.CosWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.CosWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.CosWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.CosWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Cos" title="qat.utils.waveform.Cos"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cos</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.CosWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.DragGaussianWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DragGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.DragGaussianWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.DragGaussianWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction" title="qat.utils.waveform.DragGaussianFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DragGaussianFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.ExtraSoftSquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtraSoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.ExtraSoftSquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.ExtraSoftSquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction" title="qat.utils.waveform.ExtraSoftSquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianSquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianSquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianSquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction" title="qat.utils.waveform.GaussianSquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianSquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction" title="qat.utils.waveform.GaussianFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianZeroEdgeWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianZeroEdgeWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianZeroEdgeFunction" title="qat.utils.waveform.GaussianZeroEdgeFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianZeroEdgeFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.shape_function_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -371,7 +500,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.targets">
-<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidatedSet[str]</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.targets" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[str]</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.targets" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -386,7 +515,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.waveform">
-<span class="sig-name descname"><span class="pre">waveform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.CustomWaveform" title="qat.ir.waveforms.CustomWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomWaveform</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.waveform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">waveform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="#qat.ir.waveforms.SquareWaveform" title="qat.ir.waveforms.SquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SoftSquareWaveform" title="qat.ir.waveforms.SoftSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoftSquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SofterSquareWaveform" title="qat.ir.waveforms.SofterSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterSquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform" title="qat.ir.waveforms.ExtraSoftSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.GaussianWaveform" title="qat.ir.waveforms.GaussianWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform" title="qat.ir.waveforms.SofterGaussianWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterGaussianWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.BlackmanWaveform" title="qat.ir.waveforms.BlackmanWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackmanWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SetupHoldWaveform" title="qat.ir.waveforms.SetupHoldWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SetupHoldWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform" title="qat.ir.waveforms.RoundedSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoundedSquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform" title="qat.ir.waveforms.GaussianSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianSquareWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.DragGaussianWaveform" title="qat.ir.waveforms.DragGaussianWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DragGaussianWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform" title="qat.ir.waveforms.GaussianZeroEdgeWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.CosWaveform" title="qat.ir.waveforms.CosWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CosWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SinWaveform" title="qat.ir.waveforms.SinWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SinWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SechWaveform" title="qat.ir.waveforms.SechWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SechWaveform</span></code></a><span class="pre">,</span> <a class="reference internal" href="#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.waveform" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -429,6 +558,201 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.RoundedSquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RoundedSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.RoundedSquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.RoundedSquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction" title="qat.utils.waveform.RoundedSquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoundedSquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SampledWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
+<p>Provide a list of amplitudes to define a sampled waveform.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code><span class="pre">[*</span> <span class="pre">x],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SechWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SechWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SechWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SechWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SechWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SechWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction" title="qat.utils.waveform.SechFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SechFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SechWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SetupHoldWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SetupHoldWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SetupHoldWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SetupHoldWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction" title="qat.utils.waveform.SetupHoldFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SetupHoldFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SinWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SinWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SinWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SinWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SinWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SinWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.Sin" title="qat.utils.waveform.Sin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sin</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SinWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SoftSquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SoftSquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SoftSquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction" title="qat.utils.waveform.SoftSquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoftSquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterGaussianWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterGaussianWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterGaussianWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterGaussianFunction" title="qat.utils.waveform.SofterGaussianFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterGaussianFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterSquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterSquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SofterSquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction" title="qat.utils.waveform.SofterSquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterSquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SquareWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SquareWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SquareWaveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction" title="qat.utils.waveform.SquareFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">SquareFunction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform.shape_function_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
@@ -439,7 +763,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.amp">
-<span class="sig-name descname"><span class="pre">amp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.amp" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">amp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.amp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -474,18 +798,23 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.phase">
-<span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.phase" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.phase" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.rise">
 <span class="sig-name descname"><span class="pre">rise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.rise" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform.sample" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -494,8 +823,8 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.shape">
-<span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType" title="qat.purr.compiler.devices.PulseShapeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseShapeType</span></code></a></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.shape" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.shape_function_type">
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction" title="qat.utils.waveform.ComplexFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexFunction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.shape_function_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
