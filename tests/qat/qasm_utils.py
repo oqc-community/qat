@@ -52,7 +52,7 @@ def get_qasm2(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.QASM2, file_name))
 
 
-def parse_and_apply_optimiziations(
+def parse_and_apply_optimizations(
     qasm_file_name, qubit_count=6, parser=None, opt_config=None
 ) -> InstructionBuilder:
     """

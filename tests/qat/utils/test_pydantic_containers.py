@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import random
+from copy import deepcopy
 
 import numpy as np
 import pytest
 from numpydantic import NDArray
 from pydantic import ValidationError
 
-from qat.model.device import QubitId
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     CalibratableUnitInterval,
@@ -15,9 +15,58 @@ from qat.utils.pydantic import (
     FrozenSet,
     PydDictBase,
     PydListBase,
+    PydSetBase,
+    QubitId,
     ValidatedDict,
     ValidatedSet,
 )
+
+
+@pytest.mark.parametrize("seed", [1, 2, 3, 4])
+class TestBaseContainer:
+    def test_equals_list(self, seed):
+        random_floats1 = [random.Random(seed).uniform(0.01, 1) for _ in range(10)]
+        random_floats2 = deepcopy(random_floats1)
+        assert PydListBase(random_floats1) == PydListBase(random_floats2)
+        assert PydListBase(random_floats1) == random_floats2
+
+        random_floats2[0] = -random_floats2[0]
+        assert PydListBase(random_floats1) != PydListBase(random_floats2)
+        assert PydListBase(random_floats1) != random_floats2
+
+    def test_equals_set(self, seed):
+        random_floats1 = set([random.Random(seed).uniform(0.01, 1) for _ in range(10)])
+        random_floats2 = deepcopy(random_floats1)
+        assert PydSetBase(random_floats1) == PydSetBase(random_floats2)
+        assert PydSetBase(random_floats1) == random_floats2
+
+        removed_float = random.Random(seed).sample(list(random_floats2), 1)[0]
+        random_floats2.remove(removed_float)
+        assert PydSetBase(random_floats1) != PydSetBase(random_floats2)
+        assert PydSetBase(random_floats1) != random_floats2
+
+        random_floats2.add(-removed_float)
+        assert PydSetBase(random_floats1) != PydSetBase(random_floats2)
+        assert PydSetBase(random_floats1) != random_floats2
+
+    def test_equals_dict(self, seed):
+        random_map1 = {
+            random.Random(seed).uniform(0.01, 1): random.Random(seed).uniform(0.01, 1) + 10
+            for _ in range(10)
+        }
+        random_map2 = deepcopy(random_map1)
+        assert PydDictBase(random_map1) == PydDictBase(random_map2)
+        assert PydDictBase(random_map1) == random_map2
+
+        removed_key = random.Random(seed).sample(list(random_map2), 1)[0]
+        removed_value = random_map2[removed_key]
+        random_map2.pop(removed_key)
+        assert PydDictBase(random_map1) != PydDictBase(random_map2)
+        assert PydDictBase(random_map1) != random_map2
+
+        random_map2[removed_key] = -removed_value
+        assert PydDictBase(random_map1) != PydDictBase(random_map2)
+        assert PydDictBase(random_map1) != random_map2
 
 
 @pytest.mark.parametrize("seed", [6, 7, 8, 9])

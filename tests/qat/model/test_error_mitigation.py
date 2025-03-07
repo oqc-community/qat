@@ -2,8 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
-
-from tests.qat.utils.hardware_models import generate_random_linear
+from qat.utils.hardware_model import generate_random_linear
 
 
 @pytest.mark.parametrize("n_qubits", [1, 2, 4, 8, 31, 64])

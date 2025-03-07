@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import numpy as np
 import pytest
@@ -21,9 +21,9 @@ from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.passes.result_base import ResultManager
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import Pulse, PulseShapeType
+from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 from tests.qat.utils.builder_nuggets import resonator_spect
-from tests.qat.utils.hardware_models import generate_hw_model, generate_random_linear
 
 
 class TestValidationPasses:

@@ -1,13 +1,16 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
 from typing import Optional
 
 import numpy as np
 from pydantic import ConfigDict, field_validator
 
-from qat.model.device import QubitId
 from qat.utils.pydantic import (
     CalibratableUnitInterval2x2Array,
     FrozenDict,
     NoExtraFieldsModel,
+    QubitId,
 )
 
 

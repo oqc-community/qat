@@ -14,7 +14,6 @@ from qat.model.device import (
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
-    PulseShapeType,
     Qubit,
     QubitPulseChannels,
     Resonator,
@@ -22,17 +21,6 @@ from qat.model.device import (
 
 
 class TestCalibratable:
-    @pytest.mark.parametrize("pulse_shape_type", PulseShapeType)
-    def test_calibratable_pulse_enum(self, pulse_shape_type):
-        pulse1 = CalibratablePulse(shape=pulse_shape_type)
-        pulse2 = CalibratablePulse(shape=pulse_shape_type.value)
-        assert pulse1 == pulse2
-
-    @pytest.mark.parametrize("invalid_pulse_shape_type", ["invalid_shape", 123, 0.0])
-    def test_invalid_calibratable_pulse_enum(self, invalid_pulse_shape_type):
-        with pytest.raises(ValidationError):
-            CalibratablePulse(shape=invalid_pulse_shape_type)
-
     @pytest.mark.parametrize("invalid_width", ["invalid_width", -0.001, -5])
     def test_invalid_width(self, invalid_width):
         with pytest.raises(ValidationError):

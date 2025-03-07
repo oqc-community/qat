@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from typing import Optional
 
 from qat.model.device import (
@@ -12,14 +12,13 @@ from qat.model.device import (
     PhysicalBaseband,
     PhysicalChannel,
     Qubit,
-    QubitId,
     QubitPulseChannels,
     Resonator,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
-from qat.utils.pydantic import CalibratableUnitInterval, FrozenDict, FrozenSet
+from qat.utils.pydantic import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
 
 
 class PhysicalHardwareModelBuilder:

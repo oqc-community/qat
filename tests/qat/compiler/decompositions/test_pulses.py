@@ -7,8 +7,7 @@ from qat.ir.gates.gates_2q import ECR
 from qat.ir.gates.native import X_pi_2, Z_phase
 from qat.ir.instructions import PhaseShift, Synchronize
 from qat.ir.waveforms import Pulse
-
-from tests.qat.utils.hardware_models import generate_hw_model
+from qat.utils.hardware_model import generate_hw_model
 
 
 class TestDefaultPulseDecompositions:

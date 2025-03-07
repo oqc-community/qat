@@ -4,9 +4,9 @@ import pytest
 from compiler_config.config import Qasm2Optimizations, Qasm3Optimizations
 
 from qat.integrations.tket import run_pyd_tket_optimizations
+from qat.utils.hardware_model import generate_hw_model
 
 from tests.qat.qasm_utils import get_qasm2, get_qasm3
-from tests.qat.utils.hardware_models import generate_hw_model
 
 qasm2_files = [
     "basic.qasm",

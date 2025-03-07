@@ -14,8 +14,7 @@ from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import PulseChannel
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.hardware_model import VERSION, PhysicalHardwareModel
-
-from tests.qat.utils.hardware_models import (
+from qat.utils.hardware_model import (
     generate_connectivity_data,
     generate_random_linear,
     random_connectivity,

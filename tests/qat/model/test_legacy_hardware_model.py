@@ -5,8 +5,7 @@ import pytest
 
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.purr.compiler.devices import ChannelType
-
-from tests.qat.utils.hardware_models import (
+from qat.utils.hardware_model import (
     apply_setup_to_echo_hardware,
     random_directed_connectivity,
 )

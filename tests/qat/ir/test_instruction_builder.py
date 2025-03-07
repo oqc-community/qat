@@ -16,10 +16,8 @@ from qat.ir.measure import (
     acq_mode_process_axis,
 )
 from qat.ir.waveforms import Pulse
-from qat.model.device import QubitId
-from qat.utils.pydantic import ValidatedSet
-
-from tests.qat.utils.hardware_models import generate_hw_model
+from qat.utils.hardware_model import generate_hw_model
+from qat.utils.pydantic import QubitId, ValidatedSet
 
 hw_model = generate_hw_model(n_qubits=8)
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 from typing import Any, List, Literal, Optional
@@ -14,11 +14,10 @@ from qat.ir.instructions import (
     Synchronize,
 )
 from qat.ir.waveforms import Pulse
-from qat.model.device import QubitId
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
-from qat.utils.pydantic import ValidatedSet
+from qat.utils.pydantic import QubitId, ValidatedSet
 
 
 class Acquire(QuantumInstruction):

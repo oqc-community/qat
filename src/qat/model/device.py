@@ -1,19 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 import uuid
-from typing import Optional
+from typing import Optional, Type
 
 import numpy as np
 from pydantic import Field, field_validator, model_validator
 
-from qat.purr.compiler.devices import PulseShapeType
+from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform, Waveform
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     FrozenDict,
     NoExtraFieldsModel,
-    NonNegativeInt,
+    QubitId,
 )
 
 
@@ -125,7 +125,7 @@ class PulseChannel(Component):
 
 
 class CalibratablePulse(NoExtraFieldsModel):
-    shape: PulseShapeType = PulseShapeType.GAUSSIAN
+    waveform_type: Type[Waveform] = GaussianWaveform
     width: CalibratablePositiveFloat = Field(default=100e-09, ge=0)
     amp: float = 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5)
     phase: float = 0.0
@@ -145,7 +145,7 @@ class CalibratableAcquire(NoExtraFieldsModel):
 class DrivePulseChannel(PulseChannel):
     x_pi_2_pulse: CalibratablePulse = Field(
         default=CalibratablePulse(
-            shape=PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 3.0
+            waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
         ),
         frozen=True,
     )
@@ -170,14 +170,11 @@ class SecondStatePulseChannel(PulseChannel): ...
 class FreqShiftPulseChannel(PulseChannel): ...
 
 
-QubitId = NonNegativeInt
-
-
 class CrossResonancePulseChannel(PulseChannel):
     auxiliary_qubit: QubitId
     zx_pi_4_pulse: CalibratablePulse = Field(
         default=CalibratablePulse(
-            shape=PulseShapeType.SOFT_SQUARE, width=125e-9, rise=10e-9, amp=1e6
+            waveform_type=SoftSquareWaveform, width=125e-9, rise=10e-9, amp=1e6
         ),
         frozen=True,
     )
@@ -229,10 +226,20 @@ class PulseChannelSet(NoExtraFieldsModel):
     def __ne__(self, other: PulseChannelSet):
         return not self.__eq__(other)
 
+    def contains(self, pc: PulseChannel):
+        for field_name in self.model_fields:
+            if getattr(self, field_name) == pc:
+                return True
+        return False
+
 
 class ResonatorPulseChannels(PulseChannelSet):
     measure: MeasurePulseChannel = Field(default=MeasurePulseChannel())
     acquire: AcquirePulseChannel = Field(default=AcquirePulseChannel())
+
+    @property
+    def all_pulse_channels(self):
+        return [self.measure, self.acquire]
 
 
 class Resonator(Component):
@@ -249,6 +256,10 @@ class Resonator(Component):
     pulse_channels: ResonatorPulseChannels = Field(
         frozen=True, default=ResonatorPulseChannels()
     )
+
+    @property
+    def all_pulse_channels(self):
+        return self.pulse_channels.all_pulse_channels
 
 
 class QubitPulseChannels(PulseChannelSet):

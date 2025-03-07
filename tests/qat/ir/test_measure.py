@@ -8,12 +8,10 @@ from pydantic import Field, ValidationError
 
 from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
-from qat.ir.waveforms import Pulse, PulseShapeType, Waveform
-from qat.model.device import QubitId
+from qat.ir.waveforms import GaussianWaveform, Pulse
 from qat.purr.compiler.instructions import PostProcessType
-from qat.utils.pydantic import ValidatedSet
-
-from tests.qat.utils.hardware_models import generate_hw_model
+from qat.utils.hardware_model import generate_hw_model
+from qat.utils.pydantic import QubitId, ValidatedSet
 
 model = generate_hw_model(4)
 qubits = [qubit for qubit in model.qubits.values()]
@@ -31,7 +29,7 @@ class TestAcquire:
         acquire_channel = qubits[0].resonator.pulse_channels.acquire
         filter = Pulse(
             targets=acquire_channel.uuid,
-            waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=1e-6),
+            waveform=GaussianWaveform(width=1e-6),
         )
         inst = Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
         assert inst.filter == filter
@@ -41,7 +39,7 @@ class TestAcquire:
         acquire_channel = qubits[0].resonator.pulse_channels.acquire
         filter = Pulse(
             targets=acquire_channel.uuid,
-            waveform=Waveform(shape=PulseShapeType.GAUSSIAN, width=time),
+            waveform=GaussianWaveform(width=time),
         )
         with pytest.raises(ValidationError):
             Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
@@ -121,7 +119,9 @@ class TestMeasureBlock:
         mb = MeasureBlock(qubit_targets=qubit_id)
         mb.add(
             Pulse(
-                waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                waveform=measure_channel.measure_pulse.waveform_type(
+                    **measure_channel.measure_pulse.model_dump()
+                ),
                 duration=1e-03,
                 targets=measure_channel.uuid,
                 type="measure",
@@ -142,7 +142,9 @@ class TestMeasureBlock:
         with pytest.raises(TypeError):
             mb.add(
                 Pulse(
-                    waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                    waveform=measure_channel.measure_pulse.waveform_type(
+                        **measure_channel.measure_pulse.model_dump()
+                    ),
                     duration=1e-03,
                     targets=measure_channel.uuid,
                     type="drive",
@@ -187,7 +189,9 @@ class TestMeasureBlock:
             custom_mb.add(additional_block)
             # Standard measure and acquire.
             measure = Pulse(
-                waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+                waveform=measure_channel.measure_pulse.waveform_type(
+                    **measure_channel.measure_pulse.model_dump()
+                ),
                 duration=1e-03,
                 targets=measure_channel.uuid,
                 type="measure",

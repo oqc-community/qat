@@ -20,10 +20,33 @@ from qat.ir.instructions import (
     Repeat,
     ResultsProcessing,
     Return,
+    Variable,
 )
 from qat.purr.utils.logger import LoggerLevel
+from qat.utils.hardware_model import generate_hw_model
 
-from tests.qat.utils.hardware_models import generate_hw_model
+
+class TestVariable:
+    def test_random_variable(self):
+        v1 = Variable.with_random_name()
+        assert v1.name
+
+        v2 = Variable.with_random_name()
+        assert v2.name
+        assert v1.name != v2.name
+
+    def test_serialise(self):
+        name = "test_name"
+        value = 3.14
+        var_type = float
+        v = Variable(name=name, value=value, var_type=var_type)
+
+        blob = v.model_dump()
+        v_deserialised = Variable(**blob)
+        assert v == v_deserialised
+
+        blob2 = v_deserialised.model_dump()
+        assert blob == blob2
 
 
 class TestInstructionBlock:

@@ -53,12 +53,16 @@ class TestTketOptimization:
 
         return circ, architecture
 
-    def _run_random(self, tket_opt):
+    def _run_qasm2(self, tket_opt, qasm_filename=None):
         """
         Helper class for testing various optimization configs against a varied QASM
         file.
         """
-        qasm_string = get_qasm2("random_n5_d5.qasm")
+        if not qasm_filename:
+            qasm_string = get_qasm2("random_n5_d5.qasm")
+        else:
+            qasm_string = get_qasm2(qasm_filename)
+
         opt_config = Qasm2Optimizations()
         opt_config.tket_optimizations |= tket_opt
 
@@ -66,40 +70,41 @@ class TestTketOptimization:
         return optimize_circuit(circ, architecture, opt_config.tket_optimizations)
 
     def test_globalise_phased_x(self):
-        assert self._run_random(TketOptimizations.GlobalisePhasedX)
+        assert self._run_qasm2(TketOptimizations.GlobalisePhasedX)
 
     def test_clifford_simp(self):
-        assert self._run_random(TketOptimizations.CliffordSimp)
+        assert self._run_qasm2(TketOptimizations.CliffordSimp)
 
     def test_decompose_arbitrarily_controlled_gates(self):
-        assert self._run_random(TketOptimizations.DecomposeArbitrarilyControlledGates)
+        assert self._run_qasm2(TketOptimizations.DecomposeArbitrarilyControlledGates)
 
     def test_kak_decomposition(self):
-        assert self._run_random(TketOptimizations.KAKDecomposition)
+        assert self._run_qasm2(TketOptimizations.KAKDecomposition)
 
     def test_peephole_optimize_2Q(self):
-        assert self._run_random(TketOptimizations.PeepholeOptimise2Q)
+        assert self._run_qasm2(TketOptimizations.PeepholeOptimise2Q)
 
     def test_remove_discarded(self):
-        assert self._run_random(TketOptimizations.RemoveDiscarded)
+        assert self._run_qasm2(TketOptimizations.RemoveDiscarded)
 
     def test_remove_barriers(self):
-        assert self._run_random(TketOptimizations.RemoveBarriers)
+        assert self._run_qasm2(TketOptimizations.RemoveBarriers)
 
     def test_remove_redundancies(self):
-        assert self._run_random(TketOptimizations.RemoveRedundancies)
+        assert self._run_qasm2(TketOptimizations.RemoveRedundancies)
 
-    def test_tree_qubit_squash(self):
-        assert self._run_random(TketOptimizations.ThreeQubitSquash)
+    def test_three_qubit_squash(self):
+        # `ThreeQubitSquash` cannot have barriers, so run other QASM input.
+        assert self._run_qasm2(TketOptimizations.ThreeQubitSquash, qasm_filename="ghz.qasm")
 
     def test_simplify_measured(self):
-        assert self._run_random(TketOptimizations.SimplifyMeasured)
+        assert self._run_qasm2(TketOptimizations.SimplifyMeasured)
 
     def test_context_simp(self):
-        assert self._run_random(TketOptimizations.ContextSimp)
+        assert self._run_qasm2(TketOptimizations.ContextSimp)
 
     def test_full_peephole(self):
-        assert self._run_random(TketOptimizations.FullPeepholeOptimise)
+        assert self._run_qasm2(TketOptimizations.FullPeepholeOptimise)
 
 
 class TestTketToQatIRConverter:

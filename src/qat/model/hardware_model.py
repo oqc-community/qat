@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 from copy import deepcopy
@@ -9,13 +9,14 @@ from pydantic import Field, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
 from semver import Version
 
-from qat.model.device import Qubit, QubitId
+from qat.model.device import Qubit, Resonator
 from qat.model.error_mitigation import ErrorMitigation
 from qat.utils.pydantic import (
     CalibratableUnitInterval,
     FrozenDict,
     FrozenSet,
     NoExtraFieldsModel,
+    QubitId,
 )
 
 VERSION = Version(0, 0, 1)
@@ -101,7 +102,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def validate_physical_connectivity_symmetry(cls, physical_connectivity):
         for q, connected_qs in physical_connectivity.items():
             for connected_q in connected_qs:
-                if q not in physical_connectivity[connected_q]:
+                if (
+                    physical_connectivity.get(connected_q, None)
+                    and q not in physical_connectivity[connected_q]
+                ):
                     raise ValueError(
                         f"The topology is not symmetric, qubit {q} not present in connected qubits of {connected_q}."
                     )
@@ -109,7 +113,6 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     @model_validator(mode="after")
     def validate_connectivity(self):
-
         # Check if all qubits exist in physical connectivity.
         if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity.
             assert (
@@ -209,3 +212,13 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     def qubit_with_index(self, index: int | QubitId) -> Qubit:
         return self.qubits[index]
+
+    @property
+    def quantum_devices(self) -> list[Qubit, Resonator]:
+        """
+        Returns all quantum (an)harmonic oscillator devices
+        in this hardware model as a list.
+        """
+        qubits = list(self.qubits.values())
+        resonators = [qubit.resonator for qubit in qubits]
+        return qubits + resonators

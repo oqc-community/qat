@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from collections import defaultdict
+from copy import deepcopy
 
 from qat.model.device import (
     AcquirePulseChannel,
@@ -61,13 +62,15 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
 
         # Resonator
         measure_pulse_channel = qubit.measure_device.get_pulse_channel(ChannelType.measure)
+        pulse_measure = deepcopy(qubit.pulse_measure)
+        pulse_measure.pop("shape")
         new_measure_pulse_channel = MeasurePulseChannel(
             frequency=measure_pulse_channel.frequency,
             imbalance=phys_channel_r.imbalance,
             scale=measure_pulse_channel.scale,
             fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_r.phase_offset,
-            measure_pulse=CalibratablePulse(**qubit.pulse_measure),
+            measure_pulse=CalibratablePulse(**pulse_measure),
         )
 
         if qubit.measure_acquire["weights"] is None:
@@ -94,13 +97,15 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
 
         # Qubit pulse channels
         drive_pulse_channel = qubit.get_pulse_channel(ChannelType.drive)
+        pulse_hw_x_pi_2 = deepcopy(qubit.pulse_hw_x_pi_2)
+        pulse_hw_x_pi_2.pop("shape")
         new_drive_pulse_channel = DrivePulseChannel(
             frequency=drive_pulse_channel.frequency,
             imbalance=phys_channel_q.imbalance,
             scale=drive_pulse_channel.scale,
             fixed_if=drive_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_q.phase_offset,
-            x_pi_2_pulse=CalibratablePulse(**qubit.pulse_hw_x_pi_2),
+            x_pi_2_pulse=CalibratablePulse(**pulse_hw_x_pi_2),
         )
 
         try:

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -20,13 +20,28 @@ log = get_default_logger()
 class NoExtraFieldsModel(BaseModel):
     """
     A Pydantic `BaseModel` with the extra constraints:
-        - Assignment of fields after initialisation is checked again.
-        - Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
+        #. Assignment of fields after initialisation is checked again.
+        #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
           but raise an error now.
     """
 
     model_config = ConfigDict(
         validate_assignment=True, use_enum_values=False, extra="forbid"
+    )
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class AllowExtraFieldsModel(BaseModel):
+    """
+    A Pydantic `BaseModel` with the extra constraints:
+        #. Assignment of fields after initialisation is checked again.
+        #. Extra fields given to the model are ignored (default behaviour in `BaseModel`).
+    """
+
+    model_config = ConfigDict(
+        validate_assignment=True, use_enum_values=False, extra="ignore"
     )
 
     def __str__(self):
@@ -98,7 +113,7 @@ V = TypeVar("GeneralValue")
 
 
 class PydListBase(RootModel[list[V]]):
-    root: list[V]
+    root: list[V] = list[V]()
 
     def __iter__(self):
         return iter(self.root)
@@ -261,7 +276,7 @@ class ValidatedSet(PydSetBase):
 
 
 class PydDictBase(RootModel[dict[K, V]]):
-    root: dict[K, V]
+    root: dict[K, V] = dict[K, V]()
 
     def get(self, key, default=None):
         return self.root.get(key, default)
@@ -387,3 +402,16 @@ class ValidatedDict(PydDictBase):
             value = f_validate_value(value)
 
         self.root[key] = value
+
+
+QubitId = NonNegativeInt
+
+
+def find_all_subclasses(cls: Type) -> list[Type]:
+    """
+    Recursively finds nested subclasses of a class.
+    """
+    subclasses = cls.__subclasses__()
+    for subclass in subclasses:
+        subclasses.extend(find_all_subclasses(subclass))
+    return subclasses

@@ -12,7 +12,7 @@ from qat.ir.gates.native import X_pi_2, Z_phase, ZX_pi_4
 from qat.ir.gates.operation import Barrier, Measure, Reset
 from qat.ir.instructions import PhaseShift, QuantumInstruction, Synchronize
 from qat.ir.measure import Acquire
-from qat.ir.waveforms import CustomWaveform, Pulse, PulseType, Waveform
+from qat.ir.waveforms import Pulse, PulseType, SampledWaveform, Waveform
 from qat.model.hardware_model import PhysicalHardwareModel
 
 
@@ -94,7 +94,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
 
         qubit = model.qubit_with_index(gate.qubit)
         pulse_channel = qubit.pulse_channels.drive
-        pulse_waveform = Waveform(**pulse_channel.x_pi_2_pulse.model_dump())
+        pulse_info = pulse_channel.x_pi_2_pulse.model_dump()
+        pulse_waveform = pulse_channel.x_pi_2_pulse.waveform_type(**pulse_info)
         return [
             Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform, type=PulseType.DRIVE)
         ]
@@ -139,8 +140,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
                 f"{str(qubit1)}."
             )
 
-        pulse = target1_pulse_channel.zx_pi_4_pulse.model_dump()
-        if pulse is None:
+        pulse_info = target1_pulse_channel.zx_pi_4_pulse.model_dump()
+        if pulse_info is None:
             raise ValueError(
                 f"No `zx_pi_4_pulse` available on {qubit1} with index {gate.qubit1}."
             )
@@ -150,12 +151,12 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
             Pulse(
                 targets=target1_pulse_channel.uuid,
                 type=PulseType.CROSS_RESONANCE,
-                waveform=Waveform(**pulse),
+                waveform=target1_pulse_channel.zx_pi_4_pulse.waveform_type(**pulse_info),
             ),
             Pulse(
                 targets=target2_pulse_channel.uuid,
                 type=PulseType.CROSS_RESONANCE_CANCEL,
-                waveform=Waveform(**pulse),
+                waveform=target1_pulse_channel.zx_pi_4_pulse.waveform_type(**pulse_info),
             ),
         ]
 
@@ -202,7 +203,7 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         ) - acquire_channel.acquire.delay
         if acquire_channel.acquire.use_weights is False:
             filter = Pulse(
-                waveform=CustomWaveform(samples=acquire_channel.acquire.weights),
+                waveform=SampledWaveform(samples=acquire_channel.acquire.weights),
                 duration=acquire_duration,
             )
         else:

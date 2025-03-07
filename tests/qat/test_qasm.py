@@ -62,6 +62,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 from qat.purr.compiler.metrics import CompilationMetrics
+from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.integrations.qasm import (
     CloudQasmParser,
@@ -82,7 +83,7 @@ from tests.qat.qasm_utils import (
     get_qasm2,
     get_qasm3,
     get_test_file_path,
-    parse_and_apply_optimiziations,
+    parse_and_apply_optimizations,
     qasm2_base,
     qasm3_base,
 )
@@ -1072,28 +1073,28 @@ class TestParsing:
             )
 
     def test_example(self):
-        builder = parse_and_apply_optimiziations("example.qasm")
+        builder = parse_and_apply_optimizations("example.qasm")
         assert 347 == len(builder.instructions)
 
     def test_parallel(self):
-        builder = parse_and_apply_optimiziations("parallel_test.qasm", qubit_count=8)
+        builder = parse_and_apply_optimizations("parallel_test.qasm", qubit_count=8)
         assert 2116 == len(builder.instructions)
 
     def test_example_if(self):
         with pytest.raises(ValueError):
-            parse_and_apply_optimiziations("example_if.qasm")
+            parse_and_apply_optimizations("example_if.qasm")
 
     def test_move_measurements(self):
         # We need quite a few more qubits for this test.
-        builder = parse_and_apply_optimiziations("move_measurements.qasm", qubit_count=12)
+        builder = parse_and_apply_optimizations("move_measurements.qasm", qubit_count=12)
         assert 97467 == len(builder.instructions)
 
     def test_random_n5_d5(self):
-        builder = parse_and_apply_optimiziations("random_n5_d5.qasm")
+        builder = parse_and_apply_optimizations("random_n5_d5.qasm")
         assert 4956 == len(builder.instructions)
 
     def test_ordered_keys(self):
-        builder = parse_and_apply_optimiziations(
+        builder = parse_and_apply_optimizations(
             "ordered_cregs.qasm", parser=CloudQasmParser()
         )
         ret_node: Return = builder.instructions[-1]
@@ -1113,12 +1114,27 @@ class TestParsing:
             )
 
     def test_valid_arbitrary_gate(self):
-        parse_and_apply_optimiziations("valid_custom_gate.qasm")
+        parse_and_apply_optimizations("valid_custom_gate.qasm")
 
     def test_ecr_intrinsic(self):
-        builder = parse_and_apply_optimiziations("ecr.qasm")
+        builder = parse_and_apply_optimizations("ecr.qasm")
         assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
-        assert 63 == len(builder.instructions)
+        assert 181 == len(builder.instructions)
+
+    def test_rewiring_qubits_ecr(self):
+        hardware = get_default_echo_hardware(
+            4, connectivity=[(0, 2), (0, 3), (1, 2), (1, 3)]
+        )
+        qasm = get_qasm2("ecr.qasm")
+        parser = Qasm2Parser()
+
+        # Parsing fails without QASM optimisation for hardware topology.
+        with pytest.raises(KeyError):
+            parser.parse(get_builder(hardware), qasm)
+
+        qasm = DefaultOptimizers().optimize_qasm(qasm, hardware, Qasm2Optimizations())
+        builder = parser.parse(get_builder(hardware), qasm)
+        assert any(isinstance(inst, CrossResonancePulse) for inst in builder.instructions)
 
     def test_ecr_already_exists(self):
         Qasm2Parser().parse(get_builder(self.echo), get_qasm2("ecr_exists.qasm"))
@@ -1185,7 +1201,7 @@ class TestParsing:
 
 class TestQatOptimization:
     def _measure_merge_timings(self, file, qubit_count, keys, expected):
-        builder = parse_and_apply_optimiziations(file, qubit_count=qubit_count)
+        builder = parse_and_apply_optimizations(file, qubit_count=qubit_count)
         qat_file = InstructionEmitter().emit(builder.instructions, builder.model)
         timeline = EchoEngine(builder.model).create_duration_timeline(qat_file.instructions)
 

@@ -1,22 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import uuid
 from collections import defaultdict
 from collections.abc import Iterable
+from pydoc import locate
 from typing import Any, List, Literal, Optional, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
-from pydantic import Field, field_validator, model_validator
-
-from qat.model.device import QubitId
+from pydantic import Field, field_serializer, field_validator, model_validator
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
 from qat.purr.compiler.instructions import Variable as LegacyVariable
 from qat.purr.utils.logger import get_default_logger
-from qat.utils.pydantic import NoExtraFieldsModel, ValidatedList, ValidatedSet
+from qat.utils.pydantic import NoExtraFieldsModel, QubitId, ValidatedList, ValidatedSet
 
 log = get_default_logger()
 
@@ -92,6 +92,80 @@ class Repeat(Instruction):
     repetition_period: Optional[float] = None
 
 
+class Return(Instruction):
+    """A statement defining what to return from a quantum execution."""
+
+    inst: Literal["Return"] = "Return"
+    variables: List[str] = []
+
+    @field_validator("variables", mode="before")
+    @classmethod
+    def _variables_as_list(cls, variables):
+        variables = (
+            []
+            if variables == None
+            else ([variables] if not isinstance(variables, List) else variables)
+        )
+        return variables
+
+
+class ResultsProcessing(Instruction):
+    """
+    A meta-instruction that stores how the results are processed.
+    """
+
+    inst: Literal["ResultsProcessing"] = "ResultsProcessing"
+    variable: str
+    results_processing: InlineResultsProcessing = InlineResultsProcessing.Raw
+
+    @classmethod
+    def _from_legacy(cls, legacy_rp):
+        # private as we dont want to support this in the long-term
+        return cls(
+            variable=legacy_rp.variable, results_processing=legacy_rp.results_processing
+        )
+
+
+### Variables
+class Variable(NoExtraFieldsModel):
+    """
+    States that this value is actually a variable that should be fetched instead.
+    """
+
+    name: str
+    var_type: Optional[type] = None
+    value: Any = None
+
+    @staticmethod
+    def with_random_name():
+        return Variable(name=str(uuid.uuid4()))
+
+    def __repr__(self):
+        return self.name
+
+    @field_serializer("var_type", when_used="json")
+    def _serialise_type(self, var_type: type) -> str:
+        # Types can't be (de)serialized, so we serialise as a string.
+        return var_type.__name__
+
+    @field_validator("var_type", mode="before")
+    @classmethod
+    def _validate_var_type(cls, var_type):
+        # Types can't be (de)serialised, so we use a validator to manually
+        # find the correct type.
+        if isinstance(var_type, str):
+            var_type = locate(var_type)
+        return var_type
+
+    @field_validator("value", mode="after")
+    @classmethod
+    def _validate_value_type(cls, value, val_info):
+        var_type = val_info.data["var_type"]
+        if var_type != None and not isinstance(value, var_type) and value != None:
+            raise ValueError(f"Value provided has type {type(value)}: must be {var_type}")
+        return value
+
+
 class Assign(Instruction):
     """
     Assigns a value to a variable.
@@ -136,40 +210,6 @@ class Assign(Instruction):
             return value
 
         return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
-
-
-class Return(Instruction):
-    """A statement defining what to return from a quantum execution."""
-
-    inst: Literal["Return"] = "Return"
-    variables: List[str] = []
-
-    @field_validator("variables", mode="before")
-    @classmethod
-    def _variables_as_list(cls, variables):
-        variables = (
-            []
-            if variables == None
-            else ([variables] if not isinstance(variables, List) else variables)
-        )
-        return variables
-
-
-class ResultsProcessing(Instruction):
-    """
-    A meta-instruction that stores how the results are processed.
-    """
-
-    inst: Literal["ResultsProcessing"] = "ResultsProcessing"
-    variable: str
-    results_processing: InlineResultsProcessing = InlineResultsProcessing.Raw
-
-    @classmethod
-    def _from_legacy(cls, legacy_rp):
-        # private as we dont want to support this in the long-term
-        return cls(
-            variable=legacy_rp.variable, results_processing=legacy_rp.results_processing
-        )
 
 
 ### Quantum Instructions

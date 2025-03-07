@@ -37,7 +37,7 @@ from pytket.passes import (
 )
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
-from qiskit.circuit.library import CXGate, UGate
+from qiskit.circuit.library import CXGate, ECRGate, UGate
 from sympy import pi, sympify
 
 from qat.purr.compiler.builders import InstructionBuilder
@@ -70,6 +70,9 @@ class TketBuilder:
     def barrier(self, qubits):
         qubits = [qubits] if not isinstance(qubits, List) else qubits
         self.circuit.add_barrier(qubits)
+
+    def ECR(self, qubit1, qubit2, *args):
+        self.circuit.ECR(qubit1, qubit2)
 
     def measure(self, qubits, bits, conditions=None):
         qubits = [qubits] if not isinstance(qubits, List) else qubits
@@ -160,6 +163,8 @@ class TketQasmParser(Qasm2Parser):
             gate_name = "U"
         elif isinstance(method.op, CXGate):
             gate_name = "CX"
+        elif isinstance(method.op, ECRGate):
+            gate_name = "ECR"
         else:
             gate_name = method.name
 
@@ -561,8 +566,7 @@ def optimize_circuit(circ, architecture, opts):
 
         # Not everything in the list is a pass, we've also got transforms.
         # Everything in the list should have an apply function though.
-        # for pass_ in passes:
-        SequencePass(passes).apply(circ)
+        SequencePass(passes, strict=False).apply(circ)
         apply_default_transforms(circ, architecture, opts)
         check_validity(circ, architecture)
 
