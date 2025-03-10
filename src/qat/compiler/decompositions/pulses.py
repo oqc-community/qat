@@ -94,8 +94,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
 
         qubit = model.qubit_with_index(gate.qubit)
         pulse_channel = qubit.pulse_channels.drive
-        pulse_info = pulse_channel.x_pi_2_pulse.model_dump()
-        pulse_waveform = pulse_channel.x_pi_2_pulse.waveform_type(**pulse_info)
+        pulse_info = pulse_channel.pulse.model_dump()
+        pulse_waveform = pulse_channel.pulse.waveform_type(**pulse_info)
         return [
             Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform, type=PulseType.DRIVE)
         ]
@@ -190,14 +190,14 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         measure_channel = qubit.resonator.pulse_channels.measure
         measure_instruction = Pulse(
             targets=measure_channel.uuid,
-            waveform=Waveform(**measure_channel.measure_pulse.model_dump()),
+            waveform=Waveform(**measure_channel.pulse.model_dump()),
             type=PulseType.MEASURE,
         )
 
         # Acquire-related info.
         acquire_channel = qubit.resonator.pulse_channels.acquire
         acquire_duration = (
-            measure_channel.measure_pulse.width
+            measure_channel.pulse.width
             if acquire_channel.acquire.sync
             else acquire_channel.acquire.width
         ) - acquire_channel.acquire.delay

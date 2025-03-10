@@ -37,7 +37,7 @@ from qat.ir.waveforms import Pulse, PulseType, SampledWaveform
 from qat.model.device import DrivePulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
-from qat.utils.pydantic import QubitId
+from qat.utils.pydantic import QubitId, ValidatedList
 
 log = get_default_logger()
 
@@ -182,11 +182,12 @@ class InstructionBuilder(ABC):
 
     def __add__(self, other: QuantumInstructionBuilder):
         if isinstance(other, InstructionBuilder):
-            self.add(other.instructions)
+            self.add(*other.instructions)
         else:
             raise TypeError(
                 "Only another `{self.__class__.__name__}` can be added to this builder."
             )
+        return self
 
     @staticmethod
     def constrain(angle: float):
@@ -201,9 +202,9 @@ class InstructionBuilder(ABC):
         Wrapper method to constrain the rotation angle and to determine whether to avoid redundant rotations around the Bloch sphere.
         """
 
-        def wrapper(self, target, theta=np.pi, pulse_channel=None):
+        def wrapper(self, target, theta=np.pi, **kwargs):
             theta = self.constrain(theta)
-            return self if np.isclose(theta, 0) else f(self, target, theta, pulse_channel)
+            return self if np.isclose(theta, 0) else f(self, target, theta, **kwargs)
 
         return wrapper
 
@@ -211,9 +212,16 @@ class InstructionBuilder(ABC):
     def instructions(self):
         return self._ir.instructions
 
+    @instructions.setter
+    def instructions(self, instructons: ValidatedList[Instruction]):
+        self._ir.instructions = instructons
+
     @property
     def number_of_instructions(self):
         return self._ir.number_of_instructions
+
+    def __iter__(self):
+        return self._ir.__iter__()
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
@@ -345,8 +353,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def _hw_X_pi_2(self, target: Qubit, pulse_channel: DrivePulseChannel = None):
         pulse_channel = pulse_channel or target.pulse_channels.drive
-        pulse_waveform = pulse_channel.x_pi_2_pulse.waveform_type(
-            **pulse_channel.x_pi_2_pulse.model_dump()
+        pulse_waveform = pulse_channel.pulse.waveform_type(
+            **pulse_channel.pulse.model_dump()
         )
 
         return [
@@ -426,8 +434,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         measure_channel = target.resonator.pulse_channels.measure
         measure_instruction = Pulse(
             targets=measure_channel.uuid,
-            waveform=measure_channel.measure_pulse.waveform_type(
-                **measure_channel.measure_pulse.model_dump()
+            waveform=measure_channel.pulse.waveform_type(
+                **measure_channel.pulse.model_dump()
             ),
             type=PulseType.MEASURE,
         )
@@ -435,7 +443,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         # Acquire-related info.
         acquire_channel = target.resonator.pulse_channels.acquire
         acquire_duration = (
-            measure_channel.measure_pulse.width
+            measure_channel.pulse.width
             if acquire_channel.acquire.sync
             else acquire_channel.acquire.width
         )

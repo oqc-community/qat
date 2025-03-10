@@ -220,5 +220,9 @@ class Pulse(QuantumInstruction):
         return f"{self.__class__.__name__} with type '{self.type.value}' on targets {set(self.targets)} with {self.waveform}."
 
     @property
-    def channel(self):
+    def target(self):
         return next(iter(self.targets))
+
+    @property
+    def pulse_channel(self):
+        return self.target

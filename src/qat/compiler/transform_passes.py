@@ -19,8 +19,13 @@ from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.transpiler import TranspilerError
 
 from qat.compiler.analysis_passes import InputAnalysisResult
+from qat.frontend.qasm_parsers.qasm2_parser import CloudQasmParser as PydCloudQasmParser
+from qat.frontend.qasm_parsers.qasm3_parser import Qasm3Parser as PydQasm3Parser
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.ir.instructions import PhaseReset as PydPhaseReset
+from qat.ir.instructions import PhaseShift as PydPhaseShift
+from qat.ir.waveforms import Pulse as PydPulse
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import TransformPass
@@ -60,6 +65,7 @@ class PhaseOptimisation(TransformPass):
     ):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         :param met_mgr: The metrics manager to store the number of instructions after
             optimisation.
         """
@@ -87,6 +93,58 @@ class PhaseOptimisation(TransformPass):
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
                     accum_phaseshifts.pop(channel, None)
+                optimized_instructions.append(instruction)
+            else:
+                optimized_instructions.append(instruction)
+
+        ir.instructions = optimized_instructions
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, len(optimized_instructions)
+        )
+        return ir
+
+
+class PydPhaseOptimisation(TransformPass):
+    """Iterates through the list of instructions and compresses contiguous
+    :class:`PhaseShift` instructions.
+
+    Extracted from :meth:`qat.purr.compiler.execution.QuantumExecutionEngine.optimize`.
+    """
+
+    def run(
+        self,
+        ir: QuantumInstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
+
+        accum_phaseshifts: dict[str, PydPhaseShift] = dict()
+        optimized_instructions: list = []
+        for instruction in ir:
+            if isinstance(instruction, PydPhaseShift):
+                if accum_phaseshift := accum_phaseshifts.get(instruction.target, None):
+                    accum_phaseshift.phase += instruction.phase
+                else:
+                    accum_phaseshifts[instruction.target] = PydPhaseShift(
+                        targets=instruction.target, phase=instruction.phase
+                    )
+
+            elif isinstance(instruction, PydPulse):
+                if (target := instruction.target) in accum_phaseshifts:
+                    optimized_instructions.append(accum_phaseshifts.pop(target))
+                optimized_instructions.append(instruction)
+
+            elif isinstance(instruction, PydPhaseReset):
+                for target in instruction.targets:
+                    accum_phaseshifts.pop(target, None)
                 optimized_instructions.append(instruction)
             else:
                 optimized_instructions.append(instruction)
@@ -343,15 +401,14 @@ class PydParse(TransformPass):
         if language == Languages.QIR:
             builder = self.parse_qir(program, compiler_config)
         elif language == Languages.Qasm2:
-            raise NotImplementedError(f"Language {Languages.Qasm2} not implemented yet.")
-            # parser = CloudQasmParser()
+            parser = PydCloudQasmParser()
         elif language == Languages.Qasm3:
-            raise NotImplementedError(f"Language {Languages.Qasm3} not implemented yet.")
-            # parser = Qasm3Parser()
+            parser = PydQasm3Parser()
         if parser is not None:
             if compiler_config.results_format.format is not None:
                 parser.results_format = compiler_config.results_format.format
             builder = parser.parse(builder, program)
+
         return (
             QuantumInstructionBuilder(self.hw_model)
             .repeat(compiler_config.repeats, compiler_config.repetition_period)

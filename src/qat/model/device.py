@@ -143,7 +143,13 @@ class CalibratableAcquire(NoExtraFieldsModel):
 
 
 class DrivePulseChannel(PulseChannel):
-    x_pi_2_pulse: CalibratablePulse = Field(
+    """
+    The pulse channel that drives the qubit from |0> -> |1>.
+
+    :param pulse: Calibratable parameters for the X(pi/2) drive pulse.
+    """
+
+    pulse: CalibratablePulse = Field(
         default=CalibratablePulse(
             waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
         ),
@@ -152,9 +158,13 @@ class DrivePulseChannel(PulseChannel):
 
 
 class MeasurePulseChannel(PulseChannel):
-    measure_pulse: CalibratablePulse = Field(
-        default=CalibratablePulse(width=1e-06), frozen=True
-    )
+    """
+    The pulse channel that measures the quantum state of the resonator.
+
+    :param pulse: Calibratable parameters for the measure pulse.
+    """
+
+    pulse: CalibratablePulse = Field(default=CalibratablePulse(width=1e-06), frozen=True)
 
 
 class AcquirePulseChannel(PulseChannel):
@@ -226,11 +236,15 @@ class PulseChannelSet(NoExtraFieldsModel):
     def __ne__(self, other: PulseChannelSet):
         return not self.__eq__(other)
 
-    def contains(self, pc: PulseChannel):
+    def pulse_channel_with_id(self, id_: str):
         for field_name in self.model_fields:
-            if getattr(self, field_name) == pc:
-                return True
-        return False
+            if (
+                isinstance(comp := getattr(self, field_name), Component)
+                and comp.uuid == id_
+            ):
+                return comp
+
+        return None
 
 
 class ResonatorPulseChannels(PulseChannelSet):
@@ -310,7 +324,7 @@ class Qubit(Component):
     :param physical_channel: The physical channel that carries the pulses to the physical qubit.
     :param pulse_channels: The pulse channels for controlling the qubit.
     :param resonator: The measure device of the qubit.
-    :param x_pi_2_pulse: Calibrated parameters for the X(pi/2) pulse.
+    :param pulse: Calibrated parameters for the X(pi/2) pulse.
     """
 
     physical_channel: PhysicalChannel

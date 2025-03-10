@@ -70,7 +70,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
             scale=measure_pulse_channel.scale,
             fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_r.phase_offset,
-            measure_pulse=CalibratablePulse(**pulse_measure),
+            pulse=CalibratablePulse(**pulse_measure),
         )
 
         if qubit.measure_acquire["weights"] is None:
@@ -105,7 +105,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
             scale=drive_pulse_channel.scale,
             fixed_if=drive_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_q.phase_offset,
-            x_pi_2_pulse=CalibratablePulse(**pulse_hw_x_pi_2),
+            pulse=CalibratablePulse(**pulse_hw_x_pi_2),
         )
 
         try:

@@ -18,7 +18,9 @@ class TestDefaultPulseDecompositions:
         instrs = decomps.decompose(X_pi_2(qubit=0), model)
         assert len(instrs) == 1
         assert isinstance(instrs[0], Pulse)
-        assert instrs[0].channel == model.qubit_with_index(0).pulse_channels.drive.uuid
+        assert (
+            instrs[0].pulse_channel == model.qubit_with_index(0).pulse_channels.drive.uuid
+        )
 
     def test_Z_phase_decomposition(self):
         model = generate_hw_model(4, seed=42)

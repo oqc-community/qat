@@ -820,7 +820,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         if isinstance(port, PulseChannel):
             for device in self.builder.hw.quantum_devices:
-                if device.pulse_channels.contains(port):
+                if device.pulse_channels.pulse_channel_with_id(port.uuid):
                     port = device.physical_channel
 
         if not isinstance(port, PhysicalChannel):
@@ -1601,7 +1601,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 mean_z_map_args = args[3]
             else:
                 for q in self.builder.hw.qubits.values():
-                    if q.resonator.pulse_channels.contains(pulse_channel):
+                    if q.resonator.pulse_channels.pulse_channel_with_id(pulse_channel.uuid):
                         mean_z_map_args = q.mean_z_map_args
                         break
             if mean_z_map_args is None:
@@ -1648,7 +1648,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
             qubit = None
             for q in self.builder.hw.qubits.values():
-                if q.resonator.pulse_channels.contains(pulse_channel):
+                if q.resonator.pulse_channels.pulse_channel_with_id(pulse_channel.uuid):
                     qubit = q
             if not isinstance(qubit, Qubit):
                 raise ValueError(

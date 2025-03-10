@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from copy import deepcopy
-from typing import Annotated, TypeVar, get_args
+from typing import Annotated, Any, TypeVar, get_args
 
 import numpy as np
 from frozendict import frozendict
@@ -299,6 +299,9 @@ class PydDictBase(RootModel[dict[K, V]]):
 
     def __getitem__(self, key):
         return self.root.get(key, None)
+
+    def pop(self, key: Any, *args, **kwargs):
+        return self.root.pop(key, *args, **kwargs)
 
     def __iter__(self):
         return iter(self.root)

@@ -119,8 +119,8 @@ class TestMeasureBlock:
         mb = MeasureBlock(qubit_targets=qubit_id)
         mb.add(
             Pulse(
-                waveform=measure_channel.measure_pulse.waveform_type(
-                    **measure_channel.measure_pulse.model_dump()
+                waveform=measure_channel.pulse.waveform_type(
+                    **measure_channel.pulse.model_dump()
                 ),
                 duration=1e-03,
                 targets=measure_channel.uuid,
@@ -142,8 +142,8 @@ class TestMeasureBlock:
         with pytest.raises(TypeError):
             mb.add(
                 Pulse(
-                    waveform=measure_channel.measure_pulse.waveform_type(
-                        **measure_channel.measure_pulse.model_dump()
+                    waveform=measure_channel.pulse.waveform_type(
+                        **measure_channel.pulse.model_dump()
                     ),
                     duration=1e-03,
                     targets=measure_channel.uuid,
@@ -189,8 +189,8 @@ class TestMeasureBlock:
             custom_mb.add(additional_block)
             # Standard measure and acquire.
             measure = Pulse(
-                waveform=measure_channel.measure_pulse.waveform_type(
-                    **measure_channel.measure_pulse.model_dump()
+                waveform=measure_channel.pulse.waveform_type(
+                    **measure_channel.pulse.model_dump()
                 ),
                 duration=1e-03,
                 targets=measure_channel.uuid,

@@ -213,6 +213,18 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def qubit_with_index(self, index: int | QubitId) -> Qubit:
         return self.qubits[index]
 
+    def pulse_channel_with_id(self, id_: str):
+        for qubit in self.qubits.values():
+            if qubit_pulse_channel := qubit.pulse_channels.pulse_channel_with_id(id_):
+                return qubit_pulse_channel
+
+            elif resonator_pulse_channel := qubit.resonator.pulse_channels.pulse_channel_with_id(
+                id_
+            ):
+                return resonator_pulse_channel
+
+        return None
+
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:
         """
