@@ -1034,8 +1034,6 @@
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift.channel">(PhaseShift property)</a>
 </li>
-        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.channel">(Pulse property)</a>
-</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform.channel">(Waveform property)</a>
 </li>
       </ul></li>
@@ -1306,8 +1304,6 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path0">cont_mode_waveform_idx_path0 (AwgConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path1">cont_mode_waveform_idx_path1 (AwgConfig attribute)</a>
-</li>
-      <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.contains">contains() (PulseChannelSet method)</a>
 </li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.contents">contents (BitRegister property)</a>
 
@@ -2988,6 +2984,8 @@
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingSanitisation.run.params.ir">(qat.compiler.transform_passes.PostProcessingSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydPhaseOptimisation.run.params.ir">(qat.compiler.transform_passes.PydPhaseOptimisation.run parameter)</a>
+</li>
         <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.InstructionValidation.run.params.ir">(qat.compiler.validation_passes.InstructionValidation.run parameter)</a>
 </li>
         <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation.run.params.ir">(qat.compiler.validation_passes.ReadoutValidation.run parameter)</a>
@@ -3425,12 +3423,8 @@
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z">(QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_mean_z">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.measure_pulse">measure_pulse (MeasurePulseChannel attribute)</a>
-
-      <ul>
-        <li><a href="qat.model.device.html#qat.model.device.Resonator.params.measure_pulse">(qat.model.device.Resonator parameter)</a>
+      <li><a href="qat.model.device.html#qat.model.device.Resonator.params.measure_pulse">measure_pulse (qat.model.device.Resonator parameter)</a>
 </li>
-      </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode">measure_scope_mode() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_scope_mode">[1]</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned">measure_single_shot_binned() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_binned">[1]</a>
@@ -3481,6 +3475,8 @@
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run.params.met_mgr">(qat.compiler.transform_passes.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PostProcessingSanitisation.run.params.met_mgr">(qat.compiler.transform_passes.PostProcessingSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydPhaseOptimisation.run.params.met_mgr">(qat.compiler.transform_passes.PydPhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager.run.params.met_mgr">(qat.passes.pass_base.PassManager.run parameter)</a>
 </li>
@@ -4788,10 +4784,12 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses">plot_pulses() (RealtimeChipSimEngine method)</a>
 </li>
-      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">pop() (ValidatedSet method)</a>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.pop">pop() (PydDictBase method)</a>
+
+      <ul>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      </ul></li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.position">position (AcquireDataStruct attribute)</a>
 
       <ul>
@@ -4810,6 +4808,8 @@
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_processing.params.post_processing">(qat.runtime.post_processing.apply_post_processing parameter)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.post_processing">post_processing() (InstructionBuilder method)</a>
 
       <ul>
@@ -4980,6 +4980,18 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.pulse">pulse (DrivePulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.pulse">(MeasurePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.params.pulse">(qat.model.device.DrivePulseChannel parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.params.pulse">(qat.model.device.MeasurePulseChannel parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.Qubit.params.pulse">(qat.model.device.Qubit parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.pulse">pulse() (InstructionBuilder method)</a>
 
       <ul>
@@ -4989,11 +5001,19 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.pulse_channel">pulse_channel (Acquire property)</a>
 
       <ul>
+        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.pulse_channel">(Pulse property)</a>
+</li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.params.pulse_channel">(qat.backend.waveform_v1.codegen.WaveformContext parameter)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel">(qat.ir.instruction_builder.QuantumInstructionBuilder.U parameter)</a>
 </li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.pulse_channel">(SimpleAcquire attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.pulse_channel_with_id">pulse_channel_with_id() (PhysicalHardwareModel method)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PulseChannelSet.pulse_channel_with_id">(PulseChannelSet method)</a>
 </li>
       </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.params.pulse_channels">pulse_channels (qat.model.device.Qubit parameter)</a>
@@ -5035,6 +5055,8 @@
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase">PydListBase (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydParse">PydParse (class in qat.compiler.transform_passes)</a>
+</li>
+      <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydPhaseOptimisation">PydPhaseOptimisation (class in qat.compiler.transform_passes)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase">PydSetBase (class in qat.utils.pydantic)</a>
 </li>
@@ -6605,6 +6627,10 @@
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.Parse.run.params.res_mgr">(qat.compiler.transform_passes.Parse.run parameter)</a>
 </li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PhaseOptimisation.run.params.res_mgr">(qat.compiler.transform_passes.PhaseOptimisation.run parameter)</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydPhaseOptimisation.run.params.res_mgr">(qat.compiler.transform_passes.PydPhaseOptimisation.run parameter)</a>
+</li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager.run.params.res_mgr">(qat.passes.pass_base.PassManager.run parameter)</a>
 </li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassModel.run.params.res_mgr">(qat.passes.pass_base.PassModel.run parameter)</a>
@@ -6938,6 +6964,8 @@
         <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.PydHardwareConfigValidity.run">(PydHardwareConfigValidity method)</a>
 </li>
         <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydParse.run">(PydParse method)</a>
+</li>
+        <li><a href="qat.compiler.transform_passes.html#qat.compiler.transform_passes.PydPhaseOptimisation.run">(PydPhaseOptimisation method)</a>
 </li>
         <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.QasmValidation.run">(QasmValidation method)</a>
 </li>
@@ -7641,6 +7669,8 @@
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.target">(PhaseShift property)</a>
 </li>
+        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.target">(Pulse property)</a>
+</li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.target">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z parameter)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.target">(qat.ir.instruction_builder.QuantumInstructionBuilder.U parameter)</a>
@@ -8234,24 +8264,18 @@
       </ul></li>
       <li><a href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.x">x() (QIRParser method)</a>, <a href="qat.purr.integrations.qir.html#qat.purr.integrations.qir.QIRParser.x">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder.X">X() (QiskitBuilder method)</a>
 
       <ul>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.X">(QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.X">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQIRParser.x">x() (TketQIRParser method)</a>
 </li>
       <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.X_pi_2">X_pi_2 (class in qat.ir.gates.native)</a>
 </li>
-      <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.x_pi_2_pulse">x_pi_2_pulse (DrivePulseChannel attribute)</a>
-
-      <ul>
-        <li><a href="qat.model.device.html#qat.model.device.Qubit.params.x_pi_2_pulse">(qat.model.device.Qubit parameter)</a>
-</li>
-      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.XOR">XOR (Opcode attribute)</a>
 </li>
   </ul></td>
