@@ -20,7 +20,7 @@ from qat.purr.compiler.config import (
 from qat.purr.compiler.instructions import Delay
 from qat.qat import execute_with_metrics
 
-from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
+from tests.qat.qasm_qir_utils import ProgramFileType, get_test_file_path
 
 SUPPORTED_CONFIG_VERSIONS = ["v02", "v1"]
 

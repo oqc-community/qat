@@ -20,8 +20,8 @@ from openqasm3.parser import parse as oq3_parse
 from openqasm3.visitor import QASMVisitor
 from pydantic import Field
 
-from qat.frontend.qasm_parsers.base import AbstractParser, ParseResults, QasmContext
-from qat.frontend.qasm_parsers.qasm2_parser import log
+from qat.frontend.parsers.qasm.base import AbstractParser, ParseResults, QasmContext
+from qat.frontend.parsers.qasm.qasm2 import log
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
@@ -474,7 +474,13 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
 def _create_lark_parser():
     with open(
-        join(Path(__file__).parents[2], "frontend", "grammars", "partial_qasm3.lark"),
+        join(
+            Path(__file__).parents[3],
+            "frontend",
+            "parsers",
+            "grammars",
+            "partial_qasm3.lark",
+        ),
         "r",
         encoding="utf-8",
     ) as lark_grammar_file:

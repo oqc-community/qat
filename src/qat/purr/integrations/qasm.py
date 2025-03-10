@@ -661,7 +661,13 @@ class CloudQasmParser(RestrictedQasm2Parser):
 
 def _create_lark_parser():
     with open(
-        join(Path(__file__).parents[2], "frontend", "grammars", "partial_qasm3.lark"),
+        join(
+            Path(__file__).parents[2],
+            "frontend",
+            "parsers",
+            "grammars",
+            "partial_qasm3.lark",
+        ),
         "r",
         encoding="utf-8",
     ) as lark_grammar_file:
@@ -826,7 +832,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
             )
         elif node.filename == "stdgates.inc":
             file_path = Path(
-                Path(__file__).parents[2], "frontend", "grammars", node.filename
+                Path(__file__).parents[2], "frontend", "parsers", "grammars", node.filename
             )
         else:
             file_path = Path(node.filename)

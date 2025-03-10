@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from qat.frontend.qasm_parsers.qasm2_parser import CloudQasmParser
-from qat.frontend.qasm_parsers.qasm3_parser import Qasm3Parser
+from qat.frontend.parsers.qasm.qasm2 import CloudQasmParser
+from qat.frontend.parsers.qasm.qasm3 import Qasm3Parser
 
 
 def get_qasm_parser(qasm_str: str):

@@ -76,7 +76,7 @@ from qat.purr.integrations.tket import TketBuilder, TketQasmParser
 from qat.purr.utils.serializer import json_load, json_loads
 from qat.qat import execute, execute_qasm, fetch_frontend
 
-from tests.qat.qasm_utils import (
+from tests.qat.qasm_qir_utils import (
     ProgramFileType,
     get_default_qasm2_gate_qasms,
     get_default_qasm3_gate_qasms,

@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
 
-from qat.frontend.qir_parser import QIRParser as PydQIRParser
+from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.purr.backends.echo import apply_setup_to_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

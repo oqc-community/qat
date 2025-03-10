@@ -7,7 +7,6 @@ import numpy as np
 
 from qat import qatconfig
 from qat.passes.pass_base import ValidationPass
-from qat.passes.result_base import ResultManager
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
@@ -172,8 +171,3 @@ class ReadoutValidation(ValidationPass):
                             "Mid-circuit measurements currently unable to be used."
                         )
         return ir
-
-
-class QasmValidation(ValidationPass):
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        pass

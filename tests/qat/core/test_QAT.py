@@ -27,7 +27,7 @@ from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
-from qat.frontend.frontends import DefaultFrontend, FallthroughFrontend
+from qat.frontend import AutoFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.passes.pass_base import PassManager
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
@@ -266,7 +266,7 @@ class TestQATParity:
 
         pipe = Pipeline(
             name="test",
-            frontend=DefaultFrontend(hardware_model),
+            frontend=AutoFrontend(hardware_model),
             middleend=FallthroughMiddleend(),
             backend=FallthroughBackend(),
             runtime=LegacyRuntime(
@@ -310,7 +310,7 @@ class TestQATParity:
 
         pipe = Pipeline(
             name="test",
-            frontend=DefaultFrontend(hardware_model),
+            frontend=AutoFrontend(hardware_model),
             middleend=FallthroughMiddleend(),
             backend=FallthroughBackend(),
             runtime=LegacyRuntime(
@@ -366,7 +366,7 @@ class TestQATParity:
 
         pipe = Pipeline(
             name="test",
-            frontend=DefaultFrontend(hardware_model),
+            frontend=AutoFrontend(hardware_model),
             middleend=FallthroughMiddleend(),
             backend=FallthroughBackend(),
             runtime=LegacyRuntime(

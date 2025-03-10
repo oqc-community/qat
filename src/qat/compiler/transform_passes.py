@@ -1,38 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-import os
-import tempfile
 from numbers import Number
 from typing import Dict, List
 
-from compiler_config.config import (
-    CompilerConfig,
-    Languages,
-    MetricsType,
-    Qiskit,
-    QiskitOptimizations,
-    Tket,
-    TketOptimizations,
-    get_optimizer_config,
-)
-from qiskit import QuantumCircuit, qasm2, transpile
-from qiskit.transpiler import TranspilerError
+from compiler_config.config import MetricsType
 
-from qat.compiler.analysis_passes import InputAnalysisResult
-from qat.frontend.qasm_parsers.qasm2_parser import CloudQasmParser as PydCloudQasmParser
-from qat.frontend.qasm_parsers.qasm3_parser import Qasm3Parser as PydQasm3Parser
-from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
 from qat.ir.waveforms import Pulse as PydPulse
-from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import TransformPass
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     AcquireMode,
     CustomPulse,
@@ -44,8 +25,6 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
     Pulse,
 )
-from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
-from qat.purr.integrations.tket import run_tket_optimizations_qasm
 
 
 class PhaseOptimisation(TransformPass):
@@ -204,235 +183,3 @@ class PostProcessingSanitisation(TransformPass):
         ir.instructions = [val for val in ir.instructions if val not in discarded]
         met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(ir.instructions))
         return ir
-
-
-class InputOptimisation(TransformPass):
-    """Run third party optimisation passes on the incoming QASM."""
-
-    def __init__(self, hardware: QuantumHardwareModel, *args, **kwargs):
-        """Instantiate the pass with a hardware model.
-
-        :param model: The hardware model is used in TKET optimisations.
-        """
-        self.hardware = hardware
-
-    def run(
-        self,
-        program: str,
-        res_mgr: ResultManager,
-        met_mgr: MetricsManager,
-        *args,
-        compiler_config: CompilerConfig,
-        **kwargs,
-    ):
-        """
-        :param program: The program as a string (e.g. QASM or QIR), or filepath to the
-            program.
-        :param res_mgr: The results manager to look-up the :class:`InputAnalysisResults`.
-        :param met_mgr: The metrics manager to save the optimised circuit.
-        :param compiler_config: The compiler config should be provided by a keyword
-            argument.
-        """
-
-        input_results = res_mgr.lookup_by_type(InputAnalysisResult)
-        language = input_results.language
-        program = input_results.raw_input
-        if compiler_config.optimizations is None:
-            compiler_config.optimizations = get_optimizer_config(language)
-        if language in (Languages.Qasm2, Languages.Qasm3):
-            program = self.run_qasm_optimisation(
-                program, compiler_config.optimizations, met_mgr
-            )
-        return program
-
-    def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
-        """Extracted from DefaultOptimizers.optimize_qasm"""
-
-        if (
-            isinstance(optimizations, Tket)
-            and optimizations.tket_optimizations != TketOptimizations.Empty
-        ):
-            qasm_string = run_tket_optimizations_qasm(
-                qasm_string, optimizations.tket_optimizations, self.hardware
-            )
-
-        # TODO: [QK] Spend time looking at qiskit optimization and seeing if it's
-        #   worth keeping around.
-        if (
-            isinstance(optimizations, Qiskit)
-            and optimizations.qiskit_optimizations != QiskitOptimizations.Empty
-        ):
-            qasm_string = self.run_qiskit_optimization(
-                qasm_string, optimizations.qiskit_optimizations
-            )
-
-        met_mgr.record_metric(MetricsType.OptimizedCircuit, qasm_string)
-        return qasm_string
-
-    def run_qiskit_optimization(self, qasm_string, level):
-        """
-        TODO: [QK] Current setup is unlikely to provide much benefit, refine settings
-            before using.
-        """
-        if level is not None:
-            try:
-                optimized_circuits = transpile(
-                    QuantumCircuit.from_qasm_str(qasm_string),
-                    basis_gates=["u1", "u2", "u3", "cx"],
-                    optimization_level=level,
-                )
-                qasm_string = qasm2.dumps(optimized_circuits)
-            except TranspilerError:
-                pass
-                # log.warning(f"Qiskit transpile pass failed. {str(ex)}")
-
-        return qasm_string
-
-
-class PydInputOptimisation(InputOptimisation):
-    def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
-        """Extracted from DefaultOptimizers.optimize_qasm"""
-
-        if (
-            isinstance(optimizations, Tket)
-            and optimizations.tket_optimizations != TketOptimizations.Empty
-        ):
-            qasm_string = run_pyd_tket_optimizations(
-                qasm_string, optimizations.tket_optimizations, self.hardware
-            )
-
-        if (
-            isinstance(optimizations, Qiskit)
-            and optimizations.qiskit_optimizations != QiskitOptimizations.Empty
-        ):
-            qasm_string = self.run_qiskit_optimization(
-                qasm_string, optimizations.qiskit_optimizations
-            )
-
-        met_mgr.record_metric(MetricsType.OptimizedCircuit, qasm_string)
-        return qasm_string
-
-
-class Parse(TransformPass):
-    """Parses the QASM/QIR input into IR."""
-
-    def __init__(self, hardware: QuantumHardwareModel):
-        """Instantiate the pass with a hardware model.
-
-        :param model: The hardware model is required to create Qat IR.
-        """
-        self.hardware = hardware
-
-    def run(
-        self,
-        program: str,
-        res_mgr: ResultManager,
-        *args,
-        compiler_config: CompilerConfig,
-        **kwargs,
-    ):
-        """
-        :param program: The program as a string (e.g. QASM or QIR), or filepath to the
-            program.
-        :param res_mgr: The results manager to look-up the :class:`InputAnalysisResults`.
-        :param compiler_config: The compiler config should be provided by a keyword
-            argument.
-        """
-        input_results = res_mgr.lookup_by_type(InputAnalysisResult)
-        language = input_results.language
-        builder = self.hardware.create_builder()
-        parser = None
-        if language == Languages.QIR:
-            builder = self.parse_qir(program, compiler_config)
-        elif language == Languages.Qasm2:
-            parser = CloudQasmParser()
-        elif language == Languages.Qasm3:
-            parser = Qasm3Parser()
-        if parser is not None:
-            if compiler_config.results_format.format is not None:
-                parser.results_format = compiler_config.results_format.format
-            builder = parser.parse(builder, program)
-
-        return (
-            self.hardware.create_builder()
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
-            .add(builder)
-        )
-
-    def parse_qir(self, qir_string, compiler_config):
-        """Extracted from QIRFrontend"""
-        # TODO: Resolve circular import
-        from qat.purr.integrations.qir import QIRParser
-
-        # TODO: Remove need for saving to file before parsing
-        suffix = ".bc" if isinstance(qir_string, bytes) else ".ll"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
-            if suffix == ".ll":
-                fp.write(qir_string.encode())
-            else:
-                fp.write(qir_string)
-            fp.close()
-            try:
-                parser = QIRParser(self.hardware)
-                if compiler_config.results_format.format is not None:
-                    parser.results_format = compiler_config.results_format.format
-                quantum_builder = parser.parse(fp.name)
-            finally:
-                os.remove(fp.name)
-        return quantum_builder
-
-
-class PydParse(TransformPass):
-    def __init__(self, hw_model: PydHardwareModel):
-        self.hw_model = hw_model
-
-    def run(
-        self,
-        program: str,
-        res_mgr: ResultManager,
-        *args,
-        compiler_config: CompilerConfig,
-        **kwargs,
-    ):
-        input_results = res_mgr.lookup_by_type(InputAnalysisResult)
-        language = input_results.language
-        builder = QuantumInstructionBuilder(self.hw_model)
-        parser = None
-        if language == Languages.QIR:
-            builder = self.parse_qir(program, compiler_config)
-        elif language == Languages.Qasm2:
-            parser = PydCloudQasmParser()
-        elif language == Languages.Qasm3:
-            parser = PydQasm3Parser()
-        if parser is not None:
-            if compiler_config.results_format.format is not None:
-                parser.results_format = compiler_config.results_format.format
-            builder = parser.parse(builder, program)
-
-        return (
-            QuantumInstructionBuilder(self.hw_model)
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
-            .__add__(builder)
-        )
-
-    def parse_qir(self, qir_string, compiler_config):
-        """Extracted from QIRFrontend"""
-        # TODO: Resolve circular import
-        from qat.frontend.qir_parser import QIRParser
-
-        # TODO: Remove need for saving to file before parsing
-        suffix = ".bc" if isinstance(qir_string, bytes) else ".ll"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fp:
-            if suffix == ".ll":
-                fp.write(qir_string.encode())
-            else:
-                fp.write(qir_string)
-            fp.close()
-            try:
-                parser = QIRParser(self.hw_model)
-                if compiler_config.results_format.format is not None:
-                    parser.results_format = compiler_config.results_format.format
-                builder = parser.parse(fp.name)
-            finally:
-                os.remove(fp.name)
-        return builder

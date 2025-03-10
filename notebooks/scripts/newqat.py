@@ -108,7 +108,7 @@ from qat import Pipeline
 # %%
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
-from qat.frontend.frontends import DefaultFrontend
+from qat.frontend import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.runtime.runtimes.simple import SimpleRuntime
@@ -116,7 +116,7 @@ from qat.runtime.runtimes.simple import SimpleRuntime
 model = get_default_echo_hardware(qubit_count=16)
 P = Pipeline(
     name="mycoolnewpipeline",
-    frontend=DefaultFrontend(model),
+    frontend=AutoFrontend(model),
     middleend=DefaultMiddleend(model),
     backend=WaveformV1Backend(model),
     runtime=SimpleRuntime(engine=EchoEngine()),

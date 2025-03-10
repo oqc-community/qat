@@ -5,7 +5,7 @@
 import numpy as np
 import pytest
 
-from qat.frontend.qasm_parsers.qasm3_parser import Qasm3Parser
+from qat.frontend.parsers.qasm import Qasm3Parser
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Return
 from qat.ir.waveforms import ExtraSoftSquareWaveform, Pulse, SoftSquareWaveform
@@ -14,7 +14,7 @@ from qat.utils.graphs import generate_cyclic_connectivity
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.qasm import get_qasm_parser
 
-from tests.qat.qasm_utils import get_default_qasm3_gate_qasms, get_qasm3, qasm3_base
+from tests.qat.qasm_qir_utils import get_default_qasm3_gate_qasms, get_qasm3, qasm3_base
 from tests.qat.utils.instruction import count_number_of_pulses
 
 

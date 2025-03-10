@@ -5,7 +5,7 @@ from pydantic import BaseModel, ValidationInfo, field_validator
 
 from qat.backend.base import BaseBackend
 from qat.core.config import PipelineImportDescription
-from qat.frontend.frontends import BaseFrontend
+from qat.frontend import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.runtimes.base import BaseRuntime

@@ -19,7 +19,7 @@ from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGInNode, DAGNode, DAGOpNode, DAGOutNode
 from qiskit.qasm2 import CustomInstruction
 
-from qat.frontend.qasm_parsers.base import AbstractParser, QasmContext
+from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.purr.utils.logger import get_default_logger
 

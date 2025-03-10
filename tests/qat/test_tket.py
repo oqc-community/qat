@@ -17,7 +17,7 @@ from qat.purr.integrations.tket import (
     optimize_circuit,
 )
 
-from tests.qat.qasm_utils import get_qasm2
+from tests.qat.qasm_qir_utils import get_qasm2
 
 
 @pytest.mark.parametrize(

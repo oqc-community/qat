@@ -5,7 +5,7 @@ from qat.backend.validation_passes import HardwareConfigValidity
 from qat.compiler.legacy.transform_passes import QiskitInstructionsWrapper
 from qat.compiler.legacy.validation_passes import QiskitResultsFormatValidation
 from qat.core.pipeline import Pipeline
-from qat.frontend.frontends import DefaultFrontend
+from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.passes.pass_base import PassManager
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
@@ -41,7 +41,7 @@ def get_pipeline(model, name="legacy_qiskit") -> Pipeline:
 
     return Pipeline(
         name=name,
-        frontend=DefaultFrontend(model),
+        frontend=AutoFrontend(model),
         middleend=CustomMiddleend(model, pipeline=middleend),
         backend=FallthroughBackend(model),
         runtime=LegacyRuntime(engine=engine, results_pipeline=results_pipeline),

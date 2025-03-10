@@ -195,17 +195,27 @@ class QIRParser:
                         label = byte_string.decode("utf-8").rstrip("\x00")
                     self.result_variables.append((Variable(str(res)), label))
 
-    def parse(self, qir_file: str):
+    def parse(self, qir_file: str | bytes):
         if not qir_available:
             raise RuntimeError("QIR parser unavailable.")
 
         with log_duration("QIR parsing completed, took {} seconds."):
-            if qir_file.endswith(".bc"):
-                with open(qir_file, "rb") as f:
-                    mod = Module.from_bitcode(Context(), f.read())
-            elif qir_file.endswith(".ll"):
-                with open(qir_file) as f:
-                    mod = Module.from_ir(Context(), f.read())
+            # Load the file if required
+            if isinstance(qir_file, str):
+                if qir_file.endswith(".bc"):
+                    with open(qir_file, "rb") as f:
+                        qir_file = f.read()
+                elif qir_file.endswith(".ll"):
+                    with open(qir_file) as f:
+                        qir_file = f.read()
+
+            # Create a module by inferring the type
+            if isinstance(qir_file, str):
+                mod = Module.from_ir(Context(), qir_file)
+            elif isinstance(qir_file, bytes):
+                mod = Module.from_bitcode(Context(), qir_file)
+            else:
+                raise ValueError(f"Expected type str | bytes, got {type(mod)} instead.")
 
             entry_point = next(
                 iter(filter(lambda fnc: is_entry_point(fnc), mod.functions)), None

@@ -6,7 +6,7 @@ import re
 import pytest
 from compiler_config.config import Qasm2Optimizations
 
-from qat.frontend.qasm_parsers.qasm2_parser import Qasm2Parser, RestrictedQasm2Parser
+from qat.frontend.parsers.qasm import Qasm2Parser, RestrictedQasm2Parser
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import InstructionBlock, Return
@@ -14,7 +14,7 @@ from qat.ir.measure import Acquire
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.utils.hardware_model import generate_hw_model
 
-from tests.qat.qasm_utils import get_default_qasm2_gate_qasms, get_qasm2, qasm2_base
+from tests.qat.qasm_qir_utils import get_default_qasm2_gate_qasms, get_qasm2, qasm2_base
 from tests.qat.utils.instruction import count_number_of_pulses
 
 

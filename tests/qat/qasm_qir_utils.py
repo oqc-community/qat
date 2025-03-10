@@ -2,7 +2,8 @@
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 from enum import Enum, auto
 from importlib.util import find_spec
-from os.path import abspath, dirname, join
+from os import listdir
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
 
 from compiler_config.config import Qasm2Optimizations
@@ -50,6 +51,34 @@ def get_qasm3(file_name):
 
 def get_qasm2(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.QASM2, file_name))
+
+
+def get_qir(file_name):
+    return qasm_from_file(get_test_file_path(ProgramFileType.QIR, file_name))
+
+
+def get_openpulse(file_name):
+    return qasm_from_file(get_test_file_path(ProgramFileType.OPENPULSE, file_name))
+
+
+def get_all_qasm2_paths():
+    dir = get_test_files_dir(ProgramFileType.QASM2)
+    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+
+
+def get_all_qasm3_paths():
+    dir = get_test_files_dir(ProgramFileType.QASM3)
+    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+
+
+def get_all_qir_paths():
+    dir = get_test_files_dir(ProgramFileType.QIR)
+    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+
+
+def get_all_openpulse_paths():
+    dir = get_test_files_dir(ProgramFileType.OPENPULSE)
+    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
 
 
 def parse_and_apply_optimizations(

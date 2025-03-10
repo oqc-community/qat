@@ -6,7 +6,7 @@ from compiler_config.config import Qasm2Optimizations, Qasm3Optimizations
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.utils.hardware_model import generate_hw_model
 
-from tests.qat.qasm_utils import get_qasm2, get_qasm3
+from tests.qat.qasm_qir_utils import get_qasm2, get_qasm3
 
 qasm2_files = [
     "basic.qasm",

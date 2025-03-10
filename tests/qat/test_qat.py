@@ -6,7 +6,7 @@ from compiler_config.config import CompilerConfig, MetricsType, QuantumResultsFo
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.qat import execute_with_metrics
 
-from tests.qat.qasm_utils import ProgramFileType, get_test_file_path
+from tests.qat.qasm_qir_utils import ProgramFileType, get_test_file_path
 from tests.qat.utils.models import ListReturningEngine
 
 

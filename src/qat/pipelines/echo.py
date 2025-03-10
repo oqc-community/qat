@@ -3,7 +3,7 @@
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pipeline import Pipeline
 from qat.engines.waveform_v1 import EchoEngine
-from qat.frontend.frontends import DefaultFrontend
+from qat.frontend import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
 from qat.passes.pass_base import PassManager
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -31,7 +31,7 @@ def get_pipeline(model, name="echo") -> Pipeline:
 
     return Pipeline(
         name=name,
-        frontend=DefaultFrontend(model),
+        frontend=AutoFrontend(model),
         middleend=DefaultMiddleend(model),
         backend=WaveformV1Backend(model),
         runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),

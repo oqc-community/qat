@@ -6,7 +6,7 @@ from qat.compiler.legacy.transform_passes import IntegratorAcquireSanitisation
 from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
 from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.core.pipeline import Pipeline
-from qat.frontend.frontends import DefaultFrontend
+from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.passes.pass_base import PassManager
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -37,7 +37,7 @@ def get_pipeline(model, name="legacy_echo") -> Pipeline:
 
     return Pipeline(
         name=name,
-        frontend=DefaultFrontend(model),
+        frontend=AutoFrontend(model),
         middleend=CustomMiddleend(model, pipeline=middleend),
         backend=FallthroughBackend(model),
         runtime=LegacyRuntime(engine=engine, results_pipeline=results_pipeline),

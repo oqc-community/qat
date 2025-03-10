@@ -5,7 +5,7 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat
 from qat import QAT
 from qat.pipelines.legacy.rtcs import legacy_rtcs2
 
-from tests.qat.qasm_utils import get_qasm2
+from tests.qat.qasm_qir_utils import get_qasm2
 
 
 class TestRTCSPipelines:
