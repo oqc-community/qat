@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.frontend.circuit_builder module" href="qat.frontend.circuit_builder.html" />
+    <link rel="next" title="qat.frontend.parsers package" href="qat.frontend.parsers.html" />
     <link rel="prev" title="qat.engines.zero module" href="qat.engines.zero.html" /> 
 </head>
 
@@ -102,10 +102,26 @@
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html">qat.frontend.parsers.qasm.qasm2 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html">qat.frontend.parsers.qasm.qasm3 module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.analysis_passes.html">qat.frontend.analysis_passes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.transform_passes.html">qat.frontend.transform_passes module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
@@ -299,10 +315,64 @@
 
   <section id="module-qat.frontend">
 <span id="qat-frontend-package"></span><h1>qat.frontend package<a class="headerlink" href="#module-qat.frontend" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.parsers.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.parsers.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser"><code class="docutils literal notranslate"><span class="pre">QIRParser</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.analysis_passes.html">qat.frontend.analysis_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.analysis_passes.html#qat.frontend.analysis_passes.InputAnalysis"><code class="docutils literal notranslate"><span class="pre">InputAnalysis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.analysis_passes.html#qat.frontend.analysis_passes.InputAnalysis.run"><code class="docutils literal notranslate"><span class="pre">InputAnalysis.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.analysis_passes.html#qat.frontend.analysis_passes.InputAnalysisResult"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.analysis_passes.html#qat.frontend.analysis_passes.InputAnalysisResult.language"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult.language</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.analysis_passes.html#qat.frontend.analysis_passes.InputAnalysisResult.raw_input"><code class="docutils literal notranslate"><span class="pre">InputAnalysisResult.raw_input</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend"><code class="docutils literal notranslate"><span class="pre">AutoFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.assign_frontend"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.assign_frontend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.default_frontends"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.default_frontends()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.emit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend"><code class="docutils literal notranslate"><span class="pre">BaseFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">BaseFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit"><code class="docutils literal notranslate"><span class="pre">BaseFrontend.emit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.CNOT"><code class="docutils literal notranslate"><span class="pre">CircuitBuilder.CNOT()</span></code></a></li>
@@ -335,47 +405,54 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="qat.frontend.frontends.html">qat.frontend.frontends module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.BaseFrontend"><code class="docutils literal notranslate"><span class="pre">BaseFrontend</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.BaseFrontend.emit"><code class="docutils literal notranslate"><span class="pre">BaseFrontend.emit()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.CustomFrontend"><code class="docutils literal notranslate"><span class="pre">CustomFrontend</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.CustomFrontend.emit"><code class="docutils literal notranslate"><span class="pre">CustomFrontend.emit()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.DefaultFrontend"><code class="docutils literal notranslate"><span class="pre">DefaultFrontend</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.DefaultFrontend.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">DefaultFrontend.build_pass_pipeline()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.FallthroughFrontend"><code class="docutils literal notranslate"><span class="pre">FallthroughFrontend</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.frontends.html#qat.frontend.frontends.FallthroughFrontend.emit"><code class="docutils literal notranslate"><span class="pre">FallthroughFrontend.emit()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend"><code class="docutils literal notranslate"><span class="pre">CustomFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">CustomFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit"><code class="docutils literal notranslate"><span class="pre">CustomFrontend.emit()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="qat.frontend.qir_parser.html">qat.frontend.qir_parser module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser"><code class="docutils literal notranslate"><span class="pre">QIRParser</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.ccx"><code class="docutils literal notranslate"><span class="pre">QIRParser.ccx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.cx"><code class="docutils literal notranslate"><span class="pre">QIRParser.cx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.cz"><code class="docutils literal notranslate"><span class="pre">QIRParser.cz()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.h"><code class="docutils literal notranslate"><span class="pre">QIRParser.h()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.mz"><code class="docutils literal notranslate"><span class="pre">QIRParser.mz()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.parse"><code class="docutils literal notranslate"><span class="pre">QIRParser.parse()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.process_instructions"><code class="docutils literal notranslate"><span class="pre">QIRParser.process_instructions()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.reset"><code class="docutils literal notranslate"><span class="pre">QIRParser.reset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.rx"><code class="docutils literal notranslate"><span class="pre">QIRParser.rx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.ry"><code class="docutils literal notranslate"><span class="pre">QIRParser.ry()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.rz"><code class="docutils literal notranslate"><span class="pre">QIRParser.rz()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.s"><code class="docutils literal notranslate"><span class="pre">QIRParser.s()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.s_adj"><code class="docutils literal notranslate"><span class="pre">QIRParser.s_adj()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.t"><code class="docutils literal notranslate"><span class="pre">QIRParser.t()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.t_adj"><code class="docutils literal notranslate"><span class="pre">QIRParser.t_adj()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.x"><code class="docutils literal notranslate"><span class="pre">QIRParser.x()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.y"><code class="docutils literal notranslate"><span class="pre">QIRParser.y()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir_parser.html#qat.frontend.qir_parser.QIRParser.z"><code class="docutils literal notranslate"><span class="pre">QIRParser.z()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend"><code class="docutils literal notranslate"><span class="pre">FallthroughFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">FallthroughFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit"><code class="docutils literal notranslate"><span class="pre">FallthroughFrontend.emit()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.emit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.version"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.version</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.Qasm2Frontend"><code class="docutils literal notranslate"><span class="pre">Qasm2Frontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.Qasm2Frontend.version"><code class="docutils literal notranslate"><span class="pre">Qasm2Frontend.version</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.Qasm3Frontend"><code class="docutils literal notranslate"><span class="pre">Qasm3Frontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.Qasm3Frontend.version"><code class="docutils literal notranslate"><span class="pre">Qasm3Frontend.version</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.get_qasm_version"><code class="docutils literal notranslate"><span class="pre">get_qasm_version()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.is_qasm_path"><code class="docutils literal notranslate"><span class="pre">is_qasm_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.is_qasm_str"><code class="docutils literal notranslate"><span class="pre">is_qasm_str()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.load_qasm_file"><code class="docutils literal notranslate"><span class="pre">load_qasm_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend"><code class="docutils literal notranslate"><span class="pre">QIRFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.check_and_return_source()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.emit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.is_qir_path"><code class="docutils literal notranslate"><span class="pre">is_qir_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.is_qir_str"><code class="docutils literal notranslate"><span class="pre">is_qir_str()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.qir.html#qat.frontend.qir.load_qir_file"><code class="docutils literal notranslate"><span class="pre">load_qir_file()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a><ul>
@@ -407,6 +484,29 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.frontend.transform_passes.html">qat.frontend.transform_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run_qasm_optimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run_qasm_optimisation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run_qiskit_optimization"><code class="docutils literal notranslate"><span class="pre">InputOptimisation.run_qiskit_optimization()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse"><code class="docutils literal notranslate"><span class="pre">Parse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse.parse_qir"><code class="docutils literal notranslate"><span class="pre">Parse.parse_qir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse.run"><code class="docutils literal notranslate"><span class="pre">Parse.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydInputOptimisation"><code class="docutils literal notranslate"><span class="pre">PydInputOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydInputOptimisation.run_qasm_optimisation"><code class="docutils literal notranslate"><span class="pre">PydInputOptimisation.run_qasm_optimisation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydParse"><code class="docutils literal notranslate"><span class="pre">PydParse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydParse.parse_qir"><code class="docutils literal notranslate"><span class="pre">PydParse.parse_qir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydParse.run"><code class="docutils literal notranslate"><span class="pre">PydParse.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -418,7 +518,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.engines.zero.html" class="btn btn-neutral float-left" title="qat.engines.zero module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.frontend.circuit_builder.html" class="btn btn-neutral float-right" title="qat.frontend.circuit_builder module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.frontend.parsers.html" class="btn btn-neutral float-right" title="qat.frontend.parsers package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

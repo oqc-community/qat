@@ -6,13 +6,27 @@ qat.frontend package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.frontend.parsers
+
 Submodules
 ----------
 
 .. toctree::
    :maxdepth: 4
 
+   qat.frontend.analysis_passes
+   qat.frontend.auto
+   qat.frontend.base
    qat.frontend.circuit_builder
-   qat.frontend.frontends
-   qat.frontend.qir_parser
+   qat.frontend.custom
+   qat.frontend.fallthrough
+   qat.frontend.qasm
+   qat.frontend.qir
    qat.frontend.register
+   qat.frontend.transform_passes
