@@ -110,6 +110,7 @@ class PydHardwareConfigValidity(ValidationPass):
     ):
         self._validate_shots(compiler_config)
         self._validate_error_mitigation(self.hardware_model, compiler_config)
+        return ir
 
     def _validate_shots(self, compiler_config: CompilerConfig):
         if compiler_config.repeats > qatconfig.MAX_REPEATS_LIMIT:
