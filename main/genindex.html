@@ -893,14 +893,14 @@
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister">BitRegister (class in qat.frontend.register)</a>
 
       <ul>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.BitRegister">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits">bits (BitRegister attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN">BLACKMAN (PulseShapeType attribute)</a>
@@ -965,6 +965,8 @@
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine.build_pass_pipeline">(NewQbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline">(NewQuantumRuntime method)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.PydDefaultMiddleend.build_pass_pipeline">(PydDefaultMiddleend static method)</a>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.build_pass_pipeline">(QIRFrontend static method)</a>
 </li>
@@ -3170,6 +3172,8 @@
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation.run.params.ir">(qat.middleend.passes.validation.InstructionValidation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run.params.ir">(qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.ReadoutValidation.run.params.ir">(qat.middleend.passes.validation.ReadoutValidation.run parameter)</a>
 </li>
       </ul></li>
@@ -3842,9 +3846,13 @@
 </li>
         <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.FallthroughMiddleend.params.model">(qat.middleend.middleends.FallthroughMiddleend parameter)</a>
 </li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.PydDefaultMiddleend.params.model">(qat.middleend.middleends.PydDefaultMiddleend parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.BatchedShots.params.model">(qat.middleend.passes.analysis.BatchedShots parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.DecomposeToPulses.params.model">(qat.middleend.passes.gates.transform.DecomposeToPulses parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.params.model">(qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.params.model">(qat.runtime.passes.analysis.IndexMappingAnalysis parameter)</a>
 </li>
@@ -5422,6 +5430,8 @@
 </li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.PulseType">PulseType (class in qat.ir.waveforms)</a>
 </li>
+      <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.PydDefaultMiddleend">PydDefaultMiddleend (class in qat.middleend.middleends)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase">PydDictBase (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydHardwareConfigValidity">PydHardwareConfigValidity (class in qat.backend.passes.validation)</a>
@@ -5429,6 +5439,8 @@
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydInputOptimisation">PydInputOptimisation (class in qat.frontend.passes.transform)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase">PydListBase (class in qat.utils.pydantic)</a>
+</li>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation">PydNoMidCircuitMeasurementValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydParse">PydParse (class in qat.frontend.passes.transform)</a>
 </li>
@@ -7562,6 +7574,8 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass.run">(PreCodegenPass method)</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydHardwareConfigValidity.run">(PydHardwareConfigValidity method)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run">(PydNoMidCircuitMeasurementValidation method)</a>
 </li>
         <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydParse.run">(PydParse method)</a>
 </li>
