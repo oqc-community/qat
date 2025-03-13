@@ -6,6 +6,14 @@ qat.model package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.model.loaders
+
 Submodules
 ----------
 

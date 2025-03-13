@@ -144,6 +144,21 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.legacy.html">qat.model.loaders.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.base.html">qat.model.loaders.legacy.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.echo.html">qat.model.loaders.legacy.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.file.html">qat.model.loaders.legacy.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.lucy.html">qat.model.loaders.legacy.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.qiskit.html">qat.model.loaders.legacy.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.rtcs.html">qat.model.loaders.legacy.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
@@ -319,16 +334,44 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.default"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.default</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.model_config"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.name"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription.pipeline"><code class="docutils literal notranslate"><span class="pre">PipelineImportDescription.pipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription.construct"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription.construct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription.init"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription.init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription.loader"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription.loader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription.model_config"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription.name"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription.name</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.construct"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.construct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.default"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.default</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.hardware_loader"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.hardware_loader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.init"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.model_config"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.name"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription.pipeline"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription.pipeline</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.construct"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription.construct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.default"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription.default</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.model_config"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.name"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.pipeline"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription.pipeline</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_hardwareloader"><code class="docutils literal notranslate"><span class="pre">is_hardwareloader()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_pipeline_builder"><code class="docutils literal notranslate"><span class="pre">is_pipeline_builder()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_pipeline_instance"><code class="docutils literal notranslate"><span class="pre">is_pipeline_instance()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.HardwareLoaders"><code class="docutils literal notranslate"><span class="pre">HardwareLoaders</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.HardwareLoaders.clear_cache"><code class="docutils literal notranslate"><span class="pre">HardwareLoaders.clear_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.HardwareLoaders.from_descriptions"><code class="docutils literal notranslate"><span class="pre">HardwareLoaders.from_descriptions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.HardwareLoaders.load"><code class="docutils literal notranslate"><span class="pre">HardwareLoaders.load()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.backend"><code class="docutils literal notranslate"><span class="pre">Pipeline.backend</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.consistent_model"><code class="docutils literal notranslate"><span class="pre">Pipeline.consistent_model()</span></code></a></li>

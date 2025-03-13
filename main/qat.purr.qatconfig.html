@@ -144,6 +144,21 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.legacy.html">qat.model.loaders.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.base.html">qat.model.loaders.legacy.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.echo.html">qat.model.loaders.legacy.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.file.html">qat.model.loaders.legacy.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.lucy.html">qat.model.loaders.legacy.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.qiskit.html">qat.model.loaders.legacy.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.rtcs.html">qat.model.loaders.legacy.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
@@ -407,7 +422,14 @@ Only needs to be set to True for calibration purposes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.EXTENSIONS">
 <span class="sig-name descname"><span class="pre">EXTENSIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportString</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.EXTENSIONS" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>QAT Extensions to initialise on start-up</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.HARDWARE">
+<span class="sig-name descname"><span class="pre">HARDWARE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription" title="qat.core.config.HardwareLoaderDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">HardwareLoaderDescription</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.HARDWARE" title="Link to this definition"></a></dt>
+<dd><p>QAT Hardware Models to load on start-up</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.INSTRUCTION_VALIDATION">
@@ -423,7 +445,7 @@ Only needs to be set to True for calibration purposes.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.PIPELINES">
-<span class="sig-name descname"><span class="pre">PIPELINES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineImportDescription" title="qat.core.config.PipelineImportDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineImportDescription</span></code></a><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.PIPELINES" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">PIPELINES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription" title="qat.core.config.PipelineInstanceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription" title="qat.core.config.PipelineBuilderDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilderDescription</span></code></a><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.PIPELINES" title="Link to this definition"></a></dt>
 <dd><p>QAT Pipelines to add on start-up, None adds default pipelines</p>
 </dd></dl>
 
@@ -441,6 +463,11 @@ Only needs to be set to True for calibration purposes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.load_extensions">
 <span class="sig-name descname"><span class="pre">load_extensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.load_extensions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.qatconfig.QatConfig.matching_hardware_loaders">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matching_hardware_loaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.qatconfig.QatConfig.matching_hardware_loaders" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
