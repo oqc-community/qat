@@ -32,7 +32,11 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_in
 from qat.purr.compiler.instructions import Instruction, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
-from qat.purr.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
+from qat.purr.compiler.transform_passes import (
+    DeviceUpdateSanitisation,
+    PhaseOptimisation,
+    PostProcessingSanitisation,
+)
 from qat.purr.compiler.validation_passes import InstructionValidation, ReadoutValidation
 from qat.purr.utils.logger import get_default_logger
 
@@ -282,6 +286,7 @@ class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
             PassManager()
             | PhaseOptimisation()
             | PostProcessingSanitisation()
+            | DeviceUpdateSanitisation()
             | InstructionValidation(self.engine)
             | ReadoutValidation(self.engine.model)
         )

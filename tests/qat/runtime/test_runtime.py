@@ -24,7 +24,7 @@ def test_new_quantum_runtime():
     met_mgr = MetricsManager()
     pipeline = runtime.build_pass_pipeline()
     assert pipeline.passes
-    assert len(pipeline.passes) == 4
+    assert len(pipeline.passes) == 5
     assert not any([m for m in pipeline.passes if isinstance(m._pass, AnalysisPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, TransformPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, ValidationPass)])

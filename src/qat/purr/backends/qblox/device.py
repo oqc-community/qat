@@ -155,7 +155,7 @@ class QbloxControlHardware(ControlHardware):
             sequencer: Sequencer = module.sequencers[next(iter(available))]
             allocations[target] = sequencer
 
-        log.info(
+        log.debug(
             f"Sequencer {sequencer.seq_idx} in Module {module.slot_idx} will be running {package.target}"
         )
         return module, sequencer
