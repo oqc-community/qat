@@ -25,7 +25,7 @@ class PostProcessingTransform(TransformPass):
     """Uses the post-processing instructions from the executable package to process the
     results from the engine.
 
-    The backend will return the results in a format that depends on the specified
+    The target machine will return the results in a format that depends on the specified
     :class:`AcquireMode`. However, it is often the case results need to be returned in an
     explicit format, e.g., as discriminated bits. To achieve this, extra software
     post-processing is needed.
@@ -37,7 +37,7 @@ class PostProcessingTransform(TransformPass):
 
     def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.
         """
@@ -62,7 +62,7 @@ class InlineResultsProcessingTransform(TransformPass):
 
     def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.
         """
@@ -107,7 +107,7 @@ class AssignResultsTransform(TransformPass):
 
     def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.
         """
@@ -141,7 +141,7 @@ class ResultTransform(TransformPass):
         self, acquisitions: Dict[str, any], *args, compiler_config: CompilerConfig, **kwargs
     ):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param compiler_config: The compiler config is needed to know how to process the
             results, and should be provided as a keyword argument.
         """
@@ -223,7 +223,7 @@ class ErrorMitigation(TransformPass):
         **kwargs,
     ):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param res_mgr: The results manager is needed to look up the qubit-to-variable
             mapping.
         :param compiler_config: The compiler config is needed to know how to apply error

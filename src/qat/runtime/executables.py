@@ -16,7 +16,7 @@ class AcquireDataStruct(BaseModel):
     """
     Contains all the information needed for to record a measurement / readout.
 
-    Depending on the target backend, not all information might be needed.
+    Depending on the target machine, not all information might be needed.
 
     :param int length: A readout is performed for some given time which translates to a
         number of discrete samples.
@@ -36,7 +36,7 @@ class ChannelData(BaseModel):
     Contains the instructions required by a particular channel in the control stack to execute
     a program.
 
-    For a given backend, this should be expanded on to include any instructions / data
+    For a given target, this should be expanded on to include any instructions / data
     required for execution.
 
     :param acquires: Specifies the acquire (or a list of acquires) for a channel.
@@ -59,7 +59,7 @@ class Executable(BaseModel):
     :type channel_data: dict[str, ChannelData]
     :param int shots: The number of times the program is executed.
     :param int compiled_shots: When the required number of shots exceeds the allowed amount by
-        the target backend, shots can be batched into groups. This states how many shots to do
+        the target machine, shots can be batched into groups. This states how many shots to do
         in each batch.
     :param post_processing: Contains the post-processing information for each acquisition.
     :type post_processing: dict[str, List[PostProcessing]]

@@ -14,7 +14,16 @@ from qat.runtime.executables import Executable
 
 
 class BaseBackend(abc.ABC):
+    """
+    Converts an intermediate representation (IR) to code for a given target
+    by selecting target-machine operations to implement for each instruction
+    in the IR.
+    """
+
     def __init__(self, model: None | QuantumHardwareModel):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        """
         self.model = model
 
     @abc.abstractmethod

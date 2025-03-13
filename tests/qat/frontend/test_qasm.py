@@ -12,7 +12,12 @@ from qat.frontend.qasm import (
     is_qasm_str,
     load_qasm_file,
 )
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.ir.instructions import Repeat as PydRepeat
+from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
+from qat.purr.backends.echo import Connectivity, get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
 
@@ -148,10 +153,17 @@ class TestQasm2Frontend:
         """Tests frontend-relevant details, such as successful parsing. Doesn't check the
         details of the IR as this is the responsibility of the QasmParser tests."""
         qasm2_str = get_qasm2("basic.qasm")
-        model = get_default_echo_hardware(32)
+
+        # Legacy hardware model.
+        model = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
         builder = Qasm2Frontend(model).emit(qasm2_str)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)
+
+        # Pydantic hardware model.
+        builder = Qasm2Frontend(convert_legacy_echo_hw_to_pydantic(model)).emit(qasm2_str)
+        assert isinstance(builder, PydQuantumInstructionBuilder)
+        assert isinstance(builder.instructions[0], PydRepeat)
 
 
 class TestQasm3Frontend:
@@ -179,7 +191,14 @@ class TestQasm3Frontend:
         """Tests frontend-relevant details, such as successful parsing. Doesn't check the
         details of the IR as this is the responsibility of the QasmParser tests."""
         qasm3_str = get_qasm3("basic.qasm")
-        model = get_default_echo_hardware(32)
+
+        # Legacy hardware model.
+        model = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
         builder = Qasm3Frontend(model).emit(qasm3_str)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)
+
+        # Pydantic hardware model.
+        builder = Qasm3Frontend(convert_legacy_echo_hw_to_pydantic(model)).emit(qasm3_str)
+        assert isinstance(builder, PydQuantumInstructionBuilder)
+        assert isinstance(builder.instructions[0], PydRepeat)

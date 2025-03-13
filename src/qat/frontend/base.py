@@ -6,16 +6,22 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.qat import QATInput
+from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 
 class BaseFrontend(ABC):
-    """A frontend is the front-facing part of QAT pipelines that accepts some source
-    program and handles compilation down to QAT's intermediate representation.
+    """
+    Base class for frontend that scans a high-level language-specific, but target-agnostic, input
+    :class:`QatInput` and verifies its syntax and semantics according to a specific source language
+    (QASM, QIR, ...). The input is optimised so as to adhere to the underlying topology of the QPU
+    and is then compiled to a target-agnostic intermediate representation (IR) :class:`QatIR` that
+    can be further optimised in the middle end.
 
     Generally, frontends are picked to match the source language. For example, a QIR source
     program should be coupled with the :class:`QIRFrontend`. They implement compilation
@@ -23,8 +29,11 @@ class BaseFrontend(ABC):
     QAT IR.
     """
 
-    def __init__(self, model: None | QuantumHardwareModel = None):
-        self.model = model
+    def __init__(self, model: None | QuantumHardwareModel | PydHardwareModel = None):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        """
+        self.model = check_type_legacy_or_pydantic(model)
 
     @abstractmethod
     def emit(
@@ -33,7 +42,19 @@ class BaseFrontend(ABC):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         compiler_config: Optional[CompilerConfig] = None,
-    ) -> InstructionBuilder: ...
+    ) -> InstructionBuilder:
+        """
+        Compiles an input :class:`QatInput` down to :class:`QatIR` and emits it.
+        :param src: The high-level input.
+        :param res_mgr: Collection of analysis results with caching and aggregation
+                        capabilities, defaults to None.
+        :param met_mgr: Stores useful intermediary metrics that are generated during
+                        compilation, defaults to None.
+        :param compiler_config: Compiler settings, defaults to None.
+        :return: An intermediate representation as an :class:`InstructionBuilder` which
+                holds a list of instructions to be executed on the QPU.
+        """
+        ...
 
     @abstractmethod
     def check_and_return_source(self, src): ...

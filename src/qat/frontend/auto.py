@@ -5,9 +5,11 @@ from compiler_config.config import CompilerConfig
 from qat.frontend.base import BaseFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend
 from qat.frontend.qir import QIRFrontend
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 
 class AutoFrontend(BaseFrontend):
@@ -25,14 +27,18 @@ class AutoFrontend(BaseFrontend):
         end of line to allow other frontends the opportunity to be matched.
     """
 
-    def __init__(self, model: QuantumHardwareModel | None, *frontends: BaseFrontend):
+    def __init__(
+        self,
+        model: QuantumHardwareModel | PydHardwareModel | None,
+        *frontends: BaseFrontend,
+    ):
         """
         :param model: The hardware model is needed to instantiate the default frontends,
             defaults to None.
         :param frontends: The different frontends to check the source file against.
         """
 
-        self.model = model
+        self.model = check_type_legacy_or_pydantic(model)
         if len(frontends) == 0:
             frontends = self.default_frontends(model)
         self.frontends = frontends

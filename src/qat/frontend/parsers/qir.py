@@ -11,7 +11,18 @@ from qat.purr.utils.logging_utils import log_duration
 
 qir_available = True
 try:
-    import pyqir
+    from pyqir import (
+        Call,
+        Constant,
+        Context,
+        FloatConstant,
+        IntConstant,
+        Module,
+        extract_byte_string,
+        is_entry_point,
+        qubit_id,
+        result_id,
+    )
 except ImportError:
     qir_available = False
 
@@ -87,7 +98,7 @@ class QIRParser:
 
     def process_instructions(self, instructions):
         for inst in instructions:
-            if isinstance(inst, pyqir.Call):
+            if isinstance(inst, Call):
 
                 def throw_on_invalid_args(actual_args, expected_args):
                     if actual_args != expected_args:
@@ -96,7 +107,7 @@ class QIRParser:
                             f"expected {expected_args}."
                         )
 
-                args: List[pyqir.Constant] = inst.args
+                args: List[Constant] = inst.args
                 intrinsic_name = inst.callee.name
                 if intrinsic_name in (
                     "__quantum__qis__ccx__body",
@@ -104,61 +115,61 @@ class QIRParser:
                 ):
                     throw_on_invalid_args(len(args), 3)
                     self.ccx(
-                        pyqir.qubit_id(args[0]),
-                        pyqir.qubit_id(args[1]),
-                        pyqir.qubit_id(args[2]),
+                        qubit_id(args[0]),
+                        qubit_id(args[1]),
+                        qubit_id(args[2]),
                     )
                 elif intrinsic_name in (
                     "__quantum__qis__cnot__body",
                     "__quantum__qis__cx__body",
                 ):
                     throw_on_invalid_args(len(args), 2)
-                    self.cx(pyqir.qubit_id(args[0]), pyqir.qubit_id(args[1]))
+                    self.cx(qubit_id(args[0]), qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__cz__body":
                     throw_on_invalid_args(len(args), 2)
-                    self.cz(pyqir.qubit_id(args[0]), pyqir.qubit_id(args[1]))
+                    self.cz(qubit_id(args[0]), qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__h__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.h(pyqir.qubit_id(args[0]))
+                    self.h(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__mz__body":
                     throw_on_invalid_args(len(args), 2)
-                    self.mz(pyqir.qubit_id(args[0]), pyqir.result_id(args[1]))
+                    self.mz(qubit_id(args[0]), result_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__reset__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.reset(pyqir.qubit_id(args[0]))
+                    self.reset(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__rx__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[pyqir.IntConstant, pyqir.FloatConstant] = args[0]
-                    self.rx(radii.value, pyqir.qubit_id(args[1]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.rx(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__ry__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[pyqir.IntConstant, pyqir.FloatConstant] = args[0]
-                    self.ry(radii.value, pyqir.qubit_id(args[1]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.ry(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__rz__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[pyqir.IntConstant, pyqir.FloatConstant] = args[0]
-                    self.rz(radii.value, pyqir.qubit_id(args[1]))
+                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    self.rz(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__s__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.s(pyqir.qubit_id(args[0]))
+                    self.s(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__s_adj":
                     throw_on_invalid_args(len(args), 1)
-                    self.s_adj(pyqir.qubit_id(args[0]))
+                    self.s_adj(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__t__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.t(pyqir.qubit_id(args[0]))
+                    self.t(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__t__adj":
                     throw_on_invalid_args(len(args), 1)
-                    self.t_adj(pyqir.qubit_id(args[0]))
+                    self.t_adj(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__x__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.x(pyqir.qubit_id(args[0]))
+                    self.x(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__y__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.y(pyqir.qubit_id(args[0]))
+                    self.y(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__z__body":
                     throw_on_invalid_args(len(args), 1)
-                    self.z(pyqir.qubit_id(args[0]))
+                    self.z(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__rt__initialize":
                     pass
                 elif intrinsic_name == "__quantum__rt__tuple_record_output":
@@ -167,11 +178,11 @@ class QIRParser:
                     pass
                 elif intrinsic_name == "__quantum__rt__result_record_output":
                     throw_on_invalid_args(len(args), 2)
-                    res = pyqir.result_id(args[0])
+                    res = result_id(args[0])
                     label_ptr = args[1]
                     label = ""
                     if (not label_ptr.is_null) and (
-                        byte_string := pyqir.extract_byte_string(label_ptr)
+                        byte_string := extract_byte_string(label_ptr)
                     ):
                         label = byte_string.decode("utf-8").rstrip("\x00")
                     else:
@@ -183,15 +194,25 @@ class QIRParser:
             raise RuntimeError("QIR parser unavailable.")
 
         with log_duration("QIR parsing completed, took {} seconds."):
-            if qir_file.endswith(".bc"):
-                with open(qir_file, "rb") as f:
-                    mod = pyqir.Module.from_bitcode(pyqir.Context(), f.read())
-            elif qir_file.endswith(".ll"):
-                with open(qir_file) as f:
-                    mod = pyqir.Module.from_ir(pyqir.Context(), f.read())
+            # Load the file if required
+            if isinstance(qir_file, str):
+                if qir_file.endswith(".bc"):
+                    with open(qir_file, "rb") as f:
+                        qir_file = f.read()
+                elif qir_file.endswith(".ll"):
+                    with open(qir_file) as f:
+                        qir_file = f.read()
+
+            # Create a module by inferring the type
+            if isinstance(qir_file, str):
+                mod = Module.from_ir(Context(), qir_file)
+            elif isinstance(qir_file, bytes):
+                mod = Module.from_bitcode(Context(), qir_file)
+            else:
+                raise ValueError(f"Expected type str | bytes, got {type(mod)} instead.")
 
             entry_point = next(
-                iter(filter(lambda fnc: pyqir.is_entry_point(fnc), mod.functions)), None
+                iter(filter(lambda fnc: is_entry_point(fnc), mod.functions)), None
             )
             if entry_point is None:
                 raise ValueError("Entry point unable to be found in QIR file.")

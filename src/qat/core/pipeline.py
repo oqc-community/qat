@@ -12,6 +12,17 @@ from qat.runtime.runtimes.base import BaseRuntime
 
 
 class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
+    """
+    Pipeline that compiles high-level language specific, but target-agnostic, input (QASM, QIR, ...)
+    to target-specific instructions that are executed on our hardware.
+    :param frontend: Compiles a high-level language-specific, but target-agnostic,
+                    input :class:`QatInput` to a target-agnostic intermediate representation (IR)
+                    :class:`QatIR`.
+    :param middleend: Takes an intermediate representation (IR) :class:`QatIR` and alters it based
+                    on optimisation and/or validation passes within this pipeline.
+    :param backend: Converts an intermediate representation (IR) to code for a given target machine.
+    """
+
     name: str
     frontend: BaseFrontend
     middleend: BaseMiddleend
@@ -22,7 +33,7 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
     @field_validator("model", mode="before")
     @classmethod
     def consistent_model(cls, model: QuantumHardwareModel, info: ValidationInfo):
-        """Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields
+        """Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields.
 
         Currently, this does not check hardware embedded in the runtime.
         """

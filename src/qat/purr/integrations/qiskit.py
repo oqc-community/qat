@@ -55,7 +55,7 @@ def run_qasm(qasm_str: str):
 
 class QatBackend(BasicSimulator):
     """
-    Basic qiskit backend built to run QASM on our own backends.
+    Basic qiskit backend built to run QASM on our own target machines.
 
     TODO: Expand this to become a proper back-end, as I don't believe we need to inherit
         off the QASM simulator as it stands.

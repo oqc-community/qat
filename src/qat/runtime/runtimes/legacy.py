@@ -23,7 +23,7 @@ class LegacyRuntime(BaseRuntime):
         connection_mode: ConnectionMode = ConnectionMode.DEFAULT,
     ):
         """
-        :param engine: The execution engine for a target backend.
+        :param engine: The execution engine for a target machine.
         :param results_pipeline: Optionally provided a pipeline for results processing. If
             not provided, a default pipeline is provided.
         :param connection_mode: Specifies how the connection is maintained.

@@ -9,8 +9,8 @@ from qat.runtime.executables import Executable
 
 
 class NativeEngine(ABC):
-    """:class:`NativeEngine` acts as an interface between some target backend and an
-    executable. They are used to connect to the backend (if applicable), and execute and
+    """:class:`NativeEngine` acts as an interface between some target machine and an
+    executable. They are used to connect to the target machine (if applicable), and execute and
     return the results."""
 
     @abstractmethod

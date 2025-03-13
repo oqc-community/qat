@@ -68,7 +68,7 @@ class IndexMappingAnalysis(AnalysisPass):
         **kwargs,
     ):
         """
-        :param acquisitions: The dictionary of results acquired from the targeted backend.
+        :param acquisitions: The dictionary of results acquired from the target machine.
         :param res_mgr: The results manager to save the mapping.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.

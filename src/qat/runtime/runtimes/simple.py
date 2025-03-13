@@ -17,8 +17,8 @@ class SimpleRuntime(BaseRuntime):
 
     The :class:`SimpleRuntime` handles the complete execution for simple programs that are
     free from sweeps (with exceptions of sweeps that have been lowered to the hardware).
-    This includes batching of shots, executing the program on the backend, and any software
-    post-processing that cannot be achieved in the backend. The runtime must be provided
+    This includes batching of shots, executing the program on the target machine, and any software
+    post-processing that cannot be achieved in the target machine. The runtime must be provided
     with a :class:`NativeEngine` that is capable of executing the desired programs.
     """
 

@@ -41,14 +41,15 @@ from qat.runtime.executables import AcquireDataStruct
 
 
 class WaveformV1Backend(BaseBackend, InvokerMixin):
+    """
+    Target-machine code generation from an IR for targets that only require the explicit waveforms.
+    """
+
     def __init__(self, model: QuantumHardwareModel):
-        """Code generation for backends that only require the explicit waveforms.
-
-        The emitter is used to convert IR as a :class:`InstructionBuilder` into a
-        :class:`WaveformV1Executable`.
-
-        :param QuantumHardwareModel model: As the emitter is used to generate code for some
-            targeted backend. The hardware model is needed for context-aware compilation.
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+                    As the emitter is used to generate code for some target machine, the hardware
+                    model is needed for context-aware compilation.
         """
         self.model = model
 

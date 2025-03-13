@@ -8,13 +8,20 @@ from compiler_config.config import CompilerConfig
 
 from qat.frontend.analysis_passes import InputAnalysis
 from qat.frontend.base import BaseFrontend
-from qat.frontend.transform_passes import InputOptimisation
+from qat.frontend.parsers.qasm import CloudQasmParser as PydCloudQasmParser
+from qat.frontend.parsers.qasm import Qasm3Parser as PydQasm3Parser
+from qat.frontend.transform_passes import InputOptimisation, PydInputOptimisation
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import PassManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
+from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 path_regex = re.compile(r"^.+\.(qasm)$")
 string_regex = re.compile(r"OPENQASM (?P<version>[0-9]+)(?:.[0-9])?;")
@@ -72,20 +79,23 @@ def load_qasm_file(path: str) -> str:
 class BaseQasmFrontend(BaseFrontend, ABC):
     """A base frontend for QASM programs.
 
-    Handles the parsing of QASM into QATs intermediate representation. Optionally, it can
-    also run pipelines before to optimize and validate QASM files. The QASM2 and QASM3
+    Handles the parsing of QASM into QAT's intermediate representation (IR). Optionally, it
+    can also run pipelines before to optimize and validate QASM files. The QASM2 and QASM3
     frontends are identical up to the language and its respective parser. This class
     implements the base functionality."""
 
-    def __init__(self, model: QuantumHardwareModel, pipeline: None | PassManager = None):
+    def __init__(
+        self,
+        model: QuantumHardwareModel | PydHardwareModel = None,
+        pipeline: None | PassManager = None,
+    ):
         """
         :param model: The hardware model can be required for the pipeline and is used in
             parsing.
         :param pipeline: A pipeline for validation and optimising QASM, defaults to a
             predefined pipeline that optimizes the QASM file.
         """
-
-        self.model = model
+        self.model = check_type_legacy_or_pydantic(model)
         self.pipeline = pipeline or self.build_pass_pipeline(model)
 
     @property
@@ -102,7 +112,10 @@ class BaseQasmFrontend(BaseFrontend, ABC):
 
         # TODO: replace input analysis + input optimisation with a qasm specific pass?
         # (COMPILER-340)
-        return PassManager() | InputAnalysis() | InputOptimisation(model)
+        if isinstance(model, QuantumHardwareModel):  # legacy hardware model
+            return PassManager() | InputAnalysis() | InputOptimisation(model)
+        elif isinstance(model, PydHardwareModel):  # pydantic hardware model
+            return PassManager() | InputAnalysis() | PydInputOptimisation(model)
 
     def check_and_return_source(self, src: str) -> bool | str:
         """Checks that the source program (or file path) can be interpreted as a QASM file
@@ -161,16 +174,28 @@ class BaseQasmFrontend(BaseFrontend, ABC):
             )
 
         src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
-        builder = self.model.create_builder()
+
+        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
+            builder = self.model.create_builder()
+        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
+            builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+
         if compiler_config.results_format.format is not None:
             self.parser.results_format = compiler_config.results_format.format
         builder = self.parser.parse(builder, src)
 
-        return (
-            self.model.create_builder()
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
-            .add(builder)
-        )
+        if isinstance(self.model, QuantumHardwareModel):
+            return (
+                self.model.create_builder()
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .add(builder)
+            )
+        elif isinstance(self.model, PydHardwareModel):
+            return (
+                PydQuantumInstructionBuilder(self.model)
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .__add__(builder)
+            )
 
 
 class Qasm2Frontend(BaseQasmFrontend):
@@ -191,7 +216,10 @@ class Qasm2Frontend(BaseQasmFrontend):
         """
 
         super().__init__(model, pipeline)
-        self.parser = CloudQasmParser()
+        if isinstance(self.model, QuantumHardwareModel):
+            self.parser = CloudQasmParser()
+        elif isinstance(self.model, PydHardwareModel):
+            self.parser = PydCloudQasmParser()
 
 
 class Qasm3Frontend(BaseQasmFrontend):
@@ -212,4 +240,7 @@ class Qasm3Frontend(BaseQasmFrontend):
         """
 
         super().__init__(model, pipeline)
-        self.parser = Qasm3Parser()
+        if isinstance(self.model, QuantumHardwareModel):
+            self.parser = Qasm3Parser()
+        elif isinstance(self.model, PydHardwareModel):
+            self.parser = PydQasm3Parser()

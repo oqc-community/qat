@@ -34,7 +34,7 @@ class GateDecompositionBase(DecompositionBase):
     This handles decompositions of gates to gates, and should not be used to lower gates to
     pulse instructions. While it is recommended to use :class:`DefaultGateDecompositons`,
     custom gate decompositions strategies can be implemented via this class. This could be
-    used, for example, if targetting backends that has a different native gate set, or
+    used, for example, if targeting machines that have a different native gate set, or
     trying out approximate decompositions that have a cheaper implementation cost.
     """
 

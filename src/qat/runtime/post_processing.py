@@ -21,7 +21,7 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, i
     the results.
 
     :param AcquireMode mode: The acqusition mode.
-    :param np.ndarray response: The response returned by the backend.
+    :param np.ndarray response: The response returned by the target machine.
     :returns: A dictionary containing the axis index for each type of :class:`ProcessAxis`.
     :rtype: Dict[ProcessAxis, int]
     """

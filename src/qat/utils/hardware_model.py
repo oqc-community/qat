@@ -8,6 +8,7 @@ import networkx as nx
 import numpy as np
 
 from qat.model.builder import PhysicalHardwareModelBuilder
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalBaseband,
@@ -158,3 +159,12 @@ def generate_random_linear(qubit_indices):
         random_1 = random.random()
         output[index] = np.array([[random_0, 1 - random_1], [1 - random_0, random_1]])
     return output
+
+
+def check_type_legacy_or_pydantic(hw_model: QuantumHardwareModel | PydHardwareModel):
+    if not isinstance(hw_model, QuantumHardwareModel | PydHardwareModel | None):
+        raise TypeError(
+            f"Invalid type for the hardware model: {hw_model.__class__.__name__}. Please provide a `QuantumHardwareModel` or `PhysicalHardwareModel`."
+        )
+
+    return hw_model

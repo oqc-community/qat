@@ -203,8 +203,8 @@ class FrequencyValidation(ValidationPass):
 
 
 class NoAcquireWeightsValidation(ValidationPass):
-    """Some backends do not support :class:`Acquire` instructions that contain weights. This
-    pass can be used to validate that this is the case."""
+    """Some target machines do not support :class:`Acquire` instructions that contain weights.
+    This pass can be used to validate that this is the case."""
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
@@ -214,14 +214,14 @@ class NoAcquireWeightsValidation(ValidationPass):
         has_filters = [inst.filter for inst in ir.instructions if isinstance(inst, Acquire)]
         if any(has_filters):
             raise NotImplementedError(
-                "Acquire filters are not implemented for this backend."
+                "Acquire filters are not implemented for this target machine."
             )
         return ir
 
 
 class NoMultipleAcquiresValidation(ValidationPass):
-    """Some backends do not support multiple :class:`Acquire` instructions on the same
-    channel. This validation pass should be used to verify this."""
+    """Some target machines do not support multiple :class:`Acquire` instructions on the
+    same channel. This validation pass should be used to verify this."""
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
@@ -233,7 +233,7 @@ class NoMultipleAcquiresValidation(ValidationPass):
         ]
         if len(physical_channels) != len(set(physical_channels)):
             raise NotImplementedError(
-                "Multiple acquisitions on a single channel is not supported for this backend."
+                "Multiple acquisitions on a single channel is not supported for this target machine."
             )
         return ir
 

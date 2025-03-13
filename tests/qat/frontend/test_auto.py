@@ -5,7 +5,11 @@ import pytest
 from qat.frontend.auto import AutoFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend, load_qasm_file
 from qat.frontend.qir import QIRFrontend, load_qir_file
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
+from qat.purr.backends.echo import Connectivity, get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
 
@@ -29,6 +33,11 @@ class TestAutoFrontend:
     # The hardware model being required here isn't ideal. It's because on instantiation
     # of the parser, get_builder(model) is called. Something to resolve later.
     frontend = AutoFrontend(get_default_echo_hardware(32))
+
+    @pytest.mark.parametrize("invalid_type", ["invalid", True, 3.14])
+    def invalid_type(self, invalid_type):
+        with pytest.raises(TypeError):
+            AutoFrontend(invalid_type)
 
     @pytest.mark.parametrize("qasm2_path", qasm2_tests)
     def test_assign_frontend_qasm2(self, qasm2_path):
@@ -64,3 +73,21 @@ class TestAutoFrontend:
         builder = self.frontend.emit(program)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)
+
+    @pytest.mark.parametrize(
+        "program",
+        [get_qasm2("basic.qasm"), get_qasm3("basic.qasm"), get_qir("bell_psi_plus.ll")],
+    )
+    def test_legacy_vs_pydantic_hw(self, program):
+        leg_hw = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
+        pyd_hw = convert_legacy_echo_hw_to_pydantic(leg_hw)
+
+        leg_frontend = AutoFrontend(leg_hw)
+        leg_builder = leg_frontend.emit(program)
+        assert isinstance(leg_builder, QuantumInstructionBuilder)
+        assert len(leg_builder.instructions) > 0
+
+        pyd_frontend = AutoFrontend(pyd_hw)
+        pyd_builder = pyd_frontend.emit(program)
+        assert isinstance(pyd_builder, PydQuantumInstructionBuilder)
+        assert pyd_builder.number_of_instructions > 0

@@ -37,7 +37,7 @@ class BaseRuntime(abc.ABC):
         connection_mode: ConnectionMode = ConnectionMode.DEFAULT,
     ):
         """
-        :param engine: The execution engine for a target backend.
+        :param engine: The execution engine for a target machine.
         :param results_pipeline: Optionally provided a pipeline for results processing. If
             not provided, a default pipeline is provided.
         :param connection_mode: Specifies how the connection is maintained.
@@ -65,7 +65,7 @@ class BaseRuntime(abc.ABC):
     def number_of_batches(total_shots: int, shots_per_batch: int):
         """Calculates the number of shot batches to execute.
 
-        When the total number of shots exceeds the capabilities of the backend, we can
+        When the total number of shots exceeds the capabilities of the target machine, we can
         execute a number of batches with a subset of the shots. This number of shots should
         be calculated during compilation, and included in the executable. This method
         calculates number of batches to execute.

@@ -6,12 +6,18 @@ from pathlib import Path
 from compiler_config.config import CompilerConfig
 
 from qat.frontend.base import BaseFrontend
+from qat.frontend.parsers.qir import QIRParser as PydQIRParser
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import PassManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser
+from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 string_regex = r"@__quantum__qis"
 
@@ -66,11 +72,15 @@ class QIRFrontend(BaseFrontend, ABC):
             predefined pipeline that optimizes the QASM file.
         """
 
-        self.model = model
+        self.model = check_type_legacy_or_pydantic(model)
         if not pipeline:
             pipeline = self.build_pass_pipeline()
         self.pipeline = pipeline
-        self.parser = QIRParser(model)
+
+        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
+            self.parser = QIRParser(model)
+        elif isinstance(model, PydHardwareModel):  # pydantic hardware model
+            self.parser = PydQIRParser(model)
 
     @staticmethod
     def build_pass_pipeline() -> PassManager:
@@ -143,8 +153,15 @@ class QIRFrontend(BaseFrontend, ABC):
             self.parser.results_format = compiler_config.results_format.format
         builder = self.parser.parse(src)
 
-        return (
-            self.model.create_builder()
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
-            .add(builder)
-        )
+        if isinstance(self.model, QuantumHardwareModel):
+            return (
+                self.model.create_builder()
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .add(builder)
+            )
+        elif isinstance(self.model, PydHardwareModel):
+            return (
+                PydQuantumInstructionBuilder(self.model)
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .__add__(builder)
+            )

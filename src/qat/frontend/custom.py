@@ -4,19 +4,20 @@
 from compiler_config.config import CompilerConfig
 
 from qat.frontend.base import BaseFrontend
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.pass_base import PassManager
 from qat.passes.result_base import ResultManager
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.qat import QATInput
+from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 
 class CustomFrontend(BaseFrontend):
-    """The custom frontend allows for more general compilation of source programs.
-
-    While it is not equipped with a specific parser (although we could allow for parsers
-    that fit a required contract to be passed?), it allows the user to specify custom
-    compilation requirements via a pipeline.
+    """
+    Frontend that uses a custom pipeline to compile the input to an IR.
+    While it is not equipped with a specific parser, it allows the user
+    to specify custom compilation requirements via a pipeline.
     """
 
     # TODO: Allow the custom frontend to be equipped with an optional parser. Requires
@@ -24,16 +25,16 @@ class CustomFrontend(BaseFrontend):
 
     def __init__(
         self,
-        model: None | QuantumHardwareModel,
+        model: None | QuantumHardwareModel | PydHardwareModel,
         pipeline: None | PassManager = None,
     ):
         """
-        :param model: The hardware model is required for pipeline validation.
-        :param pipeline: The custom pipeline defines the compilation process, defaults to
-            None.
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU,
+                    defaults to None.
+        :param pipeline: The custom pipeline, defaults to None.
         """
 
-        self.model = model
+        self.model = check_type_legacy_or_pydantic(model)
         self.pipeline = pipeline
 
     def check_and_return_source(self, src):
@@ -48,16 +49,17 @@ class CustomFrontend(BaseFrontend):
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
     ):
-        """Executes the custom pipeline and returns the modified program.
-
-        :param src: The source program
-        :param res_mgr: A results manager for the pipeline, if not provided, defaults to an
-            empty :class:`ResultManager`
-        :param met_mgr: A metrics manager for the pipeline, if not provided, defaults to an
-            empty :class:`MetricsManager`
-        :param compiler_config: The compiler config, if not provided, defaults to the
-            default compiler config
-        :return: The potentially modified source program
+        """
+        Compiles an input :class:`QatInput` down to :class:`QatIR` with the custom
+        pipeline and emits it.
+        :param src: The high-level input.
+        :param res_mgr: Collection of analysis results with caching and aggregation
+                        capabilities, defaults to None.
+        :param met_mgr: Stores useful intermediary metrics that are generated during
+                        compilation, defaults to None.
+        :param compiler_config: Compiler settings, defaults to None.
+        :return: An intermediate representation as an :class:`InstructionBuilder` which
+                holds a list of instructions to be executed on the QPU.
         """
 
         res_mgr = res_mgr or ResultManager()

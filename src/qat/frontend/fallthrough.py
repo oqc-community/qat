@@ -12,8 +12,10 @@ from qat.purr.compiler.builders import InstructionBuilder
 
 
 class FallthroughFrontend(BaseFrontend):
-    """A frontend that does modify the source program. Used in situations where a frontend
-    is not required, but is used to make a pipeline complete."""
+    """
+    A frontend that passes through an input :class:`InstructionBuilder` and does not modify it.
+    Used in situations where a frontend is not required, but is used to make a pipeline complete.
+    """
 
     # TODO: add support for OPTIONAL type checking. We do not always want anything to
     # "fall through" here, we might only want particular types, e.g., Qat IR (COMPILER-333)

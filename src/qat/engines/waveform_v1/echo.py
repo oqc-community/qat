@@ -14,9 +14,9 @@ class EchoEngine(NativeEngine):
     """The :class:`EchoEngine` is a minimal execution engine primarily used for testing the
     compilation pipeline.
 
-    It is not connected to any backend such as live hardware or a simulator, and just simply
-    "echos" back the buffers. Currently only accepts :class:`WaveformV1Executables`, but
-    this may be changed in the future.
+    It is not connected to any target machine such as live hardware or a simulator, and just
+    simply "echos" back the buffers. Currently only accepts :class:`WaveformV1Executables`,
+    but this may be changed in the future.
     """
 
     def execute(self, package: WaveformV1Executable):

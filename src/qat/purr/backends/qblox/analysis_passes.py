@@ -448,7 +448,7 @@ class TILegalisationPass(AnalysisPass):
 
         This pass performs target-independent legalisation. The goal here is to understand how variables
         are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-        semantics and must be kept target-agnostic so that it can be reused among backends.
+        semantics and must be kept target-agnostic so that it can be reused among targets.
 
         Particularly in QAT:
             1) A sweep instruction is illegal because it specifies unclear iteration semantics.

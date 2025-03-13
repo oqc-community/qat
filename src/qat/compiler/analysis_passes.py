@@ -22,15 +22,15 @@ class BatchedShots(AnalysisPass):
     """Determines how shots should be grouped when the total number exceeds that maximum
     allowed.
 
-    The target backend might have an allowed number of shots that can be executed by a
+    The target machine might have an allowed number of shots that can be executed by a
     single execution call. To execute a number of shots greater than this value, shots can
-    be batched, with each batch executed by its own "execute" call on the backend. For
-    example, if the maximum number of shots for a backend is 2000, but you required 4000
+    be batched, with each batch executed by its own "execute" call on the target machine. For
+    example, if the maximum number of shots for a target machine is 2000, but you required 4000
     shots, then this could be done as [2000, 2000] shots.
 
     Now consider the more complex scenario where  4001 shots are required. Clearly this can
     be done in three batches. While it is tempting to do this in batches of [2000, 2000, 1],
-    for some backends, specification of the number of shots can only be achieved at
+    for some target machines, specification of the number of shots can only be achieved at
     compilation (as opposed to runtime). Batching as described above would result in us
     needing to compile two separate programs. Instead, it makes more sense to batch the
     shots as three lots of 1334 shots, which gives a total of 4002 shots. The extra two
