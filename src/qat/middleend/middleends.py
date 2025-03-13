@@ -3,12 +3,20 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
-from qat.backend.passes.validation import HardwareConfigValidity
+from qat.backend.passes.validation import HardwareConfigValidity, PydHardwareConfigValidity
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
-from qat.middleend.passes.validation import ReadoutValidation
+from qat.middleend.passes.transform import (
+    PhaseOptimisation,
+    PostProcessingSanitisation,
+    PydPhaseOptimisation,
+)
+from qat.middleend.passes.validation import (
+    PydNoMidCircuitMeasurementValidation,
+    ReadoutValidation,
+)
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.passes.analysis import CalibrationAnalysis
 
@@ -115,4 +123,20 @@ class DefaultMiddleend(CustomMiddleend):
             | PhaseOptimisation()
             | PostProcessingSanitisation()
             | ReadoutValidation(model)
+        )
+
+
+class PydDefaultMiddleend(CustomMiddleend):
+    def __init__(self, model: PydHardwareModel):
+        pipeline = self.build_pass_pipeline(model)
+        super().__init__(model=model, pipeline=pipeline)
+
+    @staticmethod
+    def build_pass_pipeline(model) -> PassManager:
+        return (
+            PassManager()
+            | PydHardwareConfigValidity(model)
+            | CalibrationAnalysis()
+            | PydPhaseOptimisation()
+            | PydNoMidCircuitMeasurementValidation(model)
         )

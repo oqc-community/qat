@@ -20,7 +20,7 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, i
     averaged over shots, averaged over time, or neither. We must determine how to unpack
     the results.
 
-    :param mode: The acqusition mode.
+    :param mode: The acquisition mode.
     :param response: The response returned by the target machine.
     :returns: A dictionary containing the axis index for each type of :class:`ProcessAxis`.
     """

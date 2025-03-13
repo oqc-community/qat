@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+from __future__ import annotations
+
 from enum import Enum
 from typing import Literal, Optional, Type, Union
 
@@ -116,6 +118,9 @@ class SampledWaveform(AbstractWaveform):
 
     def __repr__(self):
         return f"sampled waveform"
+
+    def __eq__(self, other: SampledWaveform):
+        return np.array_equal(self.samples, other.samples)
 
 
 class SquareWaveform(Waveform):

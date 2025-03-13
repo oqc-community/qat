@@ -7,6 +7,9 @@ import numpy as np
 
 from qat import qatconfig
 from qat.core.pass_base import ValidationPass
+from qat.ir.measure import Acquire as PydAcquire
+from qat.ir.measure import Pulse as PydPulse
+from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
@@ -170,4 +173,50 @@ class ReadoutValidation(ValidationPass):
                         raise ValueError(
                             "Mid-circuit measurements currently unable to be used."
                         )
+        return ir
+
+
+class PydNoMidCircuitMeasurementValidation(ValidationPass):
+    """
+    Validates that there are no mid-circuit measurements by checking that no qubit
+    has an acquire instruction that is later followed by a pulse instruction.
+    """
+
+    def __init__(
+        self,
+        model: PydHardwareModel,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param model: The hardware model.
+        """
+        self.model = model
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """
+        :param ir: The intermediate representation (IR) :class:`InstructionBuilder`.
+        """
+        consumed_acquire_pc: set[str] = set()
+
+        if not qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
+            return ir
+
+        drive_acq_pc_map = {
+            qubit.pulse_channels.drive.uuid: qubit.resonator.pulse_channels.acquire.uuid
+            for qubit in self.model.qubits.values()
+        }
+
+        for instr in ir:
+            if isinstance(instr, PydAcquire):
+                consumed_acquire_pc.add(instr.target)
+
+            # Check if we have a measure in the middle of the circuit somewhere.
+            elif isinstance(instr, PydPulse):
+                acq_pc = drive_acq_pc_map.get(instr.target, None)
+
+                if acq_pc and acq_pc in consumed_acquire_pc:
+                    raise ValueError(
+                        "Mid-circuit measurements currently unable to be used."
+                    )
         return ir
