@@ -61,54 +61,40 @@ def apply_setup_to_hardware(
     #   that can be done in a later PR.
     qubits_by_index = {qb.index: qb for qb in qubit_devices}
     if connectivity is None:
-        for i, qubit in enumerate(qubit_devices):
-            for other_qubit in qubit_devices:
-                if qubit != other_qubit:
-                    qubit.create_pulse_channel(
-                        auxiliary_devices=[other_qubit],
-                        channel_type=ChannelType.cross_resonance,
-                        frequency=5.5e9,
-                        scale=50,
-                    )
-                    qubit.create_pulse_channel(
-                        auxiliary_devices=[other_qubit],
-                        channel_type=ChannelType.cross_resonance_cancellation,
-                        frequency=5.5e9,
-                        scale=0.0,
-                    )
-            qubit.add_coupled_qubit(qubit_devices[(i + 1) % qubit_count])
-            qubit.add_coupled_qubit(qubit_devices[(i - 1) % qubit_count])
-    else:
-        for connection in connectivity:
-            left_index, right_index = connection
-            qubit_left = qubits_by_index.get(left_index)
-            qubit_right = qubits_by_index.get(right_index)
-            qubit_right.create_pulse_channel(
-                auxiliary_devices=[qubit_left],
-                channel_type=ChannelType.cross_resonance,
-                frequency=5.5e9,
-                scale=50,
-            )
-            qubit_right.create_pulse_channel(
-                auxiliary_devices=[qubit_left],
-                channel_type=ChannelType.cross_resonance_cancellation,
-                frequency=5.5e9,
-                scale=0.0,
-            )
-            qubit_left.create_pulse_channel(
-                auxiliary_devices=[qubit_right],
-                channel_type=ChannelType.cross_resonance,
-                frequency=5.5e9,
-                scale=50,
-            )
-            qubit_left.create_pulse_channel(
-                auxiliary_devices=[qubit_right],
-                channel_type=ChannelType.cross_resonance_cancellation,
-                frequency=5.5e9,
-                scale=0.0,
-            )
-            qubit_left.add_coupled_qubit(qubit_right)
-            qubit_right.add_coupled_qubit(qubit_left)
+        connectivity = generate_connectivity(
+            Connectivity.Ring, qubit_count=len(qubit_devices)
+        )
+
+    for connection in connectivity:
+        left_index, right_index = connection
+        qubit_left = qubits_by_index.get(left_index)
+        qubit_right = qubits_by_index.get(right_index)
+        qubit_right.create_pulse_channel(
+            auxiliary_devices=[qubit_left],
+            channel_type=ChannelType.cross_resonance,
+            frequency=5.5e9,
+            scale=50,
+        )
+        qubit_right.create_pulse_channel(
+            auxiliary_devices=[qubit_left],
+            channel_type=ChannelType.cross_resonance_cancellation,
+            frequency=5.5e9,
+            scale=0.0,
+        )
+        qubit_left.create_pulse_channel(
+            auxiliary_devices=[qubit_right],
+            channel_type=ChannelType.cross_resonance,
+            frequency=5.5e9,
+            scale=50,
+        )
+        qubit_left.create_pulse_channel(
+            auxiliary_devices=[qubit_right],
+            channel_type=ChannelType.cross_resonance_cancellation,
+            frequency=5.5e9,
+            scale=0.0,
+        )
+        qubit_left.add_coupled_qubit(qubit_right)
+        qubit_right.add_coupled_qubit(qubit_left)
 
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True

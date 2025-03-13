@@ -284,8 +284,10 @@ class Test_HW_Connectivity:
             )
         )
 
-        q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
-        logical_connectivity_quality.update({q: random.Random(seed).uniform(-1.0, -0.001)})
+        q1, q2 = random.Random(seed).sample(list(range(0, n_qubits)), 2)
+        logical_connectivity_quality.update(
+            {(q1, q2): random.Random(seed).uniform(-1.0, -0.001)}
+        )
 
         with pytest.raises(ValueError):
             PhysicalHardwareModelBuilder(

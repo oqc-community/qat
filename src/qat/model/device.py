@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import uuid
-from typing import Optional, Type
+from typing import Optional
 
 import numpy as np
 from pydantic import Field, field_validator, model_validator
 
-from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform, Waveform
+from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     FrozenDict,
     NoExtraFieldsModel,
     QubitId,
+    WaveformType,
 )
 
 
@@ -125,7 +126,7 @@ class PulseChannel(Component):
 
 
 class CalibratablePulse(NoExtraFieldsModel):
-    waveform_type: Type[Waveform] = GaussianWaveform
+    waveform_type: WaveformType = GaussianWaveform
     width: CalibratablePositiveFloat = Field(default=100e-09, ge=0)
     amp: float = 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5)
     phase: float = 0.0

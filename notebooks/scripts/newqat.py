@@ -146,5 +146,3 @@ P.name
 pkg, metrics = qat.compile(src, pipeline="mycoolnewpipeline")
 res, metrics = qat.execute(pkg, pipeline="mycoolnewpipeline")
 res
-
-# %%

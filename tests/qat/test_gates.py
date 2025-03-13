@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from itertools import product
 
+import networkx as nx
 import numpy as np
 import pytest
 
@@ -189,8 +190,9 @@ class TestQasm2:
             )
             qasm = self.qasm2_base.format(N=gate.num_qubits, gate_strings=gate_string)
 
-            # parse it through the hardware and verify result
-            hw = get_default_matrix_hardware(gate.num_qubits)
+            # Parse it through a fully conencted hardware and verify result.
+            connectivity = list(nx.complete_graph(gate.num_qubits).edges)
+            hw = get_default_matrix_hardware(gate.num_qubits, connectivity=connectivity)
             parser = Qasm2Parser()
             builder = parser.parse(hw.create_builder(), qasm)
             gate_method = getattr(Gates, gate.name)

@@ -16,6 +16,7 @@ from qat.utils.pydantic import (
     FrozenDict,
     FrozenSet,
     NoExtraFieldsModel,
+    QubitCoupling,
     QubitId,
 )
 
@@ -76,9 +77,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     logical_connectivity: Optional[FrozenDict[QubitId, FrozenSet[QubitId]]] = Field(
         default=None
     )
-    logical_connectivity_quality: FrozenDict[
-        tuple[QubitId, QubitId], CalibratableUnitInterval
-    ]
+    logical_connectivity_quality: FrozenDict[QubitCoupling, CalibratableUnitInterval]
     error_mitigation: ErrorMitigation = ErrorMitigation()
 
     @model_validator(mode="before")

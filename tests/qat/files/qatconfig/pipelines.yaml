@@ -1,11 +1,22 @@
 MAX_REPEATS_LIMIT: 10
 PIPELINES:
-- name: echo8b
+- name: echo8i
   pipeline: qat.pipelines.echo.echo8
   default: false
-- name: echo16b
+- name: echo16i
   pipeline: qat.pipelines.echo.echo16
   default: true
-- name: echo32b
+- name: echo32i
   pipeline: qat.pipelines.echo.echo32
   default: false
+- name: echo6b
+  pipeline: qat.pipelines.echo.get_pipeline
+  hardware_loader: echo6loader
+  default: false
+
+
+HARDWARE:
+- name: echo6loader
+  loader: qat.model.loaders.legacy.EchoModelLoader
+  init:
+    qubit_count: 6

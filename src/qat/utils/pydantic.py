@@ -2,14 +2,24 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from copy import deepcopy
+from pydoc import locate
 from typing import Annotated, Any, TypeVar, get_args
 
 import numpy as np
 from frozendict import frozendict
 from numpydantic import NDArray, Shape
-from pydantic import AfterValidator, BaseModel, ConfigDict, RootModel
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    PlainSerializer,
+    RootModel,
+)
+from pydantic._internal._model_construction import ModelMetaclass
 from pydantic_core import core_schema
 
 from qat.purr.utils.logger import get_default_logger
@@ -26,7 +36,10 @@ class NoExtraFieldsModel(BaseModel):
     """
 
     model_config = ConfigDict(
-        validate_assignment=True, use_enum_values=False, extra="forbid"
+        validate_assignment=True,
+        use_enum_values=False,
+        extra="forbid",
+        ser_json_inf_nan="constants",
     )
 
     def __str__(self):
@@ -97,6 +110,24 @@ def validate_calibratable_unit_interval_array(array: CalibratableUnitInterval2x2
 
 CalibratableUnitInterval2x2Array = Annotated[
     NDArray[Shape["2, 2"], float], AfterValidator(validate_calibratable_unit_interval_array)
+]
+
+
+def validate_qubit_coupling(value: QubitCoupling):
+    if isinstance(value, str):
+        return tuple(map(int, re.findall(r"\d+", value)))
+    elif isinstance(value, tuple):
+        return value
+    else:
+        raise TypeError(
+            "Invalid type for `QubitCoupling`. Please provide a `str` or `tuple`."
+        )
+
+
+# A qubit coupling represented as (q_i: int, q_j: int).
+QubitCoupling = Annotated[
+    tuple[NonNegativeInt, NonNegativeInt],
+    BeforeValidator(validate_qubit_coupling),
 ]
 
 
@@ -408,6 +439,24 @@ class ValidatedDict(PydDictBase):
 
 
 QubitId = NonNegativeInt
+
+
+def validate_waveform_type(value: BaseModel):
+    if isinstance(value, str):
+        return locate("qat.ir.waveforms." + value)
+    elif isinstance(value, ModelMetaclass):
+        return value
+    else:
+        raise TypeError(
+            "Invalid type for `WaveformType`. Please provide a `str` or `BaseModel`."
+        )
+
+
+WaveformType = Annotated[
+    TypeVar("Waveform"),
+    PlainSerializer(lambda wf: wf.__name__, when_used="json-unless-none"),
+    BeforeValidator(validate_waveform_type),
+]
 
 
 def find_all_subclasses(cls: Type) -> list[Type]:

@@ -4,7 +4,7 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
-from qat.core.pipeline import Pipeline, PipelineSet
+from qat.core.pipeline import HardwareLoaders, Pipeline, PipelineSet
 from qat.passes.metrics_base import MetricsManager
 from qat.passes.result_base import ResultManager
 from qat.pipelines import get_default_pipelines
@@ -19,8 +19,10 @@ class QAT:
             qatconfig = QatConfig.from_yaml(qatconfig)
 
         self.config = qatconfig or QatConfig()
+        self._available_hardware = HardwareLoaders.from_descriptions(self.config.HARDWARE)
         self.pipelines = PipelineSet.from_descriptions(
-            self.config.PIPELINES or get_default_pipelines()
+            self.config.PIPELINES or get_default_pipelines(),
+            available_hardware=self._available_hardware,
         )
 
     def compile(

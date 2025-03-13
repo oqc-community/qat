@@ -304,7 +304,7 @@ class TestQIR:
         model = get_default_echo_hardware(10)
         config = CompilerConfig(optimizations=Tket().disable())
         config.results_format.binary_count()
-        with pytest.raises(ValueError):
+        with pytest.raises(KeyError):
             results = execute_qir(_get_qir_path("cudaq-ghz.ll"), model, config)
 
         config = CompilerConfig(optimizations=Tket().minimum())

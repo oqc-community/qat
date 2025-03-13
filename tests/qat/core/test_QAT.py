@@ -22,7 +22,11 @@ from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
-from qat.core.config import PipelineImportDescription
+from qat.core.config import (
+    HardwareLoaderDescription,
+    PipelineBuilderDescription,
+    PipelineInstanceDescription,
+)
 from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
 from qat.engines import NativeEngine
@@ -463,19 +467,37 @@ class TestQATPipelineSetup:
 
     def test_make_qatconfig_list(self):
         pipelines = [
-            PipelineImportDescription(
-                name="echo8a", pipeline="qat.pipelines.echo.echo8", default=True
+            PipelineInstanceDescription(
+                name="echo8i", pipeline="qat.pipelines.echo.echo8", default=True
             ),
-            PipelineImportDescription(name="echo16a", pipeline="qat.pipelines.echo.echo16"),
-            PipelineImportDescription(name="echo32a", pipeline="qat.pipelines.echo.echo32"),
+            PipelineInstanceDescription(
+                name="echo16i", pipeline="qat.pipelines.echo.echo16"
+            ),
+            PipelineInstanceDescription(
+                name="echo32i", pipeline="qat.pipelines.echo.echo32"
+            ),
+            PipelineBuilderDescription(
+                name="echo6b",
+                pipeline="qat.pipelines.echo.get_pipeline",
+                hardware_loader="echo6loader",
+            ),
         ]
-        q = QAT(qatconfig=QatConfig(PIPELINES=pipelines))
-        assert set(q.pipelines.list()) == {"echo8a", "echo16a", "echo32a"}
+
+        hardware = [
+            HardwareLoaderDescription(
+                name="echo6loader",
+                loader="qat.model.loaders.legacy.EchoModelLoader",
+                init={"qubit_count": 6},
+            )
+        ]
+
+        q = QAT(qatconfig=QatConfig(PIPELINES=pipelines, HARDWARE=hardware))
+        assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
 
     def test_make_qatconfig_yaml(self):
         qatconfig = QatConfig.from_yaml(dir_path / "files/qatconfig/pipelines.yaml")
         q = QAT(qatconfig=qatconfig)
-        assert set(q.pipelines.list()) == {"echo8b", "echo16b", "echo32b"}
+        assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
 
     def test_FallthroughFrontend(self):
         frontend = FallthroughFrontend()
@@ -670,3 +692,4 @@ class TestQatEchoPipelines:
 
         for key in purr_results.keys():
             assert purr_results[key] == echo_results[key]
+        assert purr_results.keys() == echo_results.keys()

@@ -1108,7 +1108,7 @@ class TestParsing:
             )
 
     def test_invalid_arbitrary_gate(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(KeyError):
             Qasm2Parser().parse(
                 get_builder(self.echo), get_qasm2("invalid_custom_gate.qasm")
             )

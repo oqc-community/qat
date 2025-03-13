@@ -34,6 +34,7 @@ packages = [
 [tool.poetry.scripts]
 format-code = "scripts.poetry_scripts:format_code"
 generate-report =  "scripts.ci.generate_report:main"
+jupytext-sync = "scripts.poetry_scripts:jupytext_sync"
 
 [tool.poetry.dependencies]
 numpy = ">=1.26.4"

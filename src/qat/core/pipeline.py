@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
+
 from pydantic import BaseModel, ValidationInfo, field_validator
 
 from qat.backend.base import BaseBackend
-from qat.core.config import PipelineImportDescription
+from qat.core.config import (
+    HardwareLoaderDescription,
+    PipelineBuilderDescription,
+    PipelineInstanceDescription,
+)
 from qat.frontend import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
+from qat.model.loaders.base import BaseModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.runtimes.base import BaseRuntime
 
@@ -45,8 +51,36 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
         return model
 
     @classmethod
-    def from_description(cls, desc: PipelineImportDescription):
+    def from_description(cls, desc: PipelineInstanceDescription):
         return desc.pipeline.model_copy(update={"name": desc.name})
+
+
+class HardwareLoaders:
+    def __init__(self, hardware_loaders: dict[str, BaseModelLoader] = {}):
+        self._loaders = dict(**hardware_loaders)
+        self._loaded_models = {}
+
+    def load(self, loader_name: str, default=None, allow_cache=True):
+        """Loads a hardware model, using the internal cache unless `allow_cache=False`."""
+        model = self._loaded_models.get(loader_name) if allow_cache else None
+        if model is None:
+            loader = self._loaders.get(loader_name)
+            if loader is None:
+                return default
+            model = loader.load()
+            self._loaded_models[loader_name] = model
+
+        return model
+
+    def clear_cache(self):
+        self._loaded_models = {}
+
+    @classmethod
+    def from_descriptions(
+        cls,
+        hardware_loader_descriptions: list[HardwareLoaderDescription],
+    ):
+        return cls({hld.name: hld.construct() for hld in hardware_loader_descriptions})
 
 
 class PipelineSet:
@@ -57,13 +91,32 @@ class PipelineSet:
             self.add(P)
 
     @classmethod
-    def from_descriptions(cls, pipeline_descriptions):
+    def from_descriptions(
+        cls,
+        pipeline_descriptions: list[
+            PipelineInstanceDescription | PipelineBuilderDescription
+        ],
+        available_hardware: HardwareLoaders,
+    ):
         default = next(
             (Pdesc.name for Pdesc in pipeline_descriptions if Pdesc.default), None
         )
-        pipelinesset = cls(
-            [Pipeline.from_description(Pdesc) for Pdesc in pipeline_descriptions]
-        )
+
+        pipes = []
+        for Pdesc in pipeline_descriptions:
+            if hasattr(Pdesc, "hardware_loader"):
+                model = available_hardware.load(Pdesc.hardware_loader)
+                if model is None:
+                    raise Exception(
+                        f"Hardware Model Loader {Pdesc.hardware_loader} not found"
+                    )
+                P = Pdesc.construct(model)
+            else:
+                P = Pdesc.construct()
+
+            pipes.append(P)
+
+        pipelinesset = cls(pipes)
         if default:
             pipelinesset.set_default(default)
 

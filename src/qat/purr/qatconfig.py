@@ -6,7 +6,14 @@ from typing import Literal, Optional, Tuple, Type
 
 import yaml
 from compiler_config.config import CompilerConfig
-from pydantic import BaseModel, ConfigDict, Field, ImportString, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ImportString,
+    ValidationInfo,
+    field_validator,
+)
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -15,7 +22,11 @@ from pydantic_settings import (
 )
 from qiskit_aer import AerSimulator
 
-from qat.core.config import PipelineImportDescription
+from qat.core.config import (
+    HardwareLoaderDescription,
+    PipelineBuilderDescription,
+    PipelineInstanceDescription,
+)
 from qat.extensions import QatExtension
 from qat.purr.utils.logger import get_default_logger
 
@@ -151,10 +162,14 @@ class QatConfig(BaseSettings):
     SIMULATION: QatSimulationConfig = QatSimulationConfig()
     """Options for QATs simulation backends."""
 
-    PIPELINES: list[PipelineImportDescription] | None = None
-    """ QAT Pipelines to add on start-up, None adds default pipelines"""
-
     EXTENSIONS: list[ImportString] = []
+    """ QAT Extensions to initialise on start-up"""
+
+    HARDWARE: list[HardwareLoaderDescription] = []
+    """ QAT Hardware Models to load on start-up """
+
+    PIPELINES: list[PipelineInstanceDescription | PipelineBuilderDescription] | None = None
+    """ QAT Pipelines to add on start-up, None adds default pipelines"""
 
     @field_validator("EXTENSIONS")
     def load_extensions(values):
@@ -181,6 +196,22 @@ class QatConfig(BaseSettings):
                 f"Exactly one pipeline must have default: true (found {num_defaults})"
             )
         return v
+
+    @field_validator("PIPELINES")
+    @classmethod
+    def matching_hardware_loaders(cls, pipelines, info: ValidationInfo):
+        if pipelines is None:
+            return pipelines
+        if len(pipelines) == 0:
+            return pipelines
+
+        hardware_loader_names = {hld.name for hld in info.data["HARDWARE"]}
+        for Pdesc in pipelines:
+            expected_loader = getattr(Pdesc, "hardware_loader", None)
+            if expected_loader and not expected_loader in hardware_loader_names:
+                raise ValueError(f"Hardware Loader {expected_loader} not defined")
+
+        return pipelines
 
     @classmethod
     def settings_customise_sources(

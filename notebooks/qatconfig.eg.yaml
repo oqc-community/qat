@@ -9,3 +9,13 @@ PIPELINES:
 - name: echo32-alt
   pipeline: qat.pipelines.echo.echo32
   default: false
+- name: echo6-alt
+  pipeline: qat.pipelines.echo.get_pipeline
+  hardware_loader: echo6loader
+  default: false
+
+HARDWARE:
+- name: echo6loader
+  loader: qat.model.loaders.legacy.EchoModelLoader
+  init:
+    qubit_count: 6
