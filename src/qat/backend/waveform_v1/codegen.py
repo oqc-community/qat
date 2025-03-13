@@ -5,7 +5,8 @@ from typing import List, Optional
 
 import numpy as np
 
-from qat.backend.analysis_passes import (
+from qat.backend.base import BaseBackend
+from qat.backend.passes.analysis import (
     IntermediateFrequencyAnalysis,
     IntermediateFrequencyResult,
     TimelineAnalysis,
@@ -13,15 +14,14 @@ from qat.backend.analysis_passes import (
     TriagePass,
     TriageResult,
 )
-from qat.backend.base import BaseBackend
-from qat.backend.transform_passes import RepeatSanitisation, ReturnSanitisation
-from qat.backend.validation_passes import FrequencyValidation, NoAcquireWeightsValidation
+from qat.backend.passes.transform import RepeatSanitisation, ReturnSanitisation
+from qat.backend.passes.validation import FrequencyValidation, NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
-from qat.compiler.transform_passes import PostProcessingSanitisation
+from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
+from qat.core.result_base import ResultManager
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
-from qat.passes.pass_base import InvokerMixin, MetricsManager, PassManager
-from qat.passes.result_base import ResultManager
+from qat.middleend.passes.transform import PostProcessingSanitisation
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel

@@ -6,8 +6,8 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
-from qat.passes.metrics_base import MetricsManager
-from qat.passes.result_base import ResultManager
+from qat.core.metrics_base import MetricsManager
+from qat.core.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.executables import Executable

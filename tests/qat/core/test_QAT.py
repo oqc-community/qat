@@ -27,13 +27,13 @@ from qat.core.config import (
     PipelineBuilderDescription,
     PipelineInstanceDescription,
 )
+from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
-from qat.passes.pass_base import PassManager
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -54,7 +54,7 @@ from qat.purr.qatconfig import QatConfig
 from qat.qat import _return_or_build, fetch_frontend
 from qat.runtime import LegacyRuntime, SimpleRuntime
 from qat.runtime.executables import Executable
-from qat.runtime.runtimes.simple import SimpleRuntime
+from qat.runtime.simple import SimpleRuntime
 
 dir_path = Path(__file__).parent.parent
 

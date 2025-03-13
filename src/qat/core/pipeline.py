@@ -14,7 +14,7 @@ from qat.frontend import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
 from qat.model.loaders.base import BaseModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.runtimes.base import BaseRuntime
+from qat.runtime.base import BaseRuntime
 
 
 class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):

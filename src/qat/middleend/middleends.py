@@ -3,14 +3,14 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
-from qat.backend.validation_passes import HardwareConfigValidity
-from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
-from qat.compiler.validation_passes import ReadoutValidation
-from qat.passes.metrics_base import MetricsManager
-from qat.passes.pass_base import PassManager
-from qat.passes.result_base import ResultManager
+from qat.backend.passes.validation import HardwareConfigValidity
+from qat.core.metrics_base import MetricsManager
+from qat.core.pass_base import PassManager
+from qat.core.result_base import ResultManager
+from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
+from qat.middleend.passes.validation import ReadoutValidation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.analysis_passes import CalibrationAnalysis
+from qat.runtime.passes.analysis import CalibrationAnalysis
 
 
 class BaseMiddleend(abc.ABC):

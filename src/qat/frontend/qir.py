@@ -5,15 +5,15 @@ from pathlib import Path
 
 from compiler_config.config import CompilerConfig
 
+from qat.core.metrics_base import MetricsManager
+from qat.core.pass_base import PassManager
+from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
-from qat.passes.metrics_base import MetricsManager
-from qat.passes.pass_base import PassManager
-from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser

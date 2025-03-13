@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
-from qat.backend.validation_passes import HardwareConfigValidity
-from qat.compiler.legacy.transform_passes import QiskitInstructionsWrapper
-from qat.compiler.legacy.validation_passes import QiskitResultsFormatValidation
+from qat.backend.passes.validation import HardwareConfigValidity
+from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.passes.pass_base import PassManager
+from qat.middleend.passes.legacy.transform import QiskitInstructionsWrapper
+from qat.middleend.passes.legacy.validation import QiskitResultsFormatValidation
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.runtime import LegacyRuntime
-from qat.runtime.legacy.transform_passes import (
+from qat.runtime.passes.legacy.transform import (
     QiskitErrorMitigation,
     QiskitSimplifyResults,
     QiskitStripMetadata,

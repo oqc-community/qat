@@ -111,7 +111,7 @@ from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.runtime.runtimes.simple import SimpleRuntime
+from qat.runtime.simple import SimpleRuntime
 
 model = get_default_echo_hardware(qubit_count=16)
 P = Pipeline(

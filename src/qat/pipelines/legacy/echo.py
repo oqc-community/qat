@@ -1,18 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
-from qat.backend.validation_passes import HardwareConfigValidity
-from qat.compiler.legacy.transform_passes import IntegratorAcquireSanitisation
-from qat.compiler.transform_passes import PhaseOptimisation, PostProcessingSanitisation
-from qat.compiler.validation_passes import InstructionValidation, ReadoutValidation
+from qat.backend.passes.validation import HardwareConfigValidity
+from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.passes.pass_base import PassManager
+from qat.middleend.passes.legacy.transform import IntegratorAcquireSanitisation
+from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
+from qat.middleend.passes.validation import InstructionValidation, ReadoutValidation
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.runtime.analysis_passes import CalibrationAnalysis, IndexMappingAnalysis
-from qat.runtime.runtimes.legacy import LegacyRuntime
-from qat.runtime.transform_passes import ErrorMitigation, ResultTransform
+from qat.runtime.legacy import LegacyRuntime
+from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
+from qat.runtime.passes.transform import ErrorMitigation, ResultTransform
 
 
 def get_pipeline(model, name="legacy_echo") -> Pipeline:

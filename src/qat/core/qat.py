@@ -4,9 +4,9 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
+from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import HardwareLoaders, Pipeline, PipelineSet
-from qat.passes.metrics_base import MetricsManager
-from qat.passes.result_base import ResultManager
+from qat.core.result_base import ResultManager
 from qat.pipelines import get_default_pipelines
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.qatconfig import QatConfig

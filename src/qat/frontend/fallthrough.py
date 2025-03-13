@@ -5,9 +5,9 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
+from qat.core.metrics_base import MetricsManager
+from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
-from qat.passes.metrics_base import MetricsManager
-from qat.passes.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 
 

@@ -5,7 +5,7 @@ import pytest
 from compiler_config.config import CompilerConfig
 
 from qat.purr.compiler.instructions import build_generated_name
-from qat.runtime.legacy.transform_passes import (
+from qat.runtime.passes.legacy.transform import (
     QiskitErrorMitigation,
     QiskitSimplifyResults,
     QiskitStripMetadata,
