@@ -339,14 +339,17 @@ to  apply.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.response">¶</a> (<em>np.ndarray</em>) – Readout results from an execution engine.</p></li>
-<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.post_processing">¶</a> (<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><em>PostProcessing</em></a>) – The post processing instruction.</p></li>
-<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.axes">¶</a> (<em>dict</em><em>[</em><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis" title="qat.purr.compiler.instructions.ProcessAxis"><em>ProcessAxis</em></a><em>, </em><em>Int</em><em>]</em>) – A dictionary containing which axes contain the shots and which contain time
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.response">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – Readout results from an execution engine.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.post_processing">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a></span>) – The post processing instruction.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_processing.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_processing.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis" title="qat.purr.compiler.instructions.ProcessAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – A dictionary containing which axes contain the shots and which contain time
 series.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The processed results as an array and the axis map.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type">(<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis" title="qat.purr.compiler.instructions.ProcessAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>])</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The processed results as an array and the axis map.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -403,15 +406,15 @@ the results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.post_processing.get_axis_map.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.get_axis_map.params.mode">¶</a> (<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><em>AcquireMode</em></a>) – The acqusition mode.</p></li>
-<li><p><span class="target" id="qat.runtime.post_processing.get_axis_map.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.get_axis_map.params.response">¶</a> (<em>np.ndarray</em>) – The response returned by the target machine.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.get_axis_map.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.get_axis_map.params.mode">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireMode</span></code></a></span>) – The acqusition mode.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.get_axis_map.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.get_axis_map.params.response">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – The response returned by the target machine.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary containing the axis index for each type of <code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis" title="qat.purr.compiler.instructions.ProcessAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dict[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis" title="qat.purr.compiler.instructions.ProcessAxis">ProcessAxis</a>, int]</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the axis index for each type of <code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
