@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qat.backend.passes
    qat.backend.waveform_v1
 
 Submodules
@@ -20,10 +21,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.backend.analysis_passes
    qat.backend.base
    qat.backend.codegen_base
    qat.backend.fallthrough
    qat.backend.graph
-   qat.backend.transform_passes
-   qat.backend.validation_passes

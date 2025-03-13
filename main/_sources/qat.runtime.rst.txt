@@ -12,8 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   qat.runtime.legacy
-   qat.runtime.runtimes
+   qat.runtime.passes
 
 Submodules
 ----------
@@ -21,9 +20,10 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.runtime.analysis_passes
+   qat.runtime.base
    qat.runtime.connection
    qat.runtime.executables
+   qat.runtime.legacy
    qat.runtime.post_processing
    qat.runtime.results_processing
-   qat.runtime.transform_passes
+   qat.runtime.simple

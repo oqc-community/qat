@@ -13,14 +13,12 @@ Subpackages
    :maxdepth: 4
 
    qat.backend
-   qat.compiler
    qat.core
    qat.engines
    qat.frontend
    qat.ir
    qat.middleend
    qat.model
-   qat.passes
    qat.pipelines
    qat.purr
    qat.runtime

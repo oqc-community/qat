@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.frontend.parsers
+   qat.frontend.passes
 
 Submodules
 ----------
@@ -20,7 +21,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.frontend.analysis_passes
    qat.frontend.auto
    qat.frontend.base
    qat.frontend.circuit_builder
@@ -29,4 +29,3 @@ Submodules
    qat.frontend.qasm
    qat.frontend.qir
    qat.frontend.register
-   qat.frontend.transform_passes
