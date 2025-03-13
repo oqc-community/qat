@@ -332,6 +332,27 @@
   <section id="module-qat.purr.compiler.transform_passes">
 <span id="qat-purr-compiler-transform-passes-module"></span><h1>qat.purr.compiler.transform_passes module<a class="headerlink" href="#module-qat.purr.compiler.transform_passes" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.transform_passes.DeviceUpdateSanitisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceUpdateSanitisation</span></span><a class="headerlink" href="#qat.purr.compiler.transform_passes.DeviceUpdateSanitisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.TransformPass" title="qat.purr.backends.qblox.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Duplicate DeviceUpdate instructions upsets the device injection mechanism, which causes corruption
+of the HW model.</p>
+<p>In fact, a DeviceInjector is currently 1-1 associated with a DeviceUpdate instruction. When multiple
+DeviceUpdate instructions (sequentially) inject the same “target”, the first DeviceInjector assigns the
+(correct) value of the attribute (on the target) to the revert_value. At this point the HW model (or any
+other target kind) is dirty, and any subsequent DeviceInjector updater would surely assign
+the (wrong, usually a placeholder <cite>Variable</cite>) to its revert_value. This results in a corrupt HW model whereby
+reversion wouldn’t have the desired effect.</p>
+<p>This pass is a (lazy) fix, which is to analyse when such cases happen and eliminate duplicate DeviceUpdate
+instructions that target THE SAME “attribute” on THE SAME “target” with THE SAME variable.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.transform_passes.DeviceUpdateSanitisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.transform_passes.DeviceUpdateSanitisation.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.transform_passes.PhaseOptimisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseOptimisation</span></span><a class="headerlink" href="#qat.purr.compiler.transform_passes.PhaseOptimisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.TransformPass" title="qat.purr.backends.qblox.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
