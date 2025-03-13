@@ -377,13 +377,12 @@ the circuit progresses.</p>
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Backend">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBackend</span></code></a>, <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.InvokerMixin" title="qat.passes.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
-<p>Code generation for backends that only require the explicit waveforms.</p>
-<p>The emitter is used to convert IR as a <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> into a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code>.</p>
+<p>Target-machine code generation from an IR for targets that only require the explicit waveforms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model">¶</a> (<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><em>QuantumHardwareModel</em></a>) – As the emitter is used to generate code for some
-targeted backend. The hardware model is needed for context-aware compilation.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.
+As the emitter is used to generate code for some target machine, the hardware
+model is needed for context-aware compilation.</p>
 </dd>
 </dl>
 <dl class="py method">

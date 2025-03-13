@@ -319,6 +319,22 @@
 <dt class="sig sig-object py" id="qat.core.pipeline.Pipeline">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.Pipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Pipeline that compiles high-level language specific, but target-agnostic, input (QASM, QIR, …)
+to target-specific instructions that are executed on our hardware.
+:param _sphinx_paramlinks_qat.core.pipeline.Pipeline.frontend: Compiles a high-level language-specific, but target-agnostic,</p>
+<blockquote>
+<div><p>input <code class="xref py py-class docutils literal notranslate"><span class="pre">QatInput</span></code> to a target-agnostic intermediate representation (IR)
+<code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.core.pipeline.Pipeline.params.middleend"></span><strong>middleend</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.Pipeline.params.middleend">¶</a> – Takes an intermediate representation (IR) <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> and alters it based
+on optimisation and/or validation passes within this pipeline.</p></li>
+<li><p><span class="target" id="qat.core.pipeline.Pipeline.params.backend"></span><strong>backend</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.Pipeline.params.backend">¶</a> – Converts an intermediate representation (IR) to code for a given target machine.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -331,7 +347,7 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.consistent_model">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">consistent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.Pipeline.consistent_model" title="Link to this definition"></a></dt>
-<dd><p>Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields</p>
+<dd><p>Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields.</p>
 <p>Currently, this does not check hardware embedded in the runtime.</p>
 </dd></dl>
 

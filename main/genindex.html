@@ -772,7 +772,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.backend">backend (Pipeline attribute)</a>
+
+      <ul>
+        <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.params.backend">(qat.core.pipeline.Pipeline parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier">Barrier (class in qat.ir.gates.operation)</a>
 </li>
       <li><a href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.barrier">barrier() (CircuitBuilder method)</a>
@@ -869,10 +873,10 @@
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.BitRegister">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
-      <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits">bits (BitRegister attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits">bits (BitRegister attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN">BLACKMAN (PulseShapeType attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.BlackmanFunction">BlackmanFunction (class in qat.purr.backends.utilities)</a>
@@ -1101,6 +1105,8 @@
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.check_disable_pulse_duration_limits">check_disable_pulse_duration_limits() (InstructionValidationConfig class method)</a>
 </li>
+      <li><a href="qat.utils.hardware_model.html#qat.utils.hardware_model.check_type_legacy_or_pydantic">check_type_legacy_or_pydantic() (in module qat.utils.hardware_model)</a>
+</li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.check_validity">check_validity() (in module qat.purr.integrations.tket)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.run_tket_optimizations.params.circ">circ (qat.purr.integrations.tket.run_tket_optimizations parameter)</a>
@@ -1194,7 +1200,11 @@
 </li>
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.compiler_config">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.compiler_config">(qat.frontend.base.BaseFrontend.emit parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.compiler_config">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
+</li>
+        <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit.params.compiler_config">(qat.frontend.fallthrough.FallthroughFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit.params.compiler_config">(qat.frontend.qasm.BaseQasmFrontend.emit parameter)</a>
 </li>
@@ -1203,6 +1213,10 @@
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run.params.compiler_config">(qat.frontend.transform_passes.InputOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse.run.params.compiler_config">(qat.frontend.transform_passes.Parse.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.emit.params.compiler_config">(qat.middleend.middleends.BaseMiddleend.emit parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.compiler_config">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.runtime.legacy.transform_passes.html#qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run.params.compiler_config">(qat.runtime.legacy.transform_passes.QiskitErrorMitigation.run parameter)</a>
 </li>
@@ -1285,6 +1299,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.connect">connect() (CompositeInstrument method)</a>
 
       <ul>
@@ -1299,8 +1315,6 @@
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxControlHardware.connect">(QbloxControlHardware method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.CONNECT_AT_BEGINNING">CONNECT_AT_BEGINNING (ConnectionMode attribute)</a>
 </li>
       <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.CONNECT_BEFORE_EXECUTE">CONNECT_BEFORE_EXECUTE (ConnectionMode attribute)</a>
@@ -2245,10 +2259,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.freq">freq (NcoConfig attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">freq_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift">freq_shift (ChannelType attribute)</a>
 
       <ul>
@@ -2308,7 +2322,11 @@
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.from_yaml">from_yaml() (QatConfig static method)</a>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.frontend">frontend (Pipeline attribute)</a>
+
+      <ul>
+        <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.params.frontend">(qat.core.pipeline.Pipeline parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.params.frontends">frontends (qat.frontend.auto.AutoFrontend parameter)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict">FrozenDict (class in qat.utils.pydantic)</a>
@@ -3074,6 +3092,10 @@
 </li>
         <li><a href="qat.compiler.validation_passes.html#qat.compiler.validation_passes.ReadoutValidation.run.params.ir">(qat.compiler.validation_passes.ReadoutValidation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.emit.params.ir">(qat.middleend.middleends.BaseMiddleend.emit parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.ir">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
+</li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassModel.run.params.ir">(qat.passes.pass_base.PassModel.run parameter)</a>
 </li>
       </ul></li>
@@ -3574,13 +3596,21 @@
 </li>
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.met_mgr">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.met_mgr">(qat.frontend.base.BaseFrontend.emit parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.met_mgr">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
+</li>
+        <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit.params.met_mgr">(qat.frontend.fallthrough.FallthroughFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit.params.met_mgr">(qat.frontend.qasm.BaseQasmFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit.params.met_mgr">(qat.frontend.qir.QIRFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run.params.met_mgr">(qat.frontend.transform_passes.InputOptimisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.emit.params.met_mgr">(qat.middleend.middleends.BaseMiddleend.emit parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.met_mgr">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager.run.params.met_mgr">(qat.passes.pass_base.PassManager.run parameter)</a>
 </li>
@@ -3604,7 +3634,11 @@
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.MICRO">MICRO (Scale attribute)</a>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.middleend">middleend (Pipeline attribute)</a>
+
+      <ul>
+        <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.params.middleend">(qat.core.pipeline.Pipeline parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.MILLI">MILLI (Scale attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.min_frequency">min_frequency (PulseChannel property)</a>
@@ -3652,6 +3686,10 @@
 </li>
         <li><a href="qat.backend.analysis_passes.html#qat.backend.analysis_passes.IntermediateFrequencyAnalysis.params.model">(qat.backend.analysis_passes.IntermediateFrequencyAnalysis parameter)</a>
 </li>
+        <li><a href="qat.backend.base.html#qat.backend.base.BaseBackend.params.model">(qat.backend.base.BaseBackend parameter)</a>
+</li>
+        <li><a href="qat.backend.fallthrough.html#qat.backend.fallthrough.FallthroughBackend.params.model">(qat.backend.fallthrough.FallthroughBackend parameter)</a>
+</li>
         <li><a href="qat.backend.validation_passes.html#qat.backend.validation_passes.FrequencyValidation.params.model">(qat.backend.validation_passes.FrequencyValidation parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model">(qat.backend.waveform_v1.codegen.WaveformV1Backend parameter)</a>
@@ -3664,7 +3702,11 @@
 </li>
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.default_frontends.params.model">(qat.frontend.auto.AutoFrontend.default_frontends parameter)</a>
 </li>
+        <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.params.model">(qat.frontend.base.BaseFrontend parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.params.model">(qat.frontend.custom.CustomFrontend parameter)</a>
+</li>
+        <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.params.model">(qat.frontend.fallthrough.FallthroughFrontend parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.params.model">(qat.frontend.qasm.BaseQasmFrontend parameter)</a>
 </li>
@@ -3681,6 +3723,16 @@
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse.params.model">(qat.frontend.transform_passes.Parse parameter)</a>
 </li>
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.PydInputOptimisation.params.model">(qat.frontend.transform_passes.PydInputOptimisation parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.params.model">(qat.middleend.middleends.BaseMiddleend parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.params.model">(qat.middleend.middleends.CustomMiddleend parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.DefaultMiddleend.params.model">(qat.middleend.middleends.DefaultMiddleend parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline.params.model">(qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.FallthroughMiddleend.params.model">(qat.middleend.middleends.FallthroughMiddleend parameter)</a>
 </li>
         <li><a href="qat.runtime.analysis_passes.html#qat.runtime.analysis_passes.IndexMappingAnalysis.params.model">(qat.runtime.analysis_passes.IndexMappingAnalysis parameter)</a>
 </li>
@@ -6911,7 +6963,11 @@
 </li>
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.res_mgr">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.res_mgr">(qat.frontend.base.BaseFrontend.emit parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.res_mgr">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
+</li>
+        <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit.params.res_mgr">(qat.frontend.fallthrough.FallthroughFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit.params.res_mgr">(qat.frontend.qasm.BaseQasmFrontend.emit parameter)</a>
 </li>
@@ -6920,6 +6976,10 @@
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.InputOptimisation.run.params.res_mgr">(qat.frontend.transform_passes.InputOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.frontend.transform_passes.html#qat.frontend.transform_passes.Parse.run.params.res_mgr">(qat.frontend.transform_passes.Parse.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.emit.params.res_mgr">(qat.middleend.middleends.BaseMiddleend.emit parameter)</a>
+</li>
+        <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.res_mgr">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.passes.pass_base.html#qat.passes.pass_base.PassManager.run.params.res_mgr">(qat.passes.pass_base.PassManager.run parameter)</a>
 </li>
@@ -7074,14 +7134,14 @@
       </ul></li>
       <li><a href="qat.runtime.transform_passes.html#qat.runtime.transform_passes.ResultTransform">ResultTransform (class in qat.runtime.transform_passes)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Return">Return (class in qat.ir.instructions)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Return">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_">return_ (QatFile property)</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">[1]</a>
@@ -7668,10 +7728,10 @@
 </li>
       <li><a href="qat.runtime.runtimes.simple.html#qat.runtime.runtimes.simple.SimpleRuntime">SimpleRuntime (class in qat.runtime.runtimes.simple)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.SIMULATION">SIMULATION (QatConfig attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
@@ -7789,7 +7849,11 @@
 </li>
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.src">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.src">(qat.frontend.base.BaseFrontend.emit parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.src">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
+</li>
+        <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit.params.src">(qat.frontend.fallthrough.FallthroughFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.check_and_return_source.params.src">(qat.frontend.qasm.BaseQasmFrontend.check_and_return_source parameter)</a>
 </li>

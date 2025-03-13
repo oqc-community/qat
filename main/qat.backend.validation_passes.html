@@ -413,8 +413,8 @@ keyword argument.</p>
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoAcquireWeightsValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoAcquireWeightsValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.NoAcquireWeightsValidation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
-<p>Some backends do not support <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions that contain weights. This
-pass can be used to validate that this is the case.</p>
+<p>Some target machines do not support <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions that contain weights.
+This pass can be used to validate that this is the case.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoAcquireWeightsValidation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NoAcquireWeightsValidation.run" title="Link to this definition"></a></dt>
@@ -431,8 +431,8 @@ pass can be used to validate that this is the case.</p>
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoMultipleAcquiresValidation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoMultipleAcquiresValidation</span></span><a class="headerlink" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.passes.pass_base.html#qat.passes.pass_base.ValidationPass" title="qat.passes.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
-<p>Some backends do not support multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions on the same
-channel. This validation pass should be used to verify this.</p>
+<p>Some target machines do not support multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions on the
+same channel. This validation pass should be used to verify this.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.validation_passes.NoMultipleAcquiresValidation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.validation_passes.NoMultipleAcquiresValidation.run" title="Link to this definition"></a></dt>
