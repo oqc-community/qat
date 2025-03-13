@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Any, List, Literal, Optional
+from typing import Literal, Optional
 
 import numpy as np
 from pydantic import Field, ValidationInfo, field_validator, model_validator
@@ -63,10 +63,10 @@ class PostProcessing(Instruction):
     """
 
     inst: Literal["PostProcessing"] = "PostProcessing"
-    output_variable: Optional[str] = None
+    output_variable: str | None = None
     process_type: PostProcessType
-    axes: List[ProcessAxis] = []
-    args: List[Any] = []
+    axes: list[ProcessAxis] = []
+    args: list[float | complex] = []
     result_needed: bool = False
 
     @classmethod

@@ -9,7 +9,7 @@ from pydantic import Field, ValidationError
 from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
-from qat.purr.compiler.instructions import PostProcessType
+from qat.purr.compiler.instructions import PostProcessType, ProcessAxis
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
@@ -89,6 +89,31 @@ class TestPostProcessing:
 
         with pytest.raises(ValidationError):
             inst2.process_type = "invalid"
+
+    @pytest.mark.parametrize(
+        ["pp_type", "args"],
+        [
+            (PostProcessType.DISCRIMINATE, [0.0]),
+            (PostProcessType.DISCRIMINATE, [0.0 + 1j]),
+            (PostProcessType.DISCRIMINATE, [np.array([0.0 + 1j])[0]]),
+            (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, [-0.1, 1]),
+            (PostProcessType.MEAN, []),
+            (PostProcessType.DOWN_CONVERT, [np.nan, np.nan]),
+            (PostProcessType.DOWN_CONVERT, [1e8, 1e-8]),
+            (PostProcessType.DOWN_CONVERT, [1e8, 1e-8 + 0j]),
+            (PostProcessType.DOWN_CONVERT, [1e8, np.array([1e-8 + 0j])[0]]),
+        ],
+    )
+    def test_serialize_deserialize_roundtrip(self, pp_type, args):
+        pp_inst = PostProcessing(
+            output_variable="test",
+            process_type=pp_type,
+            axes=[ProcessAxis.SEQUENCE],
+            args=args,
+        )
+        blob = pp_inst.model_dump()
+        new_pp_inst = PostProcessing(**blob)
+        assert pp_inst == new_pp_inst
 
 
 class TestMeasureBlock:

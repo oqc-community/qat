@@ -20,10 +20,9 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, i
     averaged over shots, averaged over time, or neither. We must determine how to unpack
     the results.
 
-    :param AcquireMode mode: The acqusition mode.
-    :param np.ndarray response: The response returned by the target machine.
+    :param mode: The acqusition mode.
+    :param response: The response returned by the target machine.
     :returns: A dictionary containing the axis index for each type of :class:`ProcessAxis`.
-    :rtype: Dict[ProcessAxis, int]
     """
 
     match mode:
@@ -41,18 +40,17 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, i
 
 def apply_post_processing(
     response: np.ndarray, post_processing: PostProcessing, axes: Dict[ProcessAxis, int]
-):
+) -> (np.ndarray, dict[ProcessAxis, int]):
     """
     Applies software post processing to the results.
 
     Uses the information in the :class:`PostProcessing` instruction to determine what method
     to  apply.
 
-    :param np.ndarray response: Readout results from an execution engine.
-    :param PostProcessing post_processing: The post processing instruction.
+    :param response: Readout results from an execution engine.
+    :param post_processing: The post processing instruction.
     :param axes: A dictionary containing which axes contain the shots and which contain time
         series.
-    :type axes: dict[ProcessAxis, Int]
     :returns: The processed results as an array and the axis map.
     """
 

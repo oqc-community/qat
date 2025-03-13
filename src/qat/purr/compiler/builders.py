@@ -776,7 +776,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         "Pass in either args or a qubit."
                     )
 
-                args = [qubit.discriminator]
+                args = qubit.discriminator
+                args = [args] if not isinstance(args, list) else args
             elif process == PostProcessType.DOWN_CONVERT:
                 phys = acq.channel.physical_channel
                 resonator = next(
