@@ -421,6 +421,12 @@
 </li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TriageResult.acquire_map">acquire_map (TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.acquire_map">[1]</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.acquire_pulse_channel">acquire_pulse_channel (Qubit property)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.acquire_pulse_channel">(Resonator property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.ACQUIRE_TTL">ACQUIRE_TTL (Opcode attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_ttl">acquire_ttl() (SequenceBuilder method)</a>
@@ -565,10 +571,10 @@
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.add_qreg">add_qreg() (Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_qreg">[1]</a>
 </li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_quantum_device">add_quantum_device() (QuantumHardwareModel method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_quantum_device">add_quantum_device() (QuantumHardwareModel method)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.add_qubit_coupling">add_qubit_coupling() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.add_qubit_stack">add_qubit_stack() (in module qat.purr.backends.realtime_chip_simulator)</a>
@@ -1571,7 +1577,11 @@
 </li>
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.cross_resonance_cancellation_channels">cross_resonance_cancellation_channels (QubitPulseChannels attribute)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.cross_resonance_cancellation_pulse_channels">cross_resonance_cancellation_pulse_channels (Qubit property)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.cross_resonance_channels">cross_resonance_channels (QubitPulseChannels attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.cross_resonance_pulse_channels">cross_resonance_pulse_channels (Qubit property)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.CouplingType.CrossKerr">CrossKerr (CouplingType attribute)</a>
 </li>
@@ -1783,10 +1793,10 @@
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
@@ -1870,6 +1880,8 @@
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.drive">drive (QubitPulseChannels attribute)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.drive_hamiltonian">drive_hamiltonian (Section attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.drive_pulse_channel">drive_pulse_channel (Qubit property)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DrivePulse">DrivePulse (class in qat.purr.compiler.instructions)</a>
 </li>
@@ -2327,6 +2339,8 @@
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.freq_shift">(QubitPulseChannels attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.freq_shift_pulse_channel">freq_shift_pulse_channel (Qubit property)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.model.device)</a>
 
       <ul>
@@ -3659,6 +3673,12 @@
       </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.Resonator.params.measure_pulse">measure_pulse (qat.model.device.Resonator parameter)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.measure_pulse_channel">measure_pulse_channel (Qubit property)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.Resonator.measure_pulse_channel">(Resonator property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode">measure_scope_mode() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_scope_mode">[1]</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned">measure_single_shot_binned() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_binned">[1]</a>
@@ -7827,6 +7847,8 @@
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.PulseType.SECOND_STATE">SECOND_STATE (PulseType attribute)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.second_state">second_state (QubitPulseChannels attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.second_state_pulse_channel">second_state_pulse_channel (Qubit property)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.SecondStatePulse">SecondStatePulse (class in qat.purr.compiler.instructions)</a>
 </li>
