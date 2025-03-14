@@ -11,13 +11,17 @@ from qat.model.device import (
     CalibratablePulse,
     CrossResonanceCancellationPulseChannel,
     CrossResonancePulseChannel,
+    DrivePulseChannel,
+    FreqShiftPulseChannel,
     PhysicalBaseband,
     PhysicalChannel,
     PulseChannel,
     Qubit,
     QubitPulseChannels,
     Resonator,
+    SecondStatePulseChannel,
 )
+from qat.utils.hardware_model import generate_hw_model
 
 
 class TestCalibratable:
@@ -133,6 +137,26 @@ class TestDevicesValidation:
             with pytest.raises(ValidationError):
                 pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
+    def test_qubit_pulse_channel_access(self, seed):
+        hw = generate_hw_model(8, seed=seed)
+
+        for qubit in hw.qubits.values():
+            assert isinstance(qubit.drive_pulse_channel, DrivePulseChannel)
+            assert isinstance(qubit.freq_shift_pulse_channel, FreqShiftPulseChannel)
+            assert isinstance(qubit.second_state_pulse_channel, SecondStatePulseChannel)
+
+            for cr_pulse_channel in qubit.cross_resonance_pulse_channels.values():
+                assert isinstance(cr_pulse_channel, CrossResonancePulseChannel)
+
+            for (
+                crc_pulse_channel
+            ) in qubit.cross_resonance_cancellation_pulse_channels.values():
+                assert isinstance(crc_pulse_channel, CrossResonanceCancellationPulseChannel)
+
+            # No setter for the pulse channel attribute.
+            with pytest.raises(AttributeError):
+                qubit.drive_pulse_channel = DrivePulseChannel()
+
     def test_qubit_pair(self, seed):
         physical_topology = {0: {1}, 1: {0}}
         builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_topology)
@@ -176,15 +200,13 @@ class TestDevicesValidation:
                 with pytest.raises(ValidationError):
                     pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
-            for i, cr_channel in enumerate(
-                qubit.pulse_channels.cross_resonance_channels.values()
-            ):
+            for i, cr_channel in enumerate(qubit.cross_resonance_pulse_channels.values()):
                 cr_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
                 with pytest.raises(ValidationError):
                     cr_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             for i, crc_channel in enumerate(
-                qubit.pulse_channels.cross_resonance_cancellation_channels.values()
+                qubit.cross_resonance_cancellation_pulse_channels.values()
             ):
                 crc_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
                 with pytest.raises(ValidationError):
@@ -223,11 +245,11 @@ class TestFrozenQubit:
 
         # Cannot add items to a frozen pulse channel dict.
         with pytest.raises(TypeError):
-            qubit.pulse_channels.cross_resonance_channels[1] = CrossResonancePulseChannel(
+            qubit.cross_resonance_pulse_channels[1] = CrossResonancePulseChannel(
                 auxiliary_qubit=2
             )
 
         with pytest.raises(TypeError):
-            qubit.pulse_channels.cross_resonance_cancellation_channels[1] = (
+            qubit.cross_resonance_cancellation_pulse_channels[1] = (
                 CrossResonanceCancellationPulseChannel(auxiliary_qubit=2)
             )

@@ -214,7 +214,7 @@ def get_cl2qu_index_mapping(instructions: InstructionBlock, hw: PhysicalHardware
             (
                 (qubit_id, qubit)
                 for qubit_id, qubit in hw.qubits.items()
-                if qubit.resonator.pulse_channels.acquire.uuid == instruction.target
+                if qubit.acquire_pulse_channel.uuid == instruction.target
             ),
             None,
         )

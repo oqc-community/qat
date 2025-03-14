@@ -18,16 +18,14 @@ class TestDefaultPulseDecompositions:
         instrs = decomps.decompose(X_pi_2(qubit=0), model)
         assert len(instrs) == 1
         assert isinstance(instrs[0], Pulse)
-        assert (
-            instrs[0].pulse_channel == model.qubit_with_index(0).pulse_channels.drive.uuid
-        )
+        assert instrs[0].pulse_channel == model.qubit_with_index(0).drive_pulse_channel.uuid
 
     def test_Z_phase_decomposition(self):
         model = generate_hw_model(4, seed=42)
         decomps = DefaultPulseDecompositions()
         instrs = decomps.decompose(Z_phase(qubit=0, theta=0.521), model)
         num_instructions = 1 + 2 * len(
-            model.qubit_with_index(0).pulse_channels.cross_resonance_cancellation_channels
+            model.qubit_with_index(0).cross_resonance_cancellation_pulse_channels
         )
         assert len(instrs) == num_instructions
         assert all([isinstance(instr, PhaseShift) for instr in instrs])

@@ -20,13 +20,13 @@ qubits_uuid = [qubit.uuid for qubit in qubits]
 
 class TestAcquire:
     def test_initiate(self):
-        acquire_channel = qubits[0].resonator.pulse_channels.acquire
+        acquire_channel = qubits[0].acquire_pulse_channel
         inst = Acquire(targets=acquire_channel.uuid)
         assert inst.duration == 1e-6
         assert list(inst.targets)[0] == acquire_channel.uuid  # We only supplied one target.
 
     def test_filter(self):
-        acquire_channel = qubits[0].resonator.pulse_channels.acquire
+        acquire_channel = qubits[0].acquire_pulse_channel
         filter = Pulse(
             targets=acquire_channel.uuid,
             waveform=GaussianWaveform(width=1e-6),
@@ -36,7 +36,7 @@ class TestAcquire:
 
     @pytest.mark.parametrize("time", [0, 5e-7, 1.01e-6, 2e-6])
     def test_filter_validation(self, time):
-        acquire_channel = qubits[0].resonator.pulse_channels.acquire
+        acquire_channel = qubits[0].acquire_pulse_channel
         filter = Pulse(
             targets=acquire_channel.uuid,
             waveform=GaussianWaveform(width=time),
@@ -46,7 +46,7 @@ class TestAcquire:
 
     @pytest.mark.parametrize("qubit_idx", list(model.qubits.keys()))
     def test_output_variable(self, qubit_idx):
-        acquire_channel = qubits[qubit_idx].resonator.pulse_channels.acquire
+        acquire_channel = qubits[qubit_idx].acquire_pulse_channel
         output_variable = f"Q{qubit_idx}"
 
         acq = Acquire(
@@ -138,8 +138,8 @@ class TestMeasureBlock:
     def test_add_instruction(self):
         qubit_id = list(model.qubits.keys())[0]
         qubit = model.qubits[qubit_id]
-        measure_channel = qubit.resonator.pulse_channels.measure
-        acquire_channel = qubit.resonator.pulse_channels.acquire
+        measure_channel = qubit.measure_pulse_channel
+        acquire_channel = qubit.acquire_pulse_channel
 
         mb = MeasureBlock(qubit_targets=qubit_id)
         mb.add(
@@ -160,7 +160,7 @@ class TestMeasureBlock:
     def add_invalid_instruction(self):
         qubit_id = list(model.qubits.keys())[0]
         qubit = model.qubits[qubit_id]
-        measure_channel = qubit.resonator.pulse_channels.measure
+        measure_channel = qubit.measure_pulse_channel
 
         mb = MeasureBlock(qubit_targets=qubit_id)
 
@@ -198,16 +198,16 @@ class TestMeasureBlock:
         max_duration = 0.0
         for qubit_idx, qubit in model.qubits.items():
             qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
-            measure_channel = qubit.resonator.pulse_channels.measure
-            acquire_channel = qubit.resonator.pulse_channels.acquire
+            measure_channel = qubit.measure_pulse_channel
+            acquire_channel = qubit.acquire_pulse_channel
             # Synchronise all pulse channels within a qubit.
             custom_mb.add(Synchronize(targets=qubit_pulse_channels))
             # Some dummy additional instruction block in the measure block.
             additional_block = AdditionalQuantumInstructionBlock(
                 qubit_targets={qubit_idx},
                 instructions=[
-                    PhaseShift(targets={qubit.pulse_channels.drive.uuid}, phase=np.pi / 2),
-                    PhaseReset(targets={qubit.pulse_channels.drive.uuid}),
+                    PhaseShift(targets={qubit.drive_pulse_channel.uuid}, phase=np.pi / 2),
+                    PhaseReset(targets={qubit.drive_pulse_channel.uuid}),
                 ],
             )
 

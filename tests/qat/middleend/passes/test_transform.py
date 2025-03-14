@@ -42,7 +42,7 @@ class TestPhaseOptimisation:
             builder.phase_shift(target=qubit, theta=phase)
             if pulse_enabled:
                 builder.pulse(
-                    targets=qubit.pulse_channels.drive.uuid,
+                    targets=qubit.drive_pulse_channel.uuid,
                     waveform=GaussianWaveform(),
                 )
 
@@ -75,7 +75,7 @@ class TestPhaseOptimisation:
             builder.phase_shift(target=qubit, theta=phase + 0.3)
             if pulse_enabled:
                 builder.pulse(
-                    targets=qubit.pulse_channels.drive.uuid,
+                    targets=qubit.drive_pulse_channel.uuid,
                     waveform=SquareWaveform(),
                 )
 

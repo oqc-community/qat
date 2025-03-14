@@ -331,10 +331,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target1_id = self._qubit_index_by_uuid[target1.uuid]
         target2_id = self._qubit_index_by_uuid[target2.uuid]
 
-        cr_pulse_channel = target1.pulse_channels.cross_resonance_channels[target2_id]
-        cr_cancellation_pulse_channel = (
-            target2.pulse_channels.cross_resonance_cancellation_channels[target1_id]
-        )
+        cr_pulse_channel = target1.cross_resonance_pulse_channels[target2_id]
+        cr_cancellation_pulse_channel = target2.cross_resonance_cancellation_pulse_channels[
+            target1_id
+        ]
 
         if np.isclose(theta, np.pi / 4.0):
             return self.add(*self._hw_ZX_pi_4(target1, target2))
@@ -352,7 +352,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
 
     def _hw_X_pi_2(self, target: Qubit, pulse_channel: DrivePulseChannel = None):
-        pulse_channel = pulse_channel or target.pulse_channels.drive
+        pulse_channel = pulse_channel or target.drive_pulse_channel
         pulse_waveform = pulse_channel.pulse.waveform_type(
             **pulse_channel.pulse.model_dump()
         )
@@ -368,7 +368,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             return []
 
         # Rotate drive pulse channel of the qubit.
-        pulse_channel = pulse_channel or target.pulse_channels.drive
+        pulse_channel = pulse_channel or target.drive_pulse_channel
         instr_collection = [PhaseShift(targets=pulse_channel.uuid, phase=theta)]
         # Rotate all cross resonance (cancellation) pulse channels pertaining to the qubit.
         qubit_id = self._qubit_index_by_uuid[target.uuid]
@@ -376,11 +376,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             for (
                 coupled_qubit_id,
                 crc_pulse_channel,
-            ) in target.pulse_channels.cross_resonance_cancellation_channels.items():
+            ) in target.cross_resonance_cancellation_pulse_channels.items():
                 coupled_qubit = self.hw.qubit_with_index(coupled_qubit_id)
-                cr_pulse_channel = coupled_qubit.pulse_channels.cross_resonance_channels[
-                    qubit_id
-                ]
+                cr_pulse_channel = coupled_qubit.cross_resonance_pulse_channels[qubit_id]
 
                 instr_collection.append(
                     PhaseShift(targets=cr_pulse_channel.uuid, phase=theta)
@@ -395,15 +393,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target1_id = self._qubit_index_by_uuid[target1.uuid]
         target2_id = self._qubit_index_by_uuid[target2.uuid]
 
-        target1_pulse_channel = target1.pulse_channels.cross_resonance_channels[target2_id]
-        target2_pulse_channel = (
-            target2.pulse_channels.cross_resonance_cancellation_channels[target1_id]
-        )
+        target1_pulse_channel = target1.cross_resonance_pulse_channels[target2_id]
+        target2_pulse_channel = target2.cross_resonance_cancellation_pulse_channels[
+            target1_id
+        ]
 
         if target1_pulse_channel is None or target2_pulse_channel is None:
             raise ValueError(
                 f"Tried to perform cross resonance on {str(target2)} "
-                f"that isn't linked to {str(target1)}."
+                f"that is not linked to {str(target1)}."
             )
 
         pulse = target1_pulse_channel.zx_pi_4_pulse.model_dump()
@@ -431,7 +429,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self, target: Qubit, mode: AcquireMode, output_variable: str = None
     ):
         # Measure-related info.
-        measure_channel = target.resonator.pulse_channels.measure
+        measure_channel = target.measure_pulse_channel
         measure_instruction = Pulse(
             targets=measure_channel.uuid,
             waveform=measure_channel.pulse.waveform_type(
@@ -441,7 +439,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
         # Acquire-related info.
-        acquire_channel = target.resonator.pulse_channels.acquire
+        acquire_channel = target.resonator.acquire_pulse_channel
         acquire_duration = (
             measure_channel.pulse.width
             if acquire_channel.acquire.sync
@@ -674,7 +672,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 resonator = target.resonator
                 phys_channel = resonator.physical_channel
                 bb = phys_channel.baseband
-                measure_pulse_ch = resonator.pulse_channels.measure
+                measure_pulse_ch = resonator.measure_pulse_channel
 
                 if measure_pulse_ch.fixed_if:
                     args = [bb.if_frequency, phys_channel.sample_time]
@@ -709,16 +707,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         target_id = self._qubit_index_by_uuid[target.uuid]
 
-        if not control.pulse_channels.cross_resonance_channels.get(target_id, None):
+        if not control.cross_resonance_pulse_channels.get(target_id, None):
             raise ValueError(
                 f"Qubits {self._qubit_index_by_uuid[control.uuid]} and {target_id} are not coupled."
             )
 
         pulse_channels = [
-            control.pulse_channels.drive.uuid,
-            control.pulse_channels.cross_resonance_channels[target_id].uuid,
-            control.pulse_channels.cross_resonance_cancellation_channels[target_id].uuid,
-            target.pulse_channels.drive.uuid,
+            control.drive_pulse_channel.uuid,
+            control.cross_resonance_pulse_channels[target_id].uuid,
+            control.cross_resonance_cancellation_pulse_channels[target_id].uuid,
+            target.drive_pulse_channel.uuid,
         ]
         sync_instruction = Synchronize(targets=pulse_channels)
 
@@ -744,7 +742,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         delay: float = 1e-06,
         **kwargs,
     ):
-        pulse_channel = target.resonator.pulse_channels.acquire
+        pulse_channel = target.acquire_pulse_channel
 
         if delay is None:
             kwargs["delay"] = pulse_channel.acquire.delay
@@ -752,7 +750,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return self.add(Acquire(targets=pulse_channel.uuid, **kwargs))
 
     def delay(self, target: Qubit | PulseChannel, duration: float):
-        pulse_channel = target.pulse_channels.drive if isinstance(target, Qubit) else target
+        pulse_channel = target.drive_pulse_channel if isinstance(target, Qubit) else target
         return self.add(Delay(targets=pulse_channel.uuid, duration=duration))
 
     def synchronize(self, targets: Qubit | PulseChannel | list[Qubit | PulseChannel]):
@@ -765,8 +763,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             elif isinstance(target, Qubit):
                 # TODO: At some point, we might want to implement (pulse channel)
                 # getters at the qubit level just for the sake of conveniency. #326
-                pulse_channel_ids.add(target.resonator.pulse_channels.acquire.uuid)
-                pulse_channel_ids.add(target.resonator.pulse_channels.measure.uuid)
+                pulse_channel_ids.add(target.acquire_pulse_channel.uuid)
+                pulse_channel_ids.add(target.measure_pulse_channel.uuid)
                 qubit_pulse_channel_ids = [
                     pulse_channel.uuid for pulse_channel in target.all_pulse_channels
                 ]
@@ -790,7 +788,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def phase_shift(self, target: Qubit | PulseChannel, theta: float):
         if isinstance(target, Qubit):
             return self.add(
-                PhaseShift(targets=target.pulse_channels.drive.uuid, phase=theta)
+                PhaseShift(targets=target.drive_pulse_channel.uuid, phase=theta)
             )
         elif isinstance(target, PulseChannel):
             return self.add(PhaseShift(targets=target.uuid, phase=theta))
@@ -803,9 +801,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def frequency_shift(self, target: Qubit, frequency):
         if isinstance(target, Qubit):
             return self.add(
-                FrequencyShift(
-                    targets=target.pulse_channels.drive.uuid, frequency=frequency
-                )
+                FrequencyShift(targets=target.drive_pulse_channel.uuid, frequency=frequency)
             )
         elif isinstance(target, PulseChannel):
             return self.add(FrequencyShift(targets=target.uuid, frequency=frequency))

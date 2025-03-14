@@ -176,7 +176,7 @@ class Test_HW_Serialisation:
         assert hw1 == hw2
 
         index = random.Random(seed).choice(list(hw2.qubits.keys()))
-        hw2.qubit_with_index(index).pulse_channels.drive.frequency = random.Random(
+        hw2.qubit_with_index(index).drive_pulse_channel.frequency = random.Random(
             seed
         ).uniform(1e08, 1e10)
         assert hw1 != hw2

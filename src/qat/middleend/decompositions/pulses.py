@@ -93,7 +93,7 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         """Decomposes the :class:`X_pi_2` intruction into a drive pulse."""
 
         qubit = model.qubit_with_index(gate.qubit)
-        pulse_channel = qubit.pulse_channels.drive
+        pulse_channel = qubit.drive_pulse_channel
         pulse_info = pulse_channel.pulse.model_dump()
         pulse_waveform = pulse_channel.pulse.waveform_type(**pulse_info)
         return [
@@ -106,16 +106,14 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         appropiate channels."""
 
         qubit = model.qubit_with_index(gate.qubit)
-        pulse_channel = qubit.pulse_channels.drive
+        pulse_channel = qubit.drive_pulse_channel
         instructions = [PhaseShift(targets=pulse_channel.uuid, phase=gate.theta)]
         for (
             qid,
             crc_pulse_channel,
-        ) in qubit.pulse_channels.cross_resonance_cancellation_channels.items():
+        ) in qubit.cross_resonance_cancellation_pulse_channels.items():
             coupled_qubit = model.qubit_with_index(qid)
-            cr_pulse_channel = coupled_qubit.pulse_channels.cross_resonance_channels[
-                gate.qubit
-            ]
+            cr_pulse_channel = coupled_qubit.cross_resonance_pulse_channels[gate.qubit]
 
             instructions.append(PhaseShift(targets=cr_pulse_channel.uuid, phase=gate.theta))
             instructions.append(
@@ -129,8 +127,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
 
         qubit1 = model.qubits[gate.qubit1]
         qubit2 = model.qubits[gate.qubit2]
-        target1_pulse_channel = qubit1.pulse_channels.cross_resonance_channels[gate.qubit2]
-        target2_pulse_channel = qubit2.pulse_channels.cross_resonance_cancellation_channels[
+        target1_pulse_channel = qubit1.cross_resonance_pulse_channels[gate.qubit2]
+        target2_pulse_channel = qubit2.cross_resonance_cancellation_pulse_channels[
             gate.qubit1
         ]
 
@@ -167,8 +165,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         pulse_channel_ids = set()
         for qid in gate.qubits:
             target = model.qubit_with_index(qid)
-            pulse_channel_ids.add(target.resonator.pulse_channels.acquire.uuid)
-            pulse_channel_ids.add(target.resonator.pulse_channels.measure.uuid)
+            pulse_channel_ids.add(target.acquire_pulse_channel.uuid)
+            pulse_channel_ids.add(target.measure_pulse_channel.uuid)
             qubit_pulse_channel_ids = [
                 pulse_channel.uuid for pulse_channel in target.all_pulse_channels
             ]
@@ -187,7 +185,7 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         qubit = model.qubit_with_index(gate.qubit)
 
         # Measure-related info.
-        measure_channel = qubit.resonator.pulse_channels.measure
+        measure_channel = qubit.measure_pulse_channel
         measure_instruction = Pulse(
             targets=measure_channel.uuid,
             waveform=Waveform(**measure_channel.pulse.model_dump()),
@@ -195,7 +193,7 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         )
 
         # Acquire-related info.
-        acquire_channel = qubit.resonator.pulse_channels.acquire
+        acquire_channel = qubit.acquire_pulse_channel
         acquire_duration = (
             measure_channel.pulse.width
             if acquire_channel.acquire.sync

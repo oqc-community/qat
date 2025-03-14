@@ -203,7 +203,7 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
             return ir
 
         drive_acq_pc_map = {
-            qubit.pulse_channels.drive.uuid: qubit.resonator.pulse_channels.acquire.uuid
+            qubit.drive_pulse_channel.uuid: qubit.acquire_pulse_channel.uuid
             for qubit in self.model.qubits.values()
         }
 

@@ -1457,7 +1457,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             qubits = [
                 qubit
                 for qubit in self.builder.hw.qubits.values()
-                if qubit.resonator.pulse_channels.acquire.uuid == pulse_channel.uuid
+                if qubit.acquire_pulse_channel.uuid == pulse_channel.uuid
             ]
 
             if len(qubits) == 1:

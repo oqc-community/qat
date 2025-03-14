@@ -276,6 +276,14 @@ class Resonator(Component):
     def all_pulse_channels(self):
         return self.pulse_channels.all_pulse_channels
 
+    @property
+    def measure_pulse_channel(self):
+        return self.pulse_channels.measure
+
+    @property
+    def acquire_pulse_channel(self):
+        return self.pulse_channels.acquire
+
 
 class QubitPulseChannels(PulseChannelSet):
     drive: DrivePulseChannel = Field(frozen=True, default=DrivePulseChannel())
@@ -338,3 +346,31 @@ class Qubit(Component):
     @property
     def all_pulse_channels(self):
         return self.pulse_channels.all_pulse_channels
+
+    @property
+    def drive_pulse_channel(self):
+        return self.pulse_channels.drive
+
+    @property
+    def second_state_pulse_channel(self):
+        return self.pulse_channels.second_state
+
+    @property
+    def freq_shift_pulse_channel(self):
+        return self.pulse_channels.freq_shift
+
+    @property
+    def cross_resonance_pulse_channels(self):
+        return self.pulse_channels.cross_resonance_channels
+
+    @property
+    def cross_resonance_cancellation_pulse_channels(self):
+        return self.pulse_channels.cross_resonance_cancellation_channels
+
+    @property
+    def measure_pulse_channel(self):
+        return self.resonator.pulse_channels.measure
+
+    @property
+    def acquire_pulse_channel(self):
+        return self.resonator.pulse_channels.acquire

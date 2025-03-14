@@ -45,7 +45,7 @@ class PhysicalHardwareModelBuilder:
         )
 
     @property
-    def model(self):
+    def model(self) -> PhysicalHardwareModel:
         return self._current_model
 
     def _build_uncalibrated_hardware_model(
