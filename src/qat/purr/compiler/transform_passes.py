@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
+from collections import defaultdict
 from numbers import Number
 from typing import Dict, List
 
-from black.trans import defaultdict
 from compiler_config.config import MetricsType
 
 from qat.purr.backends.qblox.metrics_base import MetricsManager
