@@ -19,7 +19,6 @@ calibration_results/
 
 # Docs
 docs/build/*
-docs/source/*
 !docs/source/_static
 !docs/source/_templates
 !docs/source/conf.py
