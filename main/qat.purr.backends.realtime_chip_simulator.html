@@ -9,6 +9,7 @@
   <title>qat.purr.backends.realtime_chip_simulator module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -46,6 +47,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
@@ -176,6 +185,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.legacy.html">qat.pipelines.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.base.html">qat.pipelines.legacy.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
@@ -579,7 +595,7 @@ simulator.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.couplings">
-<span class="sig-name descname"><span class="pre">couplings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.RTCSCoupling" title="qat.purr.backends.realtime_chip_simulator.RTCSCoupling"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTCSCoupling</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.couplings" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">couplings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.backends.realtime_chip_simulator.RTCSCoupling" title="qat.purr.backends.realtime_chip_simulator.RTCSCoupling"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTCSCoupling</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[r0&lt;-&gt;q0,</span> <span class="pre">q0&lt;-&gt;q1,</span> <span class="pre">q1&lt;-&gt;r1]</span></em><a class="headerlink" href="#qat.purr.backends.realtime_chip_simulator.RealtimeSimHardwareModel.couplings" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

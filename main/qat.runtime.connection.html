@@ -9,6 +9,7 @@
   <title>qat.runtime.connection module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -46,6 +47,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
@@ -176,6 +185,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.legacy.html">qat.pipelines.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.base.html">qat.pipelines.legacy.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
@@ -344,12 +360,13 @@ used. For example, if a user only requires to send jobs sporadically, then a con
 that is created before execution and ended after execution might be desired. On the
 contrary, if there is a stream of frequent jobs, the connection likely wants to be held
 indefinitely.</p>
-<p>There are different flags that can be specified:
-#. <cite>ConnectionMode.CONNECT_BEFORE_EXECUTE</cite>: Specifies that the Runtime should attempt</p>
-<blockquote>
-<div><p>to connect the engine each time execute is called.</p>
-</div></blockquote>
+<p>There are different flags that can be specified:</p>
 <ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.CONNECT_BEFORE_EXECUTE</cite>: Specifies that the Runtime should attempt</dt><dd><p>to connect the engine each time execute is called.</p>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><cite>ConnectionMode.DISCONNECT_AFTER_EXECUTE</cite>: Specifies that the Runtime should attempt</dt><dd><p>to disconnect the engine after each execute.</p>
 </dd>
@@ -367,12 +384,13 @@ manager).</p>
 </dl>
 </li>
 </ol>
-<p>Some predefined composite modes:
-#. <cite>ConnectionMode.MANUAL</cite>: Connection handling is done externally: the Runtime will</p>
-<blockquote>
-<div><p>make no attempt to manage it.</p>
-</div></blockquote>
+<p>Some predefined composite modes:</p>
 <ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.MANUAL</cite>: Connection handling is done externally: the Runtime will</dt><dd><p>make no attempt to manage it.</p>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><cite>ConnectionMode.DEFAULT</cite>: The connection will be created before each execution and</dt><dd><p>disconnected immediately after the execution is complete.</p>
 </dd>
