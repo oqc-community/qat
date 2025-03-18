@@ -1,0 +1,7 @@
+qat.purr.qat module
+===================
+
+.. automodule:: qat.purr.qat
+   :members:
+   :undoc-members:
+   :show-inheritance:
