@@ -13,8 +13,8 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.instructions import Instruction, QuantumInstruction
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
+from qat.purr.qat import execute
 from qat.purr.utils.logger import get_default_logger
-from qat.qat import execute
 
 log = get_default_logger()
 

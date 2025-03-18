@@ -50,8 +50,8 @@ from qat.purr.compiler.instructions import (
     Return,
     Variable,
 )
+from qat.purr.qat import _return_or_build, fetch_frontend
 from qat.purr.qatconfig import QatConfig
-from qat.qat import _return_or_build, fetch_frontend
 from qat.runtime import LegacyRuntime, SimpleRuntime
 from qat.runtime.executables import Executable
 from qat.runtime.simple import SimpleRuntime

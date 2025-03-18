@@ -17,7 +17,7 @@ from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
-from qat.qat import execute_qasm_with_metrics
+from qat.purr.qat import execute_qasm_with_metrics
 
 from tests.qat.qasm_qir_utils import get_qasm2
 

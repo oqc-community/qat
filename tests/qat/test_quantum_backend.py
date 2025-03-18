@@ -43,7 +43,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.runtime import QuantumRuntime, execute_instructions, get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
-from qat.qat import execute
+from qat.purr.qat import execute
 
 from tests.qat.qasm_qir_utils import get_qasm2
 from tests.qat.test_readout_mitigation import apply_error_mitigation_setup

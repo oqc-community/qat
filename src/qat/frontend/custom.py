@@ -9,7 +9,7 @@ from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.qat import QATInput
+from qat.purr.qat import QATInput
 from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 

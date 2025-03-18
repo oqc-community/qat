@@ -73,8 +73,8 @@ from qat.purr.integrations.qasm import (
 )
 from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.integrations.tket import TketBuilder, TketQasmParser
+from qat.purr.qat import execute, execute_qasm, fetch_frontend
 from qat.purr.utils.serializer import json_load, json_loads
-from qat.qat import execute, execute_qasm, fetch_frontend
 
 from tests.qat.qasm_qir_utils import (
     ProgramFileType,

@@ -3,7 +3,7 @@
 from compiler_config.config import CompilerConfig
 
 from qat.purr.qatconfig import qatconfig
-from qat.qat import (
+from qat.purr.qat import (
     execute,
     execute_qasm,
     execute_qasm_with_metrics,

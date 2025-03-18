@@ -6,7 +6,7 @@ import pytest
 from compiler_config.config import CompilerConfig
 
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.qat import execute_with_metrics
+from qat.purr.qat import execute_with_metrics
 
 from tests.qat.qasm_qir_utils import ProgramFileType, get_test_file_path
 

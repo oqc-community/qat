@@ -22,7 +22,7 @@ from qat.purr.backends.realtime_chip_simulator import (
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
-from qat.qat import execute_qasm
+from qat.purr.qat import execute_qasm
 
 from tests.qat.utils.models import get_jagged_echo_hardware
 

@@ -11,8 +11,8 @@ from qiskit.result import Result
 from qiskit.result.models import ExperimentResult, ExperimentResultData
 
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
+from qat.purr.qat import execute_qasm
 from qat.purr.utils.logger import get_default_logger
-from qat.qat import execute_qasm
 
 logger = get_default_logger()
 

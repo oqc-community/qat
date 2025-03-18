@@ -11,7 +11,7 @@ from qat.purr.backends.verification import (
     get_verification_model,
     verify_program,
 )
-from qat.qat import execute
+from qat.purr.qat import execute
 
 from tests.qat.qasm_qir_utils import ProgramFileType, get_qasm2, get_test_file_path
 

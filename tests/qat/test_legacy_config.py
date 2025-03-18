@@ -18,7 +18,7 @@ from qat.purr.compiler.config import (
     TketOptimizations,
 )
 from qat.purr.compiler.instructions import Delay
-from qat.qat import execute_with_metrics
+from qat.purr.qat import execute_with_metrics
 
 from tests.qat.qasm_qir_utils import ProgramFileType, get_test_file_path
 
