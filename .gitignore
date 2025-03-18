@@ -28,6 +28,7 @@ docs/build/*
 !docs/source/contribute.rst
 !docs/source/changelog.rst
 !docs/source/qat-logo.png
+!docs/source/getting_started/
 
 # Jupyter
 **/.ipynb_checkpoints/*

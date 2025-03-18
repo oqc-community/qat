@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 __all__ = [
     "EchoModelLoader",
     "FileModelLoader",

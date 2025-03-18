@@ -13,6 +13,7 @@ class ConnectionMode(Flag):
     indefinitely.
 
     There are different flags that can be specified:
+
     #. `ConnectionMode.CONNECT_BEFORE_EXECUTE`: Specifies that the Runtime should attempt
         to connect the engine each time execute is called.
     #. `ConnectionMode.DISCONNECT_AFTER_EXECUTE`: Specifies that the Runtime should attempt
@@ -24,6 +25,7 @@ class ConnectionMode(Flag):
         manager).
 
     Some predefined composite modes:
+
     #. `ConnectionMode.MANUAL`: Connection handling is done externally: the Runtime will
         make no attempt to manage it.
     #. `ConnectionMode.DEFAULT`: The connection will be created before each execution and

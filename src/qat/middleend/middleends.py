@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
 import abc
 from typing import Optional
 
@@ -80,6 +83,9 @@ class CustomMiddleend(BaseMiddleend):
                         compilation, defaults to None.
         :param compiler_config: Compiler settings, defaults to None.
         """
+
+        res_mgr = res_mgr or ResultManager()
+        met_mgr = met_mgr or MetricsManager()
 
         ir = self.pipeline.run(ir, res_mgr, met_mgr, compiler_config=compiler_config)
         return ir

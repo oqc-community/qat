@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BasePhysicalModelLoader

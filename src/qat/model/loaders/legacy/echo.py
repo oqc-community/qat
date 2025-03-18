@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.model.loaders.legacy.base import BaseLegacyModelLoader
 from qat.purr.backends.echo import Connectivity, get_default_echo_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

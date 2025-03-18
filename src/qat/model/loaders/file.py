@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from pathlib import Path
 
 from qat.model.hardware_model import PhysicalHardwareModel

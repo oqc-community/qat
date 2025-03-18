@@ -116,6 +116,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx_autodoc_typehints",
     "sphinx_paramlinks",
+    "sphinx.ext.graphviz",
 ]
 templates_path = ["_templates"]
 html_theme = "sphinx_rtd_theme"

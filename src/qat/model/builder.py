@@ -25,8 +25,10 @@ class PhysicalHardwareModelBuilder:
     """
     A builder class that builds a physical hardware model based on the given connectivity.
 
-    :param physical_connectivity: The connectivities of the physical qubits on the QPU (undirected graph).
-    :param logical_connectivity: The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of `physical_connectivity`.
+    :param physical_connectivity: The connectivities of the physical qubits on the QPU
+        (undirected graph).
+    :param logical_connectivity: The connectivities (directed graph) of the qubits used for
+        compilation, which can be a subgraph of `physical_connectivity`.
     :param logical_connectivity_quality: Quality of the connections between the qubits.
     """
 
