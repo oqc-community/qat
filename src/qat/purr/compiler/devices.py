@@ -334,8 +334,19 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
+        imbalance: float = None,
+        phase_offset: float = None,
     ):
-        pulse_channel = PulseChannel(id_, self, frequency, bias, scale, fixed_if)
+        pulse_channel = PulseChannel(
+            id_,
+            self,
+            frequency=frequency,
+            bias=bias,
+            scale=scale,
+            fixed_if=fixed_if,
+            imbalance=imbalance,
+            phase_offset=phase_offset,
+        )
 
         return pulse_channel
 
@@ -346,11 +357,22 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         amp=0.0,
+        imbalance: float = None,
+        phase_offset: float = None,
         active: bool = True,
         fixed_if: bool = False,
     ):
         pulse_channel = FreqShiftPulseChannel(
-            id_, self, frequency, bias, scale, amp, active, fixed_if
+            id_,
+            self,
+            frequency=frequency,
+            bias=bias,
+            scale=scale,
+            amp=amp,
+            active=active,
+            fixed_if=fixed_if,
+            imbalance=imbalance,
+            phase_offset=phase_offset,
         )
 
         return pulse_channel
@@ -386,6 +408,8 @@ class PulseChannel(QuantumComponent, Calibratable):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         fixed_if: bool = False,
+        imbalance: float = None,
+        phase_offset: float = None,
         **kwargs,
     ):
         super().__init__(id_, **kwargs)
@@ -394,6 +418,12 @@ class PulseChannel(QuantumComponent, Calibratable):
         self.frequency: float = frequency
         self.bias: complex = bias
         self.scale: complex = scale
+        self.imbalance: float = (
+            imbalance if imbalance is not None else physical_channel.imbalance
+        )
+        self.phase_offset: float = (
+            phase_offset if phase_offset is not None else physical_channel.phase_offset
+        )
 
         self.fixed_if: bool = fixed_if
 
@@ -415,14 +445,6 @@ class PulseChannel(QuantumComponent, Calibratable):
     @property
     def block_time(self):
         return self.physical_channel.block_time
-
-    @property
-    def phase_offset(self):
-        return self.physical_channel.phase_offset
-
-    @property
-    def imbalance(self):
-        return self.physical_channel.imbalance
 
     @property
     def acquire_allowed(self):
@@ -545,6 +567,20 @@ class PulseChannelView(PulseChannel):
 
     def __getattr__(self, item):
         if item in self._pulse_channel_attributes:
+            # TODO: Remove. This is a temporary solution for backwards compatibility with legacy
+            # calibration files after adding these two attributes to the `PulseChannel`.
+            # Will become obsolete soon when we move to the pydantic hardware models (COMPILER-3).
+            if item in ["phase_offset", "imbalance"] and not hasattr(
+                self.pulse_channel, item
+            ):
+                log.warning(
+                    "Legacy calibrated version of the pulse channel detected. Please re-save the hardware model."
+                )
+                setattr(
+                    self.pulse_channel,
+                    item,
+                    getattr(self.pulse_channel.physical_channel, item),
+                )
             return getattr(self.pulse_channel, item)
         return super().__getattribute__(item)
 
@@ -585,6 +621,8 @@ class QuantumDevice(QuantumComponent, Calibratable):
         fixed_if: bool = False,
         auxiliary_devices: List[QuantumDevice] = None,
         id_: str = None,
+        imbalance: Optional[float] = None,
+        phase_offset: Optional[float] = None,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
@@ -592,11 +630,25 @@ class QuantumDevice(QuantumComponent, Calibratable):
             id_ = self._create_pulse_channel_id(channel_type, [self] + auxiliary_devices)
         if channel_type == ChannelType.freq_shift:
             pulse_channel = self.physical_channel.create_freq_shift_pulse_channel(
-                id_, frequency, bias, scale, amp, active, fixed_if
+                id_=id_,
+                frequency=frequency,
+                bias=bias,
+                scale=scale,
+                amp=amp,
+                active=active,
+                fixed_if=fixed_if,
+                phase_offset=phase_offset,
+                imbalance=imbalance,
             )
         else:
             pulse_channel = self.physical_channel.create_pulse_channel(
-                id_, frequency, bias, scale, fixed_if
+                id_=id_,
+                frequency=frequency,
+                bias=bias,
+                scale=scale,
+                fixed_if=fixed_if,
+                phase_offset=phase_offset,
+                imbalance=imbalance,
             )
         self.add_pulse_channel(pulse_channel, channel_type, auxiliary_devices)
 

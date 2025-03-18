@@ -66,7 +66,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
         pulse_measure.pop("shape")
         new_measure_pulse_channel = MeasurePulseChannel(
             frequency=measure_pulse_channel.frequency,
-            imbalance=phys_channel_r.imbalance,
+            imbalance=measure_pulse_channel.imbalance,
             scale=measure_pulse_channel.scale,
             fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_r.phase_offset,
@@ -79,7 +79,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
         acquire_pulse_channel = qubit.measure_device.get_pulse_channel(ChannelType.acquire)
         new_acquire_pulse_channel = AcquirePulseChannel(
             frequency=acquire_pulse_channel.frequency,
-            imbalance=phys_channel_r.imbalance,
+            imbalance=acquire_pulse_channel.imbalance,
             scale=acquire_pulse_channel.scale,
             fixed_if=acquire_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_r.phase_offset,
@@ -101,7 +101,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
         pulse_hw_x_pi_2.pop("shape")
         new_drive_pulse_channel = DrivePulseChannel(
             frequency=drive_pulse_channel.frequency,
-            imbalance=phys_channel_q.imbalance,
+            imbalance=drive_pulse_channel.imbalance,
             scale=drive_pulse_channel.scale,
             fixed_if=drive_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_q.phase_offset,
@@ -112,7 +112,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
             freqshift_pulse_channel = qubit.get_pulse_channel(ChannelType.freq_shift)
             new_freqshift_pulse_channel = FreqShiftPulseChannel(
                 frequency=freqshift_pulse_channel.frequency,
-                imbalance=phys_channel_q.imbalance,
+                imbalance=freqshift_pulse_channel.imbalance,
                 scale=freqshift_pulse_channel.scale,
                 fixed_if=freqshift_pulse_channel.fixed_if,
                 phase_iq_offset=phys_channel_q.phase_offset,
@@ -124,7 +124,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
             secondstate_pulse_channel = qubit.get_pulse_channel(ChannelType.second_state)
             new_secondstate_pulse_channel = SecondStatePulseChannel(
                 frequency=secondstate_pulse_channel.frequency,
-                imbalance=phys_channel_q.imbalance,
+                imbalance=secondstate_pulse_channel.imbalance,
                 scale=secondstate_pulse_channel.scale,
                 fixed_if=secondstate_pulse_channel.fixed_if,
                 phase_iq_offset=phys_channel_q.phase_offset,
@@ -146,7 +146,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
                     new_cr_pulse_channel = CrossResonancePulseChannel(
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
-                        imbalance=phys_channel_q.imbalance,
+                        imbalance=pulse_channel.imbalance,
                         scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=phys_channel_q.phase_offset,
@@ -157,7 +157,7 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
                     new_crc_pulse_channel = CrossResonanceCancellationPulseChannel(
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
-                        imbalance=phys_channel_q.imbalance,
+                        imbalance=pulse_channel.imbalance,
                         scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=phys_channel_q.phase_offset,

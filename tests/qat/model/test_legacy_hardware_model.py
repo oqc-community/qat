@@ -38,7 +38,7 @@ def get_echo_hw_pair(n_qubits, seed=42):
 
 def validate_pulse_channel(pyd_pulse_channel, legacy_pulse_channel):
     assert pyd_pulse_channel.frequency == legacy_pulse_channel.frequency
-    assert pyd_pulse_channel.imbalance == legacy_pulse_channel.physical_channel.imbalance
+    assert pyd_pulse_channel.imbalance == legacy_pulse_channel.imbalance
     assert (
         pyd_pulse_channel.phase_iq_offset
         == legacy_pulse_channel.physical_channel.phase_offset
