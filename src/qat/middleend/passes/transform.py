@@ -8,9 +8,13 @@ from compiler_config.config import MetricsType
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
-from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
 from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
+from qat.ir.measure import Acquire as PydAcquire
+from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -25,6 +29,9 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
     Pulse,
 )
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 class PhaseOptimisation(TransformPass):
@@ -92,7 +99,7 @@ class PydPhaseOptimisation(TransformPass):
 
     def run(
         self,
-        ir: QuantumInstructionBuilder,
+        ir: PydQuantumInstructionBuilder,
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         *args,
@@ -183,3 +190,87 @@ class PostProcessingSanitisation(TransformPass):
         ir.instructions = [val for val in ir.instructions if val not in discarded]
         met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(ir.instructions))
         return ir
+
+
+class PydPostProcessingSanitisation(TransformPass):
+    """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
+    suitable for the acquisition mode, and removes them if not.
+
+    Extracted from :meth:`qat.purr.backends.live.LiveDeviceEngine.optimize`.
+    """
+
+    def run(
+        self,
+        ir: PydQuantumInstructionBuilder,
+        _: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
+
+        acquire_mode_output_var_map = {}
+        discarded_pp = []
+        for instr in ir:
+            if isinstance(instr, PydAcquire):
+                if instr.mode == AcquireMode.RAW:
+                    raise ValueError(
+                        "Invalid acquire mode. The target machine does not support "
+                        "a RAW acquire mode."
+                    )
+
+                if instr.output_variable:
+                    acquire_mode_output_var_map[instr.output_variable] = instr.mode
+
+            elif isinstance(instr, PydPostProcessing):
+                acq_mode = acquire_mode_output_var_map.get(instr.output_variable, None)
+
+                if not acq_mode:
+                    log.warning(
+                        f"Post-processing output variable {instr.output_variable} is not associated with any acquire output variable."
+                    )
+                    discarded_pp.append(instr)
+
+                else:
+                    if not self._valid_pp(acq_mode, instr):
+                        discarded_pp.append(instr)
+
+        ir.instructions = [instr for instr in ir.instructions if instr not in discarded_pp]
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, ir.number_of_instructions
+        )
+        return ir
+
+    def _valid_pp(self, acquire_mode: AcquireMode, pp: PydPostProcessing) -> bool:
+        """
+        Validate whether the post-processing instruction is valid with a given
+        acquire mode.
+        """
+
+        if acquire_mode == AcquireMode.SCOPE:
+            if (
+                pp.process_type == PostProcessType.MEAN
+                and ProcessAxis.SEQUENCE in pp.axes
+                and len(pp.axes) <= 1
+            ):
+                return False
+
+        elif acquire_mode == AcquireMode.INTEGRATOR:
+            if (
+                pp.process_type == PostProcessType.DOWN_CONVERT
+                and ProcessAxis.TIME in pp.axes
+                and len(pp.axes) <= 1
+            ):
+                return False
+            if (
+                pp.process_type == PostProcessType.MEAN
+                and ProcessAxis.TIME in pp.axes
+                and len(pp.axes) <= 1
+            ):
+                return False
+
+        return True

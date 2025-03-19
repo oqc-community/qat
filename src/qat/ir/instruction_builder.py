@@ -34,7 +34,7 @@ from qat.ir.measure import (
     acq_mode_process_axis,
 )
 from qat.ir.waveforms import Pulse, PulseType, SampledWaveform
-from qat.model.device import DrivePulseChannel, PulseChannel, Qubit
+from qat.model.device import Component, DrivePulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import QubitId, ValidatedList
@@ -506,9 +506,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
                 measure_block.add(Synchronize(targets=qubit_pulse_channels))
 
+            output_var = output_variable or self._generate_output_variable(qubit)
+
             # Measure and acquire instructions for the qubit.
             measure, acquire = self._generate_measure_acquire(
-                qubit, mode=mode, output_variable=output_variable
+                qubit, mode=mode, output_variable=output_var
             )
             duration = max(measure.duration, acquire.delay + acquire.duration)
             measure_block.add(measure, acquire)
@@ -535,8 +537,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable:
+        :param output_variable: The variable where the output of the acquire should be saved.
         """
+        output_variable = output_variable or self._generate_output_variable(target)
+
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
             .post_processing(
@@ -556,6 +560,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
+        output_variable = output_variable or self._generate_output_variable(target)
+
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
             .post_processing(
@@ -572,6 +578,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
+        output_variable = output_variable or self._generate_output_variable(target)
+
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
             .post_processing(
@@ -589,6 +597,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
     def measure_mean_signal(self, target: Qubit, output_variable: str = None):
+        output_variable = output_variable or self._generate_output_variable(target)
+
         return (
             self.measure(
                 target, acq_mode_process_axis[ProcessAxis.SEQUENCE], output_variable
@@ -621,6 +631,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
+        output_variable = output_variable or self._generate_output_variable(target)
+
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
             .post_processing(
@@ -634,6 +646,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
             .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
         )
+
+    def _generate_output_variable(self, target: Component):
+        return "out_" + target.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
 
     def _find_valid_measure_block(self, target_ids: QubitId | set[QubitId]):
         """

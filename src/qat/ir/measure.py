@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Literal, Optional
 
 import numpy as np
-from pydantic import Field, ValidationInfo, field_validator, model_validator
+from pydantic import Field, PrivateAttr, ValidationInfo, field_validator, model_validator
 
 from qat.ir.instructions import (
     Instruction,
@@ -97,10 +97,13 @@ class MeasureBlock(QuantumInstructionBlock):
 
     inst: Literal["MeasureBlock"] = "MeasureBlock"
     qubit_targets: ValidatedSet[QubitId] = ValidatedSet()
-    _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = (
-        Synchronize,
-        Pulse,
-        Acquire,
+    _output_variables: list[str] = PrivateAttr(default=[])
+    _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = PrivateAttr(
+        default=(
+            Synchronize,
+            Pulse,
+            Acquire,
+        )
     )
 
     def add(self, *instructions: QuantumInstruction):
@@ -108,6 +111,7 @@ class MeasureBlock(QuantumInstructionBlock):
         for instruction in instructions:
             if isinstance(instruction, Acquire):
                 self._duration_per_target[instruction.target] += instruction.delay
+                self._output_variables.append(instruction.output_variable)
             QuantumInstructionBlock.add(self, instruction)
 
     def _validate_instruction(self, *instructions: QuantumInstruction):
@@ -124,6 +128,10 @@ class MeasureBlock(QuantumInstructionBlock):
         data = super().validate_targets(data, field_name="targets")
         data = super().validate_targets(data, field_name="qubit_targets")
         return data
+
+    @property
+    def output_variables(self):
+        return self._output_variables
 
 
 acq_mode_process_axis = {
