@@ -6,6 +6,11 @@ import numpy as np
 
 from qat.core.pass_base import TransformPass, get_hardware_model
 from qat.core.result_base import ResultManager
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.ir.instructions import Return as PydReturn
+from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -83,6 +88,30 @@ class ReturnSanitisation(TransformPass):
         else:
             # If we don't have an explicit return, imply all results.
             unique_variables = set(acq.output_variable for acq in acquires)
+
+        ir.returns(list(unique_variables))
+        return ir
+
+
+class PydReturnSanitisation(TransformPass):
+    """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
+    with all acquisitions if none is found."""
+
+    def run(self, ir: PydQuantumInstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`."""
+
+        returns = [inst for inst in ir if isinstance(inst, PydReturn)]
+        measure_blocks = [inst for inst in ir if isinstance(inst, PydMeasureBlock)]
+
+        if returns:
+            unique_variables = set(itertools.chain(*[ret.variables for ret in returns]))
+            for ret in returns:
+                ir.instructions.remove(ret)
+        else:
+            # If we do not have an explicit return, imply all results.
+            unique_variables = set(
+                itertools.chain(*[mb.output_variables for mb in measure_blocks])
+            )
 
         ir.returns(list(unique_variables))
         return ir

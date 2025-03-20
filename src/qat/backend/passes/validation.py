@@ -7,6 +7,8 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 
 from qat import qatconfig
 from qat.core.pass_base import ValidationPass
+from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
+from qat.ir.instructions import Return as PydReturn
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -41,6 +43,21 @@ class ReturnSanitisationValidation(ValidationPass):
             raise ValueError("Could not find any return instructions")
         elif len(returns) > 1:
             raise ValueError("Found multiple return instructions")
+        return ir
+
+
+class PydReturnSanitisationValidation(ValidationPass):
+    """Validates that the IR has a :class:`Return` instruction."""
+
+    def run(self, ir: PydInstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        returns = [inst for inst in ir.instructions if isinstance(inst, PydReturn)]
+
+        if not returns:
+            raise ValueError("Could not find any return instructions.")
+        elif len(returns) > 1:
+            raise ValueError("Found multiple return instructions.")
         return ir
 
 

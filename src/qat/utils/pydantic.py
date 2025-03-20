@@ -200,6 +200,9 @@ class ValidatedList(PydListBase):
         for value in values:
             self.append(value)
 
+    def remove(self, value: V):
+        self.root.remove(value)
+
 
 class PydSetBase(RootModel[set[V]]):
     root: set[V] = set[V]()
