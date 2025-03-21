@@ -2,9 +2,10 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import inspect
 import warnings
+from pathlib import Path
 from typing import Literal, Optional, Tuple, Type
 
-import yaml
+import piny
 from compiler_config.config import CompilerConfig
 from pydantic import (
     BaseModel,
@@ -24,11 +25,13 @@ from qiskit_aer import AerSimulator
 
 from qat.core.config import (
     HardwareLoaderDescription,
-    PipelineBuilderDescription,
+    PipelineClassDescription,
+    PipelineFactoryDescription,
     PipelineInstanceDescription,
 )
 from qat.extensions import QatExtension
 from qat.purr.utils.logger import get_default_logger
+from qat.utils.piny import VeryStrictMatcher
 
 log = get_default_logger()
 
@@ -168,7 +171,14 @@ class QatConfig(BaseSettings):
     HARDWARE: list[HardwareLoaderDescription] = []
     """ QAT Hardware Models to load on start-up """
 
-    PIPELINES: list[PipelineInstanceDescription | PipelineBuilderDescription] | None = None
+    PIPELINES: (
+        list[
+            PipelineInstanceDescription
+            | PipelineFactoryDescription
+            | PipelineClassDescription
+        ]
+        | None
+    ) = None
     """ QAT Pipelines to add on start-up, None adds default pipelines"""
 
     @field_validator("EXTENSIONS")
@@ -188,7 +198,10 @@ class QatConfig(BaseSettings):
     def one_default(cls, v):
         if v is None:
             return v
-        if len(v) == 0:
+        elif len(v) == 0:
+            return v
+        elif len(v) == 1:
+            v[0].default = True
             return v
         num_defaults = sum(pipe.default for pipe in v)
         if not num_defaults == 1:
@@ -239,11 +252,10 @@ class QatConfig(BaseSettings):
                 f"Number of shots {compiler_config.repeats} exceeds the maximum amount of {self.MAX_REPEATS_LIMIT}."
             )
 
-    @staticmethod
-    def from_yaml(filename: str):
-        with open(filename) as f:
-            blob = yaml.safe_load(f)
-        return QatConfig(**blob)
+    @classmethod
+    def from_yaml(cls, path: str | Path):
+        blob = piny.YamlLoader(path=str(path), matcher=VeryStrictMatcher).load()
+        return cls(**blob)
 
 
 qatconfig = QatConfig()

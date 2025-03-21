@@ -24,7 +24,7 @@ from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.config import (
     HardwareLoaderDescription,
-    PipelineBuilderDescription,
+    PipelineFactoryDescription,
     PipelineInstanceDescription,
 )
 from qat.core.pass_base import PassManager
@@ -32,7 +32,7 @@ from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
-from qat.frontend import AutoFrontend, FallthroughFrontend
+from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
@@ -475,7 +475,7 @@ class TestQATPipelineSetup:
             PipelineInstanceDescription(
                 name="echo32i", pipeline="qat.pipelines.echo.echo32"
             ),
-            PipelineBuilderDescription(
+            PipelineFactoryDescription(
                 name="echo6b",
                 pipeline="qat.pipelines.echo.get_pipeline",
                 hardware_loader="echo6loader",
@@ -485,8 +485,8 @@ class TestQATPipelineSetup:
         hardware = [
             HardwareLoaderDescription(
                 name="echo6loader",
-                loader="qat.model.loaders.legacy.EchoModelLoader",
-                init={"qubit_count": 6},
+                type="qat.model.loaders.legacy.EchoModelLoader",
+                config={"qubit_count": 6},
             )
         ]
 
@@ -494,9 +494,17 @@ class TestQATPipelineSetup:
         assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
 
     def test_make_qatconfig_yaml(self):
-        qatconfig = QatConfig.from_yaml(dir_path / "files/qatconfig/pipelines.yaml")
-        q = QAT(qatconfig=qatconfig)
-        assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
+        path = str(dir_path / "files/qatconfig/pipelines.yaml")
+        q = QAT(qatconfig=path)
+        assert set(q.pipelines.list()) == {
+            "echo8i",
+            "echo16i",
+            "echo6b",
+            "echo-defaultfrontend",
+            "echocustomconfig",
+        }
+        assert type(q.pipelines.get("echo-defaultfrontend").frontend) is DefaultFrontend
+        assert q.pipelines.get("echocustomconfig").runtime.engine.x == 10
 
     def test_FallthroughFrontend(self):
         frontend = FallthroughFrontend()

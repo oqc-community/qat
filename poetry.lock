@@ -2842,6 +2842,28 @@ typing = ["typing-extensions ; python_version < \"3.10\""]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "piny"
+version = "1.1.0"
+description = "Load YAML configs with environment variables interpolation"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "piny-1.1.0-py3-none-any.whl", hash = "sha256:adc6873192dead13118e588901348cbb94c8163b128a34ed277694a875e05993"},
+    {file = "piny-1.1.0.tar.gz", hash = "sha256:18a005aeccb2af6f55790e539698865be4ab546661c27f410ec6871afe10118a"},
+]
+
+[package.dependencies]
+Click = ">=8,<9"
+pydantic = {version = ">=0.28", optional = true, markers = "extra == \"pydantic\""}
+PyYAML = ">=6,<7"
+
+[package.extras]
+marshmallow = ["marshmallow (>=3)"]
+pydantic = ["pydantic (>=0.28)"]
+trafaret = ["trafaret (>=1.2.0)"]
+
+[[package]]
 name = "pip"
 version = "25.0.1"
 description = "The PyPA recommended tool for installing Python packages."
@@ -5722,4 +5744,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "2b74b89420705eb2622c029a6124732670e9c1766359cbab465e4b0a77aee6ae"
+content-hash = "e477f6b84eebf4e79070bca89c4051b6d0bcf154af50ce630a0c402f57fd8e4f"

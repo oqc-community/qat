@@ -233,3 +233,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         qubits = list(self.qubits.values())
         resonators = [qubit.resonator for qubit in qubits]
         return qubits + resonators
+
+
+PydLogicalHardwareModel = LogicalHardwareModel
+PydPhysicalHardwareModel = PhysicalHardwareModel

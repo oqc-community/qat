@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from pathlib import Path
 from typing import Optional
 
 from compiler_config.config import CompilerConfig
@@ -14,8 +15,8 @@ from qat.runtime.executables import Executable
 
 
 class QAT:
-    def __init__(self, qatconfig: Optional[QatConfig | str] = None):
-        if isinstance(qatconfig, str):
+    def __init__(self, qatconfig: Optional[QatConfig | str | Path] = None):
+        if isinstance(qatconfig, (str, Path)):
             qatconfig = QatConfig.from_yaml(qatconfig)
 
         self.config = qatconfig or QatConfig()

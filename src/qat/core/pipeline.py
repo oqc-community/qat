@@ -7,7 +7,7 @@ from pydantic import BaseModel, ValidationInfo, field_validator
 from qat.backend.base import BaseBackend
 from qat.core.config import (
     HardwareLoaderDescription,
-    PipelineBuilderDescription,
+    PipelineFactoryDescription,
     PipelineInstanceDescription,
 )
 from qat.frontend import BaseFrontend
@@ -39,13 +39,16 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
     @field_validator("model", mode="before")
     @classmethod
     def consistent_model(cls, model: QuantumHardwareModel, info: ValidationInfo):
-        """Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields.
+        """Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields."""
 
-        Currently, this does not check hardware embedded in the runtime.
-        """
-        for end_name in ["frontend", "middleend", "backend"]:
-            end = info.data[end_name]
-            if end.model not in {model, None}:
+        for component in [
+            info.data["frontend"],
+            info.data["middleend"],
+            info.data["backend"],
+            info.data["runtime"],
+            info.data["runtime"].engine,
+        ]:
+            if hasattr(component, "model") and not component.model in {model, None}:
                 raise ValueError(f"{model} hardware does not match supplied hardware")
 
         return model
@@ -94,7 +97,7 @@ class PipelineSet:
     def from_descriptions(
         cls,
         pipeline_descriptions: list[
-            PipelineInstanceDescription | PipelineBuilderDescription
+            PipelineInstanceDescription | PipelineFactoryDescription
         ],
         available_hardware: HardwareLoaders,
     ):

@@ -6,17 +6,32 @@ PIPELINES:
 - name: echo16i
   pipeline: qat.pipelines.echo.echo16
   default: true
-- name: echo32i
-  pipeline: qat.pipelines.echo.echo32
-  default: false
 - name: echo6b
   pipeline: qat.pipelines.echo.get_pipeline
   hardware_loader: echo6loader
   default: false
+- name: echo-defaultfrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  runtime: qat.runtime.SimpleRuntime
+  engine: qat.engines.ZeroEngine
+  hardware_loader: echo6loader
+- name: echocustomconfig
+  frontend: qat.frontend.FallthroughFrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  engine: 
+    type: tests.unit.utils.engines.InitableEngine
+    config:
+      x : 10
+      cblam: 
+        host: someurl.com
+        timeout: 60
+  hardware_loader: echo6loader
 
 
 HARDWARE:
 - name: echo6loader
-  loader: qat.model.loaders.legacy.EchoModelLoader
-  init:
+  type: qat.model.loaders.legacy.EchoModelLoader
+  config:
     qubit_count: 6

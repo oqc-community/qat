@@ -18,8 +18,8 @@ from qat.runtime.passes.transform import (
 )
 
 
-def get_pipeline(model, name="echo") -> Pipeline:
-    results_pipeline = (
+def get_results_pipeline(model) -> PassManager:
+    return (
         PassManager()
         | PostProcessingTransform()
         | InlineResultsProcessingTransform()
@@ -28,6 +28,10 @@ def get_pipeline(model, name="echo") -> Pipeline:
         | IndexMappingAnalysis(model)
         | ErrorMitigation(model)
     )
+
+
+def get_pipeline(model, name="echo") -> Pipeline:
+    results_pipeline = get_results_pipeline(model=model)
 
     return Pipeline(
         name=name,

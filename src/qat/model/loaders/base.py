@@ -2,8 +2,8 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import abc
 
-from qat.model.hardware_model import LogicalHardwareModel, PhysicalHardwareModel
-from qat.purr.compiler.hardware_models import HardwareModel as LegacyHardwareModel
+from qat.model.hardware_model import PydLogicalHardwareModel, PydPhysicalHardwareModel
+from qat.purr.compiler.hardware_models import LegacyHardwareModel
 
 
 class BaseModelLoader(abc.ABC):
@@ -12,7 +12,7 @@ class BaseModelLoader(abc.ABC):
     def __init__(self): ...
 
     @abc.abstractmethod
-    def load(self) -> LegacyHardwareModel | LogicalHardwareModel:
+    def load(self) -> LegacyHardwareModel | PydLogicalHardwareModel:
         """Load and return the Hardware Model.
 
         :return: A loaded Hardware Model
@@ -23,11 +23,11 @@ class BaseModelLoader(abc.ABC):
 
 class BaseLogicalModelLoader(BaseModelLoader):
     @abc.abstractmethod
-    def load(self) -> LogicalHardwareModel:
+    def load(self) -> PydPhysicalHardwareModel:
         pass
 
 
 class BasePhysicalModelLoader(BaseModelLoader):
     @abc.abstractmethod
-    def load(self) -> PhysicalHardwareModel:
+    def load(self) -> PydPhysicalHardwareModel:
         pass

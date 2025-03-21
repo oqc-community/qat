@@ -1,0 +1,6 @@
+MAX_REPEATS_LIMIT: 10
+PIPELINES:
+- name: echo8i
+  pipeline: qat.pipelines.echo.echo8
+- name: echo16i
+  pipeline: qat.pipelines.echo.echo16

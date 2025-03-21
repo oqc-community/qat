@@ -1,0 +1,19 @@
+PIPELINES:
+- name: echocustomconfig
+  frontend: qat.frontend.FallthroughFrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  runtime: qat.runtime.SimpleRuntime
+  engine: qat.engines.ZeroEngine
+  results_pipeline: 
+    type: tests.unit.utils.resultsprocessing.get_pipeline
+    config:
+      some_int : 12
+  hardware_loader: echo6loader
+  default: true
+
+HARDWARE:
+- name: echo6loader
+  type: qat.model.loaders.legacy.EchoModelLoader
+  config:
+    qubit_count: 6

@@ -62,6 +62,7 @@ pydantic-extra-types = "^2.10.0"
 numpydantic = ">=1.6.7"
 semver = "^3.0.2"
 frozendict = "^2.4.6"
+piny = {extras = ["pydantic"], version = "^1.1.0"}
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["jupyter"], version = "^24.10.0"}

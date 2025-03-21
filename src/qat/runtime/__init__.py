@@ -3,3 +3,5 @@
 from qat.runtime.base import BaseRuntime, ResultsAggregator
 from qat.runtime.simple import SimpleRuntime
 from qat.runtime.legacy import LegacyRuntime
+
+DefaultRuntime = SimpleRuntime
