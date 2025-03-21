@@ -18,3 +18,4 @@ Submodules
    qat.core.pipeline
    qat.core.qat
    qat.core.result_base
+   qat.core.validators

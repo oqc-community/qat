@@ -83,6 +83,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html">qat.core.result_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html">qat.core.validators module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
@@ -303,6 +304,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.piny.html">qat.utils.piny module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
@@ -391,12 +393,12 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.core.html">qat.core package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.core.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.ClassDescription"><code class="docutils literal notranslate"><span class="pre">ClassDescription</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#id0"><code class="docutils literal notranslate"><span class="pre">ClassDescription</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.HardwareLoaderDescription"><code class="docutils literal notranslate"><span class="pre">HardwareLoaderDescription</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineBuilderDescription"><code class="docutils literal notranslate"><span class="pre">PipelineBuilderDescription</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineClassDescription"><code class="docutils literal notranslate"><span class="pre">PipelineClassDescription</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineFactoryDescription"><code class="docutils literal notranslate"><span class="pre">PipelineFactoryDescription</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.PipelineInstanceDescription"><code class="docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_hardwareloader"><code class="docutils literal notranslate"><span class="pre">is_hardwareloader()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_pipeline_builder"><code class="docutils literal notranslate"><span class="pre">is_pipeline_builder()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html#qat.core.config.is_pipeline_instance"><code class="docutils literal notranslate"><span class="pre">is_pipeline_instance()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a><ul>
@@ -430,6 +432,20 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin"><code class="docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager"><code class="docutils literal notranslate"><span class="pre">ResultManager</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultModel"><code class="docutils literal notranslate"><span class="pre">ResultModel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.validators.html">qat.core.validators module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_backend"><code class="docutils literal notranslate"><span class="pre">is_backend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_engine"><code class="docutils literal notranslate"><span class="pre">is_engine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_frontend"><code class="docutils literal notranslate"><span class="pre">is_frontend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_hardwareloader"><code class="docutils literal notranslate"><span class="pre">is_hardwareloader()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_middleend"><code class="docutils literal notranslate"><span class="pre">is_middleend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_passmanager"><code class="docutils literal notranslate"><span class="pre">is_passmanager()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_passmanager_factory"><code class="docutils literal notranslate"><span class="pre">is_passmanager_factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_pipeline_factory"><code class="docutils literal notranslate"><span class="pre">is_pipeline_factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_pipeline_instance"><code class="docutils literal notranslate"><span class="pre">is_pipeline_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.is_runtime"><code class="docutils literal notranslate"><span class="pre">is_runtime()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.validators.html#qat.core.validators.requires_model"><code class="docutils literal notranslate"><span class="pre">requires_model()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -664,6 +680,8 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">LogicalHardwareModel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PydLogicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PydLogicalHardwareModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PydPhysicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PydPhysicalHardwareModel</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -682,6 +700,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.pipelines.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html#qat.pipelines.echo.get_pipeline"><code class="docutils literal notranslate"><span class="pre">get_pipeline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html#qat.pipelines.echo.get_results_pipeline"><code class="docutils literal notranslate"><span class="pre">get_results_pipeline()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a><ul>
@@ -817,6 +836,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_connectivity"><code class="docutils literal notranslate"><span class="pre">random_connectivity()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_directed_connectivity"><code class="docutils literal notranslate"><span class="pre">random_directed_connectivity()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_quality_map"><code class="docutils literal notranslate"><span class="pre">random_quality_map()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.piny.html">qat.utils.piny module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.piny.html#qat.utils.piny.VeryStrictMatcher"><code class="docutils literal notranslate"><span class="pre">VeryStrictMatcher</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a><ul>
