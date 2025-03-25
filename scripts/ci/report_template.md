@@ -1,4 +1,4 @@
-## {{ package }} `{{ status }}`
+## {{ package }} Pytest Report `{{ status }}`
 https://github.com/{{repo_name}}
 
 {% if summaries.unit -%}

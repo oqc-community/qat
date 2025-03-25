@@ -1,19 +1,14 @@
 name: Unit tests of QAT
 
 on:
-  pull_request:
-    branches: [main, develop, '**patch-release**']
-
-permissions:
-  contents: write
-  actions: write
-  pull-requests: write
-
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      repository:
+        type: string
+        required: true
+        default: oqc-community/qat
   
-run-name: Units tests for QAT
+run-name: Units tests for QAT at ${{ github.ref }}
 
 jobs:
 
@@ -23,9 +18,13 @@ jobs:
     defaults:
       run:
         shell: bash
+    outputs:
+      report: ${{ steps.formatting.outputs.markdown-summary }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
 
       - name: Set up Python 3.x
         uses: actions/setup-python@v5
@@ -48,7 +47,7 @@ jobs:
 
       - name: Install dependancies
         if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
-        run: poetry install --sync --with dev
+        run: poetry install --with dev
 
       - name: jupytext tests
         id: jupytext
@@ -103,23 +102,11 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      - name: Generate static analysis report
-        uses: actions/github-script@v7
-        env:
-          SUMMARY: ${{ steps.formatting.outputs.markdown-summary }}
+      - name: Upload markdown report
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const maxGitHubBodyCharacters = 65536;
-            const output = process.env.SUMMARY + `
-
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;   
-            
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            }) 
+          path: static-report.md
+          name: formatting-markdown
 
   unit-tests:
     name: Unit Tests
@@ -135,7 +122,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
+        with:
+          python-version: ${{ matrix.python }}
 
   generate-report:
     name: Generate report
@@ -143,11 +134,17 @@ jobs:
     if: always()
     needs:
       - unit-tests
+      - formatting-tests
+    outputs:
+      report: ${{ steps.pytest.outputs.markdown-summary }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
 
       - uses: actions/download-artifact@v4
         with:
+          pattern: qat_*
           path: reports/
           merge-multiple: true
 
@@ -172,13 +169,13 @@ jobs:
 
       - name: Install dependancies
         if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
-        run: poetry install --sync --with dev
+        run: poetry sync --with dev
 
       - name: Generate report for pytest
-        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} qat-compiler -v
+        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} QAT -v
 
       - name: Output to step summary
-        id: report
+        id: pytest
         run: |
           SUMMARY=$(cat ./reports/output.md)
           echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
@@ -189,20 +186,8 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      - name: Update PR
-        uses: actions/github-script@v7
-        env:
-          SUMMARY: ${{ steps.report.outputs.markdown-summary }}
+      - name: Upload markdown report
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const maxGitHubBodyCharacters = 65536;
-            const output = process.env.SUMMARY + `
-          
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;   
-            
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            }) 
+          path: reports/output.md
+          name: pytest-markdown
