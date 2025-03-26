@@ -1,4 +1,4 @@
-name: Pull Requst Workflow
+name: Pull Request Workflow
 
 on:
   pull_request:
@@ -15,4 +15,5 @@ jobs:
     uses: ./.github/workflows/package-build.yaml
     with:
       repository: ${{ github.repository }}
+      formatting-tests: true
     secrets: inherit

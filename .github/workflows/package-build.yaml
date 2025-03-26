@@ -7,6 +7,10 @@ on:
         type: string
         required: true
         default: oqc-community/qat
+      formatting-tests:
+        type: boolean
+        required: false
+        default: true
   
 run-name: Units tests for QAT at ${{ github.ref }}
 
@@ -15,6 +19,7 @@ jobs:
   formatting-tests:
     name: Consistency and formatting
     runs-on: ubuntu-22.04
+    if: ${{ inputs.formatting-tests }}
     defaults:
       run:
         shell: bash
@@ -106,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: static-report.md
-          name: formatting-markdown
+          name: qat-formatting-markdown
 
   unit-tests:
     name: Unit Tests
@@ -190,4 +195,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: reports/output.md
-          name: pytest-markdown
+          name: qat-pytest-markdown
