@@ -198,14 +198,6 @@ class ContextMixin(ABC):
                 "Voltage range for Q exceeded. Make sure all I values are within the range [-1, 1]"
             )
 
-        if ((pulse.real > 0.3) | (pulse.imag > 0.3)).any():
-            log.warning(
-                """
-                Values above 0.3 will overdrive the mixer and  produce intermodulation distortion.
-                Consider adjusting attenuation instead.
-                """
-            )
-
         return pulse
 
     def _register_signal(self, waveform, target, data, name):
