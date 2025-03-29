@@ -4,6 +4,7 @@
 import math
 import random
 
+import numpy as np
 import pytest
 
 from qat.core.metrics_base import MetricsManager
@@ -18,9 +19,13 @@ from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.transform import (
+    AcquireSanitisation,
+    InstructionGranularitySanitisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
 )
+from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.compiler.instructions import Acquire, CustomPulse, Delay, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model
 
 
@@ -193,3 +198,178 @@ class TestPydPostProcessingSanitisation:
         pp = [instr for instr in builder if isinstance(instr, PydPostProcessing)]
         assert len(pp) == 2
         assert pp[0].output_variable != pp[1].output_variable
+
+
+class TestAcquireSanitisation:
+
+    def test_acquire_with_no_delay_is_unchanged(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        acquire_block_time = acquire_chan.physical_channel.block_time
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        builder.acquire(acquire_chan, time=acquire_block_time * 10, delay=0.0)
+
+        builder == AcquireSanitisation().run(builder)
+        assert len(builder.instructions) == 1
+        assert isinstance(builder.instructions[0], Acquire)
+
+    def test_acquire_with_delay_is_decomposed(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        acquire_block_time = acquire_chan.physical_channel.block_time
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        builder.acquire(
+            acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
+        )
+
+        builder == AcquireSanitisation().run(builder)
+        assert len(builder.instructions) == 2
+        assert isinstance(builder.instructions[0], Delay)
+        assert isinstance(builder.instructions[1], Acquire)
+
+    def test_acquire_with_delay_two_chans_is_decomposed(self):
+        model = EchoModelLoader(10).load()
+        builder = model.create_builder()
+        for qubit in (0, 1):
+            acquire_chan = model.qubits[qubit].get_acquire_channel()
+            acquire_block_time = acquire_chan.physical_channel.block_time
+
+            # Make some instructions to test
+            builder.acquire(
+                acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
+            )
+
+        builder == AcquireSanitisation().run(builder)
+        assert len(builder.instructions) == 4
+        assert isinstance(builder.instructions[0], Delay)
+        assert isinstance(builder.instructions[1], Acquire)
+        assert isinstance(builder.instructions[2], Delay)
+        assert isinstance(builder.instructions[3], Acquire)
+
+    def test_only_first_acquire_is_decomposed(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        acquire_block_time = acquire_chan.physical_channel.block_time
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        builder.acquire(
+            acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
+        )
+        builder.acquire(
+            acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
+        )
+
+        builder == AcquireSanitisation().run(builder)
+        assert len(builder.instructions) == 3
+        assert isinstance(builder.instructions[0], Delay)
+        assert isinstance(builder.instructions[1], Acquire)
+        assert isinstance(builder.instructions[2], Acquire)
+        assert builder.instructions[2].delay == 0.0
+
+
+class TestInstructionGranularitySanitisation:
+
+    def test_instructions_with_correct_timings_are_unchanged(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        drive_chan = model.qubits[0].get_drive_channel()
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        clock_cycle = 8e-8
+        delay_time = np.random.randint(1, 100) * clock_cycle
+        builder.delay(drive_chan, delay_time)
+        pulse_time = np.random.randint(1, 100) * clock_cycle
+        builder.pulse(
+            quantum_target=drive_chan, shape=PulseShapeType.SQUARE, width=pulse_time
+        )
+        acquire_time = np.random.randint(1, 100) * clock_cycle
+        builder.acquire(acquire_chan, time=acquire_time, delay=0.0)
+
+        ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
+
+        # compare in units of ns to ensure np.isclose works fine
+        assert np.isclose(ir.instructions[0].duration * 1e9, delay_time * 1e9)
+        assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
+        assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
+
+    def test_instructions_are_rounded_up(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        drive_chan = model.qubits[0].get_drive_channel()
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        clock_cycle = 8e-9
+        delay_time = np.random.randint(1, 100) * clock_cycle
+        builder.delay(drive_chan, delay_time + np.random.rand() * clock_cycle)
+        pulse_time = np.random.randint(1, 100) * clock_cycle
+        builder.pulse(
+            quantum_target=drive_chan,
+            shape=PulseShapeType.SQUARE,
+            width=pulse_time + np.random.rand() * clock_cycle,
+        )
+        acquire_time = np.random.randint(1, 100) * clock_cycle
+        builder.acquire(
+            acquire_chan,
+            time=acquire_time + np.random.rand() * clock_cycle,
+            delay=0.0,
+        )
+
+        ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
+
+        # compare in units of ns to ensure np.isclose works fine
+        assert np.isclose(
+            ir.instructions[0].duration * 1e9, (delay_time + clock_cycle) * 1e9
+        )
+        assert np.isclose(
+            ir.instructions[1].duration * 1e9, (pulse_time + clock_cycle) * 1e9
+        )
+        assert np.isclose(
+            ir.instructions[2].duration * 1e9, (acquire_time + clock_cycle) * 1e9
+        )
+
+    def test_custom_pulses_with_correct_length_are_unchanged(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        drive_chan = model.qubits[0].get_drive_channel()
+        sample_time = drive_chan.physical_channel.sample_time
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        clock_cycle = 8e-9
+        supersampling = int(np.round(clock_cycle / sample_time, 0))
+        num_samples = np.random.randint(1, 100) * supersampling
+        samples = [1.0] * num_samples
+        builder.add(CustomPulse(drive_chan, samples))
+
+        ir = InstructionGranularitySanitisation().run(builder)
+        assert ir.instructions[0].samples == samples
+
+    def test_custom_pulses_with_invalid_length_are_padded(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        drive_chan = model.qubits[0].get_drive_channel()
+        sample_time = drive_chan.physical_channel.sample_time
+        builder = model.create_builder()
+
+        # Make some instructions to test
+        clock_cycle = 8e-9
+        supersampling = int(np.round(clock_cycle / sample_time, 0))
+        num_samples = np.random.randint(1, 100) * supersampling
+
+        samples = [1.0] * (num_samples + np.random.randint(1, supersampling - 1))
+        builder.add(CustomPulse(drive_chan, samples))
+
+        ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
+        assert len(ir.instructions[0].samples) == num_samples + supersampling

@@ -3,6 +3,7 @@
 from numbers import Number
 from typing import Dict, List
 
+import numpy as np
 from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
@@ -19,8 +20,10 @@ from qat.ir.waveforms import Pulse as PydPulse
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
+    Acquire,
     AcquireMode,
     CustomPulse,
+    Delay,
     Instruction,
     PhaseReset,
     PhaseShift,
@@ -274,3 +277,117 @@ class PydPostProcessingSanitisation(TransformPass):
                 return False
 
         return True
+
+
+class AcquireSanitisation(TransformPass):
+    """Sanitises the :class:`Acquire` instruction: the first per pulse channel is split into
+    an :class:`Acquire` and a :class:`Delay`, and other acquisitions have their delay
+    removed.
+
+    :class:`Acquire` instructions are defined by a "duration" for which they instruct the
+    target to readout. They also contain a "delay" attribute, which instructions the
+    acquisition to start after some given time. This pass separates acqusitions with a
+    delay into two instructions for the first acquire that acts on the channel. For multiple
+    acquisitions on a single channel, the delay is not needed for the following
+    acquisitions, and is set to zero.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
+
+        new_instructions: list[Instruction] = []
+        acquired_channels: set[PulseChannel] = set()
+
+        for inst in ir.instructions:
+            if isinstance(inst, Acquire):
+                if inst.quantum_targets[0] in acquired_channels:
+                    # The acquire has already been seen, so set the delay to zero.
+                    inst.delay = 0.0
+                acquired_channels.update(inst.quantum_targets)
+
+                if inst.delay:
+                    delay = Delay(inst.quantum_targets, inst.delay)
+                    inst.delay = 0.0
+                    new_instructions.extend([delay, inst])
+                else:
+                    new_instructions.append(inst)
+            else:
+                new_instructions.append(inst)
+        ir.instructions = new_instructions
+        return ir
+
+
+class InstructionGranularitySanitisation(TransformPass):
+    """Rounds up the durations of quantum instructions so they are multiples of the clock
+    cycle.
+
+    Only supports quantum instructions with static non-zero durations. Assumes that
+    instructions with a non-zero duration only act on a single pulse channel. The
+    santisiation is done for all instructions simultaneously using numpy for performance.
+
+    The Pydantic version of the pass will require the (pydantic equivalent) pass
+    :class:`ActiveChannelAnalysis <qat.middleend.passes.analysis.ActiveChannelAnalysis>`
+    to have run, with results saved to the results manager to extract pulse channel
+    information.
+
+    .. warning::
+
+        This pass has the potential to invalidate the timings for sequences of instructions
+        that are time-sensitive. For example, if a pulse has an invalid time, it will round
+        it up to the nearest integer multiple. Furthemore, it will assume that
+        :class:`Acquire` instructions have no delay. This can be forced explicitly using the
+        :class:`AcquireSanitisation` pass.
+    """
+
+    # TODO: PydInstructionGranularitySanitisation: will require the PydActiveChannelAnalysis
+    # to extract the pulse/physical channel information (COMPILER-394)
+    # TODO: replace clock_cycle with target data (COMPILER-395)
+
+    def __init__(self, clock_cycle: float = 8e-9):
+        """:param clock_cycle: The clock cycle to round to."""
+
+        self.clock_cycle = clock_cycle
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
+
+        filter_instructions = [
+            inst
+            for inst in ir.instructions
+            if isinstance(inst, (Pulse, Acquire, Delay, CustomPulse))
+        ]
+
+        durations = np.asarray([inst.duration for inst in filter_instructions])
+
+        # We substract 1e-10 before rounding as floating point errors can lead to rounding
+        # problems.
+        multiples = durations / self.clock_cycle
+        rounded_multiples = np.ceil(multiples - 1e-10).astype(int)
+        durations_equal = np.isclose(multiples, rounded_multiples)
+
+        invalid_instructions: set[str] = set()
+        for idx in np.where(np.logical_not(durations_equal))[0]:
+            inst = filter_instructions[idx]
+            invalid_instructions.add(str(inst))
+            new_duration = rounded_multiples[idx] * self.clock_cycle
+            if isinstance(inst, CustomPulse):
+                sample_time = inst.quantum_targets[0].sample_time
+                padding = int(np.round((new_duration - durations[idx]) / sample_time, 0))
+                inst.samples.extend([0.0 + 0.0j] * padding)
+            elif isinstance(inst, Pulse):
+                inst.width = new_duration
+            else:
+                inst.time = new_duration
+
+        if len(invalid_instructions) > 1:
+            log.info(
+                "The following instructions do not have durations that are integer "
+                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded up: "
+                + ", ".join(set(invalid_instructions))
+            )
+
+        return ir

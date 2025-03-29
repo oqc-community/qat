@@ -34,6 +34,7 @@ from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -587,6 +588,14 @@ class TestQATPipelineSetup:
         assert res == {}
 
 
+def get_echo_model_without_acquire_delays():
+    """Creates an echo model without acquire delays for comparison with legacy code."""
+    model = EchoModelLoader(32).load()
+    for qubit in model.qubits:
+        qubit.measure_acquire["delay"] = 0.0
+    return model
+
+
 class TestQatEchoPipelines:
     """
     Parity tests specifically targeted at the echo engine in `purr` and new QAT. Aims to test:
@@ -598,7 +607,7 @@ class TestQatEchoPipelines:
         - Execution and results processing: are the results outputted in consistent formats?
     """
 
-    model = get_default_echo_hardware(32)
+    model = get_echo_model_without_acquire_delays()
     config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
     core: QAT = None
     legacy_ir = {}

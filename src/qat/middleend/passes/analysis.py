@@ -8,8 +8,9 @@ import numpy as np
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Repeat
+from qat.purr.compiler.instructions import Acquire, CustomPulse, Pulse, Repeat
 
 
 @dataclass
@@ -69,4 +70,40 @@ class BatchedShots(AnalysisPass):
         else:
             shots_per_batch = int(np.ceil(shots / num_batches))
         res_mgr.add(BatchedShotsResult(total_shots=shots, batched_shots=shots_per_batch))
+        return ir
+
+
+@dataclass
+class ActiveChannelResults(ResultInfoMixin):
+    targets: dict[str, PulseChannel]
+
+
+class ActiveChannelAnalysis(AnalysisPass):
+    """Determines the set of pulse channels which are targeted by quantum instructions.
+
+    A pulse channel that has a pulse played at any time, or an acquisition is defined to be
+    active. This pass is used to determine which pulse channels are required in compilation,
+    and is used in subsequent passes to easily extract pulse channel properties, and is
+    useful for not performing extra analysis on rogue channels picked up by
+    :class:`Synchronize` instructions.
+    """
+
+    # TODO: PydActiveChannelAnalysis: this will be even more useful for pydantic
+    # instructions (COMPILER-393)
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+
+        targets: dict[str, PulseChannel] = dict()
+        for inst in ir.instructions:
+            if isinstance(inst, (Acquire, Pulse, CustomPulse)):
+                for target in inst.quantum_targets:
+                    targets[target.full_id()] = target
+
+        res_mgr.add(ActiveChannelResults(targets=targets))
         return ir

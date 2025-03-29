@@ -11,6 +11,8 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.transform import (
+    AcquireSanitisation,
+    InstructionGranularitySanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
     PydPhaseOptimisation,
@@ -108,18 +110,21 @@ class DefaultMiddleend(CustomMiddleend):
     there are no mid-circuit measurements.
     """
 
-    def __init__(self, model: QuantumHardwareModel):
+    def __init__(self, model: QuantumHardwareModel, clock_cycle: float = 8e-9):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
+        :param clock_cycle: The period for a single sequencer clock cycle.
         """
-        pipeline = self.build_pass_pipeline(model)
+        pipeline = self.build_pass_pipeline(model, clock_cycle)
         super().__init__(model=model, pipeline=pipeline)
 
     @staticmethod
-    def build_pass_pipeline(model) -> PassManager:
+    def build_pass_pipeline(model, clock_cycle: float = 8e-9) -> PassManager:
         """
         Builds the default middle end pass pipeline.
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         :return: A :class:`PassManager` containing a sequence of passes.
         """
         return (
@@ -129,6 +134,8 @@ class DefaultMiddleend(CustomMiddleend):
             | PhaseOptimisation()
             | PostProcessingSanitisation()
             | ReadoutValidation(model)
+            | AcquireSanitisation()
+            | InstructionGranularitySanitisation(clock_cycle)
         )
 
 

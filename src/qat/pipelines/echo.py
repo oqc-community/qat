@@ -36,7 +36,7 @@ def get_pipeline(model, name="echo") -> Pipeline:
     return Pipeline(
         name=name,
         frontend=AutoFrontend(model),
-        middleend=DefaultMiddleend(model),
+        middleend=DefaultMiddleend(model, 1e-9),
         backend=WaveformV1Backend(model),
         runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),
         model=model,
