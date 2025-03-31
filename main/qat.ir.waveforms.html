@@ -561,11 +561,6 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FrozenSet[str]</span></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.targets" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PulseType</span></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.type" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.validate_duration">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Pulse.validate_duration" title="Link to this definition"></a></dt>
@@ -574,43 +569,6 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Pulse.waveform">
 <span class="sig-name descname"><span class="pre">waveform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[waveform_classes]</span></em><a class="headerlink" href="#qat.ir.waveforms.Pulse.waveform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.PulseType" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>States the intention of a pulse, e.g., to drive a Qubit, or take a measurement.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.CROSS_RESONANCE">
-<span class="sig-name descname"><span class="pre">CROSS_RESONANCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'cross_resonance'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.CROSS_RESONANCE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.CROSS_RESONANCE_CANCEL">
-<span class="sig-name descname"><span class="pre">CROSS_RESONANCE_CANCEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'cross_resonance_cancel'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.CROSS_RESONANCE_CANCEL" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.DRIVE">
-<span class="sig-name descname"><span class="pre">DRIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'drive'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.DRIVE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.MEASURE">
-<span class="sig-name descname"><span class="pre">MEASURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'measure'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.MEASURE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.OTHER">
-<span class="sig-name descname"><span class="pre">OTHER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'other'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.OTHER" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.ir.waveforms.PulseType.SECOND_STATE">
-<span class="sig-name descname"><span class="pre">SECOND_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'second_state'</span></em><a class="headerlink" href="#qat.ir.waveforms.PulseType.SECOND_STATE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
