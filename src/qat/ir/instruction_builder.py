@@ -33,7 +33,7 @@ from qat.ir.measure import (
     ProcessAxis,
     acq_mode_process_axis,
 )
-from qat.ir.waveforms import Pulse, PulseType, SampledWaveform
+from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import Component, DrivePulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
@@ -357,9 +357,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             **pulse_channel.pulse.model_dump()
         )
 
-        return [
-            Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform, type=PulseType.DRIVE)
-        ]
+        return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 
     def _hw_Z(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
@@ -415,12 +413,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             Synchronize(targets=[target1_pulse_channel.uuid, target2_pulse_channel.uuid]),
             Pulse(
                 targets=target1_pulse_channel.uuid,
-                type=PulseType.CROSS_RESONANCE,
                 waveform=waveform_type(**pulse),
             ),
             Pulse(
                 targets=target2_pulse_channel.uuid,
-                type=PulseType.CROSS_RESONANCE_CANCEL,
                 waveform=waveform_type(**pulse),
             ),
         ]
@@ -435,7 +431,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             waveform=measure_channel.pulse.waveform_type(
                 **measure_channel.pulse.model_dump()
             ),
-            type=PulseType.MEASURE,
         )
 
         # Acquire-related info.

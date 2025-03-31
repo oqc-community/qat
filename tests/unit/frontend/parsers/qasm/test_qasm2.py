@@ -79,10 +79,10 @@ class TestQasm2Parser:
     def test_random_n5_d5(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
         builder = parse_qasm2_and_apply_optimisations("random_n5_d5.qasm", hw)
-        assert count_number_of_pulses(builder, "drive") >= 60
-        assert count_number_of_pulses(builder, "cross_resonance") >= 60
-        assert count_number_of_pulses(builder, "cross_resonance_cancel") >= 60
-        assert count_number_of_pulses(builder, "measure") == 5
+        assert count_number_of_pulses(builder, "Drive") >= 60
+        assert count_number_of_pulses(builder, "CrossResonance") >= 60
+        assert count_number_of_pulses(builder, "CrossResonanceCancellation") >= 60
+        assert count_number_of_pulses(builder, "Measure") == 5
 
     def test_restrict_if(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
@@ -109,8 +109,8 @@ class TestQasm2Parser:
     def test_ecr(self, qasm_file, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
         builder = parse_qasm2_and_apply_optimisations(qasm_file, hw)
-        assert count_number_of_pulses(builder, "cross_resonance") == 2
-        assert count_number_of_pulses(builder, "cross_resonance_cancel") == 2
+        assert count_number_of_pulses(builder, "CrossResonance") == 2
+        assert count_number_of_pulses(builder, "CrossResonanceCancellation") == 2
 
     # TODO: Remove gates from list as support is added.
     _unsupported_gates = ("id", "u0", "rc3x", "c3x", "c3sqrtx", "c4x", "delay")

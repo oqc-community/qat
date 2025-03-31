@@ -16,6 +16,11 @@ from qat.ir.measure import (
     acq_mode_process_axis,
 )
 from qat.ir.waveforms import Pulse
+from qat.model.device import (
+    CrossResonanceCancellationPulseChannel,
+    CrossResonancePulseChannel,
+    MeasurePulseChannel,
+)
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
@@ -31,10 +36,12 @@ class TestInstructionBuilder:
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
 class TestPauliGates:
     def test_X_pi_2(self, qubit_index):
+        qubit = hw_model.qubit_with_index(qubit_index)
+
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
-        builder.X(target=hw_model.qubit_with_index(qubit_index), theta=np.pi / 2.0)
+        builder.X(target=qubit, theta=np.pi / 2.0)
         assert builder.number_of_instructions == 1
-        assert builder._ir.instructions[0].type.value == "drive"
+        assert builder._ir.instructions[0].target == qubit.drive_pulse_channel.uuid
 
     def test_X_min_pi_2(self, qubit_index):
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
@@ -48,11 +55,7 @@ class TestPauliGates:
         assert builder.number_of_instructions == ref_number_of_instructions
 
         phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
-        x_pi_2_pulses = [
-            instr
-            for instr in builder._ir
-            if (isinstance(instr, Pulse) and instr.type.value == "drive")
-        ]
+        x_pi_2_pulses = [instr for instr in builder._ir if (isinstance(instr, Pulse))]
         assert len(phase_shifts) == ref_number_of_instructions - 1
         assert len(x_pi_2_pulses) == 1
 
@@ -84,11 +87,7 @@ class TestPauliGates:
         assert builder.number_of_instructions == ref_number_of_instructions
 
         phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
-        x_pi_2_pulses = [
-            instr
-            for instr in builder._ir
-            if (isinstance(instr, Pulse) and instr.type.value == "drive")
-        ]
+        x_pi_2_pulses = [instr for instr in builder._ir if isinstance(instr, Pulse)]
         assert len(phase_shifts) == ref_number_of_instructions - 2
         assert len(x_pi_2_pulses) == 2
 
@@ -119,11 +118,7 @@ class TestPauliGates:
         assert builder.number_of_instructions == ref_number_of_instructions
 
         phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
-        x_pi_2_pulses = [
-            instr
-            for instr in builder._ir
-            if (isinstance(instr, Pulse) and instr.type.value == "drive")
-        ]
+        x_pi_2_pulses = [instr for instr in builder._ir if isinstance(instr, Pulse)]
         assert len(phase_shifts) == ref_number_of_instructions - 1
         assert len(x_pi_2_pulses) == 1
 
@@ -217,15 +212,23 @@ class TestTwoQubitGates:
             synchronizes = [
                 instr for instr in builder._ir if isinstance(instr, Synchronize)
             ]
+
             cr_pulses = [
                 instr
                 for instr in builder._ir
-                if isinstance(instr, Pulse) and instr.type.value == "cross_resonance"
+                if isinstance(instr, Pulse)
+                and isinstance(
+                    hw_model.pulse_channel_with_id(instr.target), CrossResonancePulseChannel
+                )
             ]
             crc_pulses = [
                 instr
                 for instr in builder._ir
-                if isinstance(instr, Pulse) and instr.type.value == "cross_resonance_cancel"
+                if isinstance(instr, Pulse)
+                and isinstance(
+                    hw_model.pulse_channel_with_id(instr.target),
+                    CrossResonanceCancellationPulseChannel,
+                )
             ]
 
             assert len(builder._ir.instructions) == 3
@@ -248,12 +251,19 @@ class TestTwoQubitGates:
             cr_pulses = [
                 instr
                 for instr in builder._ir
-                if isinstance(instr, Pulse) and instr.type.value == "cross_resonance"
+                if isinstance(instr, Pulse)
+                and isinstance(
+                    hw_model.pulse_channel_with_id(instr.target), CrossResonancePulseChannel
+                )
             ]
             crc_pulses = [
                 instr
                 for instr in builder._ir
-                if isinstance(instr, Pulse) and instr.type.value == "cross_resonance_cancel"
+                if isinstance(instr, Pulse)
+                and isinstance(
+                    hw_model.pulse_channel_with_id(instr.target),
+                    CrossResonanceCancellationPulseChannel,
+                )
             ]
             phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
 
@@ -285,9 +295,9 @@ class TestMeasure:
 
                 number_of_meas, number_of_acq = 0, 0
                 for sub_instruction in instruction:
-                    if (
-                        isinstance(sub_instruction, Pulse)
-                        and sub_instruction.type.value == "measure"
+                    if isinstance(sub_instruction, Pulse) and isinstance(
+                        hw_model.pulse_channel_with_id(sub_instruction.target),
+                        MeasurePulseChannel,
                     ):
                         number_of_meas += 1
                     elif isinstance(sub_instruction, Acquire):
@@ -323,9 +333,8 @@ class TestMeasure:
         assert isinstance(measure_block.instructions[0], Synchronize) and isinstance(
             measure_block.instructions[-1], Synchronize
         )
-        assert (
-            isinstance(measure := measure_block.instructions[1], Pulse)
-            and measure_block.instructions[1].type.value == "measure"
+        assert isinstance(measure := measure_block.instructions[1], Pulse) and isinstance(
+            hw_model.pulse_channel_with_id(measure.target), MeasurePulseChannel
         )
         assert (
             isinstance(acquire := measure_block.instructions[2], Acquire)

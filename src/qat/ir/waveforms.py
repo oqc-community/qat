@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from enum import Enum
 from typing import Literal, Optional, Type, Union
 
 import numpy as np
@@ -183,20 +182,6 @@ class SechWaveform(Waveform):
     shape_function_type: Type[SechFunction] = SechFunction
 
 
-class PulseType(Enum):
-    # TODO: Remove `PulseType` class as we do not really need this, the pulse type is implicitly encoded in the pulse channel class. #327
-    """
-    States the intention of a pulse, e.g., to drive a Qubit, or take a measurement.
-    """
-
-    DRIVE = "drive"
-    MEASURE = "measure"
-    SECOND_STATE = "second_state"
-    CROSS_RESONANCE = "cross_resonance"
-    CROSS_RESONANCE_CANCEL = "cross_resonance_cancel"
-    OTHER = "other"
-
-
 waveform_classes = tuple(find_all_subclasses(Waveform) + [SampledWaveform])
 
 
@@ -209,7 +194,6 @@ class Pulse(QuantumInstruction):
     inst: Literal["Pulse"] = "Pulse"
     targets: FrozenSet[str] = Field(max_length=1)
     ignore_channel_scale: bool = False
-    type: PulseType = PulseType.OTHER
     waveform: Union[waveform_classes]
 
     @model_validator(mode="before")
@@ -222,7 +206,7 @@ class Pulse(QuantumInstruction):
         return data
 
     def __repr__(self):
-        return f"{self.__class__.__name__} with type '{self.type.value}' on targets {set(self.targets)} with {self.waveform}."
+        return f"{self.__class__.__name__} on targets {set(self.targets)} with {self.waveform}."
 
     @property
     def target(self):

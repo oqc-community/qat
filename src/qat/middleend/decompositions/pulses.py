@@ -7,7 +7,7 @@ from qat.ir.gates.native import X_pi_2, Z_phase, ZX_pi_4
 from qat.ir.gates.operation import Barrier, Measure, Reset
 from qat.ir.instructions import PhaseShift, QuantumInstruction, Synchronize
 from qat.ir.measure import Acquire
-from qat.ir.waveforms import Pulse, PulseType, SampledWaveform, Waveform
+from qat.ir.waveforms import Pulse, SampledWaveform, Waveform
 from qat.middleend.decompositions.base import DecompositionBase
 from qat.middleend.decompositions.gates import (
     DefaultGateDecompositions,
@@ -96,9 +96,7 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         pulse_channel = qubit.drive_pulse_channel
         pulse_info = pulse_channel.pulse.model_dump()
         pulse_waveform = pulse_channel.pulse.waveform_type(**pulse_info)
-        return [
-            Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform, type=PulseType.DRIVE)
-        ]
+        return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 
     @decompose_op.register(Z_phase)
     def _(self, gate: Z_phase, model: PhysicalHardwareModel):
@@ -148,12 +146,10 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
             Synchronize(targets=[target1_pulse_channel.uuid, target2_pulse_channel.uuid]),
             Pulse(
                 targets=target1_pulse_channel.uuid,
-                type=PulseType.CROSS_RESONANCE,
                 waveform=target1_pulse_channel.zx_pi_4_pulse.waveform_type(**pulse_info),
             ),
             Pulse(
                 targets=target2_pulse_channel.uuid,
-                type=PulseType.CROSS_RESONANCE_CANCEL,
                 waveform=target1_pulse_channel.zx_pi_4_pulse.waveform_type(**pulse_info),
             ),
         ]
@@ -189,7 +185,6 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
         measure_instruction = Pulse(
             targets=measure_channel.uuid,
             waveform=Waveform(**measure_channel.pulse.model_dump()),
-            type=PulseType.MEASURE,
         )
 
         # Acquire-related info.

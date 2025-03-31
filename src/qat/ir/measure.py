@@ -120,8 +120,6 @@ class MeasureBlock(QuantumInstructionBlock):
                 raise TypeError(
                     f"Instruction {instruction} not suitable for `MeasureBlock`. Instruction type should be in {self._valid_instructions}."
                 )
-            elif isinstance(instruction, Pulse) and instruction.type.value != "measure":
-                raise TypeError(f"Pulse {instruction} is not a measure pulse.")
 
     @model_validator(mode="before")
     def validate_targets(cls, data, field_name="qubit_targets"):

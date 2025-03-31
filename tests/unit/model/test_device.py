@@ -83,6 +83,20 @@ class TestDevicesValidation:
         with pytest.raises(ValidationError):
             pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
+    def test_custom_pulse_channel(self, seed):
+        class CustomPulseChannel(PulseChannel): ...
+
+        custom_pulse_ch = CustomPulseChannel()
+        assert custom_pulse_ch.pulse_type == "custom"
+
+        with pytest.raises(TypeError):
+            # `PulseChannel` should be in the class name
+            class InvalidChannel(PulseChannel): ...
+
+        with pytest.raises(TypeError):
+            # `PulseChannel` should be at the end in the class name
+            class InvalidPulseChannelSuffix(PulseChannel): ...
+
     def test_resonator(self, seed):
         bb = PhysicalBaseband(
             frequency=random.Random(seed).uniform(1e05, 1e07),

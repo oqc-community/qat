@@ -56,13 +56,14 @@ regex = ">=2022.6.2"
 jsonpickle = ">=2.2.0"
 qblox-instruments = "0.15.0"
 lark-parser = "^0.12.0"
+pydantic = "2.10.6" # TODO: change to 2.11 (see COMPILER-396 and 399)
 pydantic-settings = ">=2.5.2"
 compiler-config = "0.1.0"
 pydantic-extra-types = "^2.10.0"
 numpydantic = ">=1.6.7"
 semver = "^3.0.2"
 frozendict = "^2.4.6"
-piny = {extras = ["pydantic"], version = "^1.1.0"}
+piny = {version = "^1.1.0"}
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["jupyter"], version = "^24.10.0"}
@@ -191,7 +192,9 @@ filterwarnings = [
     'default:.*invalid escape sequence:SyntaxWarning::1092',
     'default:.*invalid escape sequence:DeprecationWarning::1092',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
-    'default:.*GlobalisePhasedX:DeprecationWarning'
+    'default:.*GlobalisePhasedX:DeprecationWarning',
+    # TODO: Remove calls to `model_fields` attribute in instance of a `BaseModel` class (COMPILER-396)
+    #'default:Accessing this attribute on the instance is deprecated, and will be removed in Pydantic V3. Instead, you should access this attribute from the model class.:pydantic.warnings.PydanticDeprecatedSince211'
 ]
 markers = [
   "ab_test",

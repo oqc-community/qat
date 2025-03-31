@@ -1226,7 +1226,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             if not expr_list:
                 # Strip off the type as we have no need for it here.
                 # No type given if an expression list
-                arg_mappings = [name for type_, name in arg_mappings]
+                arg_mappings = [name for _, name in arg_mappings]
 
             if not isinstance(arg_mappings, list):
                 arg_mappings = [arg_mappings]

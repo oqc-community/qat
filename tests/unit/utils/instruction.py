@@ -26,8 +26,13 @@ def count_number_of_non_sync_instructions(
 
 
 def count_number_of_pulses(builder: QuantumInstructionBuilder, pulse_type: str = "measure"):
+    hw = builder.hw
+
     n_pulse = 0
     for instr in builder._ir:
-        if isinstance(instr, Pulse) and instr.type.value == pulse_type:
+        if (
+            isinstance(instr, Pulse)
+            and pulse_type.lower() == hw.pulse_channel_with_id(instr.target).pulse_type
+        ):
             n_pulse += 1
     return n_pulse

@@ -109,8 +109,8 @@ class TestQasm3Parser:
         parser = Qasm3Parser()
 
         builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
-        assert count_number_of_pulses(builder, "cross_resonance") == 2
-        assert count_number_of_pulses(builder, "cross_resonance_cancel") == 2
+        assert count_number_of_pulses(builder, "CrossResonance") == 2
+        assert count_number_of_pulses(builder, "CrossResonanceCancellation") == 2
 
     def test_no_header(self, n_qubits):
         hw = generate_hw_model(n_qubits)

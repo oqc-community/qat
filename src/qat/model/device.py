@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import re
 import uuid
 from typing import Optional
 
@@ -106,6 +107,9 @@ class PhysicalChannel(Component):
     bias: float | complex = 0.0 + 0.0j
 
 
+pulse_channel_check = re.compile(r"PulseChannel$")
+
+
 class PulseChannel(Component):
     """
     Models a pulse channel on a particular device.
@@ -123,6 +127,17 @@ class PulseChannel(Component):
     phase_iq_offset: float | complex = 0.0 + 0.0j
     scale: float | complex = 1.0 + 0.0j
     fixed_if: bool = False
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if not pulse_channel_check.search(cls.__name__):
+            raise TypeError(
+                f"The class name '{cls.__name__}' must contain `PulseChannel` at the end."
+            )
+
+    @property
+    def pulse_type(self):
+        return self.__class__.__name__.replace("PulseChannel", "").lower()
 
 
 class CalibratablePulse(NoExtraFieldsModel):
@@ -324,6 +339,13 @@ class QubitPulseChannels(PulseChannelSet):
             *self.cross_resonance_channels.values(),
             *self.cross_resonance_cancellation_channels.values(),
         ]
+
+    def pulse_channel_with_id(self, id_: str):
+        for pulse_ch in self.all_pulse_channels:
+            if pulse_ch.uuid == id_:
+                return pulse_ch
+
+        return None
 
 
 class Qubit(Component):

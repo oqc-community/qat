@@ -149,7 +149,6 @@ class TestMeasureBlock:
                 ),
                 duration=1e-03,
                 targets=measure_channel.uuid,
-                type="measure",
             )
         )
         assert mb.number_of_instructions == 1
@@ -219,7 +218,6 @@ class TestMeasureBlock:
                 ),
                 duration=1e-03,
                 targets=measure_channel.uuid,
-                type="measure",
             )
             custom_mb.add(measure)
 
