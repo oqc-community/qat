@@ -2,6 +2,7 @@
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import re
 from typing import List, Optional, Tuple, Union
+from warnings import warn
 
 import numpy as np
 from compiler_config.config import (
@@ -11,7 +12,7 @@ from compiler_config.config import (
 )
 from qiskit import QiskitError, QuantumCircuit, transpile
 from qiskit.transpiler import CouplingMap
-from qiskit.transpiler.passes import CheckMap
+from qiskit.transpiler.passes import CheckGateDirection, CheckMap
 from qiskit_aer import AerSimulator
 from qiskit_aer.backends.backendconfiguration import AerBackendConfiguration
 
@@ -233,6 +234,17 @@ def verify_placement(coupling_map, circuit):
             f" {checker.property_set['check_map_msg']}"
         )
 
+    checker = CheckGateDirection(cmap)
+    checker(circuit)
+    if not checker.property_set["is_direction_mapped"]:
+        warn(
+            "Placement would fail on a real QPU with the same topology due to invalid gate "
+            "directions. This is currently allowed for the Qiskit simulator, but will be "
+            "changed in future versions of QAT.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
 
 class QiskitEngine(InstructionExecutionEngine):
     def __init__(self, hardware_model: QiskitHardwareModel = None):
@@ -248,8 +260,9 @@ class QiskitEngine(InstructionExecutionEngine):
             method=method,
             **qiskitconfig.OPTIONS,
         )
+        initial_layout = {qb: i for i, qb in enumerate(builder.circuit.qubits)}
         job = qasm_sim.run(
-            transpile(builder.circuit, qasm_sim, coupling_map=coupling_map),
+            transpile(builder.circuit, qasm_sim, initial_layout=initial_layout),
             shots=builder.shot_count,
         )
         return job.result()
@@ -282,7 +295,8 @@ class QiskitEngine(InstructionExecutionEngine):
         # With no coupling map the backend defaults to create couplings for qubit count, which
         # defaults to 30. So we change that.
         aer_config = AerBackendConfiguration.from_dict(
-            AerSimulator._DEFAULT_CONFIGURATION | {"open_pulse": False}
+            AerSimulator._DEFAULT_CONFIGURATION
+            | {"open_pulse": False, "coupling_map": coupling_map}
         )
         aer_config.n_qubits = self.model.qubit_count
 

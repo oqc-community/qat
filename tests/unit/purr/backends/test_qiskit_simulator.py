@@ -5,7 +5,7 @@ from random import seed
 
 import networkx as nx
 import pytest
-from compiler_config.config import Qasm2Optimizations
+from compiler_config.config import CompilerConfig, Qasm2Optimizations, Tket
 from docplex.mp.model import Model
 from numpy import array, random
 from qiskit import QuantumCircuit
@@ -39,7 +39,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.purr.integrations.qiskit import QatBackend
-from qat.purr.qat import execute_qasm_with_metrics
+from qat.purr.qat import execute_qasm, execute_qasm_with_metrics
 
 from tests.unit.utils.qasm_qir import get_qasm2
 
@@ -67,8 +67,11 @@ class TestQiskitSimulator:
             results = runtime.execute(builder)
             assert len(results) > 0
 
-    def test_coupled_qasm_hardware(self):
-        seed(4)
+    @pytest.mark.parametrize("with_seed", [False, True])
+    def test_coupled_qasm_hardware(self, with_seed):
+        """Includes a regression test with a seed that has caused problems in the past."""
+        if with_seed:
+            seed(454)
         hardware = get_default_qiskit_hardware(35)
         builder = self.parse_and_apply_optimiziations(hardware, "15qb.qasm")
         runtime = hardware.create_runtime()
@@ -506,6 +509,51 @@ class TestQiskitSimulator:
         )
         assert counts["0" * qubit_count] + counts["1" * qubit_count] == 1000
         qiskitconfig.ENABLE_METADATA = False
+
+    @pytest.mark.parametrize("qubit_pair", [[0, 2]])
+    def test_cx_on_invalid_coupling(self, qubit_pair):
+        """Tests that a CX gates on an invalid coupling fails due to placement
+        verification."""
+
+        model = get_default_qiskit_hardware(10)
+        builder = model.create_builder()
+        builder.cnot(model.qubits[qubit_pair[0]], model.qubits[qubit_pair[1]])
+        builder.measure(model.qubits[qubit_pair[0]])
+        builder.measure(model.qubits[qubit_pair[1]])
+        engine = model.create_engine()
+        with pytest.raises(RuntimeError):
+            engine.execute(builder)
+
+    @pytest.mark.parametrize("qubit_pair", [[1, 0]])
+    def test_cx_on_wrong_direction(self, qubit_pair):
+        """Tests that a CX gates on a coupling with a wrong direction warns about the
+        wrong direction."""
+
+        model = get_default_qiskit_hardware(10)
+        builder = model.create_builder()
+        builder.cnot(model.qubits[qubit_pair[0]], model.qubits[qubit_pair[1]])
+        builder.measure(model.qubits[qubit_pair[0]])
+        builder.measure(model.qubits[qubit_pair[1]])
+        engine = model.create_engine()
+        with pytest.warns(DeprecationWarning):
+            results = engine.execute(builder)
+        assert len(results) == 1
+        assert "00" in results
+
+    @pytest.mark.parametrize("with_seed", [False, True])
+    def test_qft_circuit(self, with_seed):
+        """Regression test for a QFT circuit, including a seed that has caused problems in
+        the past."""
+        if with_seed:
+            seed(254)
+        model = get_default_qiskit_hardware(10)
+        qasm_str = get_qasm2("qft_5q.qasm")
+        config = CompilerConfig(optimizations=Tket().default())
+        results = execute_qasm(qasm_str, model, config)
+        assert len(results) == 1
+        assert "c" in results
+        assert "00000" in results["c"]
+        assert len(results["c"]) == 1
 
 
 class TestQiskitOptimization:
