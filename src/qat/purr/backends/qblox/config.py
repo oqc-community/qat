@@ -253,26 +253,35 @@ class QbloxConfigHelper(ABC):
         if self.sequencer_config.mixer.gain_ratio:
             sequencer.mixer_corr_gain_ratio(self.sequencer_config.mixer.gain_ratio)
 
-    def calibrate_mixer(self, module: Module, sequencer: Sequencer):
+    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
         """
         - Compensates for the LO leakage for input(s)/output(s) depending on module
         - Suppresses undesired sideband on sequencer
         """
-        self.calibrate_lo_leakage(module)
-        self.calibrate_sideband(sequencer)
+
+        pass
 
     @abstractmethod
     def calibrate_lo_leakage(self, module: Module):
         pass
 
-    def calibrate_sideband(self, sequencer: Sequencer):
+    def calibrate_sideband(self, sequencer: Sequencer, connection: str = None):
+        connection = connection or "out0"
+        sequencer.connect_sequencer(connection)
         sequencer.sideband_cal()
         sequencer.arm_sequencer()
         sequencer.start_sequencer()
 
 
 class QcmConfigHelper(QbloxConfigHelper):
-    pass
+
+    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
+        try:
+            module.disconnect_outputs()
+            self.calibrate_lo_leakage(module)
+            self.calibrate_sideband(sequencer, connection)
+        finally:
+            module.disconnect_outputs()
 
 
 class QcmRfConfigHelper(QcmConfigHelper):
@@ -319,6 +328,18 @@ class QcmRfConfigHelper(QcmConfigHelper):
 
 
 class QrmConfigHelper(QbloxConfigHelper):
+
+    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
+        try:
+            module.disconnect_outputs()
+            module.disconnect_inputs()
+
+            self.calibrate_lo_leakage(module)
+            self.calibrate_sideband(sequencer, connection)
+        finally:
+            module.disconnect_outputs()
+            module.disconnect_inputs()
+
     def configure_scope_acq(self, module: Module):
         scope_acq = self.module_config.scope_acq
         if scope_acq.sequencer_select:

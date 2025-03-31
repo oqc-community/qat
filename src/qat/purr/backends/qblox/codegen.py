@@ -240,7 +240,7 @@ class ContextMixin(ABC):
         i_index,
         q_index,
     ):
-        flight_nanos = int(delay_seconds * 1e9)
+        flight_nanos = max(int(delay_seconds * 1e9), Constants.GRID_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
             self.sequence_builder.upd_param(flight_nanos)

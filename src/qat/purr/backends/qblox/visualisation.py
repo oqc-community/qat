@@ -66,7 +66,7 @@ def plot_acquisitions(acquisitions: Dict, *args, **kwargs):
             squeeze=False,
             figsize=(10, 5),
         )
-        fig.suptitle(f"Scope and Acquisition plots for {acq_name}")
+        fig.suptitle(f"Scope and Integrator acquisitions for {acq_name}")
 
         # Scope acquisition
         scope_acq_i = np.array(acq["acquisition"]["scope"]["path0"]["data"])
