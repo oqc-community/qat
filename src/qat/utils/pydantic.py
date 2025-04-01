@@ -6,7 +6,7 @@ import re
 from collections.abc import Iterable
 from copy import deepcopy
 from pydoc import locate
-from typing import Annotated, Any, TypeVar, get_args
+from typing import Annotated, Any, Type, TypeVar, get_args
 
 import numpy as np
 from frozendict import frozendict
@@ -470,3 +470,36 @@ def find_all_subclasses(cls: Type) -> list[Type]:
     for subclass in subclasses:
         subclasses.extend(find_all_subclasses(subclass))
     return subclasses
+
+
+# Efficient serializing of numeric numpy arrays
+def _list_serializer(lst):
+    """Lists of complex numbers can be expensive to serialise: by serializing type
+    information and its value as a hex, we can have more performant serialization."""
+    lst = np.asarray(lst)
+    return {"dtype": lst.dtype.name, "shape": lst.shape, "value": lst.tobytes().hex()}
+
+
+def _list_validator(lst, ty: type):
+    """Reverts the hex value and type information into a numpy array."""
+    if isinstance(lst, dict):
+        arr = np.frombuffer(bytearray.fromhex(lst["value"]), dtype=np.dtype(lst["dtype"]))
+        return arr.reshape(lst["shape"])
+    if isinstance(lst, list):
+        return np.asarray(lst, dtype=ty)
+    return lst
+
+
+def get_annotated_array(ty: type):
+    """Creates an annotated type for numeric lists with Pydantic serializers and validators
+    for efficient serialization."""
+    return Annotated[
+        NDArray[Shape["* x"], ty],
+        BeforeValidator(lambda x: _list_validator(x, ty)),
+        PlainSerializer(_list_serializer),
+    ]
+
+
+IntNDArray = get_annotated_array(int)
+FloatNDArray = get_annotated_array(float)
+ComplexNDArray = get_annotated_array(complex)

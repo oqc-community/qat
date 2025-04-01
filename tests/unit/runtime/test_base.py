@@ -8,7 +8,7 @@ from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
 from qat.runtime import BaseRuntime, ResultsAggregator
 from qat.runtime.connection import ConnectionMode
-from qat.runtime.executables import AcquireDataStruct
+from qat.runtime.executables import AcquireData
 
 
 class TestBaseRuntime:
@@ -151,7 +151,7 @@ class TestResultsAggregator:
     @pytest.mark.parametrize("max_shots", [None, 9999, 10000])
     def test_raw(self, max_shots):
         acquires = [
-            AcquireDataStruct(
+            AcquireData(
                 length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
             )
         ]
@@ -168,7 +168,7 @@ class TestResultsAggregator:
     @pytest.mark.parametrize("max_shots", [None, 9999, 10000])
     def test_integrator(self, max_shots):
         acquires = [
-            AcquireDataStruct(
+            AcquireData(
                 length=254, position=0, mode=AcquireMode.INTEGRATOR, output_variable="test"
             )
         ]
@@ -185,7 +185,7 @@ class TestResultsAggregator:
     @pytest.mark.parametrize("max_shots", [None, 9999, 10000])
     def test_scope(self, max_shots):
         acquires = [
-            AcquireDataStruct(
+            AcquireData(
                 length=254, position=0, mode=AcquireMode.SCOPE, output_variable="test"
             )
         ]

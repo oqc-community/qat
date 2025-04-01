@@ -37,7 +37,7 @@ from qat.purr.compiler.instructions import (
     Reset,
     Waveform,
 )
-from qat.runtime.executables import AcquireDataStruct
+from qat.runtime.executables import AcquireData
 
 
 class WaveformV1Backend(BaseBackend, InvokerMixin):
@@ -201,7 +201,7 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             for acquire in acquire_list:
                 idx = triage_res.target_map[pulse_channel].index(acquire)
                 acq_list.append(
-                    AcquireDataStruct(
+                    AcquireData(
                         length=timeline_res.durations[pulse_channel][idx],
                         position=np.sum(timeline_res.durations[pulse_channel][0:idx]),
                         mode=acquire.mode,

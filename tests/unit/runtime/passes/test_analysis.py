@@ -4,7 +4,7 @@
 from qat.core.result_base import ResultManager
 from qat.ir.measure import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
+from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 
 
@@ -23,7 +23,7 @@ class TestIndexMappingAnalysis:
     def create_executable(self):
         model = get_default_echo_hardware(2)
         acquires = [
-            AcquireDataStruct(
+            AcquireData(
                 length=1,
                 position=0,
                 mode=AcquireMode.INTEGRATOR,
@@ -37,7 +37,7 @@ class TestIndexMappingAnalysis:
         channel_ids = [
             model.get_qubit(i).measure_device.physical_channel.full_id() for i in range(2)
         ]
-        package = Executable(
+        package = ChannelExecutable(
             channel_data={channel_ids[0]: channel1, channel_ids[1]: channel2}
         )
         return model, package

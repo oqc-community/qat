@@ -5,25 +5,25 @@ import numpy as np
 
 from qat.engines.zero import ZeroEngine, readout_shape
 from qat.purr.compiler.instructions import AcquireMode
-from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
+from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 
 
 class TestReadoutShape:
 
     def test_integrator(self):
-        acquire = AcquireDataStruct(
+        acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.INTEGRATOR, output_variable="test"
         )
         assert readout_shape(acquire, 1234) == (1234,)
 
     def test_scope(self):
-        acquire = AcquireDataStruct(
+        acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.SCOPE, output_variable="test"
         )
         assert readout_shape(acquire, 1234) == (254,)
 
     def test_raw(self):
-        acquire = AcquireDataStruct(
+        acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
         )
         assert readout_shape(acquire, 1234) == (
@@ -37,10 +37,10 @@ class TestZeroEngine:
     def test_mock_data(self):
         channel1 = ChannelData(
             acquires=[
-                AcquireDataStruct(
+                AcquireData(
                     length=254, position=0, mode=AcquireMode.SCOPE, output_variable="test0"
                 ),
-                AcquireDataStruct(
+                AcquireData(
                     length=42,
                     position=0,
                     mode=AcquireMode.INTEGRATOR,
@@ -49,19 +49,19 @@ class TestZeroEngine:
             ]
         )
         channel2 = ChannelData(
-            acquires=AcquireDataStruct(
+            acquires=AcquireData(
                 length=254, position=0, mode=AcquireMode.RAW, output_variable="test2"
             )
         )
         channel3 = ChannelData(
             acquires=[
-                AcquireDataStruct(
+                AcquireData(
                     length=254,
                     position=0,
                     mode=AcquireMode.INTEGRATOR,
                     output_variable="test3",
                 ),
-                AcquireDataStruct(
+                AcquireData(
                     length=254,
                     position=1000,
                     mode=AcquireMode.INTEGRATOR,
@@ -69,7 +69,7 @@ class TestZeroEngine:
                 ),
             ]
         )
-        package = Executable(
+        package = ChannelExecutable(
             shots=1000,
             compiled_shots=454,
             channel_data={"CH1": channel1, "CH2": channel2, "CH3": channel3},

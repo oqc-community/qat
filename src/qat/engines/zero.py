@@ -5,7 +5,7 @@ import numpy as np
 from qat.engines.native import NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
-from qat.runtime.executables import AcquireDataStruct, Executable
+from qat.runtime.executables import AcquireData, Executable
 
 log = get_default_logger()
 
@@ -33,7 +33,7 @@ class ZeroEngine(NativeEngine):
         return results
 
 
-def readout_shape(acquire: AcquireDataStruct, shots: int) -> tuple[int, ...]:
+def readout_shape(acquire: AcquireData, shots: int) -> tuple[int, ...]:
     """Generates the shape of the readout given the acquire information and number of shots.
 
     :param acquire: The acquisition information.

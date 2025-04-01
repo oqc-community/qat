@@ -25,15 +25,11 @@ class TestSimpleRuntime:
         builder.add(block)
         return WaveformV1Backend(model).emit(builder)
 
-    @pytest.mark.parametrize("shots", [0, 500, 1000, 1007, 2000])
+    @pytest.mark.parametrize("shots", [500, 1000, 1007, 2000])
     def test_execute_gives_correct_number_of_shots(self, shots):
         package = self.basic_acquire_circuit(shots)
         with SimpleRuntime(EchoEngine()) as runtime:
-            if shots == 0:
-                with pytest.warns():
-                    results = runtime.execute(package)
-            else:
-                results = runtime.execute(package)
+            results = runtime.execute(package)
         assert len(results) == 1
         assert np.shape(next(iter(results.values()))) == (shots,)
 

@@ -11,7 +11,7 @@ from qat.engines import ConnectionMixin, NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.qatconfig import qatconfig
 from qat.runtime.connection import ConnectionMode
-from qat.runtime.executables import AcquireDataStruct
+from qat.runtime.executables import AcquireData
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     InlineResultsProcessingTransform,
@@ -149,11 +149,11 @@ class BaseRuntime(abc.ABC):
 class ResultsAggregator:
     """Aggregates the acquisition results from batching of shots."""
 
-    def __init__(self, acquires: List[AcquireDataStruct]):
+    def __init__(self, acquires: List[AcquireData]):
         """Begin the aggregation of results for a list of acquisitions.
 
         :param acquires: List of acquires to be collected.
-        :type acquires: List[AcquireDataStruct]
+        :type acquires: List[AcquireData]
         """
         self._results = {}
         for acquire in acquires:

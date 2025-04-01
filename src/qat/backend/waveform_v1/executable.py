@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import List, Optional
 
 import numpy as np
-from pydantic import ConfigDict, field_serializer, field_validator
 
-from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
+from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
+from qat.utils.pydantic import ComplexNDArray
 
 
 class WaveformV1ChannelData(ChannelData):
@@ -15,42 +14,17 @@ class WaveformV1ChannelData(ChannelData):
 
     Stores the waveforms and acqusitions needed for execution. No control flow is possible.
 
-    :param np.ndarray buffer: The waveform to be sent at each sample.
+    :param buffer: The waveform to be sent at each sample.
+    :type buffer: list[complex]
     :param baseband_frequency: The frequency to be set for the baseband.
-    :type baseband_frequency: Optional[float]
+    :type baseband_frequency: float | None
     :param acquires: Acquire information needed for readouts.
-    :type acquires: List[AcquireDataStruct]
+    :type acquires: list[AcquireData]
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    buffer: np.ndarray = np.ndarray([])
-    baseband_frequency: Optional[float] = None
-    acquires: List[AcquireDataStruct] = []
-
-    @field_serializer("buffer", when_used="json")
-    def _serialize_nparray_as_bytes(self, lst):
-        """
-        Lists of complex numbers can be expensive to serialise: by serializing type
-        information and its value as a hex, we can have more performant serialization.
-        """
-        lst = np.array(lst)
-        return {"dtype": lst.dtype.name, "shape": lst.shape, "value": lst.tobytes().hex()}
-
-    @field_validator("buffer", mode="before")
-    @classmethod
-    def _deserialize_bytes_to_nparray(cls, lst):
-        """
-        Reverts the hex value and type information into a numpy array.
-        """
-        if isinstance(lst, dict):
-            arr = np.frombuffer(
-                bytearray.fromhex(lst["value"]), dtype=np.dtype(lst["dtype"])
-            )
-            return arr.reshape(lst["shape"])
-
-        # validators are run for any instantiation, so if its not a dict, we don't need any
-        # special validation.
-        return lst
+    buffer: ComplexNDArray = np.ndarray([])
+    baseband_frequency: float | None = None
+    acquires: list[AcquireData] = []
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -64,7 +38,7 @@ class WaveformV1ChannelData(ChannelData):
         return True
 
 
-class WaveformV1Executable(Executable):
+class WaveformV1Executable(ChannelExecutable):
     """
     A :class:`WaveformV1Executable` is an executable used in early iterations of QAT.
 
@@ -81,13 +55,13 @@ class WaveformV1Executable(Executable):
     :param float repetition_time: The amount of time to wait between shots for the QPU to
         reset.
     :param post_processing: Contains the post-processing information for each acquisition.
-    :type post_processing: Dict[str, List[PostProcessing]]
+    :type post_processing: dict[str, list[PostProcessing]]
     :param results_processing: Contains the information for how results should be formatted.
-    :type results_processing: Dict[str, InlineResultsProcessing]
+    :type results_processing: dict[str, InlineResultsProcessing]
     :param assigns: Assigns results to given variables.
-    :type assigns: List[Assign]
+    :type assigns: list[Assign]
     :param returns: Which acqusitions/variables should be returned.
-    :type returns: List[str]
+    :type returns: list[str]
     """
 
     channel_data: dict[str, WaveformV1ChannelData]

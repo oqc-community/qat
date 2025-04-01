@@ -8,7 +8,7 @@ from qat.engines.waveform_v1 import EchoEngine
 from qat.ir.measure import PostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
-from qat.runtime.executables import AcquireDataStruct, ChannelData, Executable
+from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     InlineResultsProcessingTransform,
@@ -45,10 +45,10 @@ class TestPostProcessingTransform:
                 args=[1.6],
             ),
         ]
-        acquire = AcquireDataStruct(
+        acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
         )
-        package = Executable(
+        package = ChannelExecutable(
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )
@@ -74,10 +74,10 @@ class TestPostProcessingTransform:
                 args=[1.6],
             ),
         ]
-        acquire = AcquireDataStruct(
+        acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
         )
-        package = Executable(
+        package = ChannelExecutable(
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )

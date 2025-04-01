@@ -54,7 +54,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.qat import _return_or_build, fetch_frontend
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import LegacyRuntime, SimpleRuntime
-from qat.runtime.executables import Executable
+from qat.runtime.executables import ChannelExecutable, Executable
 from qat.runtime.simple import SimpleRuntime
 
 dir_path = Path(__file__).parents[2]
@@ -581,7 +581,7 @@ class TestQATPipelineSetup:
         assert pkg == src
 
     def test_execute(self, fallthrough_pipeline):
-        pkg = Executable()
+        pkg = ChannelExecutable()
         q = QAT()
         q.pipelines.add(fallthrough_pipeline)
         res, _ = q.execute(pkg, pipeline="fallthrough")

@@ -30,7 +30,7 @@ class EchoEngine(NativeEngine):
         shots = package.compiled_shots if package.compiled_shots else package.shots
         results = {}
         for channel_data in package.channel_data.values():
-            buffer = channel_data.buffer
+            buffer = np.asarray(channel_data.buffer)
             for acquire in channel_data.acquires:
                 results[acquire.output_variable] = process_readout(
                     buffer[acquire.position : acquire.position + acquire.length],
