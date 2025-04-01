@@ -36,7 +36,7 @@ implement an engine. The engine is expected to uphold a contract with the Runtim
   format, which is a dictionary of acquisition results (one result per acquisition). The
   result is an array of readout acquisitions, whose shape will depend on the acquisition
   mode. The key for the acquisition in the dictionary is the :attr:`output_variable` stored
-  in the :class:`AcquireDataStruct <qat.runtime.executables.AcquireDataStruct>`.
+  in the :class:`AcquireData <qat.runtime.executables.AcquireData>`.
 * The number of shots to execute is stored in the attribute :attr:`compiled_shots`. Note
   that while the total number of shots in a program might be larger than the
   :attr:`compiled_shots`, sometimes the target cannot support the required amount of shots.

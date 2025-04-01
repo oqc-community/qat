@@ -454,7 +454,7 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed">acquire_weighed() (SequenceBuilder method)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct">AcquireDataStruct (class in qat.runtime.executables)</a>
+      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData">AcquireData (class in qat.runtime.executables)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode">AcquireMode (class in qat.purr.compiler.instructions)</a>
 </li>
@@ -463,13 +463,13 @@
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData.acquires">acquires (ChannelData attribute)</a>
 
       <ul>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.acquires">(ChannelExecutable property)</a>
+</li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.acquires">(Executable property)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires">(qat.backend.waveform_v1.executable.WaveformV1ChannelData parameter)</a>
 </li>
         <li><a href="qat.runtime.base.html#qat.runtime.base.ResultsAggregator.params.acquires">(qat.runtime.base.ResultsAggregator parameter)</a>
-</li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData.params.acquires">(qat.runtime.executables.ChannelData parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires">(WaveformV1ChannelData attribute)</a>
 </li>
@@ -1140,7 +1140,7 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform.channel">(Waveform property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.channel_data">channel_data (Executable attribute)</a>
+      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.channel_data">channel_data (ChannelExecutable attribute)</a>
 
       <ul>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.channel_data">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
@@ -1151,6 +1151,8 @@
 </li>
       </ul></li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData">ChannelData (class in qat.runtime.executables)</a>
+</li>
+      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable">ChannelExecutable (class in qat.runtime.executables)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses.params.channels">channels (qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses parameter)</a>
 </li>
@@ -2590,6 +2592,8 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_all_channels">get_all_channels() (Qubit method)</a>
 </li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.get_annotated_array">get_annotated_array() (in module qat.utils.pydantic)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_auxiliary_devices">get_auxiliary_devices() (QuantumDevice method)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.get_axis_map">get_axis_map() (in module qat.purr.backends.utilities)</a>
@@ -3432,10 +3436,10 @@
 </li>
       <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime">LegacyRuntime (class in qat.runtime.legacy)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.length">length (AcquireDataStruct attribute)</a>
+      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.length">length (AcquireData attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.params.length">(qat.runtime.executables.AcquireDataStruct parameter)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.length">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Sweep.length">(Sweep property)</a>
 </li>
@@ -3891,13 +3895,13 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.mode">mode (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.mode">(AcquireDataStruct attribute)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.mode">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.mode">(Measure attribute)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure.params.mode">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.params.mode">(qat.runtime.executables.AcquireDataStruct parameter)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.mode">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.get_axis_map.params.mode">(qat.runtime.post_processing.get_axis_map parameter)</a>
 </li>
@@ -3985,7 +3989,7 @@
       <ul>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.model_config">(Acquire attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.model_config">(AcquireDataStruct attribute)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.model_config">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_config">(AcquirePulseChannel attribute)</a>
 </li>
@@ -4006,6 +4010,8 @@
         <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.model_config">(CalibratablePulse attribute)</a>
 </li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData.model_config">(ChannelData attribute)</a>
+</li>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.model_config">(ChannelExecutable attribute)</a>
 </li>
         <li><a href="qat.core.config.html#id2">(ClassDescription attribute)</a>, <a href="qat.core.config.html#qat.core.config.ClassDescription.model_config">[1]</a>
 </li>
@@ -5024,13 +5030,13 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.output_variable">output_variable (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.output_variable">(AcquireDataStruct attribute)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.output_variable">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.output_variable">(PostProcessing attribute)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.params.output_variable">(qat.runtime.executables.AcquireDataStruct parameter)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.output_variable">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.output_variable">(SimpleAcquire attribute)</a>
 </li>
@@ -5315,10 +5321,10 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.position">position (AcquireDataStruct attribute)</a>
+      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.position">position (AcquireData attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireDataStruct.params.position">(qat.runtime.executables.AcquireDataStruct parameter)</a>
+        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.position">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
