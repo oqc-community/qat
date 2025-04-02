@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import re
-from pathlib import Path
 from random import random
 from typing import Dict
 
@@ -57,7 +56,13 @@ from qat.runtime import LegacyRuntime, SimpleRuntime
 from qat.runtime.executables import ChannelExecutable, Executable
 from qat.runtime.simple import SimpleRuntime
 
-dir_path = Path(__file__).parents[2]
+from tests.unit.utils.qasm_qir import (
+    ProgramFileType,
+    get_all_qasm2_paths,
+    get_all_qasm3_paths,
+    get_all_qir_paths,
+    get_test_file_path,
+)
 
 # Files that are not expected to pass tests are skipped.
 skip_qasm2 = [
@@ -86,18 +91,19 @@ skip_qir = [
     "teleportchain.ll",
     "bell_qir_measure.bc",
     "cudaq-ghz.ll",  # test is designed to fail for no TKET optims
+    "base64_bitcode_ghz",
 ]
 
 
 skip_exec = [
-    "qasm3-lark_parsing_test.qasm",
-    "qasm3-ecr_override_test.qasm",
-    "qasm3-tmp.qasm",
-    "qasm3-cx_override_test.qasm",
-    "qasm3-cnot_override_test.qasm",
-    "qasm3-invalid_pulse_length.qasm",
-    "qir-complicated.ll",
-    "qir-base_profile_ops.ll",
+    (ProgramFileType.QASM3, "lark_parsing_test.qasm"),
+    (ProgramFileType.QASM3, "ecr_override_test.qasm"),
+    (ProgramFileType.QASM3, "tmp.qasm"),
+    (ProgramFileType.QASM3, "cx_override_test.qasm"),
+    (ProgramFileType.QASM3, "cnot_override_test.qasm"),
+    (ProgramFileType.QASM3, "invalid_pulse_length.qasm"),
+    (ProgramFileType.QIR, "complicated.ll"),
+    (ProgramFileType.QIR, "base_profile_ops.ll"),
 ]
 
 
@@ -118,25 +124,18 @@ no_acquire_files = [
 ]
 
 
-qasm2_files = [
-    p
-    for p in Path(dir_path, "files", "qasm", "qasm2").glob("*.qasm")
-    if p.name not in skip_qasm2
+skip_qasm2 = [
+    get_test_file_path(ProgramFileType.QASM2, file_name) for file_name in skip_qasm2
 ]
+qasm2_files = set(get_all_qasm2_paths()) - set(skip_qasm2)
 
-qasm3_files = [
-    p
-    for p in Path(dir_path, "files", "qasm", "qasm3").glob("*.qasm")
-    if p.name not in skip_qasm3
+skip_qasm3 = [
+    get_test_file_path(ProgramFileType.QASM3, file_name) for file_name in skip_qasm3
 ]
+qasm3_files = set(get_all_qasm3_paths()) - set(skip_qasm3)
 
-
-qir_files = [
-    p for p in Path(dir_path, "files", "qir").glob("*.ll") if p.name not in skip_qir
-]
-qir_files.extend(
-    [p for p in Path(dir_path, "files", "qir").glob("*.bc") if p.name not in skip_qir]
-)
+skip_qir = [get_test_file_path(ProgramFileType.QIR, file_name) for file_name in skip_qir]
+qir_files = set(get_all_qir_paths()) - set(skip_qir)
 
 
 def equivalent_vars(self, other):
@@ -178,11 +177,8 @@ def short_file_name(path):
     return "-".join([path.parent.name, path.name])
 
 
-execution_files = [
-    p
-    for p in [*qasm2_files, *qasm3_files, *qir_files]
-    if short_file_name(p) not in skip_exec
-]
+skip_exec = [get_test_file_path(file_type, file_name) for file_type, file_name in skip_exec]
+execution_files = (qasm2_files | qasm3_files | qir_files) - set(skip_exec)
 
 
 def generate_random_linear(qubit_indices, random_data=True):
@@ -494,8 +490,8 @@ class TestQATPipelineSetup:
         q = QAT(qatconfig=QatConfig(PIPELINES=pipelines, HARDWARE=hardware))
         assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
 
-    def test_make_qatconfig_yaml(self):
-        path = str(dir_path / "files/qatconfig/pipelines.yaml")
+    def test_make_qatconfig_yaml(self, testpath):
+        path = str(testpath / "files/qatconfig/pipelines.yaml")
         q = QAT(qatconfig=path)
         assert set(q.pipelines.list()) == {
             "echo8i",

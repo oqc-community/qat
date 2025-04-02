@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import tempfile
-from os.path import dirname, join
+from os.path import join
 
 import numpy as np
 import pytest
@@ -161,10 +161,6 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 
 class TestBaseQuantum:
-    def get_qasm2(self, file_name):
-        with open(join(dirname(__file__), "files", "qasm", file_name), "r") as qasm_file:
-            return qasm_file.read()
-
     def test_batched_execution(self):
         hw = get_default_echo_hardware()
         hw.shot_limit = 10

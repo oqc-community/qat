@@ -32,12 +32,7 @@ from qat.purr.qat import _execute_with_metrics, execute, execute_qasm, fetch_fro
 
 from tests.unit.purr.integrations.test_qir import _get_qir_path
 from tests.unit.utils.models import raises_thread_exception
-from tests.unit.utils.qasm_qir import (
-    ProgramFileType,
-    get_qasm2,
-    get_qasm3,
-    get_test_file_path,
-)
+from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir
 
 
 def _get_qasm_path(file_name):
@@ -364,7 +359,7 @@ class TestExecutionFrontend:
 
     def test_valid_qasm_path(self):
         hardware = get_default_echo_hardware(2)
-        execute(get_test_file_path(ProgramFileType.QASM2, "basic.qasm"), hardware=hardware)
+        execute(get_qasm2("basic.qasm"), hardware=hardware)
 
     def test_quality_couplings(self):
         qasm_string = get_qasm2("basic.qasm")
@@ -692,7 +687,7 @@ class TestExecutionFrontend:
         frontend = fetch_frontend(qasm3_string, use_experimental=use_experimental)
         assert isinstance(frontend, frontend_mod.QASMFrontend)
 
-        qir_string = get_test_file_path(ProgramFileType.QIR, "generator-bell.ll")
+        qir_string = get_qir("generator-bell.ll")
         frontend = fetch_frontend(qir_string, use_experimental=use_experimental)
         assert isinstance(frontend, frontend_mod.QIRFrontend)
 

@@ -2,8 +2,6 @@
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 from enum import Enum, auto
 from importlib.util import find_spec
-from os import listdir
-from os.path import abspath, isfile, join
 from pathlib import Path
 
 from compiler_config.config import Qasm2Optimizations
@@ -20,6 +18,8 @@ from qat.purr.integrations.qasm import (
     qasm_from_file,
 )
 
+from tests.conftest import tests_dir
+
 
 class ProgramFileType(Enum):
     QASM2 = (auto(),)
@@ -28,24 +28,21 @@ class ProgramFileType(Enum):
     OPENPULSE = auto()
 
 
-dir_path = Path(__file__).parents[2]
-
-
-def get_test_files_dir(ir_type: ProgramFileType):
+def get_test_files_dir(ir_type: ProgramFileType) -> Path:
     if ir_type == ProgramFileType.QASM3:
-        return abspath(join(dir_path, "files", "qasm", "qasm3"))
+        return Path(tests_dir, "files", "qasm", "qasm3")
     elif ir_type == ProgramFileType.QASM2:
-        return abspath(join(dir_path, "files", "qasm", "qasm2"))
+        return Path(tests_dir, "files", "qasm", "qasm2")
     elif ir_type == ProgramFileType.QIR:
-        return abspath(join(dir_path, "files", "qir"))
+        return Path(tests_dir, "files", "qir")
     elif ir_type == ProgramFileType.OPENPULSE:
-        return abspath(join(dir_path, "files", "qasm", "qasm3", "openpulse_tests"))
+        return Path(tests_dir, "files", "qasm", "qasm3", "openpulse_tests")
     else:
         raise ValueError("Test file directory dosen't exist for this IR type.")
 
 
-def get_test_file_path(ir_type: ProgramFileType, file_name):
-    return join(get_test_files_dir(ir_type), file_name)
+def get_test_file_path(ir_type: ProgramFileType, file_name) -> Path:
+    return Path(get_test_files_dir(ir_type), file_name)
 
 
 def get_qasm3(file_name):
@@ -56,6 +53,10 @@ def get_qasm2(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.QASM2, file_name))
 
 
+def get_qir_path(file_name: str) -> Path:
+    return get_test_file_path(ProgramFileType.QIR, file_name)
+
+
 def get_qir(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.QIR, file_name))
 
@@ -64,24 +65,24 @@ def get_openpulse(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.OPENPULSE, file_name))
 
 
-def get_all_qasm2_paths():
+def get_all_qasm2_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.QASM2)
-    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+    return set(Path(dir).glob("*.qasm"))
 
 
-def get_all_qasm3_paths():
+def get_all_qasm3_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.QASM3)
-    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+    return set(Path(dir).glob("*.qasm"))
 
 
-def get_all_qir_paths():
+def get_all_qir_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.QIR)
-    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+    return set(Path(dir).glob("*"))
 
 
-def get_all_openpulse_paths():
+def get_all_openpulse_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.OPENPULSE)
-    return [join(dir, filename) for filename in listdir(dir) if isfile(join(dir, filename))]
+    return set(Path(dir).glob("*.qasm"))
 
 
 def parse_and_apply_optimizations(

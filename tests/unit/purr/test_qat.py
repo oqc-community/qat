@@ -15,7 +15,7 @@ from tests.unit.utils.qasm_qir import ProgramFileType, get_test_file_path
     [("ghz.qasm", ProgramFileType.QASM2, 193)],
 )
 def test_all_metrics_are_returned(input_string, file_type, instruction_length):
-    program = get_test_file_path(file_type, input_string)
+    program = str(get_test_file_path(file_type, input_string))
     hardware = get_default_echo_hardware()
     config = CompilerConfig()
     results, metrics = execute_with_metrics(program, hardware, config)
@@ -27,7 +27,7 @@ def test_all_metrics_are_returned(input_string, file_type, instruction_length):
     ("input_string", "file_type"), [("ghz.qasm", ProgramFileType.QASM2)]
 )
 def test_only_optim_circuitmetrics_are_returned(input_string, file_type):
-    program = get_test_file_path(file_type, input_string)
+    program = str(get_test_file_path(file_type, input_string))
     hardware = get_default_echo_hardware()
     config = CompilerConfig()
     config.metrics = MetricsType.OptimizedCircuit
@@ -40,7 +40,7 @@ def test_only_optim_circuitmetrics_are_returned(input_string, file_type):
     ("input_string", "file_type"), [("ghz.qasm", ProgramFileType.QASM2)]
 )
 def test_only_inst_len_circuitmetrics_are_returned(input_string, file_type):
-    program = get_test_file_path(file_type, input_string)
+    program = str(get_test_file_path(file_type, input_string))
     hardware = get_default_echo_hardware()
     config = CompilerConfig()
     config.metrics = MetricsType.OptimizedInstructionCount
@@ -60,7 +60,7 @@ def test_only_inst_len_circuitmetrics_are_returned(input_string, file_type):
 )
 def test_batched_execution(input_string, file_type, engine):
     hardware = get_default_echo_hardware()
-    program = get_test_file_path(file_type, input_string)
+    program = str(get_test_file_path(file_type, input_string))
     config = CompilerConfig(
         repeats=int(hardware.repeat_limit * 1.5),
         results_format=QuantumResultsFormat().raw(),

@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from itertools import product
-from os import listdir
-from os.path import dirname, isfile, join, pardir
 from pathlib import Path
 
 import networkx as nx
@@ -54,6 +52,7 @@ from tests.unit.utils.matrix_builder import (
 )
 from tests.unit.utils.models import get_jagged_echo_hardware, update_qubit_indices
 from tests.unit.utils.qasm_qir import (
+    get_all_qasm2_paths,
     get_default_qasm2_gate_qasms,
     get_default_qasm3_gate_qasms,
     get_qasm2,
@@ -644,7 +643,7 @@ class TestQASM3:
     @pytest.mark.parametrize(
         "gate_tup", get_default_qasm3_gate_qasms(), ids=lambda val: val[-1]
     )
-    def test_default_gates(self, gate_tup, monkeypatch):
+    def test_default_gates(self, gate_tup, monkeypatch, testpath):
         """Check that each default gate can be parsed individually."""
 
         def equivalent(self, other):
@@ -661,9 +660,7 @@ class TestQASM3:
         parser = Qasm3Parser()
         builder = parser.parse(hw.create_builder(), qasm)
         assert isinstance(builder, InstructionBuilder)
-        with Path(
-            Path(__file__).parents[3], "files", "qasm", "instructions", file_name
-        ).open("r") as f:
+        with Path(testpath, "files", "qasm", "instructions", file_name).open("r") as f:
             expectations = [json_loads(i, model=hw) for i in json_load(f)]
         assert len(builder.instructions) > 0
         assert isinstance(builder.instructions[-1], Return)
@@ -725,9 +722,7 @@ class TestParsing:
     echo = get_default_echo_hardware(6)
 
     def test_compare_tket_parser(self):
-        qasm_folder = join(dirname(__file__), pardir, pardir, pardir, "files", "qasm")
-        print("dit is de qasm folder", qasm_folder)
-        for file in [f for f in listdir(qasm_folder) if isfile(join(qasm_folder, f))]:
+        for file in get_all_qasm2_paths():
             qasm = get_qasm2(file)
             circ = None
             try:

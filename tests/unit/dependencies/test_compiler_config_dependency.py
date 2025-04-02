@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
-from os.path import abspath, dirname, join, pardir
+from pathlib import Path
 
 import pytest
 from compiler_config.config import CompilerConfig
@@ -8,17 +8,14 @@ from compiler_config.config import CompilerConfig
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.qat import execute_with_metrics
 
+from tests.conftest import tests_dir
 from tests.unit.utils.qasm_qir import ProgramFileType, get_test_file_path
 
 SUPPORTED_CONFIG_VERSIONS = ["v02", "v1", "v2"]
 
 
 def _get_json_path(file_name):
-    return join(
-        abspath(
-            join(dirname(__file__), pardir, pardir, "files", "compiler_config", file_name)
-        )
-    )
+    return Path(tests_dir, "files", "compiler_config", file_name)
 
 
 def _get_contents(file_path):
@@ -29,7 +26,7 @@ def _get_contents(file_path):
 
 @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
 def test_runs_successfully_with_config(version):
-    program = get_test_file_path(ProgramFileType.QASM2, "ghz.qasm")
+    program = str(get_test_file_path(ProgramFileType.QASM2, "ghz.qasm"))
     hardware = get_default_echo_hardware()
     serialised_data = _get_contents(f"serialised_full_compiler_config_{version}.json")
     deserialised_conf = CompilerConfig.create_from_json(

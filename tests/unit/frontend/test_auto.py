@@ -22,9 +22,11 @@ from tests.unit.utils.qasm_qir import (
     get_qir,
 )
 
-qasm2_tests = get_all_qasm2_paths()
+# TODO: Update frontends to work with `Path`s, COMPILER-404
+qasm2_tests = [str(path) for path in get_all_qasm2_paths()]
+qasm3_tests = [str(path) for path in qasm3_tests]
 qir_tests = [
-    test for test in get_all_qir_paths() if not test.endswith("base64_bitcode_ghz")
+    str(path) for path in get_all_qir_paths() if not path.name == "base64_bitcode_ghz"
 ]
 
 
@@ -41,6 +43,7 @@ class TestAutoFrontend:
 
     @pytest.mark.parametrize("qasm2_path", qasm2_tests)
     def test_assign_frontend_qasm2(self, qasm2_path):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
         assigned_frontend = self.frontend.assign_frontend(qasm2_path)
         assert isinstance(assigned_frontend, Qasm2Frontend)
         qasm2_str = load_qasm_file(qasm2_path)
@@ -49,6 +52,7 @@ class TestAutoFrontend:
 
     @pytest.mark.parametrize("qasm3_path", qasm3_tests)
     def test_assign_frontend_qasm3(self, qasm3_path):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
         assigned_frontend = self.frontend.assign_frontend(qasm3_path)
         assert isinstance(assigned_frontend, Qasm3Frontend)
         qasm3_str = load_qasm_file(qasm3_path)
@@ -57,6 +61,7 @@ class TestAutoFrontend:
 
     @pytest.mark.parametrize("qir_path", qir_tests)
     def test_assign_frontend_qir(self, qir_path):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
         assigned_frontend = self.frontend.assign_frontend(qir_path)
         assert isinstance(assigned_frontend, QIRFrontend)
         qir_str = load_qir_file(qir_path)

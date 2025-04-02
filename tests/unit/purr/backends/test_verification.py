@@ -37,7 +37,7 @@ class TestFirmwareVerificationEngines:
         ],
     )
     def test_circuit_length_validation(self, input_string, file_type, is_valid):
-        program = get_test_file_path(file_type, input_string)
+        program = str(get_test_file_path(file_type, input_string))
 
         optim = Tket()
         optim.disable()

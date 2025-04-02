@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import base64
-from os.path import abspath, dirname, join, pardir
+from os.path import abspath
 from unittest import mock
 
 import numpy as np
@@ -15,19 +15,11 @@ from qat.purr.integrations.qir import QIRParser
 from qat.purr.qat import execute, execute_qir
 
 from tests.unit.utils.models import get_jagged_echo_hardware
-from tests.unit.utils.qasm_qir import ProgramFileType, get_test_file_path
+from tests.unit.utils.qasm_qir import get_qir, get_qir_path
 
 
 def _get_qir_path(file_name):
-    return join(
-        abspath(join(dirname(__file__), pardir, pardir, pardir, "files", "qir", file_name))
-    )
-
-
-def _get_contents(file_path):
-    """Get QASM from a file."""
-    with open(_get_qir_path(file_path)) as ifile:
-        return ifile.read()
+    return str(get_qir_path(file_name))
 
 
 class TestQIR:
@@ -43,7 +35,7 @@ class TestQIR:
 
     def test_valid_ll_path(self):
         execute(
-            get_test_file_path(ProgramFileType.QIR, "generator-bell.ll"),
+            _get_qir_path("generator-bell.ll"),
             get_default_echo_hardware(2),
         )
 
@@ -65,7 +57,7 @@ class TestQIR:
 
     def test_cudaq_input(self):
         results = execute(
-            get_test_file_path(ProgramFileType.QIR, "basic_cudaq.ll"),
+            get_qir("basic_cudaq.ll"),
             get_default_echo_hardware(6),
         )
         assert results.get("r00000") == [0]
@@ -128,7 +120,7 @@ class TestQIR:
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         results = execute(
-            _get_contents("generator-bell.ll"), get_default_echo_hardware(4), config
+            get_qir("generator-bell.ll"), get_default_echo_hardware(4), config
         )
         assert results == {"00": 1000}
 
@@ -138,7 +130,7 @@ class TestQIR:
     def test_common_entrypoint_bitcode(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
-        program = _get_contents("base64_bitcode_ghz")
+        program = get_qir("base64_bitcode_ghz")
         program = base64.b64decode(program)
         results = execute(program, get_default_echo_hardware(4), config)
         assert results == {"0": 1000}

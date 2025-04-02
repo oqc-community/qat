@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from os.path import join
+from pathlib import Path
 
 import pytest
 
@@ -39,7 +39,7 @@ qasm3_skips = [
     "invalid_version.qasm",  # wrong header
 ]
 qasm3_skips = [
-    join(get_test_files_dir(ProgramFileType.QASM3), file_name) for file_name in qasm3_skips
+    Path(get_test_files_dir(ProgramFileType.QASM3), file_name) for file_name in qasm3_skips
 ]
 
 openpulse_skips = [
@@ -49,12 +49,12 @@ openpulse_skips = [
 ]
 
 openpulse_skips = [
-    join(get_test_files_dir(ProgramFileType.OPENPULSE), file_name)
+    Path(get_test_files_dir(ProgramFileType.OPENPULSE), file_name)
     for file_name in openpulse_skips
 ]
 
 qasm3_tests = (
-    set(get_all_qasm3_paths() + get_all_openpulse_paths())
+    (get_all_qasm3_paths() | get_all_openpulse_paths())
     - set(qasm3_skips)
     - set(openpulse_skips)
 )
@@ -116,7 +116,7 @@ def test_get_qasm_version(qasm_str, version):
 
 
 class TestLoadQasmFile:
-    @pytest.mark.parametrize("qasm_path", get_all_qasm2_paths() + list(qasm3_tests))
+    @pytest.mark.parametrize("qasm_path", (get_all_qasm2_paths() | qasm3_tests))
     def test_files_load(self, qasm_path: str):
         src = load_qasm_file(qasm_path)
         assert isinstance(src, str)
@@ -131,6 +131,8 @@ class TestQasm2Frontend:
 
     @pytest.mark.parametrize("qasm_path", get_all_qasm2_paths())
     def test_check_and_return_source_with_qasm_2_files(self, qasm_path):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
+        qasm_path = str(qasm_path)
         qasm_str = Qasm2Frontend(None).check_and_return_source(qasm_path)
         assert qasm_str
         assert qasm_str != qasm_path
@@ -146,6 +148,8 @@ class TestQasm2Frontend:
         ],
     )
     def test_check_and_return_source_with_invalid_programs(self, qasm_path: str):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
+        qasm_path = str(qasm_path)
         res = Qasm2Frontend(None).check_and_return_source(qasm_path)
         assert res == False
 
@@ -170,6 +174,8 @@ class TestQasm3Frontend:
 
     @pytest.mark.parametrize("qasm_path", qasm3_tests)
     def test_check_and_return_source_with_qasm_3_files(self, qasm_path):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
+        qasm_path = str(qasm_path)
         qasm_str = Qasm3Frontend(None).check_and_return_source(qasm_path)
         assert qasm_str
         assert qasm_str != qasm_path
@@ -184,6 +190,8 @@ class TestQasm3Frontend:
         ],
     )
     def test_check_and_return_source_with_invalid_programs(self, qasm_path: str):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
+        qasm_path = str(qasm_path)
         res = Qasm3Frontend(None).check_and_return_source(qasm_path)
         assert res == False
 
