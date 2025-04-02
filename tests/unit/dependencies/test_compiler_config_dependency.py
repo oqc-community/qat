@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from compiler_config.config import CompilerConfig
 
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.qat import execute_with_metrics
 
 from tests.conftest import tests_dir
@@ -27,7 +27,7 @@ def _get_contents(file_path):
 @pytest.mark.parametrize("version", SUPPORTED_CONFIG_VERSIONS)
 def test_runs_successfully_with_config(version):
     program = str(get_test_file_path(ProgramFileType.QASM2, "ghz.qasm"))
-    hardware = get_default_echo_hardware()
+    hardware = EchoModelLoader().load()
     serialised_data = _get_contents(f"serialised_full_compiler_config_{version}.json")
     deserialised_conf = CompilerConfig.create_from_json(
         serialised_data

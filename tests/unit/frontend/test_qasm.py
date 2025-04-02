@@ -17,7 +17,7 @@ from qat.ir.instruction_builder import (
 )
 from qat.ir.instructions import Repeat as PydRepeat
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.purr.backends.echo import Connectivity, get_default_echo_hardware
+from qat.model.loaders.legacy.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
 
@@ -159,7 +159,7 @@ class TestQasm2Frontend:
         qasm2_str = get_qasm2("basic.qasm")
 
         # Legacy hardware model.
-        model = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
+        model = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
         builder = Qasm2Frontend(model).emit(qasm2_str)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)
@@ -201,7 +201,7 @@ class TestQasm3Frontend:
         qasm3_str = get_qasm3("basic.qasm")
 
         # Legacy hardware model.
-        model = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
+        model = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
         builder = Qasm3Frontend(model).emit(qasm3_str)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)

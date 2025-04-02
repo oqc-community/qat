@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import pytest
 
@@ -19,7 +19,7 @@ from qat.ir.instruction_builder import (
 )
 from qat.ir.instructions import Return as PydReturn
 from qat.ir.measure import Acquire as PydAcquire
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.utils.hardware_model import generate_hw_model
 
 from tests.unit.utils.builder_nuggets import resonator_spect
@@ -27,7 +27,7 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 class TestTransformPasses:
     def test_return_sanitisation_pass(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -38,7 +38,7 @@ class TestTransformPasses:
         ReturnSanitisationValidation().run(builder, res_mgr)
 
     def test_desugaring_pass(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 

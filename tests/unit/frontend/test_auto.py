@@ -9,7 +9,7 @@ from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.purr.backends.echo import Connectivity, get_default_echo_hardware
+from qat.model.loaders.legacy.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
 
@@ -34,7 +34,7 @@ class TestAutoFrontend:
 
     # The hardware model being required here isn't ideal. It's because on instantiation
     # of the parser, get_builder(model) is called. Something to resolve later.
-    frontend = AutoFrontend(get_default_echo_hardware(32))
+    frontend = AutoFrontend(EchoModelLoader(32).load())
 
     @pytest.mark.parametrize("invalid_type", ["invalid", True, 3.14])
     def invalid_type(self, invalid_type):
@@ -84,7 +84,7 @@ class TestAutoFrontend:
         [get_qasm2("basic.qasm"), get_qasm3("basic.qasm"), get_qir("bell_psi_plus.ll")],
     )
     def test_legacy_vs_pydantic_hw(self, program):
-        leg_hw = get_default_echo_hardware(32, connectivity=Connectivity.Ring)
+        leg_hw = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
         pyd_hw = convert_legacy_echo_hw_to_pydantic(leg_hw)
 
         leg_frontend = AutoFrontend(leg_hw)

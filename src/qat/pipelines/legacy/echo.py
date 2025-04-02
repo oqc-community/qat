@@ -9,7 +9,7 @@ from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import IntegratorAcquireSanitisation
 from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
 from qat.middleend.passes.validation import InstructionValidation, ReadoutValidation
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.runtime.legacy import LegacyRuntime
 from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.passes.transform import ErrorMitigation, ResultTransform
@@ -45,10 +45,6 @@ def get_pipeline(model, name="legacy_echo") -> Pipeline:
     )
 
 
-legacy_echo8 = get_pipeline(get_default_echo_hardware(qubit_count=8), name="legacy_echo8")
-legacy_echo16 = get_pipeline(
-    get_default_echo_hardware(qubit_count=16), name="legacy_echo16"
-)
-legacy_echo32 = get_pipeline(
-    get_default_echo_hardware(qubit_count=32), name="legacy_echo32"
-)
+legacy_echo8 = get_pipeline(EchoModelLoader(qubit_count=8).load(), name="legacy_echo8")
+legacy_echo16 = get_pipeline(EchoModelLoader(qubit_count=16).load(), name="legacy_echo16")
+legacy_echo32 = get_pipeline(EchoModelLoader(qubit_count=32).load(), name="legacy_echo32")

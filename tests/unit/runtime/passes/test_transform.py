@@ -6,7 +6,7 @@ from compiler_config.config import InlineResultsProcessing
 from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.ir.measure import PostProcessing
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.transform import (
@@ -91,7 +91,7 @@ class TestPostProcessingTransform:
 class TestInlineResultsProcessingTransform:
 
     def test_run_results_processing_with_program(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.measure_single_shot_binned(model.get_qubit(0), output_variable="test")
         builder.results_processing("test", InlineResultsProcessing.Program)
@@ -102,7 +102,7 @@ class TestInlineResultsProcessingTransform:
         assert isinstance(results["test"], int)
 
     def test_run_results_processing_with_experiment(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.repeat(254)
         builder.measure(model.get_qubit(0), output_variable="test")
@@ -118,7 +118,7 @@ class TestInlineResultsProcessingTransform:
 class TestAssignResultsTransform:
 
     def test_only_returns_what_is_asked(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.repeat(254)
         builder.measure(model.get_qubit(0), output_variable="q0")

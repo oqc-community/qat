@@ -19,7 +19,7 @@ from qat.backend.passes.validation import (
 )
 from qat.core.result_base import ResultManager
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import Pulse, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
@@ -28,7 +28,7 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 class TestValidationPasses:
     def test_nco_freq_pass(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -46,7 +46,7 @@ class TestValidationPasses:
 
 class TestFrequencyValidation:
     res_mgr = ResultManager()
-    model = get_default_echo_hardware()
+    model = EchoModelLoader().load()
 
     def get_single_pulse_channel(self):
         return next(iter(self.model.pulse_channels.values()))
@@ -182,7 +182,7 @@ class TestFrequencyValidation:
 class TestNoAcquireWeightsValidation:
 
     def test_acquire_with_filter_raises_error(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         res_mgr = ResultManager()
         qubit = model.get_qubit(0)
         channel = qubit.get_acquire_channel()
@@ -197,7 +197,7 @@ class TestNoAcquireWeightsValidation:
 class TestNoMultipleAcquiresValidation:
 
     def test_multiple_acquires_on_same_pulse_channel_raises_error(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         res_mgr = ResultManager()
         qubit = model.get_qubit(0)
         channel = qubit.get_acquire_channel()
@@ -213,7 +213,7 @@ class TestNoMultipleAcquiresValidation:
             NoMultipleAcquiresValidation().run(builder, res_mgr)
 
     def test_multiple_acquires_that_share_physical_channel_raises_error(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         res_mgr = ResultManager()
         qubit = model.get_qubit(0)
         acquire_channel = qubit.get_acquire_channel()

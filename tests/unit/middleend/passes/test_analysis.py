@@ -12,7 +12,6 @@ from qat.middleend.passes.analysis import (
     BatchedShotsResult,
 )
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.instructions import CustomPulse, PulseShapeType
 
 
@@ -20,7 +19,7 @@ class TestBatchedShots:
 
     @pytest.mark.parametrize("shots", [0, 1000, 10000])
     def test_shots_less_than_equal_to_max_gives_expected(self, shots):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         model.repeat_limit = 10000
         builder = model.create_builder()
         builder.repeat(shots)
@@ -32,7 +31,7 @@ class TestBatchedShots:
         assert batch_res.batched_shots == shots
 
     def test_no_repeat_instruction(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         batch_pass = BatchedShots(model)
         res_mgr = ResultManager()
@@ -43,7 +42,7 @@ class TestBatchedShots:
 
     @pytest.mark.parametrize("shots", [10001, 20000, 29999])
     def test_shots_greater_than_max_gives_appropiate_batches(self, shots):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         model.repeat_limit = 10000
         builder = model.create_builder()
         builder.repeat(shots)

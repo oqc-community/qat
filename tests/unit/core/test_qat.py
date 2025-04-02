@@ -36,7 +36,6 @@ from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
-from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QIRFrontend
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
@@ -221,11 +220,7 @@ def apply_error_mitigation_setup(hw):
 )
 @pytest.mark.parametrize(
     "hardware_model",
-    [
-        pytest.param(
-            apply_error_mitigation_setup(get_default_echo_hardware(32)), id="Echo32Q"
-        )
-    ],
+    [pytest.param(apply_error_mitigation_setup(EchoModelLoader(32).load()), id="Echo32Q")],
 )
 class TestQATParity:
     """Test that qat.core.QAT generates the same outputs as the qat.purr stack."""
@@ -437,13 +432,13 @@ class MockEngine(NativeEngine):
 
 @pytest.fixture
 def echo_pipeline(qubit_count=32):
-    model = get_default_echo_hardware(qubit_count=qubit_count)
+    model = EchoModelLoader(qubit_count=qubit_count).load()
     yield qat.pipelines.echo.get_pipeline(model)
 
 
 @pytest.fixture
 def fallthrough_pipeline(qubit_count=32):
-    model = get_default_echo_hardware(qubit_count=qubit_count)
+    model = EchoModelLoader(qubit_count=qubit_count).load()
     yield Pipeline(
         name="fallthrough",
         frontend=FallthroughFrontend(),
@@ -518,7 +513,7 @@ class TestQATPipelineSetup:
 
     def test_make_pipeline(self):
         qubit_count = 32
-        model = get_default_echo_hardware(qubit_count=qubit_count)
+        model = EchoModelLoader(qubit_count=qubit_count).load()
         frontend = FallthroughFrontend()
         middleend = FallthroughMiddleend()
         backend = WaveformV1Backend(model)

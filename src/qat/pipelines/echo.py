@@ -6,7 +6,7 @@ from qat.core.pipeline import Pipeline
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.analysis import IndexMappingAnalysis
 from qat.runtime.passes.transform import (
@@ -43,6 +43,6 @@ def get_pipeline(model, name="echo") -> Pipeline:
     )
 
 
-echo8 = get_pipeline(get_default_echo_hardware(qubit_count=8), name="echo8")
-echo16 = get_pipeline(get_default_echo_hardware(qubit_count=16), name="echo16")
-echo32 = get_pipeline(get_default_echo_hardware(qubit_count=32), name="echo32")
+echo8 = get_pipeline(EchoModelLoader(qubit_count=8).load(), name="echo8")
+echo16 = get_pipeline(EchoModelLoader(qubit_count=16).load(), name="echo16")
+echo32 = get_pipeline(EchoModelLoader(qubit_count=32).load(), name="echo32")

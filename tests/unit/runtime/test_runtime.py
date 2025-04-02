@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from qat.purr.backends.echo import get_default_echo_hardware
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import (
     AnalysisPass,
@@ -15,7 +16,7 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 
 def test_new_quantum_runtime():
-    model = get_default_echo_hardware()
+    model = EchoModelLoader().load()
     engine = model.create_engine()
     runtime = NewQuantumRuntime(engine)
 

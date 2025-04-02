@@ -6,7 +6,7 @@ import pytest
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.engines.waveform_v1 import EchoEngine
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import AcquireMode
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.transform import (
@@ -18,7 +18,7 @@ from qat.runtime.passes.transform import (
 class TestSimpleRuntime:
 
     def basic_acquire_circuit(self, shots, mode=AcquireMode.INTEGRATOR):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.repeat(shots)
         block, _ = builder._generate_measure_block(model.get_qubit(0), mode, "test")
@@ -34,7 +34,7 @@ class TestSimpleRuntime:
         assert np.shape(next(iter(results.values()))) == (shots,)
 
     def test_execute_with_pipelines(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.repeat(254)
         builder.measure(model.get_qubit(0), output_variable="qubit0")

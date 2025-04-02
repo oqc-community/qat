@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import itertools
 from copy import deepcopy
@@ -26,7 +26,7 @@ from qat.backend.passes.analysis import (
 from qat.backend.passes.transform import ReturnSanitisation, ScopeSanitisation
 from qat.backend.passes.validation import ReturnSanitisationValidation
 from qat.core.result_base import ResultManager
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import (
     Acquire,
     Delay,
@@ -46,7 +46,7 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 class TestAnalysisPasses:
     def test_triage_pass(self):
         index = 0
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         qubit = model.get_qubit(index)
         builder = resonator_spect(model, [index])
 
@@ -109,7 +109,7 @@ class TestAnalysisPasses:
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1], [0, 1, 2]])
     def test_binding_pass(self, num_points, qubit_indices):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
         res_mgr = ResultManager()
 
@@ -207,7 +207,7 @@ class TestAnalysisPasses:
                 )
 
     def test_ti_legalisation_pass(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -253,7 +253,7 @@ class TestAnalysisPasses:
                     assert legal_bound == bound
 
     def test_cfg_pass(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -270,7 +270,7 @@ class TestTimelineAnalysis:
 
     def test_times_are_rounded(self):
         # construct a builder with non-rounded times
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         pulse_channel = next(iter(model.pulse_channels.values()))
         block_time = pulse_channel.block_time
         block_size = pulse_channel.block_size
@@ -298,7 +298,7 @@ class TestTimelineAnalysis:
         assert np.all(durations == [block_size, 2 * block_size])
 
     def test_sync_gives_correct_delays(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         pulse_channels = iter(model.pulse_channels.values())
         pulse_channels = [next(pulse_channels) for _ in range(3)]
 
@@ -334,7 +334,7 @@ class TestTimelineAnalysis:
 class TestIntermediateFrequencyAnalysis:
 
     def test_different_frequencies_with_fixed_if_yields_error(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         physical_channel = next(iter(model.physical_channels.values()))
         pulse_channels = iter(
             model.get_pulse_channels_from_physical_channel(physical_channel)
@@ -372,7 +372,7 @@ class TestIntermediateFrequencyAnalysis:
             IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
     def test_same_frequencies_with_fixed_if_passes(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         physical_channel = next(iter(model.physical_channels.values()))
         pulse_channels = iter(
             model.get_pulse_channels_from_physical_channel(physical_channel)
@@ -398,7 +398,7 @@ class TestIntermediateFrequencyAnalysis:
         IntermediateFrequencyAnalysis(model).run(None, res_mgr)
 
     def test_fixed_if_returns_frequencies(self):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
 
         # Find two pulse channels with different physical channels
         pulse_channels = iter(model.pulse_channels.values())

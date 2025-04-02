@@ -8,7 +8,7 @@ from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import QiskitInstructionsWrapper
 from qat.middleend.passes.legacy.validation import QiskitResultsFormatValidation
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
+from qat.model.loaders.legacy import QiskitModelLoader
 from qat.runtime import LegacyRuntime
 from qat.runtime.passes.legacy.transform import (
     QiskitErrorMitigation,
@@ -49,6 +49,12 @@ def get_pipeline(model, name="legacy_qiskit") -> Pipeline:
     )
 
 
-legacy_qiskit8 = get_pipeline(get_default_qiskit_hardware(8), name="legacy_qiskit8")
-legacy_qiskit16 = get_pipeline(get_default_qiskit_hardware(16), name="legacy_qiskit16")
-legacy_qiskit32 = get_pipeline(get_default_qiskit_hardware(32), name="legacy_qiskit32")
+legacy_qiskit8 = get_pipeline(
+    QiskitModelLoader(qubit_count=8).load(), name="legacy_qiskit8"
+)
+legacy_qiskit16 = get_pipeline(
+    QiskitModelLoader(qubit_count=16).load(), name="legacy_qiskit16"
+)
+legacy_qiskit32 = get_pipeline(
+    QiskitModelLoader(qubit_count=32).load(), name="legacy_qiskit32"
+)

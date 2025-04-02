@@ -7,7 +7,7 @@ import pytest
 
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import AcquireMode
 
 
@@ -17,7 +17,7 @@ class TestEchoEngine:
         "mode", [AcquireMode.RAW, AcquireMode.SCOPE, AcquireMode.INTEGRATOR]
     )
     def test_acquire_mode_gives_expected_results_for_single_acquire(self, mode):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         qubit = model.get_qubit(0)
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
@@ -56,7 +56,7 @@ class TestEchoEngine:
     def test_acquire_mode_gives_expected_results_for_multiple_acquires_on_same_channel(
         self, mode
     ):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         qubit = model.get_qubit(0)
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
@@ -114,7 +114,7 @@ class TestEchoEngine:
     def test_acquire_mode_gives_expected_results_for_multiple_acquires_on_different_channels(
         self, mode
     ):
-        model = get_default_echo_hardware()
+        model = EchoModelLoader().load()
         qubits = model.qubits[0:2]
         measure_channel = [qubit.get_measure_channel() for qubit in qubits]
         acquire_channel = [qubit.get_acquire_channel() for qubit in qubits]

@@ -7,7 +7,7 @@ import pytest
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.purr.backends.echo import get_default_echo_hardware
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction, Repeat, Sweep
 
@@ -53,7 +53,7 @@ class DummyTransform(TransformPass):
 
 
 def test_pass_manager():
-    model = get_default_echo_hardware()
+    model = EchoModelLoader().load()
     builder = resonator_spect(model)
     res_mgr = ResultManager()
     met_mgr = MetricsManager()
