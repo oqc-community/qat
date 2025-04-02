@@ -54,7 +54,7 @@ scipy = ">=1.13.1"
 pyqir = ">=0.8.0a1"
 regex = ">=2022.6.2"
 jsonpickle = ">=2.2.0"
-qblox-instruments = "0.15.0"
+qblox-instruments = "0.16.0"
 lark-parser = "^0.12.0"
 pydantic = "2.10.6" # TODO: change to 2.11 (see COMPILER-396 and 399)
 pydantic-settings = ">=2.5.2"
