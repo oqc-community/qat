@@ -78,7 +78,7 @@ class ActiveChannelResults(ResultInfoMixin):
     targets: dict[str, PulseChannel]
 
 
-class ActiveChannelAnalysis(AnalysisPass):
+class ActivePulseChannelAnalysis(AnalysisPass):
     """Determines the set of pulse channels which are targeted by quantum instructions.
 
     A pulse channel that has a pulse played at any time, or an acquisition is defined to be
@@ -88,7 +88,7 @@ class ActiveChannelAnalysis(AnalysisPass):
     :class:`Synchronize` instructions.
     """
 
-    # TODO: PydActiveChannelAnalysis: this will be even more useful for pydantic
+    # TODO: PydActivePulseChannelAnalysis: this will be even more useful for pydantic
     # instructions (COMPILER-393)
 
     def run(

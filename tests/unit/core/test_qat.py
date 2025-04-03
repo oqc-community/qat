@@ -419,7 +419,11 @@ class TestQATParity:
         qat_res, _ = q.execute(pkg, compiler_config=compiler_config, pipeline="test")
 
         assert purr_res == qat_res
-        assert purr_metrics.as_dict() == comp_metrics.as_dict()
+        assert purr_metrics.optimized_circuit == comp_metrics.optimized_circuit
+        assert (
+            purr_metrics.optimized_instruction_count
+            >= comp_metrics.optimized_instruction_count
+        )
 
 
 class MockEngine(NativeEngine):

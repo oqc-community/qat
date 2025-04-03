@@ -8,7 +8,7 @@ from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import CrossResonancePulse
 
 
-class TestWaveformV1Emitter:
+class TestWaveformV1Backend:
 
     def test_frequency_shift_raises_value_error_when_outside_allowed_range(self):
         # Set the maximum frequency so that we can trigger the error

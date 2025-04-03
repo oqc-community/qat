@@ -11,10 +11,14 @@ from qat.backend.passes.analysis import (
     IntermediateFrequencyResult,
     TimelineAnalysis,
     TimelineAnalysisResult,
-    TriagePass,
-    TriageResult,
 )
-from qat.backend.passes.transform import RepeatSanitisation, ReturnSanitisation
+from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.transform import (
+    LowerSyncsToDelays,
+    RepeatSanitisation,
+    ReturnSanitisation,
+    SquashDelaysOptimisation,
+)
 from qat.backend.passes.validation import FrequencyValidation, NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
@@ -33,7 +37,6 @@ from qat.purr.compiler.instructions import (
     PhaseReset,
     PhaseShift,
     Pulse,
-    Repeat,
     Reset,
     Waveform,
 )
@@ -44,6 +47,9 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
     """
     Target-machine code generation from an IR for targets that only require the explicit waveforms.
     """
+
+    # TODO: replacing buffers calculations as passes: waveform generation pass, pulse
+    # channel buffers pass, buffer amalgamation pass (COMPILER-413)
 
     def __init__(self, model: QuantumHardwareModel):
         """
@@ -70,15 +76,14 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         """
         res_mgr = res_mgr if res_mgr else ResultManager()
         met_mgr = met_mgr if met_mgr else MetricsManager()
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        triage_res: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        ir = self.run_pass_pipeline(ir, res_mgr, met_mgr)
         timeline_res: TimelineAnalysisResult = res_mgr.lookup_by_type(
             TimelineAnalysisResult
         )
         if_res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
 
-        buffers = self.create_physical_channel_buffers(triage_res, timeline_res, upconvert)
-        acquire_dict = self.create_acquire_dict(triage_res, timeline_res)
+        buffers = self.create_physical_channel_buffers(ir, timeline_res, upconvert)
+        acquire_dict = self.create_acquire_dict(ir, timeline_res)
 
         channels: dict[str, WaveformV1ChannelData] = {}
         for physical_channel, buffer in buffers.items():
@@ -90,9 +95,9 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
         # TODO: adjust the existing validation/transformation Repeat passes, or add an
         # analysis pass to determine the repeats?
-        repeat = [inst for inst in ir.instructions if isinstance(inst, Repeat)][0]
+        repeat = ir.shots
         returns = []
-        for _return in triage_res.returns:
+        for _return in ir.returns:
             returns.extend(_return.variables)
 
         return WaveformV1Executable(
@@ -101,12 +106,12 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             repetition_time=repeat.repetition_period,
             post_processing={
                 var: [PostProcessing._from_legacy(pp) for pp in pp_list]
-                for var, pp_list in triage_res.pp_map.items()
+                for var, pp_list in ir.pp_map.items()
             },
             results_processing={
-                var: rp.results_processing for var, rp in triage_res.rp_map.items()
+                var: rp.results_processing for var, rp in ir.rp_map.items()
             },
-            assigns=[Assign._from_legacy(assign) for assign in triage_res.assigns],
+            assigns=[Assign._from_legacy(assign) for assign in ir.assigns],
             returns=returns,
         )
 
@@ -118,7 +123,9 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             | PostProcessingSanitisation()
             | FrequencyValidation(self.model)
             | NoAcquireWeightsValidation()
-            | TriagePass()
+            | LowerSyncsToDelays()
+            | SquashDelaysOptimisation()
+            | PartitionByPulseChannel()
             | TimelineAnalysis()
             | IntermediateFrequencyAnalysis(self.model)
         )
@@ -149,26 +156,23 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
     def create_physical_channel_buffers(
         self,
-        triage_res: TriageResult,
+        ir: PartitionedIR,
         timeline_res: TimelineAnalysisResult,
         upconvert: bool = True,
     ):
         # Compute all pulse channel buffers
         pulse_channel_buffers = {}
-        for pulse_channel in timeline_res.durations:
+        for pulse_channel in timeline_res.target_map:
             # The buffer is trivial if there are no waveforms
             if not any(
-                [
-                    isinstance(inst, Waveform)
-                    for inst in triage_res.target_map[pulse_channel]
-                ]
+                [isinstance(inst, Waveform) for inst in ir.target_map[pulse_channel]]
             ):
                 continue
 
             pulse_channel_buffers[pulse_channel] = self.create_pulse_channel_buffer(
                 pulse_channel,
-                triage_res.target_map[pulse_channel],
-                timeline_res.durations[pulse_channel],
+                ir.target_map[pulse_channel],
+                timeline_res.target_map[pulse_channel].samples,
                 upconvert,
             )
 
@@ -192,18 +196,18 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
         return physical_channel_buffers
 
-    def create_acquire_dict(
-        self, triage_res: TriageResult, timeline_res: TimelineAnalysisResult
-    ):
+    def create_acquire_dict(self, ir: PartitionedIR, timeline_res: TimelineAnalysisResult):
         acquire_dict = {}
-        for pulse_channel, acquire_list in triage_res.acquire_map.items():
+        for pulse_channel, acquire_list in ir.acquire_map.items():
             acq_list = acquire_dict.setdefault(pulse_channel.physical_channel, [])
             for acquire in acquire_list:
-                idx = triage_res.target_map[pulse_channel].index(acquire)
+                idx = ir.target_map[pulse_channel].index(acquire)
                 acq_list.append(
                     AcquireData(
-                        length=timeline_res.durations[pulse_channel][idx],
-                        position=np.sum(timeline_res.durations[pulse_channel][0:idx]),
+                        length=timeline_res.target_map[pulse_channel].samples[idx],
+                        position=np.sum(
+                            timeline_res.target_map[pulse_channel].samples[0:idx]
+                        ),
                         mode=acquire.mode,
                         output_variable=acquire.output_variable,
                     )
@@ -212,15 +216,16 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
 
 class WaveformContext:
+    """Used for waveform code generation for a particular pulse channel.
+
+    This can be considered to be the dynamical state of a pulse channel which evolves as the
+    circuit progresses.
+    """
 
     def __init__(self, pulse_channel: PulseChannel, total_duration: int):
-        """Used for waveform code generation for a particular pulse channel.
-
-        This can be considered to be the dynamical state of a pulse channel which evolves as
-        the circuit progresses.
-
-        :param PulseChannel pulse_channel: The pulse channel that this is modelling.
-        :param int total_duration: The lifetime of the pulse channel in number of samples.
+        """
+        :param pulse_channel: The pulse channel that this is modelling.
+        :param total_duration: The lifetime of the pulse channel in number of samples.
         """
         self.pulse_channel = pulse_channel
         self._buffer = np.zeros(total_duration, dtype=np.complex128)

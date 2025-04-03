@@ -18,15 +18,139 @@ from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
+from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
+    InactivePulseChannelSanitisation,
     InstructionGranularitySanitisation,
+    PhaseOptimisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.purr.compiler.instructions import Acquire, CustomPulse, Delay, PulseShapeType
+from qat.purr.compiler.instructions import (
+    Acquire,
+    CustomPulse,
+    Delay,
+    PhaseShift,
+    Pulse,
+    PulseShapeType,
+    Synchronize,
+)
 from qat.utils.hardware_model import generate_hw_model
+
+
+class TestPhaseOptimisation:
+    def test_empty_constructor(self):
+        hw = EchoModelLoader(8).load()
+        builder = hw.create_builder()
+
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+        assert len(builder_optimised.instructions) == 0
+
+    @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_zero_phase(self, phase, pulse_enabled):
+        hw = EchoModelLoader(8).load()
+        builder = hw.create_builder()
+        for qubit in hw.qubits:
+            builder.add(PhaseShift(qubit.get_drive_channel(), phase))
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+
+        if pulse_enabled:
+            assert len(builder_optimised.instructions) == len(hw.qubits)
+        else:
+            assert len(builder_optimised.instructions) == 0
+
+    @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_single_phase(self, phase, pulse_enabled):
+        hw = EchoModelLoader(8).load()
+        builder = hw.create_builder()
+        for qubit in hw.qubits:
+            builder.phase_shift(qubit, phase)
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+
+        if pulse_enabled:
+            assert len(phase_shifts) == len(hw.qubits)
+        else:
+            assert len(phase_shifts) == 0
+
+    @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_accumulate_phases(self, phase, pulse_enabled):
+        hw = EchoModelLoader(8).load()
+        builder = hw.create_builder()
+        qubits = hw.qubits
+        for qubit in qubits:
+            builder.phase_shift(qubit, phase)
+
+        random.shuffle(hw.qubits)
+        for qubit in qubits:
+            builder.phase_shift(qubit, phase + 0.3)
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+
+        if pulse_enabled:
+            assert len(phase_shifts) == len(hw.qubits)
+            for phase_shift in phase_shifts:
+                assert math.isclose(phase_shift.phase, 2 * phase + 0.3)
+        else:
+            assert (
+                len(phase_shifts) == 0
+            )  # Phase shifts without a pulse/reset afterwards are removed.
+
+    def test_phase_reset(self):
+        hw = EchoModelLoader(2).load()
+        builder = hw.create_builder()
+        qubits = list(hw.qubits)
+
+        for qubit in qubits:
+            builder.phase_shift(qubit, 0.5)
+            builder.reset(qubit)
+
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+        assert len(phase_shifts) == 0
 
 
 class TestPydPhaseOptimisation:
@@ -39,13 +163,27 @@ class TestPydPhaseOptimisation:
         )
         assert builder_optimised.number_of_instructions == 0
 
-    def test_zero_phase(self):
+    @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_zero_phase(self, phase, pulse_enabled):
         hw = generate_hw_model(8)
         builder = PydQuantumInstructionBuilder(hardware_model=hw)
         for qubit in hw.qubits.values():
-            builder.phase_shift(target=qubit, theta=0)
+            builder.add(PydPhaseShift(targets=qubit.drive_pulse_channel.uuid, phase=phase))
+            if pulse_enabled:
+                builder.pulse(
+                    targets=qubit.drive_pulse_channel.uuid,
+                    waveform=GaussianWaveform(),
+                )
 
-        assert builder.number_of_instructions == 0
+        builder_optimised = PydPhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+
+        if pulse_enabled:
+            assert builder_optimised.number_of_instructions == hw.number_of_qubits
+        else:
+            assert builder_optimised.number_of_instructions == 0
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
@@ -373,3 +511,76 @@ class TestInstructionGranularitySanitisation:
 
         ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
         assert len(ir.instructions[0].samples) == num_samples + supersampling
+
+
+class TestInactivePulseChannelSanitisation:
+
+    def test_syncs_are_sanitized(self):
+        model = EchoModelLoader(10).load()
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+        builder.synchronize(model.qubits[0])
+        sync_inst = [
+            inst for inst in builder.instructions if isinstance(inst, Synchronize)
+        ][0]
+        assert len(sync_inst.quantum_targets) > 1
+
+        res_mgr = ResultManager()
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        sync_inst = [
+            inst for inst in builder.instructions if isinstance(inst, Synchronize)
+        ][0]
+        assert len(sync_inst.quantum_targets) == 1
+        assert next(iter(sync_inst.quantum_targets)) == model.qubits[0].get_drive_channel()
+
+    def test_delays_are_sanitized(self):
+        model = EchoModelLoader(10).load()
+        builder = model.create_builder()
+        qubit = model.qubits[0]
+
+        builder.pulse(qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
+        builder.delay(qubit.get_measure_channel(), 80e-9)
+
+        res_mgr = ResultManager()
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        assert len(builder.instructions) == 1
+        assert isinstance(builder.instructions[0], Pulse)
+
+    def test_phase_shifts_are_sanitized(self):
+        model = EchoModelLoader(10).load()
+        builder = model.create_builder()
+        qubit = model.qubits[0]
+
+        builder.pulse(qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
+        builder.phase_shift(qubit.get_measure_channel(), np.pi)
+
+        res_mgr = ResultManager()
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        assert len(builder.instructions) == 1
+        assert isinstance(builder.instructions[0], Pulse)
+
+    def test_Z_is_sanitized(self):
+        model = EchoModelLoader(10).load()
+        builder = model.create_builder()
+        qubit = model.qubits[0]
+
+        builder.pulse(qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
+        builder.Z(qubit, np.pi)
+
+        num_phase_shifts_before = len(
+            [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        )
+
+        res_mgr = ResultManager()
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+
+        num_phase_shifts_after = len(
+            [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        )
+
+        assert num_phase_shifts_after < num_phase_shifts_before
+        assert num_phase_shifts_after == 1

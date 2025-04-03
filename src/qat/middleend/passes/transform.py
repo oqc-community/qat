@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from collections import defaultdict
 from numbers import Number
-from typing import Dict, List
+from typing import List
 
 import numpy as np
 from compiler_config.config import MetricsType
@@ -17,6 +18,7 @@ from qat.ir.instructions import PhaseShift as PydPhaseShift
 from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
+from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
@@ -31,6 +33,8 @@ from qat.purr.compiler.instructions import (
     PostProcessType,
     ProcessAxis,
     Pulse,
+    QuantumInstruction,
+    Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
 
@@ -40,8 +44,6 @@ log = get_default_logger()
 class PhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
     :class:`PhaseShift` instructions.
-
-    Extracted from :meth:`qat.purr.compiler.execution.QuantumExecutionEngine.optimize`.
     """
 
     def run(
@@ -59,25 +61,24 @@ class PhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
-        optimized_instructions: List[Instruction] = []
+        accum_phaseshifts: dict[PulseChannel, float] = defaultdict(float)
+        optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
             ):
-                if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
-                    accum_phaseshift.phase += instruction.phase
-                else:
-                    accum_phaseshifts[instruction.channel] = PhaseShift(
-                        instruction.channel, instruction.phase
-                    )
-            elif isinstance(instruction, (Pulse, CustomPulse)):
+                accum_phaseshifts[instruction.channel] += instruction.phase
+            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift)):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, List):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
-                    if quantum_target in accum_phaseshifts:
-                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
+                    if not np.isclose(accum_phaseshifts[quantum_target] % (2 * np.pi), 0.0):
+                        optimized_instructions.append(
+                            PhaseShift(
+                                quantum_target, accum_phaseshifts.pop(quantum_target)
+                            )
+                        )
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
@@ -96,8 +97,6 @@ class PhaseOptimisation(TransformPass):
 class PydPhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
     :class:`PhaseShift` instructions.
-
-    Extracted from :meth:`qat.purr.compiler.execution.QuantumExecutionEngine.optimize`.
     """
 
     def run(
@@ -115,20 +114,18 @@ class PydPhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        accum_phaseshifts: dict[str, PydPhaseShift] = dict()
+        accum_phaseshifts: dict[str, float] = defaultdict(float)
         optimized_instructions: list = []
         for instruction in ir:
             if isinstance(instruction, PydPhaseShift):
-                if accum_phaseshift := accum_phaseshifts.get(instruction.target, None):
-                    accum_phaseshift.phase += instruction.phase
-                else:
-                    accum_phaseshifts[instruction.target] = PydPhaseShift(
-                        targets=instruction.target, phase=instruction.phase
-                    )
+                accum_phaseshifts[instruction.target] += instruction.phase
 
             elif isinstance(instruction, PydPulse):
-                if (target := instruction.target) in accum_phaseshifts:
-                    optimized_instructions.append(accum_phaseshifts.pop(target))
+                target = instruction.target
+                if not np.isclose(accum_phaseshifts[target] % (2 * np.pi), 0.0):
+                    optimized_instructions.append(
+                        PydPhaseShift(targets=target, phase=accum_phaseshifts.pop(target))
+                    )
                 optimized_instructions.append(instruction)
 
             elif isinstance(instruction, PydPhaseReset):
@@ -328,7 +325,7 @@ class InstructionGranularitySanitisation(TransformPass):
     santisiation is done for all instructions simultaneously using numpy for performance.
 
     The Pydantic version of the pass will require the (pydantic equivalent) pass
-    :class:`ActiveChannelAnalysis <qat.middleend.passes.analysis.ActiveChannelAnalysis>`
+    :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
     to have run, with results saved to the results manager to extract pulse channel
     information.
 
@@ -341,7 +338,7 @@ class InstructionGranularitySanitisation(TransformPass):
         :class:`AcquireSanitisation` pass.
     """
 
-    # TODO: PydInstructionGranularitySanitisation: will require the PydActiveChannelAnalysis
+    # TODO: PydInstructionGranularitySanitisation: will require the PydActivePulseChannelAnalysis
     # to extract the pulse/physical channel information (COMPILER-394)
     # TODO: replace clock_cycle with target data (COMPILER-395)
 
@@ -390,4 +387,54 @@ class InstructionGranularitySanitisation(TransformPass):
                 + ", ".join(set(invalid_instructions))
             )
 
+        return ir
+
+
+class InactivePulseChannelSanitisation(TransformPass):
+    """Removes instructions that act on inactive pulse channels.
+
+    Many channels that aren't actually needed to execute the program contain instructions,
+    mainly :class:`Synchronize` instructions and :class:`PhaseShift` instructions which
+    can happen when either of the instructions are applied to qubits. To simplify analysis
+    and optimisations in later passes, it makes sense to filter these out to reduce the
+    overall instruction amount.
+
+    .. note::
+
+        This pass requires results from the
+        :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
+        to be stored in the results manager.
+    """
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+
+        active_channels = res_mgr.lookup_by_type(ActiveChannelResults).targets.keys()
+        instructions: list[Instruction] = []
+        for inst in ir.instructions:
+            if isinstance(inst, (PostProcessing, Pulse, CustomPulse, Acquire)):
+                # instructions which define an active channel
+                instructions.append(inst)
+            elif isinstance(inst, Synchronize):
+                # inactive channels need stripping from syncs
+                inst.quantum_targets = [
+                    target
+                    for target in inst.quantum_targets
+                    if target.full_id() in active_channels
+                ]
+                if len(inst.quantum_targets) > 0:
+                    instructions.append(inst)
+            elif isinstance(inst, QuantumInstruction):
+                # other instructions need their targets checking
+                target = next(iter(inst.quantum_targets))
+                if target.full_id() in active_channels:
+                    instructions.append(inst)
+            else:
+                instructions.append(inst)
+        ir.instructions = instructions
         return ir

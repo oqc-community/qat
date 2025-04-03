@@ -6,8 +6,8 @@ import pytest
 
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.analysis import (
-    ActiveChannelAnalysis,
     ActiveChannelResults,
+    ActivePulseChannelAnalysis,
     BatchedShots,
     BatchedShotsResult,
 )
@@ -55,7 +55,7 @@ class TestBatchedShots:
         assert batch_res.batched_shots * np.ceil(shots / model.repeat_limit) >= shots
 
 
-class TestActiveChannelAnalysis:
+class TestActivePulseChannelAnalysis:
 
     def test_valid_instructions(self):
         model = EchoModelLoader().load()
@@ -70,7 +70,7 @@ class TestActiveChannelAnalysis:
         builder.acquire(acquire_chan, time=80e-9, delay=0.0)
 
         res_mgr = ResultManager()
-        builder = ActiveChannelAnalysis().run(builder, res_mgr)
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 3
         assert set(res.targets.values()) == set([drive_chan, measure_chan, acquire_chan])
@@ -86,7 +86,7 @@ class TestActiveChannelAnalysis:
         assert len(builder.instructions[-1].quantum_targets) > 1
 
         res_mgr = ResultManager()
-        builder = ActiveChannelAnalysis().run(builder, res_mgr)
+        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 1
         assert set(res.targets.values()) == set([drive_chan])

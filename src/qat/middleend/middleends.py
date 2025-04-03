@@ -10,8 +10,10 @@ from qat.backend.passes.validation import HardwareConfigValidity, PydHardwareCon
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
+from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
+    InactivePulseChannelSanitisation,
     InstructionGranularitySanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
@@ -131,6 +133,8 @@ class DefaultMiddleend(CustomMiddleend):
             PassManager()
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
+            | ActivePulseChannelAnalysis()
+            | InactivePulseChannelSanitisation()
             | PhaseOptimisation()
             | PostProcessingSanitisation()
             | ReadoutValidation(model)

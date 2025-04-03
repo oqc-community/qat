@@ -91,7 +91,11 @@ class AnalysisPass(PassInfoMixin):
 
 
 class TransformPass(PassInfoMixin):
-    """Base class for all passes that mutates the IR."""
+    """Base class for all passes that mutates the IR.
+
+    It is expected that child classes do not alter the type of the IR, but only alter its
+    contents.
+    """
 
     def run(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs):
         pass
@@ -103,6 +107,18 @@ class ValidationPass(PassInfoMixin):
 
     Behaviour is loose as to what the result of the validation would be: either a result or
     an error raised. It can change according to circumstances.
+    """
+
+    def run(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs):
+        pass
+
+
+class LoweringPass(PassInfoMixin):
+    """Base case for all passes that modify the IR, instrinsically changing its type and
+    structure.
+
+    Acts as insulation between passes that that expect to see the IR in some
+    given format.
     """
 
     def run(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs):
