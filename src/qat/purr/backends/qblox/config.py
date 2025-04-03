@@ -8,6 +8,10 @@ from typing import Dict, List
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
+
 
 @dataclass
 class ConnectionConfig:
@@ -253,10 +257,18 @@ class QbloxConfigHelper(ABC):
         if self.sequencer_config.mixer.gain_ratio:
             sequencer.mixer_corr_gain_ratio(self.sequencer_config.mixer.gain_ratio)
 
-    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
+    def calibrate_mixer(
+        self, module: Module, sequencer: Sequencer = None, connection: str = None
+    ):
         """
         - Compensates for the LO leakage for input(s)/output(s) depending on module
         - Suppresses undesired sideband on sequencer
+
+        :param module: A Module instance representing a QCM-RF or a QRM-RF card.
+        :param sequencer: A Sequencer instance representing the sequencer.
+            When None, sideband cal will run on all sequencers belonging to module `module`
+        :param connection: An optional string indicating muxing of Sequencer to analog channel
+            Defaults to "out0"
         """
 
         pass
@@ -268,6 +280,8 @@ class QbloxConfigHelper(ABC):
     def calibrate_sideband(self, sequencer: Sequencer, connection: str = None):
         connection = connection or "out0"
         sequencer.connect_sequencer(connection)
+
+        log.info(f"Calibrating sidebands on sequencer {sequencer}")
         sequencer.sideband_cal()
         sequencer.arm_sequencer()
         sequencer.start_sequencer()
@@ -275,11 +289,19 @@ class QbloxConfigHelper(ABC):
 
 class QcmConfigHelper(QbloxConfigHelper):
 
-    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
+    def calibrate_mixer(
+        self, module: Module, sequencer: Sequencer = None, connection: str = None
+    ):
         try:
             module.disconnect_outputs()
+
+            log.info(f"Calibrating LO leakage on module {module}")
             self.calibrate_lo_leakage(module)
-            self.calibrate_sideband(sequencer, connection)
+            if sequencer:
+                self.calibrate_sideband(sequencer, connection)
+            else:
+                for sequencer in module.sequencers:
+                    self.calibrate_sideband(sequencer, connection)
         finally:
             module.disconnect_outputs()
 
@@ -329,13 +351,20 @@ class QcmRfConfigHelper(QcmConfigHelper):
 
 class QrmConfigHelper(QbloxConfigHelper):
 
-    def calibrate_mixer(self, module: Module, sequencer: Sequencer, connection: str = None):
+    def calibrate_mixer(
+        self, module: Module, sequencer: Sequencer = None, connection: str = None
+    ):
         try:
             module.disconnect_outputs()
             module.disconnect_inputs()
 
+            log.info(f"Calibrating LO leakage on module {module}")
             self.calibrate_lo_leakage(module)
-            self.calibrate_sideband(sequencer, connection)
+            if sequencer:
+                self.calibrate_sideband(sequencer, connection)
+            else:
+                for sequencer in module.sequencers:
+                    self.calibrate_sideband(sequencer, connection)
         finally:
             module.disconnect_outputs()
             module.disconnect_inputs()
