@@ -60,6 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.transform.html">qat.backend.passes.transform module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
 </ul>
@@ -382,6 +383,40 @@ acquisitions, and is set to zero.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Removes instructions that act on inactive pulse channels.</p>
+<p>Many channels that aren’t actually needed to execute the program contain instructions,
+mainly <code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code> instructions and <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions which
+can happen when either of the instructions are applied to qubits. To simplify analysis
+and optimisations in later passes, it makes sense to filter these out to reduce the
+overall instruction amount.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This pass requires results from the
+<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis" title="qat.middleend.passes.analysis.ActivePulseChannelAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code></a>
+to be stored in the results manager.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionGranularitySanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clock_cycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8e-09</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
@@ -391,7 +426,7 @@ cycle.</p>
 instructions with a non-zero duration only act on a single pulse channel. The
 santisiation is done for all instructions simultaneously using numpy for performance.</p>
 <p>The Pydantic version of the pass will require the (pydantic equivalent) pass
-<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelAnalysis" title="qat.middleend.passes.analysis.ActiveChannelAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActiveChannelAnalysis</span></code></a>
+<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis" title="qat.middleend.passes.analysis.ActivePulseChannelAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code></a>
 to have run, with results saved to the results manager to extract pulse channel
 information.</p>
 <div class="admonition warning">
@@ -428,7 +463,6 @@ it up to the nearest integer multiple. Furthemore, it will assume that
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through the list of instructions and compresses contiguous
 <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions.</p>
-<p>Extracted from <a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.optimize" title="qat.purr.compiler.execution.QuantumExecutionEngine.optimize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.compiler.execution.QuantumExecutionEngine.optimize()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PhaseOptimisation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PhaseOptimisation.run" title="Link to this definition"></a></dt>
@@ -475,7 +509,6 @@ optimisation.</p></li>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Iterates through the list of instructions and compresses contiguous
 <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions.</p>
-<p>Extracted from <a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.optimize" title="qat.purr.compiler.execution.QuantumExecutionEngine.optimize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.compiler.execution.QuantumExecutionEngine.optimize()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PydPhaseOptimisation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PydPhaseOptimisation.run" title="Link to this definition"></a></dt>

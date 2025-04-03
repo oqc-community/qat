@@ -13,5 +13,6 @@ Submodules
    :maxdepth: 4
 
    qat.backend.passes.analysis
+   qat.backend.passes.lowering
    qat.backend.passes.transform
    qat.backend.passes.validation

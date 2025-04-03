@@ -60,6 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.transform.html">qat.backend.passes.transform module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
 </ul>
@@ -354,8 +355,19 @@
   <section id="module-qat.middleend.passes.analysis">
 <span id="qat-middleend-passes-analysis-module"></span><h1>qat.middleend.passes.analysis module<a class="headerlink" href="#module-qat.middleend.passes.analysis" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActiveChannelAnalysis</span></span><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelAnalysis" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelResults">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActiveChannelResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelResults" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelResults.targets">
+<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelResults.targets" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActivePulseChannelAnalysis</span></span><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <p>Determines the set of pulse channels which are targeted by quantum instructions.</p>
 <p>A pulse channel that has a pulse played at any time, or an acquisition is defined to be
@@ -364,13 +376,13 @@ and is used in subsequent passes to easily extract pulse channel properties, and
 useful for not performing extra analysis on rogue channels picked up by
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code> instructions.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelAnalysis.run" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.passes.analysis.ActiveChannelAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.analysis.ActiveChannelAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
-<li><p><span class="target" id="qat.middleend.passes.analysis.ActiveChannelAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.analysis.ActiveChannelAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -378,17 +390,6 @@ useful for not performing extra analysis on rogue channels picked up by
 </dd>
 </dl>
 </dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActiveChannelResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelResults" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActiveChannelResults.targets">
-<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActiveChannelResults.targets" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
