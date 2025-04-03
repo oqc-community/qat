@@ -12,32 +12,71 @@ from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
+from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
 from qat.ir.measure import AcquireMode
 from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
-from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
+from qat.middleend.passes.analysis import ActiveChannelResults, ActivePulseChannelAnalysis
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     InactivePulseChannelSanitisation,
+    InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
+    MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
 )
+from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
     Acquire,
     CustomPulse,
     Delay,
+    MeasurePulse,
+    PhaseReset,
     PhaseShift,
     Pulse,
     PulseShapeType,
     Synchronize,
 )
-from qat.utils.hardware_model import generate_hw_model
+
+
+class TestPhaseOptimisation:
+    hw = EchoModelLoader(qubit_count=4).load()
+
+    def test_merged_identical_phase_resets(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        phase_reset = PhaseReset(self.hw.qubits)
+        builder.add(phase_reset)
+        builder.add(phase_reset)
+        assert len(builder.instructions) == 2
+
+        PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
+        # The two phase resets should be merged to one.
+        assert len(builder.instructions) == 1
+        assert set(builder.instructions[0].quantum_targets) == set(
+            phase_reset.quantum_targets
+        )
+
+    def test_merged_phase_resets(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        targets_q1 = self.hw.qubits[0].get_all_channels()
+        targets_q2 = self.hw.qubits[1].get_all_channels()
+        builder.add(PhaseReset(targets_q1))
+        builder.add(PhaseReset(targets_q2))
+
+        PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
+        # The two phase resets should be merged to one, and the targets of both phase resets should be merged.
+        assert len(builder.instructions) == 1
+        merged_targets = set(targets_q1) | set(targets_q2)
+        assert set(builder.instructions[0].quantum_targets) == merged_targets
 
 
 class TestPhaseOptimisation:
@@ -154,9 +193,10 @@ class TestPhaseOptimisation:
 
 
 class TestPydPhaseOptimisation:
+    hw = PydEchoModelLoader(8).load()
+
     def test_empty_constructor(self):
-        hw = generate_hw_model(8)
-        builder = PydQuantumInstructionBuilder(hardware_model=hw)
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
 
         builder_optimised = PydPhaseOptimisation().run(
             builder, ResultManager(), MetricsManager()
@@ -166,9 +206,8 @@ class TestPydPhaseOptimisation:
     @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
     def test_zero_phase(self, phase, pulse_enabled):
-        hw = generate_hw_model(8)
-        builder = PydQuantumInstructionBuilder(hardware_model=hw)
-        for qubit in hw.qubits.values():
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
             builder.add(PydPhaseShift(targets=qubit.drive_pulse_channel.uuid, phase=phase))
             if pulse_enabled:
                 builder.pulse(
@@ -181,16 +220,15 @@ class TestPydPhaseOptimisation:
         )
 
         if pulse_enabled:
-            assert builder_optimised.number_of_instructions == hw.number_of_qubits
+            assert builder_optimised.number_of_instructions == self.hw.number_of_qubits
         else:
             assert builder_optimised.number_of_instructions == 0
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
     def test_single_phase(self, phase, pulse_enabled):
-        hw = generate_hw_model(8)
-        builder = PydQuantumInstructionBuilder(hardware_model=hw)
-        for qubit in hw.qubits.values():
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
             builder.phase_shift(target=qubit, theta=phase)
             if pulse_enabled:
                 builder.pulse(
@@ -206,7 +244,7 @@ class TestPydPhaseOptimisation:
         ]
 
         if pulse_enabled:
-            assert len(phase_shifts) == hw.number_of_qubits
+            assert len(phase_shifts) == self.hw.number_of_qubits
         else:
             assert (
                 len(phase_shifts) == 0
@@ -215,9 +253,8 @@ class TestPydPhaseOptimisation:
     @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
     def test_accumulate_phases(self, phase, pulse_enabled):
-        hw = generate_hw_model(8)
-        builder = PydQuantumInstructionBuilder(hardware_model=hw)
-        qubits = list(hw.qubits.values())
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        qubits = list(self.hw.qubits.values())
 
         for qubit in qubits:
             builder.phase_shift(target=qubit, theta=phase)
@@ -239,7 +276,7 @@ class TestPydPhaseOptimisation:
         ]
 
         if pulse_enabled:
-            assert len(phase_shifts) == hw.number_of_qubits
+            assert len(phase_shifts) == self.hw.number_of_qubits
             for phase_shift in phase_shifts:
                 assert math.isclose(phase_shift.phase, 2 * phase + 0.3)
         else:
@@ -248,9 +285,8 @@ class TestPydPhaseOptimisation:
             )  # Phase shifts without a pulse/reset afterwards are removed.
 
     def test_phase_reset(self):
-        hw = generate_hw_model(2)
-        builder = PydQuantumInstructionBuilder(hardware_model=hw)
-        qubits = list(hw.qubits.values())
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        qubits = list(self.hw.qubits.values())
 
         for qubit in qubits:
             builder.phase_shift(target=qubit, theta=0.5)
@@ -265,9 +301,47 @@ class TestPydPhaseOptimisation:
         ]
         assert len(phase_shifts) == 0
 
+    def test_merged_identical_phase_resets(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+        targets = [pulse_ch.uuid for pulse_ch in qubit.all_pulse_channels]
+
+        phase_reset = PydPhaseReset(targets=targets)
+        builder.add(phase_reset)
+        builder.add(phase_reset)
+        assert builder.number_of_instructions == 2
+
+        PydPhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+        # The two phase resets should be merged to one.
+        assert builder.number_of_instructions == 1
+        # assert set(builder.instructions[0].quantum_targets) == set(phase_reset.quantum_targets)
+
+    def test_merged_phase_resets(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+
+        targets_q1 = set(
+            [pulse_ch.uuid for pulse_ch in self.hw.qubit_with_index(0).all_pulse_channels]
+        )
+        targets_q2 = set(
+            [pulse_ch.uuid for pulse_ch in self.hw.qubit_with_index(1).all_pulse_channels]
+        )
+        builder.add(PydPhaseReset(targets=targets_q1))
+        builder.add(PydPhaseReset(targets=targets_q2))
+
+        PydPhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+        # The two phase resets should be merged to one, and the targets of both phase resets should be merged.
+        assert builder.number_of_instructions == 1
+        merged_targets = targets_q1 | targets_q2
+
+        assert builder.instructions[0].targets == merged_targets
+
 
 class TestPydPostProcessingSanitisation:
-    hw = generate_hw_model(32)
+    hw = PydEchoModelLoader(32).load()
 
     def test_meas_acq_with_pp(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -511,6 +585,78 @@ class TestInstructionGranularitySanitisation:
 
         ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
         assert len(ir.instructions[0].samples) == num_samples + supersampling
+
+
+class TestPhaseResetSanitisation:
+    hw = EchoModelLoader(qubit_count=4).load()
+
+    @pytest.mark.parametrize("reset_qubits", [False, True])
+    def test_phase_reset_shot(self, reset_qubits):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        if reset_qubits:
+            builder.add(PhaseReset(self.hw.qubits))
+
+        active_targets = {}
+        for qubit in self.hw.qubits:
+            builder.X(target=qubit)
+            drive_pulse_ch = qubit.get_drive_channel()
+            active_targets[drive_pulse_ch.full_id()] = drive_pulse_ch
+
+        n_instr_before = len(builder.instructions)
+
+        res_mgr = ResultManager()
+        # Mock some active targets, i.e., the drive pulse channels of the qubits.
+        res_mgr.add(ActiveChannelResults(targets=active_targets))
+        InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
+
+        # One `PhaseReset` instruction with possibly multiple targets gets added to the IR,
+        # even if there is already a phase reset present.
+        assert len(builder.instructions) == n_instr_before + 1
+        assert isinstance(builder.instructions[0], PhaseReset)
+        assert builder.instructions[0].quantum_targets == list(active_targets.values())
+
+    def test_phase_reset_shot_no_active_pulse_channels(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        for qubit in self.hw.qubits:
+            builder.X(target=qubit)
+
+        n_instr_before = len(builder.instructions)
+
+        res_mgr = ResultManager()
+        # Mock some active targets, i.e., the drive pulse channels of the qubits.
+        res_mgr.add(ActiveChannelResults(targets={}))
+        InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
+
+        # No phase reset added since there are no active targets.
+        assert len(builder.instructions) == n_instr_before
+        assert not isinstance(builder.instructions[0], PhaseReset)
+
+    def test_measure_phase_reset(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        for qubit in self.hw.qubits:
+            builder.X(target=qubit)
+            builder.measure(qubit)
+
+        n_instr_before = len(builder.instructions)
+
+        MeasurePhaseResetSanitisation().run(builder)
+
+        # A phase reset should be added for each measure instruction.
+        assert len(builder.instructions) == n_instr_before + len(self.hw.qubits)
+
+        ref_measure_pulse_channels = set(
+            [qubit.get_measure_channel() for qubit in self.hw.qubits]
+        )
+        measure_pulse_channels = set()
+        for i, instr in enumerate(builder.instructions):
+            if isinstance(instr, MeasurePulse):
+                assert isinstance(builder.instructions[i - 1], PhaseReset)
+                measure_pulse_channels.update(builder.instructions[i - 1].quantum_targets)
+
+        assert measure_pulse_channels == ref_measure_pulse_channels
 
 
 class TestInactivePulseChannelSanitisation:

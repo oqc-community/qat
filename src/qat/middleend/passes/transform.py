@@ -27,6 +27,7 @@ from qat.purr.compiler.instructions import (
     CustomPulse,
     Delay,
     Instruction,
+    MeasurePulse,
     PhaseReset,
     PhaseShift,
     PostProcessing,
@@ -61,6 +62,7 @@ class PhaseOptimisation(TransformPass):
             optimisation.
         """
 
+        previous_instruction = None
         accum_phaseshifts: dict[PulseChannel, float] = defaultdict(float)
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
@@ -80,12 +82,24 @@ class PhaseOptimisation(TransformPass):
                             )
                         )
                 optimized_instructions.append(instruction)
+
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
                     accum_phaseshifts.pop(channel, None)
-                optimized_instructions.append(instruction)
+
+                if isinstance(previous_instruction, PhaseReset):
+                    unseen_targets = list(
+                        set(instruction.quantum_targets)
+                        - set(previous_instruction.quantum_targets)
+                    )
+                    previous_instruction.quantum_targets.extend(unseen_targets)
+                else:
+                    optimized_instructions.append(instruction)
+
             else:
                 optimized_instructions.append(instruction)
+
+            previous_instruction = instruction
 
         ir.instructions = optimized_instructions
         met_mgr.record_metric(
@@ -116,6 +130,7 @@ class PydPhaseOptimisation(TransformPass):
 
         accum_phaseshifts: dict[str, float] = defaultdict(float)
         optimized_instructions: list = []
+        previous_instruction = None
         for instruction in ir:
             if isinstance(instruction, PydPhaseShift):
                 accum_phaseshifts[instruction.target] += instruction.phase
@@ -131,9 +146,17 @@ class PydPhaseOptimisation(TransformPass):
             elif isinstance(instruction, PydPhaseReset):
                 for target in instruction.targets:
                     accum_phaseshifts.pop(target, None)
-                optimized_instructions.append(instruction)
+
+                if isinstance(previous_instruction, PydPhaseReset):
+                    unseen_targets = instruction.targets - previous_instruction.targets
+                    previous_instruction.targets.update(unseen_targets)
+                else:
+                    optimized_instructions.append(instruction)
+
             else:
                 optimized_instructions.append(instruction)
+
+            previous_instruction = instruction
 
         ir.instructions = optimized_instructions
         met_mgr.record_metric(
@@ -388,6 +411,40 @@ class InstructionGranularitySanitisation(TransformPass):
             )
 
         return ir
+
+
+class InitialPhaseResetSanitisation(TransformPass):
+    """
+    Checks if every active pulse channel has a phase reset in the beginning.
+
+    .. warning::
+
+        This pass implies that an `ActiveChannelAnalysis` is performed prior to this pass.
+    """
+
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        active_targets = list(res_mgr.lookup_by_type(ActiveChannelResults).targets.values())
+
+        if active_targets:
+            ir.insert(PhaseReset(active_targets), 0)
+
+        return ir
+
+
+class MeasurePhaseResetSanitisation(TransformPass):
+    """
+    Adds a phase reset before every measure pulse.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+
+        new_instructions = []
+        for instr in ir.instructions:
+            if isinstance(instr, MeasurePulse):
+                new_instructions.append(PhaseReset(instr.quantum_targets))
+            new_instructions.append(instr)
+
+        ir.instructions = new_instructions
 
 
 class InactivePulseChannelSanitisation(TransformPass):
