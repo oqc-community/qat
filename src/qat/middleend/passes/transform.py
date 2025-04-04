@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from collections import defaultdict
+from copy import deepcopy
 from numbers import Number
 from typing import List
 
@@ -34,6 +35,7 @@ from qat.purr.compiler.instructions import (
     PostProcessType,
     ProcessAxis,
     Pulse,
+    PulseShapeType,
     QuantumInstruction,
     Synchronize,
 )
@@ -495,3 +497,78 @@ class InactivePulseChannelSanitisation(TransformPass):
                 instructions.append(inst)
         ir.instructions = instructions
         return ir
+
+
+class InstructionLengthSanitisation(TransformPass):
+    """
+    Checks if quantum instructions are too long and splits if necessary.
+    """
+
+    def __init__(self, duration_limit: float = 1e-03):
+        """
+        :param duration_limit: The maximum allowed clock cycles per instruction.
+
+        .. warning::
+
+            The pass will assume that the durations of instructions are sanitised to the
+            granularity of the pulse channels. If instructions that do not meet the criteria are
+            provided, it might produce incorrect instructions (i.e., instructions that are shorter than
+            the clock cycle). This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+            pass.
+        """
+
+        # TODO: update to target data (COMPILER-395)
+        if duration_limit == 0:
+            raise ValueError("Instruction duration limit cannot be zero.")
+        self.duration_limit = duration_limit
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        duration_limit = self.duration_limit
+
+        new_instructions = []
+        for instr in ir.instructions:
+            if isinstance(instr, Delay) and instr.duration > duration_limit:
+                new_instructions.extend(self._batch_delay(instr, duration_limit))
+
+            elif (
+                isinstance(instr, Pulse)
+                and instr.width > duration_limit
+                and instr.shape == PulseShapeType.SQUARE
+            ):
+                new_instructions.extend(self._batch_square_pulse(instr, duration_limit))
+
+            else:
+                new_instructions.append(instr)
+
+        ir.instructions = new_instructions
+        return ir
+
+    def _batch_delay(self, instruction: Delay, max_duration: float):
+        n_instr = int(instruction.duration // max_duration)
+        remainder = instruction.duration % max_duration
+
+        batch_instr = []
+        for _ in range(n_instr):
+            batch_instr.append(Delay(instruction.quantum_targets, time=max_duration))
+
+        if remainder:
+            batch_instr.append(Delay(instruction.quantum_targets, time=remainder))
+
+        return batch_instr
+
+    def _batch_square_pulse(self, instruction: Pulse, max_width: float):
+        n_instr = int(instruction.width // max_width)
+        remainder = instruction.width % max_width
+
+        batch_instr = []
+        pulse = deepcopy(instruction)
+        pulse.width = max_width
+        for _ in range(n_instr):
+            batch_instr.append(deepcopy(pulse))
+
+        if remainder:
+            pulse = deepcopy(pulse)
+            pulse.width = remainder
+            batch_instr.append(pulse)
+
+        return batch_instr
