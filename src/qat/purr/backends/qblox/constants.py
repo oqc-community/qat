@@ -1,8 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 class Constants:
+    MIN_GAIN = -pow(2, 15)
+    """Minimum gain in Q1ASM programs."""
+    MAX_GAIN = pow(2, 15) - 1
+    """Maximum gain in Q1ASM programs."""
     MAX_GAIN_SIZE = pow(2, 16) - 1
     """Max size of gain in Q1ASM programs."""
+    MIN_OFFSET = -pow(2, 15)
+    """Minimum offset in Q1ASM programs."""
+    MAX_OFFSET = pow(2, 15) - 1
+    """Maximum offset in Q1ASM programs."""
     MAX_OFFSET_SIZE = pow(2, 16) - 1
     """Max size of offset in Q1ASM programs."""
     MAX_WAIT_TIME = pow(2, 16) - 4

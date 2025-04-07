@@ -161,18 +161,16 @@ class ScopingResult:
 
 @dataclass
 class ReadWriteResult:
-    reads: Dict[str, List[QuantumInstruction]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
+    reads: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
     writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 @dataclass(frozen=True)
 class IterBound:
-    start: Union[int, float] = 0
-    step: Union[int, float] = 0
-    end: Union[int, float] = 0
-    count: int = 0
+    start: Union[int, float, complex] = None
+    step: Union[int, float, complex] = None
+    end: Union[int, float, complex] = None
+    count: int = None
 
 
 @dataclass
@@ -341,44 +339,34 @@ class BindingPass(AnalysisPass):
                         # Innermost sweep writes to the "memory index"
                         innermost_sweep, _ = sweeps[-1]
                         rw_result.writes[iter_name].append(innermost_sweep)
-                elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
-                    defining_sweep = next(
-                        (
-                            s
-                            for s in stack[::-1]
-                            if isinstance(s, Sweep) and inst.value.name in s.variables
-                        ),
-                        None,
-                    )
-                    if not defining_sweep:
-                        raise ValueError(
-                            f"Variable {inst.value} referenced but no prior declaration found in target {target}"
-                        )
+                else:
+                    attr2var = {
+                        attr: var
+                        for attr, var in vars(inst).items()
+                        if isinstance(var, Variable)
+                    }
 
-                    # Only the defining sweep writes to variable, but only on the target in question !!
-                    rw_result.writes[inst.value.name].append(defining_sweep)
+                    for attr, var in attr2var.items():
+                        if not (
+                            defining_sweep := next(
+                                (
+                                    s
+                                    for s in stack[::-1]
+                                    if isinstance(s, Sweep) and var.name in s.variables
+                                ),
+                                None,
+                            )
+                        ):
+                            raise ValueError(
+                                f"Variable {var} referenced but no prior declaration found in target {target}"
+                            )
 
-                    # A DeviceUpdate reads the variable named "inst.value.name"
-                    rw_result.reads[inst.value.name].append(inst)
-                elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
-                    defining_sweep = next(
-                        (
-                            s
-                            for s in stack[::-1]
-                            if isinstance(s, Sweep) and inst.duration.name in s.variables
-                        ),
-                        None,
-                    )
-                    if not defining_sweep:
-                        raise ValueError(
-                            f"Variable {inst.duration} referenced but no prior declaration found in target {target}"
-                        )
+                        # Only the defining sweep writes to the variable named "var.name"
+                        # but only on the target in question !!
+                        rw_result.writes[var.name].append(defining_sweep)
 
-                    # Only the defining sweep writes to variable, but only on the target in question !!
-                    rw_result.writes[inst.duration.name].append(defining_sweep)
-
-                    # A Delay reads the variable named "inst.duration.name"
-                    rw_result.reads[inst.duration.name].append(inst)
+                        # The instruction reads the variable named "var.name"
+                        rw_result.reads[var.name].append(inst)
 
             if stack:
                 raise ValueError(
@@ -424,57 +412,91 @@ class TILegalisationPass(AnalysisPass):
 
         return lo_freq, nco_freq
 
+    @staticmethod
+    def transform_amp(amp: float, scale_factor: float, ignore_scale, target: PulseChannel):
+        bias = target.bias
+        scale = (1.0 if ignore_scale else target.scale) + 0.0j
+        pulse_amp = scale * (scale_factor * amp) + bias
+
+        if abs(pulse_amp.real) > 1 or abs(pulse_amp.imag) > 1:
+            raise ValueError(f"Illegal DAC/ADC ratio. It must be within range [-1, 1]")
+
+        return pulse_amp
+
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
+        legal_bound = bound
+
+        if isinstance(inst, Delay):
+            legal_bound = IterBound(
+                start=int(calculate_duration(Delay(inst.quantum_targets, bound.start))),
+                step=int(calculate_duration(Delay(inst.quantum_targets, bound.step))),
+                end=int(calculate_duration(Delay(inst.quantum_targets, bound.end))),
+                count=bound.count,
+            )
+        elif isinstance(inst, DeviceUpdate):
+            if inst.attribute not in ["frequency", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {inst.attribute} for instruction {inst}"
+                )
+
             if inst.attribute == "frequency":
                 if inst.target.fixed_if:
                     raise ValueError(
                         f"fixed_if must be False on target {inst.target} to sweep over frequencies"
                     )
-                return IterBound(
+                legal_bound = IterBound(
                     start=self.decompose_freq(bound.start, inst.target)[1],
                     step=bound.step,
                     end=self.decompose_freq(bound.end, inst.target)[1],
                     count=bound.count,
                 )
-            elif inst.attribute == "phase":
-                return bound
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {inst.attribute}"
-                )
-        elif isinstance(inst, Pulse):
-            if inst.shape != PulseShapeType.SQUARE:
-                raise ValueError("Cannot process non-trivial pulses")
-
-            attribute = next(
-                (
-                    attr
-                    for attr, var in inst.__dict__.items()
-                    if isinstance(var, Variable) and var.name == name
-                )
-            )
-            if attribute == "width":
-                return bound
-            elif attribute == "amp":
-                return bound
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of {attribute} for instruction {inst}"
-                )
-        elif isinstance(inst, Acquire):
-            return bound
-        elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
-            return IterBound(
-                start=calculate_duration(Delay(inst.quantum_targets, bound.start)),
-                step=calculate_duration(Delay(inst.quantum_targets, bound.step)),
-                end=calculate_duration(Delay(inst.quantum_targets, bound.end)),
-                count=bound.count,
-            )
         else:
-            raise NotImplementedError(
-                f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
-            )
+            attr2var = {
+                attr: var
+                for attr, var in vars(inst).items()
+                if isinstance(var, Variable) and var.name == name
+            }
+
+            if attr2var and isinstance(inst, Pulse) and inst.shape != PulseShapeType.SQUARE:
+                raise ValueError("Cannot process non-trivial pulses")
+            if not attr2var:
+                return legal_bound
+            if len(attr2var) > 1:
+                raise ValueError(
+                    f"Unsafe analysis. Distinct attributes expecting the same variable bound {attr2var}"
+                )
+            attr, var = next(iter(attr2var.items()), (None, None))
+            if attr not in ["width", "amp", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {attr} for instruction {inst}"
+                )
+
+            target: PulseChannel = next(iter(inst.quantum_targets))
+            if attr == "width":
+                legal_bound = IterBound(
+                    start=int(calculate_duration(Delay(target, bound.start))),
+                    step=int(calculate_duration(Delay(target, bound.step))),
+                    end=int(calculate_duration(Delay(target, bound.end))),
+                    count=bound.count,
+                )
+            elif attr == "amp" and isinstance(inst, Pulse):
+                legal_bound = IterBound(
+                    start=self.transform_amp(
+                        bound.start,
+                        inst.scale_factor,
+                        inst.ignore_channel_scale,
+                        target,
+                    ),
+                    step=self.transform_amp(
+                        bound.step, inst.scale_factor, inst.ignore_channel_scale, target
+                    ),
+                    end=self.transform_amp(
+                        bound.end, inst.scale_factor, inst.ignore_channel_scale, target
+                    ),
+                    count=bound.count,
+                )
+
+        return legal_bound
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """

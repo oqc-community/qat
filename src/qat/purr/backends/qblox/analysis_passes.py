@@ -35,6 +35,9 @@ from qat.purr.compiler.instructions import (
     Variable,
     calculate_duration,
 )
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 @dataclass
@@ -55,14 +58,20 @@ class TriageResult(ResultInfoMixin):
 
 
 class TriagePass(AnalysisPass):
+    """
+    Builds a view of instructions per quantum target AOT.
+
+    Builds selections of instructions useful for subsequent analysis/transform passes, for
+    code generation, and post-playback steps.
+
+    This is equivalent to the :class:`QatFile` and simplifies the duration timeline creation
+    in the legacy code.
+    """
+
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
-        Builds a view of instructions per quantum target AOT.
-        Builds selections of instructions useful for subsequent analysis/transform passes,
-        for code generation, and post-playback steps.
-
-        This is equivalent to the QatFile and simplifies the duration timeline creation in
-        legacy code.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
 
         builder = ir.value
@@ -91,10 +100,7 @@ class TriagePass(AnalysisPass):
                             result.target_map[aqt].append(inst)
                     else:
                         result.target_map[qt].append(inst)
-            elif isinstance(inst, Sweep):
-                for t in targets:
-                    result.target_map[t].append(inst)
-            else:
+            elif isinstance(inst, Sweep | EndSweep | Repeat | EndRepeat):
                 for t in targets:
                     result.target_map[t].append(inst)
 
@@ -150,18 +156,16 @@ class ScopingResult:
 
 @dataclass
 class ReadWriteResult:
-    reads: Dict[str, List[QuantumInstruction]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
+    reads: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
     writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 @dataclass(frozen=True)
 class IterBound:
-    start: Union[int, float] = 0
-    step: Union[int, float] = 0
-    end: Union[int, float] = 0
-    count: int = 0
+    start: Union[int, float, complex] = None
+    step: Union[int, float, complex] = None
+    end: Union[int, float, complex] = None
+    count: int = None
 
 
 @dataclass
@@ -178,15 +182,28 @@ class BindingResult(ResultInfoMixin):
 
 
 class BindingPass(AnalysisPass):
+    """
+    Builds binding of variables, instructions, and a view of variables from/to scopes.
+
+    Variables are implicitly declared in sweep instructions and are ultimately read from
+    quantum instructions. Thus, every iteration variable is associated to all the scopes it
+    is declared in.
+
+    Values of the iteration variable are abstract and don't mean anything. In this pass, we
+    only extract  the bound and associate it to the name variable. Further analysis is
+    required on read sites to make sure their usage is consistent and meaningful.
+    """
+
     @staticmethod
     def extract_iter_bound(value: Union[List, np.ndarray]):
         """
-        Given a sequence of numbers (typically having been generated from np.linspace()), figure out
-        if the numbers are linearly/evenly spaced, in which case returns an IterBound instance holding
-        the start, step, end, and count of the numbers in the array, or else fail.
+        Given a sequence of numbers (typically having been generated from
+        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced,
+        in which case returns an IterBound instance holding the start, step, end, and count
+        of the numbers in the array, or else fail.
 
-        In the future, we might be interested in relaxing this condition and return "interpolated"
-        evenly spaced approximation of the input sequence.
+        In the future, we might be interested in relaxing this condition and return
+        "interpolated" evenly spaced approximation of the input sequence.
         """
 
         if value is None:
@@ -215,14 +232,8 @@ class BindingPass(AnalysisPass):
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
-        Builds binding of variables, instructions, and a view of variables from/to scopes.
-
-        Variables are implicitly declared in sweep instructions and are ultimately read from quantum
-        instructions. Thus, every iteration variable is associated to all the scopes it is declared in.
-
-        Values of the iteration variable are abstract and don't mean anything. In this pass, we only extract
-        the bound and associate it to the name variable. Further analysis is required on read sites to make
-        sure their usage is consistent and meaningful.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
 
         builder = ir.value
@@ -327,44 +338,34 @@ class BindingPass(AnalysisPass):
                         # Innermost sweep writes to the "memory index"
                         innermost_sweep, _ = sweeps[-1]
                         rw_result.writes[iter_name].append(innermost_sweep)
-                elif isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
-                    defining_sweep = next(
-                        (
-                            s
-                            for s in stack[::-1]
-                            if isinstance(s, Sweep) and inst.value.name in s.variables
-                        ),
-                        None,
-                    )
-                    if not defining_sweep:
-                        raise ValueError(
-                            f"Variable {inst.value} referenced but no prior declaration found in target {target}"
-                        )
+                else:
+                    attr2var = {
+                        attr: var
+                        for attr, var in vars(inst).items()
+                        if isinstance(var, Variable)
+                    }
 
-                    # Only the defining sweep writes to variable, but only on the target in question !!
-                    rw_result.writes[inst.value.name].append(defining_sweep)
+                    for attr, var in attr2var.items():
+                        if not (
+                            defining_sweep := next(
+                                (
+                                    s
+                                    for s in stack[::-1]
+                                    if isinstance(s, Sweep) and var.name in s.variables
+                                ),
+                                None,
+                            )
+                        ):
+                            raise ValueError(
+                                f"Variable {var} referenced but no prior declaration found in target {target}"
+                            )
 
-                    # A DeviceUpdate reads the variable named "inst.value.name"
-                    rw_result.reads[inst.value.name].append(inst)
-                elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
-                    defining_sweep = next(
-                        (
-                            s
-                            for s in stack[::-1]
-                            if isinstance(s, Sweep) and inst.duration.name in s.variables
-                        ),
-                        None,
-                    )
-                    if not defining_sweep:
-                        raise ValueError(
-                            f"Variable {inst.duration} referenced but no prior declaration found in target {target}"
-                        )
+                        # Only the defining sweep writes to the variable named "var.name"
+                        # but only on the target in question !!
+                        rw_result.writes[var.name].append(defining_sweep)
 
-                    # Only the defining sweep writes to variable, but only on the target in question !!
-                    rw_result.writes[inst.duration.name].append(defining_sweep)
-
-                    # A Delay reads the variable named "inst.duration.name"
-                    rw_result.reads[inst.duration.name].append(inst)
+                        # The instruction reads the variable named "var.name"
+                        rw_result.reads[var.name].append(inst)
 
             if stack:
                 raise ValueError(
@@ -375,6 +376,29 @@ class BindingPass(AnalysisPass):
 
 
 class TILegalisationPass(AnalysisPass):
+    """
+    An instruction is legal if it has a direct equivalent in the programming model
+    implemented by the control stack. The notion of "legal" is highly determined by the
+    hardware features of the control stack as well as its programming model. Control stacks
+    such as Qblox have a direct ISA-level representation for basic RF instructions such as
+    frequency and phase manipulation, arithmetic instructions such as add,  and branching
+    instructions such as jump.
+
+    This pass performs target-independent legalisation. The goal here is to understand how
+    variables are used and legalise their bounds. Furthermore, analysis in this pass is
+    fundamentally based on QAT semantics and must be kept target-agnostic so that it can be
+    reused among backends.
+
+    Particularly in QAT:
+    #. A sweep instruction is illegal because it specifies unclear iteration semantics.
+    #. Device updates/assigns in general are illegal because they are bound to a sweep
+       instruction via a variable. In fact, a variable (implicitly defined by a Sweep
+       instruction) remains obscure until a "read" (usually on the instruction builder or on
+       the hardware model) (typically from a DeviceUpdate instruction) is encountered where
+       its intent becomes clear. We say that a DeviceUpdate carries meaning for the variable
+       and materialises its intention.
+    """
+
     @staticmethod
     def decompose_freq(frequency: float, target: PulseChannel):
         if target.fixed_if:  # NCO freq constant
@@ -386,77 +410,96 @@ class TILegalisationPass(AnalysisPass):
 
         return lo_freq, nco_freq
 
+    @staticmethod
+    def transform_amp(amp: float, scale_factor: float, ignore_scale, target: PulseChannel):
+        bias = target.bias
+        scale = (1.0 if ignore_scale else target.scale) + 0.0j
+        pulse_amp = scale * (scale_factor * amp) + bias
+
+        if abs(pulse_amp.real) > 1 or abs(pulse_amp.imag) > 1:
+            raise ValueError(f"Illegal DAC/ADC ratio. It must be within range [-1, 1]")
+
+        return pulse_amp
+
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
+        legal_bound = bound
+
+        if isinstance(inst, Delay):
+            legal_bound = IterBound(
+                start=int(calculate_duration(Delay(inst.quantum_targets, bound.start))),
+                step=int(calculate_duration(Delay(inst.quantum_targets, bound.step))),
+                end=int(calculate_duration(Delay(inst.quantum_targets, bound.end))),
+                count=bound.count,
+            )
+        elif isinstance(inst, DeviceUpdate):
+            if inst.attribute not in ["frequency", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {inst.attribute} for instruction {inst}"
+                )
+
             if inst.attribute == "frequency":
                 if inst.target.fixed_if:
                     raise ValueError(
                         f"fixed_if must be False on target {inst.target} to sweep over frequencies"
                     )
-                return IterBound(
+                legal_bound = IterBound(
                     start=self.decompose_freq(bound.start, inst.target)[1],
                     step=bound.step,
                     end=self.decompose_freq(bound.end, inst.target)[1],
                     count=bound.count,
                 )
-            elif inst.attribute == "phase":
-                return bound
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {inst.attribute}"
-                )
-        elif isinstance(inst, Pulse):
-            if inst.shape != PulseShapeType.SQUARE:
-                raise ValueError("Cannot process non-trivial pulses")
-
-            attribute = next(
-                (
-                    attr
-                    for attr, var in inst.__dict__.items()
-                    if isinstance(var, Variable) and var.name == name
-                )
-            )
-            if attribute == "width":
-                return bound
-            elif attribute == "amp":
-                return bound
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of {attribute} for instruction {inst}"
-                )
-        elif isinstance(inst, Acquire):
-            return bound
-        elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
-            return IterBound(
-                start=calculate_duration(Delay(inst.quantum_targets, bound.start)),
-                step=calculate_duration(Delay(inst.quantum_targets, bound.step)),
-                end=calculate_duration(Delay(inst.quantum_targets, bound.end)),
-                count=bound.count,
-            )
         else:
-            raise NotImplementedError(
-                f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
-            )
+            attr2var = {
+                attr: var
+                for attr, var in vars(inst).items()
+                if isinstance(var, Variable) and var.name == name
+            }
+
+            if attr2var and isinstance(inst, Pulse) and inst.shape != PulseShapeType.SQUARE:
+                raise ValueError("Cannot process non-trivial pulses")
+            if not attr2var:
+                return legal_bound
+            if len(attr2var) > 1:
+                raise ValueError(
+                    f"Unsafe analysis. Distinct attributes expecting the same variable bound {attr2var}"
+                )
+            attr, var = next(iter(attr2var.items()), (None, None))
+            if attr not in ["width", "amp", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {attr} for instruction {inst}"
+                )
+
+            target: PulseChannel = next(iter(inst.quantum_targets))
+            if attr == "width":
+                legal_bound = IterBound(
+                    start=int(calculate_duration(Delay(target, bound.start))),
+                    step=int(calculate_duration(Delay(target, bound.step))),
+                    end=int(calculate_duration(Delay(target, bound.end))),
+                    count=bound.count,
+                )
+            elif attr == "amp" and isinstance(inst, Pulse):
+                legal_bound = IterBound(
+                    start=self.transform_amp(
+                        bound.start,
+                        inst.scale_factor,
+                        inst.ignore_channel_scale,
+                        target,
+                    ),
+                    step=self.transform_amp(
+                        bound.step, inst.scale_factor, inst.ignore_channel_scale, target
+                    ),
+                    end=self.transform_amp(
+                        bound.end, inst.scale_factor, inst.ignore_channel_scale, target
+                    ),
+                    count=bound.count,
+                )
+
+        return legal_bound
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
-        An instruction is legal if it has a direct equivalent in the programming model implemented by the control
-        stack. The notion of "legal" is highly determined by the hardware features of the control stack as well
-        as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
-        RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
-        and branching instructions such as jump.
-
-        This pass performs target-independent legalisation. The goal here is to understand how variables
-        are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-        semantics and must be kept target-agnostic so that it can be reused among targets.
-
-        Particularly in QAT:
-            1) A sweep instruction is illegal because it specifies unclear iteration semantics.
-            2) Device updates/assigns in general are illegal because they are bound to a sweep instruction
-        via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
-        until a "read" (usually on the instruction builder or on the hardware model) (typically from
-        a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
-        carries meaning for the variable and materialises its intention.
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
         """
 
         builder = ir.value
@@ -490,13 +533,24 @@ class TILegalisationPass(AnalysisPass):
 
 class QbloxLegalisationPass(AnalysisPass):
     @staticmethod
-    def phase_as_steps(phase_rad: float) -> int:
+    def phase_as_steps(phase_rad: float) -> np.uint32:
+        """
+        The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
+        However, This function must return an unsigned integer because registers are unsigned 32bit integers.
+        """
+
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
-        return int(round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG))
+        steps = int(round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG))
+        return np.array([steps], dtype=int).view(np.uint32)[0]
 
     @staticmethod
-    def freq_as_steps(freq_hz: float) -> int:
+    def freq_as_steps(freq_hz: float) -> np.uint32:
+        """
+        The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
+        However, This function must return an unsigned integer because registers are unsigned 32bit integers.
+        """
+
         steps = int(round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ))
 
         if (
@@ -511,10 +565,66 @@ class QbloxLegalisationPass(AnalysisPass):
                 f"Got {freq_hz:e} Hz"
             )
 
-        return steps
+        return np.array([steps], dtype=int).view(np.uint32)[0]
+
+    def amp_as_steps(self, amp: complex) -> complex:
+        # TODO - Needs a rethink
+        """
+        The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand. However,
+        This function must return an unsigned integer because registers are unsigned 32bit integers.
+        """
+
+        i_steps = int(amp.real * Constants.MAX_OFFSET)
+        q_steps = int(amp.imag * Constants.MAX_OFFSET)
+
+        if i_steps > Constants.MAX_OFFSET or i_steps < Constants.MIN_OFFSET:
+            raise ValueError(
+                f"""
+                Illegal offset for I. Expected it be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
+                Got {i_steps} instead
+                """
+            )
+
+        if q_steps > Constants.MAX_OFFSET or q_steps < Constants.MIN_OFFSET:
+            raise ValueError(
+                f"""
+                Illegal offset for Q. Expected it be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
+                Got {q_steps} instead
+                """
+            )
+
+        i_steps = np.array([i_steps], dtype=int).view(np.uint32)[0]
+        q_steps = np.array([q_steps], dtype=int).view(np.uint32)[0]
+
+        return i_steps + 1j * q_steps
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
-        if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
+        legal_bound = bound
+
+        if isinstance(inst, Acquire):
+            num_bins = bound.count
+            if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+                raise ValueError(
+                    f"""
+                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                        Please reduce number of points
+                        """
+                )
+        elif isinstance(inst, Delay):
+            if bound.start < Constants.GRID_TIME:
+                log.warning(
+                    f"Undefined runtime behaviour. Variable {name} has illegal lower bound"
+                )
+            if bound.end > Constants.MAX_WAIT_TIME:
+                log.warning(
+                    f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
+                )
+        elif isinstance(inst, DeviceUpdate):
+            if inst.attribute not in ["frequency", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {inst.attribute} for instruction {inst}"
+                )
+
             if inst.attribute == "frequency":
                 legal_bound = IterBound(
                     start=self.freq_as_steps(bound.start),
@@ -529,73 +639,58 @@ class QbloxLegalisationPass(AnalysisPass):
                     end=self.phase_as_steps(bound.end),
                     count=bound.count,
                 )
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {inst.attribute}"
-                )
-        elif isinstance(inst, Pulse):
-            if inst.shape != PulseShapeType.SQUARE:
-                raise ValueError("Cannot process non-trivial pulses")
+        else:
+            attr2var = {
+                attr: var
+                for attr, var in vars(inst).items()
+                if isinstance(var, Variable) and var.name == name
+            }
 
-            attribute = next(
-                (
-                    attr
-                    for attr, var in inst.__dict__.items()
-                    if isinstance(var, Variable) and var.name == name
+            if attr2var and isinstance(inst, Pulse) and inst.shape != PulseShapeType.SQUARE:
+                raise ValueError("Cannot process non-trivial pulses")
+            if not attr2var:
+                return legal_bound
+            if len(attr2var) > 1:
+                raise ValueError(
+                    f"Unsafe analysis. Distinct attributes expecting the same variable bound {attr2var}"
                 )
-            )
-            if attribute == "width":
-                # TODO - as nanoseconds for now but involve calculate_duration
+            attr, var = next(iter(attr2var.items()), (None, None))
+            if attr not in ["width", "amp", "phase"]:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {attr} for instruction {inst}"
+                )
+
+            if attr == "width":
+                if bound.start < Constants.GRID_TIME:
+                    log.warning(
+                        f"Undefined runtime behaviour. Variable {name} has illegal lower bound"
+                    )
+                if bound.end > Constants.MAX_WAIT_TIME:
+                    log.warning(
+                        f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
+                    )
+            elif attr == "amp" and isinstance(inst, Pulse):
                 legal_bound = IterBound(
-                    start=bound.start * 1e9,
-                    step=bound.step * 1e9,
-                    end=bound.end * 1e9,
+                    start=self.amp_as_steps(bound.start),
+                    step=self.amp_as_steps(bound.step),
+                    end=self.amp_as_steps(bound.end),
                     count=bound.count,
                 )
-            elif attribute == "amp":
-                # TODO - Assumed legal whereby users know about ADC ratio <-> Voltage <-> bit representation rules
-                legal_bound = bound
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of {attribute} for instruction {inst}"
+            elif attr == "phase":
+                legal_bound = IterBound(
+                    start=self.phase_as_steps(bound.start),
+                    step=self.phase_as_steps(bound.step),
+                    end=self.phase_as_steps(bound.end),
+                    count=bound.count,
                 )
-        elif isinstance(inst, Acquire):
-            num_bins = bound.count
-            if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+
+        for attr, val in vars(legal_bound).items():
+            if not (isinstance(val, int) or isinstance(val, np.uint32)):
                 raise ValueError(
-                    f"""
-                    Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
-                    Please reduce number of points
-                    """
+                    f"Illegal value {val} for attribute {attr}. Expected value to be an integer"
                 )
-            legal_bound = bound
-        elif isinstance(inst, Delay) and isinstance(inst.duration, Variable):
-            legal_bound = bound  # TODO - probably shift up by some minimum
-        else:
-            raise NotImplementedError(
-                f"Legalisation only supports DeviceUpdate and Pulse. Got {type(inst)} instead"
-            )
 
-        if not all(
-            isinstance(val, int)
-            for val in [
-                legal_bound.start,
-                legal_bound.step,
-                legal_bound.end,
-                legal_bound.count,
-            ]
-        ):
-            raise ValueError(
-                f"Illegal iter bound. Expected all attribute to be integer, but got {legal_bound} instead"
-            )
-
-        # Qblox registers are unsigned 32bit integers, but they are treated as signed integers
-        return IterBound(
-            start=np.array([legal_bound.start], dtype=int).view(np.uint32)[0],
-            step=np.array([legal_bound.step], dtype=int).view(np.uint32)[0],
-            end=np.array([legal_bound.end], dtype=int).view(np.uint32)[0],
-            count=legal_bound.count,
-        )
+        return legal_bound
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
@@ -672,6 +767,11 @@ class CFGResult(ResultInfoMixin):
 
 class CFGPass(AnalysisPass):
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
+        """
+
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")

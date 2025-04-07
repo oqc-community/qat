@@ -360,8 +360,8 @@ class DummyQbloxControlHardware(QbloxControlHardware):
                 "set_awg_offs( +)([0-9]+),([0-9]+)\nupd_param( +)([0-9]+)"
             )
             match = next(playback_pattern.finditer(sequence.program))
-            i_val = int(match.group(2)) / (Constants.MAX_OFFSET_SIZE // 2)
-            q_val = int(match.group(3)) / (Constants.MAX_OFFSET_SIZE // 2)
+            i_val = int(match.group(2)) / Constants.MAX_OFFSET
+            q_val = int(match.group(3)) / Constants.MAX_OFFSET
 
         dummy_data = [(i_val, q_val)] * Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(

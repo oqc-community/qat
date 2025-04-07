@@ -92,7 +92,11 @@ def qubit_spect(model, qubit_indices=None, num_points=None):
     return builder
 
 
-def t1(model, qubit_indices=None, num_points=None, width=None):
+def delay_iteration(model, qubit_indices=None, num_points=None, width=None):
+    """
+    Typically found in T1 measurement where an X gate is applied followed by a variable delay.
+    """
+
     qubit_indices = qubit_indices or [0]
     num_points = num_points or 100
     width = width or 500e-6
@@ -151,4 +155,126 @@ def scope_acq(model, qubit_indices=None, do_X=False):
                 time=width,
             )
         )
+    return builder
+
+
+def pulse_width_iteration(model, qubit_indices=None, num_points=None):
+    """
+    A variation of Rabi where the pulse amplitude is fixed and its width is variable.
+    """
+
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 10
+
+    drive_rate = 5e6
+    pulse_shape = PulseShapeType.SQUARE
+    time_start = 0
+    width = 10e-6
+    time = np.linspace(time_start, time_start + width, num_points)
+    var_name = "t"
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    builder.sweep(SweepValue(var_name, time))
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        drive_channel.scale = 1.0e-8 + 0.0j
+
+        builder.pulse(
+            drive_channel,
+            pulse_shape,
+            width=Variable(var_name),
+            amp=drive_rate,
+            phase=0.0,
+            drag=0.0,
+            rise=1.0 / 3.0,
+        )
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_signal(qubit, f"Q{qubit.index}")
+    return builder
+
+
+def pulse_amplitude_iteration(model, qubit_indices=None, num_points=None):
+    """
+    A variation of Rabi where the pulse width is fixed and its amplitude is variable.
+    """
+
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 10
+
+    dr_start = 0.0
+    dr_end = 5e6
+    amplitude = np.linspace(dr_start, dr_end, num_points)
+    width = 10e-6
+    pulse_shape = PulseShapeType.SQUARE
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    builder.sweep(SweepValue("amp", amplitude))
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        drive_channel.scale = 1.0e-8 + 0.0j
+
+        builder.pulse(
+            drive_channel,
+            pulse_shape,
+            width=width,
+            amp=Variable("amp"),
+            phase=0.0,
+            drag=0.0,
+            rise=1.0 / 3.0,
+        )
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_signal(qubit, f"Q{qubit.index}")
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_signal(qubit, f"Q{qubit.index}")
+
+    return builder
+
+
+def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
+    """
+    Typical in Ramsey measurement where both time and phase are variable.
+    """
+
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 10
+
+    detuning = 5e6
+    width = 10e-6
+    time = np.linspace(0, width, num_points)
+    phase = 2.0 * np.pi * detuning * time
+    time_var_name = "t"
+    phase_var_name = "p"
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    builder.sweep([SweepValue(time_var_name, time), SweepValue(phase_var_name, phase)])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        drive_channel.scale = 1.0e-8 + 0.0j
+
+        builder.X(qubit, np.pi / 2.0)
+        builder.delay(qubit, Variable(time_var_name))
+        builder.phase_shift(qubit, Variable(phase_var_name))
+        builder.Y(qubit, -np.pi / 2.0)
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_z(qubit, output_variable=f"Q{index}")
     return builder

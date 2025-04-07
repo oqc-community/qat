@@ -11,12 +11,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriagePass,
     TriageResult,
 )
-from qat.purr.backends.qblox.codegen import (
-    NewQbloxEmitter,
-    QbloxEmitter,
-    get_nco_phase_arguments,
-    get_nco_set_frequency_arguments,
-)
+from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.backends.qblox.metrics_base import MetricsManager
@@ -42,7 +37,15 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.unit.utils.builder_nuggets import qubit_spect, resonator_spect, scope_acq, t1
+from tests.unit.utils.builder_nuggets import (
+    delay_iteration,
+    pulse_amplitude_iteration,
+    pulse_width_iteration,
+    qubit_spect,
+    resonator_spect,
+    scope_acq,
+    time_and_phase_iteration,
+)
 
 log = get_default_logger()
 
@@ -80,7 +83,7 @@ class TestQbloxEmitter:
         assert pkg.target == drive_channel
         assert not pkg.sequence.waveforms
         assert (
-            f"set_awg_offs {int(Constants.MAX_OFFSET_SIZE // 2)},0\nupd_param {100}\nset_awg_offs 0,0"
+            f"set_awg_offs {Constants.MAX_OFFSET},0\nupd_param {4}\nwait {100 - 4}\nset_awg_offs 0,0"
             in pkg.sequence.program
         )
 
@@ -101,9 +104,9 @@ class TestQbloxEmitter:
         qat_file = InstructionEmitter().emit(builder.instructions, model)
         packages = QbloxEmitter().emit(qat_file)
         for package in packages:
-            expected_phase = get_nco_phase_arguments(phase)
+            expected_phase = QbloxLegalisationPass.phase_as_steps(phase)
             assert f"set_ph_delta {expected_phase}" in package.sequence.program
-            expected_freq = get_nco_set_frequency_arguments(
+            expected_freq = QbloxLegalisationPass.freq_as_steps(
                 drive_channel.baseband_if_frequency + frequency
             )
             assert f"set_freq {expected_freq}" in package.sequence.program
@@ -115,7 +118,7 @@ class TestQbloxEmitter:
         assert measure_channel == acquire_channel
 
         time = 7.5e-6
-        i_offs_steps = int(qubit.pulse_measure["amp"] * (Constants.MAX_OFFSET_SIZE // 2))
+        i_offs_steps = int(qubit.pulse_measure["amp"] * Constants.MAX_OFFSET)
         delay = qubit.measure_acquire["delay"]
 
         builder = get_builder(model).acquire(acquire_channel, time, delay=delay)
@@ -533,8 +536,54 @@ class TestNewQbloxEmitter(InvokerMixin):
 
     @pytest.mark.parametrize("num_points", [100])
     @pytest.mark.parametrize("qubit_indices", [[0]])
-    def test_t1(self, model, num_points, qubit_indices):
-        builder = t1(model, qubit_indices, num_points)
+    def test_delay_iteration(self, model, num_points, qubit_indices):
+        builder = delay_iteration(model, qubit_indices, num_points)
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        assert len(packages) == 2 * len(qubit_indices)
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_pulse_width_iteration(self, model, num_points, qubit_indices):
+        builder = pulse_width_iteration(model, qubit_indices, num_points)
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        assert len(packages) == 2 * len(qubit_indices)
+
+    @pytest.mark.skip("Needs better handing of composite bounds")
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_pulse_amplitude_iteration(self, model, num_points, qubit_indices):
+        builder = pulse_amplitude_iteration(model, qubit_indices, num_points)
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        assert len(packages) == 2 * len(qubit_indices)
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_time_and_phase_iteration(self, model, num_points, qubit_indices):
+        builder = time_and_phase_iteration(model, qubit_indices, num_points)
         ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
