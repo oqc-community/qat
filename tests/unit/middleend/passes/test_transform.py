@@ -30,6 +30,7 @@ from qat.middleend.passes.transform import (
     PhaseOptimisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
+    SynchronizeTask,
 )
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
@@ -804,3 +805,28 @@ class TestInstructionLengthSanitisation:
         for instr in builder.instructions[:-1]:
             assert instr.width == max_duration
         assert math.isclose(builder.instructions[-1].width, remainder)
+
+
+class TestSynchronizeTask:
+
+    def test_synchronize_task_adds_sync(self):
+        model = EchoModelLoader().load()
+        drive_chan = model.qubits[0].get_drive_channel()
+        measure_chan = model.qubits[0].get_measure_channel()
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                {drive_chan.full_id(): drive_chan, measure_chan.full_id(): measure_chan}
+            )
+        )
+
+        builder = model.create_builder()
+        builder.pulse(drive_chan, shape=PulseShapeType.SQUARE, width=800e-9)
+        builder.pulse(measure_chan, shape=PulseShapeType.SQUARE, width=400e-9)
+
+        SynchronizeTask().run(builder, res_mgr)
+        assert isinstance(builder.instructions[-1], Synchronize)
+        assert set(builder.instructions[-1].quantum_targets) == set(
+            [drive_chan, measure_chan]
+        )

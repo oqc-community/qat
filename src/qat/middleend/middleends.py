@@ -18,6 +18,7 @@ from qat.middleend.passes.transform import (
     PhaseOptimisation,
     PostProcessingSanitisation,
     PydPhaseOptimisation,
+    SynchronizeTask,
 )
 from qat.middleend.passes.validation import (
     PydNoMidCircuitMeasurementValidation,
@@ -140,6 +141,7 @@ class DefaultMiddleend(CustomMiddleend):
             | ReadoutValidation(model)
             | AcquireSanitisation()
             | InstructionGranularitySanitisation(clock_cycle)
+            | SynchronizeTask()
         )
 
 

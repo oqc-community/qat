@@ -662,9 +662,12 @@ class TestQatEchoPipelines:
         for key in buffers:
             purr_buffer = buffers[key]
             qat_buffer = executable.channel_data[key].buffer
-            assert len(purr_buffer) == len(qat_buffer)
+            assert len(purr_buffer) <= len(qat_buffer)
+            idx = min(len(purr_buffer), len(qat_buffer))
+            excess = len(qat_buffer) - len(purr_buffer)
             if len(purr_buffer) > 0:
-                assert np.allclose(purr_buffer, qat_buffer)
+                assert np.allclose(purr_buffer[0:idx], qat_buffer[0:idx])
+                assert np.allclose(qat_buffer[idx:], np.zeros(excess))
 
         # Acquires require more care: purr organizes acquires by pulse channel. We have
         # made a purposeful choice in the experimental code to organize by physical channel.
