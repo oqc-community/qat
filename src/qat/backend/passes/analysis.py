@@ -686,6 +686,7 @@ class TimelineAnalysisResult(ResultInfoMixin):
     target_map: dict[PulseChannel, PulseChannelTimeline] = field(
         default_factory=lambda: defaultdict(PulseChannelTimeline)
     )
+    total_duration: float = field(default=0.0)
 
 
 class TimelineAnalysis(AnalysisPass):
@@ -716,14 +717,17 @@ class TimelineAnalysis(AnalysisPass):
         target_map = ir.target_map
 
         result = TimelineAnalysisResult()
+        total_duration = 0
         for pulse_channel, instructions in target_map.items():
-            channel_durations = np.array(
+            pulse_channel_durations = np.array(
                 [
                     (inst.duration if isinstance(inst, QuantumInstruction) else 0.0)
                     for inst in instructions
                 ]
             )
-            durations = self.durations_as_samples(pulse_channel, channel_durations)
+            total_duration = max(total_duration, np.sum(pulse_channel_durations))
+
+            durations = self.durations_as_samples(pulse_channel, pulse_channel_durations)
             cumulative_durations = np.cumsum(durations)
             result.target_map[pulse_channel] = PulseChannelTimeline(
                 samples=durations,
@@ -731,6 +735,7 @@ class TimelineAnalysis(AnalysisPass):
                 end_positions=cumulative_durations - 1,
             )
 
+        result.total_duration = total_duration
         res_mgr.add(result)
         return ir
 

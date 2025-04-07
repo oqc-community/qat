@@ -1,15 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
 
+import math
 import random
 from collections import defaultdict
+from copy import deepcopy
 
 import numpy as np
 import pytest
 
 from qat.backend.passes.analysis import TriagePass, TriageResult
+from qat.backend.passes.lowering import PartitionByPulseChannel
 from qat.backend.passes.transform import (
     DesugaringPass,
+    FreqShiftSanitisation,
     LowerSyncsToDelays,
     PydReturnSanitisation,
     ReturnSanitisation,
@@ -27,6 +31,8 @@ from qat.ir.instruction_builder import (
 from qat.ir.instructions import Return as PydReturn
 from qat.ir.measure import Acquire as PydAcquire
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.devices import ChannelType, FreqShiftPulseChannel
 from qat.purr.compiler.instructions import Delay, Pulse, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model
 
@@ -148,7 +154,7 @@ class TestLowerSyncsToDelays:
         assert times[0] + times[1] + times[4] == times[2] + times[3]
 
 
-class TestSquashDelaysOptimisaiton:
+class TestSquashDelaysOptimisation:
 
     @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
     @pytest.mark.parametrize("with_phase", [True, False])
@@ -216,3 +222,72 @@ class TestSquashDelaysOptimisaiton:
         assert isinstance(builder.instructions[1], Pulse)
         assert isinstance(builder.instructions[2], Delay)
         assert np.isclose(builder.instructions[2].time, np.sum(delay_times[2:5]))
+
+
+class TestFreqShiftSanitisation:
+
+    def test_no_freq_shift_pulse_channel(self):
+        hw = EchoModelLoader(8).load()
+
+        builder = QuantumInstructionBuilder(hw)
+        res_mgr = ResultManager()
+
+        for qubit in hw.qubits:
+            builder.X(qubit)
+
+        partitioned_ir = PartitionByPulseChannel().run(builder, res_mgr=res_mgr)
+        ref_partitioned_ir = deepcopy(partitioned_ir)
+
+        FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
+
+        # No instructions added since we do not have freq shift pulse channels.
+        assert len(partitioned_ir.target_map) == len(ref_partitioned_ir.target_map)
+        for target, target_ref in zip(
+            partitioned_ir.target_map, ref_partitioned_ir.target_map
+        ):
+            assert target == target_ref
+
+    @pytest.mark.parametrize("total_duration", [1e-02, 1e-01, 3, 5])
+    def test_freq_shift_pulse_channel(self, total_duration):
+        hw = EchoModelLoader(8).load()
+
+        builder = QuantumInstructionBuilder(hw)
+        res_mgr = ResultManager()
+
+        # Add frequency shift pulse channel to first qubit.
+        qubit0 = hw.qubits[0]
+        freq_shift_pulse_ch = FreqShiftPulseChannel(
+            id_="pulse_ch_Q0", physical_channel=qubit0.physical_channel
+        )
+        qubit0.add_pulse_channel(freq_shift_pulse_ch, channel_type=ChannelType.freq_shift)
+
+        for qubit in hw.qubits:
+            builder.X(qubit)
+
+        # Total duration of the freq shift pulse should be equal to the length of this pulse.
+        builder.pulse(
+            qubit0.get_drive_channel(),
+            shape=PulseShapeType.GAUSSIAN,
+            amp=0.1,
+            width=total_duration,
+        )
+
+        partitioned_ir = PartitionByPulseChannel().run(builder, res_mgr=res_mgr)
+        ref_partitioned_ir = deepcopy(partitioned_ir)
+
+        FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
+
+        # One pulse on the freq shift pulse channel of the first qubit.
+        assert len(partitioned_ir.target_map) == len(ref_partitioned_ir.target_map) + 1
+
+        assert len(partitioned_ir.target_map[freq_shift_pulse_ch]) == 1
+        freq_shift_pulse = partitioned_ir.target_map[freq_shift_pulse_ch][0]
+        assert isinstance(freq_shift_pulse, Pulse)
+        assert (
+            freq_shift_pulse_ch in freq_shift_pulse.quantum_targets
+            and len(freq_shift_pulse.quantum_targets) == 1
+        )
+        assert freq_shift_pulse.shape == PulseShapeType.SQUARE
+        assert freq_shift_pulse.amp == freq_shift_pulse_ch.amp
+        # TO DO: Change the timings to integers of nanoseconds to improve accuracy.
+        assert math.isclose(freq_shift_pulse.width, total_duration, abs_tol=1e-06)
