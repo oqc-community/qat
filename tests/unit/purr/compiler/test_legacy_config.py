@@ -41,6 +41,8 @@ def _get_contents(file_path):
         return ifile.read()
 
 
+# TODO: remove support for old config, including related
+# serialised_default_compiler_config_x.json files (COMPILER-360)
 class TestConfigGeneral:
     def test_config_opt_contains(self):
         opt = Qasm2Optimizations()
