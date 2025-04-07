@@ -356,12 +356,45 @@
   <section id="module-qat.purr.backends.qblox.codegen">
 <span id="qat-purr-backends-qblox-codegen-module"></span><h1>qat.purr.backends.qblox.codegen module<a class="headerlink" href="#module-qat.purr.backends.qblox.codegen" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.clear" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.create_package">
+<span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.create_package" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.is_empty" title="Link to this definition"></a></dt>
+<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
+This is temporary and criteria will change with more features coming in</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.shift_frequency">
+<span class="sig-name descname"><span class="pre">shift_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.shift_frequency" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AllocationManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocationManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_reg_pool=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_lbl_counters=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registers=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AllocationManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AllocationManager.gen_label">
-<span class="sig-name descname"><span class="pre">gen_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AllocationManager.gen_label" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AllocationManager.label_gen">
+<span class="sig-name descname"><span class="pre">label_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AllocationManager.label_gen" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -377,6 +410,12 @@
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AllocationManager.reg_borrow">
+<span class="sig-name descname"><span class="pre">reg_borrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AllocationManager.reg_borrow" title="Link to this definition"></a></dt>
+<dd><p>Short-lived register allocation</p>
 </dd></dl>
 
 <dl class="py method">
@@ -397,32 +436,9 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ContextMixin</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.clear" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.create_package">
-<span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.create_package" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.ContextMixin.is_empty">
-<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.ContextMixin.is_empty" title="Link to this definition"></a></dt>
-<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-This is temporary and criteria will change with more features coming in</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoping_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="qat.purr.backends.qblox.codegen.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextMixin</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoping_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.AbstractContext" title="qat.purr.backends.qblox.codegen.AbstractContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractContext</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.delay">
 <span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.delay" title="Link to this definition"></a></dt>
@@ -431,11 +447,6 @@ This is temporary and criteria will change with more features coming in</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">
 <span class="sig-name descname"><span class="pre">device_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">du_inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.duration">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.duration" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -469,11 +480,6 @@ This is temporary and criteria will change with more features coming in</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.measure_acquire">
 <span class="sig-name descname"><span class="pre">measure_acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.measure_acquire" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -489,11 +495,6 @@ This is temporary and criteria will change with more features coming in</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.shift_frequency">
-<span class="sig-name descname"><span class="pre">shift_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.shift_frequency" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.shift_phase">
 <span class="sig-name descname"><span class="pre">shift_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.shift_phase" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -501,7 +502,9 @@ This is temporary and criteria will change with more features coming in</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.synchronize">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">synchronize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contexts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.synchronize" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Potential presence of dynamic time render static time padding method inviable.
+In such case, we simply revert to the <cite>wait_sync</cite> instruction (although it may limit muxing capabilities).</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.waveform">
@@ -580,7 +583,7 @@ Computes useful information in the form of attributes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.ContextMixin" title="qat.purr.backends.qblox.codegen.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.codegen.AbstractContext" title="qat.purr.backends.qblox.codegen.AbstractContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractContext</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.create_package">
 <span class="sig-name descname"><span class="pre">create_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.create_package" title="Link to this definition"></a></dt>
@@ -597,11 +600,6 @@ Computes useful information in the form of attributes.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">
 <span class="sig-name descname"><span class="pre">measure_acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -609,11 +607,6 @@ Computes useful information in the form of attributes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.reset_phase">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contexts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.reset_phase" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.shift_frequency">
-<span class="sig-name descname"><span class="pre">shift_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.shift_frequency" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -683,26 +676,6 @@ Computes useful information in the form of attributes.</p>
 <span class="sig-name descname"><span class="pre">timeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxPackage.timeline" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.get_nco_phase_arguments">
-<span class="sig-name descname"><span class="pre">get_nco_phase_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.get_nco_phase_arguments" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.get_nco_set_frequency_arguments">
-<span class="sig-name descname"><span class="pre">get_nco_set_frequency_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.get_nco_set_frequency_arguments" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
