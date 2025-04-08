@@ -50,18 +50,23 @@ class Opcode(Enum):
 
 
 class Q1asmInstruction:
-    def __init__(self, opcode: Opcode, *operands):
+    def __init__(self, opcode: Opcode, *operands, comment: str = None):
         self.opcode: Opcode = opcode
-        self.operands: Tuple[Any] = operands
+        self.operands: Tuple[Any, ...] = operands
+        self.comment: str = comment
 
     def __str__(self):
         args = ",".join([str(op) for op in self.operands])
-        if args == "":
-            return f"{self.opcode.value}"
 
         if self.opcode == Opcode.ADDRESS:
-            return args
-        return f"{self.opcode.value} {args}"
+            asm_str = f"{args}:"
+        else:
+            asm_str = f"{self.opcode.value} {args}"
+
+        if self.comment:
+            asm_str += f" # {self.comment}"
+
+        return asm_str
 
     def __repr__(self):
         return self.__str__()
@@ -122,96 +127,110 @@ class SequenceBuilder:
             raise ValueError(f"A weight named {name} already exists")
         self.weights[name] = {"index": index, "data": data}
 
-    def _add_instruction(self, opcode: Opcode, *operands):
-        self.q1asm_instructions.append(Q1asmInstruction(opcode, *operands))
+    def _add_instruction(self, opcode: Opcode, *operands, comment: str = None):
+        self.q1asm_instructions.append(Q1asmInstruction(opcode, *operands, comment=comment))
         return self
 
     # Control Instructions
-    def nop(self):
-        return self._add_instruction(Opcode.NOP)
+    def nop(self, comment: str = None):
+        return self._add_instruction(Opcode.NOP, comment=comment)
 
-    def stop(self):
-        return self._add_instruction(Opcode.STOP)
+    def stop(self, comment: str = None):
+        return self._add_instruction(Opcode.STOP, comment=comment)
 
     # Jump Instructions
-    def label(self, label: Union[int, str]):
-        if isinstance(label, str):
-            label = f"{label}:"
-        return self._add_instruction(Opcode.ADDRESS, label)
+    def label(self, label: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.ADDRESS, label, comment=comment)
 
-    def jmp(self, address: Union[int, str]):
+    def jmp(self, address: Union[int, str], comment: str = None):
         if isinstance(address, str):
             address = f"@{address}"
-        return self._add_instruction(Opcode.JUMP, address)
+        return self._add_instruction(Opcode.JUMP, address, comment=comment)
 
-    def jge(self, a: str, b: int, address: Union[int, str]):
+    def jge(self, a: str, b: int, address: Union[int, str], comment: str = None):
         if isinstance(address, str):
             address = f"@{address}"
-        return self._add_instruction(Opcode.JUMP_GREATER_EQUALS, a, b, address)
+        return self._add_instruction(
+            Opcode.JUMP_GREATER_EQUALS, a, b, address, comment=comment
+        )
 
-    def jlt(self, a: str, b: int, address: Union[int, str]):
+    def jlt(self, a: str, b: int, address: Union[int, str], comment: str = None):
         if isinstance(address, str):
             address = f"@{address}"
-        return self._add_instruction(Opcode.JUMP_LESS_THAN, a, b, address)
+        return self._add_instruction(Opcode.JUMP_LESS_THAN, a, b, address, comment=comment)
 
-    def loop(self, a: str, address: Union[int, str]):
+    def loop(self, a: str, address: Union[int, str], comment: str = None):
         if isinstance(address, str):
             address = f"@{address}"
-        return self._add_instruction(Opcode.LOOP, a, address)
+        return self._add_instruction(Opcode.LOOP, a, address, comment=comment)
 
     # Arithmetic instructions
-    def move(self, src: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.MOVE, src, dest)
+    def move(self, src: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.MOVE, src, dest, comment=comment)
 
-    def add(self, a: str, b: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.ADD, a, b, dest)
+    def add(self, a: str, b: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.ADD, a, b, dest, comment=comment)
 
-    def sub(self, a: str, b: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.SUB, a, b, dest)
+    def sub(self, a: str, b: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.SUB, a, b, dest, comment=comment)
 
-    def logic_not(self, src: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.NOT, src, dest)
+    def logic_not(self, src: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.NOT, src, dest, comment=comment)
 
-    def logic_and(self, a: str, b: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.AND, a, b, dest)
+    def logic_and(self, a: str, b: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.AND, a, b, dest, comment=comment)
 
-    def logic_or(self, a: str, b: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.OR, a, b, dest)
+    def logic_or(self, a: str, b: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.OR, a, b, dest, comment=comment)
 
-    def logic_xor(self, a: str, b: Union[int, str], dest: str):
-        return self._add_instruction(Opcode.XOR, a, b, dest)
+    def logic_xor(self, a: str, b: Union[int, str], dest: str, comment: str = None):
+        return self._add_instruction(Opcode.XOR, a, b, dest, comment=comment)
 
     # Parameter operation instructions
-    def set_mrk(self, mask: Union[int, str]):
-        return self._add_instruction(Opcode.SET_MARKER, mask)
+    def set_mrk(self, mask: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.SET_MARKER, mask, comment=comment)
 
-    def set_freq(self, frequency: Union[int, str]):
-        return self._add_instruction(Opcode.SET_NCO_FREQUENCY, frequency)
+    def set_freq(self, frequency: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.SET_NCO_FREQUENCY, frequency, comment=comment)
 
-    def set_ph(self, phase: Union[int, str]):
-        return self._add_instruction(Opcode.SET_NCO_PHASE, phase)
+    def set_ph(self, phase: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.SET_NCO_PHASE, phase, comment=comment)
 
-    def set_ph_delta(self, phase_delta: Union[int, str]):
-        return self._add_instruction(Opcode.SET_NCO_PHASE_OFFSET, phase_delta)
+    def set_ph_delta(self, phase_delta: Union[int, str], comment: str = None):
+        return self._add_instruction(
+            Opcode.SET_NCO_PHASE_OFFSET, phase_delta, comment=comment
+        )
 
-    def reset_ph(self):
-        return self._add_instruction(Opcode.RESET_PHASE)
+    def reset_ph(self, comment: str = None):
+        return self._add_instruction(Opcode.RESET_PHASE, comment=comment)
 
-    def set_awg_gain(self, gain_i: Union[int, str], gain_q: Union[int, str]):
-        return self._add_instruction(Opcode.SET_AWG_GAIN, gain_i, gain_q)
+    def set_awg_gain(
+        self, gain_i: Union[int, str], gain_q: Union[int, str], comment: str = None
+    ):
+        return self._add_instruction(Opcode.SET_AWG_GAIN, gain_i, gain_q, comment=comment)
 
-    def set_awg_offs(self, offset_i: Union[int, str], offset_q: Union[int, str]):
-        return self._add_instruction(Opcode.SET_AWG_OFFSET, offset_i, offset_q)
+    def set_awg_offs(
+        self, offset_i: Union[int, str], offset_q: Union[int, str], comment: str = None
+    ):
+        return self._add_instruction(
+            Opcode.SET_AWG_OFFSET, offset_i, offset_q, comment=comment
+        )
 
     # Real-time instructions
-    def upd_param(self, duration: int):
-        return self._add_instruction(Opcode.UPDATE_PARAMETERS, duration)
+    def upd_param(self, duration: int, comment: str = None):
+        return self._add_instruction(Opcode.UPDATE_PARAMETERS, duration, comment=comment)
 
-    def play(self, wave_i: Union[int, str], wave_q: Union[int, str], duration: int):
-        return self._add_instruction(Opcode.PLAY, wave_i, wave_q, duration)
+    def play(
+        self,
+        wave_i: Union[int, str],
+        wave_q: Union[int, str],
+        duration: int,
+        comment: str = None,
+    ):
+        return self._add_instruction(Opcode.PLAY, wave_i, wave_q, duration, comment=comment)
 
-    def acquire(self, acq: int, bin: Union[int, str], duration: int):
-        return self._add_instruction(Opcode.ACQUIRE, acq, bin, duration)
+    def acquire(self, acq: int, bin: Union[int, str], duration: int, comment: str = None):
+        return self._add_instruction(Opcode.ACQUIRE, acq, bin, duration, comment=comment)
 
     def acquire_weighed(
         self,
@@ -220,19 +239,33 @@ class SequenceBuilder:
         weight_i: Union[int, str],
         weight_q: Union[int, str],
         duration: int,
+        comment: str = None,
     ):
         return self._add_instruction(
-            Opcode.ACQUIRE_WEIGHED, acq, bin, weight_i, weight_q, duration
+            Opcode.ACQUIRE_WEIGHED, acq, bin, weight_i, weight_q, duration, comment=comment
         )
 
-    def acquire_ttl(self, acq: int, bin: Union[int, str], enable: int, duration: int):
-        return self._add_instruction(Opcode.ACQUIRE_TTL, acq, bin, enable, duration)
+    def acquire_ttl(
+        self,
+        acq: int,
+        bin: Union[int, str],
+        enable: int,
+        duration: int,
+        comment: str = None,
+    ):
+        return self._add_instruction(
+            Opcode.ACQUIRE_TTL, acq, bin, enable, duration, comment=comment
+        )
 
-    def wait(self, duration: Union[int, str]):
-        return self._add_instruction(Opcode.WAIT, duration)
+    def wait(self, duration: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.WAIT, duration, comment=comment)
 
-    def wait_trigger(self, trigger: Union[int, str], duration: Union[int, str]):
-        return self._add_instruction(Opcode.WAIT_TRIGGER, trigger, duration)
+    def wait_trigger(
+        self, trigger: Union[int, str], duration: Union[int, str], comment: str = None
+    ):
+        return self._add_instruction(
+            Opcode.WAIT_TRIGGER, trigger, duration, comment=comment
+        )
 
-    def wait_sync(self, duration: Union[int, str]):
-        return self._add_instruction(Opcode.WAIT_SYNC, duration)
+    def wait_sync(self, duration: Union[int, str], comment: str = None):
+        return self._add_instruction(Opcode.WAIT_SYNC, duration, comment=comment)

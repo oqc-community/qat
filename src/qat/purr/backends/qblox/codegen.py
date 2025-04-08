@@ -222,7 +222,11 @@ class AbstractContext(ABC):
 
         with self.alloc_mgr.reg_borrow("tmp") as iter_reg:
             if duration != iter_reg:
-                self.sequence_builder.move(duration, iter_reg)
+                self.sequence_builder.move(
+                    duration,
+                    iter_reg,
+                    f"Avoids cluttering {duration} as it's likely used as an accumulator",
+                )
                 self.sequence_builder.nop()
 
             self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, batch_exit)
@@ -261,9 +265,12 @@ class AbstractContext(ABC):
 
         self.sequence_builder.upd_param(Constants.GRID_TIME)
         with self.alloc_mgr.reg_borrow("tmp") as iter_reg:
-            # Qblox bug workaround.
-            self.sequence_builder.jlt(duration, Constants.GRID_TIME, batch_exit)
-
+            self.sequence_builder.jlt(
+                duration,
+                Constants.GRID_TIME,
+                batch_exit,
+                "Guards against underflow likely causable by the following subtraction",
+            )
             self.sequence_builder.sub(duration, Constants.GRID_TIME, iter_reg)
             self.sequence_builder.nop()
 
@@ -407,17 +414,21 @@ class QbloxContext(AbstractContext):
 
         self.sequence_builder.set_mrk(3)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
-        self.sequence_builder.move(0, self._repeat_reg)
+        self.sequence_builder.move(0, self._repeat_reg, "Shot / Repeat iteration")
         self.sequence_builder.label(self._repeat_label)
-        self.sequence_builder.reset_ph()
+        self.sequence_builder.reset_ph("Reset phase at the beginning of shot")
         self.sequence_builder.upd_param(Constants.GRID_TIME)
-        self.sequence_builder.wait_sync(Constants.GRID_TIME)
+        self.sequence_builder.wait_sync(
+            Constants.GRID_TIME, "Sync at the beginning of shot"
+        )
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._wait_imm(int(self._repeat_period * 1e9))
-        self.sequence_builder.add(self._repeat_reg, 1, self._repeat_reg)
+        self.sequence_builder.add(
+            self._repeat_reg, 1, self._repeat_reg, "Increment Shot / Repeat iterator"
+        )
         self.sequence_builder.nop()
         self.sequence_builder.jlt(self._repeat_reg, self._repeat_count, self._repeat_label)
         self.sequence_builder.stop()
@@ -753,13 +764,15 @@ class NewQbloxContext(AbstractContext):
         for context in contexts.values():
             register = context.alloc_mgr.registers[iter_name]
             bound = context.iter_bounds[iter_name]
-            context.sequence_builder.move(bound.start, register)
+            context.sequence_builder.move(bound.start, register, "Shot / Repeat iteration")
 
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.label(label)
-            context.sequence_builder.reset_ph()
+            context.sequence_builder.reset_ph("Reset phase at the beginning of shot")
             context.sequence_builder.upd_param(Constants.GRID_TIME)
-            context.sequence_builder.wait_sync(Constants.GRID_TIME)
+            context.sequence_builder.wait_sync(
+                Constants.GRID_TIME, "Sync at the beginning of shot"
+            )
 
     @staticmethod
     def exit_repeat(inst: Repeat, contexts: Dict):
@@ -770,7 +783,9 @@ class NewQbloxContext(AbstractContext):
             bound = context.iter_bounds[iter_name]
 
             context._wait_imm(int(inst.repetition_period * 1e9))
-            context.sequence_builder.add(register, bound.step, register)
+            context.sequence_builder.add(
+                register, bound.step, register, "Increment Shot / Repeat iterator"
+            )
             context.sequence_builder.nop()
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
@@ -782,7 +797,11 @@ class NewQbloxContext(AbstractContext):
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
-                context.sequence_builder.move(bound.start, register)
+                context.sequence_builder.move(
+                    bound.start,
+                    register,
+                    f"Initialise register allocated for variable {name}",
+                )
 
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.label(label)
@@ -795,7 +814,12 @@ class NewQbloxContext(AbstractContext):
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
-                context.sequence_builder.add(register, bound.step, register)
+                context.sequence_builder.add(
+                    register,
+                    bound.step,
+                    register,
+                    f"Increment register for variable {name}",
+                )
                 context.sequence_builder.nop()
 
             register = context.alloc_mgr.registers[iter_name]
@@ -813,7 +837,11 @@ class NewQbloxContext(AbstractContext):
             context.alloc_mgr.reg_alloc("zero")
 
             for name, register in context.alloc_mgr.registers.items():
-                context.sequence_builder.move(0, register)
+                context.sequence_builder.move(
+                    0,
+                    register,
+                    f"Precautionary initialisation for variable {name}",
+                )
 
     @staticmethod
     def epilogue(contexts: Dict):
