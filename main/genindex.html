@@ -2123,6 +2123,8 @@
         <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.PulseChannelTimeline.params.end_positions">(qat.backend.passes.analysis.PulseChannelTimeline parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation">EndOfTaskResetSanitisation (class in qat.middleend.passes.transform)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndRepeat">EndRepeat (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndSweep">EndSweep (class in qat.purr.compiler.instructions)</a>
@@ -2407,14 +2409,14 @@
 </li>
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">freq_as_steps() (QbloxLegalisationPass static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift">freq_shift (ChannelType attribute)</a>
 
       <ul>
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.freq_shift">(QubitPulseChannels attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.freq_shift_pulse_channel">freq_shift_pulse_channel (Qubit property)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.model.device)</a>
@@ -2472,6 +2474,8 @@
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.U.from_matrix">from_matrix() (U class method)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_qfile">from_qfile() (SweepIterator static method)</a>
+</li>
+      <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.from_qubit">from_qubit() (ActiveChannelResults method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.from_yaml">from_yaml() (QatConfig class method)</a>
 </li>
@@ -3143,10 +3147,10 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation">InstructionGranularitySanitisation (class in qat.middleend.passes.transform)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation">InstructionLengthSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">[1]</a>
 
       <ul>
@@ -3278,9 +3282,13 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.AcquireSanitisation.run.params.ir">(qat.middleend.passes.transform.AcquireSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.ir">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir">(qat.middleend.passes.transform.InactivePulseChannelSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.run.params.ir">(qat.middleend.passes.transform.InstructionGranularitySanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation.run.params.ir">(qat.middleend.passes.transform.InstructionLengthSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
 </li>
@@ -6570,8 +6578,6 @@
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#module-qat.purr.backends.qblox.execution.instrument_base">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.graph
 
@@ -6579,6 +6585,8 @@
         <li><a href="qat.purr.backends.qblox.graph.html#module-qat.purr.backends.qblox.graph">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.ir
 
@@ -7305,9 +7313,11 @@
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.QubitRegister">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
-      <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier.qubits">qubits (Barrier attribute)</a>
+      <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.qubits">qubits (ActiveChannelResults property)</a>
 
       <ul>
+        <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier.qubits">(Barrier attribute)</a>
+</li>
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.qubits">(ErrorMitigation property)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Gate1Q.qubits">(Gate1Q property)</a>
@@ -7539,6 +7549,8 @@
         <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.res_mgr">(qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.BatchedShots.run.params.res_mgr">(qat.middleend.passes.analysis.BatchedShots.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.InactivePulseChannelSanitisation.run parameter)</a>
 </li>
@@ -7859,6 +7871,8 @@
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.DeviceUpdateSanitisation.run">(DeviceUpdateSanitisation method)</a>
 </li>
         <li><a href="qat.backend.codegen_base.html#qat.backend.codegen_base.DfsTraversal.run">(DfsTraversal method)</a>, <a href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal.run">[1]</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run">(EndOfTaskResetSanitisation method)</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation.run">(ErrorMitigation method)</a>
 </li>
@@ -8711,9 +8725,11 @@
 </li>
       <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.mean.params.target_axes">target_axes (qat.runtime.post_processing.mean parameter)</a>
 </li>
-      <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionedIR.target_map">target_map (PartitionedIR attribute)</a>
+      <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.target_map">target_map (ActiveChannelResults attribute)</a>
 
       <ul>
+        <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionedIR.target_map">(PartitionedIR attribute)</a>
+</li>
         <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysisResult.params.target_map">(qat.backend.passes.analysis.TimelineAnalysisResult parameter)</a>
 </li>
         <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysisResult.target_map">(TimelineAnalysisResult attribute)</a>
@@ -8724,7 +8740,7 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.targets">targets (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.targets">(ActiveChannelResults attribute)</a>
+        <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.targets">(ActiveChannelResults property)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.targets">(FrequencyShift attribute)</a>
 </li>
@@ -8943,6 +8959,8 @@
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U">(QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.U">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.unassigned">unassigned (ActiveChannelResults attribute)</a>
+</li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Unit">Unit (class in qat.purr.integrations.features)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.unit">unit (Quantity attribute)</a>
