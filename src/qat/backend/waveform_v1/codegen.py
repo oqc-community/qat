@@ -40,7 +40,10 @@ from qat.purr.compiler.instructions import (
     Reset,
     Waveform,
 )
+from qat.purr.utils.logger import get_default_logger
 from qat.runtime.executables import AcquireData
+
+log = get_default_logger()
 
 
 class WaveformV1Backend(BaseBackend, InvokerMixin):
@@ -299,8 +302,9 @@ class WaveformContext:
         self._phase = 0
 
     def process_reset(self):
-        raise NotImplementedError(
-            "The Reset instruction is not implemented for WaveformV1Executables."
+        log.warning(
+            "The WaveformV1Backend uses a `repetition_time` for resetting, so the reset "
+            "instruction will be ignored."
         )
 
     def process_frequencyshift(self, frequency: float):

@@ -13,6 +13,7 @@ from qat.core.result_base import ResultManager
 from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
+    EndOfTaskResetSanitisation,
     InactivePulseChannelSanitisation,
     InstructionGranularitySanitisation,
     PhaseOptimisation,
@@ -134,8 +135,9 @@ class DefaultMiddleend(CustomMiddleend):
             PassManager()
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
-            | ActivePulseChannelAnalysis()
+            | ActivePulseChannelAnalysis(model)
             | InactivePulseChannelSanitisation()
+            | EndOfTaskResetSanitisation()
             | PhaseOptimisation()
             | PostProcessingSanitisation()
             | ReadoutValidation(model)

@@ -19,9 +19,10 @@ from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
-from qat.middleend.passes.analysis import ActiveChannelResults, ActivePulseChannelAnalysis
+from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
+    EndOfTaskResetSanitisation,
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
@@ -44,6 +45,7 @@ from qat.purr.compiler.instructions import (
     PhaseShift,
     Pulse,
     PulseShapeType,
+    Reset,
     Synchronize,
 )
 
@@ -603,20 +605,20 @@ class TestPhaseResetSanitisation:
         for qubit in self.hw.qubits:
             builder.X(target=qubit)
             drive_pulse_ch = qubit.get_drive_channel()
-            active_targets[drive_pulse_ch.full_id()] = drive_pulse_ch
+            active_targets[drive_pulse_ch] = qubit
 
         n_instr_before = len(builder.instructions)
 
         res_mgr = ResultManager()
         # Mock some active targets, i.e., the drive pulse channels of the qubits.
-        res_mgr.add(ActiveChannelResults(targets=active_targets))
+        res_mgr.add(ActiveChannelResults(target_map=active_targets))
         InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
 
         # One `PhaseReset` instruction with possibly multiple targets gets added to the IR,
         # even if there is already a phase reset present.
         assert len(builder.instructions) == n_instr_before + 1
         assert isinstance(builder.instructions[0], PhaseReset)
-        assert builder.instructions[0].quantum_targets == list(active_targets.values())
+        assert builder.instructions[0].quantum_targets == list(active_targets.keys())
 
     def test_phase_reset_shot_no_active_pulse_channels(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -628,7 +630,7 @@ class TestPhaseResetSanitisation:
 
         res_mgr = ResultManager()
         # Mock some active targets, i.e., the drive pulse channels of the qubits.
-        res_mgr.add(ActiveChannelResults(targets={}))
+        res_mgr.add(ActiveChannelResults())
         InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
 
         # No phase reset added since there are no active targets.
@@ -673,8 +675,11 @@ class TestInactivePulseChannelSanitisation:
         ][0]
         assert len(sync_inst.quantum_targets) > 1
 
+        res = ActiveChannelResults(
+            target_map={model.qubits[0].get_drive_channel(): model.qubits[0]}
+        )
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
         sync_inst = [
             inst for inst in builder.instructions if isinstance(inst, Synchronize)
@@ -690,8 +695,11 @@ class TestInactivePulseChannelSanitisation:
         builder.pulse(qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
         builder.delay(qubit.get_measure_channel(), 80e-9)
 
+        res = ActiveChannelResults(
+            target_map={model.qubits[0].get_drive_channel(): model.qubits[0]}
+        )
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], Pulse)
@@ -704,8 +712,11 @@ class TestInactivePulseChannelSanitisation:
         builder.pulse(qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
         builder.phase_shift(qubit.get_measure_channel(), np.pi)
 
+        res = ActiveChannelResults(
+            target_map={model.qubits[0].get_drive_channel(): model.qubits[0]}
+        )
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], Pulse)
@@ -722,8 +733,11 @@ class TestInactivePulseChannelSanitisation:
             [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
         )
 
+        res = ActiveChannelResults(
+            target_map={model.qubits[0].get_drive_channel(): model.qubits[0]}
+        )
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
 
         num_phase_shifts_after = len(
@@ -811,14 +825,13 @@ class TestSynchronizeTask:
 
     def test_synchronize_task_adds_sync(self):
         model = EchoModelLoader().load()
-        drive_chan = model.qubits[0].get_drive_channel()
-        measure_chan = model.qubits[0].get_measure_channel()
+        qubit = model.qubits[0]
+        drive_chan = qubit.get_drive_channel()
+        measure_chan = qubit.get_measure_channel()
 
         res_mgr = ResultManager()
         res_mgr.add(
-            ActiveChannelResults(
-                {drive_chan.full_id(): drive_chan, measure_chan.full_id(): measure_chan}
-            )
+            ActiveChannelResults(target_map={drive_chan: qubit, measure_chan: qubit})
         )
 
         builder = model.create_builder()
@@ -830,3 +843,101 @@ class TestSynchronizeTask:
         assert set(builder.instructions[-1].quantum_targets) == set(
             [drive_chan, measure_chan]
         )
+
+
+class TestEndOfTaskResetSanitisation:
+
+    @pytest.mark.parametrize("reset_q1", [False, True])
+    @pytest.mark.parametrize("reset_q2", [False, True])
+    def test_resets_added(self, reset_q1, reset_q2):
+        model = EchoModelLoader().load()
+        qubits = model.qubits[0:2]
+
+        builder = model.create_builder()
+        builder.had(qubits[0])
+        builder.cnot(qubits[0], qubits[1])
+        builder.measure(qubits[0])
+        builder.measure(qubits[1])
+        if reset_q1:
+            builder.reset(qubits[0])
+        if reset_q2:
+            builder.reset(qubits[1])
+
+        res = ActiveChannelResults()
+        for qubit in qubits:
+            res.target_map[qubit.get_drive_channel()] = qubit
+            res.target_map[qubit.get_measure_channel()] = qubit
+            res.target_map[qubit.get_acquire_channel()] = qubit
+        res.target_map[qubits[0].get_cross_resonance_channel(qubits[1])] = qubits[0]
+        res.target_map[qubits[1].get_cross_resonance_cancellation_channel(qubits[0])] = (
+            qubits[1]
+        )
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = len(builder.instructions)
+        builder = EndOfTaskResetSanitisation().run(builder, res_mgr)
+        assert before + (not reset_q1) + (not reset_q2) == len(builder.instructions)
+
+        reset_channels = [
+            inst.quantum_targets[0]
+            for inst in builder.instructions
+            if isinstance(inst, Reset)
+        ]
+        assert len(reset_channels) == 2
+        assert set(reset_channels) == set([qubit.get_drive_channel() for qubit in qubits])
+
+    def test_mid_circuit_reset_is_ignored(self):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        builder = model.create_builder()
+        builder.had(qubit)
+        builder.reset(qubit)
+        builder.had(qubit)
+
+        res = ActiveChannelResults()
+        res.target_map[qubit.get_drive_channel()] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = len(builder.instructions)
+        builder = EndOfTaskResetSanitisation().run(builder, res_mgr)
+        assert before + 1 == len(builder.instructions)
+
+        reset_channels = [
+            inst.quantum_targets[0]
+            for inst in builder.instructions
+            if isinstance(inst, Reset)
+        ]
+        assert len(reset_channels) == 2
+        assert set(reset_channels) == set([qubit.get_drive_channel()])
+
+    def test_inactive_instruction_after_reset_ignored(self):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        builder = model.create_builder()
+        builder.had(qubit)
+        builder.reset(qubit)
+        builder.phase_shift(qubit.get_drive_channel(), np.pi)
+
+        res = ActiveChannelResults()
+        res.target_map[qubit.get_drive_channel()] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = len(builder.instructions)
+        builder = EndOfTaskResetSanitisation().run(builder, res_mgr)
+        assert before == len(builder.instructions)
+
+        reset_channels = [
+            inst.quantum_targets[0]
+            for inst in builder.instructions
+            if isinstance(inst, Reset)
+        ]
+        assert len(reset_channels) == 1
+        assert reset_channels[0] == qubit.get_drive_channel()

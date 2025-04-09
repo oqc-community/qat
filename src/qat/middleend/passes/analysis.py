@@ -1,16 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel
+from qat.purr.compiler.devices import PulseChannel, Qubit, Resonator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Acquire, CustomPulse, Pulse, Repeat
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 @dataclass
@@ -75,7 +78,34 @@ class BatchedShots(AnalysisPass):
 
 @dataclass
 class ActiveChannelResults(ResultInfoMixin):
-    targets: dict[str, PulseChannel]
+    """Stores the active pulse channels in a task, which is defined by pulse channels that
+    are acted on by a pulse or acquisition.
+
+    Results are stored as a map between pulse channels and the qubit they belong to. Rogue
+    pulse channels are stored in the `unassigned` attribute. Various helper properties
+    and methods can be used to fetch the complete lists of active pulse channels and qubits.
+    """
+
+    target_map: dict[PulseChannel, Qubit] = field(default_factory=lambda: dict())
+    unassigned: list[PulseChannel] = field(default_factory=lambda: [])
+
+    @property
+    def targets(self) -> list[PulseChannel]:
+        """Returns a dictionary of all pulse channels with their full id as a key."""
+        return list(self.target_map.keys()) + self.unassigned
+
+    @property
+    def qubits(self) -> list[Qubit]:
+        """Returns a list of all active qubits."""
+        return list(set(self.target_map.values()))
+
+    def from_qubit(self, qubit: Qubit) -> list[PulseChannel]:
+        """Returns the list of pulse channels that belong to a qubit."""
+        pulse_channels = []
+        for key, val in self.target_map.items():
+            if val == qubit:
+                pulse_channels.append(key)
+        return pulse_channels
 
 
 class ActivePulseChannelAnalysis(AnalysisPass):
@@ -91,6 +121,9 @@ class ActivePulseChannelAnalysis(AnalysisPass):
     # TODO: PydActivePulseChannelAnalysis: this will be even more useful for pydantic
     # instructions (COMPILER-393)
 
+    def __init__(self, model: QuantumHardwareModel):
+        self.model = model
+
     def run(
         self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
     ) -> InstructionBuilder:
@@ -99,11 +132,40 @@ class ActivePulseChannelAnalysis(AnalysisPass):
         :param res_mgr: The result manager to store the analysis results.
         """
 
-        targets: dict[str, PulseChannel] = dict()
+        targets: set[PulseChannel] = set()
         for inst in ir.instructions:
             if isinstance(inst, (Acquire, Pulse, CustomPulse)):
-                for target in inst.quantum_targets:
-                    targets[target.full_id()] = target
+                targets.add(next(iter(inst.quantum_targets)))
 
-        res_mgr.add(ActiveChannelResults(targets=targets))
+        result = ActiveChannelResults()
+        for target in targets:
+            devices = self.model.get_devices_from_pulse_channel(target)
+
+            if len(devices) == 0:
+                device = None
+            else:
+                if len(devices) > 0:
+                    log.warning(
+                        f"Multiple targets found with pulse channel {target}. Defaulting to"
+                        f" the first pulse channel found, {devices[0]}."
+                    )
+
+                device = devices[0]
+                if isinstance(device, Resonator):
+                    qubits = [
+                        qubit
+                        for qubit in self.model.qubits
+                        if qubit.measure_device == device
+                    ]
+                    if len(qubits) == 0:
+                        device = None
+                    else:
+                        device = qubits[0]
+
+            if device:
+                result.target_map[target] = device
+            else:
+                result.unassigned.append(target)
+
+        res_mgr.add(result)
         return ir

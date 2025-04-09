@@ -12,6 +12,7 @@ from qat.middleend.passes.analysis import (
     BatchedShotsResult,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import CustomPulse, PulseShapeType
 
 
@@ -70,10 +71,14 @@ class TestActivePulseChannelAnalysis:
         builder.acquire(acquire_chan, time=80e-9, delay=0.0)
 
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
-        res = res_mgr.lookup_by_type(ActiveChannelResults)
+        builder = ActivePulseChannelAnalysis(model).run(builder, res_mgr)
+        res: ActiveChannelResults = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 3
-        assert set(res.targets.values()) == set([drive_chan, measure_chan, acquire_chan])
+        assert set(res.targets) == set([drive_chan, measure_chan, acquire_chan])
+        assert len(res.target_map) == 3
+        assert all([val == qubit for val in res.target_map.values()])
+        assert set(res.target_map.keys()) == set([drive_chan, measure_chan, acquire_chan])
+        assert set(res.from_qubit(qubit)) == set([drive_chan, measure_chan, acquire_chan])
 
     def test_syncs_dont_add_extra_channels(self):
         model = EchoModelLoader().load()
@@ -86,7 +91,21 @@ class TestActivePulseChannelAnalysis:
         assert len(builder.instructions[-1].quantum_targets) > 1
 
         res_mgr = ResultManager()
-        builder = ActivePulseChannelAnalysis().run(builder, res_mgr)
+        builder = ActivePulseChannelAnalysis(model).run(builder, res_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 1
-        assert set(res.targets.values()) == set([drive_chan])
+        assert set(res.targets) == set([drive_chan])
+
+    def test_rogue_pulse_channel(self):
+        model = EchoModelLoader().load()
+        phys_chan = next(iter(model.physical_channels.values()))
+        pulse_chan = PulseChannel("test", phys_chan)
+        builder = model.create_builder()
+
+        builder.pulse(pulse_chan, width=80e-9, shape=PulseShapeType.SQUARE)
+        res_mgr = ResultManager()
+        builder = ActivePulseChannelAnalysis(model).run(builder, res_mgr)
+        res = res_mgr.lookup_by_type(ActiveChannelResults)
+        assert len(res.targets) == 1
+        assert len(res.unassigned) == 1
+        assert res.targets == res.unassigned

@@ -21,7 +21,7 @@ from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
 from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel
+from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -37,6 +37,7 @@ from qat.purr.compiler.instructions import (
     Pulse,
     PulseShapeType,
     QuantumInstruction,
+    Reset,
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
@@ -425,7 +426,7 @@ class InitialPhaseResetSanitisation(TransformPass):
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        active_targets = list(res_mgr.lookup_by_type(ActiveChannelResults).targets.values())
+        active_targets = list(res_mgr.lookup_by_type(ActiveChannelResults).targets)
 
         if active_targets:
             ir.insert(PhaseReset(active_targets), 0)
@@ -473,7 +474,10 @@ class InactivePulseChannelSanitisation(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         """
 
-        active_channels = res_mgr.lookup_by_type(ActiveChannelResults).targets.keys()
+        active_channels = [
+            target.full_id()
+            for target in res_mgr.lookup_by_type(ActiveChannelResults).targets
+        ]
         instructions: list[Instruction] = []
         for inst in ir.instructions:
             if isinstance(inst, (PostProcessing, Pulse, CustomPulse, Acquire)):
@@ -523,6 +527,9 @@ class InstructionLengthSanitisation(TransformPass):
         self.duration_limit = duration_limit
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
         duration_limit = self.duration_limit
 
         new_instructions = []
@@ -591,6 +598,62 @@ class SynchronizeTask(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         """
 
-        active_channels = res_mgr.lookup_by_type(ActiveChannelResults).targets.values()
+        active_channels = res_mgr.lookup_by_type(ActiveChannelResults).targets
         ir.add(Synchronize(list(active_channels)))
+        return ir
+
+
+class EndOfTaskResetSanitisation(TransformPass):
+    """Checks for a reset on each active qubit at the end of a task, and adds Reset
+    operations if not found.
+
+    After each shot, it is expected that the qubit is returned to its ground state, ready
+    for the next shot. This pass ensures this is the case by checking if the last "active"
+    operation on an qubit is a :class:`Reset`, and if not, adds a :class:`Reset` to the end
+    of the instruction list.
+
+    :class:`Reset` instructions currently sit in a weird place. Their targets are drive
+    channels to match the semantics of other quantum instructions (but are instantiated with
+    a :class:Qubit). However, like measurements, resets are a qubit-level operation. You
+    cannot reset the state of a pulse channel, the state is a property of the qubit! To
+    avoid breaking changes, we'll just deal with that for now, but hope to do better in the
+    refactored instructions...
+    """
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+
+        active_pulse_channels: ActiveChannelResults = res_mgr.lookup_by_type(
+            ActiveChannelResults
+        )
+        qubit_map: dict[Qubit, None | bool] = {
+            qubit: None for qubit in active_pulse_channels.qubits
+        }
+
+        for inst in reversed(ir.instructions):
+            if not isinstance(inst, (Pulse, CustomPulse, Acquire, Reset)):
+                continue
+
+            elif isinstance(inst, Reset):
+                for target in inst.quantum_targets:
+                    # if a qubit only sees a reset, its not "active", so ignore
+                    qubit = active_pulse_channels.target_map[target]
+                    if qubit in qubit_map and qubit_map[qubit] == None:
+                        qubit_map[qubit] = True
+            else:
+                target = active_pulse_channels.target_map[next(iter(inst.quantum_targets))]
+                if qubit_map[target] == None:
+                    qubit_map[target] = False
+
+            if all([val != None for val in qubit_map.values()]):
+                break
+
+        for qubit, val in qubit_map.items():
+            if not val:
+                ir.add(Reset(qubit))
         return ir
