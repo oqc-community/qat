@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from abc import ABC
+from bisect import insort
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
@@ -94,7 +95,7 @@ class AllocationManager:
     def reg_free(self, register: str) -> None:
         if register in self._reg_pool:
             raise RuntimeError(f"Cannot free register '{register}' as it's not in use")
-        self._reg_pool.append(register)
+        insort(self._reg_pool, register)
         self.registers = {
             var: reg for var, reg in self.registers.items() if reg != register
         }
@@ -179,6 +180,39 @@ class AbstractContext(ABC):
         yield register
         self.sequence_builder.loop(register, label)
         self.alloc_mgr.reg_free(register)
+
+    @contextmanager
+    def _modulo_reg(self, a: str, n: int):
+        """
+        Helpful context that prepares a temporary register b such that a ≅ b [n] where
+        n is some immediate constant batch size.
+        """
+
+        if not isinstance(n, int) or n < 2:
+            raise ValueError(
+                f"Invalid batch size. Expected an integer >= 2, but got {n} instead"
+            )
+
+        batch_enter = self.alloc_mgr.label_gen("batch_enter")
+        batch_exit = self.alloc_mgr.label_gen("batch_exit")
+
+        iter_reg = self.alloc_mgr.reg_alloc("tmp")
+        if a != iter_reg:
+            self.sequence_builder.move(
+                a,
+                iter_reg,
+                f"Avoids cluttering {a} as it's likely used as an accumulator",
+            )
+            self.sequence_builder.nop()
+
+        self.sequence_builder.jlt(iter_reg, n, batch_exit)
+        self.sequence_builder.label(batch_enter)
+        self.sequence_builder.sub(iter_reg, n, iter_reg)
+        self.sequence_builder.nop()
+        self.sequence_builder.jge(iter_reg, n, batch_enter)
+        self.sequence_builder.label(batch_exit)
+        yield iter_reg
+        self.alloc_mgr.reg_free(iter_reg)
 
     def _wait_imm(self, duration: int):
         """
@@ -596,10 +630,6 @@ class NewQbloxContext(AbstractContext):
         self._durations: List[Union[float, str]] = []
         self._phases: List[Union[float, str]] = []
 
-    @property
-    def durations(self):
-        return self._durations
-
     def _register_acquisition(self, acquire: Acquire):
         name = f"acquire_{hash(acquire)}"
         num_bins = self.iter_bounds[name].count
@@ -713,17 +743,26 @@ class NewQbloxContext(AbstractContext):
     def device_update(self, du_inst: DeviceUpdate):
         value = du_inst.value
         if isinstance(value, Variable):
-            value = self.alloc_mgr.registers[value.name]
+            val_reg = self.alloc_mgr.registers[value.name]
 
-        if du_inst.attribute == "frequency":
-            self.sequence_builder.set_freq(value)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
-        elif du_inst.attribute == "phase":
-            self.sequence_builder.set_ph(value)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+            if du_inst.attribute == "frequency":
+                self.sequence_builder.set_freq(val_reg)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+            elif du_inst.attribute == "phase":
+                with self._modulo_reg(val_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
+                    self.sequence_builder.set_ph(iter_reg)
+
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+                self._phases.clear()
+                self._phases.append(value)
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                )
         else:
             raise NotImplementedError(
-                f"Unsupported processing of attribute {du_inst.attribute}"
+                f"Unsupported processing of immediate values for instruction {du_inst}"
             )
 
     @staticmethod
@@ -737,15 +776,18 @@ class NewQbloxContext(AbstractContext):
 
     def shift_phase(self, inst: PhaseShift):
         value = inst.phase
-        if isinstance(value, Variable):
-            value = self.alloc_mgr.registers[value.name]
-            self._phases.append(value)
-        else:
-            value = QbloxLegalisationPass.phase_as_steps(inst.phase)
-            self._phases.append(inst.phase)
 
-        self.sequence_builder.set_ph_delta(value)
+        if isinstance(value, Variable):
+            ph_reg = self.alloc_mgr.registers[value.name]
+            with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
+                self.sequence_builder.set_ph_delta(iter_reg)
+        else:
+            ph_imm = QbloxLegalisationPass.phase_as_steps(value)
+            self.sequence_builder.set_ph_delta(ph_imm)
+
         self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+        self._phases.append(value)
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):

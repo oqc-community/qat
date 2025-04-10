@@ -22,6 +22,8 @@ class Constants:
     """Minimum NCO frequency"""
     NCO_MAX_FREQ = 500e6
     """Maximum NCO frequency"""
+    NCO_MAX_PHASE_STEPS = int(1e9)
+    """Maximum NCO phase steps"""
     NCO_PHASE_STEPS_PER_DEG = 1e9 / 360
     """The number of steps per degree for NCO phase instructions arguments."""
     NCO_FREQ_STEPS_PER_HZ = 4.0
