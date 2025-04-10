@@ -321,15 +321,9 @@ class AcquireSanitisation(TransformPass):
         """
 
         new_instructions: list[Instruction] = []
-        acquired_channels: set[PulseChannel] = set()
 
         for inst in ir.instructions:
             if isinstance(inst, Acquire):
-                if inst.quantum_targets[0] in acquired_channels:
-                    # The acquire has already been seen, so set the delay to zero.
-                    inst.delay = 0.0
-                acquired_channels.update(inst.quantum_targets)
-
                 if inst.delay:
                     delay = Delay(inst.quantum_targets, inst.delay)
                     inst.delay = 0.0

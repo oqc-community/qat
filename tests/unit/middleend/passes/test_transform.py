@@ -468,28 +468,6 @@ class TestAcquireSanitisation:
         assert isinstance(builder.instructions[2], Delay)
         assert isinstance(builder.instructions[3], Acquire)
 
-    def test_only_first_acquire_is_decomposed(self):
-        # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        acquire_chan = model.qubits[0].get_acquire_channel()
-        acquire_block_time = acquire_chan.physical_channel.block_time
-        builder = model.create_builder()
-
-        # Make some instructions to test
-        builder.acquire(
-            acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
-        )
-        builder.acquire(
-            acquire_chan, time=acquire_block_time * 10, delay=acquire_block_time
-        )
-
-        builder == AcquireSanitisation().run(builder)
-        assert len(builder.instructions) == 3
-        assert isinstance(builder.instructions[0], Delay)
-        assert isinstance(builder.instructions[1], Acquire)
-        assert isinstance(builder.instructions[2], Acquire)
-        assert builder.instructions[2].delay == 0.0
-
 
 class TestInstructionGranularitySanitisation:
 
