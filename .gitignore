@@ -19,16 +19,6 @@ calibration_results/
 
 # Docs
 docs/build/*
-!docs/source/_static
-!docs/source/_templates
-!docs/source/conf.py
-!docs/source/index.rst
-!docs/source/license.rst
-!docs/source/coc.rst
-!docs/source/contribute.rst
-!docs/source/changelog.rst
-!docs/source/qat-logo.png
-!docs/source/getting_started/
 
 # Jupyter
 **/.ipynb_checkpoints/*
