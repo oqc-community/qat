@@ -417,6 +417,67 @@ refactored instructions…</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluatePulses">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluatePulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignored_shapes=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_ignored_shapes=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_function=&lt;function</span> <span class="pre">evaluate_shape&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluatePulses" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Evaluates the amplitudes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code> instructions, replacing them with a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code> and accounting for the scale of the pulse channel.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code> instructions are defined by (often many) parameters. With the exception
+of specific shapes, they cannot be implemented directly on hardware. Instead, we
+evaluate the waveform at discrete times, and communicate these values to the target.
+This pass evaluates pulses early in the compilation pipeline.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code> instructions will have <code class="code docutils literal notranslate"><span class="pre">ignore_channel_scale=True</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.middleend.passes.transform.EvaluatePulses.params.ignored_shapes"></span><strong>ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluatePulses.params.ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType" title="qat.purr.compiler.devices.PulseShapeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseShapeType</span></code></a>]]</span>) – A list of pulse shapes that are not evaluated to a custom
+pulse, defaults to <cite>[PulseShapeType.SQUARE]</cite>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.EvaluatePulses.params.acquire_ignored_shapes"></span><strong>acquire_ignored_shapes</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluatePulses.params.acquire_ignored_shapes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType" title="qat.purr.compiler.devices.PulseShapeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseShapeType</span></code></a>]]</span>) – A list of pulse shapes that are not evaluated to a
+custom pulse for <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> filters, defaults to <cite>[]</cite>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.EvaluatePulses.params.eval_function"></span><strong>eval_function</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluatePulses.params.eval_function">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">callable</span></code></span>) – Allows a pulse evaluation function to be injected, defaults
+to <code class="xref py py-meth docutils literal notranslate"><span class="pre">evaluate_shape()</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluatePulses.evaluate_waveform">
+<span class="sig-name descname"><span class="pre">evaluate_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_shapes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_lookup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluatePulses.evaluate_waveform" title="Link to this definition"></a></dt>
+<dd><p>Evaluates the waveform for a <code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code>, accounting
+for the pulse channel scale.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse" title="qat.purr.compiler.instructions.Pulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code></a> | <a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse" title="qat.purr.compiler.instructions.CustomPulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluatePulses.hash_pulse">
+<span class="sig-name descname"><span class="pre">hash_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluatePulses.hash_pulse" title="Link to this definition"></a></dt>
+<dd><p>Hashs a pulse object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluatePulses.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluatePulses.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.EvaluatePulses.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluatePulses.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions as an instruction builder.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>

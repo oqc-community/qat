@@ -441,6 +441,8 @@
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.ACQUIRE_CHANNEL">ACQUIRE_CHANNEL (InstructionValidationConfig attribute)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.params.acquire_ignored_shapes">acquire_ignored_shapes (qat.middleend.passes.transform.EvaluatePulses parameter)</a>
+</li>
       <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionedIR.acquire_map">acquire_map (PartitionedIR attribute)</a>
 
       <ul>
@@ -2167,8 +2169,6 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.error_mitigation">(QuantumExecutionEngine property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation">ErrorMitigation (class in qat.model.error_mitigation)</a>
 
       <ul>
@@ -2177,6 +2177,8 @@
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation">(class in qat.runtime.passes.transform)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.ParseResults.errors">errors (ParseResults attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.BlackmanFunction.eval">eval() (BlackmanFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.eval">[1]</a>
@@ -2213,9 +2215,15 @@
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SquareFunction.eval">(SquareFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.eval">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.params.eval_function">eval_function (qat.middleend.passes.transform.EvaluatePulses parameter)</a>
+</li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.evaluate_pulse_integral">evaluate_pulse_integral() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.evaluate_shape">evaluate_shape() (in module qat.purr.backends.utilities)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.evaluate_waveform">evaluate_waveform() (EvaluatePulses method)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses">EvaluatePulses (class in qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.event">event (BasicInterrupt property)</a>
 </li>
@@ -2663,14 +2671,14 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_default_RTCS_hardware">get_default_RTCS_hardware() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveHardwareModel.get_device">get_device() (LiveHardwareModel method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel">get_devices_from_pulse_channel() (QuantumHardwareModel method)</a>
@@ -2729,6 +2737,8 @@
         <li><a href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager.get_metric">(MetricsManager method)</a>, <a href="qat.purr.backends.qblox.metrics_base.html#qat.purr.backends.qblox.metrics_base.MetricsManager.get_metric">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.pipelines.echo.html#qat.pipelines.echo.get_middleend_pipeline">get_middleend_pipeline() (in module qat.pipelines.echo)</a>
+</li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_model">get_model() (in module qat.purr.compiler.runtime)</a>
 </li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.ControlFlowGraph.get_or_create_edge">get_or_create_edge() (ControlFlowGraph method)</a>, <a href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.get_or_create_edge">[1]</a>
@@ -2883,6 +2893,8 @@
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.has_qubit">has_qubit() (QuantumHardwareModel method)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.hash_pulse">hash_pulse() (EvaluatePulses method)</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Instruction.head">head (Instruction property)</a>
 
       <ul>
@@ -2933,6 +2945,8 @@
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.ignore_channel_scale">(UntargetedPulse attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.params.ignored_shapes">ignored_shapes (qat.middleend.passes.transform.EvaluatePulses parameter)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.PulseChannel.imbalance">imbalance (PulseChannel attribute)</a>
 
       <ul>
@@ -3281,6 +3295,8 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.AcquireSanitisation.run.params.ir">(qat.middleend.passes.transform.AcquireSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.ir">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.run.params.ir">(qat.middleend.passes.transform.EvaluatePulses.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir">(qat.middleend.passes.transform.InactivePulseChannelSanitisation.run parameter)</a>
 </li>
@@ -7883,6 +7899,8 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run">(EndOfTaskResetSanitisation method)</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation.run">(ErrorMitigation method)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluatePulses.run">(EvaluatePulses method)</a>
 </li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.FreqShiftSanitisation.run">(FreqShiftSanitisation method)</a>
 </li>
