@@ -11,9 +11,11 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
+from qat.middleend.passes.legacy.validation import PhysicalChannelAmplitudeValidation
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
+    EvaluatePulses,
     InactivePulseChannelSanitisation,
     InstructionGranularitySanitisation,
     PhaseOptimisation,
@@ -144,6 +146,8 @@ class DefaultMiddleend(CustomMiddleend):
             | AcquireSanitisation()
             | InstructionGranularitySanitisation(clock_cycle)
             | SynchronizeTask()
+            | EvaluatePulses()
+            | PhysicalChannelAmplitudeValidation()
         )
 
 

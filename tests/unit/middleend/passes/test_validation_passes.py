@@ -9,10 +9,13 @@ from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.middleend.passes.legacy.validation import PhysicalChannelAmplitudeValidation
+from qat.middleend.passes.transform import EvaluatePulses
 from qat.middleend.passes.validation import PydNoMidCircuitMeasurementValidation
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import CustomPulse, Pulse, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model
+
+from tests.unit.utils.pulses import pulse_attributes
 
 
 class TestNoMidCircuitMeasurementValidation:
@@ -297,5 +300,40 @@ class TestPhysicalChannelAmplitudeValidation:
                 ignore_channel_scale=True,
             )
         )
+        with pytest.raises(ValueError):
+            PhysicalChannelAmplitudeValidation().run(builder)
+
+    @pytest.mark.parametrize("attributes1", pulse_attributes)
+    @pytest.mark.parametrize("attributes2", pulse_attributes)
+    def test_integration_with_evaluate_pulses_passes(self, attributes1, attributes2):
+        builder = self.model.create_builder()
+        chan1 = self.model.qubits[0].get_drive_channel()
+        chan2 = self.model.qubits[0].get_cross_resonance_cancellation_channel(
+            self.model.qubits[1]
+        )
+        builder.pulse(
+            chan1, width=400e-9, amp=0.45, ignore_channel_scale=True, **attributes1
+        )
+        builder.pulse(
+            chan2, width=400e-9, amp=0.49, ignore_channel_scale=True, **attributes2
+        )
+        EvaluatePulses().run(builder)
+        PhysicalChannelAmplitudeValidation().run(builder)
+
+    @pytest.mark.parametrize("attributes1", pulse_attributes)
+    @pytest.mark.parametrize("attributes2", pulse_attributes)
+    def test_integration_with_evaluate_pulses_fails(self, attributes1, attributes2):
+        builder = self.model.create_builder()
+        chan1 = self.model.qubits[0].get_drive_channel()
+        chan2 = self.model.qubits[0].get_cross_resonance_cancellation_channel(
+            self.model.qubits[1]
+        )
+        builder.pulse(
+            chan1, width=400e-9, amp=0.49, ignore_channel_scale=True, **attributes1
+        )
+        builder.pulse(
+            chan2, width=400e-9, amp=0.65, ignore_channel_scale=True, **attributes2
+        )
+        EvaluatePulses().run(builder)
         with pytest.raises(ValueError):
             PhysicalChannelAmplitudeValidation().run(builder)

@@ -20,6 +20,7 @@ from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
 from qat.middleend.passes.analysis import ActiveChannelResults
+from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.instructions import (
@@ -702,3 +703,133 @@ class ResetsToDelays(TransformPass):
 
         ir.instructions = new_instructions
         return ir
+
+
+class EvaluatePulses(TransformPass):
+    """Evaluates the amplitudes of :class:`Pulse` instructions, replacing them with a
+    :class:`CustomPulse` and accounting for the scale of the pulse channel.
+
+    :class:`Pulse` instructions are defined by (often many) parameters. With the exception
+    of specific shapes, they cannot be implemented directly on hardware. Instead, we
+    evaluate the waveform at discrete times, and communicate these values to the target.
+    This pass evaluates pulses early in the compilation pipeline.
+
+    The :class:`CustomPulse` instructions will have :code:`ignore_channel_scale=True`.
+    """
+
+    def __init__(
+        self,
+        ignored_shapes: list[PulseShapeType] | None = None,
+        acquire_ignored_shapes: list[PulseShapeType] | None = None,
+        eval_function: callable = evaluate_shape,
+    ):
+        """
+        :param ignored_shapes: A list of pulse shapes that are not evaluated to a custom
+            pulse, defaults to `[PulseShapeType.SQUARE]`.
+        :param acquire_ignored_shapes: A list of pulse shapes that are not evaluated to a
+            custom pulse for :class:`Acquire` filters, defaults to `[]`.
+        :param eval_function: Allows a pulse evaluation function to be injected, defaults
+            to :meth:`evaluate_shape`.
+        """
+
+        ignored_shapes = (
+            ignored_shapes if ignored_shapes is not None else [PulseShapeType.SQUARE]
+        )
+        self.ignored_shapes = (
+            ignored_shapes if isinstance(ignored_shapes, list) else [ignored_shapes]
+        )
+        acquire_ignored_shapes = (
+            acquire_ignored_shapes if acquire_ignored_shapes is not None else []
+        )
+        self.acquire_ignored_shapes = (
+            acquire_ignored_shapes
+            if isinstance(acquire_ignored_shapes, list)
+            else [acquire_ignored_shapes]
+        )
+        self.evaluate = eval_function
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """:param ir: The list of instructions as an instruction builder."""
+
+        pulses: dict[str, CustomPulse] = dict()
+
+        instructions = []
+        for inst in ir.instructions:
+            if isinstance(inst, (Pulse, CustomPulse)):
+                inst = self.evaluate_waveform(inst, self.ignored_shapes, pulses)
+            elif isinstance(inst, Acquire) and inst.filter:
+                inst.filter = self.evaluate_waveform(
+                    inst.filter, self.acquire_ignored_shapes, pulses
+                )
+            instructions.append(inst)
+        ir.instructions = instructions
+        return ir
+
+    def evaluate_waveform(
+        self,
+        inst: Pulse | CustomPulse,
+        ignored_shapes: list[PulseShapeType],
+        pulse_lookup: dict[str, CustomPulse],
+    ) -> Pulse | CustomPulse:
+        """Evaluates the waveform for a :class:`Pulse` or :class:`CustomPulse`, accounting
+        for the pulse channel scale."""
+
+        if isinstance(inst, CustomPulse):
+            # custom pulses need to be changed to account for scale
+            if not inst.ignore_channel_scale:
+                target: PulseChannel = inst.channel
+                inst.samples = np.asarray(inst.samples) * target.scale
+                inst.ignore_channel_scale = True
+            return inst
+
+        if isinstance(inst, Pulse):
+            if inst.shape not in ignored_shapes:
+                # check if the pulse has already been compiled!
+                hash_ = self.hash_pulse(inst)
+                if hash_ in pulse_lookup:
+                    inst = pulse_lookup[hash_]
+                    return inst
+
+                # evaluate for non-ignored shapes
+                edge = inst.duration / 2.0 - inst.channel.sample_time * 0.5
+                samples = int(np.ceil(inst.duration / inst.channel.sample_time - 1e-10))
+                t = np.linspace(start=-edge, stop=edge, num=samples)
+                pulse_shape = self.evaluate(inst, t, 0.0)
+                if not inst.ignore_channel_scale:
+                    pulse_shape = pulse_shape * inst.channel.scale
+                inst = CustomPulse(inst.channel, pulse_shape, True)
+                pulse_lookup[hash] = inst
+
+            elif not inst.ignore_channel_scale:
+                # shapes that are ignored are still checked for scale!
+                inst.amp *= inst.channel.scale
+                inst.ignore_channel_scale = True
+
+            return inst
+
+        raise ValueError(
+            f"Expected to see a Pulse or CustomPulse type, got {type(inst)} instead."
+        )
+
+    def hash_pulse(self, pulse: Pulse) -> str:
+        """Hashs a pulse object."""
+        return hash(
+            (
+                pulse.channel.partial_id,
+                pulse.shape,
+                pulse.width,
+                pulse.amp,
+                pulse.phase,
+                pulse.drag,
+                pulse.rise,
+                pulse.amp_setup,
+                pulse.scale_factor,
+                pulse.zero_at_edges,
+                pulse.beta,
+                pulse.frequency,
+                pulse.internal_phase,
+                pulse.std_dev,
+                pulse.square_width,
+                pulse.ignore_channel_scale,
+            )
+        )

@@ -3,6 +3,7 @@
 
 import math
 import random
+from enum import Enum
 
 import numpy as np
 import pytest
@@ -23,6 +24,7 @@ from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
+    EvaluatePulses,
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
@@ -36,6 +38,7 @@ from qat.middleend.passes.transform import (
 )
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -49,6 +52,8 @@ from qat.purr.compiler.instructions import (
     Reset,
     Synchronize,
 )
+
+from tests.unit.utils.pulses import pulse_attributes
 
 
 class TestPhaseOptimisation:
@@ -984,3 +989,240 @@ class TestResetsToDelays:
         # All pulse channels in the qubit are active channels.
         assert len(delays[0].quantum_targets) == len(pulse_channels)
         assert delays[0].time == passive_reset_time
+
+
+class MockPulseShapeType(Enum):
+    HEXAGON = "hexagon"
+    SPAGHETTI = "spaghetti"
+
+
+def mock_evaluate(data, t, phase_offset):
+    if isinstance(data, Pulse) and data.shape in MockPulseShapeType:
+        if data.shape == MockPulseShapeType.HEXAGON:
+            return np.linspace(0, 1, len(t))
+        elif data.shape == MockPulseShapeType.SPAGHETTI:
+            return np.linspace(-1, 0, len(t))
+    else:
+        return evaluate_shape(data, t, phase_offset)
+
+
+class TestEvaluatePulses:
+
+    @pytest.mark.parametrize("scale", [True, False])
+    def test_pulse_not_lowered(self, scale: bool):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        chan.scale = 0.05
+        builder = model.create_builder()
+        builder.pulse(
+            chan,
+            shape=PulseShapeType.SQUARE,
+            width=400e-9,
+            amp=1.0,
+            ignore_channel_scale=scale,
+        )
+
+        EvaluatePulses().run(builder)
+        assert len(builder.instructions) == 1
+        pulse = builder.instructions[0]
+        assert isinstance(pulse, Pulse)
+        assert pulse.channel == chan
+        assert pulse.ignore_channel_scale
+        assert pulse.amp == 1.0 * (1.0 if scale else 0.05)
+
+    @pytest.mark.parametrize("scale", [True, False])
+    @pytest.mark.parametrize("attributes", pulse_attributes)
+    def test_non_square_pulses_are_lowered(self, scale: bool, attributes: dict[str]):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        chan.scale = 0.05
+        builder = model.create_builder()
+        builder.pulse(chan, width=400e-9, amp=1.0, ignore_channel_scale=scale, **attributes)
+
+        EvaluatePulses().run(builder)
+        assert len(builder.instructions) == 1
+        pulse = builder.instructions[0]
+        assert isinstance(pulse, CustomPulse)
+        assert pulse.ignore_channel_scale
+        assert len(pulse.samples) == int(np.ceil(400e-9 / chan.sample_time - 1e-10))
+        assert pulse.channel == chan
+        # the pulse is never sampled at the peak, so amp is actually < 1.0
+        assert np.max(np.abs(builder.instructions[0].samples)) >= 0.99 * (
+            1.0 if scale else 0.05
+        )
+
+    @pytest.mark.parametrize("scale", [True, False])
+    def test_custom_pulse(self, scale):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        chan.scale = 0.05
+        builder = model.create_builder()
+        builder.add(CustomPulse(chan, np.ones(80), ignore_channel_scale=scale))
+        EvaluatePulses().run(builder)
+        assert len(builder.instructions) == 1
+        pulse = builder.instructions[0]
+        assert isinstance(pulse, CustomPulse)
+        assert pulse.ignore_channel_scale
+        assert len(pulse.samples) == 80
+        assert np.allclose(pulse.samples, 1.0 if scale else 0.05)
+
+    @pytest.mark.parametrize("scale", [True, False])
+    def test_acquire_is_lowered(self, scale):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_acquire_channel()
+        chan.scale = 0.05
+        builder = model.create_builder()
+        pulse = Pulse(
+            chan,
+            shape=PulseShapeType.SQUARE,
+            width=400e-9,
+            amp=1.0,
+            ignore_channel_scale=scale,
+        )
+        builder.acquire(chan, time=400e-9, filter=pulse, delay=0.0)
+
+        EvaluatePulses().run(builder)
+        assert len(builder.instructions) == 1
+        acquire = builder.instructions[0]
+        assert isinstance(acquire, Acquire)
+        pulse = acquire.filter
+        assert isinstance(pulse, CustomPulse)
+        assert pulse.ignore_channel_scale
+        assert len(pulse.samples) == int(np.ceil(400e-9 / chan.sample_time - 1e-10))
+        assert pulse.channel == chan
+        assert np.allclose(pulse.samples, (1.0 if scale else 0.05))
+
+    @pytest.mark.parametrize("scale", [True, False])
+    def test_acquire_is_not_lowered(self, scale):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_acquire_channel()
+        chan.scale = 0.05
+        builder = model.create_builder()
+        pulse = Pulse(
+            chan,
+            shape=PulseShapeType.SQUARE,
+            width=400e-9,
+            amp=1.0,
+            ignore_channel_scale=scale,
+        )
+        builder.acquire(chan, time=400e-9, filter=pulse, delay=0.0)
+
+        EvaluatePulses(acquire_ignored_shapes=[PulseShapeType.SQUARE]).run(builder)
+        assert len(builder.instructions) == 1
+        acquire = builder.instructions[0]
+        assert isinstance(acquire, Acquire)
+        pulse = acquire.filter
+        assert isinstance(pulse, Pulse)
+        assert pulse.ignore_channel_scale
+        assert pulse.shape == PulseShapeType.SQUARE
+
+    def test_evaluate_injection_with_square(self):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        builder = model.create_builder()
+        builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.HEXAGON,
+            width=400e-9,
+            amp=1.0,
+        )
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.SPAGHETTI,
+            width=400e-9,
+            amp=1.0,
+        )
+
+        EvaluatePulses(eval_function=mock_evaluate).run(builder)
+        assert len(builder.instructions) == 3
+        assert isinstance(builder.instructions[0], Pulse)
+        assert builder.instructions[0].shape == PulseShapeType.SQUARE
+        assert isinstance(builder.instructions[1], CustomPulse)
+        assert isinstance(builder.instructions[2], CustomPulse)
+
+    def test_evaluate_injection_with_custom_ignore(self):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        builder = model.create_builder()
+        builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.HEXAGON,
+            width=400e-9,
+            amp=1.0,
+        )
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.SPAGHETTI,
+            width=400e-9,
+            amp=1.0,
+        )
+
+        EvaluatePulses(
+            ignored_shapes=[MockPulseShapeType.HEXAGON], eval_function=mock_evaluate
+        ).run(builder)
+        assert len(builder.instructions) == 3
+        assert isinstance(builder.instructions[0], CustomPulse)
+        assert isinstance(builder.instructions[1], Pulse)
+        assert builder.instructions[1].shape == MockPulseShapeType.HEXAGON
+        assert isinstance(builder.instructions[2], CustomPulse)
+
+    def test_evaluate_injection_with_two_custom_ignores(self):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        builder = model.create_builder()
+        builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.HEXAGON,
+            width=400e-9,
+            amp=1.0,
+        )
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=MockPulseShapeType.SPAGHETTI,
+            width=400e-9,
+            amp=1.0,
+        )
+
+        EvaluatePulses(
+            ignored_shapes=[PulseShapeType.SQUARE, MockPulseShapeType.HEXAGON],
+            eval_function=mock_evaluate,
+        ).run(builder)
+        assert len(builder.instructions) == 3
+        assert isinstance(builder.instructions[0], Pulse)
+        assert builder.instructions[0].shape == PulseShapeType.SQUARE
+        assert isinstance(builder.instructions[1], Pulse)
+        assert builder.instructions[1].shape == MockPulseShapeType.HEXAGON
+        assert isinstance(builder.instructions[2], CustomPulse)
+
+    @pytest.mark.parametrize("shape1", list(PulseShapeType) + list(MockPulseShapeType))
+    @pytest.mark.parametrize("shape2", list(PulseShapeType) + list(MockPulseShapeType))
+    def test_hashing_for_different_shapes(self, shape1, shape2):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        pulse1 = Pulse(chan, shape1, width=400e-9)
+        pulse2 = Pulse(chan, shape2, width=400e-9)
+        pass_ = EvaluatePulses()
+        if shape1 == shape2:
+            assert pass_.hash_pulse(pulse1) == pass_.hash_pulse(pulse2)
+        else:
+            assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)
+
+    def test_hashing_for_different_param(self):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        pulse1 = Pulse(chan, PulseShapeType.SQUARE, width=254e-9)
+        pulse2 = Pulse(chan, PulseShapeType.SQUARE, width=454e-9)
+        pass_ = EvaluatePulses()
+        assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)
+
+    def test_hashing_for_different_channels(self):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_drive_channel()
+        chan2 = model.qubits[0].get_measure_channel()
+        pulse1 = Pulse(chan, PulseShapeType.SQUARE, width=400e-9)
+        pulse2 = Pulse(chan2, PulseShapeType.SQUARE, width=400e-9)
+        pass_ = EvaluatePulses()
+        assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)

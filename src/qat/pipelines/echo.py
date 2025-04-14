@@ -1,14 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from qat.backend.passes.validation import HardwareConfigValidity
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import DefaultMiddleend
+from qat.middleend.middleends import CustomMiddleend
+from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
+from qat.middleend.passes.transform import (
+    AcquireSanitisation,
+    EndOfTaskResetSanitisation,
+    EvaluatePulses,
+    InactivePulseChannelSanitisation,
+    InstructionGranularitySanitisation,
+    PhaseOptimisation,
+    PostProcessingSanitisation,
+    SynchronizeTask,
+)
+from qat.middleend.passes.validation import ReadoutValidation
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.runtime import SimpleRuntime
-from qat.runtime.passes.analysis import IndexMappingAnalysis
+from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     ErrorMitigation,
@@ -16,6 +29,24 @@ from qat.runtime.passes.transform import (
     PostProcessingTransform,
     ResultTransform,
 )
+
+
+def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
+    return (
+        PassManager()
+        | HardwareConfigValidity(model)
+        | CalibrationAnalysis()
+        | ActivePulseChannelAnalysis(model)
+        | InactivePulseChannelSanitisation()
+        | EndOfTaskResetSanitisation()
+        | PhaseOptimisation()
+        | PostProcessingSanitisation()
+        | ReadoutValidation(model)
+        | AcquireSanitisation()
+        | InstructionGranularitySanitisation(clock_cycle)
+        | SynchronizeTask()
+        | EvaluatePulses()
+    )
 
 
 def get_results_pipeline(model) -> PassManager:
@@ -36,7 +67,7 @@ def get_pipeline(model, name="echo") -> Pipeline:
     return Pipeline(
         name=name,
         frontend=AutoFrontend(model),
-        middleend=DefaultMiddleend(model, 1e-9),
+        middleend=CustomMiddleend(model, get_middleend_pipeline(model, 1e-9)),
         backend=WaveformV1Backend(model),
         runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),
         model=model,
