@@ -651,3 +651,54 @@ class EndOfTaskResetSanitisation(TransformPass):
             if not val:
                 ir.add(Reset(qubit))
         return ir
+
+
+class ResetsToDelays(TransformPass):
+    """
+    Transforms :class:`Reset` operations to :class:`Delay`s.
+
+    Note that the delays do not necessarily agree with the granularity of the underlying target machine.
+    This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+    pass.
+    """
+
+    def __init__(self, passive_reset_time: float):
+        """
+        :param passive_reset_time: The time added to the end of each shot to allow the
+                                state of the qubits to reset.
+        """
+        self.passive_reset_time = passive_reset_time
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+        active_pulse_channels: ActiveChannelResults = res_mgr.lookup_by_type(
+            ActiveChannelResults
+        )
+
+        new_instructions = []
+        for instr in ir.instructions:
+            if isinstance(instr, Reset):
+
+                qubit_targets = {
+                    active_pulse_channels.target_map[target]
+                    for target in instr.quantum_targets
+                }
+
+                for qubit in qubit_targets:
+                    new_instructions.append(
+                        Delay(
+                            active_pulse_channels.from_qubit(qubit),
+                            time=self.passive_reset_time,
+                        )
+                    )
+
+            else:
+                new_instructions.append(instr)
+
+        ir.instructions = new_instructions
+        return ir

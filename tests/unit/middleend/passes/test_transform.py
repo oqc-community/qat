@@ -31,6 +31,7 @@ from qat.middleend.passes.transform import (
     PhaseOptimisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
+    ResetsToDelays,
     SynchronizeTask,
 )
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
@@ -919,3 +920,67 @@ class TestEndOfTaskResetSanitisation:
         ]
         assert len(reset_channels) == 1
         assert reset_channels[0] == qubit.get_drive_channel()
+
+
+@pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
+class TestResetsToDelays:
+    @pytest.mark.parametrize("add_reset", [True, False])
+    def test_qubit_reset(self, passive_reset_time: float, add_reset: bool):
+
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        builder = model.create_builder()
+        builder.had(qubit)
+        if add_reset:
+            builder.reset(qubit)
+
+        res = ActiveChannelResults()
+        res.target_map[qubit.get_drive_channel()] = qubit
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = len(builder.instructions)
+        builder = ResetsToDelays(passive_reset_time).run(builder, res_mgr)
+        assert before == len(builder.instructions)
+
+        delays = []
+        for instr in builder.instructions:
+            assert not isinstance(instr, Reset)
+
+            if isinstance(instr, Delay):
+                delays.append(instr)
+
+        if add_reset:
+            assert len(delays) == 1
+            assert len(delays[0].quantum_targets) == 1
+            assert delays[0].time == passive_reset_time
+
+    def test_pulse_channel_reset(self, passive_reset_time: float):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+        pulse_channels = qubit.get_all_channels()
+
+        builder = model.create_builder()
+        builder.reset(pulse_channels)
+
+        res = ActiveChannelResults()
+        for pulse_ch in pulse_channels:
+            res.target_map[pulse_ch] = qubit
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        builder = ResetsToDelays(passive_reset_time).run(builder, res_mgr)
+
+        delays = []
+        for instr in builder.instructions:
+            assert not isinstance(instr, Reset)
+
+            if isinstance(instr, Delay):
+                delays.append(instr)
+
+        # All pulse channels belong to a single qubit so only 1 reset -> delay.
+        assert len(delays) == 1
+        # All pulse channels in the qubit are active channels.
+        assert len(delays[0].quantum_targets) == len(pulse_channels)
+        assert delays[0].time == passive_reset_time

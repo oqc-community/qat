@@ -14,6 +14,8 @@ from compiler_config.config import InlineResultsProcessing
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType, QuantumComponent, Qubit
 from qat.purr.utils.logger import get_default_logger
 
+log = get_default_logger()
+
 if TYPE_CHECKING:
     pass
 
@@ -139,6 +141,13 @@ class Repeat(Instruction):
         super().__init__()
         self.repeat_count = repeat_count
         self.repetition_period = repetition_period
+
+        # TODO: Change in next major release of QAT. COMPILER-428
+        if repetition_period:
+            log.warning(
+                "The `repetition_period` in `Repeat` will soon be removed in favour of \
+                        `passive_reset_time` in the compiler config."
+            )
 
     def __repr__(self):
         return f"repeat {self.repeat_count},{self.repetition_period}"

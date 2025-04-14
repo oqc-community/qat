@@ -96,7 +96,7 @@ class PartitionByPulseChannel(LoweringPass):
 
             elif isinstance(inst, Repeat):
                 if partitioned_ir.shots:
-                    raise ValueError("Multiple Repeat instructions founds.")
+                    raise ValueError("Multiple Repeat instructions found.")
                 partitioned_ir.shots = inst
 
         # Assume that raw acquisitions are experiment results.
