@@ -630,19 +630,19 @@ class TestPhaseResetSanitisation:
 
         n_instr_before = len(builder.instructions)
 
-        MeasurePhaseResetSanitisation().run(builder)
+        ir = MeasurePhaseResetSanitisation().run(builder)
 
         # A phase reset should be added for each measure instruction.
-        assert len(builder.instructions) == n_instr_before + len(self.hw.qubits)
+        assert len(ir.instructions) == n_instr_before + len(self.hw.qubits)
 
         ref_measure_pulse_channels = set(
             [qubit.get_measure_channel() for qubit in self.hw.qubits]
         )
         measure_pulse_channels = set()
-        for i, instr in enumerate(builder.instructions):
+        for i, instr in enumerate(ir.instructions):
             if isinstance(instr, MeasurePulse):
-                assert isinstance(builder.instructions[i - 1], PhaseReset)
-                measure_pulse_channels.update(builder.instructions[i - 1].quantum_targets)
+                assert isinstance(ir.instructions[i - 1], PhaseReset)
+                measure_pulse_channels.update(ir.instructions[i - 1].quantum_targets)
 
         assert measure_pulse_channels == ref_measure_pulse_channels
 

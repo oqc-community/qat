@@ -444,6 +444,8 @@ class MeasurePhaseResetSanitisation(TransformPass):
 
         ir.instructions = new_instructions
 
+        return ir
+
 
 class InactivePulseChannelSanitisation(TransformPass):
     """Removes instructions that act on inactive pulse channels.
