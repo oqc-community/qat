@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from qat.backend.passes.analysis import TriagePass, TriageResult
-from qat.backend.passes.lowering import PartitionByPulseChannel
+from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
 from qat.backend.passes.transform import (
     DesugaringPass,
     FreqShiftSanitisation,
@@ -291,3 +291,11 @@ class TestFreqShiftSanitisation:
         assert freq_shift_pulse.amp == freq_shift_pulse_ch.amp
         # TO DO: Change the timings to integers of nanoseconds to improve accuracy.
         assert math.isclose(freq_shift_pulse.width, total_duration, abs_tol=1e-06)
+
+    def test_freq_shift_empty_target(self):
+        hw = EchoModelLoader(8).load()
+        res_mgr = ResultManager()
+        partitioned_ir = PartitionedIR()
+        ir = FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
+        assert len(ir.target_map) == 0
+        assert ir is partitioned_ir

@@ -267,6 +267,9 @@ class FreqShiftSanitisation(TransformPass):
 
     def run(self, ir: PartitionedIR, res_mgr: ResultManager, *args, **kwargs):
         target_map = ir.target_map
+        if len(target_map) == 0:
+            return ir
+
         shot_time = np.max(
             [
                 np.sum([inst.duration for inst in target_map[target]])
