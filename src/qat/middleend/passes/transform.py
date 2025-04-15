@@ -596,7 +596,8 @@ class SynchronizeTask(TransformPass):
         """
 
         active_channels = res_mgr.lookup_by_type(ActiveChannelResults).targets
-        ir.add(Synchronize(list(active_channels)))
+        if len(active_channels) > 0:
+            ir.add(Synchronize(list(active_channels)))
         return ir
 
 

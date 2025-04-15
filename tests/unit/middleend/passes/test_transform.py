@@ -822,11 +822,20 @@ class TestSynchronizeTask:
         builder.pulse(drive_chan, shape=PulseShapeType.SQUARE, width=800e-9)
         builder.pulse(measure_chan, shape=PulseShapeType.SQUARE, width=400e-9)
 
-        SynchronizeTask().run(builder, res_mgr)
-        assert isinstance(builder.instructions[-1], Synchronize)
-        assert set(builder.instructions[-1].quantum_targets) == set(
-            [drive_chan, measure_chan]
-        )
+        ir = SynchronizeTask().run(builder, res_mgr)
+        assert isinstance(ir.instructions[-1], Synchronize)
+        assert set(ir.instructions[-1].quantum_targets) == set([drive_chan, measure_chan])
+
+    def test_synchronize_task_not_adding_if_inactive(self):
+        model = EchoModelLoader().load()
+
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={}))
+
+        builder = model.create_builder()
+
+        ir = SynchronizeTask().run(builder, res_mgr)
+        assert len(ir.instructions) == 0
 
 
 class TestEndOfTaskResetSanitisation:
