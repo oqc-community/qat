@@ -1144,7 +1144,11 @@
       <ul>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift.channel">(FrequencyShift property)</a>
 </li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.channel">(PhaseSet property)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift.channel">(PhaseShift property)</a>
+</li>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.params.channel">(qat.purr.compiler.instructions.PhaseSet parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform.channel">(Waveform property)</a>
 </li>
@@ -3161,8 +3165,6 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation">InstructionLengthSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">[1]</a>
 
       <ul>
@@ -3179,6 +3181,8 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation">InstructionValidation (class in qat.middleend.passes.validation)</a>
 
       <ul>
@@ -3285,6 +3289,8 @@
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.SquashCNOTs.run.params.ir">(qat.middleend.passes.gates.transform.SquashCNOTs.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run.params.ir">(qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.legacy.transform.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run.params.ir">(qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run parameter)</a>
 </li>
@@ -3909,6 +3915,8 @@
         <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend.emit.params.met_mgr">(qat.middleend.middleends.BaseMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.met_mgr">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.run.params.met_mgr">(qat.middleend.passes.legacy.transform.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
 </li>
@@ -5261,6 +5269,8 @@
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.phase">phase (PhaseShift attribute)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.params.phase">(qat.purr.compiler.instructions.PhaseSet parameter)</a>
+</li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.phase">(Waveform attribute)</a>
 </li>
       </ul></li>
@@ -5284,9 +5294,11 @@
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.phase_shift">(QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.phase_shift">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation">PhaseOptimisation (class in qat.middleend.passes.transform)</a>
+      <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation">PhaseOptimisation (class in qat.middleend.passes.legacy.transform)</a>
 
       <ul>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation">(class in qat.middleend.passes.transform)</a>
+</li>
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
@@ -5296,6 +5308,8 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet">PhaseSet (class in qat.purr.compiler.instructions)</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift">PhaseShift (class in qat.ir.instructions)</a>
 
       <ul>
@@ -5534,6 +5548,8 @@
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.process_phasereset">(WaveformContext method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.process_phaseset">process_phaseset() (WaveformContext method)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_phaseshift">process_phaseshift() (QuantumExecutionEngine method)</a>
 
       <ul>
@@ -7570,6 +7586,8 @@
 </li>
         <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.BatchedShots.run.params.res_mgr">(qat.middleend.passes.analysis.BatchedShots.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.run.params.res_mgr">(qat.middleend.passes.legacy.transform.PhaseOptimisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.InactivePulseChannelSanitisation.run parameter)</a>
@@ -7956,7 +7974,7 @@
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run">(PassModel method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassModel.run">[1]</a>
 </li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run">(PhaseOptimisation method)</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation.run">[1]</a>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.run">(PhaseOptimisation method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run">[1]</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation.run">[2]</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.PhysicalChannelAmplitudeValidation.run">(PhysicalChannelAmplitudeValidation method)</a>
 </li>

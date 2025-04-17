@@ -657,6 +657,28 @@ unit.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.PhaseSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PhaseSet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
+<p>Sets the phase for a pulse channel.</p>
+<p>This sets the absolute phase of an NCO, unlike the <a class="reference internal" href="#qat.purr.compiler.instructions.PhaseShift" title="qat.purr.compiler.instructions.PhaseShift"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code></a>, which changes
+the phase relative to the current phase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.compiler.instructions.PhaseSet.params.channel"></span><strong>channel</strong><a class="paramlink headerlink reference internal" href="#qat.purr.compiler.instructions.PhaseSet.params.channel">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span>) – The pulse channel to set the phase for.</p></li>
+<li><p><span class="target" id="qat.purr.compiler.instructions.PhaseSet.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.purr.compiler.instructions.PhaseSet.params.phase">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The phase in radians.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.instructions.PhaseSet.channel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><span class="pre">PulseChannel</span></a></em><a class="headerlink" href="#qat.purr.compiler.instructions.PhaseSet.channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PhaseShift">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PhaseShift" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
