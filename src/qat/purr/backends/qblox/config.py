@@ -278,8 +278,12 @@ class QbloxConfigHelper(ABC):
         pass
 
     def calibrate_sideband(self, sequencer: Sequencer, connection: str = None):
-        connection = connection or "out0"
-        sequencer.connect_sequencer(connection)
+        if not connection:
+            log.warning(
+                "Did not provide the `connection` argument. Assuming `connection` already specified"
+            )
+        else:
+            sequencer.connect_sequencer(connection)
 
         log.info(f"Calibrating sidebands on sequencer {sequencer}")
         sequencer.sideband_cal()

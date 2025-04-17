@@ -133,6 +133,7 @@ class QbloxControlHardware(ControlHardware):
         self.address = address
         self.dummy_cfg = dummy_cfg
 
+        self.managed_mode = False
         self.dump_sequence = False
         self.plot_packages = False
         self.plot_acquisitions = False
@@ -195,22 +196,22 @@ class QbloxControlHardware(ControlHardware):
         log.debug(f"Configuring module {module}, sequencer {sequencer}")
         if module.is_qcm_type:
             if module.is_rf_type:
-                QcmRfConfigHelper(module_config, sequencer_config).configure(
-                    module, sequencer
-                )
+                config_helper = QcmRfConfigHelper(module_config, sequencer_config)
             else:
-                QcmConfigHelper(module_config, sequencer_config).configure(
-                    module, sequencer
-                )
+                config_helper = QcmConfigHelper(module_config, sequencer_config)
         elif module.is_qrm_type:
             if module.is_rf_type:
-                QrmRfConfigHelper(module_config, sequencer_config).configure(
-                    module, sequencer
-                )
+                config_helper = QrmRfConfigHelper(module_config, sequencer_config)
             else:
-                QrmConfigHelper(module_config, sequencer_config).configure(
-                    module, sequencer
-                )
+                config_helper = QrmConfigHelper(module_config, sequencer_config)
+        else:
+            raise ValueError(f"Unknown module type {module.module_type}")
+
+        config_helper.configure(module, sequencer)
+
+        if self.managed_mode:
+            log.info("Managed mode enabled")
+            config_helper.calibrate_mixer(module, sequencer)
 
     def _reset_io(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
