@@ -420,10 +420,6 @@ class TestQATParity:
 
         assert purr_res == qat_res
         assert purr_metrics.optimized_circuit == comp_metrics.optimized_circuit
-        assert (
-            purr_metrics.optimized_instruction_count
-            >= comp_metrics.optimized_instruction_count
-        )
 
 
 class MockEngine(NativeEngine):

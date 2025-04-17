@@ -1,9 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from collections import defaultdict
+from numbers import Number
+
+import numpy as np
+from compiler_config.config import MetricsType
+
+from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
+from qat.core.result_base import ResultManager
 from qat.purr.backends.qiskit_simulator import QiskitBuilder, QiskitBuilderWrapper
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.instructions import Acquire, AcquireMode
+from qat.purr.compiler.devices import PulseChannel
+from qat.purr.compiler.instructions import (
+    Acquire,
+    AcquireMode,
+    CustomPulse,
+    Instruction,
+    PhaseReset,
+    PhaseShift,
+    Pulse,
+)
 
 
 class IntegratorAcquireSanitisation(TransformPass):
@@ -43,3 +60,69 @@ class QiskitInstructionsWrapper(TransformPass):
     def run(self, ir: QiskitBuilder, *args, **kwargs) -> QiskitBuilderWrapper:
         """:param ir: The Qiskit instructions"""
         return QiskitBuilderWrapper(ir)
+
+
+class PhaseOptimisation(TransformPass):
+    """Iterates through the list of instructions and compresses contiguous
+    :class:`PhaseShift` instructions.
+    """
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
+
+        previous_instruction = None
+        accum_phaseshifts: dict[PulseChannel, float] = defaultdict(float)
+        optimized_instructions: list[Instruction] = []
+        for instruction in ir.instructions:
+            if isinstance(instruction, PhaseShift) and isinstance(
+                instruction.phase, Number
+            ):
+                accum_phaseshifts[instruction.channel] += instruction.phase
+            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift)):
+                quantum_targets = getattr(instruction, "quantum_targets", [])
+                if not isinstance(quantum_targets, list):
+                    quantum_targets = [quantum_targets]
+                for quantum_target in quantum_targets:
+                    if not np.isclose(accum_phaseshifts[quantum_target] % (2 * np.pi), 0.0):
+                        optimized_instructions.append(
+                            PhaseShift(
+                                quantum_target, accum_phaseshifts.pop(quantum_target)
+                            )
+                        )
+                optimized_instructions.append(instruction)
+
+            elif isinstance(instruction, PhaseReset):
+                for channel in instruction.quantum_targets:
+                    accum_phaseshifts.pop(channel, None)
+
+                if isinstance(previous_instruction, PhaseReset):
+                    unseen_targets = list(
+                        set(instruction.quantum_targets)
+                        - set(previous_instruction.quantum_targets)
+                    )
+                    previous_instruction.quantum_targets.extend(unseen_targets)
+                else:
+                    optimized_instructions.append(instruction)
+
+            else:
+                optimized_instructions.append(instruction)
+
+            previous_instruction = instruction
+
+        ir.instructions = optimized_instructions
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, len(optimized_instructions)
+        )
+        return ir

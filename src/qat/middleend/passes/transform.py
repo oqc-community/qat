@@ -22,7 +22,7 @@ from qat.ir.waveforms import Pulse as PydPulse
 from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, Qubit
+from qat.purr.compiler.devices import Qubit
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -31,6 +31,7 @@ from qat.purr.compiler.instructions import (
     Instruction,
     MeasurePulse,
     PhaseReset,
+    PhaseSet,
     PhaseShift,
     PostProcessing,
     PostProcessType,
@@ -48,7 +49,8 @@ log = get_default_logger()
 
 class PhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
-    :class:`PhaseShift` instructions.
+    :class:`PhaseShift` instructions. This pass will change :class:`PhaseReset` to
+    :class:`PhaseSet` instructions.
     """
 
     def run(
@@ -66,44 +68,42 @@ class PhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        previous_instruction = None
-        accum_phaseshifts: dict[PulseChannel, float] = defaultdict(float)
+        accum_phaseshifts: dict[str, PhaseShift | PhaseSet] = dict()
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
             ):
-                accum_phaseshifts[instruction.channel] += instruction.phase
-            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift)):
+                if (key := instruction.channel.partial_id) in accum_phaseshifts:
+                    accum_phaseshifts[key].phase += instruction.phase
+                else:
+                    accum_phaseshifts[key] = PhaseShift(
+                        instruction.channel, instruction.phase
+                    )
+            elif isinstance(instruction, PhaseSet) and isinstance(
+                instruction.phase, Number
+            ):
+                accum_phaseshifts[instruction.channel.partial_id] = PhaseSet(
+                    instruction.channel, instruction.phase
+                )
+            elif isinstance(instruction, PhaseReset):
+                for channel in instruction.quantum_targets:
+                    accum_phaseshifts[channel.partial_id] = PhaseSet(channel, 0.0)
+            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift, PhaseSet)):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, List):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
-                    if not np.isclose(accum_phaseshifts[quantum_target] % (2 * np.pi), 0.0):
-                        optimized_instructions.append(
-                            PhaseShift(
-                                quantum_target, accum_phaseshifts.pop(quantum_target)
-                            )
-                        )
+                    if quantum_target.partial_id in accum_phaseshifts:
+                        new_instruction = accum_phaseshifts.pop(quantum_target.partial_id)
+                        if not (
+                            isinstance(new_instruction, PhaseShift)
+                            and np.isclose(new_instruction.phase % (2 * np.pi), 0.0)
+                        ):
+                            optimized_instructions.append(new_instruction)
                 optimized_instructions.append(instruction)
-
-            elif isinstance(instruction, PhaseReset):
-                for channel in instruction.quantum_targets:
-                    accum_phaseshifts.pop(channel, None)
-
-                if isinstance(previous_instruction, PhaseReset):
-                    unseen_targets = list(
-                        set(instruction.quantum_targets)
-                        - set(previous_instruction.quantum_targets)
-                    )
-                    previous_instruction.quantum_targets.extend(unseen_targets)
-                else:
-                    optimized_instructions.append(instruction)
-
             else:
                 optimized_instructions.append(instruction)
-
-            previous_instruction = instruction
 
         ir.instructions = optimized_instructions
         met_mgr.record_metric(

@@ -46,6 +46,7 @@ from qat.purr.compiler.instructions import (
     Delay,
     MeasurePulse,
     PhaseReset,
+    PhaseSet,
     PhaseShift,
     Pulse,
     PulseShapeType,
@@ -68,28 +69,11 @@ class TestPhaseOptimisation:
         assert len(builder.instructions) == 2
 
         PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
-        # The two phase resets should be merged to one.
-        assert len(builder.instructions) == 1
-        assert set(builder.instructions[0].quantum_targets) == set(
-            phase_reset.quantum_targets
-        )
+        for inst in builder.instructions:
+            assert isinstance(inst, PhaseSet)
+        channels = set([inst.channel for inst in builder.instructions])
+        assert len(channels) == len(builder.instructions)
 
-    def test_merged_phase_resets(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
-
-        targets_q1 = self.hw.qubits[0].get_all_channels()
-        targets_q2 = self.hw.qubits[1].get_all_channels()
-        builder.add(PhaseReset(targets_q1))
-        builder.add(PhaseReset(targets_q2))
-
-        PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
-        # The two phase resets should be merged to one, and the targets of both phase resets should be merged.
-        assert len(builder.instructions) == 1
-        merged_targets = set(targets_q1) | set(targets_q2)
-        assert set(builder.instructions[0].quantum_targets) == merged_targets
-
-
-class TestPhaseOptimisation:
     def test_empty_constructor(self):
         hw = EchoModelLoader(8).load()
         builder = hw.create_builder()
@@ -200,6 +184,21 @@ class TestPhaseOptimisation:
             if isinstance(instr, PhaseShift)
         ]
         assert len(phase_shifts) == 0
+
+    def test_reset_and_shift_become_set(self):
+        hw = EchoModelLoader(2).load()
+        ir = hw.create_builder()
+        chan = hw.qubits[0].get_drive_channel()
+
+        ir.add(PhaseReset(chan))
+        ir.add(PhaseShift(chan, np.pi / 4))
+        ir.pulse(chan, shape=PulseShapeType.SQUARE, width=80e-9)
+
+        ir = PhaseOptimisation().run(ir, ResultManager(), MetricsManager())
+
+        assert len(ir.instructions) == 2
+        assert isinstance(ir.instructions[0], PhaseSet)
+        assert np.isclose(ir.instructions[0].phase, np.pi / 4)
 
 
 class TestPydPhaseOptimisation:

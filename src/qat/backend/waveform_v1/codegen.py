@@ -35,6 +35,7 @@ from qat.purr.compiler.instructions import (
     FrequencyShift,
     Instruction,
     PhaseReset,
+    PhaseSet,
     PhaseShift,
     Pulse,
     Reset,
@@ -147,6 +148,8 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                 context.process_pulse(instruction, duration, upconvert)
             elif isinstance(instruction, PhaseShift):
                 context.process_phaseshift(instruction.phase)
+            elif isinstance(instruction, PhaseSet):
+                context.process_phaseset(instruction.phase)
             elif isinstance(instruction, PhaseReset):
                 context.process_phasereset()
             elif isinstance(instruction, Reset):
@@ -297,6 +300,9 @@ class WaveformContext:
 
     def process_phaseshift(self, phase: float):
         self._phase += phase
+
+    def process_phaseset(self, phase: float):
+        self._phase = phase
 
     def process_phasereset(self):
         self._phase = 0

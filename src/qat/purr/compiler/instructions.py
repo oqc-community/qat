@@ -162,6 +162,28 @@ class EndRepeat(Instruction):
         return f"end_repeat"
 
 
+class PhaseSet(QuantumInstruction):
+    """Sets the phase for a pulse channel.
+
+    This sets the absolute phase of an NCO, unlike the :class:`PhaseShift`, which changes
+    the phase relative to the current phase."""
+
+    def __init__(self, channel: PulseChannel, phase: float):
+        """
+        :param channel: The pulse channel to set the phase for.
+        :param phase: The phase in radians.
+        """
+        super().__init__(channel)
+        self.phase: float = phase
+
+    @property
+    def channel(self) -> PulseChannel:
+        return self.quantum_targets[0]
+
+    def __repr__(self):
+        return f"phaseset {self.channel},{self.phase}"
+
+
 class PhaseShift(QuantumInstruction):
     def __init__(self, channel: "PulseChannel", phase: float):
         super().__init__(channel)
