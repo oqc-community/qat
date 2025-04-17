@@ -190,8 +190,8 @@ filterwarnings = [
     # Lark using deprecated version on sre_parse and sre_constants
     'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
     # DOcplex using deprecated escape sequence
-    'default:.*invalid escape sequence:SyntaxWarning::1092',
-    'default:.*invalid escape sequence:DeprecationWarning::1092',
+    'default:.*invalid escape sequence:SyntaxWarning::1098',
+    'default:.*invalid escape sequence:DeprecationWarning::1098',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
     'default:.*GlobalisePhasedX:DeprecationWarning',
     # TODO: Remove calls to `model_fields` attribute in instance of a `BaseModel` class (COMPILER-396)
