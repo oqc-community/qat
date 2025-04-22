@@ -92,3 +92,9 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+# Python version
+.python-version
+
+# Reports
+reports/*
