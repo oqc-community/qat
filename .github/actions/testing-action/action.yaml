@@ -38,6 +38,7 @@ runs:
 
     - name: Upload report
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: qat_${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}_unit_report
         path: reports/**
