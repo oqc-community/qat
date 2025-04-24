@@ -16,6 +16,7 @@ from pytket._tket.predicates import (
     NoMidMeasurePredicate,
 )
 from pytket._tket.transform import Transform
+from pytket.circuit import Node
 from pytket.passes import (
     AutoRebase,
     CliffordSimp,
@@ -35,6 +36,7 @@ from pytket.passes import (
     SynthesiseTket,
     ThreeQubitSquash,
 )
+from pytket.placement import Placement
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
 from qiskit.circuit.library import CXGate, ECRGate, UGate
@@ -606,44 +608,57 @@ def get_coupling_subgraphs(couplings):
     return subgraphs
 
 
-def run_tket_optimizations(circ: Circuit, opts, hardware: QuantumHardwareModel) -> Circuit:
-    """
-    Runs tket-based optimizations and modifications. Routing will always happen no
-    matter the level.
+def run_1Q_tket_optimizations(circ: Circuit, hardware: QuantumHardwareModel) -> Circuit:
+    qubit_qualities = {}
+    for qubit in hardware.qubits:
+        qubit_qualities[qubit.index] = (
+            hardware.qubit_quality(qubit.index)
+            if hardware.qubit_quality(qubit.index) != 1
+            else 0
+        )
+    best_qubit = max(qubit_qualities, key=qubit_qualities.get)
 
-    Will run optimizations in sections if a full suite fails until a minimal subset of
-    passing optimizations is found.
+    q_map = {Qubit(0): Node(best_qubit), Qubit(best_qubit): Node(0)}
+    Placement.place_with_map(circ, q_map)
 
-    :param circ: Tket circuit to optimize. The source file must be already parsed to a
-        TKET circuit.
-    :param opts: Specifies which TKET optimizations to run.
-    :param hardware: The hardware model is used for routing and placement purposes.
-    """
+    return circ
 
+
+def run_multiQ_tket_optimizations(
+    circ: Circuit, opts, hardware: QuantumHardwareModel, use_1Q_quality: bool = False
+) -> Circuit:
     couplings = deepcopy(hardware.qubit_direction_couplings)
     optimizations_failed = False
     architecture = None
     if any(couplings):
-        # Without default remapping pass multi-qubit gates don't get moved around, so
-        # trying to apply them to a limited subset of qubits provides no value.
-        logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
-        for coupling in couplings:
-            control_ind, target_ind = coupling.direction
-            coupling.direction = (
-                logical_qubit_map[control_ind],
-                logical_qubit_map[target_ind],
-            )
         if TketOptimizations.DefaultMappingPass not in opts:
             architecture = Architecture([val.direction for val in couplings])
             optimizations_failed = not optimize_circuit(circ, architecture, opts)
+
         else:
-            coupling_qualities = list({val.quality for val in couplings})
+            # Without default remapping pass multi-qubit gates don't get moved around, so
+            # trying to apply them to a limited subset of qubits provides no value.
+            logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
+            for coupling in couplings:
+                control_ind, target_ind = coupling.direction
+                coupling.direction = (
+                    logical_qubit_map[control_ind],
+                    logical_qubit_map[target_ind],
+                )
+                if use_1Q_quality:
+                    coupling.quality *= hardware.qubit_quality(
+                        control_ind
+                    ) * hardware.qubit_quality(target_ind)
+            else:
+                coupling_qualities = list({val.quality for val in couplings})
             coupling_qualities.sort(reverse=True)
+
             for quality_level in coupling_qualities:
                 filtered_couplings = [
                     val.direction for val in couplings if val.quality >= quality_level
                 ]
                 coupling_subgraphs = get_coupling_subgraphs(filtered_couplings)
+
                 for subgraph in coupling_subgraphs:
                     if circ.n_qubits <= len(
                         set([qubit for coupling in subgraph for qubit in coupling])
@@ -698,6 +713,27 @@ def run_tket_optimizations(circ: Circuit, opts, hardware: QuantumHardwareModel) 
         apply_default_transforms(circ, architecture, opts)
         check_validity(circ, architecture)
     return circ
+
+
+def run_tket_optimizations(circ: Circuit, opts, hardware: QuantumHardwareModel) -> Circuit:
+    """
+    Runs tket-based optimizations and modifications. Routing will always happen no
+    matter the level.
+
+    Will run optimizations in sections if a full suite fails until a minimal subset of
+    passing optimizations is found.
+
+    :param circ: Tket circuit to optimize. The source file must be already parsed to a
+        TKET circuit.
+    :param opts: Specifies which TKET optimizations to run.
+    :param hardware: The hardware model is used for routing and placement purposes.
+    """
+    if circ.n_qubits == 1 and hardware.error_mitigation:
+        return run_1Q_tket_optimizations(circ, hardware)
+    elif circ.n_qubits == 2 and hardware.error_mitigation:
+        return run_multiQ_tket_optimizations(circ, opts, hardware, use_1Q_quality=True)
+    else:
+        return run_multiQ_tket_optimizations(circ, opts, hardware, use_1Q_quality=False)
 
 
 def run_tket_optimizations_qasm(qasm_string, opts, hardware: QuantumHardwareModel) -> str:

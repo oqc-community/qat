@@ -10,11 +10,15 @@ class EchoModelLoader(BaseLegacyModelLoader):
         self,
         qubit_count: int = 4,
         connectivity: Connectivity | list[(int, int)] | None = None,
+        add_direction_couplings=True,
     ):
         self.connectivity = connectivity
         self.qubit_count = qubit_count
+        self.add_direction_couplings = add_direction_couplings
 
     def load(self) -> QuantumHardwareModel:
         return get_default_echo_hardware(
-            qubit_count=self.qubit_count, connectivity=self.connectivity
+            qubit_count=self.qubit_count,
+            connectivity=self.connectivity,
+            add_direction_couplings=self.add_direction_couplings,
         )

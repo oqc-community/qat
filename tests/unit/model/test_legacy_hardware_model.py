@@ -163,6 +163,6 @@ class TestEchoHardwareModelConversion:
 
         for leg_coupling_direction in leg_hw.qubit_direction_couplings:
             assert (
-                leg_coupling_direction.quality
+                leg_coupling_direction.quality / 100.0
                 == pyd_hw.logical_connectivity_quality[leg_coupling_direction.direction]
             )

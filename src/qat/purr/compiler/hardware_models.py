@@ -29,6 +29,9 @@ from qat.purr.compiler.instructions import (
     PhaseShift,
     Synchronize,
 )
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 if TYPE_CHECKING:
     from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
@@ -177,6 +180,17 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         super().__init__(
             shot_limit=shot_limit,
         )
+
+    def qubit_quality(self, qubit_index: int):
+        readout_quality = self.error_mitigation.readout_mitigation.linear.get(
+            str(qubit_index), None
+        )
+
+        if readout_quality:
+            return (readout_quality["0|0"] + readout_quality["1|1"]) / 2
+        else:
+            log.warning(f"Qubit with index {qubit_index} not found.")
+            return 0
 
     def create_engine(self) -> InstructionExecutionEngine:
         from qat.purr.backends.echo import EchoEngine

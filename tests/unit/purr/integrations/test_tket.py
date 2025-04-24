@@ -1,13 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
+import random
+
 import numpy as np
 import pytest
-from compiler_config.config import Qasm2Optimizations, TketOptimizations
+from compiler_config.config import Qasm2Optimizations, Tket, TketOptimizations
 from pytket import Circuit
 from pytket.architecture import Architecture, RingArch
 
+from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Qubit
+from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.purr.compiler.instructions import PhaseShift
 from qat.purr.integrations.tket import (
     TketBuilder,
@@ -15,6 +19,8 @@ from qat.purr.integrations.tket import (
     TketToQatIRConverter,
     get_coupling_subgraphs,
     optimize_circuit,
+    run_1Q_tket_optimizations,
+    run_multiQ_tket_optimizations,
 )
 
 from tests.unit.utils.qasm_qir import get_qasm2
@@ -37,6 +43,80 @@ from tests.unit.utils.qasm_qir import get_qasm2
 )
 def test_get_coupling_subgraphs(couplings, subgraphs):
     assert get_coupling_subgraphs(couplings) == subgraphs
+
+
+def test_1Q_circuit_optimisation():
+    hw = EchoModelLoader(4).load()
+    linear = {}
+    qubit_qualities = {}
+    for qubit in hw.qubits:
+        linear[str(qubit.index)] = {
+            "0|0": random.uniform(0.8, 1.0),
+            "1|1": random.uniform(0.8, 1.0),
+        }
+        qubit_qualities[qubit.index] = (
+            linear[str(qubit.index)]["0|0"] + linear[str(qubit.index)]["1|1"]
+        ) / 2
+    best_qubit = max(qubit_qualities, key=qubit_qualities.get)
+
+    error_mit = ErrorMitigation(readout_mitigation=ReadoutMitigation(linear=linear))
+    hw.error_mitigation = error_mit
+
+    qasm_1q_x_input = """OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[1];
+    creg c[1];
+    x q;
+    measure q -> c;
+    """
+
+    circ = TketQasmParser().parse(TketBuilder(), qasm_1q_x_input).circuit
+    circ = run_1Q_tket_optimizations(circ, hw)
+    assert best_qubit == circ.qubits[0].index[0]
+
+
+def test_2Q_circuit_optimisation():
+    hw = EchoModelLoader(4).load()
+    linear = {}
+    qubit_qualities = {}
+    for qubit in hw.qubits:
+        linear[str(qubit.index)] = {
+            "0|0": random.uniform(0.8, 1.0),
+            "1|1": random.uniform(0.8, 1.0),
+        }
+        qubit_qualities[qubit.index] = (
+            linear[str(qubit.index)]["0|0"] + linear[str(qubit.index)]["1|1"]
+        ) / 2
+    error_mit = ErrorMitigation(readout_mitigation=ReadoutMitigation(linear=linear))
+    hw.error_mitigation = error_mit
+
+    qubit_pair_qualities = {}
+    for coupling in hw.qubit_direction_couplings:
+        qubit_pair_qualities[coupling.direction] = (
+            coupling.quality
+            * hw.qubit_quality(coupling.direction[0])
+            * hw.qubit_quality(coupling.direction[1])
+        )
+
+    best_qubit_pair = max(qubit_pair_qualities, key=qubit_pair_qualities.get)
+
+    qasm_2q_bell_input = """
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[2];
+    creg c[2];
+
+    h q[0];
+    cx q[0], q[1];
+    measure q -> c;
+    """
+    opts = Tket().default()
+    circ = TketQasmParser().parse(TketBuilder(), qasm_2q_bell_input).circuit
+    circ = run_multiQ_tket_optimizations(circ, opts, hw, use_1Q_quality=True)
+    circ_indices = [idx for qubit in circ.qubits for idx in qubit.index]
+
+    for qubit in best_qubit_pair:
+        assert qubit in circ_indices
 
 
 class TestTketOptimization:

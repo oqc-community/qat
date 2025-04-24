@@ -23,7 +23,10 @@ from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 
 
 def apply_setup_to_hardware(
-    hw, qubit_count: int = 4, connectivity: Optional[List[Tuple[int, int]]] = None
+    hw,
+    qubit_count: int = 4,
+    connectivity: Optional[List[Tuple[int, int]]] = None,
+    add_direction_couplings: bool = False,
 ):
     """Apply the default echo hardware setup to the passed-in hardware."""
     qubit_devices = []
@@ -96,6 +99,17 @@ def apply_setup_to_hardware(
         qubit_left.add_coupled_qubit(qubit_right)
         qubit_right.add_coupled_qubit(qubit_left)
 
+    if add_direction_couplings:
+        for connection in connectivity:
+            hw.qubit_direction_couplings.append(
+                QubitCoupling(connection, quality=random.randrange(0, 100))
+            )
+            hw.qubit_direction_couplings.append(
+                QubitCoupling(
+                    (connection[1], connection[0]), quality=random.randrange(0, 100)
+                )
+            )
+
     hw.add_quantum_device(*qubit_devices, *resonator_devices)
     hw.is_calibrated = True
 
@@ -127,6 +141,7 @@ class Connectivity(Enum):
 def get_default_echo_hardware(
     qubit_count=4,
     connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+    add_direction_couplings: bool = False,
 ) -> "QuantumHardwareModel":
     """
     Generate a default echo target optionally providing the type of connectivity. Either you pass a
@@ -137,7 +152,9 @@ def get_default_echo_hardware(
     if isinstance(connectivity, Connectivity):
         connectivity = generate_connectivity(connectivity, qubit_count)
 
-    return apply_setup_to_hardware(model, qubit_count, connectivity)
+    return apply_setup_to_hardware(
+        model, qubit_count, connectivity, add_direction_couplings=add_direction_couplings
+    )
 
 
 class EchoEngine(QuantumExecutionEngine):

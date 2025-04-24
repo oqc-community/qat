@@ -197,8 +197,8 @@ def convert_legacy_echo_hw_to_pydantic(legacy_hw):
         logical_connectivity_quality = {}
         for coupling in legacy_hw.qubit_direction_couplings:
             logical_connectivity_quality[coupling.direction] = (
-                coupling.quality
-            )  # We assume that the quality is in [0, 1].
+                coupling.quality / 100.0
+            )  # We assume that the quality is in [0, 100] in the legacy hw model.
     else:
         logical_connectivity_quality = None
 
