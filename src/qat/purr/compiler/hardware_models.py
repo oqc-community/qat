@@ -182,6 +182,10 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         )
 
     def qubit_quality(self, qubit_index: int):
+        """
+        Readout quality for a qubit with index `qubit_index`.
+        Note that this does not take gate fidelity into account.
+        """
         readout_quality = self.error_mitigation.readout_mitigation.linear.get(
             str(qubit_index), None
         )
