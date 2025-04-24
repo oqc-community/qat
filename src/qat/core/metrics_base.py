@@ -98,6 +98,6 @@ class MetricsManager(BaseModel):
                 "Argument other must be of type MetricsManager, not of type: "
                 f"{type(other)}"
             )
-        for metric in snake_cased_flags:
-            if self.get_metric(metric) is None:
+        for metric in MetricsType:
+            if not metric.is_composite() and self.get_metric(metric) is None:
                 self.record_metric(metric, other.get_metric(metric))

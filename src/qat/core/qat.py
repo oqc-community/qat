@@ -81,5 +81,10 @@ class QAT:
         pipeline: Pipeline | str = "default",
     ):
         P = self.pipelines.get(pipeline)
-        pkg, _ = self.compile(program, compiler_config=compiler_config, pipeline=P)
-        return self.execute(pkg, compiler_config=compiler_config, pipeline=P)
+        pkg, compile_metrics = self.compile(
+            program, compiler_config=compiler_config, pipeline=P
+        )
+        result, execute_metrics = self.execute(
+            pkg, compiler_config=compiler_config, pipeline=P
+        )
+        return result, execute_metrics.merge(compile_metrics)
