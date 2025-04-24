@@ -23,6 +23,7 @@ from qat.purr.backends.qblox.config import (
     QcmRfConfigHelper,
     QrmConfigHelper,
     QrmRfConfigHelper,
+    SequencerConfig,
 )
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.ir import Sequence
@@ -187,10 +188,16 @@ class QbloxControlHardware(ControlHardware):
         module_config.scope_acq.avg_mode_en_path1 = True
 
         # Customise Sequencer config
-        sequencer_config = qblox_config.sequencers[sequencer.seq_idx]
+        sequencer_config: SequencerConfig = qblox_config.sequencers[sequencer.seq_idx]
         sequencer_config.nco.freq = nco_freq
         sequencer_config.square_weight_acq.integration_length = (
             package.sequencer_config.square_weight_acq.integration_length
+        )
+        sequencer_config.thresholded_acq.rotation = (
+            package.sequencer_config.thresholded_acq.rotation
+        )
+        sequencer_config.thresholded_acq.threshold = (
+            package.sequencer_config.thresholded_acq.threshold
         )
 
         log.debug(f"Configuring module {module}, sequencer {sequencer}")

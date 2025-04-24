@@ -541,6 +541,8 @@ class QbloxContext(AbstractContext):
         acq_index = self._register_acquisition(acquire)
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
+        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
+        self.sequencer_config.thresholded_acq.rotation = acquire.rotation
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -724,6 +726,8 @@ class NewQbloxContext(AbstractContext):
         bin_reg = self.alloc_mgr.registers[name]
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
+        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
+        self.sequencer_config.thresholded_acq.rotation = acquire.rotation
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None

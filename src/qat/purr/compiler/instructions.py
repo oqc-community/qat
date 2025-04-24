@@ -416,6 +416,8 @@ class Acquire(QuantumComponent, QuantumInstruction):
         existing_names: Set[str] = None,
         delay=None,
         filter: Union[Pulse, CustomPulse] = None,
+        rotation: float = None,
+        threshold: float = None,
     ):
         super().__init__(channel.full_id())
         super(QuantumComponent, self).__init__(channel)
@@ -432,6 +434,8 @@ class Acquire(QuantumComponent, QuantumInstruction):
         self.delay = delay
         self.output_variable = output_variable or self.generate_name(existing_names)
         self.filter: Union[Pulse, CustomPulse] = self._check_filter(filter)
+        self.rotation = rotation or 0.0
+        self.threshold = threshold or 0.0
 
     def _check_filter(self, filter):
         if filter:
@@ -974,6 +978,13 @@ class MeasureBlock(QuantumInstructionBlock):
             else None
         )
 
+        # Reverse engineering E[g] and E[e] from the Zmap args, and then compute threshold and rotation
+        A, B = qubit.mean_z_map_args[0], qubit.mean_z_map_args[1]
+        mean_g = (1 - B) / A
+        mean_e = (-1 - B) / A
+        rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+        threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+
         measure_instruction = MeasurePulse(measure_channel, **qubit.pulse_measure)
         acquire_instruction = Acquire(
             acquire_channel,
@@ -987,6 +998,8 @@ class MeasureBlock(QuantumInstructionBlock):
             existing_names,
             qubit.measure_acquire["delay"],
             weights,
+            rotation=rotation,
+            threshold=threshold,
         )
 
         return [

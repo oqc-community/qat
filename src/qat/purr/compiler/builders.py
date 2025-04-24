@@ -568,6 +568,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         # Naive entanglement checker to assure all entangled qubits are sync before a
         # measurement is done on any of them.
 
+        # Reverse engineering E[g] and E[e] from the Zmap args, and then compute threshold and rotation
+        A, B = qubit.mean_z_map_args[0], qubit.mean_z_map_args[1]
+        mean_g = (1 - B) / A
+        mean_e = (-1 - B) / A
+        rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+        threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+
         measure_instruction = MeasurePulse(measure_channel, **qubit.pulse_measure)
         acquire_instruction = Acquire(
             acquire_channel,
@@ -581,6 +588,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             self.existing_names,
             qubit.measure_acquire["delay"],
             weights,
+            rotation=rotation,
+            threshold=threshold,
         )
 
         return [
