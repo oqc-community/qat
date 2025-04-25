@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import itertools
 from collections import defaultdict
 from copy import deepcopy
 from numbers import Number
@@ -9,20 +10,23 @@ import numpy as np
 from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import TransformPass
+from qat.core.pass_base import TransformPass, get_hardware_model
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
+from qat.ir.instructions import Return as PydReturn
 from qat.ir.measure import Acquire as PydAcquire
+from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
 from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import Qubit
+from qat.purr.compiler.devices import PulseChannel, Qubit
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -39,7 +43,9 @@ from qat.purr.compiler.instructions import (
     Pulse,
     PulseShapeType,
     QuantumInstruction,
+    Repeat,
     Reset,
+    Return,
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
@@ -662,7 +668,7 @@ class ResetsToDelays(TransformPass):
     Transforms :class:`Reset` operations to :class:`Delay`s.
 
     Note that the delays do not necessarily agree with the granularity of the underlying target machine.
-    This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+    This can be enforced using the :class:`InstructionGranularitySanitisation`
     pass.
     """
 
@@ -836,3 +842,73 @@ class EvaluatePulses(TransformPass):
                 pulse.ignore_channel_scale,
             )
         )
+
+
+class ReturnSanitisation(TransformPass):
+    """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
+    with all acquisitions if none is found."""
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        returns = [inst for inst in ir.instructions if isinstance(inst, Return)]
+        acquires = [inst for inst in ir.instructions if isinstance(inst, Acquire)]
+
+        if returns:
+            unique_variables = set(itertools.chain(*[ret.variables for ret in returns]))
+            for ret in returns:
+                ir._instructions.remove(ret)
+        else:
+            # If we don't have an explicit return, imply all results.
+            unique_variables = set(acq.output_variable for acq in acquires)
+
+        ir.returns(list(unique_variables))
+        return ir
+
+
+class PydReturnSanitisation(TransformPass):
+    """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
+    with all acquisitions if none is found."""
+
+    def run(self, ir: PydQuantumInstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`."""
+
+        returns = [inst for inst in ir if isinstance(inst, PydReturn)]
+        measure_blocks = [inst for inst in ir if isinstance(inst, PydMeasureBlock)]
+
+        if returns:
+            unique_variables = set(itertools.chain(*[ret.variables for ret in returns]))
+            for ret in returns:
+                ir.instructions.remove(ret)
+        else:
+            # If we do not have an explicit return, imply all results.
+            unique_variables = set(
+                itertools.chain(*[mb.output_variables for mb in measure_blocks])
+            )
+
+        ir.returns(list(unique_variables))
+        return ir
+
+
+class RepeatSanitisation(TransformPass):
+    """Fixes repeat instructions if any with default values from the HW model.
+    Adds a repeat instructions if none is found."""
+
+    def __init__(self, model: QuantumHardwareModel = None):
+        self.model = model
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        model = self.model or get_hardware_model(args, kwargs)
+
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        if repeats:
+            for rep in repeats:
+                if rep.repeat_count is None:
+                    rep.repeat_count = model.default_repeat_count
+                if rep.repetition_period is None:
+                    rep.repetition_period = model.default_repetition_period
+        else:
+            ir.repeat(model.default_repeat_count, model.default_repetition_period)
+        return ir

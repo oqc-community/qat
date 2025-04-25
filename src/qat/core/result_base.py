@@ -90,10 +90,13 @@ class ResultManager:
         self._results.update(other_res_mgr._results)
 
     def add(self, res_obj: ResultInfoMixin):
-        """Add a results object to the manager.
+        """Add a results object to the manager, overwriting any previous results of the same
+        type.
 
         :param res_obj: Results from a pass, typically an analysis pass.
         """
+        found = [res for res in self._results if isinstance(res.value, type(res_obj))]
+        self._results -= set(found)
         self._results.add(ResultModel(res_obj))
 
     def lookup_by_type(self, ty: type):

@@ -24,6 +24,7 @@ class TestEchoEngine:
 
         # manually add a measure with the desired acquire mode
         builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
         builder.pulse(quantum_target=measure_channel, **qubit.pulse_measure)
         measure_acquire = qubit.measure_acquire
         builder.acquire(
@@ -63,6 +64,7 @@ class TestEchoEngine:
 
         # Add the acquires: make the second twice as long, add some spacing in between
         builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
         builder.pulse(quantum_target=measure_channel, **qubit.pulse_measure)
         measure_acquire = qubit.measure_acquire
         builder.acquire(
@@ -121,6 +123,7 @@ class TestEchoEngine:
 
         # add some measures on different qubits
         builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
         for qubit in qubits:
             measure_channel = qubit.get_measure_channel()
             acquire_channel = qubit.get_acquire_channel()

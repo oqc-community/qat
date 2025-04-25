@@ -8,6 +8,7 @@ from enum import Enum
 import numpy as np
 import pytest
 
+from qat.backend.passes.validation import PydReturnSanitisationValidation
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
@@ -15,6 +16,8 @@ from qat.ir.instruction_builder import (
 )
 from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
+from qat.ir.instructions import Return as PydReturn
+from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import AcquireMode
 from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
@@ -33,6 +36,7 @@ from qat.middleend.passes.transform import (
     PhaseOptimisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
+    PydReturnSanitisation,
     ResetsToDelays,
     SynchronizeTask,
 )
@@ -53,6 +57,7 @@ from qat.purr.compiler.instructions import (
     Reset,
     Synchronize,
 )
+from qat.utils.hardware_model import generate_hw_model
 
 from tests.unit.utils.pulses import pulse_attributes
 
@@ -421,6 +426,65 @@ class TestPydPostProcessingSanitisation:
         assert pp[0].output_variable != pp[1].output_variable
 
 
+class TestPydReturnSanitisation:
+    hw = generate_hw_model(8)
+
+    def test_empty_builder(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        res_mgr = ResultManager()
+
+        with pytest.raises(ValueError):
+            PydReturnSanitisationValidation().run(builder, res_mgr)
+
+        PydReturnSanitisation().run(builder, res_mgr)
+        PydReturnSanitisationValidation().run(builder, res_mgr)
+
+        return_instr: PydReturn = builder._ir.tail
+        assert len(return_instr.variables) == 0
+
+    def test_single_return(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.returns(variables=["test"])
+        ref_nr_instructions = builder.number_of_instructions
+
+        res_mgr = ResultManager()
+        PydReturnSanitisationValidation().run(builder, res_mgr)
+        PydReturnSanitisation().run(builder, res_mgr)
+
+        assert builder.number_of_instructions == ref_nr_instructions
+        assert builder.instructions[0].variables == ["test"]
+
+    def test_multiple_returns_squashed(self):
+        q0 = self.hw.qubit_with_index(0)
+        q1 = self.hw.qubit_with_index(1)
+
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.measure_single_shot_z(target=q0, output_variable="out_q0")
+        builder.measure_single_shot_z(target=q1, output_variable="out_q1")
+
+        output_vars = [
+            instr.output_variable for instr in builder if isinstance(instr, PydAcquire)
+        ]
+        assert len(output_vars) == 2
+
+        builder.returns(variables=[output_vars[0]])
+        builder.returns(variables=[output_vars[1]])
+
+        res_mgr = ResultManager()
+        # Two returns in a single IR should raise an error.
+        with pytest.raises(ValueError):
+            PydReturnSanitisationValidation().run(builder, res_mgr)
+
+        # Compress the two returns to a single return and validate.
+        PydReturnSanitisation().run(builder, res_mgr)
+        PydReturnSanitisationValidation().run(builder, res_mgr)
+
+        return_instr = builder._ir.tail
+        assert isinstance(return_instr, PydReturn)
+        for var in return_instr.variables:
+            assert var in output_vars
+
+
 class TestAcquireSanitisation:
 
     def test_acquire_with_no_delay_is_unchanged(self):
@@ -619,6 +683,11 @@ class TestPhaseResetSanitisation:
         # No phase reset added since there are no active targets.
         assert len(builder.instructions) == n_instr_before
         assert not isinstance(builder.instructions[0], PhaseReset)
+
+
+class TestMeasurePhaseResetSanitisation:
+
+    hw = EchoModelLoader(qubit_count=4).load()
 
     def test_measure_phase_reset(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)

@@ -13,19 +13,13 @@ from qat.backend.passes.analysis import (
     TimelineAnalysisResult,
 )
 from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
-from qat.backend.passes.transform import (
-    LowerSyncsToDelays,
-    RepeatSanitisation,
-    ReturnSanitisation,
-    SquashDelaysOptimisation,
-)
-from qat.backend.passes.validation import FrequencyValidation, NoAcquireWeightsValidation
+from qat.backend.passes.transform import LowerSyncsToDelays, SquashDelaysOptimisation
+from qat.backend.passes.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
-from qat.middleend.passes.transform import PostProcessingSanitisation
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -122,10 +116,6 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
     def build_pass_pipeline(self, *args, **kwargs):
         return (
             PassManager()
-            | RepeatSanitisation(self.model)
-            | ReturnSanitisation()
-            | PostProcessingSanitisation()
-            | FrequencyValidation(self.model)
             | NoAcquireWeightsValidation()
             | LowerSyncsToDelays()
             | SquashDelaysOptimisation()

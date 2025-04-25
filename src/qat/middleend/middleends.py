@@ -6,7 +6,6 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
-from qat.backend.passes.validation import HardwareConfigValidity, PydHardwareConfigValidity
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
@@ -17,13 +16,21 @@ from qat.middleend.passes.transform import (
     EndOfTaskResetSanitisation,
     EvaluatePulses,
     InactivePulseChannelSanitisation,
+    InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
+    MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
     PydPhaseOptimisation,
+    PydReturnSanitisation,
+    RepeatSanitisation,
+    ReturnSanitisation,
     SynchronizeTask,
 )
 from qat.middleend.passes.validation import (
+    FrequencyValidation,
+    HardwareConfigValidity,
+    PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
     ReadoutValidation,
 )
@@ -137,17 +144,33 @@ class DefaultMiddleend(CustomMiddleend):
             PassManager()
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
+            | FrequencyValidation(model)
+            # Process a "task" into a program. Could be considered as a frontend pipeline
+            # that converts takes a specific task and makes the appropriate qat ir.
+            # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
             | ActivePulseChannelAnalysis(model)
             | InactivePulseChannelSanitisation()
-            | EndOfTaskResetSanitisation()
-            | PhaseOptimisation()
-            | PostProcessingSanitisation()
-            | ReadoutValidation(model)
-            | AcquireSanitisation()
-            | InstructionGranularitySanitisation(clock_cycle)
+            | RepeatSanitisation(model)
+            | ReturnSanitisation()
             | SynchronizeTask()
+            | EndOfTaskResetSanitisation()
+            | InitialPhaseResetSanitisation()
+            # Basically just "corrections" to bad ir generated from the builder, should
+            # eventually be replaced with behaviour from the builder
+            | PostProcessingSanitisation()
+            | AcquireSanitisation()
+            | MeasurePhaseResetSanitisation()
+            # handles mid-circuit measures + pp validation, should be split up
+            # is pp validation needed in a pipeline that explicitly does pp sanitisation?
+            | ReadoutValidation(model)
+            # Optimisation of the ir:
+            | PhaseOptimisation()
+            # Preparing the IR for the backend
+            | InstructionGranularitySanitisation(clock_cycle)
             | EvaluatePulses()
             | PhysicalChannelAmplitudeValidation()
+            # breaks tests in whisqrs with this value of repetition period, disable for now
+            # | ResetsToDelays(model.default_repetition_period)
         )
 
 
@@ -163,5 +186,6 @@ class PydDefaultMiddleend(CustomMiddleend):
             | PydHardwareConfigValidity(model)
             | CalibrationAnalysis()
             | PydPhaseOptimisation()
+            | PydReturnSanitisation()
             | PydNoMidCircuitMeasurementValidation(model)
         )

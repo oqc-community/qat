@@ -93,6 +93,7 @@ class TestInlineResultsProcessingTransform:
     def test_run_results_processing_with_program(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
         builder.measure_single_shot_binned(model.get_qubit(0), output_variable="test")
         builder.results_processing("test", InlineResultsProcessing.Program)
         package = WaveformV1Backend(model).emit(builder)
@@ -104,7 +105,7 @@ class TestInlineResultsProcessingTransform:
     def test_run_results_processing_with_experiment(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()
-        builder.repeat(254)
+        builder.repeat(254, 100e-6)
         builder.measure(model.get_qubit(0), output_variable="test")
         builder.results_processing("test", InlineResultsProcessing.Experiment)
         package = WaveformV1Backend(model).emit(builder)
@@ -120,7 +121,7 @@ class TestAssignResultsTransform:
     def test_only_returns_what_is_asked(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()
-        builder.repeat(254)
+        builder.repeat(254, 100e-6)
         builder.measure(model.get_qubit(0), output_variable="q0")
         builder.measure(model.get_qubit(0), output_variable="q1")
         builder.returns("q0")

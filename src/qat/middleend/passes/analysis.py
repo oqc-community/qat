@@ -144,10 +144,11 @@ class ActivePulseChannelAnalysis(AnalysisPass):
             if len(devices) == 0:
                 device = None
             else:
-                if len(devices) > 0:
+                if len(devices) > 1:
                     log.warning(
-                        f"Multiple targets found with pulse channel {target}. Defaulting to"
-                        f" the first pulse channel found, {devices[0]}."
+                        f"Multiple targets found with pulse channel {target}: "
+                        + ", ".join([str(device) for device in devices])
+                        + f". Defaulting to the first pulse channel found, {devices[0]}."
                     )
 
                 device = devices[0]

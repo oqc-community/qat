@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-from qat.backend.passes.validation import HardwareConfigValidity
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
@@ -13,12 +12,19 @@ from qat.middleend.passes.transform import (
     EndOfTaskResetSanitisation,
     EvaluatePulses,
     InactivePulseChannelSanitisation,
+    InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
+    RepeatSanitisation,
+    ReturnSanitisation,
     SynchronizeTask,
 )
-from qat.middleend.passes.validation import ReadoutValidation
+from qat.middleend.passes.validation import (
+    FrequencyValidation,
+    HardwareConfigValidity,
+    ReadoutValidation,
+)
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
@@ -36,15 +42,27 @@ def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
         PassManager()
         | HardwareConfigValidity(model)
         | CalibrationAnalysis()
+        # Validate first to fail fast:
+        | FrequencyValidation(model)
+        | ReadoutValidation(model)
+        # Process a "task" into a program. Could be considered as a frontend pipeline
+        # that converts takes a specific task and makes the appropriate qat ir.
+        # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
         | ActivePulseChannelAnalysis(model)
         | InactivePulseChannelSanitisation()
-        | EndOfTaskResetSanitisation()
-        | PhaseOptimisation()
-        | PostProcessingSanitisation()
-        | ReadoutValidation(model)
-        | AcquireSanitisation()
-        | InstructionGranularitySanitisation(clock_cycle)
+        | RepeatSanitisation(model)
+        | ReturnSanitisation()
         | SynchronizeTask()
+        | EndOfTaskResetSanitisation()
+        | InitialPhaseResetSanitisation()
+        # Basically just "corrections" to bad ir generated from the builder, should
+        # eventually be replaced with behaviour from the builder
+        | PostProcessingSanitisation()
+        | AcquireSanitisation()
+        # Optimisation of the ir:
+        | PhaseOptimisation()
+        # Preparing the IR for the backend
+        | InstructionGranularitySanitisation(clock_cycle)
         | EvaluatePulses()
     )
 

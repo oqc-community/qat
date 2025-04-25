@@ -20,9 +20,10 @@ class TestSimpleRuntime:
     def basic_acquire_circuit(self, shots, mode=AcquireMode.INTEGRATOR):
         model = EchoModelLoader().load()
         builder = model.create_builder()
-        builder.repeat(shots)
+        builder.repeat(shots, 100e-6)
         block, _ = builder._generate_measure_block(model.get_qubit(0), mode, "test")
         builder.add(block)
+        builder.returns("test")
         return WaveformV1Backend(model).emit(builder)
 
     @pytest.mark.parametrize("shots", [500, 1000, 1007, 2000])
@@ -36,7 +37,7 @@ class TestSimpleRuntime:
     def test_execute_with_pipelines(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()
-        builder.repeat(254)
+        builder.repeat(254, 100e-6)
         builder.measure(model.get_qubit(0), output_variable="qubit0")
         builder.measure(model.get_qubit(1), output_variable="qubit1")
         builder.returns("qubit0")
