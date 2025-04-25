@@ -12,6 +12,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
+from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.backends.qblox.metrics_base import MetricsManager
@@ -39,6 +40,7 @@ from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
+    empty,
     pulse_amplitude_iteration,
     pulse_width_iteration,
     qubit_spect,
@@ -396,6 +398,29 @@ class TestNewQbloxEmitter(InvokerMixin):
             | TILegalisationPass()
             | QbloxLegalisationPass()
         )
+
+    def test_prologue_epilogue(self, model):
+        builder = empty(model)
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+
+        self.model = model
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        assert len(builder.instructions) == 6
+
+        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr, ignore_empty=False)
+        assert len(packages) == 2
+
+        for pkg in packages:
+            assert pkg.sequencer_config == SequencerConfig()
+            assert not pkg.timeline
+            assert not pkg.sequence.waveforms
+            assert not pkg.sequence.acquisitions
+            assert not pkg.sequence.weights
+
+            assert "set_mrk 3\nupd_param 4" in pkg.sequence.program
+            assert "stop" in pkg.sequence.program
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])

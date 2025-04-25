@@ -14,6 +14,27 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import get_builder
 
 
+def empty(model, qubit_indices=None):
+    """
+    Not literally empty, just contains stalling instructions.
+    """
+
+    qubit_indices = qubit_indices if qubit_indices is not None else [0]
+    builder = get_builder(model)
+
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        builder.id(drive_channel)
+        builder.id(measure_channel)
+        builder.id(acquire_channel)
+
+    return builder
+
+
 def resonator_spect(model, qubit_indices=None, num_points=None):
     qubit_indices = qubit_indices if qubit_indices is not None else [0]
     num_points = num_points if num_points is not None else 10

@@ -177,6 +177,18 @@ class QbloxLiveEngine(LiveDeviceEngine):
 
 
 class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
+    """
+    Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
+    It leverages Q1's programming model to accelerate a handful of pulse-level algorithms.
+
+    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
+    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
+    Nevertheless, there should be a hybrid JIT-like reconciliation in the future that can run both IR features
+    that still need static iteration while being able to accelerate programs whenever possible.
+
+    See QbloxLiveEngine and QbloxLiveEngineAdapter.
+    """
+
     def startup(self):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
@@ -229,10 +241,6 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             with log_duration("QPU returned results in {} seconds."):
                 self.model.control_hardware.set_data(packages)
                 playback_results = self.model.control_hardware.start_playback(None, None)
-
-                # Post execution step needs a lot of work
-                # TODO - Robust batching analysis (as a pass !)
-                # TODO - Lowerability analysis pass
 
                 triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
                 acquire_map = triage_result.acquire_map
@@ -329,6 +337,13 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
 
 class QbloxLiveEngineAdapter(LiveDeviceEngine):
+    """
+    A manual adapter of the new and legacy engines. Users can switch on and off HW acceleration by using
+    the `enable_hax` flag.
+
+    There should be a proper hybrid, dynamic, JIT-like engine in the future that can leverage the HW to accelerate
+    programs whenever possible.
+    """
 
     model: QbloxLiveHardwareModel
 

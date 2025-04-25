@@ -28,6 +28,7 @@ from qat.purr.compiler.instructions import (
     Delay,
     DeviceUpdate,
     FrequencyShift,
+    Id,
     Instruction,
     Jump,
     Label,
@@ -268,6 +269,9 @@ class InstructionBuilder:
         self, target: Qubit, axis: ProcessAxis = None, output_variable: str = None
     ) -> "InstructionBuilder":
         raise NotImplementedError("Not available on this hardware model.")
+
+    def id(self, target):
+        self.add(Id(target))
 
     def X(self, target: Union[Qubit, PulseChannel], radii=None):
         raise NotImplementedError("Not available on this hardware model.")

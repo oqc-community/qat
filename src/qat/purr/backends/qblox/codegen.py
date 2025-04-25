@@ -23,7 +23,6 @@ from qat.purr.backends.qblox.analysis_passes import (
 from qat.purr.backends.qblox.codegen_base import DfsTraversal
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
-from qat.purr.backends.qblox.graph import ControlFlowGraph
 from qat.purr.backends.qblox.ir import Opcode, Sequence, SequenceBuilder
 from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
@@ -632,6 +631,33 @@ class NewQbloxContext(AbstractContext):
         self._durations: List[Union[float, str]] = []
         self._phases: List[Union[float, str]] = []
 
+    def __enter__(self):
+        """
+        Serves as the prologue
+        """
+
+        self.sequence_builder.set_mrk(3)
+        self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+        # TODO - probably not the right place
+        self.alloc_mgr.reg_alloc("zero")
+
+        for name, register in self.alloc_mgr.registers.items():
+            self.sequence_builder.move(
+                0,
+                register,
+                f"Precautionary initialisation for variable {name}",
+            )
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Serves as the epilogue
+        """
+
+        self.sequence_builder.stop()
+
     def _register_acquisition(self, acquire: Acquire):
         name = f"acquire_{hash(acquire)}"
         num_bins = self.iter_bounds[name].count
@@ -873,27 +899,6 @@ class NewQbloxContext(AbstractContext):
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
-    @staticmethod
-    def prologue(contexts: Dict):
-        for context in contexts.values():
-            context.sequence_builder.set_mrk(3)
-            context.sequence_builder.upd_param(Constants.GRID_TIME)
-
-            # TODO - probably not the right place
-            context.alloc_mgr.reg_alloc("zero")
-
-            for name, register in context.alloc_mgr.registers.items():
-                context.sequence_builder.move(
-                    0,
-                    register,
-                    f"Precautionary initialisation for variable {name}",
-                )
-
-    @staticmethod
-    def epilogue(contexts: Dict):
-        for context in contexts.values():
-            context.sequence_builder.stop()
-
 
 class QbloxEmitter:
     def emit(self, qat_file: QatFile) -> List[QbloxPackage]:
@@ -1014,13 +1019,18 @@ class NewQbloxEmitter(InvokerMixin):
         return PassManager() | PreCodegenPass() | CFGPass()
 
     def emit_packages(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        ignore_empty=True,
     ) -> List[QbloxPackage]:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
+        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
 
         scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
         rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
@@ -1029,26 +1039,28 @@ class NewQbloxEmitter(InvokerMixin):
         )
         alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
-        contexts = {
-            t: NewQbloxContext(
-                alloc_mgr=alloc_mgrs[t],
-                scoping_result=scoping_results[t],
-                rw_result=rw_results[t],
-                iter_bounds=iter_bound_results[t],
-            )
-            for t in triage_result.target_map
-        }
+        with ExitStack() as stack:
+            contexts = {
+                t: stack.enter_context(
+                    NewQbloxContext(
+                        alloc_mgr=alloc_mgrs[t],
+                        scoping_result=scoping_results[t],
+                        rw_result=rw_results[t],
+                        iter_bounds=iter_bound_results[t],
+                    )
+                )
+                for t in triage_result.target_map
+            }
+            QbloxCFGWalker(contexts).run(cfg_result.cfg)
 
-        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
-        cfg_walker = QbloxCFGWalker(contexts)
-        cfg_walker.walk(cfg_result.cfg)
-
-        # Discard empty contexts
-        return [
-            context.create_package(target)
-            for target, context in contexts.items()
-            if not context.is_empty()
-        ]
+        if ignore_empty:
+            return [
+                context.create_package(target)
+                for target, context in contexts.items()
+                if not context.is_empty()
+            ]
+        else:
+            return [context.create_package(target) for target, context in contexts.items()]
 
 
 class QbloxCFGWalker(DfsTraversal):
@@ -1103,10 +1115,3 @@ class QbloxCFGWalker(DfsTraversal):
                 NewQbloxContext.exit_repeat(inst, self.contexts)
             elif isinstance(inst, Sweep):
                 NewQbloxContext.exit_sweep(inst, self.contexts)
-
-    def walk(self, cfg: ControlFlowGraph):
-        # TODO - run as visit to the entry block
-        NewQbloxContext.prologue(self.contexts)
-        self.run(cfg)
-        # TODO - run as visit to the exit block
-        NewQbloxContext.epilogue(self.contexts)
