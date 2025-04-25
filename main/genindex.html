@@ -2163,8 +2163,6 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.epilogue">epilogue() (NewQbloxContext static method)</a>
-</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals">Equals (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.ERROR">ERROR (LoggerLevel attribute)</a>
@@ -2944,6 +2942,8 @@
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.id">id() (AbstractContext method)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.id">(InstructionBuilder method)</a>
+</li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassInfoMixin.id">(PassInfoMixin method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassInfoMixin.id">[1]</a>
 </li>
         <li><a href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin.id">(ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.id">[1]</a>
@@ -3185,6 +3185,8 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation">InstructionLengthSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">[1]</a>
 
       <ul>
@@ -3201,8 +3203,6 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation">InstructionValidation (class in qat.middleend.passes.validation)</a>
 
       <ul>
@@ -5470,14 +5470,14 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.position">position (AcquireData attribute)</a>
 
       <ul>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.position">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.post_processing">post_processing (Executable attribute)</a>
@@ -5652,8 +5652,6 @@
         <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.program">(Sequence attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.prologue">prologue() (NewQbloxContext static method)</a>
-</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp">prop_delay_comp (NcoConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.prop_delay_comp_en">prop_delay_comp_en (NcoConfig attribute)</a>
@@ -9307,8 +9305,6 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.wait_trigger">wait_trigger() (SequenceBuilder method)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.walk">walk() (QbloxCFGWalker method)</a>
-</li>
       <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.AbstractParser.walk_node">walk_node() (AbstractParser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.AbstractParser.walk_node">[1]</a>
 
       <ul>
@@ -9357,10 +9353,10 @@
         <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SquareWaveform.waveform_definition">(SquareWaveform attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.waveform_definition">waveform_definition() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.waveform_definition">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.waveform_type">waveform_type (CalibratablePulse attribute)</a>
 </li>
       <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext">WaveformContext (class in qat.backend.waveform_v1.codegen)</a>

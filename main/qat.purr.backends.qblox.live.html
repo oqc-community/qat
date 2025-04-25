@@ -359,6 +359,13 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.NewQbloxLiveEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQbloxLiveEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.NewQbloxLiveEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine" title="qat.purr.backends.live.LiveDeviceEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveDeviceEngine</span></code></a>, <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin" title="qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
+<p>Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
+It leverages Q1’s programming model to accelerate a handful of pulse-level algorithms.</p>
+<p>Not all algorithms fall within Q1’s capabilities. While this remains an analysis issue we saw great
+flexibility in forking out this engine to allow R&amp;D without compromising existing execution environment.
+Nevertheless, there should be a hybrid JIT-like reconciliation in the future that can run both IR features
+that still need static iteration while being able to accelerate programs whenever possible.</p>
+<p>See QbloxLiveEngine and QbloxLiveEngineAdapter.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.NewQbloxLiveEngine.build_pass_pipeline">
 <span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.NewQbloxLiveEngine.build_pass_pipeline" title="Link to this definition"></a></dt>
@@ -417,6 +424,10 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngineAdapter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLiveEngineAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_hax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine" title="qat.purr.backends.live.LiveDeviceEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveDeviceEngine</span></code></a></p>
+<p>A manual adapter of the new and legacy engines. Users can switch on and off HW acceleration by using
+the <cite>enable_hax</cite> flag.</p>
+<p>There should be a proper hybrid, dynamic, JIT-like engine in the future that can leverage the HW to accelerate
+programs whenever possible.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.model">
 <span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.backends.qblox.live.QbloxLiveHardwareModel" title="qat.purr.backends.qblox.live.QbloxLiveHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxLiveHardwareModel</span></code></a></em><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.model" title="Link to this definition"></a></dt>
