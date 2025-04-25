@@ -355,14 +355,38 @@
   <section id="module-qat.pipelines.legacy.qiskit">
 <span id="qat-pipelines-legacy-qiskit-module"></span><h1>qat.pipelines.legacy.qiskit module<a class="headerlink" href="#module-qat.pipelines.legacy.qiskit" title="Link to this heading"></a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline">
+<span class="sig-name descname"><span class="pre">get_middleend_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline" title="Link to this definition"></a></dt>
+<dd><p>A factory for creating middleend pipelines for legacy qiskit models.</p>
+<p>Includes a list of passes that replicate the responsibilities of
+<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.validate" title="qat.purr.backends.qiskit_simulator.QiskitEngine.validate"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine.validate</span></code></a>
+and
+<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.optimize" title="qat.purr.backends.qiskit_simulator.QiskitEngine.optimize"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine.optimize</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is required for validation.</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.engine">¶</a> – The echo engine is required to perform validation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The pipeline as a pass manager.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_pipeline">
 <span class="sig-name descname"><span class="pre">get_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'legacy_qiskit'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Create a default pipeline using the legacy Qiskit backend.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.model">¶</a> – The Qiskit hardware model</p></li>
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.name"></span><strong>name</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.name">¶</a> – The name of the pipeline, defaults to “legacy”</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The Qiskit hardware model</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.name"></span><strong>name</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.name">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The name of the pipeline, defaults to “legacy”</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -370,6 +394,26 @@
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The complete pipeline.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_results_pipeline">
+<span class="sig-name descname"><span class="pre">get_results_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_results_pipeline" title="Link to this definition"></a></dt>
+<dd><p>A factory for creating results pipelines for the <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyRuntime</span></code> to execute
+with the legacy <a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine" title="qat.purr.backends.qiskit_simulator.QiskitEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine</span></code></a>.</p>
+<p>Contains passes that carry out the responibilities in the legacy
+<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitRuntime" title="qat.purr.backends.qiskit_simulator.QiskitRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitRuntime</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.pipelines.legacy.qiskit.get_results_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_results_pipeline.params.model">¶</a> – The hardware model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A pipeline containing the runtime passes.</p>
 </dd>
 </dl>
 </dd></dl>

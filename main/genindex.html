@@ -1285,11 +1285,9 @@
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.compiled_shots">(qat.runtime.executables.Executable parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.HardwareConfigValidity.run.params.compiler_config">compiler_config (qat.backend.passes.validation.HardwareConfigValidity.run parameter)</a>
+      <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.compiler_config">compiler_config (qat.frontend.auto.AutoFrontend.emit parameter)</a>
 
       <ul>
-        <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.compiler_config">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
-</li>
         <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.compiler_config">(qat.frontend.base.BaseFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.compiler_config">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
@@ -1309,6 +1307,8 @@
         <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend.emit.params.compiler_config">(qat.middleend.middleends.CustomMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.QiskitResultsFormatValidation.run.params.compiler_config">(qat.middleend.passes.legacy.validation.QiskitResultsFormatValidation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity.run.params.compiler_config">(qat.middleend.passes.validation.HardwareConfigValidity.run parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.legacy.transform.html#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.compiler_config">(qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run parameter)</a>
 </li>
@@ -2140,6 +2140,12 @@
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation.params.engine">(qat.middleend.passes.validation.InstructionValidation parameter)</a>
 </li>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_middleend_pipeline.params.engine">(qat.pipelines.legacy.base.get_middleend_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_middleend_pipeline.params.engine">(qat.pipelines.legacy.echo.get_middleend_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.engine">(qat.pipelines.legacy.qiskit.get_middleend_pipeline parameter)</a>
+</li>
         <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.params.engine">(qat.runtime.base.BaseRuntime parameter)</a>
 </li>
         <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime.params.engine">(qat.runtime.legacy.LegacyRuntime parameter)</a>
@@ -2173,6 +2179,8 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.error_mitigation">(QuantumExecutionEngine property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation">ErrorMitigation (class in qat.model.error_mitigation)</a>
 
       <ul>
@@ -2181,8 +2189,6 @@
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation">(class in qat.runtime.passes.transform)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.ParseResults.errors">errors (ParseResults attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.BlackmanFunction.eval">eval() (BlackmanFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.eval">[1]</a>
@@ -2435,7 +2441,7 @@
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FreqShiftPulseChannel">(class in qat.purr.compiler.devices)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.validate_frequency_ranges.params.freqshifts">freqshifts (qat.backend.passes.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.validate_frequency_ranges.params.freqshifts">freqshifts (qat.middleend.passes.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
 </li>
       <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.FreqShiftSanitisation">FreqShiftSanitisation (class in qat.backend.passes.transform)</a>
 </li>
@@ -2471,7 +2477,7 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation">FrequencyValidation (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation">FrequencyValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.from_description">from_description() (Pipeline class method)</a>
 </li>
@@ -2681,10 +2687,10 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel">get_devices_from_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel">get_drive_channel() (Qubit method)</a>
@@ -2742,7 +2748,15 @@
 </li>
       </ul></li>
       <li><a href="qat.pipelines.echo.html#qat.pipelines.echo.get_middleend_pipeline">get_middleend_pipeline() (in module qat.pipelines.echo)</a>
+
+      <ul>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_middleend_pipeline">(in module qat.pipelines.legacy.base)</a>
 </li>
+        <li><a href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_middleend_pipeline">(in module qat.pipelines.legacy.echo)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_middleend_pipeline">(in module qat.pipelines.legacy.qiskit)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_model">get_model() (in module qat.purr.compiler.runtime)</a>
 </li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.ControlFlowGraph.get_or_create_edge">get_or_create_edge() (ControlFlowGraph method)</a>, <a href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.get_or_create_edge">[1]</a>
@@ -2810,7 +2824,13 @@
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_resonator_response_splicing_indices">get_resonator_response_splicing_indices() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.pipelines.echo.html#qat.pipelines.echo.get_results_pipeline">get_results_pipeline() (in module qat.pipelines.echo)</a>
+
+      <ul>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_results_pipeline">(in module qat.pipelines.legacy.base)</a>
 </li>
+        <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_results_pipeline">(in module qat.pipelines.legacy.qiskit)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_results_shape">get_results_shape() (SweepIterator method)</a>
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_runtime">get_runtime() (in module qat.purr.compiler.runtime)</a>
@@ -2879,15 +2899,15 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.HardwareConfigValidity.params.hardware_model">hardware_model (qat.backend.passes.validation.HardwareConfigValidity parameter)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity.params.hardware_model">hardware_model (qat.middleend.passes.validation.HardwareConfigValidity parameter)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydHardwareConfigValidity.params.hardware_model">(qat.backend.passes.validation.PydHardwareConfigValidity parameter)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity.params.hardware_model">(qat.middleend.passes.validation.PydHardwareConfigValidity parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation.params.hardware_model">(qat.runtime.passes.transform.ErrorMitigation parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.HardwareConfigValidity">HardwareConfigValidity (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity">HardwareConfigValidity (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.core.config.html#qat.core.config.HardwareLoaderDescription">HardwareLoaderDescription (class in qat.core.config)</a>
 </li>
@@ -3244,17 +3264,9 @@
 </li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.DesugaringPass.run.params.ir">(qat.backend.passes.transform.DesugaringPass.run parameter)</a>
 </li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.PydReturnSanitisation.run.params.ir">(qat.backend.passes.transform.PydReturnSanitisation.run parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.RepeatSanitisation.run.params.ir">(qat.backend.passes.transform.RepeatSanitisation.run parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ReturnSanitisation.run.params.ir">(qat.backend.passes.transform.ReturnSanitisation.run parameter)</a>
-</li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ScopeSanitisation.run.params.ir">(qat.backend.passes.transform.ScopeSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.SquashDelaysOptimisation.run.params.ir">(qat.backend.passes.transform.SquashDelaysOptimisation.run parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.run.params.ir">(qat.backend.passes.validation.FrequencyValidation.run parameter)</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NCOFrequencyVariability.run.params.ir">(qat.backend.passes.validation.NCOFrequencyVariability.run parameter)</a>
 </li>
@@ -3318,9 +3330,17 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydPostProcessingSanitisation.run.params.ir">(qat.middleend.passes.transform.PydPostProcessingSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation.run.params.ir">(qat.middleend.passes.transform.PydReturnSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run.params.ir">(qat.middleend.passes.transform.RepeatSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run.params.ir">(qat.middleend.passes.transform.ResetsToDelays.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation.run.params.ir">(qat.middleend.passes.transform.ReturnSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SynchronizeTask.run.params.ir">(qat.middleend.passes.transform.SynchronizeTask.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.run.params.ir">(qat.middleend.passes.validation.FrequencyValidation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation.run.params.ir">(qat.middleend.passes.validation.InstructionValidation.run parameter)</a>
 </li>
@@ -4006,8 +4026,6 @@
 </li>
         <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis.params.model">(qat.backend.passes.analysis.IntermediateFrequencyAnalysis parameter)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.params.model">(qat.backend.passes.validation.FrequencyValidation parameter)</a>
-</li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.params.model">(qat.backend.waveform_v1.codegen.WaveformV1Backend parameter)</a>
 </li>
         <li><a href="qat.core.config.html#qat.core.config.PipelineClassDescription.construct.params.model">(qat.core.config.PipelineClassDescription.construct parameter)</a>
@@ -4056,9 +4074,25 @@
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.DecomposeToPulses.params.model">(qat.middleend.passes.gates.transform.DecomposeToPulses parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.params.model">(qat.middleend.passes.validation.FrequencyValidation parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.params.model">(qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation parameter)</a>
 </li>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_middleend_pipeline.params.model">(qat.pipelines.legacy.base.get_middleend_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_pipeline.params.model">(qat.pipelines.legacy.base.get_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_results_pipeline.params.model">(qat.pipelines.legacy.base.get_results_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_middleend_pipeline.params.model">(qat.pipelines.legacy.echo.get_middleend_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_pipeline.params.model">(qat.pipelines.legacy.echo.get_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.model">(qat.pipelines.legacy.qiskit.get_middleend_pipeline parameter)</a>
+</li>
         <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_pipeline.params.model">(qat.pipelines.legacy.qiskit.get_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_results_pipeline.params.model">(qat.pipelines.legacy.qiskit.get_results_pipeline parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.params.model">(qat.runtime.passes.analysis.IndexMappingAnalysis parameter)</a>
 </li>
@@ -4871,6 +4905,10 @@
 </li>
         <li><a href="qat.core.config.html#qat.core.config.PipelineInstanceDescription.name">(PipelineInstanceDescription attribute)</a>
 </li>
+        <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_pipeline.params.name">(qat.pipelines.legacy.base.get_pipeline parameter)</a>
+</li>
+        <li><a href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_pipeline.params.name">(qat.pipelines.legacy.echo.get_pipeline parameter)</a>
+</li>
         <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_pipeline.params.name">(qat.pipelines.legacy.qiskit.get_pipeline parameter)</a>
 </li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.save_object.params.name">(qat.purr.utils.logger.BasicLogger.save_object parameter)</a>
@@ -4906,10 +4944,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NCOFrequencyVariability">NCOFrequencyVariability (class in qat.backend.passes.validation)</a>
@@ -5702,7 +5740,7 @@
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase">PydDictBase (class in qat.utils.pydantic)</a>
 </li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydHardwareConfigValidity">PydHardwareConfigValidity (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity">PydHardwareConfigValidity (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydInputOptimisation">PydInputOptimisation (class in qat.frontend.passes.transform)</a>
 </li>
@@ -5720,7 +5758,7 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydPostProcessingSanitisation">PydPostProcessingSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
-      <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.PydReturnSanitisation">PydReturnSanitisation (class in qat.backend.passes.transform)</a>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation">PydReturnSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydReturnSanitisationValidation">PydReturnSanitisationValidation (class in qat.backend.passes.validation)</a>
 </li>
@@ -7515,7 +7553,7 @@
       </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Repeat.repeat_count">repeat_count (Repeat attribute)</a>
 </li>
-      <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.RepeatSanitisation">RepeatSanitisation (class in qat.backend.passes.transform)</a>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation">RepeatSanitisation (class in qat.middleend.passes.transform)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation">(class in qat.purr.backends.qblox.transform_passes)</a>
@@ -7795,7 +7833,7 @@
         <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQIRParser.returns">(TketQIRParser method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ReturnSanitisation">ReturnSanitisation (class in qat.backend.passes.transform)</a>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation">ReturnSanitisation (class in qat.middleend.passes.transform)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation">(class in qat.purr.backends.qblox.transform_passes)</a>
@@ -7924,9 +7962,9 @@
 </li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.FreqShiftSanitisation.run">(FreqShiftSanitisation method)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.run">(FrequencyValidation method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.run">(FrequencyValidation method)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.HardwareConfigValidity.run">(HardwareConfigValidity method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity.run">(HardwareConfigValidity method)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run">(InactivePulseChannelSanitisation method)</a>
 </li>
@@ -7986,7 +8024,7 @@
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass.run">(PreCodegenPass method)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydHardwareConfigValidity.run">(PydHardwareConfigValidity method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity.run">(PydHardwareConfigValidity method)</a>
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run">(PydNoMidCircuitMeasurementValidation method)</a>
 </li>
@@ -7996,7 +8034,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydPostProcessingSanitisation.run">(PydPostProcessingSanitisation method)</a>
 </li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.PydReturnSanitisation.run">(PydReturnSanitisation method)</a>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation.run">(PydReturnSanitisation method)</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydReturnSanitisationValidation.run">(PydReturnSanitisationValidation method)</a>
 </li>
@@ -8024,7 +8062,7 @@
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.RemoveRedundantSWAPs.run">(RemoveRedundantSWAPs method)</a>
 </li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.RepeatSanitisation.run">(RepeatSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">[1]</a>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run">(RepeatSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">[1]</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.RepeatSanitisationValidation.run">(RepeatSanitisationValidation method)</a>
 </li>
@@ -8032,7 +8070,7 @@
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ResultTransform.run">(ResultTransform method)</a>
 </li>
-        <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ReturnSanitisation.run">(ReturnSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation.run">[1]</a>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation.run">(ReturnSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation.run">[1]</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.ReturnSanitisationValidation.run">(ReturnSanitisationValidation method)</a>
 </li>
@@ -8800,11 +8838,11 @@
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.targets">(Pulse attribute)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.validate_frequency_ranges.params.targets">(qat.backend.passes.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if.params.targets">(qat.backend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if parameter)</a>
-</li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure.params.targets">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.validate_frequency_ranges.params.targets">(qat.middleend.passes.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if.params.targets">(qat.middleend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if parameter)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.targets">(QuantumInstruction attribute)</a>
 </li>
@@ -9105,7 +9143,7 @@
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation">validate_error_mitigation() (PhysicalHardwareModel method)</a>
 </li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.validate_frequency_ranges">validate_frequency_ranges() (FrequencyValidation static method)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.validate_frequency_ranges">validate_frequency_ranges() (FrequencyValidation static method)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.validate_input_array">validate_input_array() (in module qat.purr.backends.utilities)</a>
 </li>
@@ -9113,7 +9151,7 @@
 </li>
       <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.validate_max_shots">validate_max_shots() (BaseRuntime static method)</a>
 </li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if">validate_no_freqshifts_on_fixed_if() (FrequencyValidation method)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if">validate_no_freqshifts_on_fixed_if() (FrequencyValidation method)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative">validate_non_negative() (in module qat.utils.pydantic)</a>
 </li>
