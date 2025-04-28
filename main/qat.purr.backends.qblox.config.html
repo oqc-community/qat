@@ -775,26 +775,6 @@ Defaults to “out0”</p></li>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmConfigHelper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QcmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer">
-<span class="sig-name descname"><span class="pre">calibrate_mixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer" title="Link to this definition"></a></dt>
-<dd><ul class="simple">
-<li><p>Compensates for the LO leakage for input(s)/output(s) depending on module</p></li>
-<li><p>Suppresses undesired sideband on sequencer</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></span>) – A Module instance representing a QCM-RF or a QRM-RF card.</p></li>
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.sequencer"></span><strong>sequencer</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.sequencer">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code>]</span>) – A Sequencer instance representing the sequencer.
-When None, sideband cal will run on all sequencers belonging to module <cite>module</cite></p></li>
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.connection"></span><strong>connection</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QcmConfigHelper.calibrate_mixer.params.connection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – An optional string indicating muxing of Sequencer to analog channel
-Defaults to “out0”</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -837,26 +817,6 @@ Defaults to “out0”</p></li>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QrmConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.config.QbloxConfigHelper" title="qat.purr.backends.qblox.config.QbloxConfigHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer">
-<span class="sig-name descname"><span class="pre">calibrate_mixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer" title="Link to this definition"></a></dt>
-<dd><ul class="simple">
-<li><p>Compensates for the LO leakage for input(s)/output(s) depending on module</p></li>
-<li><p>Suppresses undesired sideband on sequencer</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></span>) – A Module instance representing a QCM-RF or a QRM-RF card.</p></li>
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.sequencer"></span><strong>sequencer</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.sequencer">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code>]</span>) – A Sequencer instance representing the sequencer.
-When None, sideband cal will run on all sequencers belonging to module <cite>module</cite></p></li>
-<li><p><span class="target" id="qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.connection"></span><strong>connection</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.config.QrmConfigHelper.calibrate_mixer.params.connection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – An optional string indicating muxing of Sequencer to analog channel
-Defaults to “out0”</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq">
 <span class="sig-name descname"><span class="pre">configure_scope_acq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq" title="Link to this definition"></a></dt>
