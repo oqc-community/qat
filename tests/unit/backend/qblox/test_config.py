@@ -6,9 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pytest
-from qblox_instruments import Cluster
-from qblox_instruments.qcodes_drivers.module import Module
-from qblox_instruments.qcodes_drivers.sequencer import Sequencer
+from qblox_instruments import ClusterType
 
 from qat.purr.backends.qblox.codegen import QbloxEmitter, calculate_duration
 from qat.purr.backends.qblox.config import (
@@ -19,12 +17,13 @@ from qat.purr.backends.qblox.config import (
     QrmRfConfigHelper,
     SequencerConfig,
 )
+from qat.purr.backends.qblox.constants import Constants
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import get_builder
 
-from tests.unit.backend.qblox.conftest import DUMMY_CONFIG
+from tests.unit.backend.qblox.conftest import random_resource
 
 
 class TestQbloxConfigMixin:
@@ -162,19 +161,11 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("q_offset", mixer_values.qcm_q_offsets)
     def test_qcm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
         module_config = ModuleConfig()
-        seq_idx, sequencer_config = 0, SequencerConfig()
+        sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-        cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
-        module: Module = next(
-            (
-                m
-                for m in cluster.modules
-                if m.present() and m.is_qcm_type and not m.is_rf_type
-            )
-        )
-        sequencer: Sequencer = module.sequencers[seq_idx]
+        module, sequencer = random_resource(ClusterType.CLUSTER_QCM, name)
 
         self.setup_qcm_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
@@ -193,15 +184,11 @@ class TestMixerConfig(TestQbloxConfigMixin):
         self, request, phase_offset, gain_ratio, i_offset, q_offset
     ):
         module_config = ModuleConfig()
-        seq_idx, sequencer_config = 0, SequencerConfig()
+        sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-        cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
-        module: Module = next(
-            (m for m in cluster.modules if m.present() and m.is_qcm_type and m.is_rf_type)
-        )
-        sequencer: Sequencer = module.sequencers[seq_idx]
+        module, sequencer = random_resource(ClusterType.CLUSTER_QCM_RF, name)
 
         self.setup_qcm_rf_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
@@ -219,19 +206,11 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("q_offset", mixer_values.qrm_q_offsets)
     def test_qrm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
         module_config = ModuleConfig()
-        seq_idx, sequencer_config = 0, SequencerConfig()
+        sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-        cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
-        module: Module = next(
-            (
-                m
-                for m in cluster.modules
-                if m.present() and m.is_qrm_type and not m.is_rf_type
-            )
-        )
-        sequencer: Sequencer = module.sequencers[seq_idx]
+        module, sequencer = random_resource(ClusterType.CLUSTER_QRM, name)
 
         self.setup_qrm_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
@@ -250,15 +229,11 @@ class TestMixerConfig(TestQbloxConfigMixin):
         self, request, phase_offset, gain_ratio, i_offset, q_offset
     ):
         module_config = ModuleConfig()
-        seq_idx, sequencer_config = 0, SequencerConfig()
+        sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
         name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-        cluster: Cluster = Cluster(name=name, dummy_cfg=DUMMY_CONFIG)
-        module: Module = next(
-            (m for m in cluster.modules if m.present() and m.is_qrm_type and m.is_rf_type)
-        )
-        sequencer: Sequencer = module.sequencers[seq_idx]
+        module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
 
         self.setup_qrm_rf_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
@@ -273,3 +248,68 @@ class TestMixerConfig(TestQbloxConfigMixin):
 
         with pytest.raises(AssertionError):
             assert module.in0_offset_path1() == module_config.offset.in0_path1
+
+
+@dataclass
+class AcqTestValues:
+    num_points = 5  # Low value for testing to reduce the size of the cartesian products
+
+    int_lengths = np.random.choice(
+        np.arange(
+            Constants.MIN_ACQ_INTEGRATION_LENGTH, Constants.MAX_ACQ_INTEGRATION_LENGTH, 4
+        ),
+        size=num_points,
+    )
+    rotations = np.random.choice(np.arange(0, 360), size=num_points).astype(float)
+    thresholds = np.random.choice(
+        np.arange(Constants.MIN_ACQ_THRESHOLD, Constants.MAX_ACQ_THRESHOLD), size=num_points
+    ).astype(float)
+
+
+class TestAcqConfig(TestQbloxConfigMixin):
+    acq_values = AcqTestValues()
+
+    @pytest.mark.parametrize("int_length", acq_values.int_lengths)
+    def test_qrm_rf_square_acq(self, request, int_length):
+        module_config = ModuleConfig()
+        sequencer_config = SequencerConfig()
+
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
+
+        sequencer_config.square_weight_acq.integration_length = int_length
+
+        QrmRfConfigHelper(module_config, sequencer_config).configure_acq(sequencer)
+
+        assert int_length == sequencer_config.square_weight_acq.integration_length
+        assert (
+            sequencer_config.square_weight_acq.integration_length
+            == sequencer.integration_length_acq()
+        )
+
+    @pytest.mark.parametrize("rotation", acq_values.rotations)
+    @pytest.mark.parametrize("threshold", acq_values.thresholds)
+    def test_qrm_rf_thresholded_acq(self, request, rotation, threshold):
+        module_config = ModuleConfig()
+        sequencer_config = SequencerConfig()
+
+        # The qcodes package generates a warning if the name of the cluster contains dashes.
+        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
+
+        sequencer_config.thresholded_acq.rotation = rotation
+        sequencer_config.thresholded_acq.threshold = threshold
+
+        QrmRfConfigHelper(module_config, sequencer_config).configure_acq(sequencer)
+
+        assert sequencer_config.thresholded_acq.rotation == rotation
+        assert np.isclose(
+            sequencer.thresholded_acq_rotation(), sequencer_config.thresholded_acq.rotation
+        )
+
+        assert sequencer_config.thresholded_acq.threshold == threshold
+        assert np.isclose(
+            sequencer.thresholded_acq_threshold(),
+            sequencer_config.thresholded_acq.threshold,
+        )

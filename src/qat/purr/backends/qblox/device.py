@@ -220,7 +220,7 @@ class QbloxControlHardware(ControlHardware):
             log.info("Managed mode enabled")
             config_helper.calibrate_mixer(module, sequencer)
 
-    def _reset_io(self):
+    def _reset_connections(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
@@ -240,7 +240,7 @@ class QbloxControlHardware(ControlHardware):
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
-            self._reset_io()
+            self._reset_connections()
 
         log.info(self._driver.get_system_status())
         self.is_connected = True
@@ -266,9 +266,8 @@ class QbloxControlHardware(ControlHardware):
                 with open(filename, "w") as f:
                     f.write(json.dumps(asdict(pkg.sequence)))
 
-        self._resources.clear()
-
         try:
+            self._resources.clear()
             for pkg in packages:
                 module, sequencer = self.allocate_resources(pkg)
                 self.configure(pkg, module, sequencer)
@@ -276,7 +275,8 @@ class QbloxControlHardware(ControlHardware):
                 log.debug(f"Uploading sequence to {module}, sequencer {sequencer}")
                 sequencer.sequence(sequence)
         except BaseException as e:
-            self._reset_io()
+            self._resources.clear()
+            self._reset_connections()
             raise e
 
     def start_playback(self, repetitions: int, repetition_time: float):

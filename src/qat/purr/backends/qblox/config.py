@@ -271,43 +271,54 @@ class QbloxConfigHelper(ABC):
             Defaults to "out0"
         """
 
-        pass
+        sequencers = [sequencer] if sequencer else module.sequencers
+
+        if connection:
+            log.info(
+                f"Provided argument `connection` is {connection}. Will overwrite sequencer's connections"
+            )
+            module.disconnect_outputs()
+            for sequencer in sequencers:
+                sequencer.connect_sequencer(connection)
+        else:
+            log.info(
+                "Argument `connection` not provided. Assuming `connection` already specified"
+            )
+
+        log.info(f"Calibrating LO leakage on module {module}")
+        offset_config = self.calibrate_lo_leakage(module)
+        mixer_configs = {}
+        for sequencer in sequencers:
+            mixer_configs[sequencer.seq_idx] = self.calibrate_sideband(
+                sequencer, connection
+            )
+
+        if connection:
+            log.info(
+                f"Mixer calibration finished. Resetting sequencer connections for module {module.slot_idx}"
+            )
+            module.disconnect_outputs()
+
+        return offset_config, mixer_configs
 
     @abstractmethod
     def calibrate_lo_leakage(self, module: Module):
         pass
 
     def calibrate_sideband(self, sequencer: Sequencer, connection: str = None):
-        if not connection:
-            log.warning(
-                "Did not provide the `connection` argument. Assuming `connection` already specified"
-            )
-        else:
-            sequencer.connect_sequencer(connection)
-
         log.info(f"Calibrating sidebands on sequencer {sequencer}")
         sequencer.sideband_cal()
         sequencer.arm_sequencer()
         sequencer.start_sequencer()
 
+        return MixerConfig(
+            phase_offset=sequencer.mixer_corr_phase_offset_degree(),
+            gain_ratio=sequencer.mixer_corr_gain_ratio(),
+        )
+
 
 class QcmConfigHelper(QbloxConfigHelper):
-
-    def calibrate_mixer(
-        self, module: Module, sequencer: Sequencer = None, connection: str = None
-    ):
-        try:
-            module.disconnect_outputs()
-
-            log.info(f"Calibrating LO leakage on module {module}")
-            self.calibrate_lo_leakage(module)
-            if sequencer:
-                self.calibrate_sideband(sequencer, connection)
-            else:
-                for sequencer in module.sequencers:
-                    self.calibrate_sideband(sequencer, connection)
-        finally:
-            module.disconnect_outputs()
+    pass
 
 
 class QcmRfConfigHelper(QcmConfigHelper):
@@ -352,27 +363,15 @@ class QcmRfConfigHelper(QcmConfigHelper):
         module.out0_lo_cal()
         module.out1_lo_cal()
 
+        return OffsetConfig(
+            out0_path0=module.out0_offset_path0(),
+            out0_path1=module.out0_offset_path1(),
+            out1_path0=module.out1_offset_path0(),
+            out1_path1=module.out1_offset_path1(),
+        )
+
 
 class QrmConfigHelper(QbloxConfigHelper):
-
-    def calibrate_mixer(
-        self, module: Module, sequencer: Sequencer = None, connection: str = None
-    ):
-        try:
-            module.disconnect_outputs()
-            module.disconnect_inputs()
-
-            log.info(f"Calibrating LO leakage on module {module}")
-            self.calibrate_lo_leakage(module)
-            if sequencer:
-                self.calibrate_sideband(sequencer, connection)
-            else:
-                for sequencer in module.sequencers:
-                    self.calibrate_sideband(sequencer, connection)
-        finally:
-            module.disconnect_outputs()
-            module.disconnect_inputs()
-
     def configure_scope_acq(self, module: Module):
         scope_acq = self.module_config.scope_acq
         if scope_acq.sequencer_select:
@@ -431,6 +430,21 @@ class QrmRfConfigHelper(QrmConfigHelper):
             sequencer.integration_length_acq(
                 self.sequencer_config.square_weight_acq.integration_length
             )
+        if self.sequencer_config.thresholded_acq.rotation:
+            sequencer.thresholded_acq_rotation(
+                self.sequencer_config.thresholded_acq.rotation
+            )
+        if self.sequencer_config.thresholded_acq.threshold:
+            sequencer.thresholded_acq_threshold(
+                self.sequencer_config.thresholded_acq.threshold
+            )
 
     def calibrate_lo_leakage(self, module: Module):
         module.out0_in0_lo_cal()
+
+        return OffsetConfig(
+            out0_path0=module.out0_offset_path0(),
+            out0_path1=module.out0_offset_path1(),
+            in0_path0=module.in0_offset_path0(),
+            in0_path1=module.in0_offset_path1(),
+        )

@@ -45,6 +45,12 @@ class Constants:
     """Each sequencer has 131072 bins with some caveats. If you are using all sequencers
     you are limited to 131k bins for the first three sequencers and 65536 bins for the final
     three to a maximum number of 589824 bins."""
+    MIN_ACQ_INTEGRATION_LENGTH = 4
+    MAX_ACQ_INTEGRATION_LENGTH = (1 << 24) - 4
+    """Minimum and maximum integration lengths"""
+    MIN_ACQ_THRESHOLD = -((1 << 24) - 4)
+    MAX_ACQ_THRESHOLD = (1 << 24) - 4
+    """Minimum and maximum thresholds for the thresholded acquisition"""
     MAX_SAMPLE_SIZE_WAVEFORMS: int = 16384
     """Maximal amount of samples in the waveforms to be uploaded to a sequencer."""
     GRID_TIME = 4  # ns
