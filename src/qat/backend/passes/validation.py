@@ -1,13 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
+import numpy as np
 
+from qat.backend.passes.lowering import PartitionedIR
 from qat.core.pass_base import ValidationPass
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
 from qat.ir.instructions import Return as PydReturn
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Acquire, Repeat, Return
+from qat.purr.compiler.instructions import Acquire, CustomPulse, Pulse, Repeat, Return
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -110,6 +112,31 @@ class NoMultipleAcquiresValidation(ValidationPass):
             raise NotImplementedError(
                 "Multiple acquisitions on a single channel is not supported for this target machine."
             )
+        return ir
+
+
+class NoAcquiresWithDifferentWeightsValidation(ValidationPass):
+    """Some target machines do not support multiple :class:`Acquire` instructions with different
+    filters on the same pulse channel. This validation pass should be used to verify this.
+    """
+
+    def run(self, ir: PartitionedIR, *args, **kwargs):
+        for pulse_ch, acquires in ir.acquire_map.items():
+            samples = []
+            for acquire in acquires:
+                if isinstance(acquire.filter, CustomPulse):
+                    samples.append(acquire.filter.samples)
+                elif isinstance(acquire, Pulse):
+                    raise TypeError(
+                        "Type of the acquire filter can only be `CustomPulse` or `None`."
+                    )
+
+            samples = np.array(samples)
+            if not np.all(samples == samples[0]):
+                raise ValueError(
+                    f"Cannot have multiple `Acquire`s on the same pulse channel ({pulse_ch.full_id()}) with different weights."
+                )
+
         return ir
 
 
