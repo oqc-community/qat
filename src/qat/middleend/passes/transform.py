@@ -430,7 +430,13 @@ class InitialPhaseResetSanitisation(TransformPass):
         active_targets = list(res_mgr.lookup_by_type(ActiveChannelResults).targets)
 
         if active_targets:
-            ir.insert(PhaseReset(active_targets), 0)
+            index = next(
+                filter(
+                    lambda tup: True if isinstance(tup[1], QuantumInstruction) else None,
+                    enumerate(ir._instructions),
+                )
+            )[0]
+            ir.insert(PhaseReset(active_targets), index)
 
         return ir
 

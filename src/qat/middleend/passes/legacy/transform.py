@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from numbers import Number
 
 import numpy as np
@@ -15,11 +15,19 @@ from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
+    Assign,
     CustomPulse,
+    EndRepeat,
+    GreaterThan,
     Instruction,
+    Jump,
+    Label,
     PhaseReset,
     PhaseShift,
+    Plus,
     Pulse,
+    Repeat,
+    Variable,
 )
 
 
@@ -125,4 +133,51 @@ class PhaseOptimisation(TransformPass):
         met_mgr.record_metric(
             MetricsType.OptimizedInstructionCount, len(optimized_instructions)
         )
+        return ir
+
+
+class LoopCount(int): ...
+
+
+class RepeatTranslation(TransformPass):
+    """Transform :class:`Repeat` instructions so that they are replaced with:
+    :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
+    and :class:`Assign` and :class:`Jump` instructions at the end."""
+
+    def __init__(self, model):
+        self.model = model
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        instructions: list[Instruction] = []
+        label_data: OrderedDict[Label, dict[str, Repeat | Variable]] = OrderedDict()
+
+        def _close_repeat(label: Label, data: dict, index: int = None) -> None:
+            # TODO: Adjust so that closing is done before finishing instructions such as
+            # returns and postprocessing. COMPILER-452
+            repeat = data["repeat"]
+            var = data["var"]
+            assign = Assign(var.name, Plus(var, 1))
+            jump = Jump(label, GreaterThan(repeat.repeat_count, var))
+            instructions.extend([assign, jump])
+
+        for inst in ir.instructions:
+            if isinstance(inst, Repeat):
+                label = Label.with_random_name(ir.existing_names)
+                var = Variable(label.name + "_count", LoopCount)
+                assign = Assign(var.name, 0)
+                label_data[label] = {"repeat": inst, "var": var}
+                instructions.extend([var, assign, label])
+            elif isinstance(inst, EndRepeat):
+                if len(label_data) < 1:
+                    raise ValueError("EndRepeat found without associated Repeat.")
+                label, data = label_data.popitem()
+                _close_repeat(label, data)
+            else:
+                instructions.append(inst)
+
+        for label, data in reversed(label_data.items()):
+            _close_repeat(label, data)
+
+        ir.instructions = instructions
         return ir

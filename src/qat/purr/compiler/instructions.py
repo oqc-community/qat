@@ -716,6 +716,12 @@ class LessOrEqualThan(BinaryOperator):
         return f"{str(self.left)} <= {str(self.right)}"
 
 
+class Plus(BinaryOperator):
+    # TODO: Improve operators in Pydantic version
+    def __repr__(self):
+        return f"{str(self.left)} + {str(self.right)}"
+
+
 def is_generated_name(name: str):
     return re.match(".*generated_name_[0-9]*$", name) is not None
 

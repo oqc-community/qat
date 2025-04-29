@@ -24,6 +24,7 @@ from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActiveChannelResults
+from qat.middleend.passes.legacy.transform import LoopCount, RepeatTranslation
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
@@ -43,19 +44,27 @@ from qat.middleend.passes.transform import (
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.backends.utilities import evaluate_shape
-from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
     Acquire,
+    Assign,
     CustomPulse,
     Delay,
+    EndRepeat,
+    GreaterThan,
+    Instruction,
+    Jump,
+    Label,
     MeasurePulse,
     PhaseReset,
     PhaseSet,
     PhaseShift,
+    Plus,
     Pulse,
     PulseShapeType,
     Reset,
     Synchronize,
+    Variable,
 )
 from qat.utils.hardware_model import generate_hw_model
 
@@ -1303,3 +1312,129 @@ class TestEvaluatePulses:
         pulse2 = Pulse(chan2, PulseShapeType.SQUARE, width=400e-9)
         pass_ = EvaluatePulses()
         assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)
+
+
+@pytest.mark.parametrize("explicit_close", [False, True])
+class TestRepeatTranslation:
+    hw = EchoModelLoader(1).load()
+
+    @staticmethod
+    def _check_loop_start(ir: InstructionBuilder, indices: list[int]):
+        for index in indices:
+            # Create Variable
+            assert isinstance(var := ir.instructions[index], Variable)
+            assert var.var_type == LoopCount
+            name_base = var.name.removesuffix("_count")
+
+            # Assign with 0 to start
+            assert isinstance(assign := ir.instructions[index + 1], Assign)
+            assert name_base in assign.name
+            assert assign.value == 0
+
+            # Create Label
+            assert isinstance(label := ir.instructions[index + 2], Label)
+            assert name_base == label.name
+
+    @staticmethod
+    def _check_loop_close(ir: InstructionBuilder, indices: list[int], repeats: list[int]):
+        for index, repeat in zip(indices, repeats):
+            # Increment LoopCount Variable with 1
+            assert isinstance(assign := ir.instructions[index], Assign)
+            name_base = assign.name.removesuffix("_count")
+            assert isinstance(plus := assign.value, Plus)
+            assert isinstance(var := plus.left, Variable)
+            assert name_base in var.name
+            assert var.var_type == LoopCount
+            assert plus.right == 1
+
+            # Conditional Jump
+            assert isinstance(jump := ir.instructions[index + 1], Jump)
+            assert name_base == jump.target
+            assert isinstance(condition := jump.condition, GreaterThan)
+            assert condition.right == var
+            assert condition.left == repeat
+
+    def test_single_repeat(self, explicit_close):
+        builder = self.hw.create_builder()
+        builder.repeat(1000)
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        ir = RepeatTranslation(self.hw).run(builder)
+
+        assert len(ir.existing_names) == 1
+
+        self._check_loop_start(ir, [0])
+        self._check_loop_close(ir, [3], [1000])
+
+    def test_multiple_repeat(self, explicit_close):
+        builder = self.hw.create_builder()
+        builder.repeat(1000).repeat(200)
+
+        if explicit_close:
+            builder.add([EndRepeat(), EndRepeat()])
+
+        ir = RepeatTranslation(self.hw).run(builder)
+
+        assert len(ir.existing_names) == 2
+
+        self._check_loop_start(ir, [0, 3])
+        self._check_loop_close(ir, [8, 6], [1000, 200])
+
+    @pytest.mark.parametrize("first", [0, 2])
+    @pytest.mark.parametrize("second", [0, 3])
+    @pytest.mark.parametrize("third", [0, 5])
+    @pytest.mark.parametrize("fourth", [0, 1])
+    @pytest.mark.parametrize("fifth", [0, 4])
+    def test_with_other_instructions(
+        self, explicit_close, first, second, third, fourth, fifth
+    ):
+        """Test all possible combinations of having additional instructions, before,
+        between, and after the repeats, with and without explicitly closing scopes.
+
+        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>, <fifth>]
+        """
+        builder = self.hw.create_builder()
+        start_indices = [0, 3]
+        close_indices = [8, 6]
+
+        if first > 0:
+            builder.add([Instruction()] * first)
+            start_indices = [i + first for i in start_indices]
+            close_indices = [i + first for i in close_indices]
+
+        builder.repeat(1000)
+
+        if second > 0:
+            builder.add([Instruction()] * second)
+            start_indices[1] += second
+            close_indices = [i + second for i in close_indices]
+
+        builder.repeat(300)
+
+        if third > 0:
+            builder.add([Instruction()] * third)
+            close_indices = [i + third for i in close_indices]
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        if fourth > 0:
+            builder.add([Instruction()] * fourth)
+            if not explicit_close:
+                close_indices[1] += fourth
+            close_indices[0] += fourth
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        if fifth > 0:
+            builder.add([Instruction()] * fifth)
+            if not explicit_close:
+                close_indices = [i + fifth for i in close_indices]
+
+        ir = RepeatTranslation(self.hw).run(builder)
+
+        self._check_loop_start(ir, start_indices)
+        self._check_loop_close(ir, close_indices, [1000, 300])

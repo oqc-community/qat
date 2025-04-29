@@ -5,19 +5,24 @@ from dataclasses import dataclass, field
 from itertools import chain
 
 from qat.core.pass_base import LoweringPass
+from qat.middleend.passes.legacy.transform import LoopCount
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
+    GreaterThan,
     InlineResultsProcessing,
     Instruction,
+    Jump,
+    Label,
     PostProcessing,
     QuantumInstruction,
     Repeat,
     ResultsProcessing,
     Return,
     Synchronize,
+    Variable,
 )
 
 
@@ -33,7 +38,8 @@ class PartitionedIR:
     target_map: dict[PulseChannel, list[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    shots: Repeat | None = field(default_factory=lambda: None)
+    # TODO: Remove Repeat type option: COMPILER-451
+    shots: Repeat | int | None = field(default_factory=lambda: None)
     returns: list[Return] = field(default_factory=list)
     assigns: list[Assign] = field(default_factory=list)
     acquire_map: dict[PulseChannel, list[Acquire]] = field(
@@ -64,8 +70,18 @@ class PartitionByPulseChannel(LoweringPass):
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
+        shared_instructions = list()
+        variables = defaultdict(list)
         partitioned_ir = PartitionedIR()
+
+        def add_to_all(inst: Instruction) -> None:
+            shared_instructions.append(inst)
+            for target_list in partitioned_ir.target_map.values():
+                target_list.append(inst)
+            partitioned_ir.target_map.default_factory = shared_instructions.copy
+
         for inst in ir.instructions:
+            handled = False
             if isinstance(inst, QuantumInstruction) and not isinstance(
                 inst, PostProcessing
             ):
@@ -75,13 +91,23 @@ class PartitionByPulseChannel(LoweringPass):
                         "PartitionByPulseChannelPass. Please lower it to `Delay` instructions "
                         "using the `LowerSyncsToDelays` pass"
                     )
+                handled = True
                 for qt in inst.quantum_targets:
                     partitioned_ir.target_map[qt].append(inst)
 
             if isinstance(inst, Return):
                 partitioned_ir.returns.append(inst)
 
+            elif isinstance(inst, Variable):
+                variables[inst.name].append(inst)
+                add_to_all(inst)
+
             elif isinstance(inst, Assign):
+                var_refs = variables[inst.name]
+                if len(var_refs) == 0:
+                    variables[inst.name].append(Variable(inst.name))
+                if var_refs[-1].var_type == LoopCount:
+                    add_to_all(inst)
                 partitioned_ir.assigns.append(inst)
 
             elif isinstance(inst, Acquire):
@@ -98,6 +124,19 @@ class PartitionByPulseChannel(LoweringPass):
                 if partitioned_ir.shots:
                     raise ValueError("Multiple Repeat instructions found.")
                 partitioned_ir.shots = inst
+
+            elif isinstance(inst, Jump):
+                if isinstance(inst.condition, GreaterThan):
+                    limit = inst.condition.left
+                    if partitioned_ir.shots:
+                        raise ValueError("Multiple Repeat or Jump instructions found.")
+                    partitioned_ir.shots = limit
+                add_to_all(inst)
+
+            elif isinstance(inst, Label):
+                add_to_all(inst)
+            elif not handled:
+                raise TypeError(f"Unexpected Instruction type: {type(inst)}.")
 
         # Assume that raw acquisitions are experiment results.
         # TODO: separate as ResultsProcessingSanitisation pass. (COMPILER-412)

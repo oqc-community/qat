@@ -20,8 +20,11 @@ from qat.purr.compiler.instructions import (
     EndRepeat,
     EndSweep,
     Instruction,
+    Jump,
+    Label,
     Pulse,
     PulseShapeType,
+    QuantumInstruction,
     Repeat,
     Sweep,
     Synchronize,
@@ -156,16 +159,21 @@ class SquashDelaysOptimisation(TransformPass):
         :param met_mgr: The metrics manager to store the number of instructions after
             optimisation.
         """
+        delimiter_types = (Pulse, CustomPulse, Acquire, Delay, Label, Jump)
         accumulated_delays: dict[PulseChannel, float] = defaultdict(float)
         instructions: list[Instruction] = []
         for inst in ir.instructions:
             if isinstance(inst, Delay) and isinstance(inst.time, Number):
                 accumulated_delays[inst.quantum_targets[0]] += inst.time
-            elif isinstance(inst, (Pulse, CustomPulse, Acquire, Delay)):
-                target = inst.quantum_targets[0]
-                if (time := accumulated_delays[target]) > 0.0:
-                    instructions.append(Delay(target, time))
-                    accumulated_delays[target] = 0.0
+            elif isinstance(inst, delimiter_types):
+                if isinstance(inst, QuantumInstruction):
+                    targets = inst.quantum_targets
+                else:
+                    targets = accumulated_delays.keys()
+                for target in targets:
+                    if (time := accumulated_delays[target]) > 0.0:
+                        instructions.append(Delay(target, time))
+                        accumulated_delays[target] = 0.0
                 instructions.append(inst)
             else:
                 instructions.append(inst)
@@ -195,7 +203,13 @@ class FreqShiftSanitisation(TransformPass):
 
         shot_time = np.max(
             [
-                np.sum([inst.duration for inst in target_map[target]])
+                np.sum(
+                    [
+                        inst.duration
+                        for inst in target_map[target]
+                        if isinstance(inst, QuantumInstruction)
+                    ]
+                )
                 for target in target_map
             ]
         )
