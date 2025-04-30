@@ -209,7 +209,7 @@ def randomly_calibrate(hardware_model: PhysicalHardwareModel, seed=42):
 
         # Calibrate qubit and resonator pulse channels.
         for pulse_channels in [qubit.pulse_channels, qubit.resonator.pulse_channels]:
-            for pulse_channel_name in pulse_channels.model_fields:
+            for pulse_channel_name in pulse_channels.__class__.model_fields:
                 pulse_channel = getattr(pulse_channels, pulse_channel_name)
                 if isinstance(pulse_channel, PulseChannel):
                     pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)

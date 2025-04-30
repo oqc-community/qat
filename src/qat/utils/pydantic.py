@@ -195,7 +195,7 @@ class ValidatedList(PydListBase):
     """
 
     def append(self, value: V):
-        annotation = self.model_fields["root"].annotation
+        annotation = self.__class__.model_fields["root"].annotation
         value_type = get_args(annotation)[0]
         # Validate if type of value == `V`.
         if not isinstance(value, value_type):
@@ -287,7 +287,7 @@ class ValidatedSet(PydSetBase):
     """
 
     def add(self, value: V):
-        annotation = self.model_fields["root"].annotation
+        annotation = self.__class__.model_fields["root"].annotation
 
         annotated_value_type = get_args(annotation)[0]
         if len(args := get_args(annotated_value_type)) >= 1:
@@ -419,7 +419,7 @@ class ValidatedDict(PydDictBase):
             self.__setitem__(key, value)
 
     def __setitem__(self, key: K, value: V):
-        annotation = self.model_fields["root"].annotation
+        annotation = self.__class__.model_fields["root"].annotation
 
         annotated_key_type = get_args(annotation)[0]
         if len(args := get_args(annotated_key_type)) >= 1:

@@ -19,6 +19,7 @@ from qat.model.device import (
     Qubit,
     QubitPulseChannels,
     Resonator,
+    ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
 from qat.utils.hardware_model import generate_hw_model
@@ -109,12 +110,12 @@ class TestDevicesValidation:
         resonator = Resonator(physical_channel=physical_channel)
         assert not resonator.is_calibrated
 
-        for pulse_channel_name in resonator.pulse_channels.model_fields:
+        for pulse_channel_name in ResonatorPulseChannels.model_fields:
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
         assert resonator.is_calibrated
 
-        for pulse_channel_name in resonator.pulse_channels.model_fields:
+        for pulse_channel_name in ResonatorPulseChannels.model_fields:
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             with pytest.raises(ValidationError):
                 pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
@@ -129,7 +130,7 @@ class TestDevicesValidation:
         )
 
         resonator = Resonator(physical_channel=physical_channel)
-        for i, pulse_channel_name in enumerate(resonator.pulse_channels.model_fields):
+        for i, pulse_channel_name in enumerate(ResonatorPulseChannels.model_fields):
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
@@ -206,7 +207,7 @@ class TestDevicesValidation:
                     pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             for i, pulse_channel_name in enumerate(
-                qubit.resonator.pulse_channels.model_fields
+                qubit.resonator.pulse_channels.__class__.model_fields
             ):
                 pulse_channel = getattr(qubit.resonator.pulse_channels, pulse_channel_name)
                 pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
@@ -242,7 +243,7 @@ class TestFrozenQubit:
         )
 
         resonator = Resonator(physical_channel=physical_channel)
-        for i, pulse_channel_name in enumerate(resonator.pulse_channels.model_fields):
+        for i, pulse_channel_name in enumerate(ResonatorPulseChannels.model_fields):
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 

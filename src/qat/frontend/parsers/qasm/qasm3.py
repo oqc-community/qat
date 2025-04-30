@@ -45,7 +45,14 @@ from qat.ir.waveforms import (
     SoftSquareWaveform,
     SquareWaveform,
 )
-from qat.model.device import AcquirePulseChannel, PhysicalChannel, PulseChannel, Qubit
+from qat.model.device import (
+    AcquirePulseChannel,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+    QubitPulseChannels,
+    ResonatorPulseChannels,
+)
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.utils.pydantic import FrozenSet, ValidatedList
 
@@ -61,7 +68,7 @@ def get_frame_mappings(hw: PhysicalHardwareModel):
     """
     frames = {}
     for q1_id, q1 in hw.qubits.items():
-        for channel_type in q1.pulse_channels.model_fields:
+        for channel_type in QubitPulseChannels.model_fields:
             if "cross_resonance" in channel_type:
                 for q2_id, pulse_channel in getattr(
                     q1.pulse_channels, channel_type
@@ -75,7 +82,7 @@ def get_frame_mappings(hw: PhysicalHardwareModel):
                     q1.pulse_channels, channel_type
                 )
 
-        for channel_type in q1.resonator.pulse_channels.model_fields:
+        for channel_type in ResonatorPulseChannels.model_fields:
             res_prefix = f"r{q1_id}"
             frames[f"{res_prefix}_{channel_type}"] = getattr(
                 q1.resonator.pulse_channels, channel_type

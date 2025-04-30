@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
-from numpydantic import NDArray
+from numpydantic import NDArray, Shape
 from pydantic import ValidationError
 
 from qat.utils.pydantic import (
@@ -156,35 +156,37 @@ class TestFrozenContainer:
 
 @pytest.mark.parametrize("array_type", [float, int, complex])
 class TestNDArray:
-    a = np.random.rand(2, 3, 4, 5)  # 4-dimensional tensor
-    b = np.random.rand(3, 4, 5)  # 3-dimensional tensor
+    a = np.random.rand(2, 3, 4)  # 3-dimensional tensor
+    b = np.random.rand(2, 3, 4)  # 3-dimensional tensor
 
     def test_dict_multi_dimensional_array(self, array_type):
         a = self.a.astype(dtype=array_type)
         b = self.b.astype(dtype=array_type)
+        NDArray_annot = NDArray[Shape["* x, * y, * z"], array_type]
 
-        d = PydDictBase[str, NDArray]({"a": a, "b": b})
+        d = PydDictBase[str, NDArray_annot]({"a": a, "b": b})
         assert np.allclose(d["a"], a)
         assert np.allclose(d["b"], b)
 
         blob = d.model_dump()
-        d_deserialised = PydDictBase[str, NDArray].model_validate(blob)
+        d_deserialised = PydDictBase[str, NDArray_annot].model_validate(blob)
         assert np.allclose(d["a"], d_deserialised["a"])
         assert np.allclose(d["b"], d_deserialised["b"])
 
         with pytest.raises(ValidationError):
-            PydDictBase[int, NDArray].model_validate(blob)
+            PydDictBase[int, NDArray_annot].model_validate(blob)
 
     def test_list_multi_dimensional_array(self, array_type):
         a = self.a.astype(dtype=array_type)
         b = self.b.astype(dtype=array_type)
+        NDArray_annot = NDArray[Shape["* x, * y, * z"], array_type]
 
-        l = PydListBase[NDArray]([a, b])
+        l = PydListBase[NDArray_annot]([a, b])
         assert np.allclose(l[0], a)
         assert np.allclose(l[1], b)
 
         blob = l.model_dump()
-        l_deserialised = PydListBase[NDArray].model_validate(blob)
+        l_deserialised = PydListBase[NDArray_annot].model_validate(blob)
         assert np.allclose(l[0], l_deserialised[0])
         assert np.allclose(l[1], l_deserialised[1])
 

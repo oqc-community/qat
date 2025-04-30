@@ -47,7 +47,7 @@ class LogicalHardwareModel(NoExtraFieldsModel):
         if type(self) != type(other):
             return False
 
-        if self.model_fields != other.model_fields:
+        if self.__class__.model_fields != other.__class__.model_fields:
             return False
 
         if self.version != other.version:

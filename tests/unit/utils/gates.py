@@ -51,7 +51,7 @@ def one_q_gate_tests():
     tests = []
     for gate in one_q_gates:
         params = {}
-        fields = [key for key in gate.model_fields.keys() if key != "inst"]
+        fields = [key for key in gate.model_fields if key != "inst"]
         for field in fields:
             if field == "qubit":
                 params[field] = [0]
@@ -70,7 +70,7 @@ def two_q_gate_tests():
     tests = []
     for gate in two_q_gates:
         params = {}
-        fields = [key for key in gate.model_fields.keys() if key != "inst"]
+        fields = [key for key in gate.model_fields if key != "inst"]
         for field in fields:
             params["qubits"] = [(0, 1), (1, 0)]
             if field != "qubit1" and field != "qubit2":

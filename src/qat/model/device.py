@@ -39,10 +39,10 @@ class Component(NoExtraFieldsModel):
         if not type(self) is type(other):
             return False
 
-        if self.model_fields != other.model_fields:
+        if self.__class__.model_fields != other.__class__.model_fields:
             return False
 
-        for field_name in self.model_fields:
+        for field_name in self.__class__.model_fields:
             field_s = getattr(self, field_name)
             field_o = getattr(other, field_name)
             if isinstance(field_s, float) and isinstance(field_o, float):
@@ -62,7 +62,7 @@ class Component(NoExtraFieldsModel):
 
     @property
     def is_calibrated(self):
-        for field_name in self.model_fields:
+        for field_name in self.__class__.model_fields:
             field_value = getattr(self, field_name)
             if (
                 isinstance(field_value, (Component, PulseChannelSet))
@@ -223,7 +223,7 @@ class PulseChannelSet(NoExtraFieldsModel):
 
     @property
     def is_calibrated(self):
-        for field_name in self.model_fields:
+        for field_name in self.__class__.model_fields:
             field_value = getattr(self, field_name)
             if isinstance(field_value, Component) and not field_value.is_calibrated:
                 return False
@@ -240,10 +240,10 @@ class PulseChannelSet(NoExtraFieldsModel):
         if type(self) != type(other):
             return False
 
-        if self.model_fields != other.model_fields:
+        if self.__class__.model_fields != other.__class__.model_fields:
             return False
 
-        for field_name in self.model_fields:
+        for field_name in self.__class__.model_fields:
             if getattr(self, field_name) != getattr(other, field_name):
                 return False
 
@@ -253,7 +253,7 @@ class PulseChannelSet(NoExtraFieldsModel):
         return not self.__eq__(other)
 
     def pulse_channel_with_id(self, id_: str):
-        for field_name in self.model_fields:
+        for field_name in self.__class__.model_fields:
             if (
                 isinstance(comp := getattr(self, field_name), Component)
                 and comp.uuid == id_
