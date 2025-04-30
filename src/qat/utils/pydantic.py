@@ -46,6 +46,18 @@ class NoExtraFieldsModel(BaseModel):
         return self.__repr__()
 
 
+class NoExtraFieldsFrozenModel(NoExtraFieldsModel):
+    """
+    A Pydantic `BaseModel` with the extra constraints:
+        #. Assignment of fields after initialisation is checked again.
+        #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
+          but raise an error now.
+        # All fields are frozen upon instantiation.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+
 class AllowExtraFieldsModel(BaseModel):
     """
     A Pydantic `BaseModel` with the extra constraints:
