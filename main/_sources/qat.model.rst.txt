@@ -25,3 +25,4 @@ Submodules
    qat.model.device
    qat.model.error_mitigation
    qat.model.hardware_model
+   qat.model.target_data

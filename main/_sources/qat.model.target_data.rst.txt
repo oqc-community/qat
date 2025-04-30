@@ -1,0 +1,7 @@
+qat.model.target\_data module
+=============================
+
+.. automodule:: qat.model.target_data
+   :members:
+   :undoc-members:
+   :show-inheritance:

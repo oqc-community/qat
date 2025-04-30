@@ -181,6 +181,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
@@ -1219,6 +1220,14 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.params.clock_cycle">(qat.middleend.passes.transform.InstructionGranularitySanitisation parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.clock_cycle_f">clock_cycle_f (DeviceDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.clock_cycle_f">(qat.model.target_data.DeviceDescription parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.clock_cycle_t">clock_cycle_t (DeviceDescription property)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.close">close() (BasicLogger method)</a>
 
       <ul>
@@ -1385,6 +1394,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_offset">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper.configure_scope_acq">configure_scope_acq() (QrmConfigHelper method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_sequencer">configure_sequencer() (QbloxConfigHelper method)</a>
@@ -1395,8 +1406,6 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_sequencer">(QrmRfConfigHelper method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument.connect">connect() (CompositeInstrument method)</a>
 
       <ul>
@@ -1781,6 +1790,12 @@
 </li>
       <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.default_pipeline">default_pipeline() (BaseRuntime method)</a>
 </li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.default_shots">default_shots (qat.model.target_data.TargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.default_shots">(TargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.middleend.decompositions.gates.html#qat.middleend.decompositions.gates.DefaultGateDecompositions">DefaultGateDecompositions (class in qat.middleend.decompositions.gates)</a>
 </li>
       <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.DefaultMiddleend">DefaultMiddleend (class in qat.middleend.middleends)</a>
@@ -1862,6 +1877,8 @@
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription">DeviceDescription (class in qat.model.target_data)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
 </li>
@@ -2482,7 +2499,11 @@
       <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.from_qubit">from_qubit() (ActiveChannelResults method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.from_yaml">from_yaml() (QatConfig class method)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.from_yaml">(TargetData class method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.frontend">frontend (Pipeline attribute)</a>
 
       <ul>
@@ -3153,6 +3174,12 @@
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.instruction">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.instruction_memory_size">instruction_memory_size (DeviceDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.instruction_memory_size">(qat.model.target_data.DeviceDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.INSTRUCTION_VALIDATION">INSTRUCTION_VALIDATION (QatConfig attribute)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock">InstructionBlock (class in qat.ir.instructions)</a>
@@ -3175,6 +3202,8 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation">InstructionLengthSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">[1]</a>
 
       <ul>
@@ -3191,8 +3220,6 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation">InstructionValidation (class in qat.middleend.passes.validation)</a>
 
       <ul>
@@ -3803,6 +3830,12 @@
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.max_scale">max_scale (Constraints attribute)</a>
 </li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.max_shots">max_shots (qat.model.target_data.TargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.max_shots">(TargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_TOTAL_BINNED_ACQUISITIONS">MAX_TOTAL_BINNED_ACQUISITIONS (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_WAIT_TIME">MAX_WAIT_TIME (Constants attribute)</a>
@@ -4164,6 +4197,8 @@
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Delay.model_config">(Delay attribute)</a>
 </li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.model_config">(DeviceDescription attribute)</a>
+</li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.model_config">(DragGaussianFunction attribute)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.DragGaussianWaveform.model_config">(DragGaussianWaveform attribute)</a>
@@ -4234,6 +4269,8 @@
 </li>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.NativeGate.model_config">(NativeGate attribute)</a>
 </li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel.model_config">(NoExtraFieldsFrozenModel attribute)</a>
+</li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel.model_config">(NoExtraFieldsModel attribute)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.model_config">(NumericFunction attribute)</a>
@@ -4294,6 +4331,8 @@
 </li>
         <li><a href="qat.model.device.html#qat.model.device.Qubit.model_config">(Qubit attribute)</a>
 </li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.QubitDescription.model_config">(QubitDescription attribute)</a>
+</li>
         <li><a href="qat.ir.gates.base.html#qat.ir.gates.base.QubitInstruction.model_config">(QubitInstruction attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.model_config">(QubitPulseChannels attribute)</a>
@@ -4309,6 +4348,8 @@
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Reset.model_config">(Reset attribute)</a>, <a href="qat.ir.instructions.html#qat.ir.instructions.Reset.model_config">[1]</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.Resonator.model_config">(Resonator attribute)</a>
+</li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.ResonatorDescription.model_config">(ResonatorDescription attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.model_config">(ResonatorPulseChannels attribute)</a>
 </li>
@@ -4367,6 +4408,8 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.model_config">(Synchronize attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.T.model_config">(T attribute)</a>
+</li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.model_config">(TargetData attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Tdg.model_config">(Tdg attribute)</a>
 </li>
@@ -4636,6 +4679,8 @@
         <li><a href="qat.model.loaders.legacy.qiskit.html#module-qat.model.loaders.legacy.qiskit">qat.model.loaders.legacy.qiskit</a>
 </li>
         <li><a href="qat.model.loaders.legacy.rtcs.html#module-qat.model.loaders.legacy.rtcs">qat.model.loaders.legacy.rtcs</a>
+</li>
+        <li><a href="qat.model.target_data.html#module-qat.model.target_data">qat.model.target_data</a>
 </li>
         <li><a href="qat.pipelines.html#module-qat.pipelines">qat.pipelines</a>
 </li>
@@ -4942,10 +4987,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NCOFrequencyVariability">NCOFrequencyVariability (class in qat.backend.passes.validation)</a>
@@ -4965,6 +5010,8 @@
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquiresWithDifferentWeightsValidation">NoAcquiresWithDifferentWeightsValidation (class in qat.backend.passes.validation)</a>
 </li>
       <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquireWeightsValidation">NoAcquireWeightsValidation (class in qat.backend.passes.validation)</a>
+</li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel">NoExtraFieldsFrozenModel (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel">NoExtraFieldsModel (class in qat.utils.pydantic)</a>
 </li>
@@ -5281,7 +5328,13 @@
 </li>
       </ul></li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.params.passive_reset_time">passive_reset_time (qat.middleend.passes.transform.ResetsToDelays parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.QubitDescription.params.passive_reset_time">(qat.model.target_data.QubitDescription parameter)</a>
 </li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.QubitDescription.passive_reset_time">(QubitDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassManager">PassManager (class in qat.core.pass_base)</a>
 
       <ul>
@@ -5472,8 +5525,6 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.position">position (AcquireData attribute)</a>
 
       <ul>
@@ -5482,6 +5533,8 @@
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.post_processing">post_processing (Executable attribute)</a>
 
       <ul>
@@ -5696,6 +5749,14 @@
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.pulse_channel">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_max">pulse_channel_if_freq_max (DeviceDescription attribute)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_min">pulse_channel_if_freq_min (DeviceDescription attribute)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_max">pulse_channel_lo_freq_max (DeviceDescription attribute)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_min">pulse_channel_lo_freq_min (DeviceDescription attribute)</a>
+</li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.pulse_channel_with_id">pulse_channel_with_id() (PhysicalHardwareModel method)</a>
 
       <ul>
@@ -5718,6 +5779,18 @@
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.PULSE_DURATION_LIMITS">PULSE_DURATION_LIMITS (InstructionValidationConfig attribute)</a>
 </li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_duration_max">pulse_duration_max (DeviceDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.pulse_duration_max">(qat.model.target_data.DeviceDescription parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.pulse_duration_min">pulse_duration_min (DeviceDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.pulse_duration_min">(qat.model.target_data.DeviceDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.PulseChannel.pulse_type">pulse_type (PulseChannel property)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.PulseChannel">PulseChannel (class in qat.model.device)</a>
@@ -6461,6 +6534,13 @@
 
       <ul>
         <li><a href="qat.model.loaders.legacy.rtcs.html#module-qat.model.loaders.legacy.rtcs">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.model.target_data
+
+      <ul>
+        <li><a href="qat.model.target_data.html#module-qat.model.target_data">module</a>
 </li>
       </ul></li>
       <li>
@@ -7363,6 +7443,12 @@
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.ZX_pi_4.params.qubit2">(qat.ir.gates.native.ZX_pi_4 parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.QUBIT_DATA">QUBIT_DATA (qat.model.target_data.TargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.QUBIT_DATA">(TargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id">qubit_id (OperatorInfo attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.qubit_physical_channel_id">qubit_physical_channel_id() (QRPairModel method)</a>
@@ -7378,6 +7464,8 @@
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_with_index">qubit_with_index() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QubitCoupling">QubitCoupling (class in qat.purr.compiler.devices)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.QubitDescription">QubitDescription (class in qat.model.target_data)</a>
 </li>
       <li><a href="qat.ir.gates.base.html#qat.ir.gates.base.QubitInstruction">QubitInstruction (class in qat.ir.gates.base)</a>
 </li>
@@ -7713,7 +7801,15 @@
         <li><a href="qat.model.device.html#qat.model.device.Qubit.resonator">(Qubit attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.RESONATOR_DATA">RESONATOR_DATA (qat.model.target_data.TargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.RESONATOR_DATA">(TargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.resonator_physical_channel_id">resonator_physical_channel_id() (QRPairModel method)</a>
+</li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.ResonatorDescription">ResonatorDescription (class in qat.model.target_data)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels">ResonatorPulseChannels (class in qat.model.device)</a>
 </li>
@@ -8827,6 +8923,8 @@
         <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TriageResult.target_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.target_map">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData">TargetData (class in qat.model.target_data)</a>
+</li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.targets">targets (Acquire attribute)</a>
 
       <ul>
@@ -9357,6 +9455,8 @@
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.waveform_definition">waveform_definition() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.waveform_definition">[1]</a>
 </li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.waveform_memory_size">waveform_memory_size (DeviceDescription attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.waveform_type">waveform_type (CalibratablePulse attribute)</a>
@@ -9379,6 +9479,8 @@
         <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.weights">(Sequence attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.weveform_memory_size">weveform_memory_size (qat.model.target_data.DeviceDescription parameter)</a>
+</li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.BlackmanFunction.width">width (BlackmanFunction attribute)</a>
 
       <ul>
