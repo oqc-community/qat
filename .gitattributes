@@ -1,2 +1,2 @@
-src/tests/files/** linguist-vendored
+tests/files/** linguist-vendored
 notebooks/ipynb/*.ipynb linguist-generated=true
