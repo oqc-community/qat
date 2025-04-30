@@ -8,7 +8,7 @@ from qat.model.loaders.base import BasePhysicalModelLoader
 
 class FileModelLoader(BasePhysicalModelLoader):
     def __init__(self, path: Path | str):
-        self.path: Path = Path(path)
+        self.path: Path = Path(path).expanduser()
 
     def load(self) -> PhysicalHardwareModel:
         blob = self.path.read_text()

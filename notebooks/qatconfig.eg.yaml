@@ -16,6 +16,6 @@ PIPELINES:
 
 HARDWARE:
 - name: echo6loader
-  loader: qat.model.loaders.legacy.EchoModelLoader
-  init:
+  type: qat.model.loaders.legacy.EchoModelLoader
+  config:
     qubit_count: 6

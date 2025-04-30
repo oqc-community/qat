@@ -10,7 +10,7 @@ from qat.purr.compiler.hardware_models import (
 
 class FileModelLoader(BaseLegacyModelLoader):
     def __init__(self, path: Path | str):
-        self.path: Path = Path(path)
+        self.path: Path = Path(path).expanduser()
 
     def load(self) -> LegacyQuantumHardwareModel:
         return LegacyQuantumHardwareModel.load_calibration_from_file(str(self.path))
