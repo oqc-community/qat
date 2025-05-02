@@ -408,6 +408,20 @@ class AbstractContext(ABC):
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
 
+    @contextmanager
+    def _wrapper_cond(self, mask, operator, duration):
+        """
+        A wrapper for conditional regions
+        """
+
+        self.sequence_builder.set_cond(
+            1, mask, operator, duration, "Start of conditional region"
+        )
+        yield
+        self.sequence_builder.set_cond(
+            0, mask, operator, duration, "End of conditional region"
+        )
+
     def id(self):
         self.sequence_builder.nop()
 
@@ -637,6 +651,7 @@ class NewQbloxContext(AbstractContext):
         """
 
         self.sequence_builder.set_mrk(3)
+        self.sequence_builder.set_latch_en(1, 4)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
 
         # TODO - probably not the right place

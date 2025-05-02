@@ -438,6 +438,18 @@ class QrmRfConfigHelper(QrmConfigHelper):
             sequencer.thresholded_acq_threshold(
                 self.sequencer_config.thresholded_acq.threshold
             )
+        if self.sequencer_config.thresholded_acq.trigger_en:
+            sequencer.thresholded_acq_trigger_en(
+                self.sequencer_config.thresholded_acq.trigger_en
+            )
+        if self.sequencer_config.thresholded_acq.trigger_address:
+            sequencer.thresholded_acq_trigger_address(
+                self.sequencer_config.thresholded_acq.trigger_address
+            )
+        if self.sequencer_config.thresholded_acq.trigger_invert:
+            sequencer.thresholded_acq_trigger_invert(
+                self.sequencer_config.thresholded_acq.trigger_invert
+            )
 
     def calibrate_lo_leakage(self, module: Module):
         module.out0_in0_lo_cal()

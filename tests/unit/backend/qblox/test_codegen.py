@@ -419,7 +419,7 @@ class TestNewQbloxEmitter(InvokerMixin):
             assert not pkg.sequence.acquisitions
             assert not pkg.sequence.weights
 
-            assert "set_mrk 3\nupd_param 4" in pkg.sequence.program
+            assert "set_mrk 3\nset_latch_en 1,4\nupd_param 4" in pkg.sequence.program
             assert "stop" in pkg.sequence.program
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])

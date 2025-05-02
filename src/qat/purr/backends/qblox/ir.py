@@ -9,7 +9,6 @@ import numpy as np
 
 class Opcode(Enum):
     # Control
-    NEW_LINE = "\n"
     NOP = "nop"
     STOP = "stop"
 
@@ -39,11 +38,14 @@ class Opcode(Enum):
     SET_AWG_OFFSET = "set_awg_offs"
 
     # Real-time pipeline
+    SET_COND = "set_cond"
     UPDATE_PARAMETERS = "upd_param"
     PLAY = "play"
     ACQUIRE = "acquire"
     ACQUIRE_WEIGHED = "acquire_weighed"
     ACQUIRE_TTL = "acquire_ttl"
+    SET_LATCH_EN = "set_latch_en"
+    LATCH_RST = "latch_rst"
     WAIT = "wait"
     WAIT_SYNC = "wait_sync"
     WAIT_TRIGGER = "wait_trigger"
@@ -97,9 +99,7 @@ class SequenceBuilder:
             waveforms=self.waveforms,
             acquisitions=self.acquisitions,
             weights=self.weights,
-            program=f"{Opcode.NEW_LINE.value}".join(
-                [str(inst) for inst in self.q1asm_instructions]
-            ),
+            program=f"\n".join([str(inst) for inst in self.q1asm_instructions]),
         )
 
     def lookup_waveform_by_data(self, data: np.ndarray):
@@ -217,6 +217,18 @@ class SequenceBuilder:
         )
 
     # Real-time instructions
+    def set_cond(
+        self,
+        enable: Union[int, str],
+        mask: Union[int, str],
+        operator: Union[int, str],
+        else_duration: int,
+        comment: str = None,
+    ):
+        return self._add_instruction(
+            Opcode.SET_COND, enable, mask, operator, else_duration, comment=comment
+        )
+
     def upd_param(self, duration: int, comment: str = None):
         return self._add_instruction(Opcode.UPDATE_PARAMETERS, duration, comment=comment)
 
@@ -256,6 +268,12 @@ class SequenceBuilder:
         return self._add_instruction(
             Opcode.ACQUIRE_TTL, acq, bin, enable, duration, comment=comment
         )
+
+    def set_latch_en(self, enable: Union[int, str], duration: int, comment: str = None):
+        return self._add_instruction(Opcode.SET_LATCH_EN, enable, duration, comment=comment)
+
+    def latch_rst(self, duration: Union[str, int], comment: str = None):
+        return self._add_instruction(Opcode.LATCH_RST, duration, comment=comment)
 
     def wait(self, duration: Union[int, str], comment: str = None):
         return self._add_instruction(Opcode.WAIT, duration, comment=comment)
