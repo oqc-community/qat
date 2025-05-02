@@ -15,6 +15,7 @@ from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
+    Assign,
     CustomPulse,
     Delay,
     EndRepeat,
@@ -22,6 +23,8 @@ from qat.purr.compiler.instructions import (
     Instruction,
     Jump,
     Label,
+    PhaseReset,
+    PhaseSet,
     Pulse,
     PulseShapeType,
     QuantumInstruction,
@@ -159,12 +162,23 @@ class SquashDelaysOptimisation(TransformPass):
         :param met_mgr: The metrics manager to store the number of instructions after
             optimisation.
         """
-        delimiter_types = (Pulse, CustomPulse, Acquire, Delay, Label, Jump)
+        delimiter_types = (
+            Acquire,
+            Assign,
+            CustomPulse,
+            Delay,
+            Jump,
+            Label,
+            PhaseReset,
+            PhaseSet,
+            Pulse,
+        )
         accumulated_delays: dict[PulseChannel, float] = defaultdict(float)
         instructions: list[Instruction] = []
         for inst in ir.instructions:
             if isinstance(inst, Delay) and isinstance(inst.time, Number):
-                accumulated_delays[inst.quantum_targets[0]] += inst.time
+                for target in inst.quantum_targets:
+                    accumulated_delays[target] += inst.time
             elif isinstance(inst, delimiter_types):
                 if isinstance(inst, QuantumInstruction):
                     targets = inst.quantum_targets

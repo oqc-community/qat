@@ -44,7 +44,6 @@ def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
         | CalibrationAnalysis()
         # Validate first to fail fast:
         | FrequencyValidation(model)
-        | ReadoutValidation(model)
         # Process a "task" into a program. Could be considered as a frontend pipeline
         # that converts takes a specific task and makes the appropriate qat ir.
         # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
@@ -59,6 +58,9 @@ def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
         # eventually be replaced with behaviour from the builder
         | PostProcessingSanitisation()
         | AcquireSanitisation()
+        # handles mid-circuit measures + pp validation, should be split up
+        # is pp validation needed in a pipeline that explicitly does pp sanitisation?
+        | ReadoutValidation(model)
         # Optimisation of the ir:
         | PhaseOptimisation()
         # Preparing the IR for the backend

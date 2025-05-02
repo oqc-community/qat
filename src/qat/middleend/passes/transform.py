@@ -33,6 +33,8 @@ from qat.purr.compiler.instructions import (
     CustomPulse,
     Delay,
     Instruction,
+    Jump,
+    Label,
     MeasurePulse,
     PhaseReset,
     PhaseSet,
@@ -77,25 +79,22 @@ class PhaseOptimisation(TransformPass):
         accum_phaseshifts: dict[str, PhaseShift | PhaseSet] = dict()
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
-            if isinstance(instruction, PhaseShift) and isinstance(
+            if isinstance(instruction, (PhaseShift, PhaseSet)) and isinstance(
                 instruction.phase, Number
             ):
-                if (key := instruction.channel.partial_id) in accum_phaseshifts:
-                    accum_phaseshifts[key].phase += instruction.phase
-                else:
-                    accum_phaseshifts[key] = PhaseShift(
-                        instruction.channel, instruction.phase
-                    )
-            elif isinstance(instruction, PhaseSet) and isinstance(
-                instruction.phase, Number
-            ):
-                accum_phaseshifts[instruction.channel.partial_id] = PhaseSet(
-                    instruction.channel, instruction.phase
+                key = instruction.channel.partial_id
+                accum_phaseshifts[key] = self.merge_phase_instructions(
+                    instruction.channel, accum_phaseshifts.get(key, None), instruction
                 )
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
-                    accum_phaseshifts[channel.partial_id] = PhaseSet(channel, 0.0)
-            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift, PhaseSet)):
+                    key = channel.partial_id
+                    accum_phaseshifts[key] = self.merge_phase_instructions(
+                        channel, accum_phaseshifts.get(key, None), instruction
+                    )
+            elif isinstance(
+                instruction, (CustomPulse, Pulse, Acquire, PhaseSet, PhaseShift)
+            ):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, List):
                     quantum_targets = [quantum_targets]
@@ -108,6 +107,15 @@ class PhaseOptimisation(TransformPass):
                         ):
                             optimized_instructions.append(new_instruction)
                 optimized_instructions.append(instruction)
+            elif isinstance(instruction, (Delay, Synchronize)):
+                for channel in instruction.quantum_targets:
+                    key = channel.partial_id
+                    if isinstance(accum_phaseshifts.get(key, None), PhaseSet):
+                        optimized_instructions.append(accum_phaseshifts.pop(key))
+                optimized_instructions.append(instruction)
+            elif isinstance(instruction, (Jump, Label)):
+                accum_phaseshifts = dict()
+                optimized_instructions.append(instruction)
             else:
                 optimized_instructions.append(instruction)
 
@@ -116,6 +124,25 @@ class PhaseOptimisation(TransformPass):
             MetricsType.OptimizedInstructionCount, len(optimized_instructions)
         )
         return ir
+
+    @staticmethod
+    def merge_phase_instructions(
+        target: PulseChannel,
+        phase1: PhaseSet | PhaseReset | PhaseShift | None,
+        phase2: PhaseSet | PhaseReset | PhaseShift,
+    ):
+        if isinstance(phase2, PhaseReset):
+            return PhaseSet(target, 0.0)
+        elif isinstance(phase2, PhaseSet):
+            return PhaseSet(target, phase2.phase)
+        elif phase1 == None:
+            return phase2
+        elif isinstance(phase1, PhaseReset):
+            return PhaseSet(target, phase2.phase)
+        elif isinstance(phase1, PhaseSet):
+            return PhaseSet(target, phase1.phase + phase2.phase)
+        else:
+            return PhaseShift(target, phase1.phase + phase2.phase)
 
 
 class PydPhaseOptimisation(TransformPass):

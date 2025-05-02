@@ -80,13 +80,14 @@ class TestPhaseOptimisation:
         phase_reset = PhaseReset(self.hw.qubits)
         builder.add(phase_reset)
         builder.add(phase_reset)
-        assert len(builder.instructions) == 2
+        builder.delay(phase_reset.quantum_targets, 1e-3)  # to stop them being deleted
+        assert len(builder.instructions) == 3
 
         PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
-        for inst in builder.instructions:
+        for inst in builder.instructions[:-1]:
             assert isinstance(inst, PhaseSet)
-        channels = set([inst.channel for inst in builder.instructions])
-        assert len(channels) == len(builder.instructions)
+        channels = set([inst.channel for inst in builder.instructions[:-1]])
+        assert len(channels) == len(builder.instructions) - 1
 
     def test_empty_constructor(self):
         hw = EchoModelLoader(8).load()
@@ -213,6 +214,65 @@ class TestPhaseOptimisation:
         assert len(ir.instructions) == 2
         assert isinstance(ir.instructions[0], PhaseSet)
         assert np.isclose(ir.instructions[0].phase, np.pi / 4)
+
+    def test_phaseset_does_not_commute_through_delay(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        chan = self.hw.qubits[0].get_drive_channel()
+        builder.add(PhaseReset(chan))
+        builder.delay(chan, 1e-3)
+        builder.add(PhaseSet(chan, np.pi / 2))
+        builder.delay(chan, 1e-3)
+        builder.add(PhaseShift(chan, np.pi / 4))
+        builder.delay(chan, 1e-3)
+
+        builder = PhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Delay,
+            Delay,
+        ]
+
+    def test_phaseset_does_not_commute_through_sync(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        chan1 = self.hw.qubits[0].get_drive_channel()
+        chan2 = self.hw.qubits[0].get_measure_channel()
+        builder.add(PhaseReset(chan1))
+        builder.add(PhaseReset(chan2))
+        builder.delay(chan1, 1e-3)
+        builder.synchronize([chan1, chan2])
+        builder.add(PhaseSet(chan1, np.pi / 2))
+        builder.add(PhaseSet(chan2, np.pi / 2))
+        builder.delay(chan2, 1e-3)
+        builder.synchronize([chan1, chan2])
+        builder.add(PhaseShift(chan1, np.pi / 4))
+        builder.add(PhaseShift(chan2, np.pi / 4))
+
+        builder = PhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+        ]
+        assert [
+            inst.quantum_targets[0]
+            for inst in builder.instructions
+            if isinstance(inst, PhaseSet)
+        ] == [chan1, chan2, chan2, chan1]
 
 
 class TestPydPhaseOptimisation:

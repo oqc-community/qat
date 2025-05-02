@@ -141,6 +141,20 @@ class TestSquashDelaysOptimisation:
         assert isinstance(builder.instructions[2], Delay)
         assert np.isclose(builder.instructions[2].time, np.sum(delay_times[2:5]))
 
+    def test_delay_with_multiple_channels(self):
+        delay_times = np.random.rand(2)
+        hw = EchoModelLoader().load()
+        chan1 = hw.qubits[0].get_drive_channel()
+        chan2 = hw.qubits[0].get_measure_channel()
+        builder = hw.create_builder()
+        builder.add(Delay([chan1, chan2], 5))
+        builder.delay(chan1, delay_times[0])
+        builder.delay(chan2, delay_times[1])
+        builder = SquashDelaysOptimisation().run(builder, ResultManager(), MetricsManager())
+        assert len(builder.instructions) == 2
+        assert builder.instructions[0].time == 5 + delay_times[0]
+        assert builder.instructions[1].time == 5 + delay_times[1]
+
 
 class TestFreqShiftSanitisation:
 
