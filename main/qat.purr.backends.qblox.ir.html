@@ -407,6 +407,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.LATCH_RST">
+<span class="sig-name descname"><span class="pre">LATCH_RST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'latch_rst'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.LATCH_RST" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.LOOP">
 <span class="sig-name descname"><span class="pre">LOOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'loop'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.LOOP" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -414,11 +419,6 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.MOVE">
 <span class="sig-name descname"><span class="pre">MOVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'move'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.MOVE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.NEW_LINE">
-<span class="sig-name descname"><span class="pre">NEW_LINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\n'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.NEW_LINE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -454,6 +454,16 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_AWG_OFFSET">
 <span class="sig-name descname"><span class="pre">SET_AWG_OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_awg_offs'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_AWG_OFFSET" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_COND">
+<span class="sig-name descname"><span class="pre">SET_COND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_cond'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_COND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.Opcode.SET_LATCH_EN">
+<span class="sig-name descname"><span class="pre">SET_LATCH_EN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'set_latch_en'</span></em><a class="headerlink" href="#qat.purr.backends.qblox.ir.Opcode.SET_LATCH_EN" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -612,6 +622,11 @@ This includes q1asm, waveforms, weights, and acquisitions.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.latch_rst">
+<span class="sig-name descname"><span class="pre">latch_rst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.latch_rst" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.logic_and">
 <span class="sig-name descname"><span class="pre">logic_and</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.logic_and" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -672,8 +687,18 @@ This includes q1asm, waveforms, weights, and acquisitions.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_cond">
+<span class="sig-name descname"><span class="pre">set_cond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_cond" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_freq">
 <span class="sig-name descname"><span class="pre">set_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_freq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.ir.SequenceBuilder.set_latch_en">
+<span class="sig-name descname"><span class="pre">set_latch_en</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.ir.SequenceBuilder.set_latch_en" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
