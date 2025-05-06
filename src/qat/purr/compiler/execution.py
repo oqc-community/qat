@@ -1018,6 +1018,18 @@ class SweepIterator:
 
         return sweep_iterator
 
+    @staticmethod
+    def from_sweeps(sweeps: List[Sweep]):
+        """
+        Convenient helper that builds a SweepIterator from a collection of sweeps.
+        This bypasses QatFile and is more suitable for the TriagePass.
+        """
+
+        sweep_iterator = SweepIterator()
+        for sweep in sweeps:
+            sweep_iterator.add_sweep(sweep)
+        return sweep_iterator
+
     def _revert_sweep_values(self, node):
         """
         Reverts all changes made by injectors during running to their pre-sweep states.

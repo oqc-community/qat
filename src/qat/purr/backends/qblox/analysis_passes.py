@@ -48,6 +48,8 @@ class TriageResult(ResultInfoMixin):
     target_map: Dict[PulseChannel, List[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
+    device_updates: List[DeviceUpdate] = field(default_factory=list)
+    quantum_instructions: List[QuantumInstruction] = field(default_factory=list)
     acquire_map: Dict[PulseChannel, List[Acquire]] = field(
         default_factory=lambda: defaultdict(list)
     )
@@ -94,6 +96,7 @@ class TriagePass(AnalysisPass):
         for inst in builder.instructions:
             # Dissect by target
             if isinstance(inst, QuantumInstruction):
+                result.quantum_instructions.append(inst)
                 for qt in inst.quantum_targets:
                     if isinstance(qt, Acquire):
                         for aqt in qt.quantum_targets:
@@ -107,6 +110,10 @@ class TriagePass(AnalysisPass):
             # Sweeps
             if isinstance(inst, Sweep):
                 result.sweeps.append(inst)
+
+            # DeviceUpdates
+            elif isinstance(inst, DeviceUpdate) and not isinstance(inst.value, Variable):
+                result.device_updates[inst.target].append(inst)
 
             # Returns
             elif isinstance(inst, Return):

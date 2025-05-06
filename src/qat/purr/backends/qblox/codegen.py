@@ -30,7 +30,6 @@ from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
-from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.instructions import (
     Acquire,
     CustomPulse,
@@ -916,11 +915,14 @@ class NewQbloxContext(AbstractContext):
 
 
 class QbloxEmitter:
-    def emit(self, qat_file: QatFile) -> List[QbloxPackage]:
+    def __init__(self, repeat: Repeat):
+        self.repeat = repeat
+
+    def emit(self, instructions: List[QuantumInstruction]) -> List[QbloxPackage]:
         contexts: Dict[PulseChannel, QbloxContext] = {}
 
         with ExitStack() as stack:
-            inst_iter = iter(qat_file.instructions)
+            inst_iter = iter(instructions)
             while (inst := next(inst_iter, None)) is not None:
                 if not isinstance(inst, QuantumInstruction):
                     continue  # Ignore classical instructions
@@ -933,7 +935,7 @@ class QbloxEmitter:
                         if not isinstance(target, PulseChannel):
                             raise ValueError(f"{target} is not a PulseChannel")
                         contexts.setdefault(
-                            target, stack.enter_context(QbloxContext(qat_file.repeat))
+                            target, stack.enter_context(QbloxContext(self.repeat))
                         )
                     QbloxContext.synchronize(inst, contexts)
                     continue
@@ -947,7 +949,7 @@ class QbloxEmitter:
                         raise ValueError(f"{target} is not a PulseChannel")
 
                     context = contexts.setdefault(
-                        target, stack.enter_context(QbloxContext(qat_file.repeat))
+                        target, stack.enter_context(QbloxContext(self.repeat))
                     )
 
                     if isinstance(inst, MeasurePulse):

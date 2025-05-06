@@ -71,7 +71,7 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
             config.sequencers = {int(k): v for k, v in config.sequencers.items()}
 
 
-class QbloxLiveEngine(LiveDeviceEngine):
+class QbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def startup(self):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
@@ -81,6 +81,20 @@ class QbloxLiveEngine(LiveDeviceEngine):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
         self.model.control_hardware.disconnect()
+
+    def optimize(self, instructions):
+        pass
+
+    def validate(self, instructions: List[Instruction]):
+        pass
+
+    def build_pass_pipeline(self, *args, **kwargs):
+        return (
+            PassManager()
+            | RepeatSanitisation(self.model)
+            | ReturnSanitisation()
+            | TriagePass()
+        )
 
     def build_acquire_list(self, position_map: Dict[PulseChannel, List[PositionData]]):
         buffers = {}
@@ -112,23 +126,23 @@ class QbloxLiveEngine(LiveDeviceEngine):
         return super()._common_execute(builder.instructions, interrupt)
 
     def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, package: QatFile, interrupt=NullInterrupt()
+        self, sweep_iterator: SweepIterator, qat_file: QatFile, interrupt=NullInterrupt()
     ):
         if self.model.control_hardware is None:
             raise ValueError("Please add a control hardware first!")
 
         results = {}
         while not sweep_iterator.is_finished():
-            sweep_iterator.do_sweep(package.instructions)
+            sweep_iterator.do_sweep(qat_file.instructions)
 
-            position_map = self.create_duration_timeline(package.instructions)
+            position_map = self.create_duration_timeline(qat_file.instructions)
 
-            qblox_packages = QbloxEmitter().emit(package)
+            qblox_packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
             aq_map = self.build_acquire_list(position_map)
             self.model.control_hardware.set_data(qblox_packages)
 
-            repetitions = package.repeat.repeat_count
-            repetition_time = package.repeat.repetition_period
+            repetitions = qat_file.repeat.repeat_count
+            repetition_time = qat_file.repeat.repetition_period
 
             for aqs in aq_map.values():
                 if len(aqs) > 1:
@@ -160,7 +174,7 @@ class QbloxLiveEngine(LiveDeviceEngine):
                 for aq in aqs:
                     response = playback_results[aq.mode][aq.output_variable]
                     response_axis = get_axis_map(aq.mode, response)
-                    for pp in package.get_pp_for_variable(aq.output_variable):
+                    for pp in qat_file.get_pp_for_variable(aq.output_variable):
                         response, response_axis = self.run_post_processing(
                             pp, response, response_axis
                         )

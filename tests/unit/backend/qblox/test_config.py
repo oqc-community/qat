@@ -87,7 +87,7 @@ class TestSequencerConfig(TestQbloxConfigMixin):
             .measure_mean_z(qubit)
         )
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
 
         assert len(packages) == 2
 

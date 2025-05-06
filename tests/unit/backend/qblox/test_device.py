@@ -61,6 +61,6 @@ class TestQbloxControlHardware:
         )
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        qblox_packages = QbloxEmitter().emit(qat_file)
+        qblox_packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         model.control_hardware.set_data(qblox_packages)
         assert any(model.control_hardware._resources)

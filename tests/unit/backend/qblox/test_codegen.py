@@ -62,7 +62,7 @@ class TestQbloxEmitter:
         builder = get_builder(model).add(gaussian)
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 1
         pkg = packages[0]
         assert pkg.target == drive_channel
@@ -79,7 +79,7 @@ class TestQbloxEmitter:
             drive_channel, PulseShapeType.SQUARE, width=width, amp=amp
         )
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 1
         pkg = packages[0]
         assert pkg.target == drive_channel
@@ -104,7 +104,7 @@ class TestQbloxEmitter:
             .frequency_shift(drive_channel, frequency)
         )
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         for package in packages:
             expected_phase = QbloxLegalisationPass.phase_as_steps(phase)
             assert f"set_ph_delta {expected_phase}" in package.sequence.program
@@ -125,7 +125,7 @@ class TestQbloxEmitter:
 
         builder = get_builder(model).acquire(acquire_channel, time, delay=delay)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 0
 
         builder = get_builder(model)
@@ -136,7 +136,7 @@ class TestQbloxEmitter:
             ]
         )
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 1
         pkg = packages[0]
         assert not pkg.sequence.waveforms
@@ -175,9 +175,9 @@ class TestQbloxEmitter:
 
         if (width_seconds > (Constants.MAX_SAMPLE_SIZE_WAVEFORMS / 2) * 1e-9).any():
             with pytest.raises(ValueError):
-                QbloxEmitter().emit(qat_file)
+                QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         else:
-            packages = QbloxEmitter().emit(qat_file)
+            packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
             assert len(packages) == 1
 
     def test_single_resonator_spect(self, model):
@@ -187,7 +187,7 @@ class TestQbloxEmitter:
         acquire_channel = qubit.get_acquire_channel()
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 1
         acquire_pkg = packages[0]
         assert acquire_pkg.target == acquire_channel
@@ -214,7 +214,7 @@ class TestQbloxEmitter:
         indices = [0, 1]
         builder = resonator_spect(model, indices)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == len(indices)
 
         for i, index in enumerate(indices):
@@ -251,7 +251,7 @@ class TestQbloxEmitter:
         acquire_channel = qubit.get_acquire_channel()
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 2
 
         # Drive
@@ -298,7 +298,7 @@ class TestQbloxEmitter:
         indices = [0, 1]
         builder = qubit_spect(model, indices)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 2 * len(indices)
 
         for i, index in enumerate(indices):
@@ -353,7 +353,7 @@ class TestQbloxEmitter:
     def test_scope_acquisition(self, model, qubit_indices):
         builder = scope_acq(model, qubit_indices)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == len(qubit_indices)
 
         acquire_pkg = next((pkg for pkg in packages))
@@ -361,7 +361,7 @@ class TestQbloxEmitter:
 
         builder = scope_acq(model, qubit_indices, do_X=True)
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
         assert len(packages) == 2 * len(qubit_indices)
 
         # Enable weights
@@ -378,7 +378,7 @@ class TestQbloxEmitter:
             acquire.filter = CustomPulse(acquire.channel, weights)
 
         qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter().emit(qat_file)
+        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
 
         acquire_pkg = next((pkg for pkg in packages))
         assert "acquire_weighed" in acquire_pkg.sequence.program
