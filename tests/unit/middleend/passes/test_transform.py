@@ -1072,6 +1072,24 @@ class TestEndOfTaskResetSanitisation:
         assert len(reset_channels) == 1
         assert reset_channels[0] == qubit.get_drive_channel()
 
+    def test_reset_with_no_drive_channel(self):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        builder = model.create_builder()
+        builder.pulse(qubit.get_measure_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
+
+        res = ActiveChannelResults()
+        res.target_map[qubit.get_measure_channel()] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        builder = EndOfTaskResetSanitisation().run(builder, res_mgr)
+        reset_instrs = [instr for instr in builder.instructions if isinstance(instr, Reset)]
+        assert len(reset_instrs) == 1
+        assert reset_instrs[0].quantum_targets[0] == qubit.get_measure_channel()
+
 
 @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
 class TestResetsToDelays:
@@ -1135,6 +1153,37 @@ class TestResetsToDelays:
         # All pulse channels in the qubit are active channels.
         assert len(delays[0].quantum_targets) == len(pulse_channels)
         assert delays[0].time == passive_reset_time
+
+    @pytest.mark.parametrize("reset_chan", ["acquire", "measure"])
+    def test_reset_with_no_drive_channel(self, passive_reset_time, reset_chan):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        if reset_chan == "measure":
+            reset_chan = qubit.get_measure_channel()
+        else:
+            reset_chan = qubit.get_acquire_channel()
+
+        builder = model.create_builder()
+        builder.pulse(qubit.get_measure_channel(), shape=PulseShapeType.SQUARE, width=80e-9)
+        builder.acquire(qubit.get_acquire_channel(), time=80e-9, delay=0.0)
+        builder.add(Reset(reset_chan))
+
+        res = ActiveChannelResults()
+        res.target_map[qubit.get_measure_channel()] = qubit
+        res.target_map[qubit.get_acquire_channel()] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        builder = ResetsToDelays(passive_reset_time).run(builder, res_mgr)
+        reset_instrs = [instr for instr in builder.instructions if isinstance(instr, Reset)]
+        assert len(reset_instrs) == 0
+        delay_instrs = [instr for instr in builder.instructions if isinstance(instr, Delay)]
+        assert len(delay_instrs) == 1
+        assert set(delay_instrs[0].quantum_targets) == set(
+            [qubit.get_acquire_channel(), qubit.get_measure_channel()]
+        )
 
 
 class MockPulseShapeType(Enum):

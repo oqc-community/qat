@@ -647,7 +647,9 @@ class EndOfTaskResetSanitisation(TransformPass):
     After each shot, it is expected that the qubit is returned to its ground state, ready
     for the next shot. This pass ensures this is the case by checking if the last "active"
     operation on an qubit is a :class:`Reset`, and if not, adds a :class:`Reset` to the end
-    of the instruction list.
+    of the instruction list. By default, the :class:`Reset` operation will have the drive
+    channel of a qubit as its target. However, if the drive channel is not an active
+    channel, a different active channel on the qubit will be used its place.
 
     :class:`Reset` instructions currently sit in a weird place. Their targets are drive
     channels to match the semantics of other quantum instructions (but are instantiated with
@@ -692,7 +694,13 @@ class EndOfTaskResetSanitisation(TransformPass):
 
         for qubit, val in qubit_map.items():
             if not val:
-                ir.add(Reset(qubit))
+                if (
+                    target := qubit.get_drive_channel()
+                ) not in active_pulse_channels.target_map:
+                    # if the drive channel isn't an active channel, choose something else
+                    target = active_pulse_channels.from_qubit(qubit)[0]
+                ir.add(Reset(target))
+
         return ir
 
 
