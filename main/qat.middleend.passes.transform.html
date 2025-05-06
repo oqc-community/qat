@@ -392,7 +392,9 @@ operations if not found.</p>
 <p>After each shot, it is expected that the qubit is returned to its ground state, ready
 for the next shot. This pass ensures this is the case by checking if the last “active”
 operation on an qubit is a <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code>, and if not, adds a <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> to the end
-of the instruction list.</p>
+of the instruction list. By default, the <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> operation will have the drive
+channel of a qubit as its target. However, if the drive channel is not an active
+channel, a different active channel on the qubit will be used its place.</p>
 <p><code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> instructions currently sit in a weird place. Their targets are drive
 channels to match the semantics of other quantum instructions (but are instantiated with
 a :class:Qubit). However, like measurements, resets are a qubit-level operation. You
