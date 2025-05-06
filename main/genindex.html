@@ -940,14 +940,14 @@
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister">BitRegister (class in qat.frontend.register)</a>
 
       <ul>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.BitRegister">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits">bits (BitRegister attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN">BLACKMAN (PulseShapeType attribute)</a>
@@ -1014,6 +1014,8 @@
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline">(NewQuantumRuntime method)</a>
 </li>
         <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.PydDefaultMiddleend.build_pass_pipeline">(PydDefaultMiddleend static method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.build_pass_pipeline">(QbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.build_pass_pipeline">(QIRFrontend static method)</a>
 </li>
@@ -1878,6 +1880,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.device_update">device_update() (NewQbloxContext method)</a>
 </li>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TriageResult.device_updates">device_updates (TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.device_updates">[1]</a>
+</li>
       <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription">DeviceDescription (class in qat.model.target_data)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector">DeviceInjector (class in qat.purr.compiler.execution)</a>
@@ -2497,6 +2501,8 @@
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_qfile">from_qfile() (SweepIterator static method)</a>
 </li>
       <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActiveChannelResults.from_qubit">from_qubit() (ActiveChannelResults method)</a>
+</li>
+      <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_sweeps">from_sweeps() (SweepIterator static method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.from_yaml">from_yaml() (QatConfig class method)</a>
 
@@ -5112,6 +5118,8 @@
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxEmitter.optimize">(QbloxEmitter method)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.optimize">(QbloxLiveEngine method)</a>
+</li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.optimize">(QiskitEngine method)</a>
 </li>
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.optimize">(QuantumExecutionEngine method)</a>
@@ -5149,10 +5157,10 @@
       </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.OR">OR (Opcode attribute)</a>
 </li>
-      <li><a href="qat.core.result_base.html#qat.core.result_base.ResultManager.update.params.other_res_mgr">other_res_mgr (qat.core.result_base.ResultManager.update parameter)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.core.result_base.html#qat.core.result_base.ResultManager.update.params.other_res_mgr">other_res_mgr (qat.core.result_base.ResultManager.update parameter)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AttConfig.out0">out0 (AttConfig attribute)</a>
 
       <ul>
@@ -7351,6 +7359,8 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.quantum_gate_call">quantum_gate_call() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_gate_call">[1]</a>
 </li>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TriageResult.quantum_instructions">quantum_instructions (TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.quantum_instructions">[1]</a>
+</li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.quantum_measurement">quantum_measurement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement">[1]</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.quantum_measurement_assignment_statement">quantum_measurement_assignment_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_measurement_assignment_statement">[1]</a>
@@ -9225,6 +9235,8 @@
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.validate">(Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.validate">[1]</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.validate">(QatConfig method)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine.validate">(QbloxLiveEngine method)</a>
 </li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.validate">(QiskitEngine method)</a>
 </li>

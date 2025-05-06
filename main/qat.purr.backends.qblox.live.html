@@ -401,11 +401,22 @@ that still need static iteration while being able to accelerate programs wheneve
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLiveEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine" title="qat.purr.backends.live.LiveDeviceEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveDeviceEngine</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine" title="qat.purr.backends.live.LiveDeviceEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveDeviceEngine</span></code></a>, <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin" title="qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.build_acquire_list">
 <span class="sig-name descname"><span class="pre">build_acquire_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_map</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine.build_acquire_list" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.build_pass_pipeline">
+<span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine.build_pass_pipeline" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine.optimize" title="Link to this definition"></a></dt>
+<dd><p>Runs optimization passes specific to this hardware.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.shutdown">
@@ -417,6 +428,12 @@ that still need static iteration while being able to accelerate programs wheneve
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.startup">
 <span class="sig-name descname"><span class="pre">startup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine.startup" title="Link to this definition"></a></dt>
 <dd><p>Starts up the underlying hardware or does nothing if already started.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine.validate" title="Link to this definition"></a></dt>
+<dd><p>Validates this graph for execution on the current hardware.</p>
 </dd></dl>
 
 </dd></dl>
