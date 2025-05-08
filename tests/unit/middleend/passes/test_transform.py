@@ -634,7 +634,7 @@ class TestInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
         assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
-    def test_instructions_are_rounded_up(self):
+    def test_instructions_are_rounded_down(self):
         # Mock up some channels and a builder
         model = EchoModelLoader(10).load()
         drive_chan = model.qubits[0].get_drive_channel()
@@ -661,15 +661,9 @@ class TestInstructionGranularitySanitisation:
         ir = InstructionGranularitySanitisation(clock_cycle).run(builder)
 
         # compare in units of ns to ensure np.isclose works fine
-        assert np.isclose(
-            ir.instructions[0].duration * 1e9, (delay_time + clock_cycle) * 1e9
-        )
-        assert np.isclose(
-            ir.instructions[1].duration * 1e9, (pulse_time + clock_cycle) * 1e9
-        )
-        assert np.isclose(
-            ir.instructions[2].duration * 1e9, (acquire_time + clock_cycle) * 1e9
-        )
+        assert np.isclose(ir.instructions[0].duration * 1e9, delay_time * 1e9)
+        assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
+        assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
     def test_custom_pulses_with_correct_length_are_unchanged(self):
         # Mock up some channels and a builder

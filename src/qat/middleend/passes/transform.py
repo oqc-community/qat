@@ -371,12 +371,17 @@ class AcquireSanitisation(TransformPass):
 
 
 class InstructionGranularitySanitisation(TransformPass):
-    """Rounds up the durations of quantum instructions so they are multiples of the clock
+    """Rounds the durations of quantum instructions so they are multiples of the clock
     cycle.
 
     Only supports quantum instructions with static non-zero durations. Assumes that
     instructions with a non-zero duration only act on a single pulse channel. The
     santisiation is done for all instructions simultaneously using numpy for performance.
+
+    For :class:`CustomPulse` instructions, the durations are rounded up by padding the pulse
+    with zero amplitude at the end. For other relevant instructions, we round down: this is
+    for compatibility with calibration files that are calibrated using legacy code. However,
+    in the future we might consider changing this to round up for consistency.
 
     The Pydantic version of the pass will require the (pydantic equivalent) pass
     :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
@@ -406,30 +411,30 @@ class InstructionGranularitySanitisation(TransformPass):
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         """
 
-        filter_instructions = [
-            inst
-            for inst in ir.instructions
-            if isinstance(inst, (Pulse, Acquire, Delay, CustomPulse))
-        ]
+        self.sanitise_quantum_instructions(
+            [inst for inst in ir.instructions if isinstance(inst, (Pulse, Acquire, Delay))]
+        )
+        self.sanitise_custom_pulses(
+            [inst for inst in ir.instructions if isinstance(inst, CustomPulse)]
+        )
+        return ir
 
-        durations = np.asarray([inst.duration for inst in filter_instructions])
+    def sanitise_quantum_instructions(self, instructions: list[Pulse | Acquire | Delay]):
+        """Sanitises the durations quantum instructions with non-zero duration by rounding
+        down to the nearest clock cycle."""
 
-        # We substract 1e-10 before rounding as floating point errors can lead to rounding
-        # problems.
+        durations = np.asarray([inst.duration for inst in instructions])
         multiples = durations / self.clock_cycle
-        rounded_multiples = np.ceil(multiples - 1e-10).astype(int)
+        rounded_multiples = np.floor(multiples + 1e-10).astype(int)
+        # 1e-10 for floating point errors
         durations_equal = np.isclose(multiples, rounded_multiples)
 
         invalid_instructions: set[str] = set()
         for idx in np.where(np.logical_not(durations_equal))[0]:
-            inst = filter_instructions[idx]
+            inst = instructions[idx]
             invalid_instructions.add(str(inst))
             new_duration = rounded_multiples[idx] * self.clock_cycle
-            if isinstance(inst, CustomPulse):
-                sample_time = inst.quantum_targets[0].sample_time
-                padding = int(np.round((new_duration - durations[idx]) / sample_time, 0))
-                inst.samples.extend([0.0 + 0.0j] * padding)
-            elif isinstance(inst, Pulse):
+            if isinstance(inst, Pulse):
                 inst.width = new_duration
             else:
                 inst.time = new_duration
@@ -437,11 +442,36 @@ class InstructionGranularitySanitisation(TransformPass):
         if len(invalid_instructions) > 1:
             log.info(
                 "The following instructions do not have durations that are integer "
-                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded up: "
-                + ", ".join(set(invalid_instructions))
+                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
+                "down: " + ", ".join(set(invalid_instructions))
             )
 
-        return ir
+    def sanitise_custom_pulses(self, instructions: list[CustomPulse]):
+        """Sanitises the durations of :class:`CustomPulse` instructions by padding the
+        pulses with zero amplitudes."""
+
+        durations = np.asarray([inst.duration for inst in instructions])
+        multiples = durations / self.clock_cycle
+        # 1e-10 for floating point errors
+        rounded_multiples = np.ceil(multiples - 1e-10).astype(int)
+        durations_equal = np.isclose(multiples, rounded_multiples)
+
+        invalid_instructions: set[str] = set()
+        for idx in np.where(np.logical_not(durations_equal))[0]:
+            inst = instructions[idx]
+            invalid_instructions.add(str(inst))
+            new_duration = rounded_multiples[idx] * self.clock_cycle
+            sample_time = inst.quantum_targets[0].sample_time
+            padding = int(np.round((new_duration - durations[idx]) / sample_time, 0))
+            inst.samples.extend([0.0 + 0.0j] * padding)
+
+        if len(invalid_instructions) > 1:
+            log.info(
+                "The following custom pulses do not have durations that are integer "
+                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
+                "up by padding with zero amplitudes: "
+                + ", ".join(set(invalid_instructions))
+            )
 
 
 class InitialPhaseResetSanitisation(TransformPass):
