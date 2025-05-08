@@ -87,6 +87,13 @@ class PostProcessing(Instruction):
             return axes if isinstance(axes, list) else [axes]
         return []
 
+    @field_validator("args", mode="before")
+    def _validate_args(cls, args=[]):
+        """Ensures that the args are not numpy arrays or numpy numbers."""
+
+        args = [args] if not isinstance(args, (list, np.ndarray)) else args
+        return np.asarray(args).tolist()
+
 
 class MeasureBlock(QuantumInstructionBlock):
     """

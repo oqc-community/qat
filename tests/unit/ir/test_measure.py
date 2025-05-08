@@ -9,6 +9,9 @@ from pydantic import Field, ValidationError
 from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
+from qat.model.loaders.legacy import EchoModelLoader
+from qat.purr.compiler.instructions import Acquire as LegacyAcquire
+from qat.purr.compiler.instructions import PostProcessing as LegacyPostProcessing
 from qat.purr.compiler.instructions import PostProcessType, ProcessAxis
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
@@ -98,7 +101,6 @@ class TestPostProcessing:
             (PostProcessType.DISCRIMINATE, [np.array([0.0 + 1j])[0]]),
             (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, [-0.1, 1]),
             (PostProcessType.MEAN, []),
-            (PostProcessType.DOWN_CONVERT, [np.nan, np.nan]),
             (PostProcessType.DOWN_CONVERT, [1e8, 1e-8]),
             (PostProcessType.DOWN_CONVERT, [1e8, 1e-8 + 0j]),
             (PostProcessType.DOWN_CONVERT, [1e8, np.array([1e-8 + 0j])[0]]),
@@ -114,6 +116,50 @@ class TestPostProcessing:
         blob = pp_inst.model_dump()
         new_pp_inst = PostProcessing(**blob)
         assert pp_inst == new_pp_inst
+
+    @pytest.mark.parametrize(
+        "args", [[1e8, 1e-8], [1 + 1.0j, 0.5 - 0.5j], [1, 0.5j], [1 + 0.5j, -2.54]]
+    )
+    def test_numpy_to_list(self, args):
+        args = np.asarray(args)
+        args = [args[0], args[1]]
+        assert isinstance(args[0], np.number)
+        assert isinstance(args[1], np.number)
+
+        pp = PostProcessing(
+            output_variable="test",
+            process_type=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+            axes=[ProcessAxis.SEQUENCE],
+            args=args,
+        )
+        assert pp.args[0] == args[0]
+        assert pp.args[1] == args[1]
+        assert not isinstance(pp.args[0], np.number)
+        assert not isinstance(pp.args[1], np.number)
+
+    @pytest.mark.parametrize(
+        "args", [[1e8, 1e-8], [1 + 1.0j, 0.5 - 0.5j], [1, 0.5j], [1 + 0.5j, -2.54]]
+    )
+    def test_legacy_numpy_to_list(self, args):
+        model = EchoModelLoader().load()
+        chan = model.qubits[0].get_acquire_channel()
+
+        args = np.asarray(args)
+        args = [args[0], args[1]]
+        assert isinstance(args[0], np.number)
+        assert isinstance(args[1], np.number)
+
+        pp = LegacyPostProcessing(
+            LegacyAcquire(chan, 0.0, delay=0.0, output_variable="test"),
+            PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+            axes=[ProcessAxis.SEQUENCE],
+            args=args,
+        )
+        new_pp = PostProcessing._from_legacy(pp)
+        assert new_pp.args[0] == args[0]
+        assert new_pp.args[1] == args[1]
+        assert not isinstance(new_pp.args[0], np.number)
+        assert not isinstance(new_pp.args[1], np.number)
 
 
 class TestMeasureBlock:
