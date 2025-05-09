@@ -38,6 +38,7 @@ from qat.middleend.passes.transform import (
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
     PydReturnSanitisation,
+    RepeatSanitisation,
     ResetsToDelays,
     SynchronizeTask,
 )
@@ -62,6 +63,7 @@ from qat.purr.compiler.instructions import (
     Plus,
     Pulse,
     PulseShapeType,
+    Repeat,
     Reset,
     Synchronize,
     Variable,
@@ -1541,3 +1543,40 @@ class TestRepeatTranslation:
 
         self._check_loop_start(ir, start_indices)
         self._check_loop_close(ir, close_indices, [1000, 300])
+
+
+class TestRepeatSanitisation:
+
+    def test_repeat_adds_to_beginning(self):
+        model = EchoModelLoader().load()
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+
+        builder = RepeatSanitisation(model).run(builder)
+        assert isinstance(repeat := builder.instructions[0], Repeat)
+        assert repeat.repeat_count == model.default_repeat_count
+        assert repeat.repetition_period == model.default_repetition_period
+
+    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
+    def test_repeats_are_shifted_to_the_beginning(self, num_repeats):
+        model = EchoModelLoader().load()
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+        for i in range(num_repeats):
+            builder.repeat(i + 1, 100e-6)
+        builder = RepeatSanitisation(model).run(builder)
+
+        for i in range(num_repeats):
+            assert isinstance(builder.instructions[i], Repeat)
+            assert builder.instructions[i].repeat_count == i + 1
+
+    def test_repeat_instructions_are_sanitised(self):
+        model = EchoModelLoader().load()
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+        builder.repeat(None, None)
+
+        builder = RepeatSanitisation(model).run(builder)
+        assert isinstance(repeat := builder.instructions[0], Repeat)
+        assert repeat.repeat_count == model.default_repeat_count
+        assert repeat.repetition_period == model.default_repetition_period

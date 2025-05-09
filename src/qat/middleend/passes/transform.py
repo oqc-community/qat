@@ -962,10 +962,15 @@ class PydReturnSanitisation(TransformPass):
 
 
 class RepeatSanitisation(TransformPass):
-    """Fixes repeat instructions if any with default values from the HW model.
-    Adds a repeat instructions if none is found."""
+    """Locates repeat instructions, bubbles them to the top of the instruction list, and
+    inserts any missing values with defaults from the hardware model. If no repeat is found,
+    then one is added to the top of the instruction list."""
 
     def __init__(self, model: QuantumHardwareModel = None):
+        """
+        :param model: The hardware model contains the default repeat value, defaults to
+            None.
+        """
         self.model = model
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
@@ -973,13 +978,30 @@ class RepeatSanitisation(TransformPass):
 
         model = self.model or get_hardware_model(args, kwargs)
 
-        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        repeats = [i for i, inst in enumerate(ir._instructions) if isinstance(inst, Repeat)]
         if repeats:
-            for rep in repeats:
+            for i in repeats:
+                rep = ir._instructions[i]
                 if rep.repeat_count is None:
                     rep.repeat_count = model.default_repeat_count
                 if rep.repetition_period is None:
                     rep.repetition_period = model.default_repetition_period
+
+            if repeats != list(range(len(repeats))):
+                for new_idx, old_idx in enumerate(repeats):
+                    if new_idx != old_idx:
+                        ir.insert(ir._instructions.pop(old_idx), new_idx)
+
+                log.warning(
+                    "Repeats are currently expected to be found at the top of the "
+                    f"instruction list, but have been found at positions {repeats}. They "
+                    "will be moved to the top. With more complex control flow and iteration"
+                    " support in the future, this will be changed so repeats keep their "
+                    "positions (with appropriate end of repeat delimiters)."
+                )
+
         else:
-            ir.repeat(model.default_repeat_count, model.default_repetition_period)
+            ir.insert(
+                Repeat(model.default_repeat_count, model.default_repetition_period), 0
+            )
         return ir
