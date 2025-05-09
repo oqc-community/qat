@@ -751,8 +751,15 @@ with all acquisitions if none is found.</p>
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Fixes repeat instructions if any with default values from the HW model.
-Adds a repeat instructions if none is found.</p>
+<p>Locates repeat instructions, bubbles them to the top of the instruction list, and
+inserts any missing values with defaults from the hardware model. If no repeat is found,
+then one is added to the top of the instruction list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.RepeatSanitisation.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.RepeatSanitisation.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a>]</span>) – The hardware model contains the default repeat value, defaults to
+None.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatSanitisation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation.run" title="Link to this definition"></a></dt>
