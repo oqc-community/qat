@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from abc import ABC
 from bisect import insort
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
@@ -30,6 +30,7 @@ from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
+from qat.purr.compiler.execution import DeviceInjectors, SweepIterator
 from qat.purr.compiler.instructions import (
     Acquire,
     CustomPulse,
@@ -380,29 +381,58 @@ class AbstractContext(ABC):
         q_index = self._register_signal(waveform, target, data.imag, "Q")
         return i_index, q_index
 
+    def _register_acquisition(self, acq_name: str, num_bins: Union[int, str]):
+        acq_index = self._acq_index
+        self.sequence_builder.add_acquisition(acq_name, acq_index, num_bins)
+        self._acq_index = acq_index + 1
+        return acq_index
+
     def _register_weight(self, name: str, weight: np.ndarray):
         wgt_index = self._wgt_index
         self.sequence_builder.add_weight(name, wgt_index, weight.tolist())
         self._wgt_index = wgt_index + 1
         return wgt_index
 
+    def _do_acquire(self, wgt_name, acq_filter, acq_index, acq_bin, acq_width):
+        if acq_filter:
+            weight = acq_filter.samples
+            wgt_i_index = self._register_weight(f"{wgt_name}_weight_I", weight.real)
+            wgt_q_index = self._register_weight(f"{wgt_name}_weight_Q", weight.imag)
+
+            # TODO - silly convoluted way of using the `acquire_weighed` instruction
+            # TODO - simplify when Qblox supports more freedom of memory addressing
+            with (
+                self.alloc_mgr.reg_borrow("wgt_i") as wgt_i_reg,
+                self.alloc_mgr.reg_borrow("wgt_q") as wgt_q_reg,
+            ):
+                self.sequence_builder.move(wgt_i_index, wgt_i_reg)
+                self.sequence_builder.move(wgt_q_index, wgt_q_reg)
+
+                self.sequence_builder.acquire_weighed(
+                    acq_index, acq_bin, wgt_i_reg, wgt_q_reg, acq_width
+                )
+        else:
+            self.sequence_builder.acquire(acq_index, acq_bin, acq_width)
+
     @contextmanager
     def _wrapper_pulse(
         self,
         delay_seconds,
+        pulse_width,
         pulse_shape,
         i_steps,
         q_steps,
         i_index,
         q_index,
     ):
-        flight_nanos = max(int(delay_seconds * 1e9), Constants.GRID_TIME)
+        delay_width = int(delay_seconds * 1e9)
+        effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self.sequence_builder.upd_param(flight_nanos)
+            self.sequence_builder.upd_param(effective_width)
         else:
-            self.sequence_builder.play(i_index, q_index, flight_nanos)
-        yield
+            self.sequence_builder.play(i_index, q_index, effective_width)
+        yield pulse_width - effective_width
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
@@ -491,14 +521,6 @@ class QbloxContext(AbstractContext):
         sequence = self.sequence_builder.build()
         return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
-    def _register_acquisition(self, acquire: Acquire):
-        acq_index = self._acq_index
-        self.sequence_builder.add_acquisition(
-            acquire.output_variable, acq_index, self._repeat_count
-        )
-        self._acq_index = acq_index + 1
-        return acq_index
-
     def delay(self, inst: Delay):
         duration = int(calculate_duration(inst))
         self._wait_imm(duration)
@@ -550,11 +572,12 @@ class QbloxContext(AbstractContext):
             )
             return
 
-        acq_index = self._register_acquisition(acquire)
+        acq_index = self._register_acquisition(acquire.output_variable, 1)
+        acq_bin = self._repeat_reg
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
-        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation
+        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -565,31 +588,20 @@ class QbloxContext(AbstractContext):
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
         with self._wrapper_pulse(
-            acquire.delay, measure.shape, i_steps, q_steps, i_index, q_index
-        ):
-            if acquire.filter:
-                weight = acquire.filter.samples
-                wgt_i_index = self._register_weight(
-                    f"{acquire.output_variable}_weight_I", weight.real
+            acquire.delay, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
+        ) as remaining_width:
+            if remaining_width < Constants.GRID_TIME:
+                log.debug(
+                    f"Rounding up duration {remaining_width} ns as it's less than the threshold {Constants.GRID_TIME} ns"
                 )
-                wgt_q_index = self._register_weight(
-                    f"{acquire.output_variable}_weight_Q", weight.imag
-                )
-
-                # TODO - silly convoluted way of using the `acquire_weighed` instruction
-                # TODO - simplify when Qblox supports more freedom of memory addressing
-                with (
-                    self.alloc_mgr.reg_borrow("wgt_i") as wgt_i_reg,
-                    self.alloc_mgr.reg_borrow("wgt_q") as wgt_q_reg,
-                ):
-                    self.sequence_builder.move(wgt_i_index, wgt_i_reg)
-                    self.sequence_builder.move(wgt_q_index, wgt_q_reg)
-
-                self.sequence_builder.acquire_weighed(
-                    acq_index, self._repeat_reg, wgt_i_reg, wgt_q_reg, acq_width
-                )
-            else:
-                self.sequence_builder.acquire(acq_index, self._repeat_reg, acq_width)
+                remaining_width = Constants.GRID_TIME
+            self._do_acquire(
+                acquire.output_variable,
+                acquire.filter,
+                acq_index,
+                acq_bin,
+                remaining_width,
+            )
 
         self._duration = self._duration + measure.duration
         self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * self._phase))
@@ -672,14 +684,6 @@ class NewQbloxContext(AbstractContext):
 
         self.sequence_builder.stop()
 
-    def _register_acquisition(self, acquire: Acquire):
-        name = f"acquire_{hash(acquire)}"
-        num_bins = self.iter_bounds[name].count
-        acq_index = self._acq_index
-        self.sequence_builder.add_acquisition(acquire.output_variable, acq_index, num_bins)
-        self._acq_index = acq_index + 1
-        return acq_index
-
     def delay(self, inst: Delay):
         value = inst.duration
 
@@ -761,9 +765,10 @@ class NewQbloxContext(AbstractContext):
             )
             return
 
-        acq_index = self._register_acquisition(acquire)
         name = f"acquire_{hash(acquire)}"
-        bin_reg = self.alloc_mgr.registers[name]
+        num_bins = self.iter_bounds[name].count
+        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
+        acq_bin = self.alloc_mgr.registers[name]
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation
@@ -778,9 +783,20 @@ class NewQbloxContext(AbstractContext):
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
         with self._wrapper_pulse(
-            acquire.delay, measure.shape, i_steps, q_steps, i_index, q_index
-        ):
-            self.sequence_builder.acquire(acq_index, bin_reg, acq_width)
+            acquire.delay, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
+        ) as remaining_width:
+            if remaining_width < Constants.GRID_TIME:
+                log.debug(
+                    f"Rounding up duration {remaining_width} ns as it's less than the threshold {Constants.GRID_TIME} ns"
+                )
+                remaining_width = Constants.GRID_TIME
+            self._do_acquire(
+                acquire.output_variable,
+                acquire.filter,
+                acq_index,
+                acq_bin,
+                remaining_width,
+            )
 
         self._durations.append(measure.duration)
 
@@ -914,11 +930,42 @@ class NewQbloxContext(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxEmitter:
-    def __init__(self, repeat: Repeat):
-        self.repeat = repeat
+class QbloxEmitter(InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        pass
 
-    def emit(self, instructions: List[QuantumInstruction]) -> List[QbloxPackage]:
+    def emit_packages(
+        self,
+        ir: QatIR,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        ignore_empty=True,
+    ) -> Dict[int, List[QbloxPackage]]:
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        sweeps = triage_result.sweeps
+        repeat = next(iter(triage_result.repeats))
+
+        switerator = SweepIterator.from_sweeps(sweeps)
+        dinjectors = DeviceInjectors(triage_result.device_updates)
+        iter2packages: Dict[int, List[QbloxPackage]] = OrderedDict()
+        try:
+            dinjectors.inject()
+            while not switerator.is_finished():
+                switerator.do_sweep(triage_result.quantum_instructions)
+                iter2packages[switerator.current_iteration] = self._do_emit(
+                    triage_result.quantum_instructions, repeat, ignore_empty
+                )
+            return iter2packages
+        except BaseException as e:
+            raise e
+        finally:
+            switerator.revert(triage_result.quantum_instructions)
+            dinjectors.revert()
+
+    def _do_emit(
+        self, instructions: List[QuantumInstruction], repeat: Repeat, ignore_empty=True
+    ) -> List[QbloxPackage]:
         contexts: Dict[PulseChannel, QbloxContext] = {}
 
         with ExitStack() as stack:
@@ -935,7 +982,7 @@ class QbloxEmitter:
                         if not isinstance(target, PulseChannel):
                             raise ValueError(f"{target} is not a PulseChannel")
                         contexts.setdefault(
-                            target, stack.enter_context(QbloxContext(self.repeat))
+                            target, stack.enter_context(QbloxContext(repeat))
                         )
                     QbloxContext.synchronize(inst, contexts)
                     continue
@@ -949,7 +996,7 @@ class QbloxEmitter:
                         raise ValueError(f"{target} is not a PulseChannel")
 
                     context = contexts.setdefault(
-                        target, stack.enter_context(QbloxContext(self.repeat))
+                        target, stack.enter_context(QbloxContext(repeat))
                     )
 
                     if isinstance(inst, MeasurePulse):
@@ -970,28 +1017,14 @@ class QbloxEmitter:
                     elif isinstance(inst, Id):
                         context.id()
 
-        contexts = self.optimize(contexts)
-
-        return [context.create_package(target) for target, context in contexts.items()]
-
-    def optimize(self, qblox_contexts: Dict) -> Dict:
-        # Remove empty contexts
-        qblox_contexts = {
-            target: context
-            for target, context in qblox_contexts.items()
-            if not context.is_empty()
-        }
-
-        # Remove Opcode.WAIT_SYNC instructions when the experiment contains only a singleton context
-        if len(qblox_contexts) == 1:
-            context = list(qblox_contexts.values())[0]
-            context.sequence_builder.q1asm_instructions = [
-                inst
-                for inst in context.sequence_builder.q1asm_instructions
-                if not inst.opcode == Opcode.WAIT_SYNC
+        if ignore_empty:
+            return [
+                context.create_package(target)
+                for target, context in contexts.items()
+                if not context.is_empty()
             ]
-
-        return qblox_contexts
+        else:
+            return [context.create_package(target) for target, context in contexts.items()]
 
 
 @dataclass

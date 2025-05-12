@@ -335,9 +335,8 @@ class QbloxControlHardware(ControlHardware):
                 for target, sequencer in allocations.items():
                     sequencer.sync_en(False)
 
-                module.disconnect_outputs()
-                if module.is_qrm_type:
-                    module.disconnect_inputs()
+            self._resources.clear()
+            self._reset_connections()
 
         return results
 

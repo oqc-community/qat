@@ -3,9 +3,13 @@
 import numpy as np
 import pytest
 
+from qat.purr.backends.qblox.analysis_passes import TriagePass
 from qat.purr.backends.qblox.codegen import QbloxEmitter
+from qat.purr.backends.qblox.metrics_base import MetricsManager
+from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
+from qat.purr.backends.qblox.result_base import ResultManager
+from qat.purr.backends.qblox.transform_passes import RepeatSanitisation, ReturnSanitisation
 from qat.purr.compiler.devices import PulseShapeType
-from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
 from qat.purr.utils.logger import get_default_logger
@@ -14,7 +18,27 @@ log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-class TestQbloxControlHardware:
+class TestQbloxControlHardware(InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        return (
+            PassManager()
+            | RepeatSanitisation(self.model)
+            | ReturnSanitisation()
+            | TriagePass()
+        )
+
+    def _do_emit(self, builder, skip_runtime=False):
+        ir = QatIR(builder)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+
+        if not skip_runtime:
+            runtime = self.model.create_runtime()
+            runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+
     def test_instruction_execution(self, model):
         amp = 1
         rise = 1.0 / 3.0
@@ -60,7 +84,10 @@ class TestQbloxControlHardware:
             .measure_mean_signal(qubit, output_variable=f"Q{0}")
         )
 
-        qat_file = InstructionEmitter().emit(builder.instructions, model)
-        qblox_packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
-        model.control_hardware.set_data(qblox_packages)
-        assert any(model.control_hardware._resources)
+        self.model = model
+        iter2packages = self._do_emit(builder, model)
+        for packages in iter2packages.values():
+            model.control_hardware.set_data(packages)
+            assert any(model.control_hardware._resources)
+            model.control_hardware.start_playback(None, None)
+            assert not any(model.control_hardware._resources)

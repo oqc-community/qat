@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from qblox_instruments import ClusterType
 
-from qat.purr.backends.qblox.codegen import QbloxEmitter, calculate_duration
 from qat.purr.backends.qblox.config import (
     ModuleConfig,
     QcmConfigHelper,
@@ -18,10 +17,6 @@ from qat.purr.backends.qblox.config import (
     SequencerConfig,
 )
 from qat.purr.backends.qblox.constants import Constants
-from qat.purr.compiler.devices import PulseShapeType
-from qat.purr.compiler.emitter import InstructionEmitter
-from qat.purr.compiler.instructions import Acquire
-from qat.purr.compiler.runtime import get_builder
 
 from tests.unit.backend.qblox.conftest import random_resource
 
@@ -70,66 +65,6 @@ class TestQbloxConfigMixin:
     def setup_sequencer_mixer_config(seq_config: SequencerConfig, phase_offset, gain_ratio):
         seq_config.mixer.gain_ratio = gain_ratio
         seq_config.mixer.phase_offset = phase_offset
-
-
-@pytest.mark.parametrize("model", [None], indirect=True)
-class TestSequencerConfig(TestQbloxConfigMixin):
-    def test_lo_and_nco_freq(self, model):
-        width = 100e-9
-        amp = 0.5
-        qubit = model.get_qubit(0)
-        drive_channel = qubit.get_drive_channel()
-        measure_channel = qubit.get_measure_channel()
-
-        builder = (
-            get_builder(model)
-            .pulse(drive_channel, PulseShapeType.SQUARE, width=width, amp=amp)
-            .measure_mean_z(qubit)
-        )
-        qat_file = InstructionEmitter().emit(builder.instructions, model)
-        packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
-
-        assert len(packages) == 2
-
-        # Drive
-        drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
-        lo_freq, nco_freq = self.extract_lo_and_nco_freqs(drive_channel)
-        module, sequencer = model.control_hardware.allocate_resources(drive_pkg)
-        model.control_hardware.configure(drive_pkg, module, sequencer)
-        assert sequencer.nco_freq() == nco_freq
-        if module.out0_lo_en():
-            assert module.out0_lo_freq() == lo_freq
-        if module.out1_lo_en():
-            assert module.out1_lo_freq() == lo_freq
-
-        # Measurement
-        acquire = next(
-            (inst for inst in qat_file.instructions if isinstance(inst, Acquire))
-        )
-        measure_pkg = next((pkg for pkg in packages if pkg.target == measure_channel))
-        module, sequencer = model.control_hardware.allocate_resources(measure_pkg)
-        model.control_hardware.configure(measure_pkg, module, sequencer)
-        hwm_seq_config = measure_channel.physical_channel.config.sequencers[
-            sequencer.seq_idx
-        ]
-        pkg_seq_config = measure_pkg.sequencer_config
-
-        assert pkg_seq_config.square_weight_acq.integration_length == calculate_duration(
-            acquire
-        )
-        assert (
-            pkg_seq_config.square_weight_acq.integration_length
-            == hwm_seq_config.square_weight_acq.integration_length
-        )
-        assert (
-            sequencer.integration_length_acq()
-            == pkg_seq_config.square_weight_acq.integration_length
-        )
-
-        lo_freq, nco_freq = self.extract_lo_and_nco_freqs(measure_channel)
-        assert sequencer.nco_freq() == nco_freq
-        if module.out0_in0_lo_en():
-            assert module.out0_in0_lo_freq() == lo_freq
 
 
 @dataclass

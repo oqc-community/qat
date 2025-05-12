@@ -42,6 +42,7 @@ from qat.purr.compiler.instructions import (
 @dataclass
 class TriageResult(ResultInfoMixin):
     sweeps: List[Sweep] = field(default_factory=list)
+    repeats: List[Repeat] = field(default_factory=list)
     returns: List[Return] = field(default_factory=list)
     assigns: List[Assign] = field(default_factory=list)
     target_map: Dict[PulseChannel, List[Instruction]] = field(
@@ -109,9 +110,13 @@ class TriagePass(AnalysisPass):
             if isinstance(inst, Sweep):
                 result.sweeps.append(inst)
 
+            # Repeats
+            elif isinstance(inst, Repeat):
+                result.repeats.append(inst)
+
             # DeviceUpdates
-            elif isinstance(inst, DeviceUpdate) and not isinstance(inst.value, Variable):
-                result.device_updates[inst.target].append(inst)
+            elif isinstance(inst, DeviceUpdate):
+                result.device_updates.append(inst)
 
             # Returns
             elif isinstance(inst, Return):

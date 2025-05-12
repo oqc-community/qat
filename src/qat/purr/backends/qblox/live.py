@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-
+from collections import defaultdict
 from typing import Dict, List
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.model.device import PulseChannel
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.backends.qblox.algorithm import stable_partition
@@ -26,16 +25,12 @@ from qat.purr.backends.qblox.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.purr.backends.utilities import PositionData, SimpleAcquire, get_axis_map
-from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import (
     DeviceInjectors,
-    SweepIterator,
     _binary_average,
     _numpy_array_to_list,
 )
 from qat.purr.compiler.instructions import (
-    Acquire,
     AcquireMode,
     DeviceUpdate,
     IndexAccessor,
@@ -71,7 +66,7 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
             config.sequencers = {int(k): v for k, v in config.sequencers.items()}
 
 
-class QbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
+class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def startup(self):
         if self.model.control_hardware is None:
             raise ValueError(f"Please add a control hardware first!")
@@ -87,200 +82,6 @@ class QbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
     def validate(self, instructions: List[Instruction]):
         pass
-
-    def build_pass_pipeline(self, *args, **kwargs):
-        return (
-            PassManager()
-            | RepeatSanitisation(self.model)
-            | ReturnSanitisation()
-            | TriagePass()
-        )
-
-    def build_acquire_list(self, position_map: Dict[PulseChannel, List[PositionData]]):
-        buffers = {}
-        for pulse_channel, positions in position_map.items():
-            buffer = buffers.setdefault(pulse_channel.full_id(), [])
-            for pos in positions:
-                if isinstance(pos.instruction, Acquire):
-                    samples = pos.end - pos.start
-                    buffer.append(
-                        SimpleAcquire(
-                            pos.start,
-                            samples,
-                            pos.instruction.output_variable,
-                            pulse_channel,
-                            pulse_channel.physical_channel,
-                            pos.instruction.mode,
-                            pos.instruction.delay,
-                            pos.instruction,
-                        )
-                    )
-
-        return buffers
-
-    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
-        """
-        Wrapper override that accepts an InstructionBuilder
-        """
-
-        return super()._common_execute(builder.instructions, interrupt)
-
-    def _execute_on_hardware(
-        self, sweep_iterator: SweepIterator, qat_file: QatFile, interrupt=NullInterrupt()
-    ):
-        if self.model.control_hardware is None:
-            raise ValueError("Please add a control hardware first!")
-
-        results = {}
-        while not sweep_iterator.is_finished():
-            sweep_iterator.do_sweep(qat_file.instructions)
-
-            position_map = self.create_duration_timeline(qat_file.instructions)
-
-            qblox_packages = QbloxEmitter(qat_file.repeat).emit(qat_file.instructions)
-            aq_map = self.build_acquire_list(position_map)
-            self.model.control_hardware.set_data(qblox_packages)
-
-            repetitions = qat_file.repeat.repeat_count
-            repetition_time = qat_file.repeat.repetition_period
-
-            for aqs in aq_map.values():
-                if len(aqs) > 1:
-                    raise ValueError(
-                        "Multiple acquisitions are not supported on the same channel in one sweep step"
-                    )
-                for aq in aqs:
-                    physical_channel = aq.physical_channel
-                    dt = physical_channel.sample_time
-                    physical_channel.readout_start = aq.start * dt + (
-                        aq.delay if aq.delay else 0.0
-                    )
-                    physical_channel.readout_length = aq.samples * dt
-                    physical_channel.acquire_mode_integrator = (
-                        aq.mode == AcquireMode.INTEGRATOR
-                    )
-
-            playback_results: Dict[str, np.ndarray] = (
-                self.model.control_hardware.start_playback(
-                    repetitions=repetitions, repetition_time=repetition_time
-                )
-            )
-
-            for channel, aqs in aq_map.items():
-                if len(aqs) > 1:
-                    raise ValueError(
-                        "Multiple acquisitions are not supported on the same channel in one sweep step"
-                    )
-                for aq in aqs:
-                    response = playback_results[aq.mode][aq.output_variable]
-                    response_axis = get_axis_map(aq.mode, response)
-                    for pp in qat_file.get_pp_for_variable(aq.output_variable):
-                        response, response_axis = self.run_post_processing(
-                            pp, response, response_axis
-                        )
-                    var_result = results.setdefault(
-                        aq.output_variable,
-                        np.empty(
-                            sweep_iterator.get_results_shape(response.shape),
-                            response.dtype,
-                        ),
-                    )
-                    sweep_iterator.insert_result_at_sweep_position(var_result, response)
-
-        return results
-
-
-class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
-    """
-    Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
-    It leverages Q1's programming model to accelerate a handful of pulse-level algorithms.
-
-    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
-    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
-    Nevertheless, there should be a hybrid JIT-like reconciliation in the future that can run both IR features
-    that still need static iteration while being able to accelerate programs whenever possible.
-
-    See QbloxLiveEngine and QbloxLiveEngineAdapter.
-    """
-
-    def startup(self):
-        if self.model.control_hardware is None:
-            raise ValueError(f"Please add a control hardware first!")
-        self.model.control_hardware.connect()
-
-    def shutdown(self):
-        if self.model.control_hardware is None:
-            raise ValueError(f"Please add a control hardware first!")
-        self.model.control_hardware.disconnect()
-
-    def optimize(self, instructions):
-        pass
-
-    def validate(self, instructions: List[Instruction]):
-        pass
-
-    def build_pass_pipeline(self, *args, **kwargs):
-        return (
-            PassManager()
-            | RepeatSanitisation(self.model)
-            | ScopeSanitisation()
-            | ReturnSanitisation()
-            | TriagePass()
-            | BindingPass()
-            | TILegalisationPass()
-            | QbloxLegalisationPass()
-        )
-
-    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
-        self._model_exists()
-
-        # TODO - A skeptical usage of DeviceInjectors on static device updates
-        # TODO - Figure out what they mean w/r to scopes and control flow
-        static_dus, builder.instructions = stable_partition(
-            builder.instructions,
-            lambda inst: isinstance(inst, DeviceUpdate)
-            and not isinstance(inst.value, Variable),
-        )
-        injectors = DeviceInjectors(static_dus)
-
-        try:
-            injectors.inject()
-            with log_duration("Codegen run in {} seconds."):
-                res_mgr = ResultManager()
-                met_mgr = MetricsManager()
-                ir = QatIR(builder)
-                self.run_pass_pipeline(ir, res_mgr, met_mgr)
-                packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
-
-            with log_duration("QPU returned results in {} seconds."):
-                self.model.control_hardware.set_data(packages)
-                playback_results = self.model.control_hardware.start_playback(None, None)
-
-                triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-                acquire_map = triage_result.acquire_map
-                sweeps = triage_result.sweeps
-                pp_map = triage_result.pp_map
-                loop_nest_shape = tuple(
-                    len(next(iter(s.variables.values()))) for s in sweeps
-                )
-
-                results = {}
-                for t, acquires in acquire_map.items():
-                    for acq in acquires:
-                        response = playback_results[acq.mode][acq.output_variable]
-                        response_axis = {}
-                        for pp in pp_map[acq.output_variable]:
-                            if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
-                                response, _ = self.run_post_processing(
-                                    pp, response, response_axis
-                                )
-                        results[acq.output_variable] = response.reshape(loop_nest_shape)
-                results = self._process_results(results, triage_result)
-                results = self._process_assigns(results, triage_result)
-
-                return results
-        finally:
-            injectors.revert()
 
     def _process_results(self, results, triage_result: TriageResult):
         """
@@ -348,6 +149,149 @@ class NewQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
             assigned_results[assign.name] = recurse_arrays(assigned_results, assign.value)
 
         return {key: assigned_results[key] for key in ret_inst.variables}
+
+
+class QbloxLiveEngine(AbstractQbloxLiveEngine):
+    def build_pass_pipeline(self, *args, **kwargs):
+        return (
+            PassManager()
+            | RepeatSanitisation(self.model)
+            | ReturnSanitisation()
+            | TriagePass()
+        )
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        self._model_exists()
+
+        with log_duration("Codegen run in {} seconds."):
+            res_mgr = ResultManager()
+            met_mgr = MetricsManager()
+            ir = QatIR(builder)
+            self.run_pass_pipeline(ir, res_mgr, met_mgr)
+            iter2packages = QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+
+        with log_duration("QPU returned results in {} seconds."):
+            playback_results = defaultdict(lambda: defaultdict(lambda: np.empty(0)))
+            for packages in iter2packages.values():
+                self.model.control_hardware.set_data(packages)
+                response: Dict[AcquireMode, Dict[str, np.ndarray]] = (
+                    self.model.control_hardware.start_playback(None, None)
+                )
+                for acq_mode, acq_data in response.items():
+                    accmulated = playback_results[acq_mode]
+                    for acq_name, acquisitions in acq_data.items():
+                        accmulated[acq_name] = np.append(accmulated[acq_name], acquisitions)
+
+            triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+            acquire_map = triage_result.acquire_map
+            sweeps = triage_result.sweeps
+            pp_map = triage_result.pp_map
+            loop_nest_shape = tuple(
+                (
+                    list(len(next(iter(s.variables.values()))) for s in sweeps)
+                    if sweeps
+                    else [1]
+                )
+                + [-1]
+            )
+
+            results = {}
+            for t, acquires in acquire_map.items():
+                for acq in acquires:
+                    response = playback_results[acq.mode][acq.output_variable]
+                    response_axis = {}
+                    for pp in pp_map[acq.output_variable]:
+                        if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                            response, _ = self.run_post_processing(
+                                pp, response, response_axis
+                            )
+                    results[acq.output_variable] = response.reshape(loop_nest_shape)
+            results = self._process_results(results, triage_result)
+            results = self._process_assigns(results, triage_result)
+
+            return results
+
+
+class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
+    """
+    Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
+    It leverages Q1's programming model to accelerate a handful of pulse-level algorithms.
+
+    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
+    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
+    Nevertheless, there should be a hybrid JIT-like reconciliation in the future that can run both IR features
+    that still need static iteration while being able to accelerate programs whenever possible.
+
+    See QbloxLiveEngine and QbloxLiveEngineAdapter.
+    """
+
+    def build_pass_pipeline(self, *args, **kwargs):
+        return (
+            PassManager()
+            | RepeatSanitisation(self.model)
+            | ScopeSanitisation()
+            | ReturnSanitisation()
+            | TriagePass()
+            | BindingPass()
+            | TILegalisationPass()
+            | QbloxLegalisationPass()
+        )
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        self._model_exists()
+
+        # TODO - A skeptical usage of DeviceInjectors on static device updates
+        # TODO - Figure out what they mean w/r to scopes and control flow
+        static_dus, builder.instructions = stable_partition(
+            builder.instructions,
+            lambda inst: isinstance(inst, DeviceUpdate)
+            and not isinstance(inst.value, Variable),
+        )
+        injectors = DeviceInjectors(static_dus)
+
+        try:
+            injectors.inject()
+            with log_duration("Codegen run in {} seconds."):
+                res_mgr = ResultManager()
+                met_mgr = MetricsManager()
+                ir = QatIR(builder)
+                self.run_pass_pipeline(ir, res_mgr, met_mgr)
+                packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+        finally:
+            injectors.revert()
+
+        with log_duration("QPU returned results in {} seconds."):
+            self.model.control_hardware.set_data(packages)
+            playback_results = self.model.control_hardware.start_playback(None, None)
+
+            triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+            acquire_map = triage_result.acquire_map
+            sweeps = triage_result.sweeps
+            pp_map = triage_result.pp_map
+            loop_nest_shape = tuple(
+                (
+                    list(len(next(iter(s.variables.values()))) for s in sweeps)
+                    if sweeps
+                    else [1]
+                )
+                + [-1]
+            )
+
+            results = {}
+            for t, acquires in acquire_map.items():
+                for acq in acquires:
+                    response = playback_results[acq.mode][acq.output_variable]
+                    response_axis = {}
+                    for pp in pp_map[acq.output_variable]:
+                        if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                            response, _ = self.run_post_processing(
+                                pp, response, response_axis
+                            )
+                    results[acq.output_variable] = response.reshape(loop_nest_shape)
+            results = self._process_results(results, triage_result)
+            results = self._process_assigns(results, triage_result)
+
+            return results
 
 
 class QbloxLiveEngineAdapter(LiveDeviceEngine):

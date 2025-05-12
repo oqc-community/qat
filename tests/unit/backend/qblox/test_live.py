@@ -244,7 +244,12 @@ class TestQbloxLiveEngine:
         for index in qubit_indices:
             qubit = model.get_qubit(index)
             acq_width = min(
-                qubit.measure_acquire["width"] * 1e9,
+                (
+                    qubit.pulse_measure["width"]
+                    if qubit.measure_acquire["sync"]
+                    else qubit.measure_acquire["width"]
+                )
+                * 1e9,
                 Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
             )
             assert f"Q{index}" in results
