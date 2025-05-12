@@ -3,7 +3,7 @@
 from abc import ABC
 from pathlib import Path
 
-from compiler_config.config import CompilerConfig
+from compiler_config.config import CompilerConfig, Tket, TketOptimizations
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -17,6 +17,7 @@ from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser
+from qat.purr.integrations.tket import run_tket_optimizations_qir
 from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 string_regex = r"@__quantum__qis"
@@ -149,19 +150,42 @@ class QIRFrontend(BaseFrontend, ABC):
             )
 
         src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
+        reset_parser_format: bool = False
         if compiler_config.results_format.format is not None:
+            # TODO: Fix the need to reset parser attributes after parsing
+            reset_parser_format = True
+            old_parser_results_format = self.parser.results_format
             self.parser.results_format = compiler_config.results_format.format
-        builder = self.parser.parse(src)
 
         if isinstance(self.model, QuantumHardwareModel):
-            return (
+            optimizations = compiler_config.optimizations
+            if (
+                isinstance(optimizations, Tket)
+                and optimizations.tket_optimizations != TketOptimizations.Empty
+            ):
+                builder = run_tket_optimizations_qir(
+                    src,
+                    optimizations.tket_optimizations,
+                    self.model,
+                    compiler_config.results_format.format,
+                )
+            else:
+                builder = self.parser.parse(src)
+
+            builder = (
                 self.model.create_builder()
                 .repeat(compiler_config.repeats, compiler_config.repetition_period)
                 .add(builder)
             )
         elif isinstance(self.model, PydHardwareModel):
-            return (
+            builder = self.parser.parse(src)
+            builder = (
                 PydQuantumInstructionBuilder(self.model)
                 .repeat(compiler_config.repeats, compiler_config.repetition_period)
                 .__add__(builder)
             )
+
+        if reset_parser_format:
+            self.parser.results_format = old_parser_results_format
+
+        return builder
