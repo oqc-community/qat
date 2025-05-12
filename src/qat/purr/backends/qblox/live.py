@@ -187,13 +187,8 @@ class QbloxLiveEngine(AbstractQbloxLiveEngine):
             sweeps = triage_result.sweeps
             pp_map = triage_result.pp_map
             loop_nest_shape = tuple(
-                (
-                    list(len(next(iter(s.variables.values()))) for s in sweeps)
-                    if sweeps
-                    else [1]
-                )
-                + [-1]
-            )
+                (list(len(next(iter(s.variables.values()))) for s in sweeps))
+            ) or (1, -1)
 
             results = {}
             for t, acquires in acquire_map.items():
@@ -269,13 +264,8 @@ class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
             sweeps = triage_result.sweeps
             pp_map = triage_result.pp_map
             loop_nest_shape = tuple(
-                (
-                    list(len(next(iter(s.variables.values()))) for s in sweeps)
-                    if sweeps
-                    else [1]
-                )
-                + [-1]
-            )
+                (list(len(next(iter(s.variables.values()))) for s in sweeps))
+            ) or (1, -1)
 
             results = {}
             for t, acquires in acquire_map.items():

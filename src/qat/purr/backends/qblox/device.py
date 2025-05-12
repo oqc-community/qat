@@ -275,8 +275,8 @@ class QbloxControlHardware(ControlHardware):
                 log.debug(f"Uploading sequence to {module}, sequencer {sequencer}")
                 sequencer.sequence(sequence)
         except BaseException as e:
-            self._resources.clear()
             self._reset_connections()
+            self._resources.clear()
             raise e
 
     def start_playback(self, repetitions: int, repetition_time: float):
@@ -338,8 +338,8 @@ class QbloxControlHardware(ControlHardware):
                 for target, sequencer in allocations.items():
                     sequencer.sync_en(False)
 
-            self._resources.clear()
             self._reset_connections()
+            self._resources.clear()
 
         return results
 
