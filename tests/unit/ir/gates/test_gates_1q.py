@@ -9,21 +9,18 @@ from tests.unit.utils.gates import same_up_to_phase, test_angles
 
 
 class TestRx:
-
     @pytest.mark.parametrize("angle", [np.pi, -np.pi])
     def test_same_as_X_with_pi(self, angle):
         assert same_up_to_phase(X(qubit=1).matrix, Rx(qubit=1, theta=angle).matrix)
 
 
 class TestRy:
-
     @pytest.mark.parametrize("angle", [np.pi, -np.pi])
     def test_same_as_Y_with_pi(self, angle):
         assert same_up_to_phase(Y(qubit=1).matrix, Ry(qubit=1, theta=angle).matrix)
 
 
 class TestRz:
-
     @pytest.mark.parametrize("angle", [np.pi, -np.pi])
     def test_same_as_Z_with_pi(self, angle):
         assert same_up_to_phase(Z(qubit=1).matrix, Rz(qubit=1, theta=angle).matrix)
@@ -42,7 +39,6 @@ class TestRz:
 
 
 class TestU:
-
     @pytest.mark.parametrize("theta", test_angles)
     @pytest.mark.parametrize("phi", test_angles)
     @pytest.mark.parametrize("lambd", test_angles)

@@ -8,7 +8,6 @@ from qat.runtime.connection import ConnectionMode
 
 
 class TestLegacyRuntime:
-
     class MockConnectedEngine(LiveDeviceEngine):
         is_connected: bool = False
 
@@ -30,17 +29,22 @@ class TestLegacyRuntime:
     def test_connect_with_connect_at_beginning(self, mode):
         engine = self.MockConnectedEngine()
         assert engine.is_connected == False
-        runtime = LegacyRuntime(engine, connection_mode=mode)
+        # Ignore F841 as the connection is automatically closed on __del__
+        runtime = LegacyRuntime(engine, connection_mode=mode)  # noqa: F841
         assert engine.is_connected == True
 
     @pytest.mark.parametrize(
         "mode",
-        [ConnectionMode.ALWAYS_ON_EXECUTE, ConnectionMode.MANUAL, ConnectionMode.DEFAULT],
+        [
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+            ConnectionMode.MANUAL,
+            ConnectionMode.DEFAULT,
+        ],
     )
     def test_connect_without_connect_at_beginning(self, mode):
         engine = self.MockConnectedEngine()
         assert engine.is_connected == False
-        runtime = LegacyRuntime(engine, connection_mode=mode)
+        LegacyRuntime(engine, connection_mode=mode)
         assert engine.is_connected == False
 
     @pytest.mark.parametrize(
@@ -105,7 +109,11 @@ class TestLegacyRuntime:
 
     @pytest.mark.parametrize(
         "mode",
-        [ConnectionMode.ALWAYS, ConnectionMode.MANUAL, ConnectionMode.ALWAYS_ON_EXECUTE],
+        [
+            ConnectionMode.ALWAYS,
+            ConnectionMode.MANUAL,
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+        ],
     )
     def test_disconnect_without_disconnect_after_execute(self, mode):
         engine = self.MockConnectedEngine()

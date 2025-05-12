@@ -136,7 +136,7 @@ class CircuitBuilder:
         return self.add(Measure(qubit=qubit, clbit=clbit))
 
     def reset(self, qubit: int):
-        f"""Reset a qubit to its :math:`|0>` state."""
+        """Reset a qubit to its :math:`|0>` state."""
         return self.add(Reset(qubit=qubit))
 
     def barrier(self, *qubits: int):

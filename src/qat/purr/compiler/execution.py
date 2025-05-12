@@ -254,8 +254,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
                     raise ValueError(
-                        f"Max Waveform width is {MaxPulseLength} s "
-                        f"given: {inst.duration} s"
+                        f"Max Waveform width is {MaxPulseLength} s given: {inst.duration} s"
                     )
                 elif isinstance(duration, Variable):
                     values = next(
@@ -270,8 +269,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     )
                     if np.max(values) > MaxPulseLength:
                         raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
-                            f"given: {values} s"
+                            f"Max Waveform width is {MaxPulseLength} s given: {values} s"
                         )
 
     def _generate_repeat_batches(self, repeats):
@@ -803,8 +801,7 @@ class DeviceInjector:
 
     def __repr__(self):
         return (
-            f"{self.updater.target.id}.{self.updater.attribute} = "
-            f"{str(self.updater.value)}"
+            f"{self.updater.target.id}.{self.updater.attribute} = {str(self.updater.value)}"
         )
 
 

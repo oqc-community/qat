@@ -25,7 +25,8 @@ def get_hardware_model(args, kw_args):
         )
     if not isinstance(hardware_model, QuantumHardwareModel):
         raise ValueError(
-            f"Expected to find an instance of {QuantumHardwareModel} in arguments list, but got {model} instead"
+            f"Expected to find an instance of {QuantumHardwareModel} in arguments list, "
+            f"but got {hardware_model} instead"
         )
 
     return hardware_model

@@ -48,7 +48,7 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
             info.data["runtime"],
             info.data["runtime"].engine,
         ]:
-            if hasattr(component, "model") and not component.model in {model, None}:
+            if hasattr(component, "model") and component.model not in {model, None}:
                 raise ValueError(f"{model} hardware does not match supplied hardware")
 
         return model
@@ -128,11 +128,11 @@ class PipelineSet:
     def set_default(self, pipeline: Pipeline | str):
         if isinstance(pipeline, Pipeline):
             name = pipeline.name
-            if not name in self._pipelines:
-                raise Exception(f"Add pipeline using add_pipeline before setting default")
+            if name not in self._pipelines:
+                raise Exception("Add pipeline using add_pipeline before setting default")
         else:
             name = pipeline
-            if not name in self._pipelines:
+            if name not in self._pipelines:
                 raise Exception(f"Cannot set default pipeline to unknown pipeline {name}")
 
         self._default_pipeline = name
@@ -162,11 +162,11 @@ class PipelineSet:
         """
         name = pipeline.name if isinstance(pipeline, Pipeline) else pipeline
 
-        if not name in self._pipelines:
+        if name not in self._pipelines:
             raise Exception(f"Pipeline {pipeline.name} not found")
 
         if isinstance(pipeline, Pipeline):
-            if not pipeline is self._pipelines[name]:
+            if pipeline is not self._pipelines[name]:
                 raise Exception(
                     f"Pipeline {pipeline.name} is not the same as stored pipeline with the same name"
                 )
@@ -186,9 +186,9 @@ class PipelineSet:
         if isinstance(pipeline, str):
             if pipeline == "default":
                 if self._default_pipeline is None:
-                    raise Exception(f"No Default Pipeline Set")
+                    raise Exception("No Default Pipeline Set")
                 pipeline = self._default_pipeline
-            elif not pipeline in self._pipelines:
+            elif pipeline not in self._pipelines:
                 raise Exception(f"Pipeline {pipeline} not found")
 
             pipeline = self._pipelines[pipeline]

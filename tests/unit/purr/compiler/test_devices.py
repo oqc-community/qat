@@ -18,9 +18,9 @@ class TestPulseChannel:
     @pytest.mark.parametrize("imbalance", [0, 1e-03, 1])
     @pytest.mark.parametrize("phase_offset", [0, 3.2e-03, 1.6])
     def test_default_pulse_channel(self, imbalance, phase_offset):
-        bb = PhysicalBaseband(f"LO1", 5.5e9, if_frequency=250e6)
+        bb = PhysicalBaseband("LO1", 5.5e9, if_frequency=250e6)
         phys_channel = PhysicalChannel(
-            f"CH1", 1.0e-9, bb, 1, imbalance=imbalance, phase_offset=phase_offset
+            "CH1", 1.0e-9, bb, 1, imbalance=imbalance, phase_offset=phase_offset
         )
 
         pulse_channel = phys_channel.create_pulse_channel("PulseCH1")
@@ -43,8 +43,8 @@ class TestPulseChannel:
 
     @pytest.mark.parametrize("imbalance", [1.0, -0.1, 3.0])
     def test_pulse_channel_imbalance(self, imbalance):
-        bb = PhysicalBaseband(f"LO1", 5.5e9, if_frequency=250e6)
-        phys_channel = PhysicalChannel(f"CH1", 1.0e-9, bb, 1, imbalance=1.1)
+        bb = PhysicalBaseband("LO1", 5.5e9, if_frequency=250e6)
+        phys_channel = PhysicalChannel("CH1", 1.0e-9, bb, 1, imbalance=1.1)
         pulse_channel = phys_channel.create_pulse_channel("PulseCH1", imbalance=imbalance)
 
         assert pulse_channel.imbalance != phys_channel.imbalance
@@ -57,8 +57,8 @@ class TestPulseChannel:
 
     @pytest.mark.parametrize("phase_offset", [0, -0.25, 1.0])
     def test_pulse_channel_phase_offset(self, phase_offset):
-        bb = PhysicalBaseband(f"LO1", 5.5e9, if_frequency=250e6)
-        phys_channel = PhysicalChannel(f"CH1", 1.0e-9, bb, 1, phase_offset=100)
+        bb = PhysicalBaseband("LO1", 5.5e9, if_frequency=250e6)
+        phys_channel = PhysicalChannel("CH1", 1.0e-9, bb, 1, phase_offset=100)
         pulse_channel = phys_channel.create_pulse_channel(
             "PulseCH1", phase_offset=phase_offset
         )
@@ -138,9 +138,9 @@ class TestCalibrationSavingAndLoading:
         for key, value in copied_echo.pulse_channels.items():
             channel_key = key[:3]
             original_channel = copied_echo.physical_channels[channel_key]
-            assert id(value.physical_channel) == id(
-                original_channel
-            ), "Copied references are different objects."
+            assert id(value.physical_channel) == id(original_channel), (
+                "Copied references are different objects."
+            )
 
         assert len(echo.basebands) == len(copied_echo.basebands)
         assert len(echo.physical_channels) == len(copied_echo.physical_channels)

@@ -103,7 +103,7 @@ class Return(Instruction):
     def _variables_as_list(cls, variables):
         variables = (
             []
-            if variables == None
+            if variables is None
             else ([variables] if not isinstance(variables, List) else variables)
         )
         return variables
@@ -161,7 +161,7 @@ class Variable(NoExtraFieldsModel):
     @classmethod
     def _validate_value_type(cls, value, val_info):
         var_type = val_info.data["var_type"]
-        if var_type != None and not isinstance(value, var_type) and value != None:
+        if var_type is not None and not isinstance(value, var_type) and value is not None:
             raise ValueError(f"Value provided has type {type(value)}: must be {var_type}")
         return value
 

@@ -67,7 +67,6 @@ class Waveform(AbstractWaveform):
         return f"{self.__class__.__name__}(width={self.width}, amp={self.amp}, phase={self.phase})"
 
     def sample(self, t: np.ndarray, phase_offset: float = 0.0):
-
         if self.shape_function_type is None:
             raise AttributeError(
                 f"Waveform of type `{self.__class__.__name__}` cannot be evaluated, please provide a valid shape function type."
@@ -106,7 +105,8 @@ class SampledWaveform(AbstractWaveform):
     Provide a list of amplitudes to define a sampled waveform.
     """
 
-    samples: NDArray[Shape["* x"], int | float | complex]
+    # TODO: Investigate linting issue with typehint Shape["* x"]
+    samples: NDArray[Shape["* x"], int | float | complex]  # noqa: F722
 
     @property
     def duration(self):
@@ -116,7 +116,7 @@ class SampledWaveform(AbstractWaveform):
         return 0.0
 
     def __repr__(self):
-        return f"sampled waveform"
+        return "sampled waveform"
 
     def __eq__(self, other: SampledWaveform):
         return np.array_equal(self.samples, other.samples)

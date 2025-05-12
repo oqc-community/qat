@@ -56,46 +56,38 @@ jobs:
 
       - name: jupytext tests
         id: jupytext
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
-          poetry run jupytext --sync --pipe black notebooks/scripts/*.py && git diff --exit-code
+          poetry run jupytext --sync --pipe "ruff check --fix {}" --pipe "ruff format {}" notebooks/scripts/*.py && git diff --exit-code
           poetry run nbstripout --verify --extra-keys="metadata.kernelspec" notebooks/ipynb/*.ipynb
 
-      - name: black scan
-        id: black
-        if: always()
-        run: |
-          poetry run black --check .
-
-      - name: isort scan
-        id: isort
-        if: always()
-        run: |
-          poetry run isort --check .
-
-      - name: autoflake scan
-        id: autoflake
-        if: always()
-        run: |
-          poetry run autoflake --check .
+      - name: Ruff lint check
+        if: ${{ !cancelled() }}
+        id: lint
+        run: poetry run ruff check
+      
+      - name: Ruff formatter check
+        id: format
+        if: ${{ !cancelled() }}
+        run: poetry run ruff format --check
 
       - name: pipaudit scan
         id: pip-audit
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           poetry run pip-audit
 
       - name: Generate report for formatting scans
         id: formatting
+        if: ${{ !cancelled() }}
         run: |
           cat <<EOF > static-report.md
           ### Static Analysis Report
           | Job | Result |
           | ---- | ------ |
           | Jupytext Check | ${{ steps.jupytext.outcome }} |
-          | Black Scan | ${{ steps.black.outcome }} |
-          | Isort Scan | ${{ steps.isort.outcome }} |
-          | Autoflake Scan | ${{ steps.autoflake.outcome }} |
+          | Lint Check | ${{ steps.lint.outcome }} |
+          | Format Check | ${{ steps.format.outcome}} |
           | Pip Audit | ${{ steps.pip-audit.outcome }} |;
           EOF
           SUMMARY=$(cat static-report.md)
@@ -109,6 +101,7 @@ jobs:
 
       - name: Upload markdown report
         uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           path: static-report.md
           name: qat-formatting-markdown

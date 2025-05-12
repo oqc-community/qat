@@ -8,7 +8,6 @@ from qat.utils.state_tensors import StateOperator, StateVector
 
 
 class TestStateVector:
-
     P = np.array([[1, 0], [0, 0]])
     Q = np.array([[0, 0], [0, 1]])
     Hadamard = np.array([[1, 1], [1, -1]]) / np.sqrt(2)
@@ -88,7 +87,6 @@ class TestStateVector:
 
 
 class TestStateOperator:
-
     def test_init(self):
         U = StateOperator(4)
         assert np.isclose(np.linalg.norm(U.tensor), np.sqrt(2.0**4))

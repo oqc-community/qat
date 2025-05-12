@@ -33,7 +33,6 @@ qasm3_files = [
 @pytest.mark.parametrize("n_qubits", [4, 8, 32, 64])
 @pytest.mark.parametrize("seed", [7, 8, 9])
 class TestPydTketOptimisation:
-
     @pytest.mark.parametrize("qasm_file", qasm2_files)
     def test_pyd_tket_qasm2_optimization(self, n_qubits, seed, qasm_file):
         qasm_string = get_qasm2(qasm_file)

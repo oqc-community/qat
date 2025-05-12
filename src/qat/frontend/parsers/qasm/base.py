@@ -145,8 +145,7 @@ class AbstractParser(abc.ABC):
     def _add_ecr(self, qubits: list[Qubit], builder: QuantumInstructionBuilder):
         if len(qubits) != 2:
             raise ValueError(
-                "Definition of ECR intrinsic is wrong. Can only take 2 "
-                "qubits as arguments."
+                "Definition of ECR intrinsic is wrong. Can only take 2 qubits as arguments."
             )
         builder.ECR(qubits[0], qubits[1])
 

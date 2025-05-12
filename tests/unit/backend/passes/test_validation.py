@@ -39,7 +39,6 @@ class TestValidationPasses:
 
 
 class TestNoAcquireWeightsValidation:
-
     def test_acquire_with_filter_raises_error(self):
         model = EchoModelLoader().load()
         res_mgr = ResultManager()
@@ -54,7 +53,6 @@ class TestNoAcquireWeightsValidation:
 
 
 class TestNoMultipleAcquiresValidation:
-
     def test_multiple_acquires_on_same_pulse_channel_raises_error(self):
         model = EchoModelLoader().load()
         res_mgr = ResultManager()

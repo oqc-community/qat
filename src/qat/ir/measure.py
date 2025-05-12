@@ -45,7 +45,7 @@ class Acquire(QuantumInstruction):
 
         if filter:
             if filter.duration == 0:  # < 0 condition already tested in `Waveform`
-                raise ValueError(f"Filter duration cannot be equal to zero.")
+                raise ValueError("Filter duration cannot be equal to zero.")
 
             if not np.isclose(filter.duration, duration, atol=1e-9):
                 raise ValueError(

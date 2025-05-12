@@ -159,7 +159,7 @@ class EndRepeat(Instruction):
     """
 
     def __repr__(self):
-        return f"end_repeat"
+        return "end_repeat"
 
 
 class PhaseSet(QuantumInstruction):
@@ -656,7 +656,7 @@ class EndSweep(Instruction):
     """
 
     def __repr__(self):
-        return f"end_sweep"
+        return "end_sweep"
 
 
 class Jump(Instruction):

@@ -103,7 +103,7 @@ class BaseRuntime(abc.ABC):
             warnings.warn(
                 f"Cannot batch {total_shots} into whole batches of {shots_per_batch}."
                 "SCOPE acquisitions will be done with a total of "
-                f"{shots_per_batch*number_of_batches}."
+                f"{shots_per_batch * number_of_batches}."
             )
         return number_of_batches
 

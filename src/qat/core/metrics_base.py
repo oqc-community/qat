@@ -32,7 +32,7 @@ class MetricsManager(BaseModel):
         missing_fields = [val for val in snake_cased_flags if val not in cls.model_fields]
         if any(missing_fields):
             raise ValidationError(
-                "MetricsManager is missing type hints for " f"{', '.join(missing_fields)}."
+                f"MetricsManager is missing type hints for {', '.join(missing_fields)}."
             )
         return value
 
@@ -95,8 +95,7 @@ class MetricsManager(BaseModel):
     def merge(self, other: "MetricsManager"):
         if not isinstance(other, type(self)):
             raise TypeError(
-                "Argument other must be of type MetricsManager, not of type: "
-                f"{type(other)}"
+                f"Argument other must be of type MetricsManager, not of type: {type(other)}"
             )
         for metric in MetricsType:
             if not metric.is_composite() and self.get_metric(metric) is None:

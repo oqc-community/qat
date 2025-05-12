@@ -487,7 +487,6 @@ class TestFrequencyValidation:
 
 
 class TestPydHardwareConfigValidity:
-
     def test_max_shot_limit_exceeded(self):
         hw_model = generate_hw_model(n_qubits=8)
         comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT + 1)

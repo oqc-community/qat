@@ -9,4 +9,4 @@ warnings.warn(
     stacklevel=2,
 )
 
-from qat.purr.qat import *  # fmt: skip
+from qat.purr.qat import *  # noqa: E402, F403

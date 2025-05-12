@@ -314,9 +314,12 @@ class QbloxControlHardware(ControlHardware):
                                 integration_length=sequencer.integration_length_acq(),
                             )
 
-                        start, end = 0, min(
-                            sequencer.integration_length_acq(),
-                            Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                        start, end = (
+                            0,
+                            min(
+                                sequencer.integration_length_acq(),
+                                Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                            ),
                         )
                         for acq_name, acq in acquisitions.items():
                             i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])

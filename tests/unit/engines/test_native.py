@@ -5,7 +5,6 @@ from qat.engines.native import ConnectionMixin
 
 
 class TestConnectionMixin:
-
     class MockConnection(ConnectionMixin):
         is_connected = False
 

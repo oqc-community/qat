@@ -174,7 +174,7 @@ class ClusterSetup:
             ),
             sequencers={
                 i: SequencerConfig(
-                    connection=ConnectionConfig(bulk_value=[f"out{i%2}"]),
+                    connection=ConnectionConfig(bulk_value=[f"out{i % 2}"]),
                 )
                 for i in range(6)
             },

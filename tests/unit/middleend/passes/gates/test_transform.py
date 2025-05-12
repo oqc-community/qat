@@ -25,7 +25,6 @@ from tests.unit.utils.gates import (
 
 
 class TestDecompose2QToCNOTs:
-
     @pytest.mark.parametrize(["gate", "params"], two_q_gate_tests())
     def test_2qs_decompose_to_only_cnots(self, gate, params):
         circ = CircuitBuilder(2)
@@ -40,7 +39,6 @@ class TestDecompose2QToCNOTs:
 
 
 class TestDecomposeToNativeGates:
-
     @pytest.mark.parametrize(["gate", "params"], one_q_gate_tests())
     def test_1qs_decompose_to_only_native(self, gate, params):
         circ = CircuitBuilder(2)
@@ -67,7 +65,6 @@ involutory_gates = [X, Y, Z, Hadamard]
 
 
 class TestSquash1QGates:
-
     @pytest.mark.parametrize(["gate", "params"], one_q_gate_tests())
     def test_squash_gives_same_matrix(self, gate, params):
         gate = gate(**params)
@@ -136,7 +133,6 @@ class TestSquash1QGates:
 
 
 class TestSquashCNOTs:
-
     def test_two_CNOTs_are_removed(self):
         circ = CircuitBuilder(2).CNOT(0, 1).CNOT(0, 1)
         ir = circ.emit()

@@ -9,7 +9,6 @@ from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 
 
 class TestReadoutShape:
-
     def test_integrator(self):
         acquire = AcquireData(
             length=254, position=0, mode=AcquireMode.INTEGRATOR, output_variable="test"
@@ -33,7 +32,6 @@ class TestReadoutShape:
 
 
 class TestZeroEngine:
-
     def test_mock_data(self):
         channel1 = ChannelData(
             acquires=[

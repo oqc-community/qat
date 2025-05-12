@@ -52,7 +52,6 @@ def plot_packages(packages: List[QbloxPackage]):
 
 def plot_acquisitions(acquisitions: Dict, *args, **kwargs):
     if not acquisitions:
-
         return
 
     integration_length: int = kwargs["integration_length"]

@@ -12,7 +12,6 @@ from qat.runtime.executables import AcquireData
 
 
 class TestBaseRuntime:
-
     class MockConnectedEngine(NativeEngine, ConnectionMixin):
         is_connected: bool = False
 
@@ -53,18 +52,23 @@ class TestBaseRuntime:
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
         engine = self.MockConnectedEngine()
         assert engine.is_connected == False
-        runtime = BaseRuntime(engine, connection_mode=mode)
+        # Ignore F841 as the connection is automatically closed on __del__
+        runtime = BaseRuntime(engine, connection_mode=mode)  # noqa: F841
         assert engine.is_connected == True
 
     @pytest.mark.parametrize(
         "mode",
-        [ConnectionMode.ALWAYS_ON_EXECUTE, ConnectionMode.MANUAL, ConnectionMode.DEFAULT],
+        [
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+            ConnectionMode.MANUAL,
+            ConnectionMode.DEFAULT,
+        ],
     )
     def test_connect_on_startup_without_connect_at_beginning(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
         engine = self.MockConnectedEngine()
         assert engine.is_connected == False
-        runtime = BaseRuntime(engine, connection_mode=mode)
+        BaseRuntime(engine, connection_mode=mode)
         assert engine.is_connected == False
 
     @pytest.mark.parametrize(
@@ -134,7 +138,11 @@ class TestBaseRuntime:
 
     @pytest.mark.parametrize(
         "mode",
-        [ConnectionMode.ALWAYS, ConnectionMode.MANUAL, ConnectionMode.ALWAYS_ON_EXECUTE],
+        [
+            ConnectionMode.ALWAYS,
+            ConnectionMode.MANUAL,
+            ConnectionMode.ALWAYS_ON_EXECUTE,
+        ],
     )
     def test_disconnect_without_disconnect_after_execute(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
@@ -147,7 +155,6 @@ class TestBaseRuntime:
 
 
 class TestResultsAggregator:
-
     @pytest.mark.parametrize("max_shots", [None, 9999, 10000])
     def test_raw(self, max_shots):
         acquires = [
@@ -169,7 +176,10 @@ class TestResultsAggregator:
     def test_integrator(self, max_shots):
         acquires = [
             AcquireData(
-                length=254, position=0, mode=AcquireMode.INTEGRATOR, output_variable="test"
+                length=254,
+                position=0,
+                mode=AcquireMode.INTEGRATOR,
+                output_variable="test",
             )
         ]
         aggregator = ResultsAggregator(acquires)

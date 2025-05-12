@@ -43,7 +43,7 @@ from qiskit.circuit.library import CXGate, ECRGate, UGate
 from sympy import pi, sympify
 
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.execution import InstructionExecutionEngine, QuantumHardwareModel
+from qat.purr.compiler.execution import InstructionExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Variable
 from qat.purr.integrations.qasm import BitRegister, Qasm2Parser, QasmContext, QubitRegister
@@ -138,7 +138,7 @@ class TketQasmParser(Qasm2Parser):
         def transform_to_halfturn(num):
             try:
                 return sympify(num) / pi
-            except:
+            except Exception:
                 raise ValueError("Cannot parse angle: {}".format(num))
 
         res = self._expand_to_match_registers(

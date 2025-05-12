@@ -443,7 +443,7 @@ def _get_highest_id(id_list, prefix, start_id=0):
                     if int(id[len(prefix) :]) > highest_id
                     else highest_id
                 )
-            except:
+            except Exception:
                 pass
 
     return highest_id
@@ -453,10 +453,10 @@ def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
     highest_channel_id = _get_highest_id(list(hw.physical_channels.keys()), "CH")
     highest_baseband_id = _get_highest_id(list(hw.basebands.keys()), "L")
 
-    qubit_channel = f"CH{highest_channel_id+1}"
-    qubit_baseband = f"L{highest_baseband_id+1}"
-    resonator_channel = f"CH{highest_channel_id+2}"
-    resonator_baseband = f"L{highest_baseband_id+2}"
+    qubit_channel = f"CH{highest_channel_id + 1}"
+    qubit_baseband = f"L{highest_baseband_id + 1}"
+    resonator_channel = f"CH{highest_channel_id + 2}"
+    resonator_baseband = f"L{highest_baseband_id + 2}"
     bb1 = PhysicalBaseband(qubit_baseband, frequency)
     bb2 = PhysicalBaseband(resonator_baseband, 8.0e9)
     hw.add_physical_baseband(bb1, bb2)
@@ -484,7 +484,7 @@ def add_qubit_stack(hw, frequency: float, anharmonicity: float, N: int):
     q.create_pulse_channel(ChannelType.second_state, frequency=frequency + anharmonicity)
 
     q_r_coupling = RTCSCoupling(
-        f"R{highest_resonator_id+1}<->Q{highest_qubit_id+1}",
+        f"R{highest_resonator_id + 1}<->Q{highest_qubit_id + 1}",
         r,
         q,
         10.0e6,
@@ -770,8 +770,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
             if all(len(buf) == 0 for buf in resonator_buffers.values()):
                 raise NotImplementedError(
-                    "There must be at least one qubit measurement to perform a "
-                    "simulation"
+                    "There must be at least one qubit measurement to perform a simulation"
                 )
 
             # Get resonator channel time steps
@@ -902,7 +901,9 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
                 c_ops += [self.get_tensor({qubit.index: cop}) for cop in qubit.cops]
 
             # Find qubit couplings.
-            rotation_func = lambda f, T: np.exp(2.0j * np.pi * f * T)
+            def rotation_func(f, T):
+                return np.exp(2.0j * np.pi * f * T)
+
             for coupling in self.model.couplings:
                 if coupling.coupling_type == CouplingType.Exchange:
                     allI = []
@@ -1318,7 +1319,7 @@ def get_resonator_response_segments(buffers, resets):
                         segment.insert(-1, [ControlType.RESET, i, i])
                     else:
                         segment.append([ControlType.RESET, i, i])
-            elif buffer_inside[buffer_idx] == True:
+            elif buffer_inside[buffer_idx] is True:
                 buffer_segments[buffer_idx][-1].append(i)
                 buffer_inside[buffer_idx] = False
         i += 1
@@ -1427,11 +1428,11 @@ def get_simple_resonator_response(
     if inside:
         segments.append((start, i))
 
-    simulate_continuous_measurement = (
-        len(segments) == 1
-        and segments[0][0] == 0
-        and segments[0][1] == len(resonator_iq) - 1
-    )
+    # simulate_continuous_measurement = (
+    #     len(segments) == 1
+    #     and segments[0][0] == 0
+    #     and segments[0][1] == len(resonator_iq) - 1
+    # )
 
     # segments is now a list of start and stop index of non-zero segments for the
     # resonator response

@@ -60,7 +60,7 @@ class AutoFrontend(BaseFrontend):
             Otherwise, the program is returned (and loaded if required).
         """
         assigned_frontend = self.assign_frontend(src)
-        if assigned_frontend == None:
+        if assigned_frontend is None:
             return False
         return assigned_frontend.check_and_return_source(src)
 

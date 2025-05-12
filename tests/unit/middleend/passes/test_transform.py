@@ -18,10 +18,9 @@ from qat.ir.instructions import PhaseReset as PydPhaseReset
 from qat.ir.instructions import PhaseShift as PydPhaseShift
 from qat.ir.instructions import Return as PydReturn
 from qat.ir.measure import Acquire as PydAcquire
-from qat.ir.measure import AcquireMode
+from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
-from qat.ir.measure import PostProcessType, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActiveChannelResults
 from qat.middleend.passes.legacy.transform import LoopCount, RepeatTranslation
@@ -557,7 +556,6 @@ class TestPydReturnSanitisation:
 
 
 class TestAcquireSanitisation:
-
     def test_acquire_with_no_delay_is_unchanged(self):
         # Mock up some channels and a builder
         model = EchoModelLoader(10).load()
@@ -610,7 +608,6 @@ class TestAcquireSanitisation:
 
 
 class TestInstructionGranularitySanitisation:
-
     def test_instructions_with_correct_timings_are_unchanged(self):
         # Mock up some channels and a builder
         model = EchoModelLoader(10).load()
@@ -751,7 +748,6 @@ class TestPhaseResetSanitisation:
 
 
 class TestMeasurePhaseResetSanitisation:
-
     hw = EchoModelLoader(qubit_count=4).load()
 
     def test_measure_phase_reset(self):
@@ -781,7 +777,6 @@ class TestMeasurePhaseResetSanitisation:
 
 
 class TestInactivePulseChannelSanitisation:
-
     def test_syncs_are_sanitized(self):
         model = EchoModelLoader(10).load()
         builder = model.create_builder()
@@ -939,7 +934,6 @@ class TestInstructionLengthSanitisation:
 
 
 class TestSynchronizeTask:
-
     def test_synchronize_task_adds_sync(self):
         model = EchoModelLoader().load()
         qubit = model.qubits[0]
@@ -972,7 +966,6 @@ class TestSynchronizeTask:
 
 
 class TestEndOfTaskResetSanitisation:
-
     @pytest.mark.parametrize("reset_q1", [False, True])
     @pytest.mark.parametrize("reset_q2", [False, True])
     def test_resets_added(self, reset_q1, reset_q2):
@@ -1091,7 +1084,6 @@ class TestEndOfTaskResetSanitisation:
 class TestResetsToDelays:
     @pytest.mark.parametrize("add_reset", [True, False])
     def test_qubit_reset(self, passive_reset_time: float, add_reset: bool):
-
         model = EchoModelLoader().load()
         qubit = model.qubits[0]
 
@@ -1198,7 +1190,6 @@ def mock_evaluate(data, t, phase_offset):
 
 
 class TestEvaluatePulses:
-
     @pytest.mark.parametrize("scale", [True, False])
     def test_pulse_not_lowered(self, scale: bool):
         model = EchoModelLoader().load()
@@ -1546,7 +1537,6 @@ class TestRepeatTranslation:
 
 
 class TestRepeatSanitisation:
-
     def test_repeat_adds_to_beginning(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()

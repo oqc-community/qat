@@ -94,7 +94,6 @@ class LowerSyncsToDelays(TransformPass):
     """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
-
         durations: dict[str, float] = defaultdict(float)
         new_instructions: list[Instruction] = []
 

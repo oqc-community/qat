@@ -14,6 +14,6 @@ class VeryStrictMatcher(StrictMatcher):
     def constructor(loader, node):
         match = StrictMatcher.matcher.match(node.value)
         key = match.groups()[0]
-        if not key in os.environ:
+        if key not in os.environ:
             raise ValueError(f"Environment Variable {key} not found")
         return os.environ[key]  # type: ignore

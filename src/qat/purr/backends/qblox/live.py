@@ -69,12 +69,12 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
 class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def startup(self):
         if self.model.control_hardware is None:
-            raise ValueError(f"Please add a control hardware first!")
+            raise ValueError("Please add a control hardware first!")
         self.model.control_hardware.connect()
 
     def shutdown(self):
         if self.model.control_hardware is None:
-            raise ValueError(f"Please add a control hardware first!")
+            raise ValueError("Please add a control hardware first!")
         self.model.control_hardware.disconnect()
 
     def optimize(self, instructions):

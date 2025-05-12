@@ -10,4 +10,4 @@ warnings.warn(
     stacklevel=2,
 )
 
-from compiler_config.config import *  # fmt: skip
+from compiler_config.config import *  # noqa: E402, F403

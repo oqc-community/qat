@@ -38,9 +38,9 @@ class SimpleRuntime(BaseRuntime):
         :returns: Execution results.
         """
 
-        if res_mgr == None:
+        if res_mgr is None:
             res_mgr = ResultManager()
-        if met_mgr == None:
+        if met_mgr is None:
             met_mgr = MetricsManager()
 
         self.validate_max_shots(package.shots)

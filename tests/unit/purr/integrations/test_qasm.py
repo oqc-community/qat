@@ -64,7 +64,6 @@ from tests.unit.utils.qasm_qir import (
 
 
 class TestQASM2:
-
     qasm2_base = """
     OPENQASM 2.0;
     include "qelib1.inc";
@@ -97,7 +96,7 @@ class TestQASM2:
             # Contruct the qasm gate.
             gate_string = gate.name
             if len(args) > 0:
-                gate_string += f"(" + ", ".join([str(arg) for arg in args]) + ")"
+                gate_string += "(" + ", ".join([str(arg) for arg in args]) + ")"
             gate_string += (
                 " " + ", ".join([f"q[{i}]" for i in range(gate.num_qubits)]) + ";"
             )
@@ -410,8 +409,7 @@ class TestQASM3:
         assert len(instruction) > 0
 
     @pytest.mark.skip(
-        "Timing isn't considered in pulse definition, only after scheduling. "
-        "Fix or remove."
+        "Timing isn't considered in pulse definition, only after scheduling. Fix or remove."
     )
     def test_pulse_timing(self):
         hw = get_default_echo_hardware()
@@ -423,8 +421,7 @@ class TestQASM3:
         assert len(instruction) == 1
 
     @pytest.mark.skip(
-        "Timing isn't considered in pulse definition, only after scheduling. "
-        "Fix or remove."
+        "Timing isn't considered in pulse definition, only after scheduling. Fix or remove."
     )
     def test_barrier_timing(self):
         hw = get_default_echo_hardware()
@@ -513,7 +510,7 @@ class TestQASM3:
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
     def test_internal_pulses(self):
-        qasm_string = get_qasm3(f"waveform_tests/internal_waveform_tests.qasm")
+        qasm_string = get_qasm3("waveform_tests/internal_waveform_tests.qasm")
         hardware = get_default_echo_hardware(8)
         config = CompilerConfig(
             repeats=10,
@@ -705,7 +702,7 @@ class TestQASM3:
             # contruct the qasm qate
             gate_string = name
             if len(args) > 0:
-                gate_string += f"(" + ", ".join([str(arg) for arg in args]) + ")"
+                gate_string += "(" + ", ".join([str(arg) for arg in args]) + ")"
             gate_string += " " + ", ".join([f"q[{i}]" for i in range(qubits)]) + ";"
             qasm = self.qasm3_base.format(N=qubits, gate_strings=gate_string)
 
@@ -727,7 +724,7 @@ class TestParsing:
             circ = None
             try:
                 circ = circuit_from_qasm_str(qasm)
-            except:
+            except Exception:
                 pass
 
             tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm)

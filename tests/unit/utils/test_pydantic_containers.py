@@ -181,14 +181,14 @@ class TestNDArray:
         b = self.b.astype(dtype=array_type)
         NDArray_annot = NDArray[Shape["* x, * y, * z"], array_type]
 
-        l = PydListBase[NDArray_annot]([a, b])
-        assert np.allclose(l[0], a)
-        assert np.allclose(l[1], b)
+        base_list = PydListBase[NDArray_annot]([a, b])
+        assert np.allclose(base_list[0], a)
+        assert np.allclose(base_list[1], b)
 
-        blob = l.model_dump()
-        l_deserialised = PydListBase[NDArray_annot].model_validate(blob)
-        assert np.allclose(l[0], l_deserialised[0])
-        assert np.allclose(l[1], l_deserialised[1])
+        blob = base_list.model_dump()
+        deserialised_list = PydListBase[NDArray_annot].model_validate(blob)
+        assert np.allclose(base_list[0], deserialised_list[0])
+        assert np.allclose(base_list[1], deserialised_list[1])
 
         with pytest.raises(ValidationError):
             PydListBase[str].model_validate(blob)

@@ -10,7 +10,6 @@ from qat.purr.compiler.transform_passes import DeviceUpdateSanitisation
 
 
 class TestDeviceUpdateSanitisation:
-
     def test_device_update_semantics(self):
         model = get_default_echo_hardware()
 

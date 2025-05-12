@@ -7,7 +7,7 @@ from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import PhaseOptimisation
-from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
+from qat.middleend.passes.transform import PostProcessingSanitisation
 from qat.middleend.passes.validation import (
     HardwareConfigValidity,
     InstructionValidation,

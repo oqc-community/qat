@@ -135,7 +135,7 @@ class PhaseOptimisation(TransformPass):
             return PhaseSet(target, 0.0)
         elif isinstance(phase2, PhaseSet):
             return PhaseSet(target, phase2.phase)
-        elif phase1 == None:
+        elif phase1 is None:
             return phase2
         elif isinstance(phase1, PhaseReset):
             return PhaseSet(target, phase2.phase)
@@ -504,7 +504,6 @@ class MeasurePhaseResetSanitisation(TransformPass):
     """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
-
         new_instructions = []
         for instr in ir.instructions:
             if isinstance(instr, MeasurePulse):
@@ -712,14 +711,14 @@ class EndOfTaskResetSanitisation(TransformPass):
                 for target in inst.quantum_targets:
                     # if a qubit only sees a reset, its not "active", so ignore
                     qubit = active_pulse_channels.target_map[target]
-                    if qubit in qubit_map and qubit_map[qubit] == None:
+                    if qubit in qubit_map and qubit_map[qubit] is None:
                         qubit_map[qubit] = True
             else:
                 target = active_pulse_channels.target_map[next(iter(inst.quantum_targets))]
-                if qubit_map[target] == None:
+                if qubit_map[target] is None:
                     qubit_map[target] = False
 
-            if all([val != None for val in qubit_map.values()]):
+            if all([val is not None for val in qubit_map.values()]):
                 break
 
         for qubit, val in qubit_map.items():
@@ -764,7 +763,6 @@ class ResetsToDelays(TransformPass):
         new_instructions = []
         for instr in ir.instructions:
             if isinstance(instr, Reset):
-
                 qubit_targets = {
                     active_pulse_channels.target_map[target]
                     for target in instr.quantum_targets

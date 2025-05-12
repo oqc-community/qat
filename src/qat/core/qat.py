@@ -59,7 +59,6 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ):
-
         P = self.pipelines.get(pipeline)
 
         compiler_config = compiler_config or CompilerConfig()

@@ -46,7 +46,6 @@ class TestTransformPasses:
 
 
 class TestLowerSyncsToDelays:
-
     def test_sync_with_two_channels(self):
         model = EchoModelLoader().load()
         chan1 = model.qubits[0].get_drive_channel()
@@ -73,7 +72,6 @@ class TestLowerSyncsToDelays:
 
 
 class TestSquashDelaysOptimisation:
-
     @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
     @pytest.mark.parametrize("with_phase", [True, False])
     def test_multiple_delays_on_one_channel(self, num_delays, with_phase):
@@ -157,7 +155,6 @@ class TestSquashDelaysOptimisation:
 
 
 class TestFreqShiftSanitisation:
-
     def test_no_freq_shift_pulse_channel(self):
         hw = EchoModelLoader(8).load()
 

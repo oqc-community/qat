@@ -128,7 +128,6 @@ class TestLoadQasmFile:
 
 
 class TestQasm2Frontend:
-
     @pytest.mark.parametrize("qasm_path", get_all_qasm2_paths())
     def test_check_and_return_source_with_qasm_2_files(self, qasm_path):
         # TODO: Update frontends to work with `Path`s, COMPILER-404
@@ -171,7 +170,6 @@ class TestQasm2Frontend:
 
 
 class TestQasm3Frontend:
-
     @pytest.mark.parametrize("qasm_path", qasm3_tests)
     def test_check_and_return_source_with_qasm_3_files(self, qasm_path):
         # TODO: Update frontends to work with `Path`s, COMPILER-404

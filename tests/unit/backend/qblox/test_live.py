@@ -26,7 +26,6 @@ log = get_default_logger()
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxLiveEngine:
-
     @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
     def test_measure_amp_sweep(self, model, amp):
         engine = model.create_engine()

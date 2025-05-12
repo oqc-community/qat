@@ -4,10 +4,10 @@ from itertools import permutations
 from random import seed
 
 import networkx as nx
+import numpy as np
 import pytest
 from compiler_config.config import CompilerConfig, Qasm2Optimizations, Tket
 from docplex.mp.model import Model
-from numpy import array, random
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import TwoLocal
 from qiskit.primitives import Estimator as QuantumInstance
@@ -113,15 +113,15 @@ class TestQiskitSimulator:
 
     def test_thermal_relaxation_noise_model(self):
         # T1 and T2 values for qubits 0-3
-        T1s = random.normal(
+        T1s = np.random.normal(
             50e3, 10e3, 4
         )  # Sampled from normal distribution mean 50 microsec
-        T2s = random.normal(
+        T2s = np.random.normal(
             70e3, 10e3, 4
         )  # Sampled from normal distribution mean 50 microsec
 
         # Truncate random T2s <= T1s
-        T2s = array([min(T2s[j], 2 * T1s[j]) for j in range(4)])
+        T2s = np.array([min(T2s[j], 2 * T1s[j]) for j in range(4)])
 
         # Instruction times (in nanoseconds)
         time_u1 = 0  # virtual gate
@@ -694,9 +694,6 @@ class TestQiskitOptimization:
                     cost = cost + w[i, j] * x[i] * (1 - x[j])
             if best_cost_brute < cost:
                 best_cost_brute = cost
-                xbest_brute = x
-
-        colors = ["r" if xbest_brute[i] == 0 else "c" for i in range(n)]
 
         max_cut = Maxcut(w)
         qp = max_cut.to_quadratic_program()

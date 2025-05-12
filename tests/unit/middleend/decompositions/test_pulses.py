@@ -11,7 +11,6 @@ from qat.utils.hardware_model import generate_hw_model
 
 
 class TestDefaultPulseDecompositions:
-
     def test_X_pi_2_decomposition(self):
         model = generate_hw_model(4, seed=42)
         decomps = DefaultPulseDecompositions()

@@ -541,7 +541,7 @@ class TestBaseQuantum:
 
         for qid in freq_shift_qubits:
             qubit = hardware.get_qubit(qid)
-            freq_channel = qubit.create_pulse_channel(
+            qubit.create_pulse_channel(
                 ChannelType.freq_shift, amp=1.0, scale=1.0, frequency=8.5e9
             )
 

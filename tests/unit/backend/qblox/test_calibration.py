@@ -11,7 +11,6 @@ from qat.purr.utils.logger import load_object_from_log_folder, save_object_to_lo
 
 @pytest.mark.parametrize("cluster_setup", [None], indirect=True)
 class TestHardwareModelLifecycle:
-
     def test_save_calibration(self, cluster_setup, calibration_filename):
         model = QbloxLiveHardwareModel()
         cluster_setup.configure(model)

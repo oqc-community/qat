@@ -21,7 +21,6 @@ from qat.purr.compiler.instructions import (
 
 
 class TestPartitionByPulseChannel:
-
     def create_triaged_instructions(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()

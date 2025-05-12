@@ -20,7 +20,6 @@ import qat.pipelines.echo
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.config import (
     HardwareLoaderDescription,
     PipelineFactoryDescription,
@@ -28,7 +27,6 @@ from qat.core.config import (
 )
 from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
-from qat.core.qat import QAT
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
@@ -53,7 +51,6 @@ from qat.purr.qat import _return_or_build, fetch_frontend
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import LegacyRuntime, SimpleRuntime
 from qat.runtime.executables import ChannelExecutable, Executable
-from qat.runtime.simple import SimpleRuntime
 
 from tests.unit.utils.qasm_qir import (
     ProgramFileType,
@@ -519,7 +516,7 @@ class TestQATPipelineSetup:
         backend = WaveformV1Backend(model)
         runtime = SimpleRuntime(engine=EchoEngine())
 
-        P = Pipeline(
+        Pipeline(
             name="default",
             frontend=frontend,
             middleend=middleend,
@@ -538,7 +535,7 @@ class TestQATPipelineSetup:
         q.pipelines.add(echo_pipeline)
         assert echo_pipeline.name in q.pipelines.list()
         q.pipelines.remove(echo_pipeline)
-        assert not echo_pipeline.name in q.pipelines.list()
+        assert echo_pipeline.name not in q.pipelines.list()
 
     def test_add_pipeline_set_default(self, fallthrough_pipeline):
         pipe1 = fallthrough_pipeline.model_copy(update={"name": "pipe1"})

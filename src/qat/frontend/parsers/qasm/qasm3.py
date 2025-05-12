@@ -116,7 +116,6 @@ class UntargetedPulse(Pulse):
 
 
 class Qasm3ParserBase(AbstractParser, QASMVisitor):
-
     def parser_language(self) -> Languages:
         return Languages.Qasm3
 
@@ -157,7 +156,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
     def _fetch_or_parse(self, qasm_str: str) -> ast.Program:
         if 'defcalgrammar "openpulse"' in qasm_str:
-            raise ValueError(f"QASM3ParserBase can not parse OpenPulse programs.")
+            raise ValueError("QASM3ParserBase can not parse OpenPulse programs.")
 
         # If we have seen this file before.
         qasm_id = hash(qasm_str)
@@ -906,8 +905,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
             if frequency is not _empty and not isinstance(frequency, float):
                 raise ValueError(
-                    f"Frequency '{str(frequency)}' used in {intrinsic_name} "
-                    "is not a float."
+                    f"Frequency '{str(frequency)}' used in {intrinsic_name} is not a float."
                 )
             if phase is not _empty and not isinstance(phase, float):
                 raise ValueError(
@@ -1532,16 +1530,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     tree.children[1].children[1], walk_variable=False
                 )
                 raise ValueError(
-                    f"Play frame argument {variable_name} has not been linked to a "
-                    "frame."
+                    f"Play frame argument {variable_name} has not been linked to a frame."
                 )
 
             pulse_target = args[0]
             if not isinstance(pulse_target, PulseChannel):
                 variable_name = self.transform_to_value(tree.children[1].children[0])
                 raise ValueError(
-                    f"Play waveform argument {variable_name} does not point to a "
-                    "waveform."
+                    f"Play waveform argument {variable_name} does not point to a waveform."
                 )
 
             ut_pulse_blob = deepcopy(ut_pulse.model_dump())

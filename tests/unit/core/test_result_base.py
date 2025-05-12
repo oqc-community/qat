@@ -11,7 +11,6 @@ class MockResult(ResultInfoMixin):
 
 
 class TestResultsManager:
-
     def test_result_overwrites(self):
         res = ResultManager()
         res.add(MockResult("test1"))

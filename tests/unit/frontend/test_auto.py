@@ -31,7 +31,6 @@ qir_tests = [
 
 
 class TestAutoFrontend:
-
     # The hardware model being required here isn't ideal. It's because on instantiation
     # of the parser, get_builder(model) is called. Something to resolve later.
     frontend = AutoFrontend(EchoModelLoader(32).load())

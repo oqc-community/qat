@@ -21,7 +21,6 @@ from qat.purr.compiler.instructions import (
 
 
 class ScopeSanitisation(TransformPass):
-
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """
         Bubbles up all sweeps and repeats to the beginning of the list.

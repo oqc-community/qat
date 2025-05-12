@@ -67,20 +67,18 @@ frozendict = "^2.4.6"
 piny = {version = "^1.1.0"}
 
 [tool.poetry.group.dev.dependencies]
-black = {extras = ["jupyter"], version = "^24.10.0"}
 pip-audit = "^2.9.0"
 coverage = ">=7.8.0"
 pytest = "^8.3.5"
 pytest-cov = ">=6.1.1"
 pytest-mock = "^3.14.0"
-autoflake = "^2.3.1"
-isort = "^5.13.2"
 docplex = "^2.21.207"
 pre-commit = "^3.2.0"
 pytest-benchmark = "^4.0.0"
 jinja2 = "^3.1.5"
-jupytext = "1.16.7"
+jupytext = "1.17.1"
 nbstripout = "^0.8.1"
+ruff = "^0.11.7"
 
 [tool.poetry.group.licenses]
 optional = true
@@ -135,25 +133,22 @@ html_theme_options.navigation_depth=6
 html_theme_options.includehidden=true
 html_theme_options.titles_only=false
 
-[tool.autoflake]
-remove-all-unused-imports = true
-ignore-init-module-imports = true
-ignore-pass-after-docstring = true
-in-place = true
-recursive = true
-
-[tool.isort]
-py_version = 39
-profile = "black"
-line_length = 92
-known_first_party = ["qat"]
-known_local_folder = ["tests", "benchmarks"]
-extend_skip = ["__init__.py"]
-extend_skip_glob = ["notebooks/**"]
-
-[tool.black]
+[tool.ruff]
 line-length = 92
-target-version = ["py310", "py311", "py312"]
+extend-exclude = ["__init__.py", "benchmarks/**"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore imports not at top of notebook files
+"notebooks/**" = ["E402"]
+# Ignore a == b comparisons for tests
+"tests/**" = ["E711", "E712", "E721"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["qat"]
+known-local-folder = ["tests", "benchmarks"]
 
 [tool.pytest.ini_options]
 addopts = [

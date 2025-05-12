@@ -8,32 +8,24 @@ repos:
       - id: check-merge-conflict
         stages: [commit, manual]
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.16.7  # CURRENT_TAG/COMMIT_HASH
+    rev: v1.17.1  # CURRENT_TAG/COMMIT_HASH
     hooks:
       - id: jupytext
-        args: [--sync, --pre-commit-mode, --pipe, black]
+        args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
         additional_dependencies:
-          - black[jupyter]==24.10.0 # Matches hook
+          - ruff==v0.11.7
   - repo: https://github.com/kynan/nbstripout
     rev: 0.5.0
     hooks:
     - id: nbstripout
       args: [--extra-keys=metadata.kernelspec]
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
     hooks:
-      - id: black
-        stages: [commit, manual]
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        stages: [commit, manual]
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.2.0
-    hooks:
-      - id: autoflake
-        stages: [ commit, manual ]
+      # Run the linter.
+      - id: ruff
+      # Run the formatter.
+      - id: ruff-format
   - repo: https://github.com/python-poetry/poetry
     rev: 2.1.1
     hooks:

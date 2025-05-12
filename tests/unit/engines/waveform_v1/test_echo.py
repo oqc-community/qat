@@ -12,7 +12,6 @@ from qat.purr.compiler.instructions import AcquireMode
 
 
 class TestEchoEngine:
-
     @pytest.mark.parametrize(
         "mode", [AcquireMode.RAW, AcquireMode.SCOPE, AcquireMode.INTEGRATOR]
     )

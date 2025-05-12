@@ -25,8 +25,7 @@ class _FlagFieldValidation(type):
         missing_fields = [val for val in snake_cased_flags if val not in hint_names]
         if any(missing_fields):
             raise ValueError(
-                "CompilationMetrics is missing type hints for "
-                f"{', '.join(missing_fields)}."
+                f"CompilationMetrics is missing type hints for {', '.join(missing_fields)}."
             )
 
         return super().__new__(mcs, name, inheritance, attributes)

@@ -374,7 +374,7 @@ class TestQATConfig:
         model = EchoModelLoader().load()
 
         with pytest.raises(ValueError):
-            P = desc.construct(model=model)
+            desc.construct(model=model)
 
     def test_yaml_custom_config_invalid_arg(self, qatconfig_testfiles):
         """Check that invalid config (types) raise exceptions
@@ -387,4 +387,4 @@ class TestQATConfig:
         model = EchoModelLoader().load()
 
         with pytest.raises(ValueError):
-            P = desc.construct(model=model)
+            desc.construct(model=model)

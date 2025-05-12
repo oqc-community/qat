@@ -373,7 +373,7 @@ def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 
 
 def get_builder(
-    model: Union[QuantumHardwareModel, InstructionExecutionEngine]
+    model: Union[QuantumHardwareModel, InstructionExecutionEngine],
 ) -> QuantumInstructionBuilder:
     if isinstance(model, InstructionExecutionEngine):
         model = model.model

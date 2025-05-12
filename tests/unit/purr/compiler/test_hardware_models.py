@@ -59,7 +59,6 @@ def apply_error_mitigation_setup(
     [get_default_echo_hardware(), get_default_RTCS_hardware(), get_jagged_echo_hardware()],
 )
 class TestErrorMitigationValidation:
-
     def apply_mitigation(
         self,
         hw,

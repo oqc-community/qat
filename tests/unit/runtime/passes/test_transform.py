@@ -17,7 +17,6 @@ from qat.runtime.passes.transform import (
 
 
 class TestPostProcessingTransform:
-
     def test_raw_to_bits(self):
         mock_readout = {"test": np.ones((1000, 254))}
         pp_instructions = [
@@ -89,7 +88,6 @@ class TestPostProcessingTransform:
 
 
 class TestInlineResultsProcessingTransform:
-
     def test_run_results_processing_with_program(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()
@@ -117,7 +115,6 @@ class TestInlineResultsProcessingTransform:
 
 
 class TestAssignResultsTransform:
-
     def test_only_returns_what_is_asked(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()

@@ -35,7 +35,7 @@ class TestCalibratable:
             CalibratableAcquire(width=invalid_width)
 
     @pytest.mark.parametrize("invalid_delay", ["invalid_delay", -0.001, -5])
-    def test_invalid_width(self, invalid_delay):
+    def test_invalid_delay(self, invalid_delay):
         with pytest.raises(ValidationError):
             CalibratableAcquire(width=invalid_delay)
 

@@ -9,7 +9,6 @@ from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 
 
 class TestIndexMappingAnalysis:
-
     def create_qat_ir(self):
         model = get_default_echo_hardware(2)
         builder = model.create_builder()

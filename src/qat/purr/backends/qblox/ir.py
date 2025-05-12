@@ -99,7 +99,7 @@ class SequenceBuilder:
             waveforms=self.waveforms,
             acquisitions=self.acquisitions,
             weights=self.weights,
-            program=f"\n".join([str(inst) for inst in self.q1asm_instructions]),
+            program="\n".join([str(inst) for inst in self.q1asm_instructions]),
         )
 
     def lookup_waveform_by_data(self, data: np.ndarray):

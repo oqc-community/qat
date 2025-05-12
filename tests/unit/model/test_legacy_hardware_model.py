@@ -115,7 +115,6 @@ class TestEchoHardwareModelConversion:
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
 
         for qubit_index, qubit in pyd_hw.qubits.items():
-
             for pulse_channel_name in [
                 "cross_resonance_channels",
                 "cross_resonance_cancellation_channels",

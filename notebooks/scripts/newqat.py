@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.7
+#       jupytext_version: 1.17.1
 # ---
 
 # %% [markdown]
@@ -78,8 +78,8 @@ qat.pipelines
 
 # %%
 import pathlib
-import yaml
 
+import yaml
 
 print(yaml.dump(yaml.safe_load(pathlib.Path("../qatconfig.eg.yaml").read_text())))
 

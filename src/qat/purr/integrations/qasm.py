@@ -242,8 +242,7 @@ class AbstractParser:
     def _add_ecr(self, qubits, builder):
         if len(qubits) != 2:
             raise ValueError(
-                "Definition of ECR intrinsic is wrong. Can only take 2 "
-                "qubits as arguments."
+                "Definition of ECR intrinsic is wrong. Can only take 2 qubits as arguments."
             )
         builder.ECR(qubits[0], qubits[1])
 
@@ -640,8 +639,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
             invalid_gates = gate_nodes.difference(self.allowed_gates)
             if any(invalid_gates):
                 raise ValueError(
-                    f"Gates [{', '.join(invalid_gates)}] "
-                    "are currently unable to be used."
+                    f"Gates [{', '.join(invalid_gates)}] are currently unable to be used."
                 )
 
         if self.disable_if and any(
@@ -752,7 +750,6 @@ class UntargetedPulse:
 
 
 class Qasm3ParserBase(AbstractParser, QASMVisitor):
-
     def parser_language(self) -> Languages:
         return Languages.Qasm3
 
@@ -791,7 +788,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
     def _fetch_or_parse(self, qasm_str: str) -> ast.Program:
         if 'defcalgrammar "openpulse"' in qasm_str:
-            raise ValueError(f"QASM3ParserBase can not parse OpenPulse programs.")
+            raise ValueError("QASM3ParserBase can not parse OpenPulse programs.")
 
         # If we've seen this file before
         qasm_id = hash(qasm_str)
@@ -1502,8 +1499,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
             if frequency is not _empty and not isinstance(frequency, float):
                 raise ValueError(
-                    f"Frequency '{str(frequency)}' used in {intrinsic_name} "
-                    "is not a float."
+                    f"Frequency '{str(frequency)}' used in {intrinsic_name} is not a float."
                 )
             if phase is not _empty and not isinstance(phase, float):
                 raise ValueError(
@@ -2089,15 +2085,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     tree.children[1].children[1], walk_variable=False
                 )
                 raise ValueError(
-                    f"Play frame argument {variable_name} hasn't been linked to a " "frame."
+                    f"Play frame argument {variable_name} hasn't been linked to a frame."
                 )
 
             pulse_target = args[0]
             if not isinstance(pulse_target, PulseChannel):
                 variable_name = self.transform_to_value(tree.children[1].children[0])
                 raise ValueError(
-                    f"Play waveform argument {variable_name} doesn't point to a "
-                    "waveform."
+                    f"Play waveform argument {variable_name} doesn't point to a waveform."
                 )
 
             self.builder.add(ut_pulse.build_with_target(pulse_target))

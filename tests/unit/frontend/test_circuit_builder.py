@@ -13,7 +13,6 @@ from tests.unit.utils.gates import get_non_abstract_subgates
 
 
 class TestCircuitBuilder:
-
     def test_add_raises_value_error(self):
         circuit = CircuitBuilder(4)
 

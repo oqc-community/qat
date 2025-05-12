@@ -166,7 +166,6 @@ def test_interrupt_triggered_on_batch_n(
     ],
 )
 def test_interrupt_not_triggered_on_n_batches(get_hardware):
-
     hardware = get_hardware(2)
     # Force more than one batch in the batches
     hardware.repeat_limit = 10

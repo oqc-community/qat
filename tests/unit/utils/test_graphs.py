@@ -92,7 +92,6 @@ class TestToshiko:
 
         # Couplings
         for leg_subgr in legacy_subgraphs:
-
             found_match = False
             for nx_subgr in nx_subgraphs_edges:
                 if set(leg_subgr) == set(nx_subgr):

@@ -116,7 +116,7 @@ CalibratableUnitInterval = Annotated[
 
 def validate_calibratable_unit_interval_array(array: CalibratableUnitInterval2x2Array):
     if np.any(array > 1) or np.any(array < 0):
-        raise ValueError(f"Given array elements must be in the interval [0, 1].")
+        raise ValueError("Given array elements must be in the interval [0, 1].")
     return array
 
 
@@ -237,7 +237,7 @@ class PydSetBase(RootModel[set[V]]):
         elif isinstance(other, set):
             return self.root.issubset(other)
         else:
-            raise NotImplemented(f"Unsupported processing for {self} and {other}.")
+            raise NotImplementedError(f"Unsupported processing for {self} and {other}.")
 
     def __sub__(self, other: PydSetBase):
         if isinstance(other, PydSetBase):
@@ -245,7 +245,7 @@ class PydSetBase(RootModel[set[V]]):
         elif isinstance(other, set):
             return self.root.__sub__(other)
         else:
-            raise NotImplemented(f"Unsupported processing for {self} and {other}.")
+            raise NotImplementedError(f"Unsupported processing for {self} and {other}.")
 
     def __and__(self, other: PydSetBase):
         if isinstance(other, PydSetBase):
@@ -253,7 +253,7 @@ class PydSetBase(RootModel[set[V]]):
         elif isinstance(other, set):
             return self.root.__and__(other)
         else:
-            raise NotImplemented(f"Unsupported processing for {self} and {other}.")
+            raise NotImplementedError(f"Unsupported processing for {self} and {other}.")
 
     def __len__(self):
         return self.root.__len__()
@@ -506,7 +506,8 @@ def get_annotated_array(ty: type):
     """Creates an annotated type for numeric lists with Pydantic serializers and validators
     for efficient serialization."""
     return Annotated[
-        NDArray[Shape["* x"], ty],
+        # TODO: Investigate linting issue with Shape["* x"]
+        NDArray[Shape["* x"], ty],  # noqa: F722
         BeforeValidator(lambda x: _list_validator(x, ty)),
         PlainSerializer(_list_serializer),
     ]

@@ -34,7 +34,6 @@ class TestQiskitErrorMitigation:
 
 
 class TestQiskitStripMetadata:
-
     def test_metadata_is_removed(self):
         """When metadata is enabled, results are returned as a tuple of execution results
         and metadata. Let's check they're stripped away!"""
@@ -45,7 +44,6 @@ class TestQiskitStripMetadata:
 
 
 class TestQiskitSimplifyResults:
-
     def test_single_register_has_key_removed(self):
         results = {build_generated_name(): np.zeros(1000)}
         results = QiskitSimplifyResults().run(results)

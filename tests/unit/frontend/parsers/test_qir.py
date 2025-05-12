@@ -24,7 +24,6 @@ pyd_hw_model = convert_legacy_echo_hw_to_pydantic(leg_hw_model)
 
 
 class TestQIRParser:
-
     @pytest.mark.parametrize(
         "qir_file",
         [

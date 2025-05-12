@@ -272,7 +272,6 @@ class TestAnalysisPasses:
 
 
 class TestTimelineAnalysis:
-
     def test_timelines_match(self):
         """Test the results of the timeline analyis match with the expectation."""
         model = EchoModelLoader().load()
@@ -452,7 +451,6 @@ class TestTimelineAnalysis:
 
 
 class TestIntermediateFrequencyAnalysis:
-
     def test_different_frequencies_with_fixed_if_yields_error(self):
         model = EchoModelLoader().load()
         physical_channel = next(iter(model.physical_channels.values()))

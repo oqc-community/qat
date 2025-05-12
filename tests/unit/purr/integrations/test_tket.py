@@ -188,7 +188,6 @@ class TestTketOptimization:
 
 
 class TestTketToQatIRConverter:
-
     def test_get_qubit(self):
         model = get_default_echo_hardware(10)
         converter = TketToQatIRConverter(model)

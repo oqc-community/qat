@@ -26,7 +26,6 @@ class InterruptableExecutingMixin:
         interrupt: Interrupt = NullInterrupt(),
         **kwargs,
     ):
-
         calibrations = [
             find_calibration(arg) for arg in compiler_config.active_calibrations
         ]

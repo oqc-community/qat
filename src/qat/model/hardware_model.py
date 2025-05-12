@@ -35,16 +35,16 @@ class LogicalHardwareModel(NoExtraFieldsModel):
 
     @field_validator("version")
     def version_compatibility(version: Version):
-        assert (
-            version.major == VERSION.major
-        ), f"Direct instantiation requires major version compatibility (expected {VERSION.major}.Y.Z, found {version})"
-        assert (
-            VERSION >= version
-        ), f"Latest supported hardware model version {VERSION}, found {version}"
+        assert version.major == VERSION.major, (
+            f"Direct instantiation requires major version compatibility (expected {VERSION.major}.Y.Z, found {version})"
+        )
+        assert VERSION >= version, (
+            f"Latest supported hardware model version {VERSION}, found {version}"
+        )
         return VERSION
 
     def __eq__(self, other: LogicalHardwareModel) -> bool:
-        if type(self) != type(other):
+        if type(self) is not type(other):
             return False
 
         if self.__class__.model_fields != other.__class__.model_fields:
@@ -114,9 +114,9 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def validate_connectivity(self):
         # Check if all qubits exist in physical connectivity.
         if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity.
-            assert (
-                self.qubits.keys() == self.physical_connectivity.keys()
-            ), f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."
+            assert self.qubits.keys() == self.physical_connectivity.keys(), (
+                f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."
+            )
 
         # Check if logical connectivity is subset of physical connectivity.
         for qubit_index in self.logical_connectivity:
@@ -144,15 +144,15 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             for chan in qubit.cross_resonance_cancellation_pulse_channels.values()
         }
 
-        assert (
-            cross_resonance_edges == cross_cancellation_edges
-        ), "Cross resonance channels mismatch cross resonance cancellation channels."
-        assert (
-            logical_connectivities == cross_resonance_edges
-        ), "Cross resonance channels mismatch logical connectivity."
-        assert (
-            logical_connectivities == cross_cancellation_edges
-        ), "Cross resonance cancellation channels mismatch logical connectivity."
+        assert cross_resonance_edges == cross_cancellation_edges, (
+            "Cross resonance channels mismatch cross resonance cancellation channels."
+        )
+        assert logical_connectivities == cross_resonance_edges, (
+            "Cross resonance channels mismatch logical connectivity."
+        )
+        assert logical_connectivities == cross_cancellation_edges, (
+            "Cross resonance cancellation channels mismatch logical connectivity."
+        )
 
         return self
 
@@ -217,8 +217,9 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             if qubit_pulse_channel := qubit.pulse_channels.pulse_channel_with_id(id_):
                 return qubit_pulse_channel
 
-            elif resonator_pulse_channel := qubit.resonator.pulse_channels.pulse_channel_with_id(
-                id_
+            elif (
+                resonator_pulse_channel
+                := qubit.resonator.pulse_channels.pulse_channel_with_id(id_)
             ):
                 return resonator_pulse_channel
 

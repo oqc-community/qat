@@ -221,7 +221,6 @@ class TestInstruction:
 
 @pytest.mark.parametrize("num_qubits", [1, 2, 3])
 class TestSingleGates:
-
     @pytest.mark.parametrize(
         ["func_name", "args", "gate"],
         [(val[0], val[2], val[1]) for val in single_gate_list().values()],
@@ -286,7 +285,6 @@ class TestDoubleGates:
 
 
 class TestSweep:
-
     def test_sweep_runs(self):
         hw = get_default_echo_hardware(2)
         builder = (
@@ -420,8 +418,8 @@ class TestInstructionExecution:
                 assert len(list_) == expected_shape[dim]
                 if len(list_) > 0 and not isinstance(list_[0], list):
                     return
-                for l in list_:
-                    _check_size(l, dim + 1)
+                for nested_list in list_:
+                    _check_size(nested_list, dim + 1)
 
             _check_size(results, 0)
             assert max(dims) == len(expected_shape) - 1

@@ -336,8 +336,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
             invalid_gates = gate_nodes.difference(self.allowed_gates)
             if any(invalid_gates):
                 raise ValueError(
-                    f"Gates [{', '.join(invalid_gates)}] "
-                    "are currently unable to be used."
+                    f"Gates [{', '.join(invalid_gates)}] are currently unable to be used."
                 )
 
         if self.disable_if and any(

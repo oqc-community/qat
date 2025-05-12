@@ -795,12 +795,12 @@ def get_default_logger():
 
             stack = traceback.extract_stack()
             is_test_env = any(
-                val.filename is not None and val.filename.endswith(f"unittest\\loader.py")
+                val.filename is not None and val.filename.endswith("unittest\\loader.py")
                 for val in stack
             )
             if is_test_env:
                 _default_logging_instance.log_folder.needs_cleanup = True
-        except:
+        except Exception:
             _default_logging_instance.warning("Test environment detection failed.")
 
     return _default_logging_instance

@@ -116,7 +116,7 @@ class QiskitResultsFormatValidation(ValidationPass):
             if isinstance(results_format, QuantumResultsFormat)
             else results_format
         )
-        if format_flags == None or not ResultsFormatting.BinaryCount in format_flags:
+        if format_flags is None or ResultsFormatting.BinaryCount not in format_flags:
             log.warning(
                 "The results formatting `BinaryCount` was not found in the formatting "
                 "flags. Please note that the Qiskit runtime only currently supports "

@@ -36,7 +36,7 @@ class Component(NoExtraFieldsModel):
         if self.uuid != other.uuid:
             return False
 
-        if not type(self) is type(other):
+        if type(self) is not type(other):
             return False
 
         if self.__class__.model_fields != other.__class__.model_fields:
@@ -237,7 +237,7 @@ class PulseChannelSet(NoExtraFieldsModel):
         return True
 
     def __eq__(self, other: PulseChannelSet):
-        if type(self) != type(other):
+        if type(self) is not type(other):
             return False
 
         if self.__class__.model_fields != other.__class__.model_fields:
@@ -317,9 +317,9 @@ class QubitPulseChannels(PulseChannelSet):
     @field_validator("cross_resonance_channels", "cross_resonance_cancellation_channels")
     def validate_channels_qubit_mapping(cls, channels):
         for aux_qubit_id, pulse_channel in channels.items():
-            assert (
-                aux_qubit_id == pulse_channel.auxiliary_qubit
-            ), f"Mismatch in mapping for qubit id in {channels}."
+            assert aux_qubit_id == pulse_channel.auxiliary_qubit, (
+                f"Mismatch in mapping for qubit id in {channels}."
+            )
         return channels
 
     @model_validator(mode="after")
@@ -327,7 +327,9 @@ class QubitPulseChannels(PulseChannelSet):
         assert (
             self.cross_resonance_channels.keys()
             == self.cross_resonance_cancellation_channels.keys()
-        ), f"Mismatch between auxiliary qubit ids for cross resonance and cross resonance cancellation channels."
+        ), (
+            "Mismatch between auxiliary qubit ids for cross resonance and cross resonance cancellation channels."
+        )
         return self
 
     @property

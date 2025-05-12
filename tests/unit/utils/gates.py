@@ -37,7 +37,7 @@ def get_non_abstract_subgates(cls: type):
             classes.add(next_cls)
         new_classes = next_cls.__subclasses__()
         for new_cls in new_classes:
-            if not new_cls in classes:
+            if new_cls not in classes:
                 unchecked_classes.add(new_cls)
         unchecked_classes.remove(next_cls)
     return classes

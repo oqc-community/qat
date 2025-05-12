@@ -941,7 +941,6 @@ class QbloxEmitter(InvokerMixin):
         met_mgr: MetricsManager,
         ignore_empty=True,
     ) -> Dict[int, List[QbloxPackage]]:
-
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
         repeat = next(iter(triage_result.repeats))

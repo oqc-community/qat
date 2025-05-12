@@ -8,8 +8,8 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, ImportString
 if TYPE_CHECKING:
     from qat.core.pipeline import Pipeline
     from qat.model.hardware_model import PydLogicalHardwareModel
-    from qat.purr.compiler.hardware_models import LegacyHardwareModel
     from qat.model.loaders.base import BaseModelLoader
+    from qat.purr.compiler.hardware_models import LegacyHardwareModel
 
 from .validators import (
     is_backend,

@@ -58,7 +58,6 @@ class PydReturnSanitisationValidation(ValidationPass):
 
 
 class NCOFrequencyVariability(ValidationPass):
-
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 

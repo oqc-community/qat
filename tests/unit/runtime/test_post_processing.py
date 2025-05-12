@@ -16,7 +16,6 @@ from qat.runtime.post_processing import (
 
 
 class TestApplyPostProcessing:
-
     def test_invalid_pp_type_raises_not_implemented_error(self):
         pp = PostProcessing(output_variable="test", process_type=PostProcessType.MUL)
         with pytest.raises(NotImplementedError):

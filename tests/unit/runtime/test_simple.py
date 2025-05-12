@@ -16,7 +16,6 @@ from qat.runtime.passes.transform import (
 
 
 class TestSimpleRuntime:
-
     def basic_acquire_circuit(self, shots, mode=AcquireMode.INTEGRATOR):
         model = EchoModelLoader().load()
         builder = model.create_builder()

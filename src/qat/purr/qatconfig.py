@@ -221,7 +221,7 @@ class QatConfig(BaseSettings):
         hardware_loader_names = {hld.name for hld in info.data["HARDWARE"]}
         for Pdesc in pipelines:
             expected_loader = getattr(Pdesc, "hardware_loader", None)
-            if expected_loader and not expected_loader in hardware_loader_names:
+            if expected_loader and expected_loader not in hardware_loader_names:
                 raise ValueError(f"Hardware Loader {expected_loader} not defined")
 
         return pipelines

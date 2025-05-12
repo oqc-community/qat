@@ -662,8 +662,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
             and len(auxiliary_devices) == 0
         ):
             raise ValueError(
-                f"Channel type {channel_type.name} requires at least one "
-                "auxillary_device"
+                f"Channel type {channel_type.name} requires at least one auxillary_device"
             )
         return ".".join(
             [str(x.full_id()) for x in (auxiliary_devices)] + [channel_type.name]

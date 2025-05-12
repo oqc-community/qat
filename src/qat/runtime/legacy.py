@@ -57,9 +57,9 @@ class LegacyRuntime(BaseRuntime):
         :returns: Execution results.
         """
 
-        if res_mgr == None:
+        if res_mgr is None:
             res_mgr = ResultManager()
-        if met_mgr == None:
+        if met_mgr is None:
             met_mgr = MetricsManager()
 
         self.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)

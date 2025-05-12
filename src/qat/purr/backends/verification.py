@@ -135,7 +135,6 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
 
 
 class LucyVerificationEngine(VerificationEngine):
-
     max_circuit_duration = 90000e-9
 
     def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
@@ -146,7 +145,7 @@ class LucyVerificationEngine(VerificationEngine):
 
         circuit_duration = max([duration for duration in durations.values()])
 
-        log.debug(f"The circuit duration is {circuit_duration/1e-6} microseconds.")
+        log.debug(f"The circuit duration is {circuit_duration / 1e-6} microseconds.")
 
         if circuit_duration > self.max_circuit_duration:
             raise VerificationError(

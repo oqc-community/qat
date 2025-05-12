@@ -17,7 +17,6 @@ from qat.purr.compiler.instructions import CustomPulse, PulseShapeType
 
 
 class TestBatchedShots:
-
     @pytest.mark.parametrize("shots", [0, 1000, 10000])
     def test_shots_less_than_equal_to_max_gives_expected(self, shots):
         model = EchoModelLoader().load()
@@ -57,7 +56,6 @@ class TestBatchedShots:
 
 
 class TestActivePulseChannelAnalysis:
-
     def test_valid_instructions(self):
         model = EchoModelLoader().load()
         builder = model.create_builder()

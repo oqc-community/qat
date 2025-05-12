@@ -82,8 +82,7 @@ def validate_input_array(func):
                 raise TypeError(f"Function given {type(arg)}, expecting numpy.ndarray")
             if arg.size > max_size:
                 raise RuntimeError(
-                    f"Function given {arg.size} element inputs "
-                    f"exceeding maximum {max_size}"
+                    f"Function given {arg.size} element inputs exceeding maximum {max_size}"
                 )
         return func(*args, **kwargs)
 

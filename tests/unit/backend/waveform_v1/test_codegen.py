@@ -7,7 +7,6 @@ from qat.model.loaders.legacy import EchoModelLoader
 
 
 class TestWaveformV1Executable:
-
     def test_same_after_serialize_deserialize_roundtrip(self):
         model = EchoModelLoader(10).load()
         builder = model.create_builder()

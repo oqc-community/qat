@@ -429,7 +429,7 @@ class TILegalisationPass(AnalysisPass):
         pulse_amp = scale * (scale_factor * amp) + bias
 
         if abs(pulse_amp.real) > 1 or abs(pulse_amp.imag) > 1:
-            raise ValueError(f"Illegal DAC/ADC ratio. It must be within range [-1, 1]")
+            raise ValueError("Illegal DAC/ADC ratio. It must be within range [-1, 1]")
 
         return pulse_amp
 
