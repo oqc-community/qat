@@ -609,24 +609,19 @@ Computes useful information in the form of attributes.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxEmitter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxEmitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxEmitter</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin" title="qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxEmitter.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter.emit" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#qat.purr.backends.qblox.codegen.QbloxPackage" title="qat.purr.backends.qblox.codegen.QbloxPackage"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a>]</span></p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxEmitter.build_pass_pipeline">
+<span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter.build_pass_pipeline" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxEmitter.optimize">
-<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qblox_contexts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter.optimize" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxEmitter.emit_packages">
+<span class="sig-name descname"><span class="pre">emit_packages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxEmitter.emit_packages" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#qat.purr.backends.qblox.codegen.QbloxPackage" title="qat.purr.backends.qblox.codegen.QbloxPackage"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a>]]</span></p>
 </dd>
 </dl>
 </dd></dl>
