@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-import json
 import random
 from collections import defaultdict
 from copy import deepcopy
@@ -20,6 +19,8 @@ from qat.utils.hardware_model import (
     random_connectivity,
     random_quality_map,
 )
+
+from tests.unit.utils.models import get_toshiko_connectivity
 
 
 @pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])
@@ -421,17 +422,15 @@ class Test_OQC_Hardware:
         hw = randomly_calibrate(hardware_model=hw, seed=seed)
         assert hw.is_calibrated
 
-    def test_toshiko(self, seed, n_removed_qubits):
+    def test_toshiko(self, testpath, seed, n_removed_qubits):
         lattice_connectivity = defaultdict(set)
         qubit_indices = set()
 
-        filepath = "tests/files/hardware/toshiko_lattice_connections.json"
-        with open(filepath, "r") as f:
-            connections = json.load(f)
-            for c in connections["connections"]:
-                lattice_connectivity[c[0]].add(c[1])
-                lattice_connectivity[c[1]].add(c[0])
-                qubit_indices.update([c[0], c[1]])
+        connections = get_toshiko_connectivity()
+        for c in connections:
+            lattice_connectivity[c[0]].add(c[1])
+            lattice_connectivity[c[1]].add(c[0])
+            qubit_indices.update([c[0], c[1]])
         lattice_connectivity = dict(lattice_connectivity)
 
         # Randomly remove 3 qubits from the GPU connectivity.

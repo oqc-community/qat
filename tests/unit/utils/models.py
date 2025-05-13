@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
+import json
 import random
 import re
 import threading
 from contextlib import contextmanager
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -18,6 +20,8 @@ from qat.purr.compiler.devices import (
     Resonator,
 )
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+
+from tests.conftest import tests_dir
 
 
 @contextmanager
@@ -170,6 +174,15 @@ def update_qubit_indices(program: str, qubit_indices: List[int]) -> str:
 
     new_program += program[old_end:]
     return new_program
+
+
+def get_toshiko_connectivity():
+    with Path(tests_dir, "files", "hardware", "toshiko_lattice_connections.json").open(
+        "r"
+    ) as f:
+        connectivity = json.load(f)
+
+    return connectivity["connections"]
 
 
 class ListReturningEngine(EchoEngine):
