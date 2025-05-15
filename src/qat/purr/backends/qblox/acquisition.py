@@ -1,0 +1,120 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
+from typing import List
+
+from pydantic import BaseModel, Field
+
+
+class PathData(BaseModel):
+    """
+    This object wraps the actual data as a list of samples, the number
+    of averages performed by the hardware (if any), and whether the hw observed any out-of-range samples.
+    """
+
+    avg_count: int = Field(alias="avg_cnt", default=None)
+    oor: bool = Field(alias="out-of-range", default=None)
+    data: List[float] = Field(alias="data", default=[])
+
+
+class IntegData(BaseModel):
+    """
+    Path 0 refers to I while Path 1 refers to Q
+    """
+
+    i: List[float] = Field(alias="path0", default=[])
+    q: List[float] = Field(alias="path1", default=[])
+
+
+class ScopeAcqData(BaseModel):
+    """
+    Path 0 refers to I while Path 1 refers to Q. Their lengths are statically equal
+    to :class:`Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS`
+    """
+
+    i: PathData = Field(alias="path0", default=PathData())
+    q: PathData = Field(alias="path1", default=PathData())
+
+
+class BinnedAcqData(BaseModel):
+    """
+    Binned data is data that's been acquired and processed via different routes such as squared acquisition,
+    weighed integration. Processing here refers to steps like averaging, rotation, and thresholding
+    which are executed by the hardware.
+    """
+
+    avg_count: List[int] = Field(alias="avg_cnt", default=[])
+    integration: IntegData = Field(alias="integration", default=IntegData())
+    threshold: List[float] = Field(alias="threshold", default=[])
+
+
+class AcqData(BaseModel):
+    """
+    The actual acquisition data, it represents the value associated with the key "acquisition"
+    in the acquisition blob returned by Qblox. This object contains scope data and binned data.
+    """
+
+    bins: BinnedAcqData = Field(alias="bins", default=BinnedAcqData())
+    scope: ScopeAcqData = Field(alias="scope", default=ScopeAcqData())
+
+
+class Acquisition(BaseModel):
+    """
+    Represents a single acquisition. In Qblox terminology, this object contains scope, integrated, and threshold
+    data all at once. It's up to the SW layer to pick up what it needs and adapt it to its flow.
+
+    An acquisition contains is described by a name, index, and blob data represented by :class:`AcqData`
+    """
+
+    name: str = None
+    index: int = Field(alias="index", default=None)
+    acq_data: AcqData = Field(alias="acquisition", default=AcqData())
+
+    @staticmethod
+    def accumulate(acq1: "Acquisition", acq2: "Acquisition"):
+        if acq1 == Acquisition():
+            return acq2.model_copy(deep=True)
+
+        if acq2 == Acquisition():
+            return acq1.model_copy(deep=True)
+
+        if acq1 == acq2:
+            return acq1.model_copy(deep=True)
+
+        result = Acquisition()
+
+        if acq1.index != acq2.index:
+            raise ValueError(
+                f"Expected the same index but got {acq1.index} != {acq2.index}"
+            )
+        result.index = acq1.index
+
+        if acq1.name != acq2.name:
+            raise ValueError(f"Expected the same name but got {acq1.name} != {acq2.name}")
+        result.name = acq1.name
+
+        scope_data1 = acq1.acq_data.scope
+        scope_data2 = acq2.acq_data.scope
+        scope_data = result.acq_data.scope
+
+        scope_data.i.avg_count = min(
+            scope_data1.i.avg_count or 0, scope_data2.i.avg_count or 0
+        )
+        scope_data.i.oor = scope_data1.i.oor and scope_data2.i.oor
+        scope_data.i.data = scope_data1.i.data + scope_data2.i.data
+        scope_data.q.avg_count = min(
+            scope_data1.q.avg_count or 0, scope_data2.q.avg_count or 0
+        )
+        scope_data.q.oor = scope_data1.q.oor and scope_data2.q.oor
+        scope_data.q.data = scope_data1.q.data + scope_data2.q.data
+
+        bin_data1 = acq1.acq_data.bins
+        bin_data2 = acq2.acq_data.bins
+        bin_data = result.acq_data.bins
+
+        bin_data.avg_count = bin_data1.avg_count + bin_data2.avg_count
+        bin_data.integration.i = bin_data1.integration.i + bin_data2.integration.i
+        bin_data.integration.q = bin_data1.integration.q + bin_data2.integration.q
+        bin_data.threshold = bin_data1.threshold + bin_data2.threshold
+
+        return result

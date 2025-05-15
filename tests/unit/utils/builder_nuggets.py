@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import numbers
 
 import numpy as np
 
@@ -8,10 +9,31 @@ from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
     MeasurePulse,
+    Pulse,
     SweepValue,
     Variable,
 )
 from qat.purr.compiler.runtime import get_builder
+
+
+def direct_x(qubit, channel=None, theta=None, amp=None, drag=None, width=None, rise=None):
+    pulse = Pulse(
+        channel or qubit.get_default_pulse_channel(), **dict(qubit.pulse_hw_x_pi_2)
+    )
+    if theta is not None:
+        if isinstance(theta, numbers.Number):
+            pulse.amp *= theta / (0.5 * np.pi)
+        else:
+            pulse.amp = theta
+    if amp is not None:
+        pulse.amp = amp
+    if drag is not None:
+        pulse.drag = drag
+    if width is not None:
+        pulse.width = width
+    if rise is not None:
+        pulse.rise = rise
+    return pulse
 
 
 def empty(model, qubit_indices=None):
@@ -298,4 +320,31 @@ def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         builder.measure_mean_z(qubit, output_variable=f"Q{index}")
+    return builder
+
+
+def multi_readout(model, qubit_indices=None, do_X=False):
+    qubit_indices = qubit_indices or [0]
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
+
+        builder.measure_single_shot_binned(qubit, output_variable=f"0_Q{index}")
+        builder.delay(drive_channel, 5e-6)
+        if do_X:
+            builder.add(direct_x(qubit, theta=np.pi / 2))
+            builder.add(direct_x(qubit, theta=np.pi / 2))
+        else:
+            builder.delay(drive_channel, 2 * qubit.pulse_hw_x_pi_2["width"])
+        builder.measure_single_shot_signal(qubit, output_variable=f"1_Q{index}")
+
     return builder

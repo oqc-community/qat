@@ -573,7 +573,7 @@ class QbloxContext(AbstractContext):
             return
 
         acq_index = self._register_acquisition(acquire.output_variable, 1)
-        acq_bin = self._repeat_reg
+        acq_bin = 0
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation

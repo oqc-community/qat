@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from qat import qatconfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.live import (
     NewQbloxLiveEngine,
@@ -16,6 +17,7 @@ from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
+    multi_readout,
     qubit_spect,
     resonator_spect,
     scope_acq,
@@ -219,16 +221,18 @@ class TestQbloxLiveEngine:
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_resonator_spect(self, model):
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_resonator_spect(self, model, qubit_indices):
         engine = model.create_engine()
-        builder = resonator_spect(model, [0, 1])
+        builder = resonator_spect(model, qubit_indices)
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_qubit_spect(self, model):
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_qubit_spect(self, model, qubit_indices):
         engine = model.create_engine()
-        builder = qubit_spect(model, [0, 1])
+        builder = qubit_spect(model, qubit_indices)
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
@@ -253,6 +257,23 @@ class TestQbloxLiveEngine:
             )
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (1, acq_width)
+
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_multi_readout(self, model, qubit_indices):
+        old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
+        try:
+            qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = False
+            engine = model.create_engine()
+            builder = multi_readout(model, qubit_indices, do_X=True)
+
+            results, _ = execute_instructions(engine, builder)
+            assert results
+            assert len(results) == 2 * len(qubit_indices)
+            for index in qubit_indices:
+                assert f"0_Q{index}" in results
+                assert f"1_Q{index}" in results
+        finally:
+            qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

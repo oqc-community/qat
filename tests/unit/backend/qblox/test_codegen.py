@@ -5,6 +5,7 @@ from contextlib import nullcontext
 import numpy as np
 import pytest
 
+from qat import qatconfig
 from qat.purr.backends.qblox.algorithm import stable_partition
 from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
@@ -42,6 +43,7 @@ from qat.purr.utils.logger import get_default_logger
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     empty,
+    multi_readout,
     pulse_amplitude_iteration,
     pulse_width_iteration,
     qubit_spect,
@@ -166,7 +168,7 @@ class TestQbloxEmitter(InvokerMixin):
             assert not pkg.sequence.waveforms
             assert qubit.pulse_measure["shape"] == PulseShapeType.SQUARE
             assert (
-                f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\nacquire 0,R0,{remaining_width}\nset_awg_offs 0,0"
+                f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\nacquire 0,0,{remaining_width}\nset_awg_offs 0,0"
                 in pkg.sequence.program
             )
 
@@ -411,6 +413,46 @@ class TestQbloxEmitter(InvokerMixin):
         for packages in iter2packages.values():
             acquire_pkg = next((pkg for pkg in packages))
             assert "acquire_weighed" in acquire_pkg.sequence.program
+
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_multi_readout(self, model, qubit_indices):
+        builder = multi_readout(model, qubit_indices, do_X=False)
+        iter2packages = self._do_emit(builder, model)
+        for packages in iter2packages.values():
+            assert len(packages) == len(qubit_indices)
+
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            measure_channel = qubit.get_measure_channel()
+
+            # Readout
+            measure_pkg = next((pkg for pkg in packages if pkg.target == measure_channel))
+            assert measure_pkg.sequence.acquisitions
+            assert measure_pkg.sequence.program.count("acquire") == 2
+
+        builder = multi_readout(model, qubit_indices, do_X=True)
+        with pytest.raises(ValueError):
+            self._do_emit(builder, model)
+
+        old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
+        try:
+            qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = False
+            iter2packages = self._do_emit(builder, model)
+            for packages in iter2packages.values():
+                assert len(packages) == 2 * len(qubit_indices)
+
+            for index in qubit_indices:
+                qubit = model.get_qubit(index)
+                measure_channel = qubit.get_measure_channel()
+
+                # Readout
+                measure_pkg = next(
+                    (pkg for pkg in packages if pkg.target == measure_channel)
+                )
+                assert measure_pkg.sequence.acquisitions
+                assert measure_pkg.sequence.program.count("acquire") == 2
+        finally:
+            qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
