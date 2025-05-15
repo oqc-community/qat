@@ -121,6 +121,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
@@ -208,6 +212,7 @@
 </li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.purr.backends.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
@@ -384,6 +389,49 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData"><code class="docutils literal notranslate"><span class="pre">AcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.bins"><code class="docutils literal notranslate"><span class="pre">AcqData.bins</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.model_config"><code class="docutils literal notranslate"><span class="pre">AcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.scope"><code class="docutils literal notranslate"><span class="pre">AcqData.scope</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition"><code class="docutils literal notranslate"><span class="pre">Acquisition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.accumulate"><code class="docutils literal notranslate"><span class="pre">Acquisition.accumulate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.acq_data"><code class="docutils literal notranslate"><span class="pre">Acquisition.acq_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.index"><code class="docutils literal notranslate"><span class="pre">Acquisition.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.model_config"><code class="docutils literal notranslate"><span class="pre">Acquisition.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.name"><code class="docutils literal notranslate"><span class="pre">Acquisition.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.avg_count"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.avg_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.integration"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.integration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.model_config"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.threshold"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.threshold</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData"><code class="docutils literal notranslate"><span class="pre">IntegData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.i"><code class="docutils literal notranslate"><span class="pre">IntegData.i</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.model_config"><code class="docutils literal notranslate"><span class="pre">IntegData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.q"><code class="docutils literal notranslate"><span class="pre">IntegData.q</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData"><code class="docutils literal notranslate"><span class="pre">PathData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.avg_count"><code class="docutils literal notranslate"><span class="pre">PathData.avg_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.data"><code class="docutils literal notranslate"><span class="pre">PathData.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.model_config"><code class="docutils literal notranslate"><span class="pre">PathData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.oor"><code class="docutils literal notranslate"><span class="pre">PathData.oor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.i"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.i</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.model_config"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.q"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.q</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html#qat.purr.backends.qblox.algorithm.stable_partition"><code class="docutils literal notranslate"><span class="pre">stable_partition()</span></code></a></li>
 </ul>

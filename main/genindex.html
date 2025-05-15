@@ -118,6 +118,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
@@ -205,6 +209,7 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
@@ -402,13 +407,19 @@
         <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.AbstractWaveform">(class in qat.purr.compiler.waveforms)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.accumulate">accumulate() (Acquisition static method)</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.accumulated_sweep_iteration">accumulated_sweep_iteration (SweepIterator property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig.acq">acq (ConnectionConfig attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.acq_data">acq_data (Acquisition attribute)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig.acq_I">acq_I (ConnectionConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig.acq_Q">acq_Q (ConnectionConfig attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData">AcqData (class in qat.purr.backends.qblox.acquisition)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.acquire">acquire (AcquirePulseChannel attribute)</a>
 
@@ -489,6 +500,8 @@
 </li>
       </ul></li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.AcquireSanitisation">AcquireSanitisation (class in qat.middleend.passes.transform)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition">Acquisition (class in qat.purr.backends.qblox.acquisition)</a>
 </li>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">acquisitions (qat.runtime.passes.analysis.IndexMappingAnalysis.run parameter)</a>
 
@@ -804,6 +817,12 @@
         <li><a href="qat.model.device.html#qat.model.device.CrossResonancePulseChannel.auxiliary_qubit">(CrossResonancePulseChannel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.avg_count">avg_count (BinnedAcqData attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.avg_count">(PathData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path0">avg_mode_en_path0 (ScopeAcqConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig.avg_mode_en_path1">avg_mode_en_path1 (ScopeAcqConfig attribute)</a>
@@ -942,16 +961,20 @@
         <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult">(class in qat.purr.backends.qblox.analysis_passes)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData">BinnedAcqData (class in qat.purr.backends.qblox.acquisition)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.bins">bins (AcqData attribute)</a>
+</li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister">BitRegister (class in qat.frontend.register)</a>
 
       <ul>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.BitRegister">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.bits">bits (BitRegister attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN">BLACKMAN (PulseShapeType attribute)</a>
@@ -1726,9 +1749,11 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output.params.data">data (qat.purr.utils.logger.BasicLogger.output parameter)</a>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.data">data (PathData attribute)</a>
 
       <ul>
+        <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output.params.data">(qat.purr.utils.logger.BasicLogger.output parameter)</a>
+</li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.output.params.data">(qat.purr.utils.logger.CompositeLogger.output parameter)</a>
 </li>
       </ul></li>
@@ -2950,6 +2975,12 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.i">i (IntegData attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.i">(ScopeAcqData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Id">Id (class in qat.ir.gates.gates_1q)</a>
 
       <ul>
@@ -3024,9 +3055,11 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.include">include() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.include">[1]</a>
 </li>
-      <li><a href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.index">index (CregIndexValue attribute)</a>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.index">index (Acquisition attribute)</a>
 
       <ul>
+        <li><a href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.index">(CregIndexValue attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.merge_builder.params.index">(qat.purr.compiler.builders.InstructionBuilder.merge_builder parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.index">(QRPairModel attribute)</a>
@@ -3243,6 +3276,10 @@
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentConcept">InstrumentConcept (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel">InstrumentModel (class in qat.purr.backends.qblox.execution.instrument_base)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData">IntegData (class in qat.purr.backends.qblox.acquisition)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.integration">integration (BinnedAcqData attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SquareWeightAcq.integration_length">integration_length (SquareWeightAcq attribute)</a>
 </li>
@@ -4163,17 +4200,23 @@
       <ul>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform.model_config">(AbstractWaveform attribute)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.model_config">(AcqData attribute)</a>
+</li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.model_config">(Acquire attribute)</a>
 </li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.model_config">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_config">(AcquirePulseChannel attribute)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.model_config">(Acquisition attribute)</a>
+</li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.AllowExtraFieldsModel.model_config">(AllowExtraFieldsModel attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Assign.model_config">(Assign attribute)</a>
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier.model_config">(Barrier attribute)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.model_config">(BinnedAcqData attribute)</a>
 </li>
         <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.model_config">(BitRegister attribute)</a>
 </li>
@@ -4277,6 +4320,8 @@
 </li>
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.model_config">(InstrumentModel attribute)</a>
 </li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.model_config">(IntegData attribute)</a>
+</li>
         <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_config">(LogicalHardwareModel attribute)</a>
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.model_config">(Measure attribute)</a>
@@ -4300,6 +4345,8 @@
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.OpenPulseContext.model_config">(OpenPulseContext attribute)</a>
 </li>
         <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.ParseResults.model_config">(ParseResults attribute)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.model_config">(PathData attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Phase.model_config">(Phase attribute)</a>
 </li>
@@ -4392,6 +4439,8 @@
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.S.model_config">(S attribute)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.model_config">(SampledWaveform attribute)</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.model_config">(ScopeAcqData attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Sdg.model_config">(Sdg attribute)</a>
 </li>
@@ -4612,6 +4661,10 @@
 </li>
         <li><a href="qat.frontend.register.html#module-qat.frontend.register">qat.frontend.register</a>
 </li>
+        <li><a href="qat.integrations.html#module-qat.integrations">qat.integrations</a>
+</li>
+        <li><a href="qat.integrations.tket.html#module-qat.integrations.tket">qat.integrations.tket</a>
+</li>
         <li><a href="qat.ir.html#module-qat.ir">qat.ir</a>
 </li>
         <li><a href="qat.ir.gates.html#module-qat.ir.gates">qat.ir.gates</a>
@@ -4737,6 +4790,8 @@
         <li><a href="qat.purr.backends.live_devices.html#module-qat.purr.backends.live_devices">qat.purr.backends.live_devices</a>
 </li>
         <li><a href="qat.purr.backends.qblox.html#module-qat.purr.backends.qblox">qat.purr.backends.qblox</a>
+</li>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#module-qat.purr.backends.qblox.acquisition">qat.purr.backends.qblox.acquisition</a>
 </li>
         <li><a href="qat.purr.backends.qblox.algorithm.html#module-qat.purr.backends.qblox.algorithm">qat.purr.backends.qblox.algorithm</a>
 </li>
@@ -4944,6 +4999,8 @@
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform.name">name (AbstractWaveform property)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.name">(Acquisition attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyHybridReadoutMitigation.name">(ApplyHybridReadoutMitigation attribute)</a>
 </li>
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.name">(ApplyLinearReadoutMitigation attribute)</a>
@@ -5100,6 +5157,8 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.OffsetConfig">OffsetConfig (class in qat.purr.backends.qblox.config)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.one_default">one_default() (QatConfig class method)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.oor">oor (PathData attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode">Opcode (class in qat.purr.backends.qblox.ir)</a>
 </li>
@@ -5369,6 +5428,8 @@
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.load_qir_file.params.path">(qat.frontend.qir.load_qir_file parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData">PathData (class in qat.purr.backends.qblox.acquisition)</a>
+</li>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.phase">phase (CalibratablePulse attribute)</a>
 </li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Phase">Phase (class in qat.ir.gates.gates_1q)</a>
@@ -5859,6 +5920,12 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.q">q (IntegData attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.q">(ScopeAcqData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Q1asmInstruction">Q1asmInstruction (class in qat.purr.backends.qblox.ir)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_cluster">q_cluster (QRPairModel attribute)</a>
@@ -6235,6 +6302,20 @@
 
       <ul>
         <li><a href="qat.frontend.register.html#module-qat.frontend.register">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.integrations
+
+      <ul>
+        <li><a href="qat.integrations.html#module-qat.integrations">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.integrations.tket
+
+      <ul>
+        <li><a href="qat.integrations.tket.html#module-qat.integrations.tket">module</a>
 </li>
       </ul></li>
       <li>
@@ -6679,6 +6760,13 @@
 </li>
       </ul></li>
       <li>
+    qat.purr.backends.qblox.acquisition
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#module-qat.purr.backends.qblox.acquisition">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.purr.backends.qblox.algorithm
 
       <ul>
@@ -6741,6 +6829,8 @@
         <li><a href="qat.purr.backends.qblox.execution.executor.html#module-qat.purr.backends.qblox.execution.executor">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.execution.instrument_base
 
@@ -6755,8 +6845,6 @@
         <li><a href="qat.purr.backends.qblox.graph.html#module-qat.purr.backends.qblox.graph">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.ir
 
@@ -7935,10 +8023,10 @@
       </ul></li>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_">return_ (QatFile property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.returns">returns (Executable attribute)</a>
 
       <ul>
@@ -8255,6 +8343,8 @@
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.run_post_processing">run_post_processing() (QuantumExecutionEngine method)</a>
 </li>
+      <li><a href="qat.integrations.tket.html#qat.integrations.tket.run_pyd_tket_optimizations">run_pyd_tket_optimizations() (in module qat.integrations.tket)</a>
+</li>
       <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.run_qasm">run_qasm() (in module qat.purr.integrations.qiskit)</a>
 </li>
       <li><a href="qat.purr.integrations.qiskit.html#qat.purr.integrations.qiskit.run_qasm_circuit">run_qasm_circuit() (in module qat.purr.integrations.qiskit)</a>
@@ -8401,6 +8491,8 @@
       </ul></li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.scale_factor">scale_factor (Waveform attribute)</a>
 </li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.scope">scope (AcqData attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.SCOPE">SCOPE (AcquireMode attribute)</a>
 </li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.ScopingResult.scope2symbols">scope2symbols (ScopingResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.ScopingResult.scope2symbols">[1]</a>
@@ -8408,6 +8500,8 @@
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig.scope_acq">scope_acq (ModuleConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ScopeAcqConfig">ScopeAcqConfig (class in qat.purr.backends.qblox.config)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData">ScopeAcqData (class in qat.purr.backends.qblox.acquisition)</a>
 </li>
       <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ScopeSanitisation">ScopeSanitisation (class in qat.backend.passes.transform)</a>
 
@@ -8603,6 +8697,8 @@
       </ul></li>
       <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.number_of_batches.params.shots_per_batch">shots_per_batch (qat.runtime.base.BaseRuntime.number_of_batches parameter)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.shutdown">shutdown() (AbstractQbloxLiveEngine method)</a>
 
       <ul>
@@ -8611,8 +8707,6 @@
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime">SimpleRuntime (class in qat.runtime.simple)</a>
@@ -9059,9 +9153,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.discriminate.params.threshold">threshold (qat.runtime.post_processing.discriminate parameter)</a>
+      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.threshold">threshold (BinnedAcqData attribute)</a>
 
       <ul>
+        <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.discriminate.params.threshold">(qat.runtime.post_processing.discriminate parameter)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.threshold">(ThresholdedAcqConfig attribute)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.TtlAcqConfig.threshold">(TtlAcqConfig attribute)</a>

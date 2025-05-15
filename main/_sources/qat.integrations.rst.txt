@@ -1,0 +1,15 @@
+qat.integrations package
+========================
+
+.. automodule:: qat.integrations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.integrations.tket
