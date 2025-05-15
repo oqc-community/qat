@@ -32,6 +32,7 @@ from qat.middleend.passes.transform import (
     ReturnSanitisation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
     Acquire,
     Delay,
@@ -275,6 +276,8 @@ class TestTimelineAnalysis:
     def test_timelines_match(self):
         """Test the results of the timeline analyis match with the expectation."""
         model = EchoModelLoader().load()
+        target_data = TargetData.random()
+
         qubits = model.qubits[0:2]
         drive_channels = [qubit.get_drive_channel() for qubit in qubits]
         measure_channels = [qubit.get_measure_channel() for qubit in qubits]
@@ -298,7 +301,7 @@ class TestTimelineAnalysis:
         builder.measure(qubits[0])
         builder.measure(qubits[1])
 
-        builder = InstructionGranularitySanitisation().run(builder)
+        builder = InstructionGranularitySanitisation(model, target_data).run(builder)
         builder = LowerSyncsToDelays().run(builder)
 
         res_mgr = ResultManager()
@@ -373,6 +376,8 @@ class TestTimelineAnalysis:
         """
 
         model = EchoModelLoader().load()
+        target_data = TargetData.random()
+
         qubit1 = model.qubits[0]
         qubit2 = model.qubits[1]
         qubit1.pulse_hw_x_pi_2["width"] = drive_width
@@ -387,7 +392,7 @@ class TestTimelineAnalysis:
         builder.ECR(qubit1, qubit2)
 
         res_mgr = ResultManager()
-        InstructionGranularitySanitisation(8e-9).run(builder, res_mgr)
+        InstructionGranularitySanitisation(model, target_data).run(builder, res_mgr)
         LowerSyncsToDelays().run(builder, res_mgr)
         ir = PartitionByPulseChannel().run(builder, res_mgr)
         TimelineAnalysis().run(ir, res_mgr)

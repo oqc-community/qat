@@ -26,6 +26,7 @@ from qat.middleend.passes.validation import (
     ReadoutValidation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.passes.transform import (
@@ -37,19 +38,21 @@ from qat.runtime.passes.transform import (
 )
 
 
-def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
+def get_middleend_pipeline(model) -> PassManager:
+    target_data = TargetData.default()
+
     return (
         PassManager()
         | HardwareConfigValidity(model)
         | CalibrationAnalysis()
         # Validate first to fail fast:
-        | FrequencyValidation(model)
+        | FrequencyValidation(model, target_data)
         # Process a "task" into a program. Could be considered as a frontend pipeline
         # that converts takes a specific task and makes the appropriate qat ir.
         # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
         | ActivePulseChannelAnalysis(model)
         | InactivePulseChannelSanitisation()
-        | RepeatSanitisation(model)
+        | RepeatSanitisation(model, target_data)
         | ReturnSanitisation()
         | SynchronizeTask()
         | EndOfTaskResetSanitisation()
@@ -64,7 +67,7 @@ def get_middleend_pipeline(model, clock_cycle=1e-9) -> PassManager:
         # Optimisation of the ir:
         | PhaseOptimisation()
         # Preparing the IR for the backend
-        | InstructionGranularitySanitisation(clock_cycle)
+        | InstructionGranularitySanitisation(model, target_data)
         | EvaluatePulses()
     )
 
@@ -87,7 +90,7 @@ def get_pipeline(model, name="echo") -> Pipeline:
     return Pipeline(
         name=name,
         frontend=AutoFrontend(model),
-        middleend=CustomMiddleend(model, get_middleend_pipeline(model, 1e-9)),
+        middleend=CustomMiddleend(model, get_middleend_pipeline(model)),
         backend=WaveformV1Backend(model),
         runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),
         model=model,

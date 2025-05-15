@@ -11,10 +11,10 @@ from qat.core.pass_base import ValidationPass
 from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import Pulse as PydPulse
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
+from qat.model.target_data import TargetData
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import MaxPulseLength, PulseChannel, Qubit
-from qat.purr.compiler.execution import QuantumExecutionEngine
+from qat.purr.compiler.devices import PulseChannel, Qubit
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -35,18 +35,22 @@ class InstructionValidation(ValidationPass):
     Extracted from :mod:`qat.purr.compiler.execution.QuantumExecutionEngine.validate`.
     """
 
-    def __init__(self, engine: QuantumExecutionEngine, *args, **kwargs):
+    def __init__(self, target_data: TargetData, *args, **kwargs):
         """
         :param engine: The engine contains information about the hardware, such as
             instruction limits.
         """
-        self.engine = engine
+        self.instruction_memory_size = target_data.instruction_memory_size
+        self.pulse_duration_max = max(
+            target_data.QUBIT_DATA.pulse_duration_max,
+            target_data.RESONATOR_DATA.pulse_duration_max,
+        )
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         instruction_length = len(ir.instructions)
-        if instruction_length > self.engine.max_instruction_len:
+        if instruction_length > self.instruction_memory_size:
             raise ValueError(
                 f"Program too large to be run in a single block on current hardware. "
                 f"{instruction_length} instructions."
@@ -60,14 +64,14 @@ class InstructionValidation(ValidationPass):
                 )
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
-                if isinstance(duration, Number) and duration > MaxPulseLength:
+                if isinstance(duration, Number) and duration > self.pulse_duration_max:
                     if (
                         not qatconfig.DISABLE_PULSE_DURATION_LIMITS
                     ):  # Do not throw error if we specifically disabled the limit checks.
                         # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
                         # which is specific to each hardware model and can be stored as a member variables there.
                         raise ValueError(
-                            f"Max Waveform width is {MaxPulseLength} s "
+                            f"Max Waveform width is {self.pulse_duration_max} s "
                             f"given: {inst.duration} s"
                         )
                 elif isinstance(duration, Variable):
@@ -81,10 +85,10 @@ class InstructionValidation(ValidationPass):
                             ]
                         )
                     )
-                    if np.max(values) > MaxPulseLength:
+                    if np.max(values) > self.pulse_duration_max:
                         if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
                             raise ValueError(
-                                f"Max Waveform width is {MaxPulseLength} s "
+                                f"Max Waveform width is {self.pulse_duration_max} s "
                                 f"given: {values} s"
                             )
         return ir
@@ -302,14 +306,32 @@ class FrequencyValidation(ValidationPass):
        physical channel with a pulse channel that has a fixed IF.
     """
 
-    def __init__(self, model: QuantumHardwareModel):
+    def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """Instantiate the pass with a hardware model.
 
         :param model: The hardware model.
+        :param target_data: Target-related information.
         """
 
         # TODO: replace with new hardware models as our refactors mature.
         self.model = model
+        qubit_freq_limits = {
+            pulse_ch: (
+                target_data.QUBIT_DATA.pulse_channel_lo_freq_min,
+                target_data.QUBIT_DATA.pulse_channel_lo_freq_max,
+            )
+            for qubit in model.qubits
+            for pulse_ch in qubit.pulse_channels.values()
+        }
+        res_freq_limits = {
+            pulse_ch: (
+                target_data.RESONATOR_DATA.pulse_channel_lo_freq_min,
+                target_data.RESONATOR_DATA.pulse_channel_lo_freq_max,
+            )
+            for res in model.resonators
+            for pulse_ch in res.pulse_channels.values()
+        }
+        self.freq_shift_limits = qubit_freq_limits | res_freq_limits
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
@@ -318,13 +340,15 @@ class FrequencyValidation(ValidationPass):
 
         freqshifts = [inst for inst in ir.instructions if isinstance(inst, FrequencyShift)]
         targets = set([inst.channel for inst in freqshifts])
-        self.validate_frequency_ranges(targets, freqshifts)
+        self.validate_frequency_ranges(targets, freqshifts, self.freq_shift_limits)
         self.validate_no_freqshifts_on_fixed_if(targets)
         return ir
 
     @staticmethod
     def validate_frequency_ranges(
-        targets: List[PulseChannel], freqshifts: List[FrequencyShift]
+        targets: List[PulseChannel],
+        freqshifts: List[FrequencyShift],
+        freq_limits: dict[PulseChannel, tuple[int, int]],
     ):
         """Validates that a pulse channel remains within its allowed frequency range.
 
@@ -334,14 +358,13 @@ class FrequencyValidation(ValidationPass):
         for target in targets:
             freq_shifts = [inst.frequency for inst in freqshifts if inst.channel == target]
             freqs = target.frequency + np.cumsum(freq_shifts)
-            violations = np.logical_or(
-                freqs > target.max_frequency, freqs < target.min_frequency
-            )
+            min_freq, max_freq = freq_limits[target]
+            violations = np.logical_or(freqs > max_freq, freqs < min_freq)
             if np.any(violations):
                 raise ValueError(
                     f"Frequency shifts will change the pulse channel frequency to fall "
-                    f"out of the allowed range between {target.min_frequency} and "
-                    f"{target.max_frequency} for pulse channel {target.full_id()}."
+                    f"out of the allowed range between {min_freq} and "
+                    f"{max_freq} for pulse channel {target.full_id()}."
                 )
 
     def validate_no_freqshifts_on_fixed_if(self, targets: List[PulseChannel]):

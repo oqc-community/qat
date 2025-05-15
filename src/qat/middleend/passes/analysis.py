@@ -7,6 +7,7 @@ import numpy as np
 
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
+from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, Qubit, Resonator
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -41,15 +42,17 @@ class BatchedShots(AnalysisPass):
     shots can just be discarded at run time.
     """
 
-    def __init__(self, model: QuantumHardwareModel):
+    def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """Instantiate the pass with a hardware model.
 
         :param model: The hardware model that contains the total number of shots.
+        :param target_data: Target-related information.
         """
         # TODO: replace the hardware model with whatever structures will contain the allowed
         # number of shots in the future.
         # TODO: determine if this should be fused with `RepeatSanitisation`.
         self.model = model
+        self.target_data = target_data
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
@@ -61,12 +64,12 @@ class BatchedShots(AnalysisPass):
         if len(repeats) > 0:
             shots = repeats[0].repeat_count
         else:
-            shots = self.model.default_repeat_count
+            shots = self.target_data.default_shots
 
         if shots < 0 or not isinstance(shots, int):
             raise ValueError("The number of shots must be a non-negative integer.")
 
-        max_shots = self.model.repeat_limit
+        max_shots = self.target_data.max_shots
         num_batches = int(np.ceil(shots / max_shots))
         if num_batches == 0:
             shots_per_batch = 0

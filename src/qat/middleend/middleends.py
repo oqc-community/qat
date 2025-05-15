@@ -35,6 +35,7 @@ from qat.middleend.passes.validation import (
     ReadoutValidation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
+from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.passes.analysis import CalibrationAnalysis
 
@@ -123,17 +124,22 @@ class DefaultMiddleend(CustomMiddleend):
     there are no mid-circuit measurements.
     """
 
-    def __init__(self, model: QuantumHardwareModel, clock_cycle: float = 8e-9):
+    def __init__(
+        self, model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
+    ):
         """
         :param model: The hardware model that holds calibrated information on the qubits on
             the QPU.
         :param clock_cycle: The period for a single sequencer clock cycle.
         """
-        pipeline = self.build_pass_pipeline(model, clock_cycle)
+        pipeline = self.build_pass_pipeline(model)
+        self.target_data = target_data
         super().__init__(model=model, pipeline=pipeline)
 
     @staticmethod
-    def build_pass_pipeline(model, clock_cycle: float = 8e-9) -> PassManager:
+    def build_pass_pipeline(
+        model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
+    ) -> PassManager:
         """
         Builds the default middle end pass pipeline.
         :param model: The hardware model that holds calibrated information on the qubits on
@@ -144,13 +150,13 @@ class DefaultMiddleend(CustomMiddleend):
             PassManager()
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
-            | FrequencyValidation(model)
+            | FrequencyValidation(model, target_data)
             # Process a "task" into a program. Could be considered as a frontend pipeline
             # that converts takes a specific task and makes the appropriate qat ir.
             # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
             | ActivePulseChannelAnalysis(model)
             | InactivePulseChannelSanitisation()
-            | RepeatSanitisation(model)
+            | RepeatSanitisation(model, target_data)
             | ReturnSanitisation()
             | SynchronizeTask()
             | EndOfTaskResetSanitisation()
@@ -166,7 +172,7 @@ class DefaultMiddleend(CustomMiddleend):
             # Optimisation of the ir:
             | PhaseOptimisation()
             # Preparing the IR for the backend
-            | InstructionGranularitySanitisation(clock_cycle)
+            | InstructionGranularitySanitisation(model, target_data)
             | EvaluatePulses()
             | PhysicalChannelAmplitudeValidation()
             # breaks tests in whisqrs with this value of repetition period, disable for now

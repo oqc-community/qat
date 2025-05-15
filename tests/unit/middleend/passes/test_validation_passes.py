@@ -24,6 +24,7 @@ from qat.middleend.passes.validation import (
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import CustomPulse, Pulse, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
@@ -354,6 +355,7 @@ class TestPhysicalChannelAmplitudeValidation:
 class TestFrequencyValidation:
     res_mgr = ResultManager()
     model = EchoModelLoader().load()
+    target_data = TargetData.default()
 
     def get_single_pulse_channel(self):
         return next(iter(self.model.pulse_channels.values()))
@@ -379,42 +381,55 @@ class TestFrequencyValidation:
         )
         return pulse_channel_1, pulse_channel_2
 
-    def set_frequency_range(self, pulse_channel, lower_tol, upper_tol):
-        phys_chan = pulse_channel.physical_channel
-        phys_chan.pulse_channel_max_frequency = pulse_channel.frequency + upper_tol
-        phys_chan.pulse_channel_min_frequency = pulse_channel.frequency - lower_tol
+    def set_frequency_range(self, target_data, pulse_channel, lower_tol, upper_tol):
+        return target_data.model_copy(
+            update={
+                "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(
+                    update={
+                        "pulse_channel_lo_freq_max": pulse_channel.frequency + upper_tol,
+                        "pulse_channel_lo_freq_min": pulse_channel.frequency - lower_tol,
+                    }
+                ),
+                "RESONATOR_DATA": target_data.RESONATOR_DATA.model_copy(
+                    update={
+                        "pulse_channel_lo_freq_max": pulse_channel.frequency + upper_tol,
+                        "pulse_channel_lo_freq_min": pulse_channel.frequency - lower_tol,
+                    }
+                ),
+            }
+        )
 
     @pytest.mark.parametrize("freq", [-1e-9, -1e-8, 0, 1e8, 1e9])
     def test_raises_no_error_when_freq_shift_in_range(self, freq):
         channel = self.get_single_pulse_channel()
-        self.set_frequency_range(channel, 1e9, 1e9)
+        target_data = self.set_frequency_range(self.target_data, channel, 1e9, 1e9)
         builder = self.model.create_builder()
         builder.frequency_shift(channel, freq)
-        FrequencyValidation(self.model).run(builder, self.res_mgr)
+        FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("freq", [-1e9, 1e9])
     def test_raises_value_error_when_freq_shift_out_of_range(self, freq):
         channel = self.get_single_pulse_channel()
-        self.set_frequency_range(channel, 1e8, 1e8)
+        target_data = self.set_frequency_range(self.target_data, channel, 1e8, 1e8)
         builder = self.model.create_builder()
         builder.frequency_shift(channel, freq)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(builder, self.res_mgr)
+            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("freq", [-2e8, 2e8])
     def test_moves_out_and_in_raises_value_error(self, freq):
         channel = self.get_single_pulse_channel()
-        self.set_frequency_range(channel, 1e8, 1e8)
+        target_data = self.set_frequency_range(self.target_data, channel, 1e8, 1e8)
         builder = self.model.create_builder()
         builder.frequency_shift(channel, freq)
         builder.frequency_shift(channel, -freq)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(builder, self.res_mgr)
+            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_no_value_error_for_two_channels_same_physical_channel(self, sign):
         channels = self.get_two_pulse_channels_from_single_physical_channel()
-        self.set_frequency_range(channels[0], 1e9, 1e9)
+        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
         builder = self.model.create_builder()
 
         # interweave with random instructions
@@ -425,12 +440,12 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[0], sign * 3e8)
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4e8)
-        FrequencyValidation(self.model).run(builder, self.res_mgr)
+        FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_same_physical_channel(self, sign):
         channels = self.get_two_pulse_channels_from_single_physical_channel()
-        self.set_frequency_range(channels[0], 1e9, 1e9)
+        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
         builder = self.model.create_builder()
 
         # interweave with random instructions
@@ -442,32 +457,20 @@ class TestFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 5e8)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(builder, self.res_mgr)
-
-    @pytest.mark.parametrize("sign", [+1, -1])
-    def test_no_value_error_for_two_channels_different_physical_channel(self, sign):
-        channels = self.get_two_pulse_channels_from_different_physical_channels()
-        self.set_frequency_range(channels[0], 1e9, 1e9)
-        self.set_frequency_range(channels[1], 5e8, 5e8)
-        builder = self.model.create_builder()
-        builder.frequency_shift(channels[0], sign * 4e8)
-        builder.frequency_shift(channels[1], sign * 1e8)
-        builder.frequency_shift(channels[0], sign * 3e8)
-        builder.frequency_shift(channels[1], sign * 4e8)
-        FrequencyValidation(self.model).run(builder, self.res_mgr)
+            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_different_physical_channel(self, sign):
         channels = self.get_two_pulse_channels_from_different_physical_channels()
-        self.set_frequency_range(channels[0], 1e9, 1e9)
-        self.set_frequency_range(channels[1], 5e8, 5e8)
+        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
+        target_data = self.set_frequency_range(self.target_data, channels[1], 5e8, 5e8)
         builder = self.model.create_builder()
         builder.frequency_shift(channels[0], sign * 4e8)
         builder.frequency_shift(channels[1], sign * 1e8)
         builder.frequency_shift(channels[0], sign * 7e8)
         builder.frequency_shift(channels[1], sign * 4e8)
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model).run(builder, self.res_mgr)
+            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
 
     def test_fixed_if_raises_not_implemented_error(self):
         channels = self.get_two_pulse_channels_from_different_physical_channels()
@@ -476,14 +479,14 @@ class TestFrequencyValidation:
         builder.frequency_shift(channels[0], 1e8)
         builder.frequency_shift(channels[1], 1e8)
         with pytest.raises(NotImplementedError):
-            FrequencyValidation(self.model).run(builder, self.res_mgr)
+            FrequencyValidation(self.model, self.target_data).run(builder, self.res_mgr)
 
     def test_fixed_if_does_not_affect_other_channel(self):
         channels = self.get_two_pulse_channels_from_different_physical_channels()
         builder = self.model.create_builder()
         channels[0].fixed_if = True
         builder.frequency_shift(channels[1], 1e8)
-        FrequencyValidation(self.model).run(builder, self.res_mgr)
+        FrequencyValidation(self.model, self.target_data).run(builder, self.res_mgr)
 
 
 class TestPydHardwareConfigValidity:

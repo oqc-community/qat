@@ -13,7 +13,7 @@ from qat.middleend.passes.validation import (
     InstructionValidation,
     ReadoutValidation,
 )
-from qat.purr.compiler.execution import InstructionExecutionEngine
+from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.legacy import LegacyRuntime
 from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
@@ -40,7 +40,7 @@ def get_results_pipeline(model: QuantumHardwareModel) -> PassManager:
 
 
 def get_middleend_pipeline(
-    model: QuantumHardwareModel, engine: InstructionExecutionEngine
+    model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
 ) -> PassManager:
     """A factory for creating middleend pipelines for legacy echo models.
 
@@ -59,7 +59,7 @@ def get_middleend_pipeline(
         | CalibrationAnalysis()
         | PhaseOptimisation()
         | PostProcessingSanitisation()
-        | InstructionValidation(engine)
+        | InstructionValidation(target_data)
         | ReadoutValidation(model)
     )
 
@@ -76,7 +76,7 @@ def get_pipeline(model: QuantumHardwareModel, name: str = "legacy") -> Pipeline:
     return Pipeline(
         name=name,
         frontend=AutoFrontend(model),
-        middleend=CustomMiddleend(model, pipeline=get_middleend_pipeline(model, engine)),
+        middleend=CustomMiddleend(model, pipeline=get_middleend_pipeline(model)),
         backend=FallthroughBackend(model),
         runtime=LegacyRuntime(engine=engine, results_pipeline=get_results_pipeline(model)),
         model=model,

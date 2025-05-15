@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-
+import random
+from functools import cached_property
 from pathlib import Path
 
 import piny
-from pydantic import NonNegativeFloat, PositiveFloat, PositiveInt
+from pydantic import NonNegativeFloat, PositiveFloat, PositiveInt, model_validator
 
 from qat.utils.piny import VeryStrictMatcher
 from qat.utils.pydantic import NoExtraFieldsFrozenModel
@@ -14,9 +15,10 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
     """
     Device-related target description.
 
-    :param clock_cycle_f: The clock cycle (in frequency units).
+    :param sample_time: The rate at which the pulse is sampled (in s).
+    :param samples_per_clock_cycle: The number of samples per clock cycle.
     :param instruction_memory_size: The max. allowed number of instructions.
-    :param weveform_memory_size: The max. memory that can be used for waveforms.
+    :param waveform_memory_size: The max. memory that can be used for waveforms, in clock cycles.
     :param pulse_duration_min: The minimal pulse duration for all pulse channels.
     :param pulse_duration_max: The maximal pulse duration for all pulse channels.
     :pulse_channel_lo_freq_min: The minimal LO frequency for a pulse channel.
@@ -25,19 +27,49 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
     :pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse channel.
     """
 
-    clock_cycle_f: PositiveInt
+    sample_time: PositiveFloat
+    samples_per_clock_cycle: PositiveInt
     instruction_memory_size: PositiveInt
     waveform_memory_size: PositiveInt
     pulse_duration_min: PositiveFloat
     pulse_duration_max: PositiveFloat
-    pulse_channel_lo_freq_min: PositiveInt | PositiveFloat
-    pulse_channel_lo_freq_max: PositiveInt | PositiveFloat
-    pulse_channel_if_freq_min: PositiveInt | PositiveFloat
-    pulse_channel_if_freq_max: PositiveInt | PositiveFloat
+    pulse_channel_lo_freq_min: PositiveInt
+    pulse_channel_lo_freq_max: PositiveInt
+    pulse_channel_if_freq_min: PositiveInt
+    pulse_channel_if_freq_max: PositiveInt
 
-    @property
-    def clock_cycle_t(self):
-        return 1 / self.clock_cycle_f
+    @model_validator(mode="after")
+    def validate_durations(self):
+        if self.pulse_duration_min > self.pulse_duration_max:
+            raise ValueError(
+                "Min. pulse duration cannot be larger than max. pulse duration."
+            )
+        return self
+
+    @classmethod
+    def random(cls, seed=42):
+        return cls(
+            **{
+                "sample_time": random.Random(seed).choice([1e-09, 2e-09]),
+                "samples_per_clock_cycle": random.Random(seed).randint(5, 10),
+                "instruction_memory_size": random.Random(seed).randint(200, 8000),
+                "waveform_memory_size": random.Random(seed).randint(1000, 2000),
+                "pulse_duration_min": random.Random(seed).uniform(1e-09, 1e-07),
+                "pulse_duration_max": random.Random(seed).uniform(1e-06, 1e-03),
+                "pulse_channel_lo_freq_min": random.Random(seed).randint(1_000, 10_000),
+                "pulse_channel_lo_freq_max": random.Random(seed).randint(
+                    1_000_000, 100_000_000
+                ),
+                "pulse_channel_if_freq_min": random.Random(seed).randint(1_000, 10_000),
+                "pulse_channel_if_freq_max": random.Random(seed).randint(
+                    1_000_000, 100_000_000
+                ),
+            }
+        )
+
+    @cached_property
+    def clock_cycle(self):
+        return self.samples_per_clock_cycle * self.sample_time
 
 
 class QubitDescription(DeviceDescription):
@@ -49,6 +81,14 @@ class QubitDescription(DeviceDescription):
 
     passive_reset_time: NonNegativeFloat
 
+    @classmethod
+    def random(cls, seed=42):
+        device_descr = DeviceDescription.random(seed).model_dump()
+        device_descr.update(
+            {"passive_reset_time": random.Random(seed).uniform(1e-06, 1e-04)}
+        )
+        return cls(**device_descr)
+
 
 class ResonatorDescription(DeviceDescription):
     """
@@ -58,7 +98,34 @@ class ResonatorDescription(DeviceDescription):
     ...
 
 
-class TargetData(NoExtraFieldsFrozenModel):
+class AbstractTargetData(NoExtraFieldsFrozenModel):
+    """
+    Data related to a general target machine.
+
+    :param max_shots: The maximum amount of shots possible on this target.
+    :param default_shots: The default amount of shots on this target if none specified through the instructions.
+    """
+
+    max_shots: PositiveInt
+    default_shots: PositiveInt = 1
+
+    def __getattribute__(self, name: str):
+        if name in ["QUBIT_DATA", "RESONATOR_DATA"]:
+            try:
+                return super().__getattribute__(name)
+            except AttributeError:
+                raise AttributeError(
+                    f"Tried to get '{name}' from {self.__class__.__name__}, which does not exist. Please use a child class of `AbstractTargetData` that has '{name}'."
+                )
+        return super().__getattribute__(name)
+
+    @classmethod
+    def from_yaml(cls, path: str | Path):
+        blob = piny.YamlLoader(path=str(path), matcher=VeryStrictMatcher).load()
+        return cls(**blob)
+
+
+class TargetData(AbstractTargetData):
     """
     Data related to a general target machine.
 
@@ -68,13 +135,76 @@ class TargetData(NoExtraFieldsFrozenModel):
     :param RESONATOR_DATA: Resonator-related target description.
     """
 
-    max_shots: PositiveInt
-    default_shots: PositiveInt = 1
-
     QUBIT_DATA: QubitDescription
     RESONATOR_DATA: ResonatorDescription
 
+    @cached_property
+    def clock_cycle(self):
+        return max(self.QUBIT_DATA.clock_cycle, self.RESONATOR_DATA.clock_cycle)
+
+    @cached_property
+    def instruction_memory_size(self):
+        return max(
+            self.QUBIT_DATA.instruction_memory_size,
+            self.RESONATOR_DATA.instruction_memory_size,
+        )
+
+    @model_validator(mode="after")
+    def validate_clock_cycles(self):
+        if self.QUBIT_DATA.clock_cycle != self.RESONATOR_DATA.clock_cycle:
+            raise ValueError(
+                "Different clock cycles for qubit and resonator are currently not supported."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def validate_instruction_memory_size(self):
+        if (
+            self.QUBIT_DATA.instruction_memory_size
+            != self.RESONATOR_DATA.instruction_memory_size
+        ):
+            raise ValueError(
+                "Different instruction memory sizes for qubit and resonator are currently not supported."
+            )
+        return self
+
     @classmethod
-    def from_yaml(cls, path: str | Path):
-        blob = piny.YamlLoader(path=str(path), matcher=VeryStrictMatcher).load()
-        return cls(**blob)
+    def random(cls, seed: int = 42):
+        return cls(
+            max_shots=random.Random(seed).randint(200, 1000),
+            default_shots=random.Random(seed).randint(1, 100),
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+
+    @classmethod
+    def default(cls):
+        return TargetData(
+            max_shots=10_000,
+            default_shots=1_000,
+            QUBIT_DATA=QubitDescription(
+                passive_reset_time=1e-08,
+                sample_time=1e-09,
+                samples_per_clock_cycle=1,
+                instruction_memory_size=50_000,
+                waveform_memory_size=1_500,
+                pulse_duration_min=64e-09,
+                pulse_duration_max=1e-03,
+                pulse_channel_lo_freq_min=1e06,
+                pulse_channel_lo_freq_max=1e10,
+                pulse_channel_if_freq_min=1e06,
+                pulse_channel_if_freq_max=1e10,
+            ),
+            RESONATOR_DATA=ResonatorDescription(
+                sample_time=1e-09,
+                samples_per_clock_cycle=1,
+                instruction_memory_size=50_000,
+                waveform_memory_size=1_500,
+                pulse_duration_min=64e-09,
+                pulse_duration_max=1e-03,
+                pulse_channel_lo_freq_min=1e06,
+                pulse_channel_lo_freq_max=1e10,
+                pulse_channel_if_freq_min=1e06,
+                pulse_channel_if_freq_max=1e10,
+            ),
+        )

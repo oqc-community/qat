@@ -32,6 +32,7 @@ from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
 from qat.purr.compiler.emitter import InstructionEmitter
@@ -579,8 +580,16 @@ class TestQATPipelineSetup:
 def get_echo_model_without_acquire_delays():
     """Creates an echo model without acquire delays for comparison with legacy code."""
     model = EchoModelLoader(32).load()
+    model.default_repeat_count = TargetData.default().default_shots
+    model.repeat_limit = TargetData.default().max_shots
+    model.default_repetition_period = TargetData.default().QUBIT_DATA.passive_reset_time
+    sample_time_qubit = TargetData.default().QUBIT_DATA.sample_time
+    sample_time_resonator = TargetData.default().RESONATOR_DATA.sample_time
     for qubit in model.qubits:
         qubit.measure_acquire["delay"] = 0.0
+        qubit.physical_channel.sample_time = sample_time_qubit
+    for resonator in model.resonators:
+        resonator.physical_channel.sample_time = sample_time_resonator
     return model
 
 
@@ -596,7 +605,11 @@ class TestQatEchoPipelines:
     """
 
     model = get_echo_model_without_acquire_delays()
-    config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
+    config = CompilerConfig(
+        results_format=QuantumResultsFormat().binary_count(),
+        repeats=TargetData.default().default_shots,
+        repetition_period=TargetData.default().QUBIT_DATA.passive_reset_time,
+    )
     core: QAT = None
     legacy_ir = {}
     executables = {}

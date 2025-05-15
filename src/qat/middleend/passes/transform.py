@@ -10,7 +10,7 @@ import numpy as np
 from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import TransformPass, get_hardware_model
+from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
@@ -23,6 +23,7 @@ from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import Pulse as PydPulse
 from qat.middleend.passes.analysis import ActiveChannelResults
+from qat.model.target_data import TargetData
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, Qubit
@@ -401,10 +402,19 @@ class InstructionGranularitySanitisation(TransformPass):
     # to extract the pulse/physical channel information (COMPILER-394)
     # TODO: replace clock_cycle with target data (COMPILER-395)
 
-    def __init__(self, clock_cycle: float = 8e-9):
-        """:param clock_cycle: The clock cycle to round to."""
+    def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
+        """:param target_data: Target-related information."""
 
-        self.clock_cycle = clock_cycle
+        self.clock_cycle = target_data.clock_cycle
+        qubit_sample_times = {
+            qubit.physical_channel: target_data.QUBIT_DATA.sample_time
+            for qubit in model.qubits
+        }
+        res_sample_times = {
+            resonator.physical_channel: target_data.RESONATOR_DATA.sample_time
+            for resonator in model.resonators
+        }
+        self.sample_times = qubit_sample_times | res_sample_times
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
         """
@@ -439,7 +449,7 @@ class InstructionGranularitySanitisation(TransformPass):
             else:
                 inst.time = new_duration
 
-        if len(invalid_instructions) > 1:
+        if len(invalid_instructions) >= 1:
             log.info(
                 "The following instructions do not have durations that are integer "
                 f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
@@ -461,8 +471,14 @@ class InstructionGranularitySanitisation(TransformPass):
             inst = instructions[idx]
             invalid_instructions.add(str(inst))
             new_duration = rounded_multiples[idx] * self.clock_cycle
-            sample_time = inst.quantum_targets[0].sample_time
-            padding = int(np.round((new_duration - durations[idx]) / sample_time, 0))
+
+            padding = int(
+                np.round(
+                    (new_duration - durations[idx])
+                    / self.sample_times[inst.quantum_targets[0].physical_channel],
+                    0,
+                )
+            )
             inst.samples.extend([0.0 + 0.0j] * padding)
 
         if len(invalid_instructions) > 1:
@@ -573,7 +589,7 @@ class InstructionLengthSanitisation(TransformPass):
     Checks if quantum instructions are too long and splits if necessary.
     """
 
-    def __init__(self, duration_limit: float = 1e-03):
+    def __init__(self, target_data: TargetData):
         """
         :param duration_limit: The maximum allowed clock cycles per instruction.
 
@@ -585,29 +601,26 @@ class InstructionLengthSanitisation(TransformPass):
             the clock cycle). This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
             pass.
         """
-
-        # TODO: update to target data (COMPILER-395)
-        if duration_limit == 0:
-            raise ValueError("Instruction duration limit cannot be zero.")
-        self.duration_limit = duration_limit
+        self.duration_limit = target_data.QUBIT_DATA.pulse_duration_max
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         """
-        duration_limit = self.duration_limit
 
         new_instructions = []
         for instr in ir.instructions:
-            if isinstance(instr, Delay) and instr.duration > duration_limit:
-                new_instructions.extend(self._batch_delay(instr, duration_limit))
+            if isinstance(instr, Delay) and instr.duration > self.duration_limit:
+                new_instructions.extend(self._batch_delay(instr, self.duration_limit))
 
             elif (
                 isinstance(instr, Pulse)
-                and instr.width > duration_limit
+                and instr.width > self.duration_limit
                 and instr.shape == PulseShapeType.SQUARE
             ):
-                new_instructions.extend(self._batch_square_pulse(instr, duration_limit))
+                new_instructions.extend(
+                    self._batch_square_pulse(instr, self.duration_limit)
+                )
 
             else:
                 new_instructions.append(instr)
@@ -742,12 +755,11 @@ class ResetsToDelays(TransformPass):
     pass.
     """
 
-    def __init__(self, passive_reset_time: float):
+    def __init__(self, target_data: TargetData):
         """
-        :param passive_reset_time: The time added to the end of each shot to allow the
-                                state of the qubits to reset.
+        :param target_data: Target-related information.
         """
-        self.passive_reset_time = passive_reset_time
+        self.passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
 
     def run(
         self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
@@ -964,26 +976,26 @@ class RepeatSanitisation(TransformPass):
     inserts any missing values with defaults from the hardware model. If no repeat is found,
     then one is added to the top of the instruction list."""
 
-    def __init__(self, model: QuantumHardwareModel = None):
+    def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """
         :param model: The hardware model contains the default repeat value, defaults to
             None.
+        :param target_data: Target-related information.
         """
         self.model = model
+        self.target_data = target_data
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-
-        model = self.model or get_hardware_model(args, kwargs)
 
         repeats = [i for i, inst in enumerate(ir._instructions) if isinstance(inst, Repeat)]
         if repeats:
             for i in repeats:
                 rep = ir._instructions[i]
                 if rep.repeat_count is None:
-                    rep.repeat_count = model.default_repeat_count
+                    rep.repeat_count = self.target_data.default_shots
                 if rep.repetition_period is None:
-                    rep.repetition_period = model.default_repetition_period
+                    rep.repetition_period = self.target_data.QUBIT_DATA.passive_reset_time
 
             if repeats != list(range(len(repeats))):
                 for new_idx, old_idx in enumerate(repeats):
@@ -1000,6 +1012,10 @@ class RepeatSanitisation(TransformPass):
 
         else:
             ir.insert(
-                Repeat(model.default_repeat_count, model.default_repetition_period), 0
+                Repeat(
+                    self.target_data.default_shots,
+                    self.target_data.QUBIT_DATA.passive_reset_time,
+                ),
+                0,
             )
         return ir

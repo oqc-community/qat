@@ -12,6 +12,7 @@ from compiler_config.config import (
 
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
+from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import is_generated_name
@@ -152,7 +153,7 @@ class ResultTransform(TransformPass):
         format_flags = (
             compiler_config.results_format or ResultsFormatting.DynamicStructureReturn
         )
-        repeats = compiler_config.repeats or 1000
+        repeats = compiler_config.repeats or TargetData.default().default_shots
 
         if len(acquisitions) == 0:
             return []

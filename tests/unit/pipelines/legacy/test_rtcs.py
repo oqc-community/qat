@@ -3,6 +3,7 @@
 from compiler_config.config import CompilerConfig, QuantumResultsFormat
 
 from qat import QAT
+from qat.model.target_data import TargetData
 from qat.pipelines.legacy.rtcs import legacy_rtcs2
 
 from tests.unit.utils.qasm_qir import get_qasm2
@@ -25,10 +26,14 @@ class TestRTCSPipelines:
     def test_bell_with_binary_count(self):
         """Without the sanitization pass on Acquires, this will not pass."""
 
-        config = CompilerConfig(results_format=QuantumResultsFormat().binary_count())
+        config = CompilerConfig(
+            results_format=QuantumResultsFormat().binary_count(),
+            repeats=TargetData.default().default_shots,
+            repetition_period=TargetData.default().QUBIT_DATA.passive_reset_time,
+        )
         results = self.execute_bell_state(config)
         assert len(results) == 1
         assert "b" in results
         assert "00" in results["b"]
         assert "11" in results["b"]
-        assert results["b"]["00"] + results["b"]["11"] > 500
+        assert results["b"]["00"] + results["b"]["11"] > config.repeats // 2

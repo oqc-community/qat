@@ -2,25 +2,27 @@ max_shots: 100_000
 default_shots: 100
 
 QUBIT_DATA:
-  clock_cycle_f: 10_000_000
+  sample_time: 1e-09
+  samples_per_clock_cycle: 8
   instruction_memory_size: 16_000
   waveform_memory_size: 20_000
   pulse_duration_min: 1e-09
   pulse_duration_max: 1e-03
-  pulse_channel_lo_freq_min: 1e3
-  pulse_channel_lo_freq_max: 1e10
-  pulse_channel_if_freq_min: 1e2
-  pulse_channel_if_freq_max: 2e9
+  pulse_channel_lo_freq_min: 1_000
+  pulse_channel_lo_freq_max: 10_000_000_000
+  pulse_channel_if_freq_min: 2_000
+  pulse_channel_if_freq_max: 2_000_000_000
   passive_reset_time: 3e-03
   
 
 RESONATOR_DATA:
-  clock_cycle_f: 20_000_000
-  instruction_memory_size: 8_000
+  sample_time: 1e-09
+  samples_per_clock_cycle: 8
+  instruction_memory_size: 16_000
   waveform_memory_size: 10_000
   pulse_duration_min: 1e-09
   pulse_duration_max: 1e-03
-  pulse_channel_lo_freq_min: 1e3
-  pulse_channel_lo_freq_max: 1e10
-  pulse_channel_if_freq_min: 1e2
-  pulse_channel_if_freq_max: 2e9
+  pulse_channel_lo_freq_min: 1_000
+  pulse_channel_lo_freq_max: 10_000_000_000
+  pulse_channel_if_freq_min: 2_000
+  pulse_channel_if_freq_max: 2_000_000_000
