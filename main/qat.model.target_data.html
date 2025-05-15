@@ -355,6 +355,46 @@
   <section id="module-qat.model.target_data">
 <span id="qat-model-target-data-module"></span><h1>qat.model.target_data module<a class="headerlink" href="#module-qat.model.target_data" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractTargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
+<p>Data related to a general target machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.max_shots">¶</a> – The maximum amount of shots possible on this target.</p></li>
+<li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.default_shots"></span><strong>default_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.default_shots">¶</a> – The default amount of shots on this target if none specified through the instructions.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.default_shots">
+<span class="sig-name descname"><span class="pre">default_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.default_shots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.from_yaml">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.from_yaml" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.max_shots">
+<span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_shots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
@@ -362,9 +402,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.clock_cycle_f"></span><strong>clock_cycle_f</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.clock_cycle_f">¶</a> – The clock cycle (in frequency units).</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.sample_time"></span><strong>sample_time</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.sample_time">¶</a> – The rate at which the pulse is sampled (in s).</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.samples_per_clock_cycle"></span><strong>samples_per_clock_cycle</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.samples_per_clock_cycle">¶</a> – The number of samples per clock cycle.</p></li>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.instruction_memory_size"></span><strong>instruction_memory_size</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.instruction_memory_size">¶</a> – The max. allowed number of instructions.</p></li>
-<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.weveform_memory_size"></span><strong>weveform_memory_size</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.weveform_memory_size">¶</a> – The max. memory that can be used for waveforms.</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.waveform_memory_size"></span><strong>waveform_memory_size</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.waveform_memory_size">¶</a> – The max. memory that can be used for waveforms, in clock cycles.</p></li>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_duration_min"></span><strong>pulse_duration_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_duration_min">¶</a> – The minimal pulse duration for all pulse channels.</p></li>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_duration_max"></span><strong>pulse_duration_max</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_duration_max">¶</a> – The maximal pulse duration for all pulse channels.</p></li>
 </ul>
@@ -386,14 +427,9 @@
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.clock_cycle_f">
-<span class="sig-name descname"><span class="pre">clock_cycle_f</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.clock_cycle_f" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
-<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.clock_cycle_t">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle_t</span></span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.clock_cycle_t" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.clock_cycle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.clock_cycle" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -409,22 +445,22 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.pulse_channel_if_freq_max">
-<span class="sig-name descname"><span class="pre">pulse_channel_if_freq_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_max" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pulse_channel_if_freq_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_max" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.pulse_channel_if_freq_min">
-<span class="sig-name descname"><span class="pre">pulse_channel_if_freq_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_min" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pulse_channel_if_freq_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_if_freq_min" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_max">
-<span class="sig-name descname"><span class="pre">pulse_channel_lo_freq_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_max" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pulse_channel_lo_freq_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_max" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_min">
-<span class="sig-name descname"><span class="pre">pulse_channel_lo_freq_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_min" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pulse_channel_lo_freq_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_channel_lo_freq_min" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -435,6 +471,26 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.pulse_duration_min">
 <span class="sig-name descname"><span class="pre">pulse_duration_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.pulse_duration_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.random">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.sample_time">
+<span class="sig-name descname"><span class="pre">sample_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.sample_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.samples_per_clock_cycle">
+<span class="sig-name descname"><span class="pre">samples_per_clock_cycle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.DeviceDescription.samples_per_clock_cycle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription.validate_durations">
+<span class="sig-name descname"><span class="pre">validate_durations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription.validate_durations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -469,6 +525,11 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">passive_reset_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.QubitDescription.passive_reset_time" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.QubitDescription.random">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.QubitDescription.random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -491,7 +552,7 @@ validated to form a valid model.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.model.target_data.AbstractTargetData" title="qat.model.target_data.AbstractTargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractTargetData</span></code></a></p>
 <p>Data related to a general target machine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -517,19 +578,19 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">RESONATOR_DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.model.target_data.ResonatorDescription" title="qat.model.target_data.ResonatorDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResonatorDescription</span></code></a></em><a class="headerlink" href="#qat.model.target_data.TargetData.RESONATOR_DATA" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.target_data.TargetData.default_shots">
-<span class="sig-name descname"><span class="pre">default_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.default_shots" title="Link to this definition"></a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.clock_cycle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock_cycle</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.clock_cycle" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.model.target_data.TargetData.from_yaml">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.from_yaml" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.default">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.default" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.target_data.TargetData.max_shots">
-<span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.max_shots" title="Link to this definition"></a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.instruction_memory_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instruction_memory_size</span></span><a class="headerlink" href="#qat.model.target_data.TargetData.instruction_memory_size" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -537,6 +598,21 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.random">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.validate_clock_cycles">
+<span class="sig-name descname"><span class="pre">validate_clock_cycles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.validate_clock_cycles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.validate_instruction_memory_size">
+<span class="sig-name descname"><span class="pre">validate_instruction_memory_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.validate_instruction_memory_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
