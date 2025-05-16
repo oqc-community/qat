@@ -14,7 +14,9 @@ from qat.middleend.passes.validation import (
     ReadoutValidation,
 )
 from qat.model.target_data import TargetData
+from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.runtime.connection import ConnectionMode
 from qat.runtime.legacy import LegacyRuntime
 from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.passes.transform import ErrorMitigation, ResultTransform
@@ -64,7 +66,12 @@ def get_middleend_pipeline(
     )
 
 
-def get_pipeline(model: QuantumHardwareModel, name: str = "legacy") -> Pipeline:
+def get_pipeline(
+    model: QuantumHardwareModel,
+    name: str = "legacy",
+    target_data: TargetData = TargetData.default(),
+    connection_mode: ConnectionMode = ConnectionMode.MANUAL,
+) -> Pipeline:
     """A factory for building complete compilation and execution pipelines using legacy
     hardware models and legacy engines.
 
@@ -72,12 +79,22 @@ def get_pipeline(model: QuantumHardwareModel, name: str = "legacy") -> Pipeline:
     :param name: The name of the pipeline, defaults to "legacy"
     :return: The complete pipeline.
     """
-    engine = model.create_engine()
+    if isinstance(model, LiveHardwareModel):
+        # Let the Runtime handle startup based on ConnectionMode
+        engine = model.create_engine(startup_engine=False)
+    else:
+        engine = model.create_engine()
     return Pipeline(
         name=name,
         frontend=AutoFrontend(model),
-        middleend=CustomMiddleend(model, pipeline=get_middleend_pipeline(model)),
+        middleend=CustomMiddleend(
+            model, pipeline=get_middleend_pipeline(model, target_data=target_data)
+        ),
         backend=FallthroughBackend(model),
-        runtime=LegacyRuntime(engine=engine, results_pipeline=get_results_pipeline(model)),
+        runtime=LegacyRuntime(
+            engine=engine,
+            results_pipeline=get_results_pipeline(model),
+            connection_mode=connection_mode,
+        ),
         model=model,
     )
