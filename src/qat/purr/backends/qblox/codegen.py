@@ -698,16 +698,13 @@ class NewQbloxContext(AbstractContext):
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         attr2var = {
-            attr: var
-            for attr, var in waveform.__dict__.items()
-            if isinstance(var, Variable)
+            attr: var for attr, var in vars(waveform).items() if isinstance(var, Variable)
         }
 
         if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
             if "amp" in attr2var:
-                pulse_amp = self.alloc_mgr.registers[attr2var["amp"].name]
-
-                i_steps = pulse_amp
+                amp_var = attr2var["amp"]
+                i_steps = self.alloc_mgr.registers[amp_var.name]
                 q_steps = self.alloc_mgr.registers["zero"]
             else:
                 bias = target.bias
@@ -722,7 +719,8 @@ class NewQbloxContext(AbstractContext):
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
 
             if "width" in attr2var:
-                pulse_width = self.alloc_mgr.registers[attr2var["width"].name]
+                width_var = attr2var["width"]
+                pulse_width = self.alloc_mgr.registers[width_var.name]
                 self._upd_param_reg(pulse_width)
             else:
                 pulse_width = int(calculate_duration(waveform))

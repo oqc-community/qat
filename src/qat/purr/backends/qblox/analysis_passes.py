@@ -431,7 +431,10 @@ class TILegalisationPass(AnalysisPass):
         if abs(pulse_amp.real) > 1 or abs(pulse_amp.imag) > 1:
             raise ValueError("Illegal DAC/ADC ratio. It must be within range [-1, 1]")
 
-        return pulse_amp
+        if pulse_amp.imag != 0:
+            raise NotImplementedError("Unsupported processing of complex amplitudes")
+
+        return pulse_amp.real
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
         legal_bound = bound
@@ -444,7 +447,7 @@ class TILegalisationPass(AnalysisPass):
                 count=bound.count,
             )
         elif isinstance(inst, DeviceUpdate):
-            if inst.attribute not in ["frequency", "phase"]:
+            if inst.attribute not in ["frequency", "scale", "amp"]:
                 raise NotImplementedError(
                     f"Unsupported processing of attribute {inst.attribute} for instruction {inst}"
                 )
@@ -467,15 +470,15 @@ class TILegalisationPass(AnalysisPass):
                 if isinstance(var, Variable) and var.name == name
             }
 
-            if attr2var and isinstance(inst, Pulse) and inst.shape != PulseShapeType.SQUARE:
-                raise ValueError("Cannot process non-trivial pulses")
             if not attr2var:
                 return legal_bound
             if len(attr2var) > 1:
                 raise ValueError(
                     f"Unsafe analysis. Distinct attributes expecting the same variable bound {attr2var}"
                 )
-            attr, var = next(iter(attr2var.items()), (None, None))
+            if isinstance(inst, Pulse) and inst.shape != PulseShapeType.SQUARE:
+                raise ValueError("Cannot process non-trivial pulses")
+            attr, var = next(iter(attr2var.items()))
             if attr not in ["width", "amp", "phase"]:
                 raise NotImplementedError(
                     f"Unsupported processing of attribute {attr} for instruction {inst}"
@@ -579,36 +582,22 @@ class QbloxLegalisationPass(AnalysisPass):
 
         return np.array([steps], dtype=int).view(np.uint32)[0]
 
-    def amp_as_steps(self, amp: complex) -> complex:
-        # TODO - Needs a rethink
+    def amp_as_steps(self, amp: float) -> np.uint32:
         """
         The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand. However,
         This function must return an unsigned integer because registers are unsigned 32bit integers.
         """
 
-        i_steps = int(amp.real * Constants.MAX_OFFSET)
-        q_steps = int(amp.imag * Constants.MAX_OFFSET)
-
-        if i_steps > Constants.MAX_OFFSET or i_steps < Constants.MIN_OFFSET:
+        amp_steps = int(amp.real * Constants.MAX_OFFSET)
+        if amp_steps < Constants.MIN_OFFSET or amp_steps > Constants.MAX_OFFSET:
             raise ValueError(
                 f"""
-                Illegal offset for I. Expected it be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
-                Got {i_steps} instead
+                Expected offset to be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
+                Got {amp_steps} instead
                 """
             )
 
-        if q_steps > Constants.MAX_OFFSET or q_steps < Constants.MIN_OFFSET:
-            raise ValueError(
-                f"""
-                Illegal offset for Q. Expected it be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
-                Got {q_steps} instead
-                """
-            )
-
-        i_steps = np.array([i_steps], dtype=int).view(np.uint32)[0]
-        q_steps = np.array([q_steps], dtype=int).view(np.uint32)[0]
-
-        return i_steps + 1j * q_steps
+        return np.array([amp_steps], dtype=int).view(np.uint32)[0]
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
         legal_bound = bound

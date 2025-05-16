@@ -279,11 +279,6 @@ def pulse_amplitude_iteration(model, qubit_indices=None, num_points=None):
         qubit = model.get_qubit(index)
         builder.measure_mean_signal(qubit, f"Q{qubit.index}")
 
-    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
-    for index in qubit_indices:
-        qubit = model.get_qubit(index)
-        builder.measure_mean_signal(qubit, f"Q{qubit.index}")
-
     return builder
 
 

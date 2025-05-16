@@ -660,7 +660,6 @@ class TestNewQbloxEmitter(InvokerMixin):
         packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)
 
-    @pytest.mark.skip("Needs better handing of composite bounds")
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_amplitude_iteration(self, model, num_points, qubit_indices):
