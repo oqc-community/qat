@@ -419,9 +419,23 @@ type.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultManager.check_for_type">
+<span class="sig-name descname"><span class="pre">check_for_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.check_for_type" title="Link to this definition"></a></dt>
+<dd><p>Checks the result manager contains a result with a given type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.check_for_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.check_for_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The results type.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultManager.lookup_by_type">
 <span class="sig-name descname"><span class="pre">lookup_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.lookup_by_type" title="Link to this definition"></a></dt>
-<dd><p>Find a result by its type.</p>
+<dd><p>Find a result by its type. Throws an error if none or multiple are found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.lookup_by_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.lookup_by_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The results type.</p>
