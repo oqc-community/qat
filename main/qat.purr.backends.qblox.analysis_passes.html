@@ -453,6 +453,11 @@ of the numbers in the array, or else fail.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.astype">
+<span class="sig-name descname"><span class="pre">astype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.astype" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.count">
 <span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.count" title="Link to this definition"></a></dt>
@@ -482,11 +487,10 @@ of the numbers in the array, or else fail.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps">
 <span class="sig-name descname"><span class="pre">amp_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_awg_offs</cite> expects DAC ratio as a (potentially signed) integer operand. However,
-This function must return an unsigned integer because registers are unsigned 32bit integers.</p>
+<dd><p>The instruction <cite>set_awg_offs</cite> expects DAC ratio as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uint32</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -494,11 +498,10 @@ This function must return an unsigned integer because registers are unsigned 32b
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">freq_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_freq</cite> expects the frequency as a (potentially signed) integer operand.
-However, This function must return an unsigned integer because registers are unsigned 32bit integers.</p>
+<dd><p>The instruction <cite>set_freq</cite> expects the frequency as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uint32</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -506,11 +509,10 @@ However, This function must return an unsigned integer because registers are uns
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_ph_delta</cite> expects the phase shift as a (potentially signed) integer operand.
-However, This function must return an unsigned integer because registers are unsigned 32bit integers.</p>
+<dd><p>The instruction <cite>set_ph_delta</cite> expects the phase shift as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uint32</span></code></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>

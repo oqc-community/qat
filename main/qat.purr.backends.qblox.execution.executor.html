@@ -385,35 +385,12 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parse_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.LeafInstrument" title="qat.purr.backends.qblox.execution.instrument_base.LeafInstrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafInstrument</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.allocate_resources">
-<span class="sig-name descname"><span class="pre">allocate_resources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor.allocate_resources" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.collect">
 <span class="sig-name descname"><span class="pre">collect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor.collect" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.connect">
-<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor.connect" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.disconnect">
-<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor.disconnect" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.install">
-<span class="sig-name descname"><span class="pre">install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.execution.executor.LeafExecutor.install" title="Link to this definition"></a></dt>
-<dd><p>Installs and configures the package on the given (module, sequencer) resource.
-Nominally follows resource allocation, but also serves for adhoc package installations
-that aren’t necessarily tied to any automatic resource allocation.</p>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.execution.executor.LeafExecutor.playback">

@@ -366,9 +366,29 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractQbloxLiveEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine" title="qat.purr.backends.live.LiveDeviceEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveDeviceEngine</span></code></a>, <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin" title="qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.combine_playbacks">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">combine_playbacks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playbacks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.combine_playbacks" title="Link to this definition"></a></dt>
+<dd><p>Combines acquisition objects from multiple acquire instructions in multiple readout targets.
+Notice that <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby()</span></code> preserves (original) relative order, which makes it honour
+the (sequential) lexicographical order of the loop nest:</p>
+<p>playback[target][“acq_0”] contains (potentially) a list of acquisitions collected in the same
+order as the order in which the packages were sent to the FPGA.</p>
+<p>Although acquisition names are enough for unicity in practice, the playback’s structure
+distinguishes different (multiple) acquisitions per readout target, thus making it more robust.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.optimize">
 <span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.optimize" title="Link to this definition"></a></dt>
 <dd><p>Runs optimization passes specific to this hardware.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.process_playback">
+<span class="sig-name descname"><span class="pre">process_playback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.process_playback" title="Link to this definition"></a></dt>
+<dd><p>Now that the combined playback is ready, we can compute and process results as required
+by customers. This requires loop nest information as well as post-processing and shaping
+requirements.</p>
 </dd></dl>
 
 <dl class="py method">
