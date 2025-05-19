@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from copy import copy
 
 import numpy as np
 import pytest
@@ -8,7 +7,7 @@ import pytest
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.purr.compiler.instructions import AcquireMode
+from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 
 
 class TestEchoEngine:
@@ -60,31 +59,36 @@ class TestEchoEngine:
         qubit = model.get_qubit(0)
         measure_channel = qubit.get_measure_channel()
         acquire_channel = qubit.get_acquire_channel()
+        amp = qubit.pulse_measure["amp"]
+        width = qubit.pulse_measure["width"]
 
         # Add the acquires: make the second twice as long, add some spacing in between
         builder = model.create_builder()
         builder.repeat(1000, 100e-6)
-        builder.pulse(quantum_target=measure_channel, **qubit.pulse_measure)
-        measure_acquire = qubit.measure_acquire
+        builder.pulse(
+            qubit.get_measure_channel(), shape=PulseShapeType.SQUARE, width=width, amp=amp
+        )
         builder.acquire(
-            acquire_channel,
-            output_variable="test1",
+            qubit.get_acquire_channel(),
             mode=mode,
-            delay=measure_acquire["delay"],
-            time=measure_acquire["width"],
+            delay=0.0,
+            time=width,
+            output_variable="test1",
         )
         builder.delay(measure_channel, 1e-6)
-        builder.synchronize([measure_channel, acquire_channel])
-        measure_pulse = copy(qubit.pulse_measure)
-        measure_pulse["width"] = 2 * measure_pulse["width"]
-        measure_pulse["amp"] = 2.0
-        builder.pulse(quantum_target=measure_channel, **measure_pulse)
+        builder.delay(acquire_channel, 1e-6)
+        builder.pulse(
+            qubit.get_measure_channel(),
+            shape=PulseShapeType.SQUARE,
+            width=2 * width,
+            amp=2 * amp,
+        )
         builder.acquire(
-            acquire_channel,
-            output_variable="test2",
+            qubit.get_acquire_channel(),
             mode=mode,
-            delay=measure_acquire["delay"],
-            time=2 * measure_acquire["width"],
+            delay=0.0,
+            time=2 * width,
+            output_variable="test2",
         )
         package = WaveformV1Backend(model).emit(builder)
 
@@ -93,10 +97,10 @@ class TestEchoEngine:
         results = engine.execute(package)
         assert len(results) == 2
         output_vars = ["test1", "test2"]
-        amps = [qubit.pulse_measure["amp"], 2 * qubit.pulse_measure["amp"]]
+        amps = [amp, 2 * amp]
         samples = [
-            np.ceil(measure_acquire["width"] / acquire_channel.sample_time),
-            2 * np.ceil(measure_acquire["width"] / acquire_channel.sample_time),
+            np.ceil(width / acquire_channel.sample_time),
+            2 * np.ceil(width / acquire_channel.sample_time),
         ]
         for i, output_vars in enumerate(output_vars):
             assert output_vars in results

@@ -7,7 +7,7 @@ from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.engines.waveform_v1 import EchoEngine
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.purr.compiler.instructions import AcquireMode
+from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.transform import (
     InlineResultsProcessingTransform,
@@ -18,10 +18,19 @@ from qat.runtime.passes.transform import (
 class TestSimpleRuntime:
     def basic_acquire_circuit(self, shots, mode=AcquireMode.INTEGRATOR):
         model = EchoModelLoader().load()
+        qubit = model.qubits[0]
         builder = model.create_builder()
         builder.repeat(shots, 100e-6)
-        block, _ = builder._generate_measure_block(model.get_qubit(0), mode, "test")
-        builder.add(block)
+        builder.pulse(
+            qubit.get_measure_channel(), shape=PulseShapeType.SQUARE, width=800e-9
+        )
+        builder.acquire(
+            qubit.get_acquire_channel(),
+            delay=0.0,
+            mode=mode,
+            time=800e-9,
+            output_variable="test",
+        )
         builder.returns("test")
         return WaveformV1Backend(model).emit(builder)
 
@@ -37,8 +46,18 @@ class TestSimpleRuntime:
         model = EchoModelLoader().load()
         builder = model.create_builder()
         builder.repeat(254, 100e-6)
-        builder.measure(model.get_qubit(0), output_variable="qubit0")
-        builder.measure(model.get_qubit(1), output_variable="qubit1")
+        for i in range(2):
+            qubit = model.qubits[i]
+            builder.pulse(
+                qubit.get_measure_channel(), shape=PulseShapeType.SQUARE, width=800e-9
+            )
+            builder.acquire(
+                qubit.get_acquire_channel(),
+                delay=0.0,
+                mode=AcquireMode.INTEGRATOR,
+                time=800e-9,
+                output_variable=f"qubit{i}",
+            )
         builder.returns("qubit0")
 
         # Test with default pipeline

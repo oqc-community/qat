@@ -13,7 +13,6 @@ from qat.backend.passes.analysis import (
     TimelineAnalysisResult,
 )
 from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
-from qat.backend.passes.transform import LowerSyncsToDelays, SquashDelaysOptimisation
 from qat.backend.passes.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
@@ -117,8 +116,6 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         return (
             PassManager()
             | NoAcquireWeightsValidation()
-            | LowerSyncsToDelays()
-            | SquashDelaysOptimisation()
             | PartitionByPulseChannel()
             | TimelineAnalysis()
             | IntermediateFrequencyAnalysis(self.model)

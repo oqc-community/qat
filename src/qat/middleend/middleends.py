@@ -10,7 +10,6 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
-from qat.middleend.passes.legacy.validation import PhysicalChannelAmplitudeValidation
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
@@ -18,13 +17,16 @@ from qat.middleend.passes.transform import (
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
+    LowerSyncsToDelays,
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
     PydPhaseOptimisation,
     PydReturnSanitisation,
     RepeatSanitisation,
+    ResetsToDelays,
     ReturnSanitisation,
+    SquashDelaysOptimisation,
     SynchronizeTask,
 )
 from qat.middleend.passes.validation import (
@@ -151,32 +153,30 @@ class DefaultMiddleend(CustomMiddleend):
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
             | FrequencyValidation(model, target_data)
+            | ActivePulseChannelAnalysis(model)
+            | InactivePulseChannelSanitisation()
+            # Basically just "corrections" to bad ir generated from the builder, should
+            # eventually be replaced with behaviour from the builder
+            | PostProcessingSanitisation()
+            | ReadoutValidation(model)
+            | AcquireSanitisation()
+            | MeasurePhaseResetSanitisation()
             # Process a "task" into a program. Could be considered as a frontend pipeline
             # that converts takes a specific task and makes the appropriate qat ir.
             # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
-            | ActivePulseChannelAnalysis(model)
-            | InactivePulseChannelSanitisation()
             | RepeatSanitisation(model, target_data)
             | ReturnSanitisation()
             | SynchronizeTask()
             | EndOfTaskResetSanitisation()
-            | InitialPhaseResetSanitisation()
-            # Basically just "corrections" to bad ir generated from the builder, should
-            # eventually be replaced with behaviour from the builder
-            | PostProcessingSanitisation()
-            | AcquireSanitisation()
-            | MeasurePhaseResetSanitisation()
-            # handles mid-circuit measures + pp validation, should be split up
-            # is pp validation needed in a pipeline that explicitly does pp sanitisation?
-            | ReadoutValidation(model)
-            # Optimisation of the ir:
-            | PhaseOptimisation()
-            # Preparing the IR for the backend
+            # Preparing for the backend
             | InstructionGranularitySanitisation(model, target_data)
             | EvaluatePulses()
-            | PhysicalChannelAmplitudeValidation()
-            # breaks tests in whisqrs with this value of repetition period, disable for now
-            # | ResetsToDelays(model.default_repetition_period)
+            | InitialPhaseResetSanitisation()
+            | LowerSyncsToDelays()
+            | ResetsToDelays(target_data)
+            # Optimisation of the ir:
+            | PhaseOptimisation()
+            | SquashDelaysOptimisation()
         )
 
 

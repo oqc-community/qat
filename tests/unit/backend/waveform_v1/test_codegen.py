@@ -3,6 +3,7 @@
 
 
 from qat.backend.waveform_v1.codegen import WaveformV1Backend, WaveformV1Executable
+from qat.middleend.passes.transform import LowerSyncsToDelays
 from qat.model.loaders.legacy import EchoModelLoader
 
 
@@ -14,7 +15,9 @@ class TestWaveformV1Executable:
         builder.had(model.get_qubit(0))
         for i in range(9):
             builder.cnot(model.get_qubit(i), model.get_qubit(i + 1))
-
+        # backend is not expected to see syncs, so lets remove them using this pass for
+        # ease
+        builder = LowerSyncsToDelays().run(builder)
         executable = WaveformV1Backend(model).emit(builder)
         blob = executable.serialize()
         new_executable = WaveformV1Executable.deserialize(blob)
