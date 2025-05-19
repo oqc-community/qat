@@ -1,13 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from collections import defaultdict
+from functools import reduce
+from itertools import groupby
 from typing import Dict, List
 
-import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
+from qat.purr.backends.qblox.acquisition import Acquisition
 from qat.purr.backends.qblox.algorithm import stable_partition
 from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
@@ -25,6 +27,8 @@ from qat.purr.backends.qblox.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
+from qat.purr.backends.utilities import software_post_process_linear_map_complex_to_real
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.execution import (
     DeviceInjectors,
     _binary_average,
@@ -150,6 +154,87 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
         return {key: assigned_results[key] for key in ret_inst.variables}
 
+    @staticmethod
+    def combine_playbacks(playbacks: Dict[PulseChannel, List[Acquisition]]):
+        """
+        Combines acquisition objects from multiple acquire instructions in multiple readout targets.
+        Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
+        the (sequential) lexicographical order of the loop nest:
+
+        playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in the same
+        order as the order in which the packages were sent to the FPGA.
+
+        Although acquisition names are enough for unicity in practice, the playback's structure
+        distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
+        """
+
+        playback: Dict[PulseChannel, Dict[str, Acquisition]] = {}
+        for target, acquisitions in playbacks.items():
+            groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
+            playback[target] = {
+                name: reduce(
+                    lambda acq1, acq2: Acquisition.accumulate(acq1, acq2),
+                    acqs,
+                    Acquisition(),
+                )
+                for name, acqs in groups_by_name
+            }
+
+        return playback
+
+    def process_playback(
+        self, playback: Dict[PulseChannel, Dict[str, Acquisition]], res_mgr: ResultManager
+    ):
+        """
+        Now that the combined playback is ready, we can compute and process results as required
+        by customers. This requires loop nest information as well as post-processing and shaping
+        requirements.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        acquire_map = triage_result.acquire_map
+        sweeps = triage_result.sweeps
+        pp_map = triage_result.pp_map
+        loop_nest_shape = tuple(
+            (list(len(next(iter(s.variables.values()))) for s in sweeps))
+        ) or (1, -1)
+
+        results = {}
+        for target, acquisitions in playback.items():
+            acquires = acquire_map[target]
+            for name, acquisition in acquisitions.items():
+                scope_data = acquisition.acq_data.scope
+                integ_data = acquisition.acq_data.bins.integration
+                thrld_data = acquisition.acq_data.bins.threshold
+
+                acquire = next((inst for inst in acquires if inst.output_variable == name))
+                if acquire.mode in [AcquireMode.SCOPE, AcquireMode.RAW]:
+                    response = (scope_data.i.data + 1j * scope_data.q.data).reshape(
+                        loop_nest_shape
+                    )
+                elif acquire.mode == AcquireMode.INTEGRATOR:
+                    response = (integ_data.i + 1j * integ_data.q).reshape(loop_nest_shape)
+                else:
+                    raise ValueError(f"Unrecognised acquire mode {acquire.mode}")
+
+                post_procs, axes = pp_map[name], {}
+                for pp in post_procs:
+                    if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                        response, _ = software_post_process_linear_map_complex_to_real(
+                            pp.args, response, axes
+                        )
+                    elif pp.process == PostProcessType.DISCRIMINATE:
+                        # f: {0, 1}  --->   {-1, 1}
+                        #      x    |--->   2x - 1
+                        response = (2 * thrld_data - 1).reshape(loop_nest_shape)
+
+                results[name] = response
+
+        results = self._process_results(results, triage_result)
+        results = self._process_assigns(results, triage_result)
+
+        return results
+
 
 class QbloxLiveEngine(AbstractQbloxLiveEngine):
     def build_pass_pipeline(self, *args, **kwargs):
@@ -171,39 +256,19 @@ class QbloxLiveEngine(AbstractQbloxLiveEngine):
             iter2packages = QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
 
         with log_duration("QPU returned results in {} seconds."):
-            playback_results = defaultdict(lambda: defaultdict(lambda: np.empty(0)))
+            playbacks: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
             for packages in iter2packages.values():
                 self.model.control_hardware.set_data(packages)
-                response: Dict[AcquireMode, Dict[str, np.ndarray]] = (
+                payback: Dict[PulseChannel, List[Acquisition]] = (
                     self.model.control_hardware.start_playback(None, None)
                 )
-                for acq_mode, acq_data in response.items():
-                    accmulated = playback_results[acq_mode]
-                    for acq_name, acquisitions in acq_data.items():
-                        accmulated[acq_name] = np.append(accmulated[acq_name], acquisitions)
+                for target, acquisitions in payback.items():
+                    playbacks[target] += acquisitions
 
-            triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-            acquire_map = triage_result.acquire_map
-            sweeps = triage_result.sweeps
-            pp_map = triage_result.pp_map
-            loop_nest_shape = tuple(
-                (list(len(next(iter(s.variables.values()))) for s in sweeps))
-            ) or (1, -1)
-
-            results = {}
-            for t, acquires in acquire_map.items():
-                for acq in acquires:
-                    response = playback_results[acq.mode][acq.output_variable]
-                    response_axis = {}
-                    for pp in pp_map[acq.output_variable]:
-                        if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
-                            response, _ = self.run_post_processing(
-                                pp, response, response_axis
-                            )
-                    results[acq.output_variable] = response.reshape(loop_nest_shape)
-            results = self._process_results(results, triage_result)
-            results = self._process_assigns(results, triage_result)
-
+            playback: Dict[PulseChannel, Dict[str, Acquisition]] = self.combine_playbacks(
+                playbacks
+            )
+            results = self.process_playback(playback, res_mgr)
             return results
 
 
@@ -257,30 +322,14 @@ class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
 
         with log_duration("QPU returned results in {} seconds."):
             self.model.control_hardware.set_data(packages)
-            playback_results = self.model.control_hardware.start_playback(None, None)
+            playbacks: Dict[PulseChannel, List[Acquisition]] = (
+                self.model.control_hardware.start_playback(None, None)
+            )
 
-            triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-            acquire_map = triage_result.acquire_map
-            sweeps = triage_result.sweeps
-            pp_map = triage_result.pp_map
-            loop_nest_shape = tuple(
-                (list(len(next(iter(s.variables.values()))) for s in sweeps))
-            ) or (1, -1)
-
-            results = {}
-            for t, acquires in acquire_map.items():
-                for acq in acquires:
-                    response = playback_results[acq.mode][acq.output_variable]
-                    response_axis = {}
-                    for pp in pp_map[acq.output_variable]:
-                        if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
-                            response, _ = self.run_post_processing(
-                                pp, response, response_axis
-                            )
-                    results[acq.output_variable] = response.reshape(loop_nest_shape)
-            results = self._process_results(results, triage_result)
-            results = self._process_assigns(results, triage_result)
-
+            playback: Dict[PulseChannel, Dict[str, Acquisition]] = self.combine_playbacks(
+                playbacks
+            )
+            results = self.process_playback(playback, res_mgr)
             return results
 
 

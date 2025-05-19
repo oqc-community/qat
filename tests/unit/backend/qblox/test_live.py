@@ -237,26 +237,40 @@ class TestQbloxLiveEngine:
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_scope_acq(self, model):
+    @pytest.mark.parametrize(
+        "acq_width",
+        (
+            np.random.choice(
+                np.arange(Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS) * 1e-9,
+                3,
+            )
+        ).tolist(),
+    )
+    @pytest.mark.parametrize("sync", [True, False])
+    def test_scope_acq(self, model, acq_width, sync):
         qubit_indices = [0]
         engine = model.create_engine()
-        builder = scope_acq(model, qubit_indices)
 
-        results, _ = execute_instructions(engine, builder)
-        assert results is not None
         for index in qubit_indices:
             qubit = model.get_qubit(index)
-            acq_width = min(
-                (
-                    qubit.pulse_measure["width"]
-                    if qubit.measure_acquire["sync"]
-                    else qubit.measure_acquire["width"]
-                )
-                * 1e9,
-                Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
-            )
+            qubit.measure_acquire["width"] = acq_width
+            qubit.measure_acquire["sync"] = sync
+
+        builder = scope_acq(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        assert results is not None
+
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+
             assert f"Q{index}" in results
-            assert results[f"Q{index}"].shape == (1, acq_width)
+            if sync:
+                assert results[f"Q{index}"].shape == (
+                    1,
+                    int(qubit.pulse_measure["width"] * 1e9),
+                )
+            else:
+                assert results[f"Q{index}"].shape == (1, int(acq_width * 1e9))
 
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_multi_readout(self, model, qubit_indices):

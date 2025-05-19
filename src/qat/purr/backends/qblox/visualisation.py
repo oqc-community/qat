@@ -5,7 +5,9 @@ from typing import Dict, List
 import numpy as np
 from matplotlib import pyplot as plt
 
+from qat.purr.backends.qblox.acquisition import Acquisition
 from qat.purr.backends.qblox.codegen import QbloxPackage
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -50,54 +52,50 @@ def plot_packages(packages: List[QbloxPackage]):
     plt.show()
 
 
-def plot_acquisitions(acquisitions: Dict, *args, **kwargs):
-    if not acquisitions:
+def plot_playback(playback: Dict[PulseChannel, List[Acquisition]]):
+    if not playback:
         return
 
-    integration_length: int = kwargs["integration_length"]
+    for i, (target, acquisitions) in enumerate(playback.items()):
+        for acquisition in acquisitions:
+            fig, axes = plt.subplots(
+                nrows=3,
+                ncols=1,
+                sharex=False,
+                sharey=False,
+                squeeze=False,
+                figsize=(10, 5),
+            )
+            fig.suptitle(f"Playback plots for {acquisition.name} on {target}")
 
-    for i, (acq_name, acq) in enumerate(acquisitions.items()):
-        fig, axes = plt.subplots(
-            nrows=2,
-            ncols=1,
-            sharex=False,
-            sharey=False,
-            squeeze=False,
-            figsize=(10, 5),
-        )
-        fig.suptitle(f"Scope and Integrator acquisitions for {acq_name}")
+            scope_data = acquisition.acq_data.scope
+            integ_data = acquisition.acq_data.bins.integration
+            thrld_data = acquisition.acq_data.bins.threshold
 
-        # Scope acquisition
-        scope_acq_i = np.array(acq["acquisition"]["scope"]["path0"]["data"])
-        scope_acq_q = np.array(acq["acquisition"]["scope"]["path1"]["data"])
-        max_length = scope_acq_i.size
-        if max_length > 0:
-            t = np.linspace(0, max_length, max_length)
-            axes[0, 0].plot(t, scope_acq_i, label="I")
-            axes[0, 0].plot(t, scope_acq_q, label="Q")
+            # Scope data
+            axes[0, 0].plot(scope_data.i.data, label="I")
+            axes[0, 0].plot(scope_data.q.data, label="Q")
             axes[0, 0].set_xlabel("Sample (ns)")
-            axes[0, 0].set_ylabel("Scope signal")
+            axes[0, 0].set_ylabel("Value")
             axes[0, 0].autoscale()
             axes[0, 0].legend()
+            axes[0, 0].title.set_text("Scope acquisition")
 
-        # Binned acquisition
-        bin_acq_i = (
-            np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-            / integration_length
-        )
-        bin_acq_q = (
-            np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-            / integration_length
-        )
-        max_length = bin_acq_i.size
-        if max_length > 0 and not np.isnan(np.append(bin_acq_i, bin_acq_q)).any():
-            t = np.linspace(0, max_length, max_length)
-            axes[1, 0].plot(t, bin_acq_i, label="I")
-            axes[1, 0].plot(t, bin_acq_q, label="Q")
-            axes[1, 0].set_xlabel("Shot")
-            axes[1, 0].set_ylabel("Acq Signal")
+            # Integration data
+            axes[1, 0].plot(integ_data.i, label="I")
+            axes[1, 0].plot(integ_data.q, label="Q")
+            axes[1, 0].set_xlabel("Iteration")
+            axes[1, 0].set_ylabel("Value")
             axes[1, 0].autoscale()
             axes[1, 0].legend()
+            axes[1, 0].title.set_text("Integrated acquisition")
+
+            # Threshold data
+            axes[2, 0].plot(thrld_data, label="I")
+            axes[2, 0].set_xlabel("Iteration")
+            axes[2, 0].set_ylabel("Value")
+            axes[2, 0].autoscale()
+            axes[2, 0].title.set_text("Thresholded acquisition")
 
         plt.tight_layout()
         plt.show()

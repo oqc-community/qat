@@ -62,8 +62,10 @@ class Q1asmInstruction:
 
         if self.opcode == Opcode.ADDRESS:
             asm_str = f"{args}:"
-        else:
+        elif args:
             asm_str = f"{self.opcode.value} {args}"
+        else:
+            asm_str = f"{self.opcode.value}"
 
         if self.comment:
             asm_str += f" # {self.comment}"

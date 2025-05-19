@@ -3,9 +3,9 @@
 
 import json
 import os
+from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime
-from functools import reduce
 from typing import Dict, List
 
 import numpy as np
@@ -14,7 +14,9 @@ from qblox_instruments import Cluster, DummyBinnedAcquisitionData, DummyScopeAcq
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
+from qat.backend.passes.analysis import TILegalisationPass
 from qat.purr.backends.live_devices import ControlHardware, Instrument, LivePhysicalBaseband
+from qat.purr.backends.qblox.acquisition import Acquisition
 from qat.purr.backends.qblox.codegen import QbloxPackage
 from qat.purr.backends.qblox.config import (
     ModuleConfig,
@@ -27,7 +29,7 @@ from qat.purr.backends.qblox.config import (
 )
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.ir import Sequence
-from qat.purr.backends.qblox.visualisation import plot_acquisitions, plot_packages
+from qat.purr.backends.qblox.visualisation import plot_packages, plot_playback
 from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalChannel,
@@ -35,7 +37,6 @@ from qat.purr.compiler.devices import (
     Qubit,
     Resonator,
 )
-from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -163,12 +164,9 @@ class QbloxControlHardware(ControlHardware):
         return module, sequencer
 
     def configure(self, package: QbloxPackage, module: Module, sequencer: Sequencer):
-        if package.target.fixed_if:  # NCO freq constant
-            nco_freq = package.target.baseband_if_frequency
-            lo_freq = package.target.frequency - nco_freq
-        else:  # LO freq constant
-            lo_freq = package.target.baseband_frequency
-            nco_freq = package.target.frequency - lo_freq
+        lo_freq, nco_freq = TILegalisationPass.decompose_freq(
+            package.target.frequency, package.target
+        )
 
         qblox_config = package.target.physical_channel.config
 
@@ -227,7 +225,7 @@ class QbloxControlHardware(ControlHardware):
         modules = self._resources.keys() or self._driver.get_connected_modules().values()
 
         for m in modules:
-            log.info(f"Resetting sequencer connections for module {m.slot_idx}")
+            log.debug(f"Resetting sequencer connections for module {m.slot_idx}")
             m.disconnect_outputs()
             if m.is_qrm_type:
                 m.disconnect_inputs()
@@ -283,7 +281,7 @@ class QbloxControlHardware(ControlHardware):
         if not any(self._resources):
             raise ValueError("No resources allocated. Install packages first")
 
-        results = {AcquireMode.SCOPE: {}, AcquireMode.INTEGRATOR: {}}
+        results: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
         try:
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -304,35 +302,40 @@ class QbloxControlHardware(ControlHardware):
                         sequencer.get_acquisition_status(timeout=60)
                         acquisitions = sequencer.get_acquisitions()
 
-                        for acq_name in acquisitions:
-                            sequencer.store_scope_acquisition(acq_name)
+                        for name in acquisitions:
+                            sequencer.store_scope_acquisition(name)
 
-                        acquisitions = sequencer.get_acquisitions()  # (re)fetch after store
-                        if self.plot_acquisitions:
-                            plot_acquisitions(
-                                acquisitions,
-                                integration_length=sequencer.integration_length_acq(),
-                            )
+                        # (re)fetch the lot after having stored scope acquisition
+                        acquisitions = sequencer.get_acquisitions()
 
+                        integ_length = sequencer.integration_length_acq()
                         start, end = (
                             0,
                             min(
-                                sequencer.integration_length_acq(),
+                                integ_length,
                                 Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
                             ),
                         )
-                        for acq_name, acq in acquisitions.items():
-                            i = np.array(acq["acquisition"]["bins"]["integration"]["path0"])
-                            q = np.array(acq["acquisition"]["bins"]["integration"]["path1"])
-                            results[AcquireMode.INTEGRATOR][acq_name] = (
-                                i + 1j * q
-                            ) / sequencer.integration_length_acq()
+                        for name, acquisition in acquisitions.items():
+                            acquisition = Acquisition.model_validate(acquisition)
+                            acquisition.name = name
 
-                            i = np.array(acq["acquisition"]["scope"]["path0"]["data"])
-                            q = np.array(acq["acquisition"]["scope"]["path1"]["data"])
-                            results[AcquireMode.SCOPE][acq_name] = (i + 1j * q)[start:end]
+                            scope_data = acquisition.acq_data.scope
+                            scope_data.i.data = scope_data.i.data[start:end]
+                            scope_data.q.data = scope_data.q.data[start:end]
+
+                            integ_data = acquisition.acq_data.bins.integration
+                            integ_data.i /= integ_length
+                            integ_data.q /= integ_length
+
+                            results[target].append(acquisition)
 
                         sequencer.delete_acquisition_data(all=True)
+
+            if self.plot_acquisitions:
+                plot_playback(results)
+
+            return results
         finally:
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -340,8 +343,6 @@ class QbloxControlHardware(ControlHardware):
 
             self._reset_connections()
             self._resources.clear()
-
-        return results
 
     def __getstate__(self) -> Dict:
         results = super(QbloxControlHardware, self).__getstate__()
@@ -357,25 +358,18 @@ class QbloxControlHardware(ControlHardware):
 
 
 class DummyQbloxControlHardware(QbloxControlHardware):
-    def _setup_dummy_scope_acq_data(self, module, sequencer: Sequencer, sequence: Sequence):
-        if sequence.waveforms:
-            dummy_data = reduce(
-                lambda a, b: a + b, [a["data"] for a in sequence.waveforms.values()]
-            )
-            norm = np.linalg.norm(dummy_data)
-            i_val = min(dummy_data) / norm
-            q_val = max(dummy_data) / norm
-        else:
-            playback_pattern = regex.compile(
-                "set_awg_offs( +)([0-9]+),([0-9]+)\nupd_param( +)([0-9]+)"
-            )
-            match = next(playback_pattern.finditer(sequence.program))
-            i_val = int(match.group(2)) / Constants.MAX_OFFSET
-            q_val = int(match.group(3)) / Constants.MAX_OFFSET
+    shot_pattern = regex.compile("jlt( +)R([0-9]+),([0-9]+),@(.*)\n")
 
-        dummy_data = [(i_val, q_val)] * Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
+    def _setup_dummy_scope_acq_data(self, module, sequencer: Sequencer, sequence: Sequence):
+        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
+        avg_count = int(shot_match.group(3)) if shot_match else 1
+
+        dummy_data = np.random.random(
+            size=(Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS, 2)
+        )
+        dummy_data = [(iq[0], iq[1]) for iq in dummy_data]
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(
-            data=dummy_data, out_of_range=(False, False), avg_cnt=(1, 1)
+            data=dummy_data, out_of_range=(False, False), avg_cnt=(avg_count, avg_count)
         )
         module.set_dummy_scope_acquisition_data(
             sequencer=sequencer.seq_idx, data=dummy_scope_acquisition_data
@@ -384,10 +378,16 @@ class DummyQbloxControlHardware(QbloxControlHardware):
     def _setup_dummy_binned_acq_data(
         self, module, sequencer: Sequencer, sequence: Sequence
     ):
+        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
+        avg_count = int(shot_match.group(3)) if shot_match else 1
+
         for name, acquisition in sequence.acquisitions.items():
-            dummy_data = (np.random.random(), np.random.random())
             dummy_binned_acquisition_data = [
-                DummyBinnedAcquisitionData(data=dummy_data, thres=1, avg_cnt=1)
+                DummyBinnedAcquisitionData(
+                    data=(np.random.random(), np.random.random()),
+                    thres=np.random.choice(2),
+                    avg_cnt=avg_count,
+                )
             ] * acquisition["num_bins"]
             module.set_dummy_binned_acquisition_data(
                 sequencer=sequencer.seq_idx,

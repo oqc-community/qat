@@ -184,6 +184,14 @@ class IterBound:
     end: Union[int, float, complex] = None
     count: int = None
 
+    def astype(self, ty: type):
+        return IterBound(
+            start=np.array([self.start], dtype=type(self.start)).view(ty)[0],
+            step=np.array([self.step], dtype=type(self.step)).view(ty)[0],
+            end=np.array([self.end], dtype=type(self.end)).view(ty)[0],
+            count=self.count,
+        )
+
 
 @dataclass
 class BindingResult(ResultInfoMixin):

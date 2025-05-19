@@ -1,15 +1,38 @@
+import pytest
+
 from qat.purr.backends.qblox.ir import Opcode, Q1asmInstruction, SequenceBuilder
 
 
 class TestQ1asmInstruction:
-    def test_address_instruction(self):
-        without_comment = Q1asmInstruction(Opcode.ADDRESS, "label")
-        assert str(without_comment) == "label:"
+    @pytest.mark.parametrize(
+        ("op_code", "operands", "comment"),
+        [
+            (Opcode.NOP, (), "Stalling"),
+            (Opcode.STOP, (), "Stop the sequencer"),
+            (Opcode.ADDRESS, ("label",), "Marked address as label"),
+            (Opcode.ADD, ("R0", "R1", "R0"), "R0 <- R0 + R1"),
+            (Opcode.JUMP, ("label",), "Unconditionally jump to address marked by label"),
+            (
+                Opcode.JUMP_LESS_THAN,
+                (
+                    "R0",
+                    1000,
+                    "label",
+                ),
+                "If R0 < 1000 then jump to address marked by label",
+            ),
+        ],
+    )
+    def test_asm_string(self, op_code, operands, comment):
+        instruction = Q1asmInstruction(op_code, *operands, comment=comment)
 
-        with_comment = Q1asmInstruction(
-            Opcode.ADDRESS, "label", comment="Marked address for jumping here"
-        )
-        assert str(with_comment) == "label: # Marked address for jumping here"
+        args = ",".join([str(op) for op in operands])
+        if op_code == Opcode.ADDRESS:
+            assert str(instruction) == f"{args}: # {comment}"
+        elif args:
+            assert str(instruction) == f"{op_code.value} {args} # {comment}"
+        else:
+            assert str(instruction) == f"{op_code.value} # {comment}"
 
 
 def test_sequence_builder():

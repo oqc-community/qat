@@ -179,6 +179,14 @@ class IterBound:
     end: Union[int, float, complex] = None
     count: int = None
 
+    def astype(self, ty: type):
+        return IterBound(
+            start=np.array([self.start], dtype=type(self.start)).view(ty)[0],
+            step=np.array([self.step], dtype=type(self.step)).view(ty)[0],
+            end=np.array([self.end], dtype=type(self.end)).view(ty)[0],
+            count=self.count,
+        )
+
 
 @dataclass
 class BindingResult(ResultInfoMixin):
@@ -548,22 +556,20 @@ class TILegalisationPass(AnalysisPass):
 
 class QbloxLegalisationPass(AnalysisPass):
     @staticmethod
-    def phase_as_steps(phase_rad: float) -> np.uint32:
+    def phase_as_steps(phase_rad: float) -> int:
         """
         The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
-        However, This function must return an unsigned integer because registers are unsigned 32bit integers.
         """
 
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
         steps = int(round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG))
-        return np.array([steps], dtype=int).view(np.uint32)[0]
+        return steps
 
     @staticmethod
-    def freq_as_steps(freq_hz: float) -> np.uint32:
+    def freq_as_steps(freq_hz: float) -> int:
         """
         The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
-        However, This function must return an unsigned integer because registers are unsigned 32bit integers.
         """
 
         steps = int(round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ))
@@ -580,12 +586,11 @@ class QbloxLegalisationPass(AnalysisPass):
                 f"Got {freq_hz:e} Hz"
             )
 
-        return np.array([steps], dtype=int).view(np.uint32)[0]
+        return steps
 
-    def amp_as_steps(self, amp: float) -> np.uint32:
+    def amp_as_steps(self, amp: float) -> int:
         """
-        The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand. However,
-        This function must return an unsigned integer because registers are unsigned 32bit integers.
+        The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand.
         """
 
         amp_steps = int(amp.real * Constants.MAX_OFFSET)
@@ -597,7 +602,7 @@ class QbloxLegalisationPass(AnalysisPass):
                 """
             )
 
-        return np.array([amp_steps], dtype=int).view(np.uint32)[0]
+        return amp_steps
 
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
         legal_bound = bound
@@ -686,12 +691,13 @@ class QbloxLegalisationPass(AnalysisPass):
                 )
 
         for attr, val in vars(legal_bound).items():
-            if not (isinstance(val, int) or isinstance(val, np.uint32)):
+            if not isinstance(val, int):
                 raise ValueError(
                     f"Illegal value {val} for attribute {attr}. Expected value to be an integer"
                 )
 
-        return legal_bound
+        # Qblox registers are unsigned 32bit integers.
+        return legal_bound.astype(np.uint32)
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
         """

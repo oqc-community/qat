@@ -6,6 +6,7 @@ from collections import OrderedDict, defaultdict
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
+from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -18,6 +19,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     QbloxLegalisationPass,
     ReadWriteResult,
     ScopingResult,
+    TILegalisationPass,
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen_base import DfsTraversal
@@ -129,11 +131,25 @@ class AbstractContext(ABC):
         self._acq_index: int = 0
         self._wgt_index: int = 0
 
+        self._durations: List[Union[float, str]] = []
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
+        self._phases: List[Union[float, str]] = []
+        self._timeline: np.ndarray = np.empty(0, dtype=complex)
+
+    @property
+    def durations(self):
+        return self._durations
+
+    @property
+    def total_duration(self):
+        if all((isinstance(d, Number) for d in self._durations)):
+            return sum(self._durations)
+        else:
+            ValueError("Cannot determine duration statically as timeline is dynamic")
 
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config)
+        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
 
     def is_empty(self):
         """
@@ -454,6 +470,20 @@ class AbstractContext(ABC):
     def id(self):
         self.sequence_builder.nop()
 
+    def delay(self, inst: Delay):
+        if isinstance(inst.duration, Variable):
+            val_reg = self.alloc_mgr.registers[inst.duration.name]
+            self._wait_reg(val_reg)
+            self._timeline = None
+        elif isinstance(inst.duration, Number):
+            val_imm = int(calculate_duration(inst))
+            self._wait_imm(val_imm)
+            self._timeline = np.append(self._timeline, np.zeros(val_imm, dtype=complex))
+        else:
+            raise ValueError(f"Expected a Variable or a Number but got {inst.duration}")
+
+        self._durations.append(inst.duration)
+
     def shift_frequency(self, inst, target):
         # TODO - discuss w/t quantum_target.fixed_if is True or False
         old_frequency = target.frequency + self._frequency
@@ -469,6 +499,81 @@ class AbstractContext(ABC):
         self.sequence_builder.set_freq(value)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
 
+    def shift_phase(self, inst: PhaseShift):
+        if isinstance(inst.phase, Variable):
+            ph_reg = self.alloc_mgr.registers[inst.phase.name]
+            with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
+                self.sequence_builder.set_ph_delta(iter_reg)
+            self.sequence_builder.upd_param(Constants.GRID_TIME)
+        elif isinstance(inst.phase, Number):
+            ph_imm = QbloxLegalisationPass.phase_as_steps(inst.phase)
+            self.sequence_builder.set_ph_delta(ph_imm)
+            self.sequence_builder.upd_param(Constants.GRID_TIME)
+        else:
+            raise ValueError(f"Expected a Variable or a Number but got {inst.phase}")
+
+        self._phases.append(inst.phase)
+
+    @staticmethod
+    def reset_phase(inst: PhaseReset, contexts: Dict):
+        for target in inst.quantum_targets:
+            cxt = contexts[target]
+            cxt.sequence_builder.reset_ph()
+            cxt.sequence_builder.upd_param(Constants.GRID_TIME)
+
+            cxt._phases.clear()
+
+    @staticmethod
+    def synchronize(inst: Synchronize, contexts: Dict):
+        """
+        Favours static time padding whenever possible, or else uses SYNC.
+        TODO - Default to SYNC when Qblox supports finer grained SYNC groups
+        """
+
+        is_static = all(
+            all((isinstance(d, Number) for d in contexts[target].durations))
+            for target in inst.quantum_targets
+        )
+
+        for target in inst.quantum_targets:
+            cxt = contexts[target]
+            if is_static:
+                max_duration = max(
+                    (contexts[target].total_duration for target in inst.quantum_targets)
+                )
+                cxt.delay(Delay(target, max_duration - cxt.total_duration))
+            else:
+                cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+
+    def device_update(self, du_inst: DeviceUpdate):
+        if isinstance(du_inst.value, Variable):
+            val_reg = self.alloc_mgr.registers[du_inst.value.name]
+            if du_inst.attribute == "frequency":
+                self.sequence_builder.set_freq(val_reg)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+            elif du_inst.attribute == "scale":
+                pass
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                )
+        elif isinstance(du_inst.value, Number):
+            if du_inst.attribute == "frequency":
+                lo_freq, nco_freq = TILegalisationPass.decompose_freq(
+                    du_inst.value, du_inst.target
+                )
+                freq_imm = QbloxLegalisationPass.freq_as_steps(nco_freq)
+                self.sequence_builder.set_freq(freq_imm)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+            elif du_inst.attribute == "scale":
+                pass
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                )
+        else:
+            raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")
+
 
 class QbloxContext(AbstractContext):
     def __init__(self, repeat: Repeat):
@@ -478,10 +583,6 @@ class QbloxContext(AbstractContext):
         self._repeat_period = repeat.repetition_period
         self._repeat_reg = None
         self._repeat_label = None
-
-        self._duration: float = 0.0
-        self._phase: float = 0.0  # Tracks phase shifts on the target
-        self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
     def __enter__(self):
         self.clear()
@@ -513,21 +614,6 @@ class QbloxContext(AbstractContext):
         self._repeat_label = None
         self._repeat_reg = None
 
-    @property
-    def duration(self):
-        return self._duration
-
-    def create_package(self, target: PulseChannel):
-        sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
-
-    def delay(self, inst: Delay):
-        duration = int(calculate_duration(inst))
-        self._wait_imm(duration)
-
-        self._duration = self._duration + inst.duration
-        self._timeline = np.append(self._timeline, np.zeros(duration, dtype=complex))
-
     def waveform(self, waveform: Waveform, target: PulseChannel):
         pulse = self._evaluate_waveform(waveform, target)
         pulse_width = pulse.size
@@ -554,8 +640,10 @@ class QbloxContext(AbstractContext):
             self.sequence_builder.play(i_index, q_index, max_width)
             self._wait_imm(pulse_width - max_width)
 
-        self._duration = self._duration + waveform.duration
-        self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * self._phase))
+        self._durations.append(waveform.duration)
+        if all((isinstance(p, Number) for p in self._phases)):
+            total_phase = sum(self._phases)
+            self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * total_phase))
 
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
@@ -603,35 +691,10 @@ class QbloxContext(AbstractContext):
                 remaining_width,
             )
 
-        self._duration = self._duration + measure.duration
-        self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * self._phase))
-
-    @staticmethod
-    def reset_phase(inst: PhaseReset, contexts: Dict):
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            cxt.sequence_builder.reset_ph()
-            cxt.sequence_builder.upd_param(Constants.GRID_TIME)
-
-            cxt._phase = 0.0
-
-    def shift_phase(self, inst: PhaseShift):
-        value = QbloxLegalisationPass.phase_as_steps(inst.phase)
-        self.sequence_builder.set_ph_delta(value)
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-        self._phase = self._phase + inst.phase
-
-    @staticmethod
-    def synchronize(inst: Synchronize, contexts: Dict):
-        # TODO - For now, enable only logical time padding
-        # TODO - Enable when finer grained SYNC groups are supported
-        max_duration = max([cxt.duration for cxt in contexts.values()])
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            delay_time = max_duration - cxt.duration
-            cxt.delay(Delay(target, delay_time))
-            # cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+        self._durations.append(measure.duration)
+        if all((isinstance(p, Number) for p in self._phases)):
+            total_phase = sum(self._phases)
+            self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * total_phase))
 
 
 class NewQbloxContext(AbstractContext):
@@ -652,9 +715,6 @@ class NewQbloxContext(AbstractContext):
         self.reads: Dict[str, List[Instruction]] = rw_result.reads
         self.writes: Dict[str, List[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
-
-        self._durations: List[Union[float, str]] = []
-        self._phases: List[Union[float, str]] = []
 
     def __enter__(self):
         """
@@ -683,18 +743,6 @@ class NewQbloxContext(AbstractContext):
         """
 
         self.sequence_builder.stop()
-
-    def delay(self, inst: Delay):
-        value = inst.duration
-
-        if isinstance(value, Variable):
-            register = self.alloc_mgr.registers[value.name]
-            self._wait_reg(register)
-        else:
-            duration = int(calculate_duration(inst))
-            self._wait_imm(duration)
-
-        self._durations.append(value)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         attr2var = {
@@ -797,66 +845,6 @@ class NewQbloxContext(AbstractContext):
             )
 
         self._durations.append(measure.duration)
-
-    def device_update(self, du_inst: DeviceUpdate):
-        value = du_inst.value
-        if isinstance(value, Variable):
-            val_reg = self.alloc_mgr.registers[value.name]
-
-            if du_inst.attribute == "frequency":
-                self.sequence_builder.set_freq(val_reg)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
-            elif du_inst.attribute == "phase":
-                with self._modulo_reg(val_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
-                    self.sequence_builder.set_ph(iter_reg)
-
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-                self._phases.clear()
-                self._phases.append(value)
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
-                )
-        else:
-            raise NotImplementedError(
-                f"Unsupported processing of immediate values for instruction {du_inst}"
-            )
-
-    @staticmethod
-    def reset_phase(inst: PhaseReset, contexts: Dict):
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            cxt.sequence_builder.reset_ph()
-            cxt.sequence_builder.upd_param(Constants.GRID_TIME)
-
-            cxt._phases.clear()
-
-    def shift_phase(self, inst: PhaseShift):
-        value = inst.phase
-
-        if isinstance(value, Variable):
-            ph_reg = self.alloc_mgr.registers[value.name]
-            with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
-                self.sequence_builder.set_ph_delta(iter_reg)
-        else:
-            ph_imm = QbloxLegalisationPass.phase_as_steps(value)
-            self.sequence_builder.set_ph_delta(ph_imm)
-
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-        self._phases.append(value)
-
-    @staticmethod
-    def synchronize(inst: Synchronize, contexts: Dict):
-        """
-        Potential presence of dynamic time render static time padding method inviable.
-        In such case, we simply revert to the `wait_sync` instruction (although it may limit muxing capabilities).
-        """
-
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
 
     @staticmethod
     def enter_repeat(inst: Repeat, contexts: Dict):
@@ -996,6 +984,8 @@ class QbloxEmitter(InvokerMixin):
                         target, stack.enter_context(QbloxContext(repeat))
                     )
 
+                    if isinstance(inst, DeviceUpdate):
+                        context.device_update(inst)
                     if isinstance(inst, MeasurePulse):
                         acquire = next(inst_iter, None)
                         if acquire is None or not isinstance(acquire, Acquire):

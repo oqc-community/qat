@@ -3,6 +3,7 @@
 from contextlib import nullcontext as does_not_raise
 from copy import deepcopy
 
+import numpy as np
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -113,6 +114,6 @@ class TestAnalysisPasses:
                                 step=QbloxLegalisationPass.freq_as_steps(bound.step),
                                 end=QbloxLegalisationPass.freq_as_steps(bound.end),
                                 count=bound.count,
-                            )
+                            ).astype(np.uint32)
                 else:
                     assert legal_bound == bound

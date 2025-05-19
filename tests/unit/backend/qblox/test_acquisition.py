@@ -12,6 +12,8 @@ from qat.purr.backends.qblox.constants import Constants
 
 
 def test_default_constructors():
+    assert Acquisition() == Acquisition()
+
     acquisition = Acquisition()
 
     assert not acquisition.index
@@ -22,23 +24,23 @@ def test_default_constructors():
 
     assert scope_data.i == PathData()
     assert not scope_data.i.avg_count
-    assert not scope_data.i.data
+    assert scope_data.i.data.size == 0
     assert not scope_data.i.oor
 
     assert scope_data.q == PathData()
     assert not scope_data.q.avg_count
-    assert not scope_data.q.data
+    assert scope_data.q.data.size == 0
     assert not scope_data.q.oor
 
     bin_data = acquisition.acq_data.bins
     assert bin_data == BinnedAcqData()
-    assert not bin_data.avg_count
-    assert not bin_data.threshold
+    assert bin_data.avg_count.size == 0
+    assert bin_data.threshold.size == 0
     assert bin_data.integration == IntegData()
 
     integ_data = bin_data.integration
-    assert not integ_data.i
-    assert not integ_data.q
+    assert integ_data.i.size == 0
+    assert integ_data.q.size == 0
 
 
 def test_serialisation(testpath):

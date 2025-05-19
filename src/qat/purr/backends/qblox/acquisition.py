@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import List
 
+import numpy as np
 from pydantic import BaseModel, Field
+
+from qat.utils.pydantic import FloatNDArray, IntNDArray
 
 
 class PathData(BaseModel):
@@ -14,7 +16,18 @@ class PathData(BaseModel):
 
     avg_count: int = Field(alias="avg_cnt", default=None)
     oor: bool = Field(alias="out-of-range", default=None)
-    data: List[float] = Field(alias="data", default=[])
+    data: FloatNDArray = Field(alias="data", default=np.empty(0, dtype=float))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        if self.avg_count != other.avg_count:
+            return False
+        if self.oor != other.oor:
+            return False
+        if np.any(self.data != other.data):
+            return False
+        return True
 
 
 class IntegData(BaseModel):
@@ -22,8 +35,17 @@ class IntegData(BaseModel):
     Path 0 refers to I while Path 1 refers to Q
     """
 
-    i: List[float] = Field(alias="path0", default=[])
-    q: List[float] = Field(alias="path1", default=[])
+    i: FloatNDArray = Field(alias="path0", default=np.empty(0, dtype=float))
+    q: FloatNDArray = Field(alias="path1", default=np.empty(0, dtype=float))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        if np.any(self.i != other.i):
+            return False
+        if np.any(self.q != other.q):
+            return False
+        return True
 
 
 class ScopeAcqData(BaseModel):
@@ -43,9 +65,20 @@ class BinnedAcqData(BaseModel):
     which are executed by the hardware.
     """
 
-    avg_count: List[int] = Field(alias="avg_cnt", default=[])
+    avg_count: IntNDArray = Field(alias="avg_cnt", default=np.empty(0, dtype=int))
     integration: IntegData = Field(alias="integration", default=IntegData())
-    threshold: List[float] = Field(alias="threshold", default=[])
+    threshold: FloatNDArray = Field(alias="threshold", default=np.empty(0, dtype=float))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        if np.any(self.avg_count != other.avg_count):
+            return False
+        if self.integration != other.integration:
+            return False
+        if np.any(self.threshold != other.threshold):
+            return False
+        return True
 
 
 class AcqData(BaseModel):
@@ -101,20 +134,20 @@ class Acquisition(BaseModel):
             scope_data1.i.avg_count or 0, scope_data2.i.avg_count or 0
         )
         scope_data.i.oor = scope_data1.i.oor and scope_data2.i.oor
-        scope_data.i.data = scope_data1.i.data + scope_data2.i.data
+        scope_data.i.data = np.append(scope_data1.i.data, scope_data2.i.data)
         scope_data.q.avg_count = min(
             scope_data1.q.avg_count or 0, scope_data2.q.avg_count or 0
         )
         scope_data.q.oor = scope_data1.q.oor and scope_data2.q.oor
-        scope_data.q.data = scope_data1.q.data + scope_data2.q.data
+        scope_data.q.data = np.append(scope_data1.q.data, scope_data2.q.data)
 
         bin_data1 = acq1.acq_data.bins
         bin_data2 = acq2.acq_data.bins
         bin_data = result.acq_data.bins
 
-        bin_data.avg_count = bin_data1.avg_count + bin_data2.avg_count
-        bin_data.integration.i = bin_data1.integration.i + bin_data2.integration.i
-        bin_data.integration.q = bin_data1.integration.q + bin_data2.integration.q
-        bin_data.threshold = bin_data1.threshold + bin_data2.threshold
+        bin_data.avg_count = np.append(bin_data1.avg_count, bin_data2.avg_count)
+        bin_data.integration.i = np.append(bin_data1.integration.i, bin_data2.integration.i)
+        bin_data.integration.q = np.append(bin_data1.integration.q, bin_data2.integration.q)
+        bin_data.threshold = np.append(bin_data1.threshold, bin_data2.threshold)
 
         return result
