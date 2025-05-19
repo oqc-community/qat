@@ -100,7 +100,7 @@ class ResultManager:
         self._results.add(ResultModel(res_obj))
 
     def lookup_by_type(self, ty: type):
-        """Find a result by its type.
+        """Find a result by its type. Throws an error if none or multiple are found.
 
         :param ty: The results type.
         """
@@ -112,3 +112,12 @@ class ResultManager:
             raise ValueError(f"Found multiple results instances of {ty}")
 
         return found[0]
+
+    def check_for_type(self, ty: type) -> bool:
+        """Checks the result manager contains a result with a given type.
+
+        :param ty: The results type.
+        """
+
+        found = [res.value for res in self._results if isinstance(res.value, ty)]
+        return len(found) > 0

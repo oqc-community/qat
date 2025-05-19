@@ -1,28 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
 
-import math
 import random
 from collections import defaultdict
-from copy import deepcopy
 
 import numpy as np
 import pytest
 
 from qat.backend.passes.analysis import TriagePass, TriageResult
-from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
 from qat.backend.passes.transform import (
     DesugaringPass,
-    FreqShiftSanitisation,
     LowerSyncsToDelays,
     SquashDelaysOptimisation,
 )
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.devices import ChannelType, FreqShiftPulseChannel
-from qat.purr.compiler.instructions import Delay, Pulse, PulseShapeType
+from qat.purr.compiler.instructions import (
+    Delay,
+    Pulse,
+    PulseShapeType,
+)
 
 from tests.unit.utils.builder_nuggets import resonator_spect
 
@@ -152,79 +150,3 @@ class TestSquashDelaysOptimisation:
         assert len(builder.instructions) == 2
         assert builder.instructions[0].time == 5 + delay_times[0]
         assert builder.instructions[1].time == 5 + delay_times[1]
-
-
-class TestFreqShiftSanitisation:
-    def test_no_freq_shift_pulse_channel(self):
-        hw = EchoModelLoader(8).load()
-
-        builder = QuantumInstructionBuilder(hw)
-        res_mgr = ResultManager()
-
-        for qubit in hw.qubits:
-            builder.X(qubit)
-
-        partitioned_ir = PartitionByPulseChannel().run(builder, res_mgr=res_mgr)
-        ref_partitioned_ir = deepcopy(partitioned_ir)
-
-        FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
-
-        # No instructions added since we do not have freq shift pulse channels.
-        assert len(partitioned_ir.target_map) == len(ref_partitioned_ir.target_map)
-        for target, target_ref in zip(
-            partitioned_ir.target_map, ref_partitioned_ir.target_map
-        ):
-            assert target == target_ref
-
-    @pytest.mark.parametrize("total_duration", [1e-02, 1e-01, 3, 5])
-    def test_freq_shift_pulse_channel(self, total_duration):
-        hw = EchoModelLoader(8).load()
-
-        builder = QuantumInstructionBuilder(hw)
-        res_mgr = ResultManager()
-
-        # Add frequency shift pulse channel to first qubit.
-        qubit0 = hw.qubits[0]
-        freq_shift_pulse_ch = FreqShiftPulseChannel(
-            id_="pulse_ch_Q0", physical_channel=qubit0.physical_channel
-        )
-        qubit0.add_pulse_channel(freq_shift_pulse_ch, channel_type=ChannelType.freq_shift)
-
-        for qubit in hw.qubits:
-            builder.X(qubit)
-
-        # Total duration of the freq shift pulse should be equal to the length of this pulse.
-        builder.pulse(
-            qubit0.get_drive_channel(),
-            shape=PulseShapeType.GAUSSIAN,
-            amp=0.1,
-            width=total_duration,
-        )
-
-        partitioned_ir = PartitionByPulseChannel().run(builder, res_mgr=res_mgr)
-        ref_partitioned_ir = deepcopy(partitioned_ir)
-
-        FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
-
-        # One pulse on the freq shift pulse channel of the first qubit.
-        assert len(partitioned_ir.target_map) == len(ref_partitioned_ir.target_map) + 1
-
-        assert len(partitioned_ir.target_map[freq_shift_pulse_ch]) == 1
-        freq_shift_pulse = partitioned_ir.target_map[freq_shift_pulse_ch][0]
-        assert isinstance(freq_shift_pulse, Pulse)
-        assert (
-            freq_shift_pulse_ch in freq_shift_pulse.quantum_targets
-            and len(freq_shift_pulse.quantum_targets) == 1
-        )
-        assert freq_shift_pulse.shape == PulseShapeType.SQUARE
-        assert freq_shift_pulse.amp == freq_shift_pulse_ch.amp
-        # TO DO: Change the timings to integers of nanoseconds to improve accuracy.
-        assert math.isclose(freq_shift_pulse.width, total_duration, abs_tol=1e-06)
-
-    def test_freq_shift_empty_target(self):
-        hw = EchoModelLoader(8).load()
-        res_mgr = ResultManager()
-        partitioned_ir = PartitionedIR()
-        ir = FreqShiftSanitisation(hw).run(partitioned_ir, res_mgr=res_mgr)
-        assert len(ir.target_map) == 0
-        assert ir is partitioned_ir

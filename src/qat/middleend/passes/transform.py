@@ -1019,3 +1019,93 @@ class RepeatSanitisation(TransformPass):
                 0,
             )
         return ir
+
+
+class FreqShiftSanitisation(TransformPass):
+    """
+    Looks for any active frequency shift pulse channels in the hardware model and adds
+    square pulses for the duration.
+
+    .. warning::
+
+        This pass assumes the following, which is achieved via other passes:
+
+        * :class:`Synchronize` instructions have already been lowered to :class:`Delay`
+          instructions.
+        * Durations are static.
+    """
+
+    def __init__(self, model: QuantumHardwareModel):
+        """:param model: The hardware model containing the frequency shift channels."""
+
+        self.model = model
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The QatIR as an instruction builder.
+        :param res_mgr: The results manager.
+        """
+
+        freq_shift_channels = self.get_freq_shift_channels()
+        if len(freq_shift_channels) == 0:
+            return ir
+        ir = self.add_freq_shift_to_ir(ir, set(freq_shift_channels.keys()))
+
+        if res_mgr.check_for_type(ActiveChannelResults):
+            res: ActiveChannelResults = res_mgr.lookup_by_type(ActiveChannelResults)
+            res.target_map.update(freq_shift_channels)
+
+        return ir
+
+    def get_freq_shift_channels(self) -> dict[PulseChannel, Qubit]:
+        """Returns all active frequency shift pulse channels found in the hardware model."""
+
+        channels: dict[PulseChannel, Qubit] = dict()
+        for qubit in self.model.qubits:
+            try:
+                freq_shift_pulse_ch = qubit.get_freq_shift_channel()
+                if freq_shift_pulse_ch.active:
+                    channels[freq_shift_pulse_ch] = qubit
+            except KeyError:
+                continue
+
+        return channels
+
+    @staticmethod
+    def add_freq_shift_to_ir(
+        ir: InstructionBuilder, freq_shift_channels: set[PulseChannel]
+    ) -> InstructionBuilder:
+        """Adds frequency shift instructions to the instruction builder."""
+
+        durations = defaultdict(list)
+        for inst in ir.instructions:
+            if isinstance(inst, QuantumInstruction) and (duration := inst.duration) > 0:
+                for target in inst.quantum_targets:
+                    durations[target].append(duration)
+
+        if len(durations) == 0:
+            return ir
+
+        max_duration = np.max([np.sum(duration) for duration in durations.values()])
+        if max_duration == 0.0:
+            return ir
+
+        # Find the index if the first quantum instruction
+        index = next(
+            filter(
+                lambda tup: True if isinstance(tup[1], QuantumInstruction) else None,
+                enumerate(ir._instructions),
+            )
+        )[0]
+
+        for channel in freq_shift_channels:
+            pulse = Pulse(
+                channel,
+                shape=PulseShapeType.SQUARE,
+                amp=channel.amp,
+                width=max_duration,
+            )
+            ir.insert(pulse, index)
+        return ir

@@ -6,13 +6,11 @@ from numbers import Number
 import numpy as np
 from compiler_config.config import MetricsType
 
-from qat.backend.passes.lowering import PartitionedIR
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -26,13 +24,15 @@ from qat.purr.compiler.instructions import (
     PhaseReset,
     PhaseSet,
     Pulse,
-    PulseShapeType,
     QuantumInstruction,
     Repeat,
     Sweep,
     Synchronize,
 )
+from qat.purr.utils.logger import get_default_logger
 from qat.utils.algorithm import stable_partition
+
+log = get_default_logger()
 
 
 class ScopeSanitisation(TransformPass):
@@ -197,54 +197,4 @@ class SquashDelaysOptimisation(TransformPass):
         ir.instructions = instructions
 
         met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(instructions))
-        return ir
-
-
-class FreqShiftSanitisation(TransformPass):
-    """
-    Looks for any active frequency shift pulse channels in the hardware model and adds
-    square pulses for the duration of the shot.
-    """
-
-    def __init__(self, model: QuantumHardwareModel = None):
-        self.model = model
-
-    def run(self, ir: PartitionedIR, res_mgr: ResultManager, *args, **kwargs):
-        target_map = ir.target_map
-        if len(target_map) == 0:
-            return ir
-
-        shot_time = np.max(
-            [
-                np.sum(
-                    [
-                        inst.duration
-                        for inst in target_map[target]
-                        if isinstance(inst, QuantumInstruction)
-                    ]
-                )
-                for target in target_map
-            ]
-        )
-
-        if shot_time < 0:
-            raise ValueError("Shot time in `TimelineAnalysisResult` should be >= 0.")
-
-        for qubit in self.model.qubits:
-            try:
-                freq_shift_pulse_ch = qubit.get_freq_shift_channel()
-                if freq_shift_pulse_ch.active:
-                    pulse = Pulse(
-                        freq_shift_pulse_ch,
-                        shape=PulseShapeType.SQUARE,
-                        amp=freq_shift_pulse_ch.amp,
-                        width=shot_time,
-                    )
-
-                    target_map.setdefault(freq_shift_pulse_ch, []).append(pulse)
-
-            except KeyError:
-                continue
-
-        ir.target_map = target_map
         return ir
