@@ -12,7 +12,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.utils.algorithm
    qat.utils.graphs
    qat.utils.hardware_model
    qat.utils.piny
