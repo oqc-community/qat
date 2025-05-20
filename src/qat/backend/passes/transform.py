@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import numpy as np
+from more_itertools import partition
 
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
@@ -12,7 +13,6 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Sweep,
 )
-from qat.utils.algorithm import stable_partition
 
 
 class ScopeSanitisation(TransformPass):
@@ -26,9 +26,10 @@ class ScopeSanitisation(TransformPass):
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
-        head, tail = stable_partition(
-            ir.instructions, lambda inst: isinstance(inst, (Sweep, Repeat))
+        tail, head = partition(
+            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
         )
+        tail, head = list(tail), list(head)
 
         delimiters = [
             EndSweep() if isinstance(inst, Sweep) else EndRepeat() for inst in head

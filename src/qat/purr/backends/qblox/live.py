@@ -6,11 +6,11 @@ from itertools import groupby
 from typing import Dict, List
 
 from compiler_config.config import InlineResultsProcessing
+from more_itertools import partition
 
 from qat.purr.backends.live import LiveDeviceEngine, LiveHardwareModel
 from qat.purr.backends.live_devices import ControlHardware
 from qat.purr.backends.qblox.acquisition import Acquisition
-from qat.purr.backends.qblox.algorithm import stable_partition
 from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
     QbloxLegalisationPass,
@@ -302,11 +302,14 @@ class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
 
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
-        static_dus, builder.instructions = stable_partition(
-            builder.instructions,
+        remaining, static_dus = partition(
             lambda inst: isinstance(inst, DeviceUpdate)
             and not isinstance(inst.value, Variable),
+            builder.instructions,
         )
+        remaining, static_dus = list(remaining), list(static_dus)
+
+        builder.instructions = remaining
         injectors = DeviceInjectors(static_dus)
 
         try:

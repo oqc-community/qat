@@ -4,8 +4,8 @@
 import itertools
 
 import numpy as np
+from more_itertools import partition
 
-from qat.purr.backends.qblox.algorithm import stable_partition
 from qat.purr.backends.qblox.pass_base import QatIR, TransformPass, get_hardware_model
 from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -34,9 +34,10 @@ class ScopeSanitisation(TransformPass):
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        head, tail = stable_partition(
-            builder.instructions, lambda inst: isinstance(inst, (Sweep, Repeat))
+        tail, head = partition(
+            lambda inst: isinstance(inst, (Sweep, Repeat)), builder.instructions
         )
+        tail, head = list(tail), list(head)
 
         delimiters = [
             EndSweep() if isinstance(inst, Sweep) else EndRepeat() for inst in head
