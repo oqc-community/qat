@@ -609,12 +609,12 @@ def get_coupling_subgraphs(couplings):
 
 
 def run_1Q_tket_optimizations(circ: Circuit, hardware: QuantumHardwareModel) -> Circuit:
+    logical_qubit_map = {q.index: i for i, q in enumerate(hardware.qubits)}
+
     qubit_qualities = {}
-    for qubit in hardware.qubits:
-        qubit_qualities[qubit.index] = (
-            hardware.qubit_quality(qubit.index)
-            if hardware.qubit_quality(qubit.index) != 1
-            else 0
+    for phys_q, log_q in logical_qubit_map.items():
+        qubit_qualities[log_q] = (
+            hardware.qubit_quality(phys_q) if hardware.qubit_quality(phys_q) != 1 else 0
         )
     best_qubit = max(qubit_qualities, key=qubit_qualities.get)
 

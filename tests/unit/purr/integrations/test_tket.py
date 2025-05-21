@@ -45,8 +45,17 @@ def test_get_coupling_subgraphs(couplings, subgraphs):
     assert get_coupling_subgraphs(couplings) == subgraphs
 
 
-def test_1Q_circuit_optimisation():
+@pytest.mark.parametrize("different_logical_physical_indices", [True, False])
+def test_1Q_circuit_optimisation(different_logical_physical_indices):
     hw = EchoModelLoader(4).load()
+
+    phys_to_log_qubit_map = {qubit.index: i for i, qubit in enumerate(hw.qubits)}
+    if different_logical_physical_indices:
+        for i, qubit in enumerate(hw.qubits):
+            phys_to_log_qubit_map.pop(qubit.index)
+            phys_to_log_qubit_map[qubit.index + 5] = i
+            qubit.index = qubit.index + 5
+
     linear = {}
     qubit_qualities = {}
     for qubit in hw.qubits:
@@ -54,7 +63,7 @@ def test_1Q_circuit_optimisation():
             "0|0": random.uniform(0.8, 1.0),
             "1|1": random.uniform(0.8, 1.0),
         }
-        qubit_qualities[qubit.index] = (
+        qubit_qualities[phys_to_log_qubit_map[qubit.index]] = (
             linear[str(qubit.index)]["0|0"] + linear[str(qubit.index)]["1|1"]
         ) / 2
     best_qubit = max(qubit_qualities, key=qubit_qualities.get)
@@ -73,6 +82,10 @@ def test_1Q_circuit_optimisation():
     circ = TketQasmParser().parse(TketBuilder(), qasm_1q_x_input).circuit
     circ = run_1Q_tket_optimizations(circ, hw)
     assert best_qubit == circ.qubits[0].index[0]
+
+    if different_logical_physical_indices:
+        inv_map = {v: k for k, v in phys_to_log_qubit_map.items()}
+        assert best_qubit != inv_map[best_qubit]
 
 
 def test_2Q_circuit_optimisation():
