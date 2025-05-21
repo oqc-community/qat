@@ -45,6 +45,8 @@ from qat.purr.compiler.instructions import (
     PhaseReset,
     PhaseShift,
     PostProcessing,
+    PostProcessType,
+    ProcessAxis,
     Pulse,
     QuantumInstruction,
     Repeat,
@@ -514,14 +516,11 @@ class AbstractContext(ABC):
 
         self._phases.append(inst.phase)
 
-    @staticmethod
-    def reset_phase(inst: PhaseReset, contexts: Dict):
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            cxt.sequence_builder.reset_ph()
-            cxt.sequence_builder.upd_param(Constants.GRID_TIME)
+    def reset_phase(self):
+        self.sequence_builder.reset_ph()
+        self.sequence_builder.upd_param(Constants.GRID_TIME)
 
-            cxt._phases.clear()
+        self._phases.clear()
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
@@ -646,7 +645,11 @@ class QbloxContext(AbstractContext):
             self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * total_phase))
 
     def measure_acquire(
-        self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
+        self,
+        measure: MeasurePulse,
+        acquire: Acquire,
+        post_procs: List[PostProcessing],
+        target: PulseChannel,
     ):
         pulse = self._evaluate_waveform(measure, target)
         pulse_width = pulse.size
@@ -660,8 +663,15 @@ class QbloxContext(AbstractContext):
             )
             return
 
-        acq_index = self._register_acquisition(acquire.output_variable, 1)
-        acq_bin = 0
+        requires_shot_avg = any(
+            (
+                pp.process == PostProcessType.MEAN and ProcessAxis.SEQUENCE in pp.axes
+                for pp in post_procs
+            )
+        )
+        num_bins = 1 if requires_shot_avg else self._repeat_count
+        acq_bin = 0 if requires_shot_avg else self._repeat_reg
+        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         acq_width = int(calculate_duration(acquire))
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation
@@ -929,7 +939,6 @@ class QbloxEmitter(InvokerMixin):
     ) -> Dict[int, List[QbloxPackage]]:
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
-        repeat = next(iter(triage_result.repeats))
 
         switerator = SweepIterator.from_sweeps(sweeps)
         dinjectors = DeviceInjectors(triage_result.device_updates)
@@ -938,8 +947,8 @@ class QbloxEmitter(InvokerMixin):
             dinjectors.inject()
             while not switerator.is_finished():
                 switerator.do_sweep(triage_result.quantum_instructions)
-                iter2packages[switerator.current_iteration] = self._do_emit(
-                    triage_result.quantum_instructions, repeat, ignore_empty
+                iter2packages[switerator.accumulated_sweep_iteration] = self._do_emit(
+                    triage_result, ignore_empty
                 )
             return iter2packages
         except BaseException as e:
@@ -949,16 +958,14 @@ class QbloxEmitter(InvokerMixin):
             dinjectors.revert()
 
     def _do_emit(
-        self, instructions: List[QuantumInstruction], repeat: Repeat, ignore_empty=True
+        self, triage_result: TriageResult, ignore_empty=True
     ) -> List[QbloxPackage]:
+        repeat = next(iter(triage_result.repeats))
         contexts: Dict[PulseChannel, QbloxContext] = {}
 
         with ExitStack() as stack:
-            inst_iter = iter(instructions)
+            inst_iter = iter(triage_result.quantum_instructions)
             while (inst := next(inst_iter, None)) is not None:
-                if not isinstance(inst, QuantumInstruction):
-                    continue  # Ignore classical instructions
-
                 if isinstance(inst, PostProcessing):
                     continue  # Ignore postprocessing
 
@@ -972,10 +979,6 @@ class QbloxEmitter(InvokerMixin):
                     QbloxContext.synchronize(inst, contexts)
                     continue
 
-                if isinstance(inst, PhaseReset):
-                    QbloxContext.reset_phase(inst, contexts)
-                    continue
-
                 for target in inst.quantum_targets:
                     if not isinstance(target, PulseChannel):
                         raise ValueError(f"{target} is not a PulseChannel")
@@ -986,13 +989,16 @@ class QbloxEmitter(InvokerMixin):
 
                     if isinstance(inst, DeviceUpdate):
                         context.device_update(inst)
-                    if isinstance(inst, MeasurePulse):
+                    elif isinstance(inst, PhaseReset):
+                        context.reset_phase()
+                    elif isinstance(inst, MeasurePulse):
                         acquire = next(inst_iter, None)
                         if acquire is None or not isinstance(acquire, Acquire):
                             raise ValueError(
                                 "Found a MeasurePulse but no Acquire instruction followed"
                             )
-                        context.measure_acquire(inst, acquire, target)
+                        post_procs = triage_result.pp_map[acquire.output_variable]
+                        context.measure_acquire(inst, acquire, post_procs, target)
                     elif isinstance(inst, Waveform):
                         context.waveform(inst, target)
                     elif isinstance(inst, Delay):
@@ -1118,15 +1124,14 @@ class QbloxCFGWalker(DfsTraversal):
                 elif isinstance(inst, Synchronize):
                     NewQbloxContext.synchronize(inst, self.contexts)
                     continue
-                elif isinstance(inst, PhaseReset):
-                    NewQbloxContext.reset_phase(inst, self.contexts)
-                    continue
 
                 for target in inst.quantum_targets:
                     context = self.contexts[target]
                     if isinstance(inst, DeviceUpdate):
                         context.device_update(inst)
-                    if isinstance(inst, MeasurePulse):
+                    elif isinstance(inst, PhaseReset):
+                        context.reset_phase()
+                    elif isinstance(inst, MeasurePulse):
                         next_inst = next(iterator, None)
                         if next_inst is None or not isinstance(next_inst, Acquire):
                             raise ValueError(

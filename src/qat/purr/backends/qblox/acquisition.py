@@ -25,7 +25,7 @@ class PathData(BaseModel):
             return False
         if self.oor != other.oor:
             return False
-        if np.any(self.data != other.data):
+        if self.data.size != other.data.size or np.any(self.data != other.data):
             return False
         return True
 
@@ -41,9 +41,9 @@ class IntegData(BaseModel):
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        if np.any(self.i != other.i):
+        if self.i.size != other.i.size or np.any(self.i != other.i):
             return False
-        if np.any(self.q != other.q):
+        if self.q.size != other.q.size or np.any(self.q != other.q):
             return False
         return True
 
@@ -72,11 +72,15 @@ class BinnedAcqData(BaseModel):
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        if np.any(self.avg_count != other.avg_count):
+        if self.avg_count.size != other.avg_count.size or np.any(
+            self.avg_count != other.avg_count
+        ):
             return False
         if self.integration != other.integration:
             return False
-        if np.any(self.threshold != other.threshold):
+        if self.threshold.size != other.threshold.size or np.any(
+            self.threshold != other.threshold
+        ):
             return False
         return True
 

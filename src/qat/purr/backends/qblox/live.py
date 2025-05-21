@@ -40,6 +40,7 @@ from qat.purr.compiler.instructions import (
     IndexAccessor,
     Instruction,
     PostProcessType,
+    ProcessAxis,
     Variable,
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
@@ -194,10 +195,10 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         acquire_map = triage_result.acquire_map
         sweeps = triage_result.sweeps
+        repeats = triage_result.repeats
         pp_map = triage_result.pp_map
-        loop_nest_shape = tuple(
-            (list(len(next(iter(s.variables.values()))) for s in sweeps))
-        ) or (1, -1)
+        sweep_counts = list(len(next(iter(s.variables.values()))) for s in sweeps)
+        repeat_counts = list(r.repeat_count for r in repeats)
 
         results = {}
         for target, acquisitions in playback.items():
@@ -209,25 +210,33 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
                 acquire = next((inst for inst in acquires if inst.output_variable == name))
                 if acquire.mode in [AcquireMode.SCOPE, AcquireMode.RAW]:
-                    response = (scope_data.i.data + 1j * scope_data.q.data).reshape(
-                        loop_nest_shape
-                    )
+                    repeat_counts.clear()
+                    response = scope_data.i.data + 1j * scope_data.q.data
                 elif acquire.mode == AcquireMode.INTEGRATOR:
-                    response = (integ_data.i + 1j * integ_data.q).reshape(loop_nest_shape)
+                    response = integ_data.i + 1j * integ_data.q
                 else:
                     raise ValueError(f"Unrecognised acquire mode {acquire.mode}")
 
                 post_procs, axes = pp_map[name], {}
                 for pp in post_procs:
-                    if pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                    if (
+                        pp.process == PostProcessType.MEAN
+                        and ProcessAxis.SEQUENCE in pp.axes
+                    ):
+                        repeat_counts.clear()
+                    elif pp.process == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
                         response, _ = software_post_process_linear_map_complex_to_real(
                             pp.args, response, axes
                         )
                     elif pp.process == PostProcessType.DISCRIMINATE:
                         # f: {0, 1}  --->   {-1, 1}
                         #      x    |--->   2x - 1
-                        response = (2 * thrld_data - 1).reshape(loop_nest_shape)
+                        response = 2 * thrld_data - 1
 
+                loop_nest_shape = tuple((sweep_counts or [1]) + (repeat_counts or [-1]))
+                response = response.reshape(loop_nest_shape)
+                if sweep_counts:
+                    response = response.squeeze()
                 results[name] = response
 
         results = self._process_results(results, triage_result)

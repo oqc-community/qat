@@ -19,15 +19,101 @@ from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     multi_readout,
     qubit_spect,
+    readout_freq,
     resonator_spect,
     scope_acq,
+    xpi2amp,
+    zmap,
 )
 
 log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-class TestQbloxLiveEngine:
+@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+@pytest.mark.parametrize("enable_hax", [False, True])
+class Test1QMeasurements:
+    def test_resonator_spect(self, enable_hax, model, qubit_indices):
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = resonator_spect(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (10,)
+
+    def test_qubit_spect(self, enable_hax, model, qubit_indices):
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = qubit_spect(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (10,)
+
+    def test_xpi2amp(self, enable_hax, model, qubit_indices):
+        if enable_hax:
+            pytest.skip("Needs more alignment as JIT execution work advances")
+
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = xpi2amp(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        assert len(results) == len(qubit_indices)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (2, 10)
+
+    def test_readout_freq(self, enable_hax, model, qubit_indices):
+        if enable_hax:
+            pytest.skip("Needs more alignment as JIT execution work advances")
+
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = readout_freq(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        assert len(results) == len(qubit_indices)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (10, 2, 1000)
+
+    def test_zmap(self, enable_hax, model, qubit_indices):
+        if enable_hax:
+            pytest.skip("Needs more alignment as JIT execution work advances")
+
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = zmap(model, qubit_indices, do_X=True)
+        results, _ = execute_instructions(engine, builder)
+        assert len(results) == len(qubit_indices)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (1, 1000)
+
+    def test_t1(self, enable_hax, model, qubit_indices):
+        runtime = model.create_runtime()
+        engine = runtime.engine
+        engine.enable_hax = enable_hax
+
+        builder = delay_iteration(model, qubit_indices)
+        results, _ = execute_instructions(engine, builder)
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (100,)
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+class TestBuildingBlocks:
     @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
     def test_measure_amp_sweep(self, model, amp):
         engine = model.create_engine()
@@ -204,39 +290,6 @@ class TestQbloxLiveEngine:
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_measure_scope_mode(self, model):
-        engine = model.create_engine()
-        q0 = model.get_qubit(0)
-
-        amp = 1
-        qubit = q0
-        qubit.pulse_measure["amp"] = amp
-        drive_channel2 = qubit.get_drive_channel()
-        builder = (
-            get_builder(model)
-            .pulse(drive_channel2, PulseShapeType.SQUARE, width=100e-9, amp=amp)
-            .measure_scope_mode(qubit)
-        )
-
-        results, _ = execute_instructions(engine, builder)
-        assert results is not None
-
-    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
-    def test_resonator_spect(self, model, qubit_indices):
-        engine = model.create_engine()
-        builder = resonator_spect(model, qubit_indices)
-
-        results, _ = execute_instructions(engine, builder)
-        assert results is not None
-
-    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
-    def test_qubit_spect(self, model, qubit_indices):
-        engine = model.create_engine()
-        builder = qubit_spect(model, qubit_indices)
-
-        results, _ = execute_instructions(engine, builder)
-        assert results is not None
-
     @pytest.mark.parametrize(
         "acq_width",
         (
@@ -294,27 +347,8 @@ class TestQbloxLiveEngine:
 class TestQbloxLiveEngineAdapter:
     def test_engine_adapter(self, model):
         runtime = model.create_runtime()
-        assert isinstance(runtime.engine, QbloxLiveEngineAdapter)
-        assert isinstance(runtime.engine._legacy_engine, QbloxLiveEngine)
-        assert isinstance(runtime.engine._new_engine, NewQbloxLiveEngine)
+        engine = runtime.engine
 
-    def test_resonator_spect(self, model):
-        runtime = model.create_runtime()
-        runtime.engine.enable_hax = True
-        builder = resonator_spect(model)
-        results = runtime.execute(builder)
-        assert results is not None
-
-    def test_qubit_spect(self, model):
-        runtime = model.create_runtime()
-        runtime.engine.enable_hax = True
-        builder = qubit_spect(model)
-        results = runtime.execute(builder)
-        assert results is not None
-
-    def test_t1(self, model):
-        runtime = model.create_runtime()
-        runtime.engine.enable_hax = True
-        builder = delay_iteration(model)
-        results = runtime.execute(builder)
-        assert results is not None
+        assert isinstance(engine, QbloxLiveEngineAdapter)
+        assert isinstance(engine._legacy_engine, QbloxLiveEngine)
+        assert isinstance(engine._new_engine, NewQbloxLiveEngine)

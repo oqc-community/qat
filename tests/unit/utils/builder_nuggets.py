@@ -9,6 +9,8 @@ from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
     MeasurePulse,
+    PostProcessType,
+    ProcessAxis,
     Pulse,
     SweepValue,
     Variable,
@@ -152,10 +154,12 @@ def delay_iteration(model, qubit_indices=None, num_points=None, width=None):
     builder.sweep(SweepValue(var_name, time))
     for index in qubit_indices:
         qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
 
         # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
-        qubit.get_drive_channel().scale = 1.0e-8 + 0.0j
-        qubit.get_second_state_channel().scale = 1.0e-8 + 0.0j
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
 
         builder.X(qubit, np.pi)
         builder.delay(qubit, Variable(var_name))
@@ -175,8 +179,12 @@ def scope_acq(model, qubit_indices=None, do_X=False):
     if do_X:
         for index in qubit_indices:
             qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            second_state_channel = qubit.get_second_state_channel()
+
             # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
-            qubit.get_drive_channel().scale = 1.0e-8 + 0.0j
+            drive_channel.scale = 1.0e-8 + 0.0j
+            second_state_channel.scale = 1.0e-8 + 0.0j
 
             builder.add(model.get_gate_X(qubit, np.pi, qubit.get_drive_channel()))
     builder.synchronize([model.get_qubit(index) for index in qubit_indices])
@@ -222,7 +230,11 @@ def pulse_width_iteration(model, qubit_indices=None, num_points=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
         drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
 
         builder.pulse(
             drive_channel,
@@ -262,8 +274,11 @@ def pulse_amplitude_iteration(model, qubit_indices=None, num_points=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         drive_channel = qubit.get_drive_channel()
-        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel = qubit.get_second_state_channel()
 
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
         builder.pulse(
             drive_channel,
             pulse_shape,
@@ -304,7 +319,11 @@ def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
         drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
 
         builder.X(qubit, np.pi / 2.0)
         builder.delay(qubit, Variable(time_var_name))
@@ -342,4 +361,167 @@ def multi_readout(model, qubit_indices=None, do_X=False):
             builder.delay(drive_channel, 2 * qubit.pulse_hw_x_pi_2["width"])
         builder.measure_single_shot_signal(qubit, output_variable=f"1_Q{index}")
 
+    return builder
+
+
+def xpi2amp(model, qubit_indices=None, num_points=None):
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 10
+
+    amp_range = 0.35
+    N = 3
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    rel_amps = np.linspace((1 - amp_range / N), (1 + amp_range / N), num_points)
+    start_shift = np.linspace(0.0, np.pi, 2)
+    amps_dict = {
+        f"Q{q}": rel_amps * model.get_qubit(q).pulse_hw_x_pi_2["amp"] for q in qubit_indices
+    }
+
+    builder.sweep(SweepValue("p", start_shift))
+    builder.sweep([SweepValue(f"amp{q}", amps_dict[f"Q{q}"]) for q in qubit_indices])
+    for q in qubit_indices:
+        qubit = model.get_qubit(q)
+        drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
+
+        builder.add([direct_x(qubit, amp=Variable(f"amp{q}")) for _ in range(4 * N)])
+        builder.phase_shift(qubit, Variable("p"))
+        builder.add(direct_x(qubit, amp=Variable(f"amp{q}")))
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_z(qubit, output_variable=f"Q{index}")
+
+    return builder
+
+
+def readout_freq(model, qubit_indices=None, num_points=None):
+    qubit_indices = qubit_indices or [0]
+    num_points = num_points or 10
+
+    old_freqs = {
+        f"Q{q}": model.get_qubit(q).get_measure_channel().frequency for q in qubit_indices
+    }
+    freq_delta = np.linspace(-2e6, 2e6, num_points)
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    builder.sweep(
+        [
+            SweepValue(f"readout_freq_Q{q}", old_freqs[f"Q{q}"] + freq_delta)
+            for q in qubit_indices
+        ]
+    )
+    builder.sweep(
+        [
+            SweepValue(f"amp_Q{q}", [0, model.get_qubit(q).pulse_hw_x_pi_2["amp"]])
+            for q in qubit_indices
+        ]
+    )
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
+
+        drive_pulse_dict = qubit.pulse_hw_x_pi_2.copy()
+        drive_pulse_dict.pop("amp")
+        builder.device_assign(
+            measure_channel, "frequency", Variable(f"readout_freq_Q{index}")
+        )
+        builder.device_assign(
+            acquire_channel, "frequency", Variable(f"readout_freq_Q{index}")
+        )
+        builder.pulse(drive_channel, amp=Variable(f"amp_Q{index}"), **drive_pulse_dict)
+        builder.pulse(drive_channel, amp=Variable(f"amp_Q{index}"), **drive_pulse_dict)
+        builder.measure_single_shot_signal(qubit, output_variable=f"Q{index}")
+
+    return builder
+
+
+def zmap(model, qubit_indices=None, do_X=False):
+    qubit_indices = qubit_indices or [0]
+
+    x12 = False
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    if x12:
+        for index in qubit_indices:
+            builder.X(model.get_qubit(index))
+    builder.synchronize([model.get_qubit(q) for q in qubit_indices])
+    if do_X:
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit_drive_channel = (
+                qubit.get_second_state_channel() if x12 else qubit.get_drive_channel()
+            )
+            builder.add(model.get_gate_X(qubit, np.pi, qubit_drive_channel))
+    builder.synchronize([model.get_qubit(q) for q in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        drive_channel = qubit.get_drive_channel()
+        second_state_channel = qubit.get_second_state_channel()
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
+        drive_channel.scale = 1.0e-8 + 0.0j
+        second_state_channel.scale = 1.0e-8 + 0.0j
+
+        measure_pulse_dict = qubit.pulse_measure.copy()
+        measure_pulse_dict.pop("width")
+        measure_pulse_dict.pop("amp")
+        measure_amp = qubit.pulse_measure["amp"]
+        measure_width = qubit.pulse_measure["width"]
+        builder.device_assign(
+            measure_channel,
+            "frequency",
+            measure_channel.frequency,
+        )
+        width = (
+            measure_width
+            if qubit.measure_acquire["sync"]
+            else qubit.measure_acquire["width"]
+        )
+        builder.add(
+            MeasurePulse(
+                qubit.get_measure_channel(),
+                width=measure_width,
+                amp=measure_amp,
+                **measure_pulse_dict,
+            )
+        )
+        acquire = Acquire(
+            acquire_channel,
+            time=width,
+            mode=AcquireMode.INTEGRATOR,
+            filter=None,
+            output_variable=f"Q{qubit.index}",
+            delay=qubit.measure_acquire["delay"],
+        )
+        builder.add(acquire)
+        builder.synchronize(qubit)
+        builder.post_processing(
+            acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, qubit
+        )
+        builder.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, qubit)
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.synchronize([qubit.get_all_channels()])
     return builder

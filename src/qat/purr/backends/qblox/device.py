@@ -188,6 +188,7 @@ class QbloxControlHardware(ControlHardware):
         # Customise Sequencer config
         sequencer_config: SequencerConfig = qblox_config.sequencers[sequencer.seq_idx]
         sequencer_config.nco.freq = nco_freq
+        sequencer_config.nco.prop_delay_comp_en = True
         sequencer_config.square_weight_acq.integration_length = (
             package.sequencer_config.square_weight_acq.integration_length
         )
