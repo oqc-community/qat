@@ -384,6 +384,11 @@
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.duration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.durations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">durations</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.durations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -399,6 +404,16 @@
 <dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
 This is temporary and criteria will change with more features coming in</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.ledger">
+<span class="sig-name descname"><span class="pre">ledger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.ledger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.phase">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.phase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.reset_phase">
@@ -422,9 +437,24 @@ This is temporary and criteria will change with more features coming in</p>
 TODO - Default to SYNC when Qblox supports finer grained SYNC groups</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.total_duration">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_duration</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.total_duration" title="Link to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.wait_imm">
+<span class="sig-name descname"><span class="pre">wait_imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.wait_imm" title="Link to this definition"></a></dt>
+<dd><p>Waits for <cite>duration</cite> nanoseconds expressed as an immediate.</p>
+<p><cite>duration</cite> must be positive</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.wait_reg">
+<span class="sig-name descname"><span class="pre">wait_reg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.wait_reg" title="Link to this definition"></a></dt>
+<dd><p>A mere <cite>wait RX</cite> in general has undefined runtime behaviour.</p>
+<p>This is a useful helper to dynamically wait for a <cite>duration</cite> nanoseconds expressed as a register.
+<cite>iter_reg</cite> is a short-lived register only used as an interator. Customer is responsible for (de)allocation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AbstractContext.waveform">
+<span class="sig-name descname"><span class="pre">waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AbstractContext.waveform" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -505,11 +535,6 @@ TODO - Default to SYNC when Qblox supports finer grained SYNC groups</p>
 <span class="sig-name descname"><span class="pre">measure_acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.measure_acquire" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.NewQbloxContext.waveform">
-<span class="sig-name descname"><span class="pre">waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.NewQbloxContext.waveform" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -581,11 +606,6 @@ Computes useful information in the form of attributes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">
 <span class="sig-name descname"><span class="pre">measure_acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_procs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.waveform">
-<span class="sig-name descname"><span class="pre">waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.waveform" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
