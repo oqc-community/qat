@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import re
+import shutil
 from random import random
 from typing import Dict
 
@@ -20,14 +21,16 @@ import qat.pipelines.echo
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
-from qat.core.config import (
+from qat.core.config.configure import get_config
+from qat.core.config.descriptions import (
     HardwareLoaderDescription,
     PipelineFactoryDescription,
     PipelineInstanceDescription,
 )
+from qat.core.config.session import QatSessionConfig
+from qat.core.config.validators import MismatchingHardwareModelException
 from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
-from qat.core.validators import MismatchingHardwareModelException
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
@@ -455,6 +458,31 @@ class TestQATPipelineSetup:
         assert q.pipelines.default == "echo32"
         assert q.pipelines.get("default").name == "echo32"
 
+    def test_qat_session_respects_globalqat_config(self):
+        qatconfig = get_config()
+        OLD_LIMIT = qatconfig.MAX_REPEATS_LIMIT
+        NEW_LIMIT = 324214
+        assert OLD_LIMIT != NEW_LIMIT
+        qatconfig.MAX_REPEATS_LIMIT = NEW_LIMIT
+
+        q = QAT()
+        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default == "echo32"
+        assert q.pipelines.get("default").name == "echo32"
+        assert q.config.MAX_REPEATS_LIMIT == NEW_LIMIT
+        qatconfig.MAX_REPEATS_LIMIT = OLD_LIMIT
+
+    def test_qat_session_extends_qatconfig_instance(self):
+        qatconfig = QatConfig()
+        qatconfig.MAX_REPEATS_LIMIT = 44325
+        assert get_config().MAX_REPEATS_LIMIT != qatconfig.MAX_REPEATS_LIMIT
+
+        q = QAT(qatconfig=qatconfig)
+        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default == "echo32"
+        assert q.pipelines.get("default").name == "echo32"
+        assert q.config.MAX_REPEATS_LIMIT == qatconfig.MAX_REPEATS_LIMIT
+
     def test_make_qatconfig_list(self):
         pipelines = [
             PipelineInstanceDescription(
@@ -481,7 +509,7 @@ class TestQATPipelineSetup:
             )
         ]
 
-        q = QAT(qatconfig=QatConfig(PIPELINES=pipelines, HARDWARE=hardware))
+        q = QAT(qatconfig=QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware))
         assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
 
     def test_make_qatconfig_yaml(self, testpath):
@@ -496,6 +524,24 @@ class TestQATPipelineSetup:
         }
         assert type(q.pipelines.get("echo-defaultfrontend").frontend) is DefaultFrontend
         assert q.pipelines.get("echocustomconfig").runtime.engine.x == 10
+
+    def test_make_qatconfig_yaml_curdir(self, testpath, tmpdir, monkeypatch):
+        config_file = testpath / "files/qatconfig/pipelines.yaml"
+        q1 = QAT()
+        monkeypatch.chdir(tmpdir)
+        shutil.copy(config_file, tmpdir / "qatconfig.yaml")
+        q2 = QAT()
+        assert set(q2.pipelines.list()) != set(q1.pipelines.list())
+        assert set(q2.pipelines.list()) == {
+            "echo8i",
+            "echo16i",
+            "echo6b",
+            "echo-defaultfrontend",
+            "echocustomconfig",
+        }
+
+        assert type(q2.pipelines.get("echo-defaultfrontend").frontend) is DefaultFrontend
+        assert q2.pipelines.get("echocustomconfig").runtime.engine.x == 10
 
     def test_FallthroughFrontend(self):
         frontend = FallthroughFrontend()

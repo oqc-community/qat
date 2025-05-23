@@ -32,7 +32,7 @@ from qiskit_optimization.applications import Maxcut, Tsp
 from qiskit_optimization.converters import QuadraticProgramToQubo
 from qiskit_optimization.translators import from_docplex_mp
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
 from qat.purr.compiler.builders import InstructionBuilder
@@ -42,6 +42,8 @@ from qat.purr.integrations.qiskit import QatBackend
 from qat.purr.qat import execute_qasm, execute_qasm_with_metrics
 
 from tests.unit.utils.qasm_qir import get_qasm2
+
+qatconfig = get_config()
 
 qiskitconfig = qatconfig.SIMULATION.QISKIT
 

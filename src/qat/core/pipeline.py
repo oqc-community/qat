@@ -5,7 +5,7 @@
 from pydantic import BaseModel, ValidationInfo, field_validator
 
 from qat.backend.base import BaseBackend
-from qat.core.config import (
+from qat.core.config.descriptions import (
     HardwareLoaderDescription,
     PipelineFactoryDescription,
     PipelineInstanceDescription,

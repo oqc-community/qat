@@ -4,13 +4,16 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
+from qat.core.config.session import QatSessionConfig
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.qatconfig import InstructionValidationConfig, QatConfig
+from qat.purr.qatconfig import InstructionValidationConfig
 from qat.purr.utils.logger import LoggerLevel
 
 from tests.unit.purr.compiler.test_execution import get_test_model, get_test_runtime
+
+qatconfig = get_config()
 
 MAX_REPEATS_LIMIT = 100_000  # Default value for qatconfig.MAX_REPEATS_LIMIT.
 
@@ -25,7 +28,7 @@ def test_qatconfig_invalid_assignment(invalid_argument):
 
 def test_default_disable_pulse_duration_limits(monkeypatch):
     monkeypatch.delenv("QAT_DISABLE_PULSE_DURATION_LIMITS", raising=False)
-    newconfig = QatConfig()
+    newconfig = QatSessionConfig()
     with pytest.warns(DeprecationWarning):
         assert (
             isinstance(newconfig.DISABLE_PULSE_DURATION_LIMITS, bool)
@@ -35,7 +38,7 @@ def test_default_disable_pulse_duration_limits(monkeypatch):
 
 def test_default_repeats_limit(monkeypatch):
     monkeypatch.delenv("QAT_MAX_REPEATS_LIMIT", raising=False)
-    newconfig = QatConfig()
+    newconfig = QatSessionConfig()
     assert (
         isinstance(newconfig.MAX_REPEATS_LIMIT, int)
         and newconfig.MAX_REPEATS_LIMIT == MAX_REPEATS_LIMIT
@@ -62,7 +65,7 @@ def test_change_disable_pulse_duration_limits(disable_pulse_duration_limits):
 
 
 def test_disable_pulse_duration_limits_throws_warning(caplog):
-    newconfig = QatConfig()
+    newconfig = QatSessionConfig()
     # Capture if warnings are sent to logger.
     with caplog.at_level(LoggerLevel.WARNING.value):
         newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = False
@@ -76,7 +79,7 @@ def test_disable_pulse_duration_limits_throws_warning(caplog):
 @pytest.mark.parametrize("repeats_limit", [10_000, 16_874, 50_000, 100_000])
 def test_change_env_variables(monkeypatch, repeats_limit):
     monkeypatch.setenv("QAT_MAX_REPEATS_LIMIT", str(repeats_limit))
-    newconfig = QatConfig()
+    newconfig = QatSessionConfig()
     assert (
         newconfig.MAX_REPEATS_LIMIT == repeats_limit
     )  # New instances of QatConfig should have the updated env variable.
@@ -117,7 +120,7 @@ def test_validate_instructions(monkeypatch, mocker, runtime, validation):
 
 
 def test_extension_loads():
-    qatconfig = QatConfig(EXTENSIONS=["tests.unit.purr.extensions.SomeExtension"])
+    qatconfig = QatSessionConfig(EXTENSIONS=["tests.unit.purr.extensions.SomeExtension"])
     from .extensions import SomeExtension, loaded_extensions
 
     assert "SomeExtension" in loaded_extensions
@@ -126,7 +129,7 @@ def test_extension_loads():
 
 
 def test_extension_load_multiple():
-    qatconfig = QatConfig(
+    qatconfig = QatSessionConfig(
         EXTENSIONS=[
             "tests.unit.purr.extensions.SomeExtension",
             "tests.unit.purr.extensions.AnotherExtension",
@@ -141,9 +144,9 @@ def test_extension_load_multiple():
 
 def test_nonexistant_extension():
     with pytest.raises(ValidationError):
-        QatConfig(EXTENSIONS=["tests.unit.doesntexist"])
+        QatSessionConfig(EXTENSIONS=["tests.unit.doesntexist"])
 
 
 def test_extension_not_a_QatExtension():
     with pytest.raises(ValidationError):
-        QatConfig(EXTENSIONS=["tests.unit.purr.extensions.NotAnExtension"])
+        QatSessionConfig(EXTENSIONS=["tests.unit.purr.extensions.NotAnExtension"])

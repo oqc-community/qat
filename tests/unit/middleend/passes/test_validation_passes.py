@@ -10,7 +10,7 @@ from compiler_config.config import (
     QuantumResultsFormat,
 )
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
@@ -29,6 +29,8 @@ from qat.purr.compiler.instructions import CustomPulse, Pulse, PulseShapeType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 from tests.unit.utils.pulses import pulse_attributes
+
+qatconfig = get_config()
 
 
 class TestNoMidCircuitMeasurementValidation:

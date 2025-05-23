@@ -10,6 +10,6 @@ __all__ = [
 
 from .echo import EchoModelLoader
 from .file import FileModelLoader
+from .lucy import LucyModelLoader
 from .qiskit import QiskitModelLoader
 from .rtcs import RTCSModelLoader
-from .lucy import LucyModelLoader

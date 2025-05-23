@@ -136,7 +136,7 @@ html_theme_options.titles_only=false
 
 [tool.ruff]
 line-length = 92
-extend-exclude = ["__init__.py", "benchmarks/**"]
+extend-exclude = ["benchmarks/**"]
 
 [tool.ruff.lint]
 extend-select = ["I"]

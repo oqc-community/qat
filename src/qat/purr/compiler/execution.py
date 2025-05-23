@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.utilities import (
     UPCONVERT_SIGN,
     PositionData,
@@ -227,7 +227,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def validate(self, instructions: List[Instruction]):
         """Validates this graph for execution on the current hardware."""
-        validation_settings = qatconfig.INSTRUCTION_VALIDATION
+        validation_settings = get_config().INSTRUCTION_VALIDATION
         self._model_exists()
 
         if validation_settings.MAX_INSTRUCTION_LENGTH:
@@ -313,9 +313,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
             # Rebuild repeat list if the hardware can't support the current setup.
             repeat_count = qat_file.repeat.repeat_count
-            if repeat_count > qatconfig.MAX_REPEATS_LIMIT:
+
+            MAX_REPEATS_LIMIT = get_config().MAX_REPEATS_LIMIT
+            if repeat_count > MAX_REPEATS_LIMIT:
                 raise ValueError(
-                    f"Number of shots {repeat_count} exceeds the maximum amount of {qatconfig.MAX_REPEATS_LIMIT}."
+                    f"Number of shots {repeat_count} exceeds the maximum amount of {MAX_REPEATS_LIMIT}."
                 )
 
             if repeat_count > self.model.repeat_limit:

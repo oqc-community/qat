@@ -1,5 +1,6 @@
 def get_default_pipelines():
     from qat.core.pipeline import PipelineInstanceDescription
+
     from .echo import echo8, echo16, echo32
 
     return [

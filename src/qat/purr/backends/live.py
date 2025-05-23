@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.live_devices import (
     ControlHardware,
     ControlHardwareChannel,
@@ -62,7 +62,10 @@ def apply_setup_to_hardware(
             f"LO{channel_index}", 5.5e9, if_frequency=250e6, instrument=control_hardware
         )
         bb2 = LivePhysicalBaseband(
-            f"LO{channel_index + 1}", 8.5e9, if_frequency=250e6, instrument=control_hardware
+            f"LO{channel_index + 1}",
+            8.5e9,
+            if_frequency=250e6,
+            instrument=control_hardware,
         )
         hw.add_physical_baseband(bb1, bb2)
 
@@ -431,7 +434,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                         )
 
                 # Check if we've got a measure in the middle of the circuit somewhere.
-                elif qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
+                elif get_config().INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
                     if isinstance(inst, Acquire):
                         for qbit in self.model.qubits:
                             if qbit.get_acquire_channel() == inst.channel:

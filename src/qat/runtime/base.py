@@ -6,10 +6,10 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
+from qat.core.config.configure import get_config
 from qat.core.pass_base import PassManager
 from qat.engines import ConnectionMixin, NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
-from qat.purr.qatconfig import qatconfig
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.executables import AcquireData
 from qat.runtime.passes.transform import (
@@ -109,6 +109,8 @@ class BaseRuntime(abc.ABC):
 
     @staticmethod
     def validate_max_shots(shots: int):
+        qatconfig = get_config()
+
         # TODO: determine if this should be a pass.
         if shots > qatconfig.MAX_REPEATS_LIMIT:
             raise ValueError(

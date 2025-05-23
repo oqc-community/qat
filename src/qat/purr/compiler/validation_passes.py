@@ -5,7 +5,7 @@ from typing import List
 
 import numpy as np
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.backends.qblox.pass_base import QatIR, ValidationPass
 from qat.purr.backends.qblox.result_base import ResultManager
@@ -40,6 +40,7 @@ class InstructionValidation(ValidationPass):
         self.engine = engine
 
     def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+        qatconfig = get_config()
         builder = ir.value
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
@@ -108,6 +109,7 @@ class ReadoutValidation(ValidationPass):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         model = self.hardware
+        qatconfig = get_config()
 
         if not isinstance(model, LiveHardwareModel):
             return

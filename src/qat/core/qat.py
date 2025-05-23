@@ -5,10 +5,12 @@ from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
+from qat.core.config.configure import get_qatconfig, override_config
+from qat.core.config.session import QatSessionConfig
+from qat.core.config.validators import MismatchingHardwareModelException
 from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import HardwareLoaders, Pipeline, PipelineSet
 from qat.core.result_base import ResultManager
-from qat.core.validators import MismatchingHardwareModelException
 from qat.pipelines import get_default_pipelines
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.qatconfig import QatConfig
@@ -16,11 +18,19 @@ from qat.runtime.executables import Executable
 
 
 class QAT:
-    def __init__(self, qatconfig: Optional[QatConfig | str | Path] = None):
+    def __init__(
+        self, qatconfig: Optional[QatSessionConfig | QatConfig | str | Path] = None
+    ):
         if isinstance(qatconfig, (str, Path)):
-            qatconfig = QatConfig.from_yaml(qatconfig)
+            qatconfig = QatSessionConfig.from_yaml(qatconfig)
 
-        self.config = qatconfig or QatConfig()
+        if type(qatconfig) is QatConfig:
+            qatconfig = QatSessionConfig(**qatconfig.model_dump(exclude_defaults=True))
+
+        self.config = qatconfig or QatSessionConfig(
+            **get_qatconfig().model_dump(exclude_defaults=True)
+        )
+
         self._available_hardware = HardwareLoaders.from_descriptions(self.config.HARDWARE)
         self.pipelines = PipelineSet.from_descriptions(
             self.config.PIPELINES or get_default_pipelines(),
@@ -33,26 +43,36 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ):
-        P = self.pipelines.get(pipeline)
+        with override_config(self.config):
+            P = self.pipelines.get(pipeline)
 
-        # TODO: Improve metrics and config handling
-        compiler_config = compiler_config or CompilerConfig()
-        metrics_manager = MetricsManager(compiler_config.metrics)
-        compilation_results = ResultManager()
+            # TODO: Improve metrics and config handling
+            compiler_config = compiler_config or CompilerConfig()
+            metrics_manager = MetricsManager(compiler_config.metrics)
+            compilation_results = ResultManager()
 
-        ir = P.frontend.emit(
-            program, compilation_results, metrics_manager, compiler_config=compiler_config
-        )
+            ir = P.frontend.emit(
+                program,
+                compilation_results,
+                metrics_manager,
+                compiler_config=compiler_config,
+            )
 
-        ir = P.middleend.emit(
-            ir, compilation_results, metrics_manager, compiler_config=compiler_config
-        )
+            ir = P.middleend.emit(
+                ir,
+                compilation_results,
+                metrics_manager,
+                compiler_config=compiler_config,
+            )
 
-        package = P.backend.emit(
-            ir, compilation_results, metrics_manager, compiler_config=compiler_config
-        )
+            package = P.backend.emit(
+                ir,
+                compilation_results,
+                metrics_manager,
+                compiler_config=compiler_config,
+            )
 
-        return package, metrics_manager
+            return package, metrics_manager
 
     def execute(
         self,
@@ -60,23 +80,24 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ):
-        P = self.pipelines.get(pipeline)
-        if P.model.calibration_id != package.calibration_id:
-            raise MismatchingHardwareModelException(
-                f"Hardware id in the executable package '{P.model.calibration_id}'' does not match the hardware id '{package.calibration_id}' used during compilation."
+        with override_config(self.config):
+            P = self.pipelines.get(pipeline)
+            if P.model.calibration_id != package.calibration_id:
+                raise MismatchingHardwareModelException(
+                    f"Hardware id in the executable package '{P.model.calibration_id}'' does not match the hardware id '{package.calibration_id}' used during compilation."
+                )
+
+            compiler_config = compiler_config or CompilerConfig()
+            pp_results = ResultManager()
+            metrics_manager = MetricsManager(compiler_config.metrics)
+
+            results = P.runtime.execute(
+                package,
+                res_mgr=pp_results,
+                met_mgr=metrics_manager,
+                compiler_config=compiler_config,
             )
-
-        compiler_config = compiler_config or CompilerConfig()
-        pp_results = ResultManager()
-        metrics_manager = MetricsManager(compiler_config.metrics)
-
-        results = P.runtime.execute(
-            package,
-            res_mgr=pp_results,
-            met_mgr=metrics_manager,
-            compiler_config=compiler_config,
-        )
-        return results, metrics_manager
+            return results, metrics_manager
 
     def run(
         self,
@@ -84,11 +105,12 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ):
-        P = self.pipelines.get(pipeline)
-        pkg, compile_metrics = self.compile(
-            program, compiler_config=compiler_config, pipeline=P
-        )
-        result, execute_metrics = self.execute(
-            pkg, compiler_config=compiler_config, pipeline=P
-        )
-        return result, execute_metrics.merge(compile_metrics)
+        with override_config(self.config):
+            P = self.pipelines.get(pipeline)
+            pkg, compile_metrics = self.compile(
+                program, compiler_config=compiler_config, pipeline=P
+            )
+            result, execute_metrics = self.execute(
+                pkg, compiler_config=compiler_config, pipeline=P
+            )
+            return result, execute_metrics.merge(compile_metrics)

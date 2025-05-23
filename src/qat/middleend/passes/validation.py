@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from compiler_config.config import CompilerConfig, ErrorMitigationConfig, ResultsFormatting
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import Pulse as PydPulse
@@ -66,7 +66,7 @@ class InstructionValidation(ValidationPass):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > self.pulse_duration_max:
                     if (
-                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
+                        not get_config().DISABLE_PULSE_DURATION_LIMITS
                     ):  # Do not throw error if we specifically disabled the limit checks.
                         # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
                         # which is specific to each hardware model and can be stored as a member variables there.
@@ -86,7 +86,7 @@ class InstructionValidation(ValidationPass):
                         )
                     )
                     if np.max(values) > self.pulse_duration_max:
-                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+                        if not get_config().DISABLE_PULSE_DURATION_LIMITS:
                             raise ValueError(
                                 f"Max Waveform width is {self.pulse_duration_max} s "
                                 f"given: {values} s"
@@ -118,6 +118,7 @@ class ReadoutValidation(ValidationPass):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         model = self.hardware
+        qatconfig = get_config()
 
         if not isinstance(model, LiveHardwareModel):
             return ir
@@ -204,6 +205,7 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
         :param ir: The intermediate representation (IR) :class:`InstructionBuilder`.
         """
         consumed_acquire_pc: set[str] = set()
+        qatconfig = get_config()
 
         if not qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
             return ir
@@ -275,6 +277,8 @@ class PydHardwareConfigValidity(ValidationPass):
         return ir
 
     def _validate_shots(self, compiler_config: CompilerConfig):
+        qatconfig = get_config()
+
         if compiler_config.repeats > qatconfig.MAX_REPEATS_LIMIT:
             raise ValueError(
                 f"Number of shots in compiler config {compiler_config.repeats} exceeds max "

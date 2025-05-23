@@ -4,7 +4,7 @@ from pydantic import ImportString, ValidationError
 import qat
 import qat.frontend
 import qat.pipelines
-from qat.core.config import (
+from qat.core.config.descriptions import (
     ClassDescription,
     HardwareLoaderDescription,
     ImportFrontend,
@@ -12,9 +12,9 @@ from qat.core.config import (
     PipelineFactoryDescription,
     PipelineInstanceDescription,
 )
+from qat.core.config.session import QatSessionConfig
 from qat.core.pipeline import Pipeline
 from qat.model.loaders.base import BaseModelLoader
-from qat.purr.qatconfig import QatConfig
 
 
 @pytest.fixture
@@ -202,7 +202,7 @@ class TestQATConfig:
             )
         ]
 
-        qc = QatConfig(PIPELINES=pipelines, HARDWARE=hardware)
+        qc = QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
 
         pipes = {P.name: P.pipeline for P in qc.PIPELINES}
         assert pipes == {
@@ -238,7 +238,7 @@ class TestQATConfig:
         ]
 
         assert pipelines[0].hardware_loader == "echo6loader"
-        qc = QatConfig(PIPELINES=pipelines, HARDWARE=hardware)
+        qc = QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
 
         pipe_names = {P.name for P in qc.PIPELINES}
         assert pipe_names == {"echocustom"}
@@ -264,10 +264,10 @@ class TestQATConfig:
         ]
 
         with pytest.raises(ValidationError):
-            QatConfig(PIPELINES=pipelines, HARDWARE=hardware)
+            QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
 
     def test_yaml_custom_config(self, qatconfig_testfiles):
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "customconfig.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "customconfig.yaml")
 
         from qat.model.loaders.legacy import EchoModelLoader
 
@@ -281,7 +281,7 @@ class TestQATConfig:
         assert P.runtime.engine.cblam.timeout == 60
 
     def test_yaml_legacy_pipeline(self, qatconfig_testfiles):
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "legacyengine.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "legacyengine.yaml")
 
         from qat.model.loaders.legacy import EchoModelLoader
 
@@ -293,7 +293,7 @@ class TestQATConfig:
         assert P.runtime.engine.model is model
 
     def test_yaml_factory_with_engine(self, qatconfig_testfiles):
-        qatconfig = QatConfig.from_yaml(
+        qatconfig = QatSessionConfig.from_yaml(
             qatconfig_testfiles / "pipelinefactorywithengine.yaml"
         )
 
@@ -309,7 +309,9 @@ class TestQATConfig:
         assert P.runtime.engine.cblam.timeout == 60
 
     def test_yaml_custom_result_pipeline(self, qatconfig_testfiles):
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "customresultspipeline.yaml")
+        qatconfig = QatSessionConfig.from_yaml(
+            qatconfig_testfiles / "customresultspipeline.yaml"
+        )
 
         from qat.model.loaders.legacy import EchoModelLoader
 
@@ -328,7 +330,7 @@ class TestQATConfig:
         from qat.model.loaders.legacy import EchoModelLoader
 
         monkeypatch.setenv("SOME_ENV_VAR", "A_VALUE")
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
 
         model = EchoModelLoader().load()
 
@@ -345,7 +347,7 @@ class TestQATConfig:
         from qat.model.loaders.legacy import EchoModelLoader
         from qat.runtime import DefaultRuntime
 
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "defaults.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "defaults.yaml")
 
         model = EchoModelLoader().load()
 
@@ -361,7 +363,7 @@ class TestQATConfig:
     def test_yaml_custom_config_missing_from_env(self, monkeypatch, qatconfig_testfiles):
         monkeypatch.delenv("SOME_ENV_VAR", raising=False)
         with pytest.raises(ValueError):
-            QatConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
+            QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
 
     def test_yaml_custom_config_invalid_type(self, qatconfig_testfiles):
         """Check that invalid config (types) raise exceptions
@@ -369,7 +371,7 @@ class TestQATConfig:
         Config is only validated on pipeline construction"""
         from qat.model.loaders.legacy import EchoModelLoader
 
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "invalidtype.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidtype.yaml")
         desc = qatconfig.PIPELINES[0]
         model = EchoModelLoader().load()
 
@@ -382,7 +384,7 @@ class TestQATConfig:
         Config is only validated on pipeline construction"""
         from qat.model.loaders.legacy import EchoModelLoader
 
-        qatconfig = QatConfig.from_yaml(qatconfig_testfiles / "invalidarg.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidarg.yaml")
         desc = qatconfig.PIPELINES[0]
         model = EchoModelLoader().load()
 

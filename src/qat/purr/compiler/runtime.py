@@ -13,7 +13,7 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
 from qat.purr.backends.qblox.result_base import ResultManager
@@ -28,7 +28,10 @@ from qat.purr.compiler.execution import (
     QuantumExecutionEngine,
     _binary,
 )
-from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
+from qat.purr.compiler.hardware_models import (
+    QuantumHardwareModel,
+    get_cl2qu_index_mapping,
+)
 from qat.purr.compiler.instructions import Instruction, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin
@@ -218,6 +221,8 @@ class QuantumRuntime(MetricsMixin):
             )
 
         instructions = self.engine.optimize(instructions)
+        qatconfig = get_config()
+
         if not qatconfig.INSTRUCTION_VALIDATION.DISABLED:
             self.engine.validate(instructions)
         self.record_metric(
@@ -392,6 +397,9 @@ def execute_instructions(
 ):
     if config is None:
         config = CompilerConfig()
+
+    qatconfig = get_config()
+
     qatconfig.validate(config)
     config.validate(hardware)
 

@@ -3,12 +3,14 @@
 import numpy as np
 import pytest
 
+from qat.core.config.configure import get_config
 from qat.engines import ConnectionMixin, NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
-from qat.purr.qatconfig import qatconfig
 from qat.runtime import BaseRuntime, ResultsAggregator
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.executables import AcquireData
+
+qatconfig = get_config()
 
 
 class TestBaseRuntime:

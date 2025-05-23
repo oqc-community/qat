@@ -16,7 +16,7 @@ from qiskit.transpiler.passes import CheckGateDirection, CheckMap
 from qiskit_aer import AerSimulator
 from qiskit_aer.backends.backendconfiguration import AerBackendConfiguration
 
-from qat import qatconfig
+from qat.core.config.configure import get_config
 from qat.purr.backends.echo import (
     Connectivity,
     add_direction_couplings_to_hardware,
@@ -39,7 +39,6 @@ from qat.purr.compiler.runtime import QuantumRuntime
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
-qiskitconfig = qatconfig.SIMULATION.QISKIT
 
 
 def get_default_qiskit_hardware(
@@ -258,7 +257,7 @@ class QiskitEngine(InstructionExecutionEngine):
             aer_config,
             noise_model=builder.model.noise_model,
             method=method,
-            **qiskitconfig.OPTIONS,
+            **get_config().SIMULATION.QISKIT.OPTIONS,
         )
         initial_layout = {qb: i for i, qb in enumerate(builder.circuit.qubits)}
         job = qasm_sim.run(
@@ -302,6 +301,8 @@ class QiskitEngine(InstructionExecutionEngine):
 
         # AerSimulator can call a range of backends. We allow these to be choosen, along with
         # any relevant arguments.
+
+        qiskitconfig = get_config().SIMULATION.QISKIT
         try:
             # Determine the sequence of backends to try
             method = qiskitconfig.METHOD
@@ -344,7 +345,7 @@ class QiskitEngine(InstructionExecutionEngine):
             for creg in returns:
                 creg_result = {}
                 c_indices = [
-                    builder.bit_ordering[ref.name] if isinstance(ref, Variable) else None
+                    (builder.bit_ordering[ref.name] if isinstance(ref, Variable) else None)
                     for ref in assigns[creg]
                 ]
                 for key, value in trimmed.items():
@@ -432,6 +433,8 @@ class QiskitRuntime(QuantumRuntime):
         if not isinstance(builder, QiskitBuilder):
             raise ValueError("Wrong builder type passed to QASM runtime.")
         results = self.engine.execute(builder)
+
+        qiskitconfig = get_config().SIMULATION.QISKIT
         if qiskitconfig.ENABLE_METADATA:
             (results, metadata) = results
 
