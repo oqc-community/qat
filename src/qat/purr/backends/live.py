@@ -146,6 +146,7 @@ class LiveHardwareModel(QuantumHardwareModel):
         repeat_count=1000,
         repetition_period=100e-6,
         error_mitigation: Optional[ErrorMitigation] = None,
+        calibration_id: str = "",
     ):
         super().__init__(
             shot_limit=shot_limit,
@@ -153,6 +154,7 @@ class LiveHardwareModel(QuantumHardwareModel):
             repeat_count=repeat_count,
             repetition_period=repetition_period,
             error_mitigation=error_mitigation,
+            calibration_id=calibration_id,
         )
         self.control_hardware: ControlHardware = control_hardware
         self.instruments: Dict[str, Instrument] = {}

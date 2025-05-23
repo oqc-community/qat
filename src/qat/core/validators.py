@@ -114,3 +114,6 @@ def requires_model(value: type) -> bool:
     we are not constent enough with type hinting for this.
     """
     return "model" in inspect.signature(value).parameters
+
+
+class MismatchingHardwareModelException(Exception): ...

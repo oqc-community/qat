@@ -8,6 +8,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import HardwareLoaders, Pipeline, PipelineSet
 from qat.core.result_base import ResultManager
+from qat.core.validators import MismatchingHardwareModelException
 from qat.pipelines import get_default_pipelines
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.qatconfig import QatConfig
@@ -60,6 +61,10 @@ class QAT:
         pipeline: Pipeline | str = "default",
     ):
         P = self.pipelines.get(pipeline)
+        if P.model.calibration_id != package.calibration_id:
+            raise MismatchingHardwareModelException(
+                f"Hardware id in the executable package '{P.model.calibration_id}'' does not match the hardware id '{package.calibration_id}' used during compilation."
+            )
 
         compiler_config = compiler_config or CompilerConfig()
         pp_results = ResultManager()

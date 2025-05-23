@@ -53,6 +53,8 @@ class Executable(BaseModel):
     :type assigns: list[Assign]
     :param returns: Which acqusitions/variables should be returned.
     :type returns: list[str]
+    :param calibration_id: The (unique) calibration ID of the underlying hardware model.
+    :type calibration_id: str
     """
 
     shots: PositiveInt = 1000
@@ -61,6 +63,8 @@ class Executable(BaseModel):
     results_processing: dict[str, InlineResultsProcessing] = dict()
     assigns: list[Assign] = []
     returns: set[str] = set()
+
+    calibration_id: str = ""
 
     def serialize(self, indent: int = 4) -> str:
         """Serializes the executable as a JSON blob."""

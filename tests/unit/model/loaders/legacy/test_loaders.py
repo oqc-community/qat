@@ -36,3 +36,5 @@ class TestLoaders:
         loader = FileModelLoader(path)
         model = loader.load()
         assert isinstance(model, LegacyHardwareModel)
+        # Checks whether the hash is generated correctly.
+        assert len(model.calibration_id) == 32

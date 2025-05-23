@@ -477,3 +477,7 @@ class QiskitBuilderWrapper:
     @property
     def instructions(self):
         return self.builder
+
+    @property
+    def calibration_id(self):
+        return ""

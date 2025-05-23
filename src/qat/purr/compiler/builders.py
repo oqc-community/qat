@@ -80,6 +80,10 @@ class InstructionBuilder:
         self.add(instructions)
 
     @property
+    def calibration_id(self):
+        return self.model.calibration_id
+
+    @property
     def instructions(self):
         flat_list = []
         for inst in self._instructions:

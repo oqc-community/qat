@@ -6,6 +6,7 @@ from qat.model.loaders.legacy.base import BaseLegacyModelLoader
 from qat.purr.compiler.hardware_models import (
     QuantumHardwareModel as LegacyQuantumHardwareModel,
 )
+from qat.utils.hardware_model import hash_calibration_file
 
 
 class FileModelLoader(BaseLegacyModelLoader):
@@ -13,4 +14,6 @@ class FileModelLoader(BaseLegacyModelLoader):
         self.path: Path = Path(path).expanduser()
 
     def load(self) -> LegacyQuantumHardwareModel:
-        return LegacyQuantumHardwareModel.load_calibration_from_file(str(self.path))
+        hw = LegacyQuantumHardwareModel.load_calibration_from_file(str(self.path))
+        hw.calibration_id = hash_calibration_file(str(self.path))
+        return hw

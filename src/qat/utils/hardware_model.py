@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import hashlib
 import itertools as it
 import random
 from collections import defaultdict
+from pathlib import Path
 
 import networkx as nx
 import numpy as np
@@ -168,3 +170,16 @@ def check_type_legacy_or_pydantic(hw_model: QuantumHardwareModel | PydHardwareMo
         )
 
     return hw_model
+
+
+def hash_calibration_file(file_path: str | Path, algorithm="md5", chunk_size=8_192) -> str:
+    """Compute the hash of a calibration file."""
+    file_path = Path(file_path)
+
+    hash_func = hashlib.new(algorithm)
+    with file_path.open("rb") as file:
+        # Byte chunks from the file and update hash.
+        while chunk := file.read(chunk_size):
+            hash_func.update(chunk)
+
+    return hash_func.hexdigest()

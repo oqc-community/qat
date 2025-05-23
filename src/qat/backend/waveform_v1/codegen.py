@@ -110,6 +110,7 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             },
             assigns=[Assign._from_legacy(assign) for assign in ir.assigns],
             returns=returns,
+            calibration_id=self.model.calibration_id,
         )
 
     def build_pass_pipeline(self, *args, **kwargs):

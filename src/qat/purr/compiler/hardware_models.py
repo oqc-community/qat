@@ -163,6 +163,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         repeat_count=1000,
         repetition_period=100e-6,
         error_mitigation: Optional[ErrorMitigation] = None,
+        calibration_id: str = "",
     ):
         # Our hardware has a default shot limit of 10,000 right now.
         self.default_acquire_mode = acquire_mode or AcquireMode.RAW
@@ -175,6 +176,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.basebands: Dict[str, PhysicalBaseband] = {}
         self.qubit_direction_couplings: List[QubitCoupling] = []
         self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
+        self.calibration_id = calibration_id
 
         # Construct last due to us overriding calibratables fields with properties.
         super().__init__(

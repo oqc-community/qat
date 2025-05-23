@@ -27,6 +27,7 @@ from qat.core.config import (
 )
 from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
+from qat.core.validators import MismatchingHardwareModelException
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
@@ -580,6 +581,7 @@ class TestQATPipelineSetup:
 def get_echo_model_without_acquire_delays():
     """Creates an echo model without acquire delays for comparison with legacy code."""
     model = EchoModelLoader(32).load()
+    model.calibration_id = "default_id"
     model.default_repeat_count = TargetData.default().default_shots
     model.repeat_limit = TargetData.default().max_shots
     model.default_repetition_period = TargetData.default().QUBIT_DATA.passive_reset_time
@@ -713,3 +715,15 @@ class TestQatEchoPipelines:
         for key in purr_results.keys():
             assert purr_results[key] == echo_results[key]
         assert purr_results.keys() == echo_results.keys()
+
+    @pytest.mark.parametrize(
+        "qasm_file",
+        qasm2_files,
+        ids=short_file_name,
+    )
+    def test_qat_execute_rejects_different_hw_models(self, request, qasm_file):
+        package = self.get_executable(request, qasm_file)
+        package.calibration_id = "different_id"
+
+        with pytest.raises(MismatchingHardwareModelException):
+            self.core.execute(package, pipeline="new")
