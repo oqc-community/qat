@@ -485,7 +485,7 @@ class TestNewQbloxEmitter(InvokerMixin):
 
         for pkg in packages:
             assert pkg.sequencer_config == SequencerConfig()
-            assert pkg.timeline.size == 0
+            assert pkg.timeline.size == 4
             assert not pkg.sequence.waveforms
             assert not pkg.sequence.acquisitions
             assert not pkg.sequence.weights

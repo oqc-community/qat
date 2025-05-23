@@ -143,11 +143,18 @@ class AbstractContext(ABC):
         return self._durations
 
     @property
-    def total_duration(self):
+    def duration(self):
         if all((isinstance(d, Number) for d in self._durations)):
             return sum(self._durations)
-        else:
-            ValueError("Cannot determine duration statically as timeline is dynamic")
+
+        ValueError("Cannot determine duration statically in dynamic settings")
+
+    @property
+    def phase(self):
+        if all((isinstance(p, Number) for p in self._phases)):
+            return sum(self._phases)
+
+        ValueError("Cannot determine phase statically in dynamic settings")
 
     def create_package(self, target: PulseChannel):
         sequence = self.sequence_builder.build()
@@ -181,6 +188,87 @@ class AbstractContext(ABC):
         self.sequence_builder.acquisitions.clear()
         self.sequence_builder.weights.clear()
         self.sequence_builder.q1asm_instructions.clear()
+
+    def wait_imm(self, duration: int):
+        """
+        Waits for `duration` nanoseconds expressed as an immediate.
+
+        `duration` must be positive
+        """
+
+        if duration <= 0:
+            log.debug(f"Expected positive duration, but got {duration}")
+            return
+
+        quotient = duration // Constants.MAX_WAIT_TIME
+        remainder = duration % Constants.MAX_WAIT_TIME
+
+        if remainder < Constants.GRID_TIME:
+            log.debug(f"Rounding up {remainder} ns to {Constants.GRID_TIME} ns")
+            remainder = Constants.GRID_TIME
+            duration = quotient * Constants.MAX_WAIT_TIME + remainder
+
+        if quotient >= Constants.LOOP_UNROLL_THRESHOLD:
+            with self._loop("wait_label", quotient):
+                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+        elif quotient >= 1:
+            for _ in range(quotient):
+                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+
+        self.sequence_builder.wait(remainder)
+
+    def wait_reg(self, duration: str):
+        """
+        A mere `wait RX` in general has undefined runtime behaviour.
+
+        This is a useful helper to dynamically wait for a `duration` nanoseconds expressed as a register.
+        `iter_reg` is a short-lived register only used as an interator. Customer is responsible for (de)allocation.
+        """
+
+        batch_enter = self.alloc_mgr.label_gen("batch_enter")
+        batch_exit = self.alloc_mgr.label_gen("batch_exit")
+        remainder = self.alloc_mgr.label_gen("remainder")
+        round_up = self.alloc_mgr.label_gen("round_up")
+
+        with self.alloc_mgr.reg_borrow("tmp") as iter_reg:
+            if duration != iter_reg:
+                self.sequence_builder.move(
+                    duration,
+                    iter_reg,
+                    f"Avoids cluttering {duration} as it's likely used as an accumulator",
+                )
+                self.sequence_builder.nop()
+
+            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, round_up)
+            self.sequence_builder.jlt(iter_reg, Constants.MAX_WAIT_TIME, remainder)
+            self.sequence_builder.label(batch_enter)
+            self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+            self.sequence_builder.sub(iter_reg, Constants.MAX_WAIT_TIME, iter_reg)
+            self.sequence_builder.nop()
+            self.sequence_builder.jge(iter_reg, Constants.MAX_WAIT_TIME, batch_enter)
+            self.sequence_builder.jge(iter_reg, Constants.GRID_TIME, remainder)
+            self.sequence_builder.label(round_up)
+            self.sequence_builder.jlt(iter_reg, 1, batch_exit)
+            self.sequence_builder.move(Constants.GRID_TIME, iter_reg, "Rounding up")
+            self.sequence_builder.nop()
+            self.sequence_builder.label(remainder)
+            self.sequence_builder.wait(iter_reg)
+            self.sequence_builder.label(batch_exit)
+
+    def ledger(self, duration: Union[int, str], pulse: np.ndarray = None):
+        if isinstance(duration, int):
+            pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
+            if all((isinstance(p, Number) for p in self._phases)):
+                total_phase = sum(self._phases)
+                pulse = pulse * np.exp(1.0j * total_phase)
+            assert pulse.size == duration
+            self._durations.append(duration)
+            self._timeline = np.append(self._timeline, pulse)
+        elif isinstance(duration, str):
+            self._durations.append(duration)
+            self._timeline = None  # Destroy the timeline as we are in dynamic setting
+        else:
+            raise ValueError(f"Expected legal immediate or register, but got {duration}")
 
     @contextmanager
     def _loop(self, label: str, count: int = 1):
@@ -231,76 +319,9 @@ class AbstractContext(ABC):
         yield iter_reg
         self.alloc_mgr.reg_free(iter_reg)
 
-    def _wait_imm(self, duration: int):
-        """
-        Waits for `duration` nanoseconds expressed as an immediate.
-
-        `duration` must be positive
-        """
-
-        if duration < 0:
-            raise ValueError(f"Duration must be positive, got {duration} instead")
-
-        quotient = duration // Constants.MAX_WAIT_TIME
-        remainder = duration % Constants.MAX_WAIT_TIME
-
-        if quotient >= Constants.LOOP_UNROLL_THRESHOLD:
-            with self._loop("wait_label", quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-        elif quotient >= 1:
-            for _ in range(quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-
-        if remainder >= Constants.GRID_TIME:
-            self.sequence_builder.wait(remainder)
-        else:
-            log.debug(
-                f"Ignoring (remainder) {duration} ns as it's less than the threshold {Constants.GRID_TIME} ns"
-            )
-            return
-
-    def _wait_reg(self, duration: str):
-        """
-        A mere `wait RX` in general has undefined runtime behaviour.
-
-        This is a useful helper to dynamically wait for a `duration` nanoseconds expressed as a register.
-        `iter_reg` is a short-lived register only used as an interator. Customer is responsible for (de)allocation.
-        """
-
-        batch_enter = self.alloc_mgr.label_gen("batch_enter")
-        batch_exit = self.alloc_mgr.label_gen("batch_exit")
-        remainder = self.alloc_mgr.label_gen("remainder")
-
-        with self.alloc_mgr.reg_borrow("tmp") as iter_reg:
-            if duration != iter_reg:
-                self.sequence_builder.move(
-                    duration,
-                    iter_reg,
-                    f"Avoids cluttering {duration} as it's likely used as an accumulator",
-                )
-                self.sequence_builder.nop()
-
-            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, batch_exit)
-            self.sequence_builder.jlt(iter_reg, Constants.MAX_WAIT_TIME, remainder)
-            self.sequence_builder.label(batch_enter)
-            self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-            self.sequence_builder.sub(iter_reg, Constants.MAX_WAIT_TIME, iter_reg)
-            self.sequence_builder.nop()
-            self.sequence_builder.jge(iter_reg, Constants.MAX_WAIT_TIME, batch_enter)
-            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, batch_exit)
-            self.sequence_builder.label(remainder)
-            self.sequence_builder.wait(iter_reg)
-            self.sequence_builder.label(batch_exit)
-
     def _upd_param_imm(self, duration: int):
-        if duration < Constants.GRID_TIME:
-            log.debug(
-                f"Rounding up duration {duration} ns as it's less than the threshold {Constants.GRID_TIME} ns"
-            )
-            duration = Constants.GRID_TIME
-
         self.sequence_builder.upd_param(Constants.GRID_TIME)
-        self._wait_imm(duration - Constants.GRID_TIME)
+        self.wait_imm(duration - Constants.GRID_TIME)
 
     def _upd_param_reg(self, duration: str):
         """
@@ -308,6 +329,9 @@ class AbstractContext(ABC):
 
         If `duration` is less than the threshold Constants.GRID_TIME, the generates assembly rounds up
         and waits for Constants.GRID_TIME.
+
+        Note that the `up_param` instruction is defined only for an immediate operand which must be
+        at least Constants.GRID_TIME. Therefore, technically we're already forced to round up.
         """
 
         batch_enter = self.alloc_mgr.label_gen("batch_enter")
@@ -320,7 +344,7 @@ class AbstractContext(ABC):
                 duration,
                 Constants.GRID_TIME,
                 batch_exit,
-                "Guards against underflow likely causable by the following subtraction",
+                "Guards against risky underflow",
             )
             self.sequence_builder.sub(duration, Constants.GRID_TIME, iter_reg)
             self.sequence_builder.nop()
@@ -435,7 +459,7 @@ class AbstractContext(ABC):
     @contextmanager
     def _wrapper_pulse(
         self,
-        delay_seconds,
+        delay_width,
         pulse_width,
         pulse_shape,
         i_steps,
@@ -443,7 +467,6 @@ class AbstractContext(ABC):
         i_index,
         q_index,
     ):
-        delay_width = int(delay_seconds * 1e9)
         effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
@@ -454,6 +477,8 @@ class AbstractContext(ABC):
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+            self.ledger(Constants.GRID_TIME)
 
     @contextmanager
     def _wrapper_cond(self, mask, operator, duration):
@@ -474,17 +499,15 @@ class AbstractContext(ABC):
 
     def delay(self, inst: Delay):
         if isinstance(inst.duration, Variable):
-            val_reg = self.alloc_mgr.registers[inst.duration.name]
-            self._wait_reg(val_reg)
-            self._timeline = None
+            duration = self.alloc_mgr.registers[inst.duration.name]
+            self.wait_reg(duration)
         elif isinstance(inst.duration, Number):
-            val_imm = int(calculate_duration(inst))
-            self._wait_imm(val_imm)
-            self._timeline = np.append(self._timeline, np.zeros(val_imm, dtype=complex))
+            duration = int(calculate_duration(inst))
+            self.wait_imm(duration)
         else:
             raise ValueError(f"Expected a Variable or a Number but got {inst.duration}")
 
-        self._durations.append(inst.duration)
+        self.ledger(duration)
 
     def shift_frequency(self, inst, target):
         # TODO - discuss w/t quantum_target.fixed_if is True or False
@@ -501,6 +524,8 @@ class AbstractContext(ABC):
         self.sequence_builder.set_freq(value)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
 
+        self.ledger(Constants.GRID_TIME)
+
     def shift_phase(self, inst: PhaseShift):
         if isinstance(inst.phase, Variable):
             ph_reg = self.alloc_mgr.registers[inst.phase.name]
@@ -515,12 +540,74 @@ class AbstractContext(ABC):
             raise ValueError(f"Expected a Variable or a Number but got {inst.phase}")
 
         self._phases.append(inst.phase)
+        self.ledger(Constants.GRID_TIME)
 
     def reset_phase(self):
         self.sequence_builder.reset_ph()
         self.sequence_builder.upd_param(Constants.GRID_TIME)
 
         self._phases.clear()
+        self.ledger(Constants.GRID_TIME)
+
+    def waveform(self, waveform: Waveform, target: PulseChannel):
+        attr2var = {
+            attr: var for attr, var in vars(waveform).items() if isinstance(var, Variable)
+        }
+
+        if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
+            if "amp" in attr2var:
+                pulse_amp = attr2var["amp"]
+                i_steps = self.alloc_mgr.registers[pulse_amp.name]
+                q_steps = self.alloc_mgr.registers["zero"]
+            else:
+                bias = target.bias
+                scale = 1.0 + 0.0j if waveform.ignore_channel_scale else target.scale
+
+                pulse_amp = waveform.scale_factor * waveform.amp
+                pulse_amp = scale * pulse_amp + bias
+
+                i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
+                q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
+
+            self.sequence_builder.set_awg_offs(i_steps, q_steps)
+
+            if "width" in attr2var:
+                pulse_width = attr2var["width"]
+                pulse_width = self.alloc_mgr.registers[pulse_width.name]
+                self._upd_param_reg(pulse_width)
+            else:
+                pulse_width = int(calculate_duration(waveform))
+                self._upd_param_imm(pulse_width)
+
+            self.sequence_builder.set_awg_offs(0, 0)
+            self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+            self.ledger(Constants.GRID_TIME)
+
+            pulse = (
+                np.ones(pulse_width, dtype=complex) * pulse_amp
+                if isinstance(pulse_width, Number) and isinstance(pulse_amp, Number)
+                else None
+            )
+        else:
+            pulse = self._evaluate_waveform(waveform, target)
+            pulse_width = pulse.size
+            if pulse_width < Constants.GRID_TIME:
+                log.debug(
+                    f"""
+                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
+                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                    This pulse will be ignored.
+                    """
+                )
+                return
+
+            max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
+            i_index, q_index = self._register_waveform(waveform, target, pulse)
+            self.sequence_builder.play(i_index, q_index, max_width)
+            self.wait_imm(pulse_width - max_width)
+
+        self.ledger(pulse_width, pulse)
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
@@ -537,12 +624,15 @@ class AbstractContext(ABC):
         for target in inst.quantum_targets:
             cxt = contexts[target]
             if is_static:
-                max_duration = max(
-                    (contexts[target].total_duration for target in inst.quantum_targets)
+                duration_offset = (
+                    max((contexts[target].duration for target in inst.quantum_targets))
+                    - cxt.duration
                 )
-                cxt.delay(Delay(target, max_duration - cxt.total_duration))
+                cxt.wait_imm(duration_offset)
+                cxt.ledger(duration_offset)
             else:
                 cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+                cxt.ledger(Constants.GRID_TIME)
 
     def device_update(self, du_inst: DeviceUpdate):
         if isinstance(du_inst.value, Variable):
@@ -550,6 +640,8 @@ class AbstractContext(ABC):
             if du_inst.attribute == "frequency":
                 self.sequence_builder.set_freq(val_reg)
                 self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+                self.ledger(Constants.GRID_TIME)
             elif du_inst.attribute == "scale":
                 pass
             else:
@@ -564,6 +656,8 @@ class AbstractContext(ABC):
                 freq_imm = QbloxLegalisationPass.freq_as_steps(nco_freq)
                 self.sequence_builder.set_freq(freq_imm)
                 self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+                self.ledger(Constants.GRID_TIME)
             elif du_inst.attribute == "scale":
                 pass
             else:
@@ -589,19 +683,21 @@ class QbloxContext(AbstractContext):
         self._repeat_label = self.alloc_mgr.label_gen("shot")
 
         self.sequence_builder.set_mrk(3)
+        self.sequence_builder.set_latch_en(1, 4)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
+
         self.sequence_builder.move(0, self._repeat_reg, "Shot / Repeat iteration")
+
         self.sequence_builder.label(self._repeat_label)
-        self.sequence_builder.reset_ph("Reset phase at the beginning of shot")
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
         self.sequence_builder.wait_sync(
             Constants.GRID_TIME, "Sync at the beginning of shot"
         )
+        self.reset_phase()
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._wait_imm(int(self._repeat_period * 1e9))
+        self.wait_imm(int(self._repeat_period * 1e9))
         self.sequence_builder.add(
             self._repeat_reg, 1, self._repeat_reg, "Increment Shot / Repeat iterator"
         )
@@ -613,37 +709,6 @@ class QbloxContext(AbstractContext):
         self._repeat_label = None
         self._repeat_reg = None
 
-    def waveform(self, waveform: Waveform, target: PulseChannel):
-        pulse = self._evaluate_waveform(waveform, target)
-        pulse_width = pulse.size
-        if pulse_width < Constants.GRID_TIME:
-            log.debug(
-                f"""
-                Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                This pulse will be ignored.
-                """
-            )
-            return
-
-        if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
-            i_steps = int(pulse[0].real * Constants.MAX_OFFSET)
-            q_steps = int(pulse[0].imag * Constants.MAX_OFFSET)
-            self.sequence_builder.set_awg_offs(i_steps, q_steps)
-            self._upd_param_imm(pulse_width)
-            self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
-        else:
-            i_index, q_index = self._register_waveform(waveform, target, pulse)
-            max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
-            self.sequence_builder.play(i_index, q_index, max_width)
-            self._wait_imm(pulse_width - max_width)
-
-        self._durations.append(waveform.duration)
-        if all((isinstance(p, Number) for p in self._phases)):
-            total_phase = sum(self._phases)
-            self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * total_phase))
-
     def measure_acquire(
         self,
         measure: MeasurePulse,
@@ -653,6 +718,8 @@ class QbloxContext(AbstractContext):
     ):
         pulse = self._evaluate_waveform(measure, target)
         pulse_width = pulse.size
+        delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
+
         if pulse_width < Constants.GRID_TIME:
             log.debug(
                 f"""
@@ -663,6 +730,14 @@ class QbloxContext(AbstractContext):
             )
             return
 
+        if pulse_width < delay_width + Constants.GRID_TIME:
+            raise ValueError(
+                f"""
+                Expected pulse width >= delay width + {Constants.GRID_TIME} ns.
+                Got pulse width = {pulse_width} ns and delay width = {delay_width} ns.
+                """
+            )
+
         requires_shot_avg = any(
             (
                 pp.process == PostProcessType.MEAN and ProcessAxis.SEQUENCE in pp.axes
@@ -671,8 +746,8 @@ class QbloxContext(AbstractContext):
         )
         num_bins = 1 if requires_shot_avg else self._repeat_count
         acq_bin = 0 if requires_shot_avg else self._repeat_reg
-        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         acq_width = int(calculate_duration(acquire))
+        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation
         self.sequencer_config.thresholded_acq.threshold = acquire.threshold
@@ -686,13 +761,9 @@ class QbloxContext(AbstractContext):
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
         with self._wrapper_pulse(
-            acquire.delay, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
+            delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            if remaining_width < Constants.GRID_TIME:
-                log.debug(
-                    f"Rounding up duration {remaining_width} ns as it's less than the threshold {Constants.GRID_TIME} ns"
-                )
-                remaining_width = Constants.GRID_TIME
+            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,
@@ -701,10 +772,7 @@ class QbloxContext(AbstractContext):
                 remaining_width,
             )
 
-        self._durations.append(measure.duration)
-        if all((isinstance(p, Number) for p in self._phases)):
-            total_phase = sum(self._phases)
-            self._timeline = np.append(self._timeline, pulse * np.exp(1.0j * total_phase))
+        self.ledger(pulse_width, pulse)
 
 
 class NewQbloxContext(AbstractContext):
@@ -735,9 +803,6 @@ class NewQbloxContext(AbstractContext):
         self.sequence_builder.set_latch_en(1, 4)
         self.sequence_builder.upd_param(Constants.GRID_TIME)
 
-        # TODO - probably not the right place
-        self.alloc_mgr.reg_alloc("zero")
-
         for name, register in self.alloc_mgr.registers.items():
             self.sequence_builder.move(
                 0,
@@ -754,63 +819,13 @@ class NewQbloxContext(AbstractContext):
 
         self.sequence_builder.stop()
 
-    def waveform(self, waveform: Waveform, target: PulseChannel):
-        attr2var = {
-            attr: var for attr, var in vars(waveform).items() if isinstance(var, Variable)
-        }
-
-        if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
-            if "amp" in attr2var:
-                amp_var = attr2var["amp"]
-                i_steps = self.alloc_mgr.registers[amp_var.name]
-                q_steps = self.alloc_mgr.registers["zero"]
-            else:
-                bias = target.bias
-                scale = 1.0 + 0.0j if waveform.ignore_channel_scale else target.scale
-
-                pulse_amp = waveform.scale_factor * waveform.amp
-                pulse_amp = scale * pulse_amp + bias
-
-                i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
-                q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
-
-            self.sequence_builder.set_awg_offs(i_steps, q_steps)
-
-            if "width" in attr2var:
-                width_var = attr2var["width"]
-                pulse_width = self.alloc_mgr.registers[width_var.name]
-                self._upd_param_reg(pulse_width)
-            else:
-                pulse_width = int(calculate_duration(waveform))
-                self._upd_param_imm(pulse_width)
-
-            self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
-        else:
-            pulse = self._evaluate_waveform(waveform, target)
-            pulse_width = pulse.size
-            if pulse_width < Constants.GRID_TIME:
-                log.debug(
-                    f"""
-                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                    This pulse will be ignored. 
-                    """
-                )
-                return
-
-            max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
-            i_index, q_index = self._register_waveform(waveform, target, pulse)
-            self.sequence_builder.play(i_index, q_index, max_width)
-            self._wait_imm(pulse_width - max_width)
-
-        self._durations.append(waveform.duration)
-
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
     ):
         pulse = self._evaluate_waveform(measure, target)
         pulse_width = pulse.size
+        delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
+
         if pulse_width < Constants.GRID_TIME:
             log.debug(
                 f"""
@@ -821,11 +836,19 @@ class NewQbloxContext(AbstractContext):
             )
             return
 
+        if pulse_width < delay_width + Constants.GRID_TIME:
+            raise ValueError(
+                f"""
+                Expected pulse width >= delay width + {Constants.GRID_TIME} ns.
+                Got pulse width = {pulse_width} ns and delay width = {delay_width} ns.
+                """
+            )
+
         name = f"acquire_{hash(acquire)}"
         num_bins = self.iter_bounds[name].count
-        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         acq_bin = self.alloc_mgr.registers[name]
         acq_width = int(calculate_duration(acquire))
+        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = acquire.rotation
         self.sequencer_config.thresholded_acq.threshold = acquire.threshold
@@ -839,13 +862,9 @@ class NewQbloxContext(AbstractContext):
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
         with self._wrapper_pulse(
-            acquire.delay, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
+            delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            if remaining_width < Constants.GRID_TIME:
-                log.debug(
-                    f"Rounding up duration {remaining_width} ns as it's less than the threshold {Constants.GRID_TIME} ns"
-                )
-                remaining_width = Constants.GRID_TIME
+            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,
@@ -854,7 +873,7 @@ class NewQbloxContext(AbstractContext):
                 remaining_width,
             )
 
-        self._durations.append(measure.duration)
+        self.ledger(pulse_width, pulse)
 
     @staticmethod
     def enter_repeat(inst: Repeat, contexts: Dict):
@@ -866,11 +885,10 @@ class NewQbloxContext(AbstractContext):
 
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.label(label)
-            context.sequence_builder.reset_ph("Reset phase at the beginning of shot")
-            context.sequence_builder.upd_param(Constants.GRID_TIME)
             context.sequence_builder.wait_sync(
                 Constants.GRID_TIME, "Sync at the beginning of shot"
             )
+            context.reset_phase()
 
     @staticmethod
     def exit_repeat(inst: Repeat, contexts: Dict):
@@ -880,7 +898,7 @@ class NewQbloxContext(AbstractContext):
             label = context.alloc_mgr.labels[iter_name]
             bound = context.iter_bounds[iter_name]
 
-            context._wait_imm(int(inst.repetition_period * 1e9))
+            context.wait_imm(int(inst.repetition_period * 1e9))
             context.sequence_builder.add(
                 register, bound.step, register, "Increment Shot / Repeat iterator"
             )
@@ -1049,6 +1067,7 @@ class PreCodegenPass(AnalysisPass):
             reads = binding_result.rw_results[target].reads
             writes = binding_result.rw_results[target].writes
 
+            alloc_mgr.reg_alloc("zero")
             names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
             for name in names:
                 alloc_mgr.reg_alloc(name)
