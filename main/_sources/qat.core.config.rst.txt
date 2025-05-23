@@ -1,7 +1,18 @@
-qat.core.config module
-======================
+qat.core.config package
+=======================
 
 .. automodule:: qat.core.config
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.core.config.configure
+   qat.core.config.descriptions
+   qat.core.config.session
+   qat.core.config.validators

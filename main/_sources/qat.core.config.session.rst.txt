@@ -1,0 +1,7 @@
+qat.core.config.session module
+==============================
+
+.. automodule:: qat.core.config.session
+   :members:
+   :undoc-members:
+   :show-inheritance:
