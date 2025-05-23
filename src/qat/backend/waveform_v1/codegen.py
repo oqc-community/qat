@@ -14,7 +14,10 @@ from qat.backend.passes.analysis import (
 )
 from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
 from qat.backend.passes.validation import NoAcquireWeightsValidation
-from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
+from qat.backend.waveform_v1.executable import (
+    WaveformV1ChannelData,
+    WaveformV1Executable,
+)
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
 from qat.ir.instructions import Assign
@@ -90,17 +93,18 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                 acquires=acquire_dict.get(physical_channel, []),
             )
 
-        # TODO: adjust the existing validation/transformation Repeat passes, or add an
-        # analysis pass to determine the repeats?
-        repeat = ir.shots
         returns = []
         for _return in ir.returns:
             returns.extend(_return.variables)
 
         return WaveformV1Executable(
             channel_data=channels,
-            shots=repeat.repeat_count,
-            repetition_time=repeat.repetition_period,
+            shots=ir.shots,
+            repetition_time=(
+                ir.repetition_period
+                if ir.repetition_period is not None
+                else self.model.default_repetition_period
+            ),
             post_processing={
                 var: [PostProcessing._from_legacy(pp) for pp in pp_list]
                 for var, pp_list in ir.pp_map.items()

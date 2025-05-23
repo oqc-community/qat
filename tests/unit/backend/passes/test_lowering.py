@@ -14,7 +14,6 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
     Pulse,
     PulseShapeType,
-    Repeat,
     ResultsProcessing,
     Return,
 )
@@ -65,7 +64,8 @@ class TestPartitionByPulseChannel:
 
     def test_repeats(self):
         model, ir = self.create_triaged_instructions()
-        assert isinstance(ir.shots, Repeat)
+        assert isinstance(ir.shots, int)
+        assert ir.repetition_period is None
 
     def test_assigns(self):
         model, ir = self.create_triaged_instructions()

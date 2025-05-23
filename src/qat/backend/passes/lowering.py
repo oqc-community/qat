@@ -108,7 +108,11 @@ class PartitionByPulseChannel(LoweringPass):
                     variables[inst.name].append(Variable(inst.name))
                 if var_refs[-1].var_type == LoopCount:
                     add_to_all(inst)
-                partitioned_ir.assigns.append(inst)
+                if isinstance(inst.value, list | str):
+                    # Only list assigns that are readout/result assignements
+                    # TODO: Supper different assigns for result readout vs loop
+                    # variables etc.
+                    partitioned_ir.assigns.append(inst)
 
             elif isinstance(inst, Acquire):
                 for t in inst.quantum_targets:
@@ -123,7 +127,8 @@ class PartitionByPulseChannel(LoweringPass):
             elif isinstance(inst, Repeat):
                 if partitioned_ir.shots:
                     raise ValueError("Multiple Repeat instructions found.")
-                partitioned_ir.shots = inst
+                partitioned_ir.shots = inst.repeat_count
+                partitioned_ir.repetition_period = inst.repetition_period
 
             elif isinstance(inst, Jump):
                 if isinstance(inst.condition, GreaterThan):
@@ -131,6 +136,7 @@ class PartitionByPulseChannel(LoweringPass):
                     if partitioned_ir.shots:
                         raise ValueError("Multiple Repeat or Jump instructions found.")
                     partitioned_ir.shots = limit
+                    partitioned_ir.repetition_period = ir.repetition_period
                 add_to_all(inst)
 
             elif isinstance(inst, Label):

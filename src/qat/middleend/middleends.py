@@ -10,13 +10,18 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
+from qat.middleend.passes.legacy.transform import (
+    RepeatTranslation,
+)
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
     EvaluatePulses,
+    FreqShiftSanitisation,
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionGranularitySanitisation,
+    InstructionLengthSanitisation,
     LowerSyncsToDelays,
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
@@ -127,14 +132,16 @@ class DefaultMiddleend(CustomMiddleend):
     """
 
     def __init__(
-        self, model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
+        self,
+        model: QuantumHardwareModel,
+        target_data: TargetData = TargetData.default(),
     ):
         """
         :param model: The hardware model that holds calibrated information on the qubits on
             the QPU.
         :param clock_cycle: The period for a single sequencer clock cycle.
         """
-        pipeline = self.build_pass_pipeline(model)
+        pipeline = self.build_pass_pipeline(model, target_data)
         self.target_data = target_data
         super().__init__(model=model, pipeline=pipeline)
 
@@ -151,32 +158,30 @@ class DefaultMiddleend(CustomMiddleend):
         return (
             PassManager()
             | HardwareConfigValidity(model)
-            | CalibrationAnalysis()
             | FrequencyValidation(model, target_data)
             | ActivePulseChannelAnalysis(model)
-            | InactivePulseChannelSanitisation()
-            # Basically just "corrections" to bad ir generated from the builder, should
-            # eventually be replaced with behaviour from the builder
+            # Sanitising input IR to make it complete
+            | RepeatSanitisation(model, target_data)
+            | ReturnSanitisation()
+            | SynchronizeTask()
+            # Corrections / optimisations to the IR
             | PostProcessingSanitisation()
             | ReadoutValidation(model)
             | AcquireSanitisation()
             | MeasurePhaseResetSanitisation()
-            # Process a "task" into a program. Could be considered as a frontend pipeline
-            # that converts takes a specific task and makes the appropriate qat ir.
-            # For example, wrapping the "task" in a repeat / for loop for QASM / QIR.
-            | RepeatSanitisation(model, target_data)
-            | ReturnSanitisation()
-            | SynchronizeTask()
-            | EndOfTaskResetSanitisation()
-            # Preparing for the backend
             | InstructionGranularitySanitisation(model, target_data)
+            | InactivePulseChannelSanitisation()
+            # Preparing for codegen
             | EvaluatePulses()
-            | InitialPhaseResetSanitisation()
             | LowerSyncsToDelays()
-            | ResetsToDelays(target_data)
-            # Optimisation of the ir:
+            | FreqShiftSanitisation(model)
+            | InitialPhaseResetSanitisation()
             | PhaseOptimisation()
+            | EndOfTaskResetSanitisation()
+            | ResetsToDelays(target_data)
             | SquashDelaysOptimisation()
+            | InstructionLengthSanitisation(target_data)
+            | RepeatTranslation(model)
         )
 
 

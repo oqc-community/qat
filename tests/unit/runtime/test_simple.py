@@ -6,6 +6,9 @@ import pytest
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.engines.waveform_v1 import EchoEngine
+from qat.middleend.passes.legacy.transform import (
+    RepeatTranslation,
+)
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 from qat.runtime import SimpleRuntime
@@ -32,6 +35,7 @@ class TestSimpleRuntime:
             output_variable="test",
         )
         builder.returns("test")
+        builder = RepeatTranslation(model).run(builder)
         return WaveformV1Backend(model).emit(builder)
 
     @pytest.mark.parametrize("shots", [500, 1000, 1007, 2000])
@@ -59,6 +63,7 @@ class TestSimpleRuntime:
                 output_variable=f"qubit{i}",
             )
         builder.returns("qubit0")
+        builder = RepeatTranslation(model).run(builder)
 
         # Test with default pipeline
         package = WaveformV1Backend(model).emit(builder)

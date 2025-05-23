@@ -151,6 +151,7 @@ class RepeatTranslation(TransformPass):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
         instructions: list[Instruction] = []
         label_data: OrderedDict[Label, dict[str, Repeat | Variable]] = OrderedDict()
+        repetition_period = None
 
         def _close_repeat(label: Label, data: dict, index: int = None) -> None:
             # TODO: Adjust so that closing is done before finishing instructions such as
@@ -168,6 +169,8 @@ class RepeatTranslation(TransformPass):
                 assign = Assign(var.name, 0)
                 label_data[label] = {"repeat": inst, "var": var}
                 instructions.extend([var, assign, label])
+                if repetition_period is None and inst.repetition_period is not None:
+                    repetition_period = inst.repetition_period
             elif isinstance(inst, EndRepeat):
                 if len(label_data) < 1:
                     raise ValueError("EndRepeat found without associated Repeat.")
@@ -179,5 +182,6 @@ class RepeatTranslation(TransformPass):
         for label, data in reversed(label_data.items()):
             _close_repeat(label, data)
 
+        ir.repetition_period = repetition_period or self.model.default_repetition_period
         ir.instructions = instructions
         return ir
