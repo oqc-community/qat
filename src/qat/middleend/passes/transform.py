@@ -84,13 +84,13 @@ class PhaseOptimisation(TransformPass):
             if isinstance(instruction, (PhaseShift, PhaseSet)) and isinstance(
                 instruction.phase, Number
             ):
-                key = instruction.channel.partial_id
+                key = instruction.channel.partial_id()
                 accum_phaseshifts[key] = self.merge_phase_instructions(
                     instruction.channel, accum_phaseshifts.get(key, None), instruction
                 )
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
-                    key = channel.partial_id
+                    key = channel.partial_id()
                     accum_phaseshifts[key] = self.merge_phase_instructions(
                         channel, accum_phaseshifts.get(key, None), instruction
                     )
@@ -101,8 +101,8 @@ class PhaseOptimisation(TransformPass):
                 if not isinstance(quantum_targets, List):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
-                    if quantum_target.partial_id in accum_phaseshifts:
-                        new_instruction = accum_phaseshifts.pop(quantum_target.partial_id)
+                    if quantum_target.partial_id() in accum_phaseshifts:
+                        new_instruction = accum_phaseshifts.pop(quantum_target.partial_id())
                         if not (
                             isinstance(new_instruction, PhaseShift)
                             and np.isclose(new_instruction.phase % (2 * np.pi), 0.0)
@@ -111,7 +111,7 @@ class PhaseOptimisation(TransformPass):
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, (Delay, Synchronize)):
                 for channel in instruction.quantum_targets:
-                    key = channel.partial_id
+                    key = channel.partial_id()
                     if isinstance(accum_phaseshifts.get(key, None), PhaseSet):
                         optimized_instructions.append(accum_phaseshifts.pop(key))
                 optimized_instructions.append(instruction)

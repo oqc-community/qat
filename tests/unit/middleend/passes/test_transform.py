@@ -284,6 +284,31 @@ class TestPhaseOptimisation:
             if isinstance(inst, PhaseSet)
         ] == [chan1, chan2, chan2, chan1]
 
+    def test_partial_ids_are_used(self):
+        """Regression test to ensure the partial ids are used as keys."""
+
+        model = EchoModelLoader(2).load()
+        model.qubits[0].get_drive_channel().id = "test"
+        model.qubits[1].get_drive_channel().id = "test"
+        builder = model.create_builder()
+        builder.add(PhaseShift(model.qubits[0].get_drive_channel(), np.pi / 2))
+        builder.add(PhaseShift(model.qubits[1].get_drive_channel(), -np.pi / 4))
+        builder.pulse(
+            model.qubits[0].get_drive_channel(),
+            shape=PulseShapeType.SQUARE,
+            width=80e-9,
+        )
+
+        builder = PhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+        phase_shifts = [
+            inst for inst in builder.instructions if isinstance(inst, PhaseShift)
+        ]
+        assert len(phase_shifts) == 1
+        assert phase_shifts[0].channel.id == "test"
+        assert phase_shifts[0].phase == np.pi / 4
+
 
 class TestPydPhaseOptimisation:
     hw = PydEchoModelLoader(8).load()
