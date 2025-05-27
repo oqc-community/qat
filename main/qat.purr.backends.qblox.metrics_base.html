@@ -366,7 +366,7 @@
 <span id="qat-purr-backends-qblox-metrics-base-module"></span><h1>qat.purr.backends.qblox.metrics_base module<a class="headerlink" href="#module-qat.purr.backends.qblox.metrics_base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Default:</span> <span class="pre">6&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Experimental:</span> <span class="pre">14&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Pydantic version based on qat.purr.compiler.metrics.py elements.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -429,6 +429,11 @@ collection.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count">
 <span class="sig-name descname"><span class="pre">optimized_instruction_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices">
+<span class="sig-name descname"><span class="pre">physical_qubit_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
