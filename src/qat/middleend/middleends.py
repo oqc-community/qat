@@ -109,8 +109,11 @@ class CustomMiddleend(BaseMiddleend):
         :param compiler_config: Compiler settings, defaults to None.
         """
 
-        res_mgr = res_mgr or ResultManager()
-        met_mgr = met_mgr or MetricsManager()
+        res_mgr = res_mgr if res_mgr is not None else ResultManager()
+        met_mgr = met_mgr if met_mgr is not None else MetricsManager()
+        compiler_config = (
+            compiler_config if compiler_config is not None else CompilerConfig()
+        )
 
         ir = self.pipeline.run(ir, res_mgr, met_mgr, compiler_config=compiler_config)
         return ir
