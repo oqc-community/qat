@@ -861,17 +861,17 @@ class QuantumInstructionBuilder(InstructionBuilder):
         _, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(FrequencyShift(channel, frequency))
 
-    def cnot(self, controlled_qubit: Qubit, target_qubit: Qubit):
-        if isinstance(controlled_qubit, List):
-            if len(controlled_qubit) > 1:
+    def cnot(self, control: Qubit, target: Qubit):
+        if isinstance(control, List):
+            if len(control) > 1:
                 raise ValueError("CNOT requires one control qubit.")
             else:
-                controlled_qubit = controlled_qubit[0]
+                control = control[0]
 
-        self.ECR(controlled_qubit, target_qubit)
-        self.X(controlled_qubit)
-        self.Z(controlled_qubit, -np.pi / 2)
-        return self.X(target_qubit, -np.pi / 2)
+        self.ECR(control, target)
+        self.X(control)
+        self.Z(control, -np.pi / 2)
+        return self.X(target, -np.pi / 2)
 
     def ECR(self, control: Qubit, target: Qubit):
         if not isinstance(control, Qubit) or not isinstance(target, Qubit):

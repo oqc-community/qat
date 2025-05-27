@@ -16,11 +16,12 @@ class MetricsManager(BaseModel):
     """Pydantic version based on qat.purr.compiler.metrics.py elements."""
 
     enabled_metrics: Optional[MetricsType] = Field(
-        default=MetricsType.Default, repr=False, exclude=True
+        default=MetricsType.Experimental, repr=False, exclude=True
     )
 
     optimized_circuit: Optional[str] = Field(default=None)
     optimized_instruction_count: Optional[int] = Field(default=None)
+    physical_qubit_indices: Optional[list[int]] = Field(default=None)
 
     @model_validator(mode="before")
     def validate_all_fields_exist(cls, value):
@@ -33,7 +34,7 @@ class MetricsManager(BaseModel):
         return value
 
     def __init__(
-        self, enabled_metrics: Optional[MetricsType] = MetricsType.Default, **kwargs
+        self, enabled_metrics: Optional[MetricsType] = MetricsType.Experimental, **kwargs
     ):
         super().__init__(enabled_metrics=enabled_metrics, **kwargs)
 
@@ -59,7 +60,7 @@ class MetricsManager(BaseModel):
         """
         if enabled_metrics is None:
             # log.warning("Attempted to enable metrics with no value. Defaulting.")
-            enabled_metrics = MetricsType.Default
+            enabled_metrics = MetricsType.Experimental
 
         # log.info(f"Enabling metrics with flags: {str(enabled_metrics)}")
         self.enable(enabled_metrics, overwrite)

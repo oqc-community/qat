@@ -9,7 +9,9 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.analysis import ActivePulseChannelAnalysis
+from qat.middleend.passes.analysis import (
+    ActivePulseChannelAnalysis,
+)
 from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
 )

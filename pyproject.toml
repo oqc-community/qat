@@ -59,7 +59,7 @@ qblox-instruments = "0.16.0"
 lark-parser = "^0.12.0"
 pydantic = "2.11.4"
 pydantic-settings = ">=2.5.2"
-compiler-config = "0.1.0"
+compiler-config = { git = "https://github.com/oqc-community/compiler-config.git", branch = "main" }
 pydantic-extra-types = "^2.10.4"
 numpydantic = ">=1.6.7"
 semver = "^3.0.2"
@@ -190,8 +190,8 @@ filterwarnings = [
     'default:.*invalid escape sequence:DeprecationWarning::1098',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
     'default:.*GlobalisePhasedX:DeprecationWarning',
-    # TODO: Remove calls to `model_fields` attribute in instance of a `BaseModel` class (COMPILER-396)
-    #'default:Accessing this attribute on the instance is deprecated, and will be removed in Pydantic V3. Instead, you should access this attribute from the model class.:pydantic.warnings.PydanticDeprecatedSince211'
+    # TODO: Change to passive_reset_time. 428, 455
+    'default:.*to modify the reset time of qubits to their ground state:UserWarning:',
 ]
 markers = [
   "ab_test",

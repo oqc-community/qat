@@ -20,11 +20,12 @@ class MetricsManager(BaseModel):
     """
 
     enabled_metrics: Optional[MetricsType] = Field(
-        default=MetricsType.Default, repr=False, exclude=True
+        default=MetricsType.Experimental, repr=False, exclude=True
     )
 
     optimized_circuit: Optional[str] = Field(default=None)
     optimized_instruction_count: Optional[int] = Field(default=None)
+    physical_qubit_indices: Optional[list[int]] = Field(default=None)
 
     @model_validator(mode="before")
     def validate_all_fields_exist(cls, value):
@@ -36,10 +37,10 @@ class MetricsManager(BaseModel):
             )
         return value
 
-    def __init__(self, enabled_metrics: MetricsType = MetricsType.Default, **kwargs):
+    def __init__(self, enabled_metrics: MetricsType = MetricsType.Experimental, **kwargs):
         """
         :param enabled_metrics: Which metrics to enable? Default,
-            :attr:`MetricsType.Default.`"""
+            :attr:`MetricsType.Experimental.`"""
 
         super().__init__(enabled_metrics=enabled_metrics, **kwargs)
 
@@ -47,7 +48,7 @@ class MetricsManager(BaseModel):
         """Enable these sets of metrics for collection.
 
         :param enabled_metrics: Which metrics to enable? Default,
-            :attr:`MetricsType.Default`.
+            :attr:`MetricsType.Experimental`.
         :param overwrite: If true, overwrite these metrics with a new collection.
             If false, just enable them in the current collection. Default, true.
         """
@@ -60,18 +61,20 @@ class MetricsManager(BaseModel):
             self.enabled_metrics = self.enabled_metrics | enabled_metrics
 
     def enable_metrics(
-        self, enabled_metrics: MetricsType = MetricsType.Default, overwrite: bool = True
+        self,
+        enabled_metrics: MetricsType = MetricsType.Experimental,
+        overwrite: bool = True,
     ):
         """Enables the set of metrics in the current collection.
 
         :param enabled_metrics: Which metrics to enable? Default,
-            :attr:`MetricsType.Default`.
+            :attr:`MetricsType.Experimental`.
         :param overwrite: If true, overwrite these metrics with a new collection.
             If false, just enable them in the current collection. Default, true.
         """
         if enabled_metrics is None:
             # log.warning("Attempted to enable metrics with no value. Defaulting.")
-            enabled_metrics = MetricsType.Default
+            enabled_metrics = MetricsType.Experimental
 
         # log.info(f"Enabling metrics with flags: {str(enabled_metrics)}")
         self.enable(enabled_metrics, overwrite)

@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from qat.core.metrics_base import MetricsManager, MetricsType
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
 from qat.model.target_data import TargetData
@@ -93,6 +94,11 @@ class ActiveChannelResults(ResultInfoMixin):
     unassigned: list[PulseChannel] = field(default_factory=lambda: [])
 
     @property
+    def physical_qubit_indices(self) -> set[int]:
+        """Returns a list of all active physical qubit indices."""
+        return set([qubit.index for qubit in self.target_map.values()])
+
+    @property
     def targets(self) -> list[PulseChannel]:
         """Returns a dictionary of all pulse channels with their full id as a key."""
         return list(self.target_map.keys()) + self.unassigned
@@ -128,7 +134,12 @@ class ActivePulseChannelAnalysis(AnalysisPass):
         self.model = model
 
     def run(
-        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ) -> InstructionBuilder:
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
@@ -151,25 +162,21 @@ class ActivePulseChannelAnalysis(AnalysisPass):
                     log.warning(
                         f"Multiple targets found with pulse channel {target}: "
                         + ", ".join([str(device) for device in devices])
-                        + f". Defaulting to the first pulse channel found, {devices[0]}."
+                        + f". Defaulting to the first quantum device found, {devices[0]}."
                     )
 
                 device = devices[0]
                 if isinstance(device, Resonator):
-                    qubits = [
-                        qubit
-                        for qubit in self.model.qubits
-                        if qubit.measure_device == device
-                    ]
-                    if len(qubits) == 0:
-                        device = None
-                    else:
-                        device = qubits[0]
+                    device = self.model._map_resonator_to_qubit(device)
 
             if device:
                 result.target_map[target] = device
             else:
                 result.unassigned.append(target)
+
+        phys_q_indices = sorted(list(result.physical_qubit_indices))
+        log.info(f"Physical qubits used in this circuit: {phys_q_indices}")
+        met_mgr.record_metric(MetricsType.PhysicalQubitIndices, phys_q_indices)
 
         res_mgr.add(result)
         return ir

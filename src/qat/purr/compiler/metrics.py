@@ -40,9 +40,12 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
 
     optimized_circuit: Optional[str]
     optimized_instruction_count: Optional[int]
+    physical_qubit_indices: Optional[list[int]]
 
     def __init__(self, enabled_metrics=None):
-        self.enabled_metrics: Optional[MetricsType] = enabled_metrics or MetricsType.Default
+        self.enabled_metrics: Optional[MetricsType] = (
+            enabled_metrics or MetricsType.Experimental
+        )
         for key in [val.snake_case_name() for val in self._target_metrics()]:
             setattr(self, key, None)
 
@@ -125,7 +128,7 @@ class MetricsMixin:
         """
         if enabled_metrics is None:
             log.warning("Attempted to enable metrics with no value. Defaulting.")
-            enabled_metrics = MetricsType.Default
+            enabled_metrics = MetricsType.Experimental
 
         if self.compilation_metrics is None:
             return

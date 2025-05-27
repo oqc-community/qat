@@ -7,7 +7,9 @@ from qat.core.metrics_base import MetricsManager
 
 
 class TestMetricsManager:
-    @pytest.mark.parametrize("flag", [*[mt for mt in MetricsType], MetricsType.Default])
+    @pytest.mark.parametrize(
+        "flag", [*[mt for mt in MetricsType], MetricsType.Experimental]
+    )
     def test_metrics_recording(self, flag):
         met_mgr = MetricsManager(flag)
 
@@ -36,8 +38,8 @@ class TestMetricsManager:
         ],
     )
     def test_merge_metrics_managers(self, records):
-        met_mgr_1 = MetricsManager(MetricsType.Default)
-        met_mgr_2 = MetricsManager(MetricsType.Default)
+        met_mgr_1 = MetricsManager(MetricsType.Experimental)
+        met_mgr_2 = MetricsManager(MetricsType.Experimental)
 
         met_mgr_1.optimized_circuit = "Original circuit"
         met_mgr_1.optimized_instruction_count = 42

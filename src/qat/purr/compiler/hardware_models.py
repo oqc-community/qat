@@ -414,6 +414,17 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             else:
                 return primary_devices[0], chanbit
 
+    def _map_resonator_to_qubit(self, resonator: Resonator):
+        """Finds and returns the qubit that is coupled to the resonator."""
+        if not isinstance(resonator, Resonator):
+            raise ValueError(f"Expected Resonator but got {type(resonator)}.")
+
+        for qubit in self.qubits:
+            if resonator.full_id() == qubit.measure_device.full_id():
+                return qubit
+
+        return None
+
     @property
     def is_calibrated(self):
         def check_devices(target_devices):
