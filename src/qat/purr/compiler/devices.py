@@ -495,6 +495,7 @@ class FreqShiftPulseChannel(PulseChannel):
         bias=0.0 + 0.0j,
         scale=1.0 + 0.0j,
         amp=0.0,
+        phase=0,
         active: bool = True,
         fixed_if: bool = False,
         **kwargs,
@@ -502,6 +503,7 @@ class FreqShiftPulseChannel(PulseChannel):
         super().__init__(id_, physical_channel, frequency, bias, scale, fixed_if, **kwargs)
         self.amp: float = amp
         self.active: bool = active
+        self.phase: float = phase
 
 
 class QubitCoupling(Calibratable):

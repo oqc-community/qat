@@ -515,6 +515,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                             freq_channel,
                             shape=PulseShapeType.SQUARE,
                             amp=freq_channel.amp,
+                            phase=getattr(freq_channel, "phase", 0),
                             width=end_point * qubit.physical_channel.sample_time,
                         )
                         results[freq_channel] = [

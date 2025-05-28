@@ -1106,6 +1106,7 @@ class FreqShiftSanitisation(TransformPass):
                 channel,
                 shape=PulseShapeType.SQUARE,
                 amp=channel.amp,
+                phase=getattr(channel, "phase", 0),
                 width=max_duration,
             )
             ir.insert(pulse, index)
