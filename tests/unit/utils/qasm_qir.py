@@ -9,6 +9,8 @@ from openqasm3 import ast
 
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.devices import PulseShapeType
+from qat.purr.compiler.instructions import Pulse
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import (
@@ -77,7 +79,7 @@ def get_all_qasm3_paths() -> set[Path]:
 
 def get_all_qir_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.QIR)
-    return set(Path(dir).glob("*"))
+    return set(Path(dir).glob("*.ll")) | set(Path(dir).glob("*.bc"))
 
 
 def get_all_openpulse_paths() -> set[Path]:
@@ -170,3 +172,22 @@ def get_default_qasm2_gate_qasms():
             gate_string = f"{name}{arg_string} {qubit_string};"
             qasm2_gates[name] = (N, gate_string)
     return list(qasm2_gates.values())
+
+
+def get_pulses_from_builder(builder, shape_type=PulseShapeType.GAUSSIAN):
+    """Get the gaussian pulses from the builder"""
+    return [
+        inst
+        for inst in builder.instructions
+        if (isinstance(inst, Pulse) and inst.shape == shape_type)
+    ]
+
+
+def filename_ids(val):
+    if type(val) is str:
+        strs = val.split("/")
+        return str(strs[-1])
+    elif hasattr(val, "name"):
+        return str(val.name)
+    else:
+        return str(val)

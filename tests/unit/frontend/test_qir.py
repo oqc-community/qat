@@ -11,7 +11,7 @@ from compiler_config.config import (
 )
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
-from qat.frontend.qir import QIRFrontend
+from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.model.loaders.legacy.echo import EchoModelLoader
@@ -21,11 +21,59 @@ from qat.purr.compiler.instructions import Pulse, ResultsProcessing
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
 
 from tests.unit.utils.models import get_jagged_echo_hardware
-from tests.unit.utils.qasm_qir import get_qir_path
+from tests.unit.utils.qasm_qir import (
+    filename_ids,
+    get_all_qir_paths,
+    get_openpulse,
+    get_qasm2,
+    get_qasm3,
+    get_qir_path,
+)
 
 
 def _get_qir_path(file_name):
     return str(get_qir_path(file_name))
+
+
+class TestQIRLoadingMethods:
+    @pytest.mark.parametrize(
+        "file_name, expected",
+        [
+            ("mock-file.ll", True),
+            ("mock-file.bc", True),
+            ("mock-file.qasm", False),
+        ],
+    )
+    def test_is_qir_path(self, file_name, expected):
+        assert is_qir_path(file_name) == expected
+
+    @pytest.mark.parametrize(
+        "file_name, expected",
+        [
+            ("@__quantum__qis", True),
+            ("@__quantum__qis__h", True),
+            ("not a qir string", False),
+        ],
+    )
+    def test_is_qir_str(self, file_name, expected):
+        assert is_qir_str(file_name) == expected
+
+    @pytest.mark.parametrize(
+        "file_name, out_type",
+        [
+            ("basic.ll", str),
+            ("hello.bc", bytes),
+        ],
+    )
+    def test_load_qir_file(self, file_name, out_type):
+        path = _get_qir_path(file_name)
+        content = load_qir_file(path)
+        assert isinstance(content, out_type)
+
+    def test_load_qir_file_invalid_file_type_throws_error(self):
+        path = get_qasm2("basic.qasm")
+        with pytest.raises(ValueError, match="String expected to end in `.ll` or `.bc`."):
+            load_qir_file(path)
 
 
 class TestQIRFrontend:
@@ -137,3 +185,29 @@ class TestQIRFrontend:
             ]
         )
         assert builder_bin is not builder_raw
+
+    @pytest.mark.parametrize("qir_path", get_all_qir_paths(), ids=filename_ids)
+    def test_check_and_return_source_with_qasm_2_files(self, qir_path, legacy_model):
+        qir_path = str(qir_path)
+        qir_str = QIRFrontend(legacy_model).check_and_return_source(qir_path)
+        assert qir_str
+        assert qir_str != qir_path
+        qasm_str2 = QIRFrontend(legacy_model).check_and_return_source(qir_str)
+        assert qir_str == qasm_str2
+
+    @pytest.mark.parametrize(
+        "qasm_path",
+        [
+            _get_qir_path("nonsense/nonsense.ll"),
+            get_qasm3("basic.qasm"),
+            get_qasm3("basic.qasm"),
+            get_openpulse("acquire.qasm"),
+            1337,
+        ],
+    )
+    def test_check_and_return_source_with_invalid_programs(
+        self, qasm_path: str, legacy_model
+    ):
+        # TODO: Update frontends to work with `Path`s, COMPILER-404
+        res = QIRFrontend(legacy_model).check_and_return_source(qasm_path)
+        assert not res

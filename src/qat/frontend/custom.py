@@ -10,7 +10,6 @@ from qat.frontend.base import BaseFrontend
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.qat import QATInput
-from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 
 class CustomFrontend(BaseFrontend):
@@ -33,8 +32,7 @@ class CustomFrontend(BaseFrontend):
                     defaults to None.
         :param pipeline: The custom pipeline, defaults to None.
         """
-
-        self.model = check_type_legacy_or_pydantic(model)
+        super().__init__(model)
         self.pipeline = pipeline
 
     def check_and_return_source(self, src):

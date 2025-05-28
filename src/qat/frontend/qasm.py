@@ -21,7 +21,6 @@ from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
-from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 path_regex = re.compile(r"^.+\.(qasm)$")
 string_regex = re.compile(r"OPENQASM (?P<version>[0-9]+)(?:.[0-9])?;")
@@ -84,6 +83,8 @@ class BaseQasmFrontend(BaseFrontend, ABC):
     frontends are identical up to the language and its respective parser. This class
     implements the base functionality."""
 
+    parser: None | CloudQasmParser | Qasm3Parser | PydCloudQasmParser | PydQasm3Parser
+
     def __init__(
         self,
         model: QuantumHardwareModel | PydHardwareModel = None,
@@ -95,15 +96,17 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         :param pipeline: A pipeline for validation and optimising QASM, defaults to a
             predefined pipeline that optimizes the QASM file.
         """
-        self.model = check_type_legacy_or_pydantic(model)
-        self.pipeline = pipeline or self.build_pass_pipeline(model)
+        super().__init__(model)
+        self.pipeline = (
+            pipeline if pipeline is not None else self.build_pass_pipeline(model)
+        )
 
     @property
     @abstractmethod
     def version(self) -> int: ...
 
     @staticmethod
-    def build_pass_pipeline(model: QuantumHardwareModel) -> PassManager:
+    def build_pass_pipeline(model: QuantumHardwareModel) -> PassManager | None:
         """Creates a pipeline to optimize QASM files.
 
         :param model: The hardware model is needed for optimizations.
@@ -141,6 +144,60 @@ class BaseQasmFrontend(BaseFrontend, ABC):
 
         return src
 
+    def _check_source(self, src: str) -> str:
+        """
+        Checks that the source program (or file path) can be interpreted as a QASM file and raises and error if not.
+        """
+        src = self.check_and_return_source(src)
+        if not src:
+            raise ValueError(
+                f"Source program is not a QASM{self.version} program, or a path "
+                f"to a QASM{self.version} program."
+            )
+        return src
+
+    def _generate_builder(
+        self,
+        src: str,
+        compiler_config: CompilerConfig,
+    ) -> InstructionBuilder | None:
+        """
+        Creates the instruction builder for execution from the base builder and compiler config.
+        :param builder: The base instruction builder.
+        :param compiler_config: The compiler config is used in both the pipeline and for
+            parsing.
+        """
+        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
+            builder = self.model.create_builder()
+        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
+            builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+        else:
+            raise TypeError("Invalid hardware model type set.")
+        builder = self.parser.parse(builder, src)
+
+        if isinstance(self.model, QuantumHardwareModel):
+            return (
+                self.model.create_builder()
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .add(builder)
+            )
+        elif isinstance(self.model, PydHardwareModel):
+            return (
+                PydQuantumInstructionBuilder(self.model)
+                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .__add__(builder)
+            )
+        return None
+
+    def _init_parser_results_format(self, compiler_config: CompilerConfig) -> None:
+        """Initializes the parser with the compiler config.
+
+        :param compiler_config: The compiler config is used in both the pipeline and for
+            parsing.
+        """
+        if compiler_config.results_format.format is not None:
+            self.parser.results_format = compiler_config.results_format.format
+
     def emit(
         self,
         src: str,
@@ -161,41 +218,16 @@ class BaseQasmFrontend(BaseFrontend, ABC):
             QASM program.
         :returns: The program as an :class:`InstructionBuilder`.
         """
+        res_mgr, met_mgr, compiler_config = self._check_metrics_and_config(
+            res_mgr, met_mgr, compiler_config
+        )
 
-        res_mgr = res_mgr or ResultManager()
-        met_mgr = met_mgr or MetricsManager()
-        compiler_config = compiler_config or CompilerConfig()
-
-        src = self.check_and_return_source(src)
-        if not src:
-            raise ValueError(
-                f"Source program is not a QASM{self.version} program, or a path "
-                f"to a QASM{self.version} program."
-            )
-
+        src = self._check_source(src)
         src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
 
-        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
-            builder = self.model.create_builder()
-        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
-            builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+        self._init_parser_results_format(compiler_config)
 
-        if compiler_config.results_format.format is not None:
-            self.parser.results_format = compiler_config.results_format.format
-        builder = self.parser.parse(builder, src)
-
-        if isinstance(self.model, QuantumHardwareModel):
-            return (
-                self.model.create_builder()
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
-                .add(builder)
-            )
-        elif isinstance(self.model, PydHardwareModel):
-            return (
-                PydQuantumInstructionBuilder(self.model)
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
-                .__add__(builder)
-            )
+        return self._generate_builder(src, compiler_config)
 
 
 class Qasm2Frontend(BaseQasmFrontend):

@@ -18,7 +18,6 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser
 from qat.purr.integrations.tket import run_tket_optimizations_qir
-from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 string_regex = r"@__quantum__qis"
 
@@ -72,16 +71,9 @@ class QIRFrontend(BaseFrontend, ABC):
         :param pipeline: A pipeline for validation and optimising QASM, defaults to a
             predefined pipeline that optimizes the QASM file.
         """
-
-        self.model = check_type_legacy_or_pydantic(model)
-        if not pipeline:
-            pipeline = self.build_pass_pipeline()
-        self.pipeline = pipeline
-
-        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
-            self.parser = QIRParser(model)
-        elif isinstance(model, PydHardwareModel):  # pydantic hardware model
-            self.parser = PydQIRParser(model)
+        super().__init__(model)
+        self.pipeline = pipeline if pipeline is not None else self.build_pass_pipeline()
+        self.parser = self._init_parser()
 
     @staticmethod
     def build_pass_pipeline() -> PassManager:
@@ -92,7 +84,13 @@ class QIRFrontend(BaseFrontend, ABC):
 
         return PassManager()
 
-    def check_and_return_source(self, src: str | bytes) -> bool | str:
+    def _init_parser(self) -> QIRParser | None:
+        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
+            return QIRParser(self.model)
+        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
+            return PydQIRParser(self.model)
+
+    def check_and_return_source(self, src: str | bytes) -> bool | str | bytes:
         """Checks that the source program (or file path) can be interpreted as a QIR file
         by checking against the language.
 
@@ -118,45 +116,18 @@ class QIRFrontend(BaseFrontend, ABC):
 
         return False
 
-    def emit(
-        self,
-        src: str,
-        res_mgr: ResultManager | None = None,
-        met_mgr: MetricsManager | None = None,
-        compiler_config: CompilerConfig | None = None,
-    ) -> InstructionBuilder:
-        """Compiles the source QIR program into QAT's intermediate representation.
-
-        :param src: The source program, or path to the source program.
-        :param res_mgr: The result manager to store results from passes within the pipeline,
-            defaults to an empty :class:`ResultManager`.
-        :param met_mgr: The metrics manager to store metrics, such as the optimized QIR
-            circuit, defaults to an empty :class:`MetricsManager`.
-        :param compiler_config: The compiler config is used in both the pipeline and for
-            parsing.
-        :raises ValueError: An error is thrown if the the program is not detected to be a
-            QIR program.
-        :returns: The program as an :class:`InstructionBuilder`.
-        """
-
-        res_mgr = res_mgr or ResultManager()
-        met_mgr = met_mgr or MetricsManager()
-        compiler_config = compiler_config or CompilerConfig()
-
+    def _check_source(self, src: str) -> str:
         src = self.check_and_return_source(src)
         if not src:
             raise ValueError(
                 "Source program is not a QIR program, or a path to a QIR program."
             )
+        return src
 
-        src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
-        reset_parser_format: bool = False
-        if compiler_config.results_format.format is not None:
-            # TODO: Fix the need to reset parser attributes after parsing
-            reset_parser_format = True
-            old_parser_results_format = self.parser.results_format
-            self.parser.results_format = compiler_config.results_format.format
-
+    def _get_builder(
+        self, compiler_config: CompilerConfig, src: str
+    ) -> InstructionBuilder | None:
+        builder = None
         if isinstance(self.model, QuantumHardwareModel):
             optimizations = compiler_config.optimizations
             if (
@@ -184,6 +155,46 @@ class QIRFrontend(BaseFrontend, ABC):
                 .repeat(compiler_config.repeats, compiler_config.repetition_period)
                 .__add__(builder)
             )
+        return builder
+
+    def emit(
+        self,
+        src: str,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
+    ) -> InstructionBuilder:
+        """Compiles the source QIR program into QAT's intermediate representation.
+
+        :param src: The source program, or path to the source program.
+        :param res_mgr: The result manager to store results from passes within the pipeline,
+            defaults to an empty :class:`ResultManager`.
+        :param met_mgr: The metrics manager to store metrics, such as the optimized QIR
+            circuit, defaults to an empty :class:`MetricsManager`.
+        :param compiler_config: The compiler config is used in both the pipeline and for
+            parsing.
+        :raises ValueError: An error is thrown if the the program is not detected to be a
+            QIR program.
+        :returns: The program as an :class:`InstructionBuilder`.
+        """
+        res_mgr, met_mgr, compiler_config = self._check_metrics_and_config(
+            res_mgr, met_mgr, compiler_config
+        )
+
+        src = self._check_source(src)
+
+        src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
+
+        reset_parser_format: bool = False
+        old_parser_results_format = None
+
+        if compiler_config.results_format.format is not None:
+            # TODO: Fix the need to reset parser attributes after parsing COMPILER-531
+            reset_parser_format = True
+            old_parser_results_format = self.parser.results_format
+            self.parser.results_format = compiler_config.results_format.format
+
+        builder = self._get_builder(compiler_config, src)
 
         if reset_parser_format:
             self.parser.results_format = old_parser_results_format

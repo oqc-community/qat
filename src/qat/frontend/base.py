@@ -58,3 +58,14 @@ class BaseFrontend(ABC):
 
     @abstractmethod
     def check_and_return_source(self, src): ...
+
+    @staticmethod
+    def _check_metrics_and_config(res_mgr, met_mgr, compiler_config):
+        if res_mgr is None:
+            res_mgr = ResultManager()
+        if met_mgr is None:
+            met_mgr = MetricsManager()
+        if compiler_config is None:
+            compiler_config = CompilerConfig()
+
+        return res_mgr, met_mgr, compiler_config
