@@ -35,15 +35,29 @@ class InstructionValidation(ValidationPass):
     Extracted from :mod:`qat.purr.compiler.execution.QuantumExecutionEngine.validate`.
     """
 
-    def __init__(self, target_data: TargetData, *args, **kwargs):
+    def __init__(
+        self,
+        target_data: TargetData,
+        pulse_duration_limits: bool | None = None,
+        *args,
+        **kwargs,
+    ):
         """
-        :param engine: The engine contains information about the hardware, such as
-            instruction limits.
+        :param target_data: Target-related information.
+        :param pulse_duration_limits: Whether to check the pulse duration limits.
+            If None, uses the default from the QatConfig.
+        :param instruction_memory_size: The maximum number of instructions that can
+            be run in a single shot. If None, uses the default from QatConfig.
         """
         self.instruction_memory_size = target_data.instruction_memory_size
         self.pulse_duration_max = max(
             target_data.QUBIT_DATA.pulse_duration_max,
             target_data.RESONATOR_DATA.pulse_duration_max,
+        )
+        self.pulse_duration_limits = (
+            pulse_duration_limits
+            if pulse_duration_limits is not None
+            else get_config().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
         )
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
@@ -52,8 +66,7 @@ class InstructionValidation(ValidationPass):
         instruction_length = len(ir.instructions)
         if instruction_length > self.instruction_memory_size:
             raise ValueError(
-                f"Program too large to be run in a single block on current hardware. "
-                f"{instruction_length} instructions."
+                f"Program with {instruction_length} instructions too large to be run in a single block on current hardware."
             )
 
         for inst in ir.instructions:
@@ -65,9 +78,8 @@ class InstructionValidation(ValidationPass):
             if isinstance(inst, (Pulse, CustomPulse)):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > self.pulse_duration_max:
-                    if (
-                        not get_config().DISABLE_PULSE_DURATION_LIMITS
-                    ):  # Do not throw error if we specifically disabled the limit checks.
+                    if self.pulse_duration_limits:
+                        # Do not throw error if we specifically disabled the limit checks.
                         # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
                         # which is specific to each hardware model and can be stored as a member variables there.
                         raise ValueError(
@@ -86,7 +98,7 @@ class InstructionValidation(ValidationPass):
                         )
                     )
                     if np.max(values) > self.pulse_duration_max:
-                        if not get_config().DISABLE_PULSE_DURATION_LIMITS:
+                        if self.pulse_duration_limits:
                             raise ValueError(
                                 f"Max Waveform width is {self.pulse_duration_max} s "
                                 f"given: {values} s"
@@ -106,19 +118,26 @@ class ReadoutValidation(ValidationPass):
     def __init__(
         self,
         hardware: QuantumHardwareModel,
+        no_mid_circuit_measurement: bool | None = None,
         *args,
         **kwargs,
     ):
         """
         :param hardware: The hardware model is needed to check for mid-circuit measurments.
+        :param no_mid_circuit_measurement: Whether mid-circuit measurements are allowed.
+            If None, uses the default from the QatConfig.
         """
         self.hardware = hardware
+        self.no_mid_circuit_measurement = (
+            no_mid_circuit_measurement
+            if no_mid_circuit_measurement is not None
+            else get_config().INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
+        )
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         model = self.hardware
-        qatconfig = get_config()
 
         if not isinstance(model, LiveHardwareModel):
             return ir
@@ -152,7 +171,7 @@ class ReadoutValidation(ValidationPass):
                     )
 
             # Check if we've got a measure in the middle of the circuit somewhere.
-            elif qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
+            elif self.no_mid_circuit_measurement:
                 if isinstance(inst, Acquire):
                     for qbit in model.qubits:
                         if qbit.get_acquire_channel() == inst.channel:
@@ -192,22 +211,29 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
     def __init__(
         self,
         model: PydHardwareModel,
+        no_mid_circuit_measurement: bool | None = None,
         *args,
         **kwargs,
     ):
         """
         :param model: The hardware model.
+        :param no_mid_circuit_measurement: Whether mid-circuit measurements are allowed.
+            If None, uses the default from the QatConfig.
         """
         self.model = model
+        self.no_mid_circuit_measurement = (
+            no_mid_circuit_measurement
+            if no_mid_circuit_measurement is not None
+            else get_config().INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
+        )
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
         :param ir: The intermediate representation (IR) :class:`InstructionBuilder`.
         """
         consumed_acquire_pc: set[str] = set()
-        qatconfig = get_config()
 
-        if not qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT:
+        if not self.no_mid_circuit_measurement:
             return ir
 
         drive_acq_pc_map = {
@@ -258,12 +284,17 @@ class HardwareConfigValidity(ValidationPass):
 class PydHardwareConfigValidity(ValidationPass):
     """Validates the :class:`CompilerConfig` against the hardware model."""
 
-    def __init__(self, hardware_model: PydHardwareModel):
+    def __init__(self, hardware_model: PydHardwareModel, max_shots: int | None = None):
         """Instantiate the pass with a hardware model.
 
         :param hardware_model: The hardware model.
+        :param max_shots: The maximum number of shots allowed for a single task.
+                If None, uses the default from the QatConfig.
         """
         self.hardware_model = hardware_model
+        self.max_shots = (
+            max_shots if max_shots is not None else get_config().MAX_REPEATS_LIMIT
+        )
 
     def run(
         self,
@@ -277,12 +308,10 @@ class PydHardwareConfigValidity(ValidationPass):
         return ir
 
     def _validate_shots(self, compiler_config: CompilerConfig):
-        qatconfig = get_config()
-
-        if compiler_config.repeats > qatconfig.MAX_REPEATS_LIMIT:
+        if compiler_config.repeats > self.max_shots:
             raise ValueError(
                 f"Number of shots in compiler config {compiler_config.repeats} exceeds max "
-                f"number of shots {qatconfig.MAX_REPEATS_LIMIT}."
+                f"number of shots {self.max_shots}."
             )
 
     def _validate_error_mitigation(

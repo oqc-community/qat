@@ -819,3 +819,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             raise TypeError(
                 "Please provide a target that is either a `Qubit` or a `PulseChannel`."
             )
+
+
+PydQuantumInstructionBuilder = QuantumInstructionBuilder

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from contextlib import nullcontext
 from copy import deepcopy
 
 import numpy as np
@@ -12,20 +13,29 @@ from compiler_config.config import (
 
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
-from qat.ir.instruction_builder import (
-    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
-)
+from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.middleend.passes.legacy.validation import PhysicalChannelAmplitudeValidation
 from qat.middleend.passes.transform import EvaluatePulses
 from qat.middleend.passes.validation import (
     FrequencyValidation,
+    InstructionValidation,
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
+    ReadoutValidation,
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
+from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
-from qat.purr.compiler.instructions import CustomPulse, Pulse, PulseShapeType
+from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.compiler.instructions import (
+    AcquireMode,
+    CustomPulse,
+    PostProcessType,
+    ProcessAxis,
+    Pulse,
+    PulseShapeType,
+)
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 from tests.unit.utils.pulses import pulse_attributes
@@ -33,8 +43,56 @@ from tests.unit.utils.pulses import pulse_attributes
 qatconfig = get_config()
 
 
+class TestInstructionValidation:
+    hw = EchoModelLoader(qubit_count=4).load()
+    target_data = TargetData.default()
+
+    @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
+    def test_valid_instructions(self, pulse_duration_limits):
+        builder = self.hw.create_builder()
+        for qubit in self.hw.qubits:
+            builder.X(target=qubit)
+
+        InstructionValidation(
+            self.target_data, pulse_duration_limits=pulse_duration_limits
+        ).run(builder)
+
+    @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
+    def test_pulse_too_long(self, pulse_duration_limits):
+        builder = self.hw.create_builder()
+        for qubit in self.hw.qubits:
+            builder.pulse(
+                quantum_target=qubit.get_drive_channel(),
+                width=0.1,
+                shape=PulseShapeType.GAUSSIAN,
+            )
+
+        with (
+            pytest.raises(ValueError, match="Max Waveform width is")
+            if (pulse_duration_limits or pulse_duration_limits is None)
+            else nullcontext()
+        ):
+            InstructionValidation(
+                self.target_data, pulse_duration_limits=pulse_duration_limits
+            ).run(builder)
+
+    def test_too_many_instructions(self):
+        builder = self.hw.create_builder()
+        drive_pulse_ch = self.hw.get_qubit(0).get_drive_channel()
+
+        for _ in range(self.target_data.QUBIT_DATA.instruction_memory_size + 1):
+            builder.pulse(
+                quantum_target=drive_pulse_ch, width=1e-08, shape=PulseShapeType.GAUSSIAN
+            )
+
+        with pytest.raises(
+            ValueError, match="too large to be run in a single block on current hardware."
+        ):
+            InstructionValidation(self.target_data).run(builder)
+
+
 class TestNoMidCircuitMeasurementValidation:
-    hw = generate_hw_model(32)
+    hw = PydEchoModelLoader(qubit_count=4).load()
 
     def test_no_mid_circuit_meas_found(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -492,18 +550,22 @@ class TestFrequencyValidation:
 
 
 class TestPydHardwareConfigValidity:
-    def test_max_shot_limit_exceeded(self):
+    @pytest.mark.parametrize("max_shots", [qatconfig.MAX_REPEATS_LIMIT, None])
+    def test_max_shot_limit_exceeded(self, max_shots):
         hw_model = generate_hw_model(n_qubits=8)
-        comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT + 1)
+        invalid_shots = (
+            qatconfig.MAX_REPEATS_LIMIT + 1 if max_shots is None else max_shots + 1
+        )
+
+        comp_config = CompilerConfig(repeats=invalid_shots)
         ir = "test"
         res_mgr = ResultManager()
 
+        validation_pass = PydHardwareConfigValidity(hw_model, max_shots=max_shots)
         with pytest.raises(ValueError):
-            PydHardwareConfigValidity(hw_model).run(
-                ir, res_mgr, compiler_config=comp_config
-            )
+            validation_pass.run(ir, res_mgr, compiler_config=comp_config)
 
-        comp_config = CompilerConfig(repeats=qatconfig.MAX_REPEATS_LIMIT)
+        comp_config = CompilerConfig(repeats=invalid_shots - 1)
         PydHardwareConfigValidity(hw_model).run(ir, res_mgr, compiler_config=comp_config)
 
     @pytest.mark.parametrize("n_qubits", [2, 4, 8, 32, 64])
@@ -545,3 +607,68 @@ class TestPydHardwareConfigValidity:
             results_format=QuantumResultsFormat().binary_count(),
         )
         PydHardwareConfigValidity(hw_model).run(ir, res_mgr, compiler_config=comp_config)
+
+
+class TestReadoutValidation:
+    hw = EchoModelLoader(qubit_count=4).load()
+
+    def _mock_1Q_live_hw_model(self, hw_model):
+        """Mock a 1Q live hardware model for testing."""
+        hw = LiveHardwareModel()
+        qubit = self.hw.qubits[0]
+        resonator = self.hw.resonators[0]
+        hw.add_device(qubit)
+        hw.add_physical_channel(qubit.physical_channel)
+        hw.add_device(resonator)
+        hw.add_physical_channel(resonator.physical_channel)
+        return hw
+
+    def test_valid_readout(self):
+        builder = self.hw.create_builder()
+        for qubit in self.hw.qubits:
+            builder.measure_single_shot_z(target=qubit)
+
+        ReadoutValidation(self.hw).run(builder)
+
+    @pytest.mark.parametrize("no_mid_circuit_measurement", [True, False, None])
+    def test_mid_circuit_measurement(self, no_mid_circuit_measurement):
+        # ReadoutValidation pass only checks `LiveHardwareModel`s.
+        hw = self._mock_1Q_live_hw_model(self.hw)
+
+        builder = hw.create_builder()
+        for qubit in hw.qubits:
+            builder.measure_single_shot_z(target=qubit, axis=ProcessAxis.TIME)
+        builder.X(target=qubit)
+
+        with (
+            pytest.raises(
+                ValueError, match="Mid-circuit measurements currently unable to be used."
+            )
+            if (no_mid_circuit_measurement or no_mid_circuit_measurement is None)
+            else nullcontext()
+        ):
+            ReadoutValidation(
+                hw, no_mid_circuit_measurement=no_mid_circuit_measurement
+            ).run(builder)
+
+    @pytest.mark.parametrize(
+        "acquire_mode, process_axis",
+        [
+            (AcquireMode.SCOPE, ProcessAxis.SEQUENCE),
+            (AcquireMode.INTEGRATOR, ProcessAxis.TIME),
+            (AcquireMode.RAW, None),
+        ],
+    )
+    def test_acquire_with_invalid_pp(self, acquire_mode, process_axis):
+        # ReadoutValidation pass only checks `LiveHardwareModel`s.
+        hw = self._mock_1Q_live_hw_model(self.hw)
+        qubit = hw.qubits[0]
+
+        builder = hw.create_builder()
+        builder.acquire(qubit.get_drive_channel(), mode=acquire_mode)
+        builder.post_processing(
+            builder.instructions[0], PostProcessType.MEAN, process_axis, qubit
+        )
+
+        with pytest.raises(ValueError, match="Invalid"):
+            ReadoutValidation(hw).run(builder)
