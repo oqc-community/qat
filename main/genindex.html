@@ -1900,14 +1900,14 @@
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.deserialize">(InstructionBuilder static method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.DesugaringPass">DesugaringPass (class in qat.backend.passes.transform)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.device_update">device_update() (AbstractContext method)</a>
@@ -2041,7 +2041,11 @@
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation.params.duration_limit">duration_limit (qat.middleend.passes.transform.InstructionLengthSanitisation parameter)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.durations">durations (AbstractContext property)</a>
+
+      <ul>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.durations">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysis.durations_as_samples">durations_as_samples() (TimelineAnalysis static method)</a>
 </li>
   </ul></td>
@@ -3256,14 +3260,14 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation">InstructionLengthSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions">instructions (InstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions">[1]</a>
 
       <ul>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.instructions">(InstructionBuilder property)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions">[1]</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.instructions">(MeasureBlock property)</a>
+</li>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.instructions">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.instructions">(QatFile property)</a>
 </li>
@@ -3274,6 +3278,8 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation">InstructionValidation (class in qat.middleend.passes.validation)</a>
 
       <ul>
@@ -3352,6 +3358,10 @@
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.RepeatSanitisationValidation.run.params.ir">(qat.backend.passes.validation.RepeatSanitisationValidation.run parameter)</a>
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.ReturnSanitisationValidation.run.params.ir">(qat.backend.passes.validation.ReturnSanitisationValidation.run parameter)</a>
+</li>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict parameter)</a>
+</li>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.ir">(qat.core.pass_base.PassModel.run parameter)</a>
 </li>
@@ -5873,6 +5883,8 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.pulse_channel">(Pulse property)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.params.pulse_channel">(qat.backend.waveform_v1.codegen.WaveformContext parameter)</a>
+</li>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.pulse_channel">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer parameter)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel">(qat.ir.instruction_builder.QuantumInstructionBuilder.U parameter)</a>
 </li>
@@ -9237,6 +9249,12 @@
       </ul></li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage.timeline">timeline (QbloxPackage attribute)</a>
 </li>
+      <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.timeline_res">timeline_res (qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.timeline_res">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysis">TimelineAnalysis (class in qat.backend.passes.analysis)</a>
 </li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysisResult">TimelineAnalysisResult (class in qat.backend.passes.analysis)</a>
@@ -9373,8 +9391,16 @@
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.UntargetedPulse">(class in qat.purr.integrations.qasm)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.upconvert">upconvert (qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.upconvert">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.upd_param">upd_param() (SequenceBuilder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.result_base.html#qat.core.result_base.ResultManager.update">update() (ResultManager method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager.update">[1]</a>
 
       <ul>
@@ -9385,8 +9411,6 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.update">(ValidatedSet method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">UPDATE_PARAMETERS (Opcode attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor.upload">upload() (CompositeExecutor method)</a>

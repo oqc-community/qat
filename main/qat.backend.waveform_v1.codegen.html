@@ -416,7 +416,9 @@ circuit progresses.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformContext.process_pulse">
 <span class="sig-name descname"><span class="pre">process_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformContext.process_pulse" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Converts a waveform instruction into a discrete number of samples, handling
+upconversion to the target frequency if specified.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformContext.process_reset">
@@ -445,17 +447,50 @@ model is needed for context-aware compilation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict">
 <span class="sig-name descname"><span class="pre">create_acquire_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeline_res</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a dictionary of acquire data for each physical channel based on the
+acquire map in the IR and the timeline analysis result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionedIR" title="qat.backend.passes.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The partitioned IR containing the acquire map.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.timeline_res"></span><strong>timeline_res</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.timeline_res">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysisResult" title="qat.backend.passes.analysis.TimelineAnalysisResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimelineAnalysisResult</span></code></a></span>) – The timeline analysis result containing the number of samples
+for each instruction.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers">
 <span class="sig-name descname"><span class="pre">create_physical_channel_buffers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeline_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a buffer of waveforms for each physical channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionedIR" title="qat.backend.passes.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The partitioned IR containing the instructions.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.timeline_res"></span><strong>timeline_res</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.timeline_res">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysisResult" title="qat.backend.passes.analysis.TimelineAnalysisResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimelineAnalysisResult</span></code></a></span>) – The timeline analysis result containing the number of samples
+for each instruction.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.upconvert"></span><strong>upconvert</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.upconvert">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to upconvert the waveforms to the target frequencies.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_pulse_channel_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">durations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upconvert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a buffer of waveforms for a single pulse channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.pulse_channel"></span><strong>pulse_channel</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.pulse_channel">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span>) – The pulse channel to create the buffer for.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.instructions"></span><strong>instructions</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.instructions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a>]</span>) – The list of instructions to process.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.durations"></span><strong>durations</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.durations">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – The list of durations for each instruction.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.upconvert"></span><strong>upconvert</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_pulse_channel_buffer.params.upconvert">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to upconvert the waveforms to the target frequencies.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.codegen.WaveformV1Backend.emit">
