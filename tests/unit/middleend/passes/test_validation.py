@@ -18,6 +18,7 @@ from qat.middleend.passes.legacy.validation import PhysicalChannelAmplitudeValid
 from qat.middleend.passes.transform import EvaluatePulses
 from qat.middleend.passes.validation import (
     FrequencyValidation,
+    HardwareConfigValidity,
     InstructionValidation,
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
@@ -28,6 +29,7 @@ from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.backends.live import LiveHardwareModel
+from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
     AcquireMode,
     CustomPulse,
@@ -117,6 +119,99 @@ class TestNoMidCircuitMeasurementValidation:
         p = PydNoMidCircuitMeasurementValidation(self.hw)
         with pytest.raises(ValueError):
             p.run(builder)
+
+
+class TestHardwareConfigValidity:
+    @staticmethod
+    def get_hw(legacy=True):
+        if legacy:
+            return EchoModelLoader(qubit_count=4).load()
+        return PydEchoModelLoader(qubit_count=4).load()
+
+    @pytest.mark.parametrize(
+        "mitigation_config",
+        [
+            ErrorMitigationConfig.LinearMitigation,
+            ErrorMitigationConfig.MatrixMitigation,
+            ErrorMitigationConfig.Empty,
+            None,
+        ],
+    )
+    @pytest.mark.parametrize("legacy", [True, False])
+    def test_hardware_config_valid_for_all_error_mitigation_settings(
+        self, mitigation_config, legacy
+    ):
+        hw = self.get_hw(legacy=legacy)
+        qubit_indices = [i for i in range(4)]
+        linear = generate_random_linear(qubit_indices)
+        hw.error_mitigation = ErrorMitigation(
+            readout_mitigation=ReadoutMitigation(linear=linear)
+        )
+        compiler_config = CompilerConfig(
+            error_mitigation=mitigation_config,
+            results_format=QuantumResultsFormat().binary_count(),
+        )
+        ir = QuantumInstructionBuilder(hardware_model=hw)
+        hw_config_valid = HardwareConfigValidity(hw)
+        ir_out = hw_config_valid.run(ir, compiler_config=compiler_config)
+        assert ir_out == ir
+
+    @pytest.mark.parametrize("hw_mitigation", [None, ErrorMitigation()])
+    @pytest.mark.parametrize(
+        "mitigation_config",
+        [
+            ErrorMitigationConfig.LinearMitigation,
+            ErrorMitigationConfig.MatrixMitigation,
+        ],
+    )
+    def test_hardware_config_errors_with_incompatible_mitigation_configs(
+        self, mitigation_config, hw_mitigation
+    ):
+        hw = self.get_hw()
+        hw.error_mitigation = hw_mitigation
+        compiler_config = CompilerConfig(error_mitigation=mitigation_config)
+        ir = QuantumInstructionBuilder(hardware_model=hw)
+        hw_config_valid = HardwareConfigValidity(hw)
+        with pytest.raises(
+            ValueError, match="Error mitigation not calibrated on this device."
+        ):
+            hw_config_valid.run(ir, compiler_config=compiler_config)
+
+    @pytest.mark.parametrize(
+        "results_format",
+        [
+            QuantumResultsFormat().binary(),
+            QuantumResultsFormat().raw(),
+            QuantumResultsFormat().squash_binary_result_arrays(),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "mitigation_config",
+        [
+            ErrorMitigationConfig.LinearMitigation,
+            ErrorMitigationConfig.MatrixMitigation,
+        ],
+    )
+    @pytest.mark.parametrize("legacy", [True, False])
+    def test_hardware_config_errors_with_incompatible_results_format(
+        self, results_format, mitigation_config, legacy
+    ):
+        hw = self.get_hw(legacy=legacy)
+        qubit_indices = [i for i in range(4)]
+        linear = generate_random_linear(qubit_indices)
+        hw.error_mitigation = ErrorMitigation(
+            readout_mitigation=ReadoutMitigation(linear=linear)
+        )
+        compiler_config = CompilerConfig(
+            error_mitigation=mitigation_config,
+            results_format=results_format,
+        )
+        ir = QuantumInstructionBuilder(hardware_model=hw)
+        hw_config_valid = HardwareConfigValidity(hw)
+        with pytest.raises(
+            ValueError, match="Binary Count format required for readout error mitigation"
+        ):
+            hw_config_valid.run(ir, compiler_config=compiler_config)
 
 
 class TestPhysicalChannelAmplitudeValidation:
