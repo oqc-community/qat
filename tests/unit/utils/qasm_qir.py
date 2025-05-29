@@ -40,7 +40,7 @@ def get_test_files_dir(ir_type: ProgramFileType) -> Path:
     elif ir_type == ProgramFileType.OPENPULSE:
         return Path(tests_dir, "files", "qasm", "qasm3", "openpulse_tests")
     else:
-        raise ValueError("Test file directory dosen't exist for this IR type.")
+        raise ValueError("Test file directory doesn't exist for this IR type.")
 
 
 def get_test_file_path(ir_type: ProgramFileType, file_name) -> Path:
