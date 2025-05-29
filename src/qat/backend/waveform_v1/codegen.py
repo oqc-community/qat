@@ -74,8 +74,8 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         physical channels. Deals with low-level details such as pulse scheduling and phase
         shifts.
         """
-        res_mgr = res_mgr if res_mgr else ResultManager()
-        met_mgr = met_mgr if met_mgr else MetricsManager()
+        res_mgr = res_mgr if res_mgr is not None else ResultManager()
+        met_mgr = met_mgr if met_mgr is not None else MetricsManager()
         ir = self.run_pass_pipeline(ir, res_mgr, met_mgr)
         timeline_res: TimelineAnalysisResult = res_mgr.lookup_by_type(
             TimelineAnalysisResult
@@ -133,6 +133,13 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         durations: list[int],
         upconvert: bool = True,
     ):
+        """Creates a buffer of waveforms for a single pulse channel.
+
+        :param pulse_channel: The pulse channel to create the buffer for.
+        :param instructions: The list of instructions to process.
+        :param durations: The list of durations for each instruction.
+        :param upconvert: Whether to upconvert the waveforms to the target frequencies.
+        """
         context = WaveformContext(pulse_channel, np.sum(durations))
         for i, instruction in enumerate(instructions):
             duration = durations[i]
@@ -158,6 +165,13 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         timeline_res: TimelineAnalysisResult,
         upconvert: bool = True,
     ):
+        """Creates a buffer of waveforms for each physical channel.
+
+        :param ir: The partitioned IR containing the instructions.
+        :param timeline_res: The timeline analysis result containing the number of samples
+            for each instruction.
+        :param upconvert: Whether to upconvert the waveforms to the target frequencies.
+        """
         # Compute all pulse channel buffers
         pulse_channel_buffers = {}
         for pulse_channel in timeline_res.target_map:
@@ -195,6 +209,13 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         return physical_channel_buffers
 
     def create_acquire_dict(self, ir: PartitionedIR, timeline_res: TimelineAnalysisResult):
+        """Creates a dictionary of acquire data for each physical channel based on the
+        acquire map in the IR and the timeline analysis result.
+
+        :param ir: The partitioned IR containing the acquire map.
+        :param timeline_res: The timeline analysis result containing the number of samples
+            for each instruction.
+        """
         acquire_dict = {}
         for pulse_channel, acquire_list in ir.acquire_map.items():
             acq_list = acquire_dict.setdefault(pulse_channel.physical_channel, [])
@@ -219,6 +240,9 @@ class WaveformContext:
     This can be considered to be the dynamical state of a pulse channel which evolves as the
     circuit progresses.
     """
+
+    # TODO: refactor this as a "channel backend" or as passes depending on when this is
+    # done (COMPILER-413).
 
     def __init__(self, pulse_channel: PulseChannel, total_duration: int):
         """
@@ -245,6 +269,12 @@ class WaveformContext:
         samples: int,
         do_upconvert: bool = True,
     ):
+        """Converts a waveform instruction into a discrete number of samples, handling
+        upconversion to the target frequency if specified."""
+
+        # TODO: the evaluate shape is handled in the EvaluatePulses pass, so this needs
+        # adjusting to only accept square waveforms and custom pulses. (COMPILER-413)
+
         dt = self.pulse_channel.sample_time
         length = samples * dt
         centre = length / 2.0
@@ -274,6 +304,9 @@ class WaveformContext:
         buffer: List[float],
         time: List[float],
     ):
+        """A virtually NCO to upconvert the waveforms by a frequency that is the difference
+        between the target frequency and the baseband frequency."""
+
         tslip = self.pulse_channel.phase_offset
         imbalance = self.pulse_channel.imbalance
         if self.pulse_channel.fixed_if:

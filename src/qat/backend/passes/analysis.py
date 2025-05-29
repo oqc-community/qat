@@ -690,9 +690,9 @@ class PulseChannelTimeline:
     :param np.ndarray[int] end_positions: The sample when the instruction ends.
     """
 
-    samples: np.ndarray[int] = field(default_factory=np.ndarray([]))
-    start_positions: np.ndarray[int] = field(default_factory=np.ndarray([]))
-    end_positions: np.ndarray[int] = field(default_factory=np.ndarray([]))
+    samples: np.ndarray[int] = field(default_factory=lambda: np.ndarray([]))
+    start_positions: np.ndarray[int] = field(default_factory=lambda: np.ndarray([]))
+    end_positions: np.ndarray[int] = field(default_factory=lambda: np.ndarray([]))
 
 
 @dataclass
