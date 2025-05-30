@@ -3353,12 +3353,6 @@
 </li>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoMultipleAcquiresValidation.run.params.ir">(qat.backend.passes.validation.NoMultipleAcquiresValidation.run parameter)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydReturnSanitisationValidation.run.params.ir">(qat.backend.passes.validation.PydReturnSanitisationValidation.run parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.RepeatSanitisationValidation.run.params.ir">(qat.backend.passes.validation.RepeatSanitisationValidation.run parameter)</a>
-</li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.ReturnSanitisationValidation.run.params.ir">(qat.backend.passes.validation.ReturnSanitisationValidation.run parameter)</a>
-</li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
@@ -3437,7 +3431,13 @@
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run.params.ir">(qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReturnSanitisationValidation.run.params.ir">(qat.middleend.passes.validation.PydReturnSanitisationValidation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.ReadoutValidation.run.params.ir">(qat.middleend.passes.validation.ReadoutValidation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.RepeatSanitisationValidation.run.params.ir">(qat.middleend.passes.validation.RepeatSanitisationValidation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.ReturnSanitisationValidation.run.params.ir">(qat.middleend.passes.validation.ReturnSanitisationValidation.run parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass.run.params.ir">(qat.purr.backends.qblox.analysis_passes.BindingPass.run parameter)</a>
 </li>
@@ -5979,7 +5979,7 @@
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation">PydReturnSanitisation (class in qat.middleend.passes.transform)</a>
 </li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydReturnSanitisationValidation">PydReturnSanitisationValidation (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReturnSanitisationValidation">PydReturnSanitisationValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase">PydSetBase (class in qat.utils.pydantic)</a>
 </li>
@@ -7841,7 +7841,7 @@
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.RepeatSanitisationValidation">RepeatSanitisationValidation (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.RepeatSanitisationValidation">RepeatSanitisationValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation">RepeatTranslation (class in qat.middleend.passes.legacy.transform)</a>
 </li>
@@ -8129,7 +8129,7 @@
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.ReturnSanitisationValidation">ReturnSanitisationValidation (class in qat.backend.passes.validation)</a>
+      <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.ReturnSanitisationValidation">ReturnSanitisationValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector.revert">revert() (DeviceInjector method)</a>
 
@@ -8328,7 +8328,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation.run">(PydReturnSanitisation method)</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydReturnSanitisationValidation.run">(PydReturnSanitisationValidation method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReturnSanitisationValidation.run">(PydReturnSanitisationValidation method)</a>
 </li>
         <li><a href="qat.core.qat.html#qat.core.qat.QAT.run">(QAT method)</a>
 </li>
@@ -8356,7 +8356,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run">(RepeatSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">[1]</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.RepeatSanitisationValidation.run">(RepeatSanitisationValidation method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.RepeatSanitisationValidation.run">(RepeatSanitisationValidation method)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation.run">(RepeatTranslation method)</a>
 </li>
@@ -8366,7 +8366,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation.run">(ReturnSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ReturnSanitisation.run">[1]</a>
 </li>
-        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.ReturnSanitisationValidation.run">(ReturnSanitisationValidation method)</a>
+        <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.ReturnSanitisationValidation.run">(ReturnSanitisationValidation method)</a>
 </li>
         <li><a href="qat.backend.passes.transform.html#qat.backend.passes.transform.ScopeSanitisation.run">(ScopeSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.ScopeSanitisation.run">[1]</a>
 </li>
