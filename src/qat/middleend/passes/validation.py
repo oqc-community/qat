@@ -8,6 +8,8 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
+from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
+from qat.ir.instructions import Return as PydReturn
 from qat.ir.measure import Acquire as PydAcquire
 from qat.ir.measure import Pulse as PydPulse
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
@@ -24,9 +26,14 @@ from qat.purr.compiler.instructions import (
     PostProcessing,
     ProcessAxis,
     Pulse,
+    Repeat,
+    Return,
     Sweep,
     Variable,
 )
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
 class InstructionValidation(ValidationPass):
@@ -414,3 +421,45 @@ class FrequencyValidation(ValidationPass):
                         "Hardware does not currently support frequency shifts on the "
                         f"physical channel {target.physical_channel}."
                     )
+
+
+class RepeatSanitisationValidation(ValidationPass):
+    """Checks if the builder has a :class:`Repeat` instruction and warns if none exists."""
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        if not repeats:
+            log.warning("Could not find any repeat instructions.")
+        return ir
+
+
+class ReturnSanitisationValidation(ValidationPass):
+    """Validates that the IR has a :class:`Return` instruction."""
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        returns = [inst for inst in ir.instructions if isinstance(inst, Return)]
+
+        if not returns:
+            raise ValueError("Could not find any return instructions")
+        elif len(returns) > 1:
+            raise ValueError("Found multiple return instructions")
+        return ir
+
+
+class PydReturnSanitisationValidation(ValidationPass):
+    """Validates that the IR has a :class:`Return` instruction."""
+
+    def run(self, ir: PydInstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        returns = [inst for inst in ir.instructions if isinstance(inst, PydReturn)]
+
+        if not returns:
+            raise ValueError("Could not find any return instructions.")
+        elif len(returns) > 1:
+            raise ValueError("Found multiple return instructions.")
+        return ir

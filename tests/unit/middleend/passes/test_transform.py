@@ -8,8 +8,8 @@ from enum import Enum
 
 import numpy as np
 import pytest
+from compiler_config.config import MetricsType
 
-from qat.backend.passes.validation import PydReturnSanitisationValidation
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import (
@@ -23,7 +23,9 @@ from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.measure import MeasureBlock as PydMeasureBlock
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
-from qat.middleend.passes.analysis import ActiveChannelResults
+from qat.middleend.passes.analysis import (
+    ActiveChannelResults,
+)
 from qat.middleend.passes.legacy.transform import LoopCount, RepeatTranslation
 from qat.middleend.passes.transform import (
     AcquireSanitisation,
@@ -37,13 +39,20 @@ from qat.middleend.passes.transform import (
     LowerSyncsToDelays,
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
+    PostProcessingSanitisation,
     PydPhaseOptimisation,
     PydPostProcessingSanitisation,
     PydReturnSanitisation,
     RepeatSanitisation,
     ResetsToDelays,
+    ReturnSanitisation,
     SquashDelaysOptimisation,
     SynchronizeTask,
+)
+from qat.middleend.passes.validation import (
+    PydReturnSanitisationValidation,
+    RepeatSanitisationValidation,
+    ReturnSanitisationValidation,
 )
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
@@ -68,15 +77,17 @@ from qat.purr.compiler.instructions import (
     PhaseSet,
     PhaseShift,
     Plus,
+    PostProcessing,
     Pulse,
     PulseShapeType,
     QuantumInstruction,
     Repeat,
     Reset,
+    Return,
     Synchronize,
     Variable,
 )
-from qat.utils.hardware_model import generate_hw_model
+from qat.purr.utils.logger import LoggerLevel
 
 from tests.unit.utils.pulses import pulse_attributes
 
@@ -458,15 +469,102 @@ class TestPydPhaseOptimisation:
         assert builder.instructions[0].targets == merged_targets
 
 
+class TestPostProcessingSanitisation:
+    hw = EchoModelLoader(32).load()
+
+    @pytest.mark.parametrize(
+        "axis, pp_type",
+        [
+            (ProcessAxis.TIME, PostProcessType.DOWN_CONVERT),
+            (ProcessAxis.SEQUENCE, PostProcessType.MEAN),
+        ],
+    )
+    def test_valid_meas_acq_with_pp(self, axis, pp_type):
+        builder = self.hw.create_builder()
+        qubit = self.hw.get_qubit(0)
+
+        _, acq = builder.measure(qubit=qubit, axis=axis)
+        builder.post_processing(acq, pp_type)
+        n_instr_before = len(builder.instructions)
+
+        met_mgr = MetricsManager()
+        PostProcessingSanitisation().run(builder, ResultManager(), met_mgr)
+        assert len(builder.instructions) == met_mgr.get_metric(
+            MetricsType.OptimizedInstructionCount
+        )
+        assert len(builder.instructions) == n_instr_before
+
+    @pytest.mark.parametrize(
+        "acq_mode,pp_type,pp_axes",
+        [
+            (AcquireMode.SCOPE, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]),
+            (AcquireMode.INTEGRATOR, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]),
+            (AcquireMode.INTEGRATOR, PostProcessType.MEAN, [ProcessAxis.TIME]),
+        ],
+    )
+    def test_invalid_acq_pp(self, acq_mode, pp_type, pp_axes):
+        builder = self.hw.create_builder()
+        qubit = self.hw.get_qubit(0)
+
+        _, acq = builder.measure(qubit=qubit, output_variable="test")
+        acq.mode = acq_mode
+        builder.post_processing(acq, process=pp_type, axes=pp_axes, qubit=qubit)
+        n_instr_before = len(builder.instructions)
+        assert isinstance(builder.instructions[-1], PostProcessing)
+
+        met_mgr = MetricsManager()
+        PostProcessingSanitisation().run(builder, ResultManager(), met_mgr)
+
+        # Test whether invalid PP gets sanitised from the IR.
+        assert not isinstance(builder.instructions[-1], PostProcessing)
+        assert (
+            met_mgr.get_metric(MetricsType.OptimizedInstructionCount) == n_instr_before - 1
+        )
+
+    def test_mid_circuit_measurement_two_diff_post_processing(self):
+        builder = self.hw.create_builder()
+        qubit = self.hw.get_qubit(2)
+
+        # Mid-circuit measurement with some manual (different) post-processing options.
+        _, acq1 = builder.measure(qubit=qubit, axis=ProcessAxis.TIME)
+        builder.post_processing(
+            acq1,
+            process=PostProcessType.DOWN_CONVERT,
+        )
+        builder.X(target=qubit)
+        _, acq2 = builder.measure(qubit=qubit, axis=ProcessAxis.SEQUENCE)
+        builder.post_processing(
+            acq2,
+            process=PostProcessType.MEAN,
+        )
+
+        PostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
+
+        # Make sure no instructions get discarded in the post-processing sanitisation for a mid-circuit measurement.
+        pp = [instr for instr in builder.instructions if isinstance(instr, PostProcessing)]
+        assert len(pp) == 2
+        assert pp[0].output_variable != pp[1].output_variable
+
+
 class TestPydPostProcessingSanitisation:
     hw = PydEchoModelLoader(32).load()
 
     def test_meas_acq_with_pp(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         for qubit in self.hw.qubits.values():
-            builder.measure_single_shot_z(target=qubit)
+            builder.measure(targets=qubit, mode=AcquireMode.SCOPE, output_variable="test")
+            builder.post_processing(
+                target=qubit, process_type=PostProcessType.MEAN, output_variable="test"
+            )
+        n_instr_before = builder.number_of_instructions
 
-        PydPostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
+        met_mgr = MetricsManager()
+        PydPostProcessingSanitisation().run(builder, ResultManager(), met_mgr)
+
+        assert builder.number_of_instructions == met_mgr.get_metric(
+            MetricsType.OptimizedInstructionCount
+        )
+        assert builder.number_of_instructions == n_instr_before
 
     @pytest.mark.parametrize(
         "acq_mode,pp_type,pp_axes",
@@ -530,8 +628,69 @@ class TestPydPostProcessingSanitisation:
         assert pp[0].output_variable != pp[1].output_variable
 
 
+class TestReturnSanitisation:
+    hw = EchoModelLoader(4).load()
+
+    def test_empty_builder(self):
+        builder = self.hw.create_builder()
+        res_mgr = ResultManager()
+
+        with pytest.raises(ValueError):
+            ReturnSanitisationValidation().run(builder, res_mgr)
+
+        ReturnSanitisation().run(builder, res_mgr)
+        ReturnSanitisationValidation().run(builder, res_mgr)
+
+        return_instr: Return = builder.instructions[-1]
+        assert len(return_instr.variables) == 0
+
+    def test_single_return(self):
+        builder = self.hw.create_builder()
+        builder.returns(variables=["test"])
+        ref_nr_instructions = len(builder.instructions)
+
+        res_mgr = ResultManager()
+        ReturnSanitisationValidation().run(builder, res_mgr)
+        ReturnSanitisation().run(builder, res_mgr)
+
+        assert len(builder.instructions) == ref_nr_instructions
+        assert builder.instructions[0].variables == ["test"]
+
+    def test_multiple_returns_squashed(self):
+        q0 = self.hw.get_qubit(0)
+        q1 = self.hw.get_qubit(1)
+
+        builder = self.hw.create_builder()
+        builder.measure_single_shot_z(target=q0, output_variable="out_q0")
+        builder.measure_single_shot_z(target=q1, output_variable="out_q1")
+
+        output_vars = [
+            instr.output_variable
+            for instr in builder.instructions
+            if isinstance(instr, Acquire)
+        ]
+        assert len(output_vars) == 2
+
+        builder.returns(variables=[output_vars[0]])
+        builder.returns(variables=[output_vars[1]])
+
+        res_mgr = ResultManager()
+        # Two returns in a single IR should raise an error.
+        with pytest.raises(ValueError):
+            ReturnSanitisationValidation().run(builder, res_mgr)
+
+        # Compress the two returns to a single return and validate.
+        ReturnSanitisation().run(builder, res_mgr)
+        ReturnSanitisationValidation().run(builder, res_mgr)
+
+        return_instr = builder.instructions[-1]
+        assert isinstance(return_instr, Return)
+        for var in return_instr.variables:
+            assert var in output_vars
+
+
 class TestPydReturnSanitisation:
-    hw = generate_hw_model(8)
+    hw = PydEchoModelLoader(8).load()
 
     def test_empty_builder(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -1686,18 +1845,24 @@ class TestRepeatSanitisation:
             passive_reset_time = passive_reset_time - 1e-04
             builder.repeat(shots, passive_reset_time)
 
+        RepeatSanitisationValidation().run(builder)
         ir = RepeatSanitisation(model, target_data).run(builder)
         assert isinstance(repeat := ir.instructions[0], Repeat)
         assert repeat.repeat_count == shots
         # TODO: Change to `passive_reset_time`. 428, 455
         assert repeat.repetition_period == passive_reset_time
 
-    def test_repeat_adds_to_beginning(self):
+    def test_repeat_adds_to_beginning(self, caplog):
         model = EchoModelLoader().load()
         target_data = TargetData.random()
 
         builder = model.create_builder()
         builder.X(model.qubits[0])
+
+        with caplog.at_level(LoggerLevel.WARNING.value):
+            # No `Repeat`s in IR.
+            RepeatSanitisationValidation().run(builder)
+            assert "Could not find any repeat instructions." in caplog.text
 
         builder = RepeatSanitisation(model, target_data).run(builder)
         assert isinstance(builder.instructions[0], Repeat)

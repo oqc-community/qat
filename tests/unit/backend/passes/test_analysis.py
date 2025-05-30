@@ -25,13 +25,13 @@ from qat.backend.passes.analysis import (
 )
 from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
 from qat.backend.passes.transform import ScopeSanitisation
-from qat.backend.passes.validation import ReturnSanitisationValidation
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.transform import (
     InstructionGranularitySanitisation,
     LowerSyncsToDelays,
     ReturnSanitisation,
 )
+from qat.middleend.passes.validation import ReturnSanitisationValidation
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
