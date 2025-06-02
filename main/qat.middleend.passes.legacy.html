@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.middleend.passes.legacy.transform module" href="qat.middleend.passes.legacy.transform.html" />
+    <link rel="next" title="qat.middleend.passes.legacy.analysis module" href="qat.middleend.passes.legacy.analysis.html" />
     <link rel="prev" title="qat.middleend.passes.gates.validation module" href="qat.middleend.passes.gates.validation.html" /> 
 </head>
 
@@ -59,10 +59,13 @@
 <li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.transform.html">qat.backend.passes.transform module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.legacy.html">qat.backend.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.analysis.html">qat.backend.passes.legacy.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html">qat.backend.passes.legacy.lowering module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.transform.html">qat.backend.passes.legacy.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.validation.html">qat.backend.passes.legacy.validation module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -112,6 +115,10 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.html">qat.frontend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.legacy.html">qat.frontend.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.passes.legacy.transform.html">qat.frontend.passes.legacy.transform module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.analysis.html">qat.frontend.passes.analysis module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
 </ul>
@@ -160,11 +167,11 @@
 </ul>
 </li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.middleend.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html">qat.middleend.passes.legacy.analysis module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html">qat.middleend.passes.legacy.transform module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html">qat.middleend.passes.legacy.validation module</a></li>
 </ul>
 </li>
-<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.analysis.html">qat.middleend.passes.analysis module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
@@ -367,33 +374,159 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html">qat.middleend.passes.legacy.analysis module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.from_qubit"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.from_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.physical_qubit_indices"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.physical_qubit_indices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.qubits"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.qubits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.target_map"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.target_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.targets"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.targets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.unassigned"><code class="docutils literal notranslate"><span class="pre">ActiveChannelResults.unassigned</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActivePulseChannelAnalysis"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActivePulseChannelAnalysis.run"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.BatchedShots"><code class="docutils literal notranslate"><span class="pre">BatchedShots</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.BatchedShots.run"><code class="docutils literal notranslate"><span class="pre">BatchedShots.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.BatchedShotsResult"><code class="docutils literal notranslate"><span class="pre">BatchedShotsResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.BatchedShotsResult.batched_shots"><code class="docutils literal notranslate"><span class="pre">BatchedShotsResult.batched_shots</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.BatchedShotsResult.total_shots"><code class="docutils literal notranslate"><span class="pre">BatchedShotsResult.total_shots</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html">qat.middleend.passes.legacy.transform module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.AcquireSanitisation"><code class="docutils literal notranslate"><span class="pre">AcquireSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.AcquireSanitisation.run"><code class="docutils literal notranslate"><span class="pre">AcquireSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EndOfTaskResetSanitisation"><code class="docutils literal notranslate"><span class="pre">EndOfTaskResetSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EndOfTaskResetSanitisation.run"><code class="docutils literal notranslate"><span class="pre">EndOfTaskResetSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses"><code class="docutils literal notranslate"><span class="pre">EvaluatePulses</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses.evaluate_waveform"><code class="docutils literal notranslate"><span class="pre">EvaluatePulses.evaluate_waveform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses.hash_pulse"><code class="docutils literal notranslate"><span class="pre">EvaluatePulses.hash_pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses.run"><code class="docutils literal notranslate"><span class="pre">EvaluatePulses.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation"><code class="docutils literal notranslate"><span class="pre">FreqShiftSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.add_freq_shift_to_ir"><code class="docutils literal notranslate"><span class="pre">FreqShiftSanitisation.add_freq_shift_to_ir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.get_freq_shift_channels"><code class="docutils literal notranslate"><span class="pre">FreqShiftSanitisation.get_freq_shift_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.run"><code class="docutils literal notranslate"><span class="pre">FreqShiftSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InactivePulseChannelSanitisation"><code class="docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InactivePulseChannelSanitisation.run"><code class="docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InitialPhaseResetSanitisation"><code class="docutils literal notranslate"><span class="pre">InitialPhaseResetSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InitialPhaseResetSanitisation.run"><code class="docutils literal notranslate"><span class="pre">InitialPhaseResetSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionGranularitySanitisation"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionGranularitySanitisation.run"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionGranularitySanitisation.sanitise_custom_pulses"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.sanitise_custom_pulses()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionGranularitySanitisation.sanitise_quantum_instructions"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.sanitise_quantum_instructions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionLengthSanitisation"><code class="docutils literal notranslate"><span class="pre">InstructionLengthSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InstructionLengthSanitisation.run"><code class="docutils literal notranslate"><span class="pre">InstructionLengthSanitisation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation"><code class="docutils literal notranslate"><span class="pre">IntegratorAcquireSanitisation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run"><code class="docutils literal notranslate"><span class="pre">IntegratorAcquireSanitisation.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LegacyPhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">LegacyPhaseOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LegacyPhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">LegacyPhaseOptimisation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LoopCount"><code class="docutils literal notranslate"><span class="pre">LoopCount</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LowerSyncsToDelays"><code class="docutils literal notranslate"><span class="pre">LowerSyncsToDelays</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LowerSyncsToDelays.run"><code class="docutils literal notranslate"><span class="pre">LowerSyncsToDelays.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.MeasurePhaseResetSanitisation"><code class="docutils literal notranslate"><span class="pre">MeasurePhaseResetSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.MeasurePhaseResetSanitisation.run"><code class="docutils literal notranslate"><span class="pre">MeasurePhaseResetSanitisation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.merge_phase_instructions"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.merge_phase_instructions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PostProcessingSanitisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.PostProcessingSanitisation.run"><code class="docutils literal notranslate"><span class="pre">PostProcessingSanitisation.run()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper"><code class="docutils literal notranslate"><span class="pre">QiskitInstructionsWrapper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run"><code class="docutils literal notranslate"><span class="pre">QiskitInstructionsWrapper.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatSanitisation"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatSanitisation.run"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation"><code class="docutils literal notranslate"><span class="pre">RepeatTranslation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation.run"><code class="docutils literal notranslate"><span class="pre">RepeatTranslation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.ResetsToDelays"><code class="docutils literal notranslate"><span class="pre">ResetsToDelays</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.ResetsToDelays.run"><code class="docutils literal notranslate"><span class="pre">ResetsToDelays.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.ReturnSanitisation"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.ReturnSanitisation.run"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.SquashDelaysOptimisation"><code class="docutils literal notranslate"><span class="pre">SquashDelaysOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.SquashDelaysOptimisation.run"><code class="docutils literal notranslate"><span class="pre">SquashDelaysOptimisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.SynchronizeTask"><code class="docutils literal notranslate"><span class="pre">SynchronizeTask</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.SynchronizeTask.run"><code class="docutils literal notranslate"><span class="pre">SynchronizeTask.run()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html">qat.middleend.passes.legacy.validation module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation"><code class="docutils literal notranslate"><span class="pre">FrequencyValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.run"><code class="docutils literal notranslate"><span class="pre">FrequencyValidation.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.validate_frequency_ranges"><code class="docutils literal notranslate"><span class="pre">FrequencyValidation.validate_frequency_ranges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.validate_no_freqshifts_on_fixed_if"><code class="docutils literal notranslate"><span class="pre">FrequencyValidation.validate_no_freqshifts_on_fixed_if()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.HardwareConfigValidity"><code class="docutils literal notranslate"><span class="pre">HardwareConfigValidity</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.HardwareConfigValidity.run"><code class="docutils literal notranslate"><span class="pre">HardwareConfigValidity.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.PhysicalChannelAmplitudeValidation"><code class="docutils literal notranslate"><span class="pre">PhysicalChannelAmplitudeValidation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.PhysicalChannelAmplitudeValidation.run"><code class="docutils literal notranslate"><span class="pre">PhysicalChannelAmplitudeValidation.run()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.QiskitResultsFormatValidation"><code class="docutils literal notranslate"><span class="pre">QiskitResultsFormatValidation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.QiskitResultsFormatValidation.run"><code class="docutils literal notranslate"><span class="pre">QiskitResultsFormatValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.ReadoutValidation.run"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.RepeatSanitisationValidation"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisationValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.RepeatSanitisationValidation.run"><code class="docutils literal notranslate"><span class="pre">RepeatSanitisationValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.ReturnSanitisationValidation"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisationValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.ReturnSanitisationValidation.run"><code class="docutils literal notranslate"><span class="pre">ReturnSanitisationValidation.run()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -409,7 +542,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.middleend.passes.gates.validation.html" class="btn btn-neutral float-left" title="qat.middleend.passes.gates.validation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.middleend.passes.legacy.transform.html" class="btn btn-neutral float-right" title="qat.middleend.passes.legacy.transform module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.middleend.passes.legacy.analysis.html" class="btn btn-neutral float-right" title="qat.middleend.passes.legacy.analysis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

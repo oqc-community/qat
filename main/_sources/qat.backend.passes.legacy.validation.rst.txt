@@ -1,0 +1,7 @@
+qat.backend.passes.legacy.validation module
+===========================================
+
+.. automodule:: qat.backend.passes.legacy.validation
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -6,13 +6,10 @@ qat.backend.passes package
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
+Subpackages
+-----------
 
 .. toctree::
    :maxdepth: 4
 
-   qat.backend.passes.analysis
-   qat.backend.passes.lowering
-   qat.backend.passes.transform
-   qat.backend.passes.validation
+   qat.backend.passes.legacy

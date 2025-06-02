@@ -1,0 +1,7 @@
+qat.backend.passes.legacy.analysis module
+=========================================
+
+.. automodule:: qat.backend.passes.legacy.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:

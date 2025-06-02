@@ -1,0 +1,18 @@
+qat.backend.passes.legacy package
+=================================
+
+.. automodule:: qat.backend.passes.legacy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.passes.legacy.analysis
+   qat.backend.passes.legacy.lowering
+   qat.backend.passes.legacy.transform
+   qat.backend.passes.legacy.validation

@@ -1,0 +1,7 @@
+qat.backend.passes.legacy.lowering module
+=========================================
+
+.. automodule:: qat.backend.passes.legacy.lowering
+   :members:
+   :undoc-members:
+   :show-inheritance:

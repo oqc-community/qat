@@ -1,0 +1,7 @@
+qat.frontend.passes.legacy.transform module
+===========================================
+
+.. automodule:: qat.frontend.passes.legacy.transform
+   :members:
+   :undoc-members:
+   :show-inheritance:
