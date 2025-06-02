@@ -5,9 +5,12 @@ from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.middleend.passes.legacy.transform import IntegratorAcquireSanitisation
-from qat.middleend.passes.transform import PhaseOptimisation, PostProcessingSanitisation
-from qat.middleend.passes.validation import (
+from qat.middleend.passes.legacy.transform import (
+    IntegratorAcquireSanitisation,
+    PhaseOptimisation,
+    PostProcessingSanitisation,
+)
+from qat.middleend.passes.legacy.validation import (
     HardwareConfigValidity,
     InstructionValidation,
     ReadoutValidation,

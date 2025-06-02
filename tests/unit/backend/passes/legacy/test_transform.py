@@ -2,8 +2,8 @@
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
 
 
-from qat.backend.passes.analysis import TriagePass, TriageResult
-from qat.backend.passes.transform import DesugaringPass
+from qat.backend.passes.legacy.analysis import TriagePass, TriageResult
+from qat.backend.passes.legacy.transform import DesugaringPass
 from qat.core.result_base import ResultManager
 from qat.model.loaders.legacy import EchoModelLoader
 

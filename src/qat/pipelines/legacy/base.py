@@ -6,9 +6,11 @@ from qat.core.pass_base import PassManager
 from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.middleend.passes.legacy.transform import PhaseOptimisation
-from qat.middleend.passes.transform import PostProcessingSanitisation
-from qat.middleend.passes.validation import (
+from qat.middleend.passes.legacy.transform import (
+    LegacyPhaseOptimisation,
+    PostProcessingSanitisation,
+)
+from qat.middleend.passes.legacy.validation import (
     HardwareConfigValidity,
     InstructionValidation,
     ReadoutValidation,
@@ -59,7 +61,7 @@ def get_middleend_pipeline(
         PassManager()
         | HardwareConfigValidity(model)
         | CalibrationAnalysis()
-        | PhaseOptimisation()
+        | LegacyPhaseOptimisation()
         | PostProcessingSanitisation()
         | InstructionValidation(target_data)
         | ReadoutValidation(model)

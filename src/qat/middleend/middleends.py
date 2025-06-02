@@ -9,13 +9,10 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.analysis import (
+from qat.middleend.passes.legacy.analysis import (
     ActivePulseChannelAnalysis,
 )
 from qat.middleend.passes.legacy.transform import (
-    RepeatTranslation,
-)
-from qat.middleend.passes.transform import (
     AcquireSanitisation,
     EndOfTaskResetSanitisation,
     EvaluatePulses,
@@ -28,20 +25,25 @@ from qat.middleend.passes.transform import (
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
-    PydPhaseOptimisation,
-    PydReturnSanitisation,
     RepeatSanitisation,
+    RepeatTranslation,
     ResetsToDelays,
     ReturnSanitisation,
     SquashDelaysOptimisation,
     SynchronizeTask,
 )
-from qat.middleend.passes.validation import (
+from qat.middleend.passes.legacy.validation import (
     FrequencyValidation,
     HardwareConfigValidity,
+    ReadoutValidation,
+)
+from qat.middleend.passes.transform import (
+    PydPhaseOptimisation,
+    PydReturnSanitisation,
+)
+from qat.middleend.passes.validation import (
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
-    ReadoutValidation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.model.target_data import TargetData

@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from qat.backend.graph import ControlFlowGraph
-from qat.backend.passes.analysis import (
+from qat.backend.passes.legacy.analysis import (
     BindingPass,
     BindingResult,
     CFGPass,
@@ -23,15 +23,15 @@ from qat.backend.passes.analysis import (
     TriagePass,
     TriageResult,
 )
-from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
-from qat.backend.passes.transform import ScopeSanitisation
+from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.legacy.transform import ScopeSanitisation
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.transform import (
+from qat.middleend.passes.legacy.transform import (
     InstructionGranularitySanitisation,
     LowerSyncsToDelays,
     ReturnSanitisation,
 )
-from qat.middleend.passes.validation import ReturnSanitisationValidation
+from qat.middleend.passes.legacy.validation import ReturnSanitisationValidation
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (

@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from qat.backend.passes.lowering import PartitionedIR
+from qat.backend.passes.legacy.lowering import PartitionedIR
 from qat.core.pass_base import ValidationPass
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel

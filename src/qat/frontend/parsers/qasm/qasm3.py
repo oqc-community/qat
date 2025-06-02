@@ -21,7 +21,6 @@ from openqasm3.visitor import QASMVisitor
 from pydantic import Field
 
 from qat.frontend.parsers.qasm.base import AbstractParser, ParseResults, QasmContext
-from qat.frontend.parsers.qasm.qasm2 import log
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
@@ -54,7 +53,10 @@ from qat.model.device import (
     ResonatorPulseChannels,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
+from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import FrozenSet, ValidatedList
+
+log = get_default_logger()
 
 
 class OpenPulseContext(QasmContext):

@@ -6,8 +6,8 @@ from contextlib import nullcontext
 
 import pytest
 
-from qat.backend.passes.lowering import PartitionedIR
-from qat.backend.passes.validation import (
+from qat.backend.passes.legacy.lowering import PartitionedIR
+from qat.backend.passes.legacy.validation import (
     NCOFrequencyVariability,
     NoAcquiresWithDifferentWeightsValidation,
     NoAcquireWeightsValidation,

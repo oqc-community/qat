@@ -6,8 +6,10 @@ from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import QiskitInstructionsWrapper
-from qat.middleend.passes.legacy.validation import QiskitResultsFormatValidation
-from qat.middleend.passes.validation import HardwareConfigValidity
+from qat.middleend.passes.legacy.validation import (
+    HardwareConfigValidity,
+    QiskitResultsFormatValidation,
+)
 from qat.model.loaders.legacy import QiskitModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime import LegacyRuntime

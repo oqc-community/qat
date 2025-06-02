@@ -6,7 +6,7 @@ import pytest
 
 from qat.core.metrics_base import MetricsManager, MetricsType
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.analysis import (
+from qat.middleend.passes.legacy.analysis import (
     ActiveChannelResults,
     ActivePulseChannelAnalysis,
     BatchedShots,

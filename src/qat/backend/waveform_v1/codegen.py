@@ -6,14 +6,14 @@ from typing import List, Optional
 import numpy as np
 
 from qat.backend.base import BaseBackend
-from qat.backend.passes.analysis import (
+from qat.backend.passes.legacy.analysis import (
     IntermediateFrequencyAnalysis,
     IntermediateFrequencyResult,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.lowering import PartitionByPulseChannel, PartitionedIR
-from qat.backend.passes.validation import NoAcquireWeightsValidation
+from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.legacy.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import (
     WaveformV1ChannelData,
     WaveformV1Executable,
