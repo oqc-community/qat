@@ -7,6 +7,7 @@ from pathlib import Path
 from compiler_config.config import Qasm2Optimizations
 from openqasm3 import ast
 
+from qat.frontend.qir import load_qir_file
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
@@ -47,6 +48,14 @@ def get_test_file_path(ir_type: ProgramFileType, file_name) -> Path:
     return Path(get_test_files_dir(ir_type), file_name)
 
 
+def get_qasm3_path(file_name):
+    return get_test_file_path(ProgramFileType.QASM3, file_name)
+
+
+def get_qasm2_path(file_name):
+    return get_test_file_path(ProgramFileType.QASM2, file_name)
+
+
 def get_qasm3(file_name):
     return qasm_from_file(get_test_file_path(ProgramFileType.QASM3, file_name))
 
@@ -60,7 +69,11 @@ def get_qir_path(file_name: str) -> Path:
 
 
 def get_qir(file_name):
-    return qasm_from_file(get_test_file_path(ProgramFileType.QIR, file_name))
+    file_path = get_test_file_path(ProgramFileType.QIR, file_name)
+    if file_path.suffix == "":
+        with file_path.open("r") as file_:
+            return file_.read()
+    return load_qir_file(file_path)
 
 
 def get_openpulse(file_name):

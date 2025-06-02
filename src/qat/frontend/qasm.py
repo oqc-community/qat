@@ -13,7 +13,8 @@ from qat.frontend.base import BaseFrontend
 from qat.frontend.parsers.qasm import CloudQasmParser as PydCloudQasmParser
 from qat.frontend.parsers.qasm import Qasm3Parser as PydQasm3Parser
 from qat.frontend.passes.analysis import InputAnalysis
-from qat.frontend.passes.transform import InputOptimisation, PydInputOptimisation
+from qat.frontend.passes.legacy.transform import InputOptimisation
+from qat.frontend.passes.transform import PydInputOptimisation
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
