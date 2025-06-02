@@ -159,7 +159,7 @@ class EndRepeat(Instruction):
     """
 
     def __repr__(self):
-        return "end_repeat"
+        return "end repeat"
 
 
 class PhaseSet(QuantumInstruction):
@@ -298,7 +298,7 @@ class Assign(Instruction):
         self.value = value
 
     def __repr__(self):
-        return f"{self.name} = {str(self.value)}"
+        return f"assign {self.name} = {str(self.value)}"
 
 
 class Waveform(QuantumInstruction):
@@ -612,7 +612,7 @@ class DeviceUpdate(QuantumInstruction):
         self.value = value
 
     def __repr__(self):
-        return f"{self.target.full_id()}.{self.attribute} = {str(self.value)}"
+        return f"device update {self.target.full_id()}.{self.attribute} = {str(self.value)}"
 
 
 class Sweep(Instruction):
@@ -656,7 +656,7 @@ class EndSweep(Instruction):
     """
 
     def __repr__(self):
-        return "end_sweep"
+        return "end sweep"
 
 
 class Jump(Instruction):
@@ -673,9 +673,9 @@ class Jump(Instruction):
 
     def __repr__(self):
         if self.condition is not None:
-            return f"if {str(self.condition)} -> {str(self.target)}"
+            return f"jump if {str(self.condition)} -> {str(self.target)}"
         else:
-            return f"-> {str(self.target)}"
+            return f"jump -> {str(self.target)}"
 
 
 class BinaryOperator:
@@ -765,7 +765,7 @@ class Variable:
         return build_generated_name(existing_names)
 
     def __repr__(self):
-        return self.name
+        return f"variable {self.name}"
 
     def __eq__(self, other):
         return (
@@ -797,7 +797,7 @@ class Label(Instruction):
         return build_generated_name(existing_names)
 
     def __repr__(self):
-        return f"{self.name}:"
+        return f"label {self.name}:"
 
 
 class IndexAccessor(Variable):
@@ -808,7 +808,7 @@ class IndexAccessor(Variable):
         self.index = index
 
     def __repr__(self):
-        return f"{self.name}[{self.index}]"
+        return f"index accessor {self.name}[{self.index}]"
 
 
 class ResultsProcessing(Instruction):
@@ -817,7 +817,7 @@ class ResultsProcessing(Instruction):
         self.results_processing = res_processing
 
     def __repr__(self):
-        return f"{self.variable}: {str(self.results_processing.name)}"
+        return f"results processing {self.variable}: {str(self.results_processing.name)}"
 
 
 def remove_floating_point(x):
@@ -880,6 +880,9 @@ class InstructionBlock:
             raise ValueError(f"Invalid {label} for {type(self)}: {invalid_items_str}")
 
         return items
+
+    def __repr__(self):
+        return f"instruction block [{','.join(self.instructions)}]"
 
 
 class QuantumInstructionBlock(InstructionBlock):
