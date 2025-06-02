@@ -175,10 +175,10 @@ class DefaultMiddleend(CustomMiddleend):
             | AcquireSanitisation()
             | MeasurePhaseResetSanitisation()
             | InstructionGranularitySanitisation(model, target_data)
-            | InactivePulseChannelSanitisation()
             # Preparing for codegen
             | EvaluatePulses()
             | LowerSyncsToDelays()
+            | InactivePulseChannelSanitisation()
             | FreqShiftSanitisation(model)
             | InitialPhaseResetSanitisation()
             | PhaseOptimisation()

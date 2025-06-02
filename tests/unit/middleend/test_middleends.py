@@ -240,6 +240,28 @@ class TestDefaultMiddleend:
         # altered
         assert met_mgr.optimized_instruction_count != None
 
+    def test_delay_and_sync(self, model, middleend):
+        """Regression test to test that a Delay on an inactive channel, followed by a sync
+        with an active channel can be used to delay the active channel."""
+
+        chan1 = model.qubits[0].get_drive_channel()
+        chan2 = model.qubits[1].get_drive_channel()
+        builder = model.create_builder()
+        builder.delay(chan1, 80e-9)
+        builder.synchronize([chan1, chan2])
+        builder.pulse(chan2, width=160e-9, shape=PulseShapeType.SQUARE)
+        ir = middleend.emit(builder)
+
+        instructions = [
+            inst
+            for inst in ir.instructions
+            if isinstance(inst, QuantumInstruction) and chan2 in inst.quantum_targets
+        ]
+        assert isinstance(instructions[1], Delay)
+        assert instructions[1].duration == 80e-9
+        assert isinstance(instructions[2], Pulse)
+        assert instructions[2].duration == 160e-9
+
 
 class TestFallthroughMiddleend:
     model = EchoModelLoader().load()
