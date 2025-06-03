@@ -2,12 +2,11 @@
 name = "qat-compiler"
 # This name has the -compiler suffix in order to use the poetry and twine tools to build and publish to PyPI
 # witout having to manually adjust the dist file names.
-version = "2.7.0"
 description = "A low-level quantum compiler and runtime which facilitates executing quantum IRs."
 readme = "README.rst"
 license = "BSD-3-Clause"
 requires-python = ">=3.10,<3.13"
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "version"]
 authors = [
     { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
     { name = "Harry Waring", email = "hwaring@oqc.tech" },
@@ -30,6 +29,7 @@ requires-poetry = ">=2.0"
 packages = [
     { include = "qat", from = "src/" }
 ]
+version = "0.0.0"
 
 [tool.poetry.scripts]
 format-code = "scripts.poetry_scripts:format_code"
@@ -103,10 +103,29 @@ sphinx-autodoc-typehints = "^3.0.0"
 sphinx-paramlinks = "^0.6.0"
 sphinx-multiversion = "^0.2.4"
 sphinx-pyproject = "^0.3.0"
+dunamai = "^1.24.1"
+
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+[tool.poetry-dynamic-versioning]
+enable = true
+pattern = "default-unprefixed"
+vcs = "git"
+metadata = false
+dirty = false
+style = "pep440"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{ serialize_pep440(base) }}
+    {%- else -%}
+        {{ serialize_pep440(base, post=distance, dev=timestamp) }}
+    {%- endif -%}
+"""
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.sphinx-pyproject]
 copyright = "2025, Oxford Quantum Circuits Ltd"

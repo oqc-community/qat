@@ -1,2 +1,3 @@
 tests/files/** linguist-vendored
 notebooks/ipynb/*.ipynb linguist-generated=true
+.git_archival.json  export-subst

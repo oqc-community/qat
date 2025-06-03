@@ -27,7 +27,8 @@ jobs:
         cache: poetry
 
     - name: Install project
-      run: poetry sync --with docs
+      run: |
+        poetry sync --with docs
 
     - name: Build docs
       run: |
