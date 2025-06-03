@@ -35,6 +35,7 @@ from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
     ResetsToDelays,
     ReturnSanitisation,
+    ScopeSanitisation,
     SquashDelaysOptimisation,
     SynchronizeTask,
 )
@@ -74,7 +75,6 @@ from qat.purr.compiler.instructions import (
     Synchronize,
     Variable,
 )
-from qat.purr.utils.logger import LoggerLevel
 
 from tests.unit.utils.pulses import pulse_attributes
 
@@ -1693,40 +1693,10 @@ class TestRepeatSanitisation:
 
         RepeatSanitisationValidation().run(builder)
         ir = RepeatSanitisation(model, target_data).run(builder)
-        assert isinstance(repeat := ir.instructions[0], Repeat)
+        assert isinstance(repeat := ir.instructions[-1], Repeat)
         assert repeat.repeat_count == shots
         # TODO: Change to `passive_reset_time`. 428, 455
         assert repeat.repetition_period == passive_reset_time
-
-    def test_repeat_adds_to_beginning(self, caplog):
-        model = EchoModelLoader().load()
-        target_data = TargetData.random()
-
-        builder = model.create_builder()
-        builder.X(model.qubits[0])
-
-        with caplog.at_level(LoggerLevel.WARNING.value):
-            # No `Repeat`s in IR.
-            RepeatSanitisationValidation().run(builder)
-            assert "Could not find any repeat instructions." in caplog.text
-
-        builder = RepeatSanitisation(model, target_data).run(builder)
-        assert isinstance(builder.instructions[0], Repeat)
-
-    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
-    def test_repeats_are_shifted_to_the_beginning(self, num_repeats):
-        model = EchoModelLoader().load()
-        target_data = TargetData.random()
-
-        builder = model.create_builder()
-        builder.X(model.qubits[0])
-        for i in range(num_repeats):
-            builder.repeat(i + 1, 100e-6)
-        builder = RepeatSanitisation(model, target_data).run(builder)
-
-        for i in range(num_repeats):
-            assert isinstance(builder.instructions[i], Repeat)
-            assert builder.instructions[i].repeat_count == i + 1
 
     def test_repeat_instructions_are_sanitised(self):
         model = EchoModelLoader().load()
@@ -1737,7 +1707,7 @@ class TestRepeatSanitisation:
         builder.repeat(None, None)
 
         builder = RepeatSanitisation(model, target_data).run(builder)
-        assert isinstance(repeat := builder.instructions[0], Repeat)
+        assert isinstance(repeat := builder.instructions[-1], Repeat)
         assert repeat.repeat_count == target_data.default_shots
         assert repeat.repetition_period == target_data.QUBIT_DATA.passive_reset_time
 
@@ -2023,3 +1993,33 @@ class TestSquashDelaysOptimisation:
         assert len(builder.instructions) == 2
         assert builder.instructions[0].time == 5 + delay_times[0]
         assert builder.instructions[1].time == 5 + delay_times[1]
+
+
+class TestScopeSanitisation:
+    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
+    def test_repeats_are_shifted_to_the_beginning(self, num_repeats):
+        model = EchoModelLoader().load()
+
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+        for i in range(num_repeats):
+            builder.repeat(i + 1, 100e-6)
+        builder = ScopeSanitisation().run(builder)
+
+        for i in range(num_repeats):
+            assert isinstance(builder.instructions[i], Repeat)
+            assert builder.instructions[i].repeat_count == i + 1
+
+    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
+    def test_repeat_scopes_are_closed(self, num_repeats):
+        model = EchoModelLoader().load()
+        builder = model.create_builder()
+        for i in range(num_repeats):
+            builder.repeat(1000)
+        builder.delay(model.qubits[0].get_drive_channel(), 80e-9)
+
+        builder = ScopeSanitisation().run(builder)
+        end_repeats = [inst for inst in builder.instructions if isinstance(inst, EndRepeat)]
+        assert len(end_repeats) == num_repeats
+        for j in range(num_repeats):
+            assert isinstance(builder.instructions[-1 - j], EndRepeat)

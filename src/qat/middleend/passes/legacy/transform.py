@@ -8,6 +8,7 @@ from typing import List
 
 import numpy as np
 from compiler_config.config import MetricsType
+from more_itertools import partition
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
@@ -26,6 +27,7 @@ from qat.purr.compiler.instructions import (
     CustomPulse,
     Delay,
     EndRepeat,
+    EndSweep,
     GreaterThan,
     Instruction,
     Jump,
@@ -44,6 +46,7 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Reset,
     Return,
+    Sweep,
     Synchronize,
     Variable,
 )
@@ -959,9 +962,8 @@ class ReturnSanitisation(TransformPass):
 
 
 class RepeatSanitisation(TransformPass):
-    """Locates repeat instructions, bubbles them to the top of the instruction list, and
-    inserts any missing values with defaults from the hardware model. If no repeat is found,
-    then one is added to the top of the instruction list."""
+    """Adds repeat counts and repetition periods to :class:`Repeat` instructions. If none
+    is found, a repeat instruction is added."""
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """
@@ -983,27 +985,10 @@ class RepeatSanitisation(TransformPass):
                     rep.repeat_count = self.target_data.default_shots
                 if rep.repetition_period is None:
                     rep.repetition_period = self.target_data.QUBIT_DATA.passive_reset_time
-
-            if repeats != list(range(len(repeats))):
-                for new_idx, old_idx in enumerate(repeats):
-                    if new_idx != old_idx:
-                        ir.insert(ir._instructions.pop(old_idx), new_idx)
-
-                log.warning(
-                    "Repeats are currently expected to be found at the top of the "
-                    f"instruction list, but have been found at positions {repeats}. They "
-                    "will be moved to the top. With more complex control flow and iteration"
-                    " support in the future, this will be changed so repeats keep their "
-                    "positions (with appropriate end of repeat delimiters)."
-                )
-
         else:
-            ir.insert(
-                Repeat(
-                    self.target_data.default_shots,
-                    self.target_data.QUBIT_DATA.passive_reset_time,
-                ),
-                0,
+            ir.repeat(
+                self.target_data.default_shots,
+                self.target_data.QUBIT_DATA.passive_reset_time,
             )
         return ir
 
@@ -1214,4 +1199,31 @@ class SquashDelaysOptimisation(TransformPass):
         ir.instructions = instructions
 
         met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(instructions))
+        return ir
+
+
+class ScopeSanitisation(TransformPass):
+    """Bubbles up all sweeps and repeats to the beginning of the list and adds delimiter
+    instructions to the repeats and sweeps signifying the end of their scopes.
+
+    .. warning::
+
+        This pass is intended for use with legacy builders that do not use
+        :class:`EndRepeat` and :class:`EndSweep` instructions. It will add a delimiter
+        instruction for each :class:`Repeat` and :class:`Sweep` found in the IR.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        tail, head = partition(
+            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
+        )
+        tail, head = list(tail), list(head)
+
+        delimiters = [
+            EndSweep() if isinstance(inst, Sweep) else EndRepeat() for inst in head
+        ]
+
+        ir.instructions = head + tail + delimiters[::-1]
         return ir

@@ -29,6 +29,7 @@ from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
     ResetsToDelays,
     ReturnSanitisation,
+    ScopeSanitisation,
     SquashDelaysOptimisation,
     SynchronizeTask,
 )
@@ -188,6 +189,7 @@ class DefaultMiddleend(CustomMiddleend):
             | ResetsToDelays(target_data)
             | SquashDelaysOptimisation()
             | InstructionLengthSanitisation(target_data)
+            | ScopeSanitisation()
             | RepeatTranslation(model)
         )
 

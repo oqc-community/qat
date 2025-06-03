@@ -183,11 +183,31 @@ class TestDefaultMiddleend:
         assert self.check_ir_has_type(processed_ir, Return)
 
     def test_ir_has_repeats(self, preprocessed_ir, processed_ir):
-        """Test that the default middleend adds a repeat instruction and it is lowered."""
+        """Test that the default middleend adds a repeat instruction and it is lowered,
+        and wraps the whole IR."""
         for type in (Jump, Label, Repeat):
             assert not self.check_ir_has_type(preprocessed_ir, type)
         for type in (Jump, Label):
             assert self.check_ir_has_type(processed_ir, type)
+
+        label_idx = next(
+            i for i, inst in enumerate(processed_ir.instructions) if isinstance(inst, Label)
+        )
+        jump_idx = next(
+            i for i, inst in enumerate(processed_ir.instructions) if isinstance(inst, Jump)
+        )
+        first_quantum_idx = next(
+            i
+            for i, inst in enumerate(processed_ir.instructions)
+            if isinstance(inst, QuantumInstruction)
+        )
+        last_quantum_idx = next(
+            i
+            for i, inst in enumerate(processed_ir.instructions[::-1])
+            if isinstance(inst, QuantumInstruction)
+        )
+        assert label_idx < first_quantum_idx
+        assert jump_idx > last_quantum_idx
 
     def test_ir_has_phase_set(self, preprocessed_ir, processed_ir):
         """Test that the default middleend adds a phase reset which is altered by phase

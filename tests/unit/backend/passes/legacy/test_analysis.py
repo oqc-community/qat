@@ -24,12 +24,12 @@ from qat.backend.passes.legacy.analysis import (
     TriageResult,
 )
 from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
-from qat.backend.passes.legacy.transform import ScopeSanitisation
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.legacy.transform import (
     InstructionGranularitySanitisation,
     LowerSyncsToDelays,
     ReturnSanitisation,
+    ScopeSanitisation,
 )
 from qat.middleend.passes.legacy.validation import ReturnSanitisationValidation
 from qat.model.loaders.legacy import EchoModelLoader

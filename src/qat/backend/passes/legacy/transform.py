@@ -2,41 +2,11 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import numpy as np
-from more_itertools import partition
 
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.instructions import (
-    EndRepeat,
-    EndSweep,
-    Repeat,
-    Sweep,
-)
-
-
-class ScopeSanitisation(TransformPass):
-    """Bubbles up all sweeps and repeats to the beginning of the list.
-    Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.
-
-    Intended for legacy existing builders and the relative order of instructions guarantees
-    backwards compatibility.
-    """
-
-    def run(self, ir: InstructionBuilder, *args, **kwargs):
-        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-
-        tail, head = partition(
-            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
-        )
-        tail, head = list(tail), list(head)
-
-        delimiters = [
-            EndSweep() if isinstance(inst, Sweep) else EndRepeat() for inst in head
-        ]
-
-        ir.instructions = head + tail + delimiters[::-1]
-        return ir
+from qat.purr.compiler.instructions import Sweep
 
 
 class DesugaringPass(TransformPass):
