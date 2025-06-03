@@ -57,6 +57,7 @@ class TriageResult(ResultInfoMixin):
         default_factory=lambda: defaultdict(list)
     )
     rp_map: Dict[str, ResultsProcessing] = field(default_factory=dict)
+    active_targets: Set[PulseChannel] = field(default_factory=set)
 
 
 class TriagePass(AnalysisPass):
@@ -87,10 +88,9 @@ class TriagePass(AnalysisPass):
                 else:
                     targets.update(inst.quantum_targets)
 
-        active_targets = set()
         result = TriageResult()
         for inst in ir.instructions:
-            # Dissect by target
+            ### Dissect by target ###
             if isinstance(inst, QuantumInstruction):
                 result.quantum_instructions.append(inst)
                 for qt in inst.quantum_targets:
@@ -106,42 +106,29 @@ class TriagePass(AnalysisPass):
                 for t in targets:
                     result.target_map[t].append(inst)
 
-            # Sweeps
+            ### Assortments ###
             if isinstance(inst, Sweep):
                 result.sweeps.append(inst)
-
-            # Repeats
             elif isinstance(inst, Repeat):
                 result.repeats.append(inst)
-
-            # DeviceUpdates
             elif isinstance(inst, DeviceUpdate):
                 result.device_updates.append(inst)
-
-            # Returns
             elif isinstance(inst, Return):
                 result.returns.append(inst)
-
-            # Assigns
             elif isinstance(inst, Assign):
                 result.assigns.append(inst)
-
-            # Acquisition by target
-            elif isinstance(inst, Acquire):
-                for t in inst.quantum_targets:
-                    active_targets.add(t)
-                    result.acquire_map[t].append(inst)
-
-            elif isinstance(inst, Pulse):
-                active_targets.add(inst.channel)
-
-            # Post-processing by output variable
             elif isinstance(inst, PostProcessing):
                 result.pp_map[inst.output_variable].append(inst)
-
-            # Results-processing by output variable
             elif isinstance(inst, ResultsProcessing):
                 result.rp_map[inst.variable] = inst
+
+            ### Active targets ###
+            if isinstance(inst, Acquire):
+                for t in inst.quantum_targets:
+                    result.active_targets.add(t)
+                    result.acquire_map[t].append(inst)
+            elif isinstance(inst, Pulse):
+                result.active_targets.add(inst.channel)
 
         # Assume that raw acquisitions are experiment results.
         acquires = list(itertools.chain(*result.acquire_map.values()))
@@ -154,7 +141,6 @@ class TriagePass(AnalysisPass):
             result.rp_map[missing_var] = ResultsProcessing(
                 missing_var, InlineResultsProcessing.Experiment
             )
-        result.target_map = {target: result.target_map[target] for target in active_targets}
 
         res_mgr.add(result)
 

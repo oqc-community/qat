@@ -74,8 +74,8 @@ class TestAnalysisPasses:
 
         target_map = result.target_map
         assert isinstance(target_map, Dict)
-        assert len(target_map) == 2
-        assert qubit.get_drive_channel() not in target_map
+        assert len(target_map) == 7
+        assert qubit.get_drive_channel() in target_map
         assert qubit.get_measure_channel() in target_map
         assert qubit.get_acquire_channel() in target_map
 
@@ -94,6 +94,11 @@ class TestAnalysisPasses:
                 for var in itertools.chain(*acquire_map.values())
             ]
         )
+
+        active_targets = result.active_targets
+        assert len(active_targets) == 2
+        assert qubit.get_measure_channel() in active_targets
+        assert qubit.get_acquire_channel() in active_targets
 
     @pytest.mark.parametrize(
         "value, bound",
