@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import json
-import warnings
 from typing import TYPE_CHECKING
 
 import compiler_config.serialiser as legacy_serialiser
@@ -36,30 +35,6 @@ def json_load(
 ):
     kwargs.setdefault("cls", CustomQatJsonDecoder)
     return json.load(*args, serializable_types=serializable_types, model=model, **kwargs)
-
-
-class CustomJSONEncoder(legacy_serialiser.CustomJSONEncoder):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "class 'qat.purr.utils.serializer.CustomJSONEncoder' is deprecated, please use "
-            "'compiler_config.serialiser.CustomJSONEncoder' or "
-            "'qat.purr.utils.serializer.CustomQatJsonEncoder' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-
-class CustomJsonDecoder(legacy_serialiser.CustomJsonDecoder):
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "class 'qat.purr.utils.serializer.CustomJsonDecoder' is deprecated, please use "
-            "'compiler_config.serialiser.CustomJsonDecoder' or "
-            "'qat.purr.utils.serializer.CustomQatJsonDecoder' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
 
 
 class CustomQatJsonDecoder(legacy_serialiser.CustomJsonDecoder):

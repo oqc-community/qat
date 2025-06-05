@@ -27,13 +27,12 @@ def test_qatconfig_invalid_assignment(invalid_argument):
 
 
 def test_default_disable_pulse_duration_limits(monkeypatch):
-    monkeypatch.delenv("QAT_DISABLE_PULSE_DURATION_LIMITS", raising=False)
+    monkeypatch.delenv("QAT_INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS", raising=False)
     newconfig = QatSessionConfig()
-    with pytest.warns(DeprecationWarning):
-        assert (
-            isinstance(newconfig.DISABLE_PULSE_DURATION_LIMITS, bool)
-            and newconfig.DISABLE_PULSE_DURATION_LIMITS == False
-        )
+    assert (
+        isinstance(newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS, bool)
+        and newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS == True
+    )
 
 
 def test_default_repeats_limit(monkeypatch):
@@ -57,9 +56,13 @@ def test_change_max_repeats_limit(repeats_limit):
 @pytest.mark.parametrize("disable_pulse_duration_limits", [True, False])
 def test_change_disable_pulse_duration_limits(disable_pulse_duration_limits):
     # Test direct change of repeats limit.
-    with pytest.warns(DeprecationWarning):
-        qatconfig.DISABLE_PULSE_DURATION_LIMITS = disable_pulse_duration_limits
-        assert qatconfig.DISABLE_PULSE_DURATION_LIMITS == disable_pulse_duration_limits
+    qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = (
+        not disable_pulse_duration_limits
+    )
+    assert (
+        qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
+        != disable_pulse_duration_limits
+    )
 
     qatconfig.__init__()  # Reload settings to default.
 
@@ -70,10 +73,6 @@ def test_disable_pulse_duration_limits_throws_warning(caplog):
     with caplog.at_level(LoggerLevel.WARNING.value):
         newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = False
         assert "Disabled check for pulse duration limits" in caplog.text
-    with pytest.warns(DeprecationWarning):
-        with caplog.at_level(LoggerLevel.WARNING.value):
-            newconfig.DISABLE_PULSE_DURATION_LIMITS = True
-            assert "Disabled check for pulse duration limits" in caplog.text
 
 
 @pytest.mark.parametrize("repeats_limit", [10_000, 16_874, 50_000, 100_000])

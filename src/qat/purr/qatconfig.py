@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
-import warnings
 from typing import Literal, Optional, Tuple, Type
 
 from compiler_config.config import CompilerConfig
@@ -102,28 +101,6 @@ class QatConfig(BaseSettings):
 
     INSTRUCTION_VALIDATION: InstructionValidationConfig = InstructionValidationConfig()
     """Options for Instruction validation before execution."""
-
-    @property
-    def DISABLE_PULSE_DURATION_LIMITS(self):
-        """Flag to disable the lower and upper pulse duration limits.
-        Only needs to be set to True for calibration purposes."""
-        warnings.warn(
-            "'QatConfig().DISABLE_PULSE_DURATION_LIMITS' is being deprecated, please use "
-            "'QatConfig().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return not self.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
-
-    @DISABLE_PULSE_DURATION_LIMITS.setter
-    def DISABLE_PULSE_DURATION_LIMITS(self, val: bool):
-        warnings.warn(
-            "'QatConfig().DISABLE_PULSE_DURATION_LIMITS' is being deprecated, please use "
-            "'QatConfig().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = not val
 
     SIMULATION: QatSimulationConfig = QatSimulationConfig()
     """Options for QATs simulation backends."""

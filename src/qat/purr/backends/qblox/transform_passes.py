@@ -6,7 +6,7 @@ import itertools
 import numpy as np
 from more_itertools import partition
 
-from qat.purr.backends.qblox.pass_base import QatIR, TransformPass, get_hardware_model
+from qat.purr.backends.qblox.pass_base import QatIR, TransformPass
 from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -60,7 +60,7 @@ class RepeatSanitisation(TransformPass):
         if not isinstance(builder, InstructionBuilder):
             raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
-        model = self.model or get_hardware_model(args, kwargs)
+        model = self.model
 
         repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
         if repeats:

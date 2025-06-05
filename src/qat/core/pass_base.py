@@ -1,37 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-import warnings
 from abc import ABC, abstractmethod
 from typing import List
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
-
-
-def get_hardware_model(args, kw_args):
-    """To be replaced with a constructor argument on the relevant passes"""
-    warnings.warn(
-        "Passing hardware models to pass.run as args or kwargs is deprecated, please use "
-        "constructor arguments",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    hardware_model = kw_args.get("model", None)
-    if hardware_model is None:
-        hardware_model = next(
-            (a for a in args if isinstance(a, QuantumHardwareModel)), None
-        )
-    if not isinstance(hardware_model, QuantumHardwareModel):
-        raise ValueError(
-            f"Expected to find an instance of {QuantumHardwareModel} in arguments list, "
-            f"got {hardware_model} instead"
-        )
-
-    return hardware_model
 
 
 class PassConcept(ABC):

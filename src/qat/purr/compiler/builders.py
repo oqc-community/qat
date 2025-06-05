@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
-import itertools
 import math
-import warnings
 from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
@@ -33,7 +31,6 @@ from qat.purr.compiler.instructions import (
     Jump,
     Label,
     MeasureBlock,
-    MeasurePulse,
     PhaseReset,
     PhaseShift,
     PostProcessing,
@@ -51,7 +48,6 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.utils.logger import get_default_logger
 
-warnings.simplefilter("always", DeprecationWarning)
 log = get_default_logger()
 
 
@@ -560,53 +556,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return results
 
-    def _generate_legacy_measure_block(
-        self,
-        qubit: Qubit,
-        mode: AcquireMode,
-        output_variable: str = None,
-    ):
-        measure_channel = qubit.get_measure_channel()
-        acquire_channel = qubit.get_acquire_channel()
-        weights = (
-            qubit.measure_acquire.get("weights", None)
-            if qubit.measure_acquire.get("use_weights", False)
-            else None
-        )
-        # Naive entanglement checker to assure all entangled qubits are sync before a
-        # measurement is done on any of them.
-
-        # Reverse engineering E[g] and E[e] from the Zmap args, and then compute threshold and rotation
-        A, B = qubit.mean_z_map_args[0], qubit.mean_z_map_args[1]
-        mean_g = (1 - B) / A
-        mean_e = (-1 - B) / A
-        rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
-        threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
-
-        measure_instruction = MeasurePulse(measure_channel, **qubit.pulse_measure)
-        acquire_instruction = Acquire(
-            acquire_channel,
-            (
-                qubit.pulse_measure["width"]
-                if qubit.measure_acquire["sync"]
-                else qubit.measure_acquire["width"]
-            ),
-            mode,
-            output_variable,
-            self.existing_names,
-            qubit.measure_acquire["delay"],
-            weights,
-            rotation=rotation,
-            threshold=threshold,
-        )
-
-        return [
-            Synchronize(qubit),
-            measure_instruction,
-            acquire_instruction,
-            Synchronize(qubit),
-        ], acquire_instruction
-
     def _generate_measure_block(
         self,
         qubit: Qubit,
@@ -621,69 +570,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def _find_previous_measurement_block(
         self,
-        mblock_types: List[Instruction] = [Acquire, MeasurePulse],
-        optional_block_types: List[Instruction] = [Synchronize],
     ):
-        # List of node types that a measurement can be made up of.
-        mblock_types_cycle = itertools.cycle(mblock_types)
-
-        # Look at the instructions immediately before this measure, and try to find a
-        # set of instructions that look exactly like a measure selection. It's a little
-        # bit loose with matching, but if it sees a measure followed by an acquire,
-        # surrounded by syncs and post-processing, it'll accept that block as a
-        # 'measurement'.
-        current_type = next(mblock_types_cycle)
-        previous_measure_block = []
-        instructions = reversed(self._instructions)
-
-        for inst in instructions:
-            if not isinstance(
-                inst, QuantumInstruction | QuantumInstructionBlock
-            ) or isinstance(inst, PostProcessing):
-                continue
-
-            if isinstance(inst, MeasureBlock) and len(previous_measure_block) == 0:
+        for inst in reversed(self._instructions):
+            if isinstance(inst, MeasureBlock):
                 return inst
-
-            if not isinstance(inst, (*optional_block_types, current_type)):
-                current_type = next(mblock_types_cycle)
-                if not isinstance(inst, (*optional_block_types, current_type)):
-                    break
-
-            previous_measure_block.insert(0, inst)
-
-        pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
-        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
-            mblock_types + optional_block_types
-        )
-        if full_measure_block and len(pre_syncs) >= 2:
-            return previous_measure_block
-        return None
-
-    def _join_legacy_measure_blocks(self, previous_measure_block, new_measure_block):
-        # If we detect a full measure block before us, merge it together if we're
-        # entangled and/or can do it validly.
-        pre_syncs = [val for val in previous_measure_block if isinstance(val, Synchronize)]
-        new_syncs = [val for val in new_measure_block if isinstance(val, Synchronize)]
-        full_measure_block = set([val.__class__ for val in previous_measure_block]) == set(
-            [val.__class__ for val in new_measure_block]
-        )
-        if full_measure_block and len(pre_syncs) >= 2:
-            # Merge the first and last sync with the new.
-            pre_syncs[0] += new_syncs[0]
-            pre_syncs[-1] += new_syncs[-1]
-
-            # Add in our current changes.
-            self.insert(
-                [
-                    val
-                    for val in new_measure_block
-                    if isinstance(val, (MeasurePulse, Acquire))
-                ],
-                index=self._instructions.index(pre_syncs[-1]),
-            )
-        else:
-            self.add(new_measure_block)
+            elif isinstance(
+                inst, QuantumInstruction | QuantumInstructionBlock
+            ) and not isinstance(inst, PostProcessing):
+                # If we hit a quantum instruction (block) that is not `PostProcessing`,
+                # we stop looking for a previous measure block.
+                return None
 
     def _append_measure_block(
         self,
@@ -725,18 +621,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         previous_measure_block = self._find_previous_measurement_block()
 
-        if isinstance(previous_measure_block, list):
-            warnings.warn(
-                "Use of legacy measurement block recognition is deprecated. "
-                "Please use the 'MeasureBlock' type instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            new_measure_block, acquire_instruction = self._generate_legacy_measure_block(
-                qubit, mode, output_variable
-            )
-            self._join_legacy_measure_blocks(previous_measure_block, new_measure_block)
-        elif (
+        if (
             isinstance(previous_measure_block, MeasureBlock)
             and qubit not in previous_measure_block.quantum_targets
         ):
