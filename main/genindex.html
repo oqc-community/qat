@@ -945,8 +945,12 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.beta">(Waveform attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.bias">bias (PhysicalChannel attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.IQBias.bias">bias (IQBias attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.IQBias.params.bias">(qat.model.device.IQBias parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.bias_value">bias_value (DCBiasChannel property)</a>
 </li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary">binary() (in module qat.runtime.results_processing)</a>
@@ -973,10 +977,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.AcqData.bins">bins (AcqData attribute)</a>
 </li>
-      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
+</li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister">BitRegister (class in qat.frontend.register)</a>
 
       <ul>
@@ -2991,6 +2995,8 @@
         <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.ScopeAcqData.i">(ScopeAcqData attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.I_bias">I_bias (PhysicalChannel property)</a>
+</li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Id">Id (class in qat.ir.gates.gates_1q)</a>
 
       <ul>
@@ -3119,98 +3125,16 @@
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.insert_result_at_sweep_position">insert_result_at_sweep_position() (SweepIterator method)</a>
 </li>
-      <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.inst">inst (Acquire attribute)</a>
+      <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.X_pi_2.inst">inst (X_pi_2 attribute)</a>
 
       <ul>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Assign.inst">(Assign attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier.inst">(Barrier attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CNOT.inst">(CNOT attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CPhase.inst">(CPhase attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CRx.inst">(CRx attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CRy.inst">(CRy attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CRz.inst">(CRz attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Delay.inst">(Delay attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ECR.inst">(ECR attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.inst">(FrequencyShift attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Gate1Q.inst">(Gate1Q attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Hadamard.inst">(Hadamard attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Id.inst">(Id attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Instruction.inst">(Instruction attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.inst">(InstructionBlock attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.inst">(Measure attribute)</a>
-</li>
-        <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.inst">(MeasureBlock attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Phase.inst">(Phase attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset.inst">(PhaseReset attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.inst">(PhaseShift attribute)</a>
-</li>
-        <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.inst">(PostProcessing attribute)</a>
-</li>
-        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.inst">(Pulse attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.inst">(QuantumInstruction attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.inst">(QuantumInstructionBlock attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Repeat.inst">(Repeat attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Reset.inst">(Reset attribute)</a>, <a href="qat.ir.instructions.html#qat.ir.instructions.Reset.inst">[1]</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.inst">(ResultsProcessing attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Return.inst">(Return attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Rx.inst">(Rx attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Ry.inst">(Ry attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Rz.inst">(Rz attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.S.inst">(S attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Sdg.inst">(Sdg attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.SWAP.inst">(SWAP attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.inst">(Synchronize attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.T.inst">(T attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Tdg.inst">(Tdg attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.U.inst">(U attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.X.inst">(X attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.X_pi_2.inst">(X_pi_2 attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Y.inst">(Y attribute)</a>
-</li>
-        <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Z.inst">(Z attribute)</a>
-</li>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.Z_phase.inst">(Z_phase attribute)</a>
 </li>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.ZX_pi_4.inst">(ZX_pi_4 attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Instruction.instr_type">instr_type (Instruction property)</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Instruction">Instruction (class in qat.ir.instructions)</a>
 
       <ul>
@@ -3273,8 +3197,6 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions">(QuantumInstructionBlock attribute)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.InstructionValidation">InstructionValidation (class in qat.middleend.passes.legacy.validation)</a>
 
       <ul>
@@ -3311,6 +3233,8 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.internal_phase">(Waveform attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt">Interrupt (class in qat.purr.compiler.interrupt)</a>
 </li>
       <li><a href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.InterruptableExecutingMixin">InterruptableExecutingMixin (class in qat.purr.compiler.experimental.frontends)</a>
@@ -3323,6 +3247,10 @@
         <li><a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin">(class in qat.purr.backends.qblox.pass_base)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.iq_voltage_bias">iq_voltage_bias (PhysicalChannel attribute)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.IQBias">IQBias (class in qat.model.device)</a>
+</li>
       <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run.params.ir">ir (qat.backend.passes.legacy.analysis.BindingPass.run parameter)</a>
 
       <ul>
@@ -4351,6 +4279,8 @@
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.model_config">(InstrumentModel attribute)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.IntegData.model_config">(IntegData attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.IQBias.model_config">(IQBias attribute)</a>
 </li>
         <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_config">(LogicalHardwareModel attribute)</a>
 </li>
@@ -5994,6 +5924,8 @@
       </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Q1asmInstruction">Q1asmInstruction (class in qat.purr.backends.qblox.ir)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.Q_bias">Q_bias (PhysicalChannel property)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_cluster">q_cluster (QRPairModel attribute)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.q_freq">q_freq (QRPairModel attribute)</a>
@@ -6902,6 +6834,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#module-qat.purr.backends.qblox.config">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.constants
 
@@ -6909,8 +6843,6 @@
         <li><a href="qat.purr.backends.qblox.constants.html#module-qat.purr.backends.qblox.constants">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.device
 
