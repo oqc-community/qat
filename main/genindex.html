@@ -260,7 +260,6 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
@@ -325,7 +324,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
 </ul>
 </li>
 </ul>
@@ -1723,10 +1721,6 @@
 </li>
       <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend">CustomFrontend (class in qat.frontend.custom)</a>
 </li>
-      <li><a href="qat.purr.utils.serializer.html#qat.purr.utils.serializer.CustomJsonDecoder">CustomJsonDecoder (class in qat.purr.utils.serializer)</a>
-</li>
-      <li><a href="qat.purr.utils.serializer.html#qat.purr.utils.serializer.CustomJSONEncoder">CustomJSONEncoder (class in qat.purr.utils.serializer)</a>
-</li>
       <li><a href="qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend">CustomMiddleend (class in qat.middleend.middleends)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse">CustomPulse (class in qat.purr.compiler.instructions)</a>
@@ -1909,14 +1903,14 @@
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.deserialize">(InstructionBuilder static method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.passes.legacy.transform.html#qat.backend.passes.legacy.transform.DesugaringPass">DesugaringPass (class in qat.backend.passes.legacy.transform)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.device_update">device_update() (AbstractContext method)</a>
@@ -1940,8 +1934,6 @@
 </li>
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.disable">disable() (InstructionValidationConfig method)</a>
-</li>
-      <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.DISABLE_PULSE_DURATION_LIMITS">DISABLE_PULSE_DURATION_LIMITS (QatConfig property)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.DISABLED">DISABLED (InstructionValidationConfig property)</a>
 </li>
@@ -2749,10 +2741,10 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel">get_devices_from_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel">get_drive_channel() (Qubit method)</a>
@@ -2777,12 +2769,6 @@
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_ZX">get_gate_ZX() (QuantumHardwareModel method)</a>
 </li>
-      <li><a href="qat.core.pass_base.html#qat.core.pass_base.get_hardware_model">get_hardware_model() (in module qat.core.pass_base)</a>
-
-      <ul>
-        <li><a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.get_hardware_model">(in module qat.purr.backends.qblox.pass_base)</a>
-</li>
-      </ul></li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_hw_x_pi_2">get_hw_x_pi_2() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_hw_z">get_hw_z() (QuantumHardwareModel method)</a>
@@ -4905,8 +4891,6 @@
 </li>
         <li><a href="qat.purr.compiler.caches.html#module-qat.purr.compiler.caches">qat.purr.compiler.caches</a>
 </li>
-        <li><a href="qat.purr.compiler.config.html#module-qat.purr.compiler.config">qat.purr.compiler.config</a>
-</li>
         <li><a href="qat.purr.compiler.devices.html#module-qat.purr.compiler.devices">qat.purr.compiler.devices</a>
 </li>
         <li><a href="qat.purr.compiler.emitter.html#module-qat.purr.compiler.emitter">qat.purr.compiler.emitter</a>
@@ -4966,8 +4950,6 @@
         <li><a href="qat.purr.utils.logging_utils.html#module-qat.purr.utils.logging_utils">qat.purr.utils.logging_utils</a>
 </li>
         <li><a href="qat.purr.utils.serializer.html#module-qat.purr.utils.serializer">qat.purr.utils.serializer</a>
-</li>
-        <li><a href="qat.qat.html#module-qat.qat">qat.qat</a>
 </li>
         <li><a href="qat.runtime.html#module-qat.runtime">qat.runtime</a>
 </li>
@@ -6927,6 +6909,8 @@
         <li><a href="qat.purr.backends.qblox.constants.html#module-qat.purr.backends.qblox.constants">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.device
 
@@ -6934,8 +6918,6 @@
         <li><a href="qat.purr.backends.qblox.device.html#module-qat.purr.backends.qblox.device">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.execution
 
@@ -7074,13 +7056,6 @@
 
       <ul>
         <li><a href="qat.purr.compiler.caches.html#module-qat.purr.compiler.caches">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.purr.compiler.config
-
-      <ul>
-        <li><a href="qat.purr.compiler.config.html#module-qat.purr.compiler.config">module</a>
 </li>
       </ul></li>
       <li>
@@ -7291,13 +7266,6 @@
 
       <ul>
         <li><a href="qat.purr.utils.serializer.html#module-qat.purr.utils.serializer">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.qat
-
-      <ul>
-        <li><a href="qat.qat.html#module-qat.qat">module</a>
 </li>
       </ul></li>
       <li>
