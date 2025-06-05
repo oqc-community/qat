@@ -2,7 +2,7 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Literal, Optional, Type, Union
+from typing import Optional, Type, Union
 
 import numpy as np
 from numpydantic import NDArray, Shape
@@ -191,7 +191,6 @@ class Pulse(QuantumInstruction):
     (e.g. a drive or measure pulse) can be specified using the type.
     """
 
-    inst: Literal["Pulse"] = "Pulse"
     targets: FrozenSet[str] = Field(max_length=1)
     ignore_channel_scale: bool = False
     waveform: Union[waveform_classes]

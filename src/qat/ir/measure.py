@@ -5,7 +5,12 @@ from __future__ import annotations
 from typing import Literal, Optional
 
 import numpy as np
-from pydantic import Field, PrivateAttr, ValidationInfo, field_validator, model_validator
+from pydantic import (
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 
 from qat.ir.instructions import (
     Instruction,
@@ -21,7 +26,6 @@ from qat.utils.pydantic import QubitId, ValidatedSet
 
 
 class Acquire(QuantumInstruction):
-    inst: Literal["Acquire"] = "Acquire"
     targets: ValidatedSet[str] = Field(max_length=1)
     suffix_incrementor: int = 0
     duration: float = 1e-6
@@ -38,22 +42,26 @@ class Acquire(QuantumInstruction):
     def target(self):
         return next(iter(self.targets))
 
-    @field_validator("filter", mode="before")
-    @classmethod
-    def _validate_filter(cls, filter, info: ValidationInfo):
-        duration = info.data["duration"]
+    @model_validator(mode="before")
+    def _validate_filter(cls, data: dict):
+        duration = data.get("duration")
+        filter = data.get("filter")
 
         if filter:
-            if filter.duration == 0:  # < 0 condition already tested in `Waveform`
+            filter_duration = (
+                filter.duration if isinstance(filter, Pulse) else filter["duration"]
+            )
+
+            if filter_duration == 0:  # < 0 condition already tested in `Waveform`
                 raise ValueError("Filter duration cannot be equal to zero.")
 
-            if not np.isclose(filter.duration, duration, atol=1e-9):
+            if not np.isclose(filter_duration, duration, atol=1e-9):
                 raise ValueError(
-                    f"Filter duration '{filter.duration}' must be equal to Acquire "
+                    f"Filter duration '{filter_duration}' must be equal to Acquire "
                     f"duration '{duration}'."
                 )
 
-        return filter
+        return data
 
 
 class PostProcessing(Instruction):
@@ -62,7 +70,6 @@ class PostProcessing(Instruction):
     happen in the FPGA's or a software post-process.
     """
 
-    inst: Literal["PostProcessing"] = "PostProcessing"
     output_variable: str | None = None
     process_type: PostProcessType
     axes: list[ProcessAxis] = []
@@ -102,7 +109,6 @@ class MeasureBlock(QuantumInstructionBlock):
     measurement such as a measure pulse, an acquire or a synchronize.
     """
 
-    inst: Literal["MeasureBlock"] = "MeasureBlock"
     qubit_targets: ValidatedSet[QubitId] = ValidatedSet()
     _output_variables: list[str] = PrivateAttr(default=[])
     _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = PrivateAttr(

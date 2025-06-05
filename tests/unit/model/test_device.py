@@ -66,7 +66,11 @@ class TestDevicesValidation:
         assert not physical_channel.is_calibrated
 
         physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
+        physical_channel.iq_voltage_bias.bias = random.Random(seed + 2).uniform(
+            1e05, 1e07
+        ) + 1.0j * random.Random(seed + 3).uniform(1e05, 1e07)
         assert physical_channel.is_calibrated
+        assert physical_channel.I_bias != physical_channel.Q_bias
 
         with pytest.raises(ValidationError):
             physical_channel.sample_time = random.Random(seed).uniform(-1e-08, -1e-10)

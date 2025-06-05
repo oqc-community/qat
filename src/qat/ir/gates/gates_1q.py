@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
-from typing import Literal
 
 import numpy as np
 from pydantic import NonNegativeInt
@@ -12,7 +11,6 @@ from qat.ir.gates.base import Angle, GateBase
 class Gate1Q(GateBase, ABC):
     """Base gate for single qubit operations."""
 
-    inst: Literal["Gate1Q"] = "Gate1Q"
     qubit: NonNegativeInt
 
     @property
@@ -35,8 +33,6 @@ class Id(Gate1Q):
     :param qubit: Target qubit index.
     """
 
-    inst: Literal["Id"] = "Id"
-
     @property
     def matrix(self):
         return np.array([[1, 0], [0, 1]])
@@ -53,8 +49,6 @@ class X(Gate1Q):
 
     """
 
-    inst: Literal["X"] = "X"
-
     @property
     def matrix(self):
         return np.array([[0, 1], [1, 0]])
@@ -70,8 +64,6 @@ class Y(Gate1Q):
     :param qubit: Target qubit index.
     """
 
-    inst: Literal["Y"] = "Y"
-
     @property
     def matrix(self):
         return np.array([[0, -1j], [1j, 0]])
@@ -86,8 +78,6 @@ class Z(Gate1Q):
 
     :param qubit: Target qubit index.
     """
-
-    inst: Literal["Z"] = "Z"
 
     @property
     def matrix(self):
@@ -109,7 +99,6 @@ class Rx(Gate1Q):
     :param theta: Rotation angle
     """
 
-    inst: Literal["Rx"] = "Rx"
     theta: Angle = np.pi
 
     @property
@@ -134,7 +123,6 @@ class Ry(Gate1Q):
     :param theta: Rotation angle
     """
 
-    inst: Literal["Ry"] = "Ry"
     theta: Angle = np.pi
 
     @property
@@ -159,7 +147,6 @@ class Rz(Gate1Q):
     :param theta: Rotation angle
     """
 
-    inst: Literal["Rz"] = "Rz"
     theta: Angle = np.pi
 
     @property
@@ -181,7 +168,6 @@ class Phase(Gate1Q):
     :param theta: Rotation angle
     """
 
-    inst: Literal["Phase"] = "Phase"
     theta: Angle = np.pi
 
     @property
@@ -214,7 +200,6 @@ class U(Gate1Q):
     :param lambd: Rotation angle :math:`\lambda` around the Z-axis (first).
     """
 
-    inst: Literal["U"] = "U"
     theta: Angle = 0.0
     phi: Angle = 0.0
     lambd: Angle = 0.0
@@ -263,8 +248,6 @@ class Hadamard(Gate1Q):
         H = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}.
     """
 
-    inst: Literal["Hadamard"] = "Hadamard"
-
     @property
     def matrix(self):
         return 1 / np.sqrt(2) * np.array([[1, 1], [1, -1]])
@@ -278,8 +261,6 @@ class S(Gate1Q):
 
     .. math:: S = \begin{bmatrix} 1 & 0 \\ 0 & i \end{bmatrix}.
     """
-
-    inst: Literal["S"] = "S"
 
     @property
     def matrix(self):
@@ -295,8 +276,6 @@ class Sdg(Gate1Q):
     .. math:: S^{\dagger} = \begin{bmatrix} 1 & 0 \\ 0 & -i \end{bmatrix}.
     """
 
-    inst: Literal["Sdg"] = "Sdg"
-
     @property
     def matrix(self):
         return np.array([[1, 0], [0, -1j]])
@@ -311,8 +290,6 @@ class T(Gate1Q):
     .. math:: T = \begin{bmatrix} 1 & 0 \\ 0 & (1 + i)/\sqrt{2} \end{bmatrix}.
     """
 
-    inst: Literal["T"] = "T"
-
     @property
     def matrix(self):
         return np.array([[1, 0], [0, (1 + 1j) / (np.sqrt(2))]])
@@ -325,8 +302,6 @@ class Tdg(Gate1Q):
     representation:
 
     .. math:: T^{\dagger} = \begin{bmatrix} 1 & 0 \\ 0 & (1 - i)/\sqrt{2} \end{bmatrix}."""
-
-    inst: Literal["Tdg"] = "Tdg"
 
     @property
     def matrix(self):

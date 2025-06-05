@@ -88,6 +88,17 @@ class PhysicalBaseband(Component):
     if_frequency: CalibratablePositiveFloat = Field(default=np.nan)
 
 
+class IQBias(NoExtraFieldsModel):
+    """
+    Models the bias in voltages V_I / V_Q for the I and Q components in a physical channel.
+
+    :param bias: The bias as a complex number, where the real part is the I component
+                and the imaginary part is the Q component.
+    """
+
+    bias: complex | float = 0 + 0j
+
+
 class PhysicalChannel(Component):
     """
     Models a physical channel that can carry one or multiple pulses.
@@ -97,14 +108,22 @@ class PhysicalChannel(Component):
 
         sample_time: The rate at which the pulse is sampled.
         block_size: The number of samples within a single block.
-        bias: The bias in voltages V_I / V_Q for the I and Q components.
+        iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.
     """
 
     baseband: PhysicalBaseband = Field(frozen=True)
 
     sample_time: CalibratablePositiveFloat = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
-    bias: float | complex = 0.0 + 0.0j
+    iq_voltage_bias: IQBias = Field(default=IQBias())
+
+    @property
+    def I_bias(self) -> float:
+        return self.iq_voltage_bias.bias.real
+
+    @property
+    def Q_bias(self) -> float:
+        return self.iq_voltage_bias.bias.imag
 
 
 pulse_channel_check = re.compile(r"PulseChannel$")

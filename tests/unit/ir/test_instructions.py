@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import random
+from copy import deepcopy
 from itertools import product
 
 import numpy as np
@@ -24,6 +25,7 @@ from qat.ir.instructions import (
 )
 from qat.purr.utils.logger import LoggerLevel
 from qat.utils.hardware_model import generate_hw_model
+from qat.utils.pydantic import ValidatedList
 
 
 class TestVariable:
@@ -316,3 +318,83 @@ class TestDelay:
     def test_validation(self, delay):
         with pytest.raises(ValidationError):
             Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)
+
+
+class TestInstructionSerialisationDeserialisation:
+    @pytest.mark.parametrize(
+        "inst",
+        [
+            PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06),
+            FrequencyShift(targets={"t2"}, frequency=1.0, duration=2.3e-06),
+            Delay(targets={"t3"}, duration=1e-8),
+            Repeat(repeat_count=10, repetition_period=0.01),
+            Assign(name="var1", value=42),
+            Return(variables=["var1"]),
+        ],
+    )
+    def test_single_instruction(self, inst):
+        blob = inst.model_dump()
+        new_inst = inst.__class__(**blob)
+        assert inst == new_inst
+
+    @pytest.mark.parametrize("validated", [True, False])
+    def test_flat_instruction_block(self, validated):
+        inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)
+        inst2 = FrequencyShift(targets={"t2"}, frequency=1.0, duration=2.3e-06)
+        instructions = [inst1, inst2]
+
+        if validated:
+            instructions = ValidatedList(instructions)
+
+        block = InstructionBlock(instructions=instructions)
+
+        blob = block.model_dump()
+        new_block = InstructionBlock(**blob)
+
+        assert new_block.number_of_instructions == 2
+        assert new_block.instructions[0] == inst1
+        assert new_block.instructions[1] == inst2
+
+    def test_nested_instruction_block(self):
+        inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)
+        inst2 = FrequencyShift(targets={"t2"}, frequency=1.0, duration=2.3e-06)
+        nested_block = InstructionBlock(instructions=[inst1, inst1, inst2])
+        block = InstructionBlock(instructions=[nested_block, inst1, inst2])
+        ref_nr_instr = block.number_of_instructions
+
+        blob = block.model_dump()
+        new_block = InstructionBlock(**blob)
+        assert new_block.number_of_instructions == ref_nr_instr
+
+        ref_instructions = [inst1, inst1, inst2, inst1, inst2]
+        for instr, ref_instr in zip(new_block, ref_instructions):
+            instr == ref_instr
+
+    def test_reserialisation_deserialisation(self):
+        inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)
+        inst2 = Delay(targets={"t2"}, duration=2.8e-06)
+        block = InstructionBlock(instructions=[inst1, inst2])
+
+        blob = block.model_dump()
+        new_block = InstructionBlock(**blob)
+
+        copied_block = deepcopy(new_block)
+        assert copied_block.model_dump() == new_block.model_dump()
+
+    def test_json_dump(self):
+        inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)
+        inst2 = Delay(targets={"t2"}, duration=2.8e-06)
+        block = InstructionBlock(instructions=[inst1, inst2])
+
+        json_str = block.model_dump_json()
+        rehydrated_block = InstructionBlock.model_validate_json(json_str)
+        assert rehydrated_block == block
+
+    def test_wrong_json_dump(self):
+        inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)
+        inst2 = Delay(targets={"t2"}, duration=2.8e-06)
+        block = InstructionBlock(instructions=[inst1, inst2])
+
+        wrong_json_str = block.model_dump_json().replace("t2", "t100")
+        rehydrated_block = InstructionBlock.model_validate_json(wrong_json_str)
+        assert rehydrated_block != block

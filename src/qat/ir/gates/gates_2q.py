@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
-from typing import Literal
 
 import numpy as np
 from pydantic import NonNegativeInt
@@ -60,8 +59,6 @@ class CNOT(ControlGate2Q):
         \end{bmatrix}
     """
 
-    inst: Literal["CNOT"] = "CNOT"
-
     @property
     def matrix(self):
         return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])
@@ -83,8 +80,6 @@ class ECR(Gate2Q):
         \end{bmatrix}
     """
 
-    inst: Literal["ECR"] = "ECR"
-
     @property
     def matrix(self):
         return (1 / np.sqrt(2)) * np.array(
@@ -105,8 +100,6 @@ class SWAP(Gate2Q):
         \end{bmatrix}
     """
 
-    inst: Literal["SWAP"] = "SWAP"
-
     @property
     def matrix(self):
         return np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
@@ -119,7 +112,6 @@ class CPhase(ControlGate2Q):
     :math:`CR_{z}(\theta)` gate.
     """
 
-    inst: Literal["CPhase"] = "CPhase"
     theta: Angle = np.pi
 
     @property
@@ -137,7 +129,6 @@ class CPhase(ControlGate2Q):
 class CRz(ControlGate2Q):
     r"""Implements the controlled-:math:`R_{z}(\theta)` gate."""
 
-    inst: Literal["CRz"] = "CRz"
     theta: Angle = np.pi
 
     @property
@@ -155,7 +146,6 @@ class CRz(ControlGate2Q):
 class CRx(ControlGate2Q):
     r"""Implements the controlled-:math:`R_{x}(\theta)` gate."""
 
-    inst: Literal["CRx"] = "CRx"
     theta: Angle = np.pi
 
     @property
@@ -175,7 +165,6 @@ class CRx(ControlGate2Q):
 class CRy(ControlGate2Q):
     r"""Implements the controlled-:math:`R_{y}(\theta)` gate."""
 
-    inst: Literal["CRy"] = "CRy"
     theta: Angle = np.pi
 
     @property

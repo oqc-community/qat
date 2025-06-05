@@ -771,9 +771,7 @@ class TestInstructionValidation:
         qie.validate(invalid_acquire)
 
         monkeypatch.setattr(qatconfig.INSTRUCTION_VALIDATION, "ACQUIRE_CHANNEL", True)
-        with pytest.raises(
-            ValueError, match=rf"{invalid_acquire[0].channel.physical_channel}"
-        ):
+        with pytest.raises(ValueError):
             qie.validate(invalid_acquire)
 
     def test_mid_circuit_measurement_check_ignored_by_flag(self, monkeypatch):

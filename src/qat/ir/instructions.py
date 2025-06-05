@@ -5,25 +5,49 @@ from __future__ import annotations
 import uuid
 from collections import defaultdict
 from collections.abc import Iterable
+from functools import cached_property
 from pydoc import locate
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, List, Optional, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
-from pydantic import Field, field_serializer, field_validator, model_validator
+from pydantic import (
+    Field,
+    computed_field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
 from qat.purr.compiler.instructions import Variable as LegacyVariable
 from qat.purr.utils.logger import get_default_logger
-from qat.utils.pydantic import NoExtraFieldsModel, QubitId, ValidatedList, ValidatedSet
+from qat.utils.pydantic import (
+    AllowExtraFieldsModel,
+    FrozenSet,
+    NoExtraFieldsModel,
+    QubitId,
+    ValidatedList,
+    ValidatedSet,
+)
 
 log = get_default_logger()
 
 
 ### Instructions
-class Instruction(NoExtraFieldsModel):
-    inst: Literal["Instruction"] = "Instruction"
+
+BASE_INSTR = "qat.ir.instructions.Instruction"
+
+
+class Instruction(AllowExtraFieldsModel):
+    @computed_field
+    @cached_property
+    def instr_type(self) -> str:
+        """
+        Returns the type of the instruction, which is the class name.
+        """
+        return self.__class__.__module__ + "." + self.__class__.__name__
 
     def __iter__(self):
         yield self
@@ -45,8 +69,7 @@ class Instruction(NoExtraFieldsModel):
 
 
 class InstructionBlock(Instruction, Iterable):
-    inst: Literal["InstructionBlock"] = "InstructionBlock"
-    instructions: ValidatedList[Instruction] = ValidatedList[Instruction]([])
+    instructions: ValidatedList[Instruction] = []
 
     def add(self, *instructions: Instruction, flatten: bool = False):
         for instruction in instructions:
@@ -80,6 +103,39 @@ class InstructionBlock(Instruction, Iterable):
             f"Cannot access last element of an empty `{self.__class__.__name__}`."
         )
 
+    @field_serializer("instructions")
+    def _serialize_instructions(self, instructions: list[Instruction]):
+        return [inst.model_dump() for inst in self]
+
+    @field_validator("instructions", mode="before")
+    @classmethod
+    def _rehydrate_instructions(cls, instructions):
+        if isinstance(instructions, Instruction):
+            return instructions
+        if not isinstance(instructions, (list, ValidatedList)):
+            raise TypeError(
+                f"Expected `instructions` to be a list of `Instruction` instances or dictionaries, got {type(instructions)}."
+            )
+
+        rehydrated = []
+        # Cache for located types to avoid repeated lookups
+        type_cache: dict[str, type[Instruction]] = {}
+
+        for instr in instructions:
+            if isinstance(instr, dict):
+                instr_type_str = instr.get("instr_type", BASE_INSTR)
+                if instr_type_str not in type_cache:
+                    type_cache[instr_type_str] = locate(instr_type_str)
+                instr_type = type_cache[instr_type_str]
+                rehydrated.append(instr_type(**instr))
+            elif isinstance(instr, Instruction):
+                rehydrated.append(instr)
+            else:
+                raise TypeError(
+                    f"Instruction must be an Instruction instance or dict, got {type(instr)}."
+                )
+        return rehydrated
+
 
 class Repeat(Instruction):
     """
@@ -87,7 +143,6 @@ class Repeat(Instruction):
     value of the current operations, also known as shots.
     """
 
-    inst: Literal["Repeat"] = "Repeat"
     repeat_count: Optional[int] = None
     repetition_period: Optional[float] = None
 
@@ -95,7 +150,6 @@ class Repeat(Instruction):
 class Return(Instruction):
     """A statement defining what to return from a quantum execution."""
 
-    inst: Literal["Return"] = "Return"
     variables: List[str] = []
 
     @field_validator("variables", mode="before")
@@ -114,7 +168,6 @@ class ResultsProcessing(Instruction):
     A meta-instruction that stores how the results are processed.
     """
 
-    inst: Literal["ResultsProcessing"] = "ResultsProcessing"
     variable: str
     results_processing: InlineResultsProcessing = InlineResultsProcessing.Raw
 
@@ -192,7 +245,6 @@ class Assign(Instruction):
     """
 
     # set as any for now... not sure what the restrictions would be here
-    inst: Literal["Assign"] = "Assign"
     name: str
     value: Any
 
@@ -220,27 +272,42 @@ class QuantumInstruction(Instruction):
     another form of component.
     """
 
-    inst: Literal["QuantumInstruction"] = "QuantumInstruction"
     targets: ValidatedSet[str]
     duration: float = Field(ge=0, default=0)  # in seconds
 
     @model_validator(mode="before")
     def validate_targets(cls, data, field_name="targets"):
-        targets = data.get(field_name, [])
+        if isinstance(data, QuantumInstruction):
+            targets = getattr(data, field_name, set())
+        elif isinstance(data, dict):
+            targets = data.get(field_name, set())
+        else:
+            raise TypeError(
+                f"Expected data to be a QuantumInstruction or dict, got {type(data)}."
+            )
         annotation = cls.model_fields[field_name].annotation
 
-        if isinstance(targets, (ValidatedSet, set)):
-            data[field_name] = annotation(targets)
+        if isinstance(targets, (FrozenSet, ValidatedSet, set, frozenset)):
+            new_field = annotation(targets)
 
         elif isinstance(targets, (list, tuple, np.ndarray)):
             if len(unique_targets := set(targets)) < len(targets):
                 log.warning(
                     f"`QuantumInstruction` has duplicate targets {targets}. Duplicates have been removed."
                 )
-            data[field_name] = annotation(unique_targets)
+            new_field = annotation(unique_targets)
 
         elif isinstance(targets, (str, int)):
-            data[field_name] = annotation({targets})
+            new_field = annotation({targets})
+        else:
+            raise TypeError(
+                f"Expected `targets` to be a set, list, tuple, or string, got {type(targets)}."
+            )
+
+        if isinstance(data, QuantumInstruction):
+            setattr(data, field_name, new_field)
+        elif isinstance(data, dict):
+            data[field_name] = new_field
 
         return data
 
@@ -251,7 +318,6 @@ class QuantumInstruction(Instruction):
 
 
 class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
-    inst: Literal["QuantumInstructionBlock"] = "QuantumInstructionBlock"
     instructions: ValidatedList[QuantumInstruction] = []
     targets: ValidatedSet[str] = ValidatedSet()
     _duration_per_target: dict[str, float] = defaultdict(lambda: 0.0, dict())
@@ -272,7 +338,6 @@ class PhaseShift(QuantumInstruction):
     the pulse channel.
     """
 
-    inst: Literal["PhaseShift"] = "PhaseShift"
     targets: ValidatedSet[str] = Field(max_length=1)
     phase: float = 0.0
 
@@ -284,7 +349,6 @@ class PhaseShift(QuantumInstruction):
 class FrequencyShift(QuantumInstruction):
     """Change the frequency of a pulse channel."""
 
-    inst: Literal["FrequencyShift"] = "FrequencyShift"
     targets: ValidatedSet[str] = Field(max_length=1)
     frequency: float = 0.0
 
@@ -296,8 +360,6 @@ class FrequencyShift(QuantumInstruction):
 class Delay(QuantumInstruction):
     """Instructs a quantum target to do nothing for a fixed time."""
 
-    inst: Literal["Delay"] = "Delay"
-
 
 class Synchronize(QuantumInstruction):
     """
@@ -305,21 +367,16 @@ class Synchronize(QuantumInstruction):
     execution on any of them.
     """
 
-    inst: Literal["Synchronize"] = "Synchronize"
-
 
 class PhaseReset(QuantumInstruction):
     """
     Reset the phase shift of given pulse channels, or the pulse channels of given qubits.
     """
 
-    inst: Literal["PhaseReset"] = "PhaseReset"
-
 
 class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
-    inst: Literal["Reset"] = "Reset"
     targets: ValidatedSet[str] = Field(max_length=0, default=ValidatedSet[str](set()))
     qubit_targets: Union[QubitId, set[QubitId]]
 
