@@ -1202,6 +1202,72 @@ class SquashDelaysOptimisation(TransformPass):
         return ir
 
 
+class BatchedShots(TransformPass):
+    """Determines how shots should be grouped when the total number exceeds that maximum
+    allowed.
+
+    The target machine might have an allowed number of shots that can be executed by a
+    single execution call. To execute a number of shots greater than this value, shots can
+    be batched, with each batch executed by its own "execute" call on the target machine.
+    For example, if the maximum number of shots for a target machine is 2000, but you
+    required 4000 shots, then this could be done as [2000, 2000] shots.
+
+    Now consider the more complex scenario where  4001 shots are required. Clearly this can
+    be done in three batches. While it is tempting to do this in batches of [2000, 2000, 1],
+    for some target machines, specification of the number of shots can only be achieved at
+    compilation (as opposed to runtime). Batching as described above would result in us
+    needing to compile two separate programs. Instead, it makes more sense to batch the
+    shots as three lots of 1334 shots, which gives a total of 4002 shots. The extra two
+    shots can just be discarded at run time.
+
+    .. warning::
+
+        This pass makes certain assumptions about the IR, including that there is only
+        at most one :class:`Repeat` instruction that contributes to the number of readouts,
+        and there is at most one readout per shot. It will change the number of shots in
+        the :class:`Repeat` instruction to the decided batch size, and store the total
+        required shots in the IR, which is less than ideal. It would be nice to save this
+        as an analysis result, but an unfortante side effect of the decoupled nature of
+        the middle- and back-end is that the results manager might not necessarily be
+        passed along.
+    """
+
+    def __init__(self, target_data: TargetData):
+        """
+        :param target_data: Target-related information.
+        """
+        self.max_shots = target_data.max_shots
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        if len(repeats) == 0:
+            return ir
+
+        if len(repeats) > 1:
+            log.warning(
+                "Multiple repeat instructions found. Using only the first for batching of "
+                "shots."
+            )
+
+        repeat = repeats[0]
+        num_shots = repeat.repeat_count
+        num_batches = int(np.ceil(num_shots / self.max_shots))
+        shots_per_batch = int(np.ceil(num_shots / num_batches))
+
+        if num_batches > 1:
+            log.info(
+                f"The number of shots {num_shots} exceeds the maximum allowed on the "
+                f"target. Batching as {num_batches} batches of {shots_per_batch} shots."
+            )
+
+        repeat.repeat_count = shots_per_batch
+        ir.shots = num_shots
+        ir.compiled_shots = shots_per_batch
+        return ir
+
+
 class ScopeSanitisation(TransformPass):
     """Bubbles up all sweeps and repeats to the beginning of the list and adds delimiter
     instructions to the repeats and sweeps signifying the end of their scopes.

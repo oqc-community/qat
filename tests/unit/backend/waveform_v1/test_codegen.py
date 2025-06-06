@@ -136,6 +136,7 @@ class TestWaveformV1Backend:
         executable = self.backend.emit(builder)
         assert isinstance(executable, WaveformV1Executable)
         assert executable.shots == 1000
+        assert executable.compiled_shots == 1000
         if repetition_period is not None:
             assert executable.repetition_time == repetition_period
         else:
@@ -296,6 +297,16 @@ class TestWaveformV1Backend:
         assert acquire.output_variable == "test_var"
         assert acquire.length == 360
         assert acquire.position == 160
+
+    def test_batched_shots(self):
+        builder = self.model.create_builder()
+        builder.shots = 15000
+        builder.compiled_shots = 1000
+        builder.repetition_period = 100e-6
+        builder.pulse(self.channel, width=80e-9, shape=PulseShapeType.SQUARE)
+        executable = self.backend.emit(builder)
+        assert executable.shots == 15000
+        assert executable.compiled_shots == 1000
 
 
 class TestWaveformContext:

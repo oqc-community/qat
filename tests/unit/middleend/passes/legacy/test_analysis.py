@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-import numpy as np
 import pytest
 
 from qat.core.metrics_base import MetricsManager, MetricsType
@@ -9,56 +8,11 @@ from qat.core.result_base import ResultManager
 from qat.middleend.passes.legacy.analysis import (
     ActiveChannelResults,
     ActivePulseChannelAnalysis,
-    BatchedShots,
-    BatchedShotsResult,
 )
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.model.target_data import AbstractTargetData
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import CustomPulse, PulseShapeType
 from qat.purr.utils.logger import LoggerLevel
-
-
-class TestBatchedShots:
-    model = EchoModelLoader().load()
-
-    @pytest.mark.parametrize("shots", [0, 1000, 10000])
-    def test_shots_less_than_equal_to_max_gives_expected(self, shots):
-        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
-
-        builder = self.model.create_builder()
-        builder.repeat(shots)
-        batch_pass = BatchedShots(self.model, target_data)
-        res_mgr = ResultManager()
-        batch_pass.run(builder, res_mgr)
-        batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
-        assert batch_res.total_shots == shots
-        assert batch_res.batched_shots == shots
-
-    def test_no_repeat_instruction(self):
-        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
-
-        builder = self.model.create_builder()
-        batch_pass = BatchedShots(self.model, target_data)
-        res_mgr = ResultManager()
-        batch_pass.run(builder, res_mgr)
-        batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
-        assert batch_res.total_shots == target_data.default_shots
-        assert batch_res.batched_shots == target_data.default_shots
-
-    @pytest.mark.parametrize("shots", [10001, 20000, 29999])
-    def test_shots_greater_than_max_gives_appropiate_batches(self, shots):
-        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
-
-        builder = self.model.create_builder()
-        builder.repeat(shots)
-        batch_pass = BatchedShots(self.model, target_data)
-        res_mgr = ResultManager()
-        batch_pass.run(builder, res_mgr)
-        batch_res = res_mgr.lookup_by_type(BatchedShotsResult)
-        assert batch_res.total_shots == shots
-        assert batch_res.batched_shots <= shots
-        assert batch_res.batched_shots * np.ceil(shots / target_data.max_shots) >= shots
 
 
 class TestActivePulseChannelAnalysis:

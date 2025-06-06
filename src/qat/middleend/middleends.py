@@ -14,6 +14,7 @@ from qat.middleend.passes.legacy.analysis import (
 )
 from qat.middleend.passes.legacy.transform import (
     AcquireSanitisation,
+    BatchedShots,
     EndOfTaskResetSanitisation,
     EvaluatePulses,
     FreqShiftSanitisation,
@@ -189,6 +190,7 @@ class DefaultMiddleend(CustomMiddleend):
             | ResetsToDelays(target_data)
             | SquashDelaysOptimisation()
             | InstructionLengthSanitisation(target_data)
+            | BatchedShots(target_data)
             | ScopeSanitisation()
             | RepeatTranslation(model)
         )

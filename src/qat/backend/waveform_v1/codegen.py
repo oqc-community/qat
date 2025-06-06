@@ -100,6 +100,7 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         return WaveformV1Executable(
             channel_data=channels,
             shots=ir.shots,
+            compiled_shots=ir.compiled_shots,
             repetition_time=(
                 ir.repetition_period
                 if ir.repetition_period is not None

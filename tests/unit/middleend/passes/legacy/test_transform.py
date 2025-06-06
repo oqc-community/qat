@@ -18,6 +18,7 @@ from qat.middleend.passes.legacy.analysis import (
 )
 from qat.middleend.passes.legacy.transform import (
     AcquireSanitisation,
+    BatchedShots,
     EndOfTaskResetSanitisation,
     EvaluatePulses,
     FreqShiftSanitisation,
@@ -44,7 +45,12 @@ from qat.middleend.passes.legacy.validation import (
     ReturnSanitisationValidation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.model.target_data import QubitDescription, ResonatorDescription, TargetData
+from qat.model.target_data import (
+    AbstractTargetData,
+    QubitDescription,
+    ResonatorDescription,
+    TargetData,
+)
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.devices import ChannelType, FreqShiftPulseChannel
@@ -1993,6 +1999,46 @@ class TestSquashDelaysOptimisation:
         assert len(builder.instructions) == 2
         assert builder.instructions[0].time == 5 + delay_times[0]
         assert builder.instructions[1].time == 5 + delay_times[1]
+
+
+class TestBatchedShots:
+    model = EchoModelLoader().load()
+
+    def test_with_no_repeat(self):
+        builder = self.model.create_builder()
+        builder.delay(self.model.qubits[0].get_drive_channel(), 80e-9)
+        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
+        ir = BatchedShots(target_data).run(builder)
+        assert len([inst for inst in ir.instructions if isinstance(inst, Repeat)]) == 0
+        assert not hasattr(ir, "shots")
+        assert not hasattr(ir, "compiled_shots")
+
+    @pytest.mark.parametrize("num_shots", [1, 1000, 999, 10000])
+    def test_not_batched_with_possible_amount(self, num_shots):
+        builder = self.model.create_builder()
+        builder.repeat(num_shots)
+        target_data = AbstractTargetData(max_shots=10000)
+        ir = BatchedShots(target_data).run(builder)
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        assert len(repeats) == 1
+        assert repeats[0].repeat_count == num_shots
+        assert ir.shots == num_shots
+        assert ir.compiled_shots == num_shots
+
+    @pytest.mark.parametrize("num_shots", [1001, 1999, 2000, 4254])
+    def test_shots_are_batched(self, num_shots):
+        builder = self.model.create_builder()
+        builder.repeat(num_shots)
+        target_data = AbstractTargetData(max_shots=1000)
+        ir = BatchedShots(target_data).run(builder)
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
+        assert len(repeats) == 1
+        assert repeats[0].repeat_count <= 1000
+        assert ir.compiled_shots == repeats[0].repeat_count
+        assert ir.shots == num_shots
+        num_batches = np.ceil(ir.shots / ir.compiled_shots)
+        assert num_batches * ir.compiled_shots >= num_shots
+        assert (num_batches - 1) * ir.compiled_shots < num_shots
 
 
 class TestScopeSanitisation:

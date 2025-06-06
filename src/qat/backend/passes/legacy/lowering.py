@@ -38,8 +38,8 @@ class PartitionedIR:
     target_map: dict[PulseChannel, list[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    # TODO: Remove Repeat type option: COMPILER-451
-    shots: Repeat | int | None = field(default_factory=lambda: None)
+    shots: int | None = field(default=None)
+    compiled_shots: int | None = field(default=None)
     returns: list[Return] = field(default_factory=list)
     assigns: list[Assign] = field(default_factory=list)
     acquire_map: dict[PulseChannel, list[Acquire]] = field(
@@ -74,12 +74,20 @@ class PartitionByPulseChannel(LoweringPass):
         variables = defaultdict(list)
         partitioned_ir = PartitionedIR()
 
+        if hasattr(ir, "shots") and hasattr(ir, "compiled_shots"):
+            partitioned_ir.shots = ir.shots
+            partitioned_ir.compiled_shots = ir.compiled_shots
+
+        if hasattr(ir, "repetition_period"):
+            partitioned_ir.repetition_period = ir.repetition_period
+
         def add_to_all(inst: Instruction) -> None:
             shared_instructions.append(inst)
             for target_list in partitioned_ir.target_map.values():
                 target_list.append(inst)
             partitioned_ir.target_map.default_factory = shared_instructions.copy
 
+        repeat_seen = False
         for inst in ir.instructions:
             handled = False
             if isinstance(inst, QuantumInstruction) and not isinstance(
@@ -125,18 +133,22 @@ class PartitionByPulseChannel(LoweringPass):
                 partitioned_ir.rp_map[inst.variable] = inst
 
             elif isinstance(inst, Repeat):
-                if partitioned_ir.shots:
+                if repeat_seen:
                     raise ValueError("Multiple Repeat instructions found.")
-                partitioned_ir.shots = inst.repeat_count
+                if partitioned_ir.shots is None:
+                    partitioned_ir.shots = inst.repeat_count
+                    partitioned_ir.compiled_shots = inst.repeat_count
                 partitioned_ir.repetition_period = inst.repetition_period
+                repeat_seen = True
 
             elif isinstance(inst, Jump):
                 if isinstance(inst.condition, GreaterThan):
-                    limit = inst.condition.left
-                    if partitioned_ir.shots:
+                    if repeat_seen:
                         raise ValueError("Multiple Repeat or Jump instructions found.")
-                    partitioned_ir.shots = limit
-                    partitioned_ir.repetition_period = ir.repetition_period
+                    if partitioned_ir.shots is None:
+                        limit = inst.condition.left
+                        partitioned_ir.shots = limit
+                        partitioned_ir.compiled_shots = limit
                 add_to_all(inst)
 
             elif isinstance(inst, Label):

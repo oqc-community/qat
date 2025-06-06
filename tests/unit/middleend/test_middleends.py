@@ -125,6 +125,7 @@ class TestDefaultMiddleend:
         target_data_blob = target_data.model_dump()
         target_data_blob["QUBIT_DATA"]["passive_reset_time"] = 1e-3
         target_data_blob["QUBIT_DATA"]["pulse_duration_max"] = 1e-4
+        target_data_blob["max_shots"] = 8192
         target_data = TargetData(**target_data_blob)
         return DefaultMiddleend(model=model, target_data=target_data)
 
@@ -281,6 +282,19 @@ class TestDefaultMiddleend:
         assert instructions[1].duration == 80e-9
         assert isinstance(instructions[2], Pulse)
         assert instructions[2].duration == 160e-9
+
+    def test_batched_shots(self, model, middleend):
+        """Test that the DefaultMiddleend can handle batched shots."""
+        builder = model.create_builder()
+        builder.X(model.qubits[0])
+        builder.measure(model.qubits[0])
+        builder.repeat(10000)
+        ir = middleend.emit(builder)
+
+        assert ir.shots == 10000
+        assert ir.compiled_shots < 8192
+        jump = [inst for inst in ir.instructions if isinstance(inst, Jump)][0]
+        assert jump.condition.left == ir.compiled_shots
 
 
 class TestFallthroughMiddleend:
