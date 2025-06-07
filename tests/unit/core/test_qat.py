@@ -662,20 +662,15 @@ class TestQatEchoPipelines:
     legacy_ir = {}
     executables = {}
 
-    def create_legacy_pipelines(self):
+    def setup_class(self):
+        """Setup the QAT instance and pipelines for the tests."""
+        self.core = QAT()
         pipe = get_legacy_echo_pipeline(self.model, "legacy")
         self.core.pipelines.add(pipe)
-
-    def create_new_pipelines(self):
         pipe = get_echo_pipeline(self.model, "new")
         self.core.pipelines.add(pipe)
 
     def get_legacy_ir(self, request, qasm_file):
-        if not self.core:
-            self.core = QAT()
-            self.create_legacy_pipelines()
-            self.create_new_pipelines()
-
         key = request.node.callspec.id
         if key not in self.legacy_ir:
             legacy_ir, _ = self.core.compile(str(qasm_file), self.config, pipeline="legacy")
@@ -684,11 +679,6 @@ class TestQatEchoPipelines:
         return self.legacy_ir[key]
 
     def get_executable(self, request, qasm_file):
-        if not self.core:
-            self.core = QAT()
-            self.create_legacy_pipelines()
-            self.create_new_pipelines()
-
         key = request.node.callspec.id
         if key not in self.executables:
             executable, _ = self.core.compile(str(qasm_file), self.config, pipeline="new")
@@ -773,3 +763,21 @@ class TestQatEchoPipelines:
 
         with pytest.raises(MismatchingHardwareModelException):
             self.core.execute(package, pipeline="new")
+
+    @pytest.mark.parametrize(
+        "qasm_file",
+        qasm2_files,
+        ids=short_file_name,
+    )
+    @pytest.mark.parametrize(
+        "pipeline",
+        ["legacy", "new"],
+    )
+    def test_serialised_executable(self, qasm_file, pipeline):
+        """Test that the executable can be serialized and deserialized."""
+        package, _ = self.core.compile(
+            str(qasm_file), self.config, pipeline=pipeline, to_json=True
+        )
+        assert isinstance(package, str)
+        results, _ = self.core.execute(package, self.config, pipeline=pipeline)
+        assert isinstance(results, dict)

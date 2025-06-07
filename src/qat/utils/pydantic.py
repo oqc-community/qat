@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 from copy import deepcopy
+from functools import cached_property
 from pydoc import locate
 from typing import Annotated, Any, Type, TypeVar, get_args
 
@@ -18,6 +19,7 @@ from pydantic import (
     ConfigDict,
     PlainSerializer,
     RootModel,
+    computed_field,
 )
 from pydantic._internal._model_construction import ModelMetaclass
 from pydantic_core import core_schema
@@ -71,6 +73,35 @@ class AllowExtraFieldsModel(BaseModel):
 
     def __str__(self):
         return self.__repr__()
+
+
+class RehydratableModel(BaseModel):
+    @computed_field
+    @cached_property
+    def object_type(self) -> str:
+        """
+        Returns the type of the object, which is the class name.
+        """
+        return self.__class__.__module__ + "." + self.__class__.__name__
+
+    @classmethod
+    def _rehydrate_object(cls, data):
+        type_str = data.get("object_type", None)
+        if type_str is None:
+            cls_type = cls
+        else:
+            # Locate the class using the type string.
+            cls_type = locate(type_str)
+        if cls_type is None:
+            raise ValueError(
+                f"Could not locate class for type string '{type_str}'. Ensure it is a valid class path."
+            )
+        # Create an instance of the located class with the provided data.
+        if not issubclass(cls_type, cls):
+            raise TypeError(
+                f"Located class '{cls_type.__name__}' is not a subclass of '{cls.__name__}'."
+            )
+        return cls_type(**data)
 
 
 # This base file is used to implement classes/methods common to all hardware.

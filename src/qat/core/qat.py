@@ -42,6 +42,7 @@ class QAT:
         program,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
+        to_json: bool = False,
     ):
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
@@ -72,16 +73,25 @@ class QAT:
                 compiler_config=compiler_config,
             )
 
+            if to_json:
+                package = package.serialize()
+
             return package, metrics_manager
 
     def execute(
         self,
-        package: InstructionBuilder | Executable,
+        package: InstructionBuilder | Executable | str,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ):
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
+            if isinstance(package, str):
+                # If the package is a string, deserialize it
+                if "py/object" in package:
+                    package = InstructionBuilder.deserialize(package)
+                else:
+                    package = Executable.deserialize(package)
             if P.model.calibration_id != package.calibration_id:
                 raise MismatchingHardwareModelException(
                     f"Hardware id in the executable package '{P.model.calibration_id}'' does not match the hardware id '{package.calibration_id}' used during compilation."

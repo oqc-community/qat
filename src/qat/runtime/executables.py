@@ -10,6 +10,7 @@ from pydantic_core import from_json
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
 from qat.purr.compiler.instructions import AcquireMode
+from qat.utils.pydantic import RehydratableModel
 
 
 class AcquireData(BaseModel):
@@ -30,7 +31,7 @@ class AcquireData(BaseModel):
     output_variable: str
 
 
-class Executable(BaseModel):
+class Executable(RehydratableModel):
     """
     :class:`Executables` are instruction packages that will be sent to a target (either
     physical control hardware or a simulator).
@@ -73,7 +74,7 @@ class Executable(BaseModel):
     @classmethod
     def deserialize(cls, blob: str):
         """Instantiates a executable from a JSON blob."""
-        return cls(**from_json(blob))
+        return cls._rehydrate_object(from_json(blob))
 
     @property
     @abstractmethod
