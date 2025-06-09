@@ -3,19 +3,17 @@
 from collections import defaultdict
 from itertools import chain
 
+from compiler_config.config import InlineResultsProcessing
+
 from qat.core.pass_base import LoweringPass
-from qat.ir.lowered import PartitionedIR
-from qat.middleend.passes.legacy.transform import LoopCount
-from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.instructions import (
-    Acquire,
+from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.instructions import (
     Assign,
     GreaterThan,
-    InlineResultsProcessing,
     Instruction,
     Jump,
     Label,
-    PostProcessing,
+    LoopCount,
     QuantumInstruction,
     Repeat,
     ResultsProcessing,
@@ -23,6 +21,8 @@ from qat.purr.compiler.instructions import (
     Synchronize,
     Variable,
 )
+from qat.ir.lowered import PartitionedIR
+from qat.ir.measure import Acquire, PostProcessing
 
 
 class PartitionByPulseChannel(LoweringPass):
@@ -41,7 +41,7 @@ class PartitionByPulseChannel(LoweringPass):
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> PartitionedIR:
         """
-        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param ir: The list of instructions stored in a :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
         shared_instructions = list()
@@ -52,9 +52,6 @@ class PartitionByPulseChannel(LoweringPass):
             partitioned_ir.shots = ir.shots
             partitioned_ir.compiled_shots = ir.compiled_shots
 
-        if hasattr(ir, "repetition_period"):
-            partitioned_ir.repetition_period = ir.repetition_period
-
         def add_to_all(inst: Instruction) -> None:
             shared_instructions.append(inst)
             for target_list in partitioned_ir.target_map.values():
@@ -62,73 +59,70 @@ class PartitionByPulseChannel(LoweringPass):
             partitioned_ir.target_map.default_factory = shared_instructions.copy
 
         repeat_seen = False
-        for inst in ir.instructions:
+        for instr in ir:
             handled = False
-            if isinstance(inst, QuantumInstruction) and not isinstance(
-                inst, PostProcessing
-            ):
-                if isinstance(inst, Synchronize):
+            if isinstance(instr, QuantumInstruction):
+                if isinstance(instr, Synchronize):
                     raise ValueError(
-                        f"The `Synchronize` instruction {inst} is not supported by the "
-                        "PartitionByPulseChannelPass. Please lower it to `Delay` instructions "
+                        f"The `Synchronize` instruction {instr} is not supported by the "
+                        "PartitionByPulseChannel pass. Please lower it to `Delay` instructions "
                         "using the `LowerSyncsToDelays` pass"
                     )
                 handled = True
-                for qt in inst.quantum_targets:
-                    partitioned_ir.target_map[qt].append(inst)
+                for target in instr.targets:
+                    partitioned_ir.target_map[target].append(instr)
 
-            if isinstance(inst, Return):
-                partitioned_ir.returns.append(inst)
+            if isinstance(instr, Return):
+                partitioned_ir.returns.append(instr)
 
-            elif isinstance(inst, Variable):
-                variables[inst.name].append(inst)
-                add_to_all(inst)
+            elif isinstance(instr, Variable):
+                variables[instr.name].append(instr)
+                add_to_all(instr)
 
-            elif isinstance(inst, Assign):
-                var_refs = variables[inst.name]
+            elif isinstance(instr, Assign):
+                var_refs = variables[instr.name]
                 if len(var_refs) == 0:
-                    variables[inst.name].append(Variable(inst.name))
+                    variables[instr.name].append(Variable(name=instr.name))
                 if var_refs[-1].var_type == LoopCount:
-                    add_to_all(inst)
-                if isinstance(inst.value, list | str):
+                    add_to_all(instr)
+                if isinstance(instr.value, list | str):
                     # Only list assigns that are readout/result assignements
                     # TODO: Supper different assigns for result readout vs loop
                     # variables etc.
-                    partitioned_ir.assigns.append(inst)
+                    partitioned_ir.assigns.append(instr)
 
-            elif isinstance(inst, Acquire):
-                for t in inst.quantum_targets:
-                    partitioned_ir.acquire_map[t].append(inst)
+            elif isinstance(instr, Acquire):
+                for target in instr.targets:
+                    partitioned_ir.acquire_map[target].append(instr)
 
-            elif isinstance(inst, PostProcessing):
-                partitioned_ir.pp_map[inst.output_variable].append(inst)
+            elif isinstance(instr, PostProcessing):
+                partitioned_ir.pp_map[instr.output_variable].append(instr)
 
-            elif isinstance(inst, ResultsProcessing):
-                partitioned_ir.rp_map[inst.variable] = inst
+            elif isinstance(instr, ResultsProcessing):
+                partitioned_ir.rp_map[instr.variable] = instr
 
-            elif isinstance(inst, Repeat):
+            elif isinstance(instr, Repeat):
                 if repeat_seen:
                     raise ValueError("Multiple Repeat instructions found.")
                 if partitioned_ir.shots is None:
-                    partitioned_ir.shots = inst.repeat_count
-                    partitioned_ir.compiled_shots = inst.repeat_count
-                partitioned_ir.repetition_period = inst.repetition_period
+                    partitioned_ir.shots = instr.repeat_count
+                    partitioned_ir.compiled_shots = instr.repeat_count
                 repeat_seen = True
 
-            elif isinstance(inst, Jump):
-                if isinstance(inst.condition, GreaterThan):
+            elif isinstance(instr, Jump):
+                if isinstance(instr.condition, GreaterThan):
                     if repeat_seen:
-                        raise ValueError("Multiple Repeat or Jump instructions found.")
+                        raise ValueError("Multiple `Repeat` or `Jump` instructions found.")
                     if partitioned_ir.shots is None:
-                        limit = inst.condition.left
+                        limit = instr.condition.left
                         partitioned_ir.shots = limit
                         partitioned_ir.compiled_shots = limit
-                add_to_all(inst)
+                add_to_all(instr)
 
-            elif isinstance(inst, Label):
-                add_to_all(inst)
+            elif isinstance(instr, Label):
+                add_to_all(instr)
             elif not handled:
-                raise TypeError(f"Unexpected Instruction type: {type(inst)}.")
+                raise TypeError(f"Unexpected Instruction type: {type(instr)}.")
 
         # Assume that raw acquisitions are experiment results.
         # TODO: separate as ResultsProcessingSanitisation pass. (COMPILER-412)
@@ -140,7 +134,10 @@ class PartitionByPulseChannel(LoweringPass):
         }
         for missing_var in missing_results:
             partitioned_ir.rp_map[missing_var] = ResultsProcessing(
-                missing_var, InlineResultsProcessing.Experiment
+                variable=missing_var, results_processing=InlineResultsProcessing.Experiment
             )
 
         return partitioned_ir
+
+
+PydPartitionByPulseChannel = PartitionByPulseChannel

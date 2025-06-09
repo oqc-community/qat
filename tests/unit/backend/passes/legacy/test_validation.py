@@ -6,7 +6,6 @@ from contextlib import nullcontext
 
 import pytest
 
-from qat.backend.passes.legacy.lowering import PartitionedIR
 from qat.backend.passes.legacy.validation import (
     NCOFrequencyVariability,
     NoAcquiresWithDifferentWeightsValidation,
@@ -14,6 +13,7 @@ from qat.backend.passes.legacy.validation import (
     NoMultipleAcquiresValidation,
 )
 from qat.core.result_base import ResultManager
+from qat.ir.lowered import PartitionedIR
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import Acquire, CustomPulse, Pulse, PulseShapeType
 

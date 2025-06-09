@@ -21,3 +21,6 @@ class EchoModelLoader(BasePhysicalModelLoader):
     def load(self) -> PhysicalHardwareModel:
         legacy_model = self._legacy.load()
         return convert_legacy_echo_hw_to_pydantic(legacy_model)
+
+
+PydEchoModelLoader = EchoModelLoader

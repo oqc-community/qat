@@ -11,7 +11,6 @@ from qat.backend.passes.legacy.analysis import (
     PulseChannelTimeline,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.lowering import PartitionedIR
 from qat.backend.waveform_v1.codegen import (
     WaveformContext,
     WaveformV1Backend,
@@ -19,6 +18,7 @@ from qat.backend.waveform_v1.codegen import (
 )
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.legacy.transform import (
     LowerSyncsToDelays,
     RepeatTranslation,

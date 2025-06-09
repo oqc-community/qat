@@ -12,9 +12,9 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.graph import ControlFlowGraph
-from qat.backend.passes.legacy.lowering import PartitionedIR
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
+from qat.ir.lowered import PartitionedIR
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType

@@ -12,7 +12,7 @@ from qat.backend.passes.legacy.analysis import (
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.legacy.lowering import PartitionByPulseChannel
 from qat.backend.passes.legacy.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import (
     WaveformV1ChannelData,
@@ -21,6 +21,7 @@ from qat.backend.waveform_v1.executable import (
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
 from qat.ir.instructions import Assign
+from qat.ir.lowered import PartitionedIR
 from qat.ir.measure import PostProcessing
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder

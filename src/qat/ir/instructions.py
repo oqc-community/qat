@@ -219,6 +219,44 @@ class Variable(NoExtraFieldsModel):
         return value
 
 
+class Label(Instruction):
+    """
+    Label to apply to a line of code. Used as anchors for other instructions like jumps.
+    """
+
+    name: str
+
+    @staticmethod
+    def with_random_name(self):
+        return Label(name=f"label_{uuid.uuid4()}")
+
+
+class Jump(Instruction):
+    """
+    Classic jump instruction, should be linked to label with an optional condition.
+    """
+
+    label: Label | str
+    condition: BinaryOperator | None = None
+
+    @field_validator("label", mode="after")
+    @classmethod
+    def _validate_label(cls, label: Union[str, Label]):
+        if isinstance(label, str):
+            label = Label(name=label)
+        return label
+
+    @property
+    def target(self):
+        return self.label.name
+
+    def __repr__(self):
+        if self.condition is not None:
+            return f"jump if {str(self.condition)} -> {str(self.target)}"
+        else:
+            return f"jump -> {str(self.target)}"
+
+
 class Assign(Instruction):
     """
     Assigns a value to a variable.
@@ -262,6 +300,55 @@ class Assign(Instruction):
             return value
 
         return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
+
+
+class LoopCount(int): ...
+
+
+### Binary Operators
+
+
+class BinaryOperator(NoExtraFieldsModel):
+    """Binary operator, such as ``x == y``, ``x != y`` etc."""
+
+    left: Union[int, float, Variable]
+    right: Union[int, float, Variable]
+
+
+class Equals(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} == {str(self.right)}"
+
+
+class NotEquals(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} != {str(self.right)}"
+
+
+class GreaterThan(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} > {str(self.right)}"
+
+
+class GreaterOrEqualThan(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} >= {str(self.right)}"
+
+
+class LessThan(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} < {str(self.right)}"
+
+
+class LessOrEqualThan(BinaryOperator):
+    def __repr__(self):
+        return f"{str(self.left)} <= {str(self.right)}"
+
+
+class Plus(BinaryOperator):
+    # TODO: Improve operators in Pydantic version
+    def __repr__(self):
+        return f"{str(self.left)} + {str(self.right)}"
 
 
 ### Quantum Instructions

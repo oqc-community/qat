@@ -23,8 +23,9 @@ from qat.backend.passes.legacy.analysis import (
     TriagePass,
     TriageResult,
 )
-from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.legacy.lowering import PartitionByPulseChannel
 from qat.core.result_base import ResultManager
+from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.legacy.transform import (
     InstructionGranularitySanitisation,
     LowerSyncsToDelays,

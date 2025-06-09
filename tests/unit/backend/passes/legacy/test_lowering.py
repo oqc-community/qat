@@ -2,7 +2,8 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
 
-from qat.backend.passes.legacy.lowering import PartitionByPulseChannel, PartitionedIR
+from qat.backend.passes.legacy.lowering import PartitionByPulseChannel
+from qat.ir.lowered import PartitionedIR
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import (
     Acquire,

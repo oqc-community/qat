@@ -80,6 +80,20 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     logical_connectivity_quality: FrozenDict[QubitCoupling, CalibratableUnitInterval]
     error_mitigation: ErrorMitigation = ErrorMitigation()
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._ids_to_pulse_channels = {
+            pulse_channel.uuid: pulse_channel
+            for qubit in self.qubits.values()
+            for pulse_channel in qubit.all_pulse_channels
+            + qubit.resonator.all_pulse_channels
+        }
+        self._ids_to_physical_channels = {
+            phys_channel.uuid: phys_channel
+            for qubit in self.qubits.values()
+            for phys_channel in [qubit.physical_channel, qubit.resonator.physical_channel]
+        }
+
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):
         if not data.get("logical_connectivity", None):
@@ -213,17 +227,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         return self.qubits[index]
 
     def pulse_channel_with_id(self, id_: str):
-        for qubit in self.qubits.values():
-            if qubit_pulse_channel := qubit.pulse_channels.pulse_channel_with_id(id_):
-                return qubit_pulse_channel
+        return self._ids_to_pulse_channels.get(id_, None)
 
-            elif (
-                resonator_pulse_channel
-                := qubit.resonator.pulse_channels.pulse_channel_with_id(id_)
-            ):
-                return resonator_pulse_channel
-
-        return None
+    def physical_channel_with_id(self, id_: str):
+        return self._ids_to_physical_channels.get(id_, None)
 
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:
