@@ -461,6 +461,21 @@ class PhaseReset(QuantumInstruction):
     """
 
 
+class PhaseSet(QuantumInstruction):
+    """Sets the phase for a pulse channel.
+
+    This sets the absolute phase of an NCO, unlike the :class:`PhaseShift`, which changes
+    the phase relative to the current phase.
+    """
+
+    targets: ValidatedSet[str] = Field(max_length=1)
+    phase: float = 0.0
+
+    @property
+    def target(self):
+        return next(iter(self.targets))
+
+
 class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
