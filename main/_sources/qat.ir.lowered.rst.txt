@@ -1,0 +1,7 @@
+qat.ir.lowered module
+=====================
+
+.. automodule:: qat.ir.lowered
+   :members:
+   :undoc-members:
+   :show-inheritance:

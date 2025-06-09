@@ -66,6 +66,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.validation.html">qat.backend.passes.legacy.validation module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -148,6 +149,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -478,12 +480,12 @@ as information of pulse channels are needed.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR" title="qat.backend.passes.legacy.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR" title="qat.ir.lowered.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR" title="qat.backend.passes.legacy.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR" title="qat.ir.lowered.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -714,12 +716,12 @@ pass.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR" title="qat.backend.passes.legacy.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR" title="qat.ir.lowered.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.legacy.analysis.TimelineAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR" title="qat.backend.passes.legacy.lowering.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR" title="qat.ir.lowered.PartitionedIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">PartitionedIR</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>

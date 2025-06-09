@@ -13,3 +13,11 @@ Subpackages
    :maxdepth: 4
 
    qat.backend.passes.legacy
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.passes.lowering

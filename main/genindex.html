@@ -63,6 +63,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.validation.html">qat.backend.passes.legacy.validation module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -145,6 +146,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -467,7 +469,7 @@
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses.params.acquire_ignored_shapes">acquire_ignored_shapes (qat.middleend.passes.legacy.transform.EvaluatePulses parameter)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.acquire_map">acquire_map (PartitionedIR attribute)</a>
+      <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.acquire_map">acquire_map (PartitionedIR attribute)</a>
 
       <ul>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.acquire_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.acquire_map">[1]</a>
@@ -800,7 +802,7 @@
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.assigns">assigns (Executable attribute)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.assigns">(PartitionedIR attribute)</a>
+        <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.assigns">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
@@ -955,8 +957,12 @@
 </li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_count">binary_count() (in module qat.runtime.results_processing)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.BinaryOperator">BinaryOperator (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator">BinaryOperator (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.BinaryOperator">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass">BindingPass (class in qat.backend.passes.legacy.analysis)</a>
 
       <ul>
@@ -1328,7 +1334,7 @@
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.compiled_shots">compiled_shots (Executable attribute)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.compiled_shots">(PartitionedIR attribute)</a>
+        <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.compiled_shots">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.compiled_shots">(qat.runtime.executables.Executable parameter)</a>
 </li>
@@ -1382,6 +1388,8 @@
       <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.CompositeInstrument">CompositeInstrument (class in qat.purr.backends.qblox.execution.instrument_base)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger">CompositeLogger (class in qat.purr.utils.logger)</a>
+</li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.condition">condition (Jump attribute)</a>
 </li>
       <li><a href="qat.core.config.descriptions.html#id1">config (ClassDescription attribute)</a>, <a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ClassDescription.config">[1]</a>
 
@@ -2213,8 +2221,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals">Equals (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Equals">Equals (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.ERROR">ERROR (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.error">error() (CompositeLogger method)</a>
@@ -2743,10 +2755,10 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel">get_devices_from_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel">get_drive_channel() (Qubit method)</a>
@@ -2903,10 +2915,18 @@
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.GIGA">GIGA (Scale attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterOrEqualThan">GreaterOrEqualThan (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.GreaterOrEqualThan">GreaterOrEqualThan (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterOrEqualThan">(class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterThan">GreaterThan (class in qat.purr.compiler.instructions)</a>
+      </ul></li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.GreaterThan">GreaterThan (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterThan">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.GRID_TIME">GRID_TIME (Constants attribute)</a>
 </li>
   </ul></td>
@@ -3272,6 +3292,8 @@
 </li>
         <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoMultipleAcquiresValidation.run.params.ir">(qat.backend.passes.legacy.validation.NoMultipleAcquiresValidation.run parameter)</a>
 </li>
+        <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionByPulseChannel.run.params.ir">(qat.backend.passes.lowering.PartitionByPulseChannel.run parameter)</a>
+</li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
@@ -3467,8 +3489,12 @@
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.JsonLoggerHandler">JsonLoggerHandler (class in qat.purr.utils.logger)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Jump">Jump (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump">Jump (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Jump">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.JUMP">JUMP (Opcode attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.jump">jump() (InstructionBuilder method)</a>
@@ -3501,10 +3527,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.labber_style">labber_style (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label">Label (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label">Label (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label">(class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.label">label (QRPairModel attribute)</a>
+      </ul></li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.label">label (Jump attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.label">(QRPairModel attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.label">label() (SequenceBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.label_gen">label_gen() (AllocationManager method)</a>
@@ -3537,6 +3571,8 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.ledger">ledger() (AbstractContext method)</a>
 </li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.left">left (BinaryOperator attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.LegacyHardwareModel">LegacyHardwareModel (in module qat.purr.compiler.hardware_models)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LegacyPhaseOptimisation">LegacyPhaseOptimisation (class in qat.middleend.passes.legacy.transform)</a>
@@ -3553,10 +3589,18 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.length">(SweepIterator property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessOrEqualThan">LessOrEqualThan (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.LessOrEqualThan">LessOrEqualThan (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessOrEqualThan">(class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessThan">LessThan (class in qat.purr.compiler.instructions)</a>
+      </ul></li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.LessThan">LessThan (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessThan">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LevelFilter">LevelFilter (class in qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.LifetimePass">LifetimePass (class in qat.backend.passes.legacy.analysis)</a>
@@ -3689,8 +3733,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.LOOP_UNROLL_THRESHOLD">LOOP_UNROLL_THRESHOLD (Constants attribute)</a>
 </li>
-      <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LoopCount">LoopCount (class in qat.middleend.passes.legacy.transform)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.LoopCount">LoopCount (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LoopCount">(class in qat.middleend.passes.legacy.transform)</a>
 </li>
+      </ul></li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.LoweringPass">LoweringPass (class in qat.core.pass_base)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LowerSyncsToDelays">LowerSyncsToDelays (class in qat.middleend.passes.legacy.transform)</a>
@@ -4170,6 +4218,8 @@
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Barrier.model_config">(Barrier attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.model_config">(BinaryOperator attribute)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.model_config">(BinnedAcqData attribute)</a>
 </li>
         <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.model_config">(BitRegister attribute)</a>
@@ -4226,6 +4276,8 @@
 </li>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ECR.model_config">(ECR attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Equals.model_config">(Equals attribute)</a>
+</li>
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.model_config">(ErrorMitigation attribute)</a>
 </li>
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.model_config">(Executable attribute)</a>
@@ -4260,6 +4312,10 @@
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.GaussianZeroEdgeWaveform.model_config">(GaussianZeroEdgeWaveform attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.GreaterOrEqualThan.model_config">(GreaterOrEqualThan attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.GreaterThan.model_config">(GreaterThan attribute)</a>
+</li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Hadamard.model_config">(Hadamard attribute)</a>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.HardwareLoaderDescription.model_config">(HardwareLoaderDescription attribute)</a>
@@ -4278,6 +4334,14 @@
 </li>
         <li><a href="qat.model.device.html#qat.model.device.IQBias.model_config">(IQBias attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.model_config">(Jump attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label.model_config">(Label attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.LessOrEqualThan.model_config">(LessOrEqualThan attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.LessThan.model_config">(LessThan attribute)</a>
+</li>
         <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.model_config">(LogicalHardwareModel attribute)</a>
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.model_config">(Measure attribute)</a>
@@ -4295,6 +4359,8 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel.model_config">(NoExtraFieldsFrozenModel attribute)</a>
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel.model_config">(NoExtraFieldsModel attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.NotEquals.model_config">(NotEquals attribute)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.model_config">(NumericFunction attribute)</a>
 </li>
@@ -4323,6 +4389,8 @@
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineFactoryDescription.model_config">(PipelineFactoryDescription attribute)</a>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineInstanceDescription.model_config">(PipelineInstanceDescription attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Plus.model_config">(Plus attribute)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.model_config">(PostProcessing attribute)</a>
 </li>
@@ -4555,6 +4623,8 @@
 </li>
         <li><a href="qat.backend.passes.legacy.validation.html#module-qat.backend.passes.legacy.validation">qat.backend.passes.legacy.validation</a>
 </li>
+        <li><a href="qat.backend.passes.lowering.html#module-qat.backend.passes.lowering">qat.backend.passes.lowering</a>
+</li>
         <li><a href="qat.backend.waveform_v1.html#module-qat.backend.waveform_v1">qat.backend.waveform_v1</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#module-qat.backend.waveform_v1.codegen">qat.backend.waveform_v1.codegen</a>
@@ -4656,6 +4726,8 @@
         <li><a href="qat.ir.instruction_builder.html#module-qat.ir.instruction_builder">qat.ir.instruction_builder</a>
 </li>
         <li><a href="qat.ir.instructions.html#module-qat.ir.instructions">qat.ir.instructions</a>
+</li>
+        <li><a href="qat.ir.lowered.html#module-qat.ir.lowered">qat.ir.lowered</a>
 </li>
         <li><a href="qat.ir.measure.html#module-qat.ir.measure">qat.ir.measure</a>
 </li>
@@ -4983,6 +5055,8 @@
 </li>
         <li><a href="qat.purr.backends.qblox.execution.instrument_base.html#qat.purr.backends.qblox.execution.instrument_base.InstrumentModel.name">(InstrumentModel attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label.name">(Label attribute)</a>
+</li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.name">(OperatorInfo attribute)</a>
 </li>
         <li><a href="qat.core.pipeline.html#qat.core.pipeline.Pipeline.name">(Pipeline attribute)</a>
@@ -5076,8 +5150,12 @@
 </li>
       <li><a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.NOT">NOT (Opcode attribute)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.NotEquals">NotEquals (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.NotEquals">NotEquals (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.NotEquals">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.NOTSET">NOTSET (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt">NullInterrupt (class in qat.purr.compiler.interrupt)</a>
@@ -5365,8 +5443,12 @@
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.partial_id">partial_id() (PulseChannel method)</a>
 </li>
       <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionByPulseChannel">PartitionByPulseChannel (class in qat.backend.passes.legacy.lowering)</a>
+
+      <ul>
+        <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionByPulseChannel">(class in qat.backend.passes.lowering)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR">PartitionedIR (class in qat.backend.passes.legacy.lowering)</a>
+      </ul></li>
+      <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR">PartitionedIR (class in qat.ir.lowered)</a>
 </li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassManager.add.params.pass_obj">pass_obj (qat.core.pass_base.PassManager.add parameter)</a>
 </li>
@@ -5490,6 +5572,8 @@
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.physical_channel_id">physical_channel_id (PulseChannel property)</a>
 </li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_with_id">physical_channel_with_id() (PhysicalHardwareModel method)</a>
+</li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity">physical_connectivity (PhysicalHardwareModel attribute)</a>
 
       <ul>
@@ -5582,8 +5666,12 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses">plot_pulses() (RealtimeChipSimEngine method)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Plus">Plus (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Plus">Plus (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Plus">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.pop">pop() (PydDictBase method)</a>
 
       <ul>
@@ -5596,10 +5684,10 @@
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.position">(qat.runtime.executables.AcquireData parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
+</li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.post_processing">post_processing (Executable attribute)</a>
 
       <ul>
@@ -5632,7 +5720,7 @@
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType">PostProcessType (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.pp_map">pp_map (PartitionedIR attribute)</a>
+      <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.pp_map">pp_map (PartitionedIR attribute)</a>
 
       <ul>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.pp_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map">[1]</a>
@@ -5884,6 +5972,8 @@
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase">PydDictBase (class in qat.utils.pydantic)</a>
 </li>
+      <li><a href="qat.model.loaders.converted.html#qat.model.loaders.converted.PydEchoModelLoader">PydEchoModelLoader (in module qat.model.loaders.converted)</a>
+</li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity">PydHardwareConfigValidity (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydInputOptimisation">PydInputOptimisation (class in qat.frontend.passes.transform)</a>
@@ -5895,6 +5985,8 @@
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation">PydNoMidCircuitMeasurementValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydParse">PydParse (class in qat.frontend.passes.transform)</a>
+</li>
+      <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PydPartitionByPulseChannel">PydPartitionByPulseChannel (in module qat.backend.passes.lowering)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydPhaseOptimisation">PydPhaseOptimisation (class in qat.middleend.passes.transform)</a>
 </li>
@@ -6062,6 +6154,13 @@
 
       <ul>
         <li><a href="qat.backend.passes.legacy.validation.html#module-qat.backend.passes.legacy.validation">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.backend.passes.lowering
+
+      <ul>
+        <li><a href="qat.backend.passes.lowering.html#module-qat.backend.passes.lowering">module</a>
 </li>
       </ul></li>
       <li>
@@ -6419,6 +6518,13 @@
 
       <ul>
         <li><a href="qat.ir.instructions.html#module-qat.ir.instructions">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir.lowered
+
+      <ul>
+        <li><a href="qat.ir.lowered.html#module-qat.ir.lowered">module</a>
 </li>
       </ul></li>
       <li>
@@ -6827,6 +6933,8 @@
         <li><a href="qat.purr.backends.qblox.codegen_base.html#module-qat.purr.backends.qblox.codegen_base">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.config
 
@@ -6834,8 +6942,6 @@
         <li><a href="qat.purr.backends.qblox.config.html#module-qat.purr.backends.qblox.config">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.constants
 
@@ -7816,6 +7922,8 @@
 </li>
         <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionByPulseChannel.run.params.res_mgr">(qat.backend.passes.legacy.lowering.PartitionByPulseChannel.run parameter)</a>
 </li>
+        <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionByPulseChannel.run.params.res_mgr">(qat.backend.passes.lowering.PartitionByPulseChannel.run parameter)</a>
+</li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassManager.run.params.res_mgr">(qat.core.pass_base.PassManager.run parameter)</a>
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.res_mgr">(qat.core.pass_base.PassModel.run parameter)</a>
@@ -8042,7 +8150,7 @@
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.returns">returns (Executable attribute)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.returns">(PartitionedIR attribute)</a>
+        <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.returns">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
@@ -8083,6 +8191,8 @@
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector.revert">(VariableInjector method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.right">right (BinaryOperator attribute)</a>
+</li>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.Connectivity.Ring">Ring (Connectivity attribute)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.rise">rise (CalibratablePulse attribute)</a>
@@ -8131,7 +8241,7 @@
       </ul></li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.RoundedSquareWaveform">RoundedSquareWaveform (class in qat.ir.waveforms)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.rp_map">rp_map (PartitionedIR attribute)</a>
+      <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.rp_map">rp_map (PartitionedIR attribute)</a>
 
       <ul>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.rp_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.rp_map">[1]</a>
@@ -8236,7 +8346,7 @@
 </li>
         <li><a href="qat.frontend.passes.legacy.transform.html#qat.frontend.passes.legacy.transform.Parse.run">(Parse method)</a>
 </li>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionByPulseChannel.run">(PartitionByPulseChannel method)</a>
+        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionByPulseChannel.run">(PartitionByPulseChannel method)</a>, <a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionByPulseChannel.run">[1]</a>
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassConcept.run">(PassConcept method)</a>, <a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.PassConcept.run">[1]</a>
 </li>
@@ -8698,7 +8808,7 @@
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.shots">shots (Executable attribute)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.shots">(PartitionedIR attribute)</a>
+        <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.shots">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
@@ -9038,6 +9148,8 @@
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.target">(FrequencyShift property)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.target">(Jump property)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.target">(PhaseShift property)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.target">(Pulse property)</a>
@@ -9072,7 +9184,7 @@
       <li><a href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.target_map">target_map (ActiveChannelResults attribute)</a>
 
       <ul>
-        <li><a href="qat.backend.passes.legacy.lowering.html#qat.backend.passes.legacy.lowering.PartitionedIR.target_map">(PartitionedIR attribute)</a>
+        <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.target_map">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TimelineAnalysisResult.params.target_map">(qat.backend.passes.legacy.analysis.TimelineAnalysisResult parameter)</a>
 </li>
@@ -9691,7 +9803,7 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.width">(Waveform attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label.with_random_name">with_random_name() (Label static method)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label.with_random_name">with_random_name() (Label static method)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label.with_random_name">[1]</a>
 
       <ul>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.with_random_name">(Variable static method)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Variable.with_random_name">[1]</a>
