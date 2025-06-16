@@ -6941,8 +6941,6 @@
         <li><a href="qat.purr.backends.qblox.codegen_base.html#module-qat.purr.backends.qblox.codegen_base">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.config
 
@@ -6950,6 +6948,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#module-qat.purr.backends.qblox.config">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.constants
 
@@ -7688,6 +7688,8 @@
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.qubit_physical_channel_id">qubit_physical_channel_id() (QRPairModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubit_quality">qubit_quality() (QuantumHardwareModel method)</a>
+</li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.Reset.qubit_target">qubit_target (Reset property)</a>
 </li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.qubit_targets">qubit_targets (MeasureBlock attribute)</a>
 
@@ -9154,13 +9156,7 @@
       <ul>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ControlGate2Q.target">(ControlGate2Q property)</a>
 </li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.target">(FrequencyShift property)</a>
-</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.target">(Jump property)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.target">(PhaseSet property)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.target">(PhaseShift property)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.target">(Pulse property)</a>
 </li>
@@ -9169,6 +9165,10 @@
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.target">(qat.ir.instruction_builder.QuantumInstructionBuilder.U parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage.target">(QbloxPackage attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.target">(QuantumInstruction property)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Reset.target">(Reset property)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.ZX.params.target1">target1 (qat.ir.instruction_builder.QuantumInstructionBuilder.ZX parameter)</a>
@@ -9205,19 +9205,9 @@
       </ul></li>
       <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData">TargetData (class in qat.model.target_data)</a>
 </li>
-      <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.targets">targets (Acquire attribute)</a>
+      <li><a href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.targets">targets (ActiveChannelResults property)</a>
 
       <ul>
-        <li><a href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults.targets">(ActiveChannelResults property)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.targets">(FrequencyShift attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.targets">(PhaseSet attribute)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.targets">(PhaseShift attribute)</a>
-</li>
-        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.targets">(Pulse attribute)</a>
-</li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure.params.targets">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.validate_frequency_ranges.params.targets">(qat.middleend.passes.legacy.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
@@ -9229,6 +9219,8 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.targets">(QuantumInstructionBlock attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Reset.targets">(Reset attribute)</a>
+</li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.targets">(Synchronize attribute)</a>
 </li>
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.targets">(UntargetedPulse attribute)</a>
 </li>
@@ -9559,14 +9551,6 @@
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling">validate_qubit_coupling() (in module qat.utils.pydantic)</a>
 </li>
-      <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.validate_targets">validate_targets() (MeasureBlock class method)</a>
-
-      <ul>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.validate_targets">(QuantumInstruction class method)</a>
-</li>
-        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Reset.validate_targets">(Reset method)</a>
-</li>
-      </ul></li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_waveform_type">validate_waveform_type() (in module qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict">ValidatedDict (class in qat.utils.pydantic)</a>
