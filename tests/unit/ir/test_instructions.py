@@ -21,11 +21,11 @@ from qat.ir.instructions import (
     Repeat,
     ResultsProcessing,
     Return,
+    Synchronize,
     Variable,
 )
-from qat.purr.utils.logger import LoggerLevel
 from qat.utils.hardware_model import generate_hw_model
-from qat.utils.pydantic import ValidatedList
+from qat.utils.pydantic import FrozenSet, ValidatedList
 
 
 class TestVariable:
@@ -104,7 +104,12 @@ class TestInstructionBlock:
     def test_ordering(self):
         comp_instr = InstructionBlock()
 
-        instructions = [Instruction(), PhaseShift(), Delay(), FrequencyShift()]
+        instructions = [
+            Instruction(),
+            PhaseShift(target=None),
+            Delay(target=None),
+            FrequencyShift(target=None),
+        ]
         comp_instr.add(*instructions)
 
         for instr, ref_instr in zip(comp_instr, instructions):
@@ -185,26 +190,25 @@ pulse_channels = [
 class TestQuantumInstruction:
     def test_create_single_qubit_target(self):
         for target in qubits:
-            inst = QuantumInstruction(targets=target)
-            assert inst.targets == {target}
+            inst1 = QuantumInstruction(targets=target)
+            assert inst1.targets == {target}
+
+            inst2 = QuantumInstruction(target=target)
+            assert inst1.targets == inst2.targets
+            assert inst1.target == inst2.target
 
     def test_create_single_pulse_channel_target(self):
         for target in pulse_channels:
             inst = QuantumInstruction(targets=target)
             assert inst.targets == {target}
 
-    def test_create_multiple_qubit_targets(self):
-        inst = QuantumInstruction(targets=qubits)
-        assert len(inst.targets) == len(qubits)
-
-    def test_create_multiple_pulse_channel_targets(self):
-        inst = QuantumInstruction(targets=pulse_channels)
-        assert len(inst.targets) == len(pulse_channels)
+    def test_multiple_targets_throws_error(self):
+        targets = pulse_channels
+        with pytest.raises(ValidationError):
+            QuantumInstruction(targets=targets)
 
     def test_list_to_set_removes_redundancy(self, caplog):
-        with caplog.at_level(LoggerLevel.WARNING.value):
-            inst = QuantumInstruction(targets=["test", "test"])
-            assert "Duplicates have been removed" in caplog.text
+        inst = QuantumInstruction(targets=["test", "test"])
         assert inst.targets == set(["test"])
 
     @pytest.mark.parametrize(
@@ -318,6 +322,19 @@ class TestDelay:
     def test_validation(self, delay):
         with pytest.raises(ValidationError):
             Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)
+
+
+class TestSynchronize:
+    def test_multiple_targets(self):
+        targets = {"t1", "t2", "t3"}
+        sync = Synchronize(targets=targets)
+        assert isinstance(sync.targets, FrozenSet)
+        assert sync.targets == targets
+
+    @pytest.mark.parametrize("invalid_targets", [set(), {"t1"}])
+    def test_invalid_no_targets(self, invalid_targets):
+        with pytest.raises(ValidationError):
+            Synchronize(targets=invalid_targets)
 
 
 class TestInstructionSerialisationDeserialisation:

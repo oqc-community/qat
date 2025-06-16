@@ -7,16 +7,16 @@ from collections import defaultdict
 from collections.abc import Iterable
 from functools import cached_property
 from pydoc import locate
-from typing import Any, List, Optional, Union
+from typing import Annotated, Any, List, Optional, Union
 
-import numpy as np
 from compiler_config.config import InlineResultsProcessing
 from pydantic import (
+    BeforeValidator,
+    ConfigDict,
     Field,
     computed_field,
     field_serializer,
     field_validator,
-    model_validator,
 )
 
 # The following things from legacy instructions are unchanged, so just import for now.
@@ -30,6 +30,7 @@ from qat.utils.pydantic import (
     QubitId,
     ValidatedList,
     ValidatedSet,
+    _validate_set,
 )
 
 log = get_default_logger()
@@ -359,54 +360,28 @@ class QuantumInstruction(Instruction):
     another form of component.
     """
 
-    targets: ValidatedSet[str]
+    targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] | None = Field(
+        min_length=1, max_length=1, alias="target"
+    )
     duration: float = Field(ge=0, default=0)  # in seconds
 
-    @model_validator(mode="before")
-    def validate_targets(cls, data, field_name="targets"):
-        if isinstance(data, QuantumInstruction):
-            targets = getattr(data, field_name, set())
-        elif isinstance(data, dict):
-            targets = data.get(field_name, set())
-        else:
-            raise TypeError(
-                f"Expected data to be a QuantumInstruction or dict, got {type(data)}."
-            )
-        annotation = cls.model_fields[field_name].annotation
-
-        if isinstance(targets, (FrozenSet, ValidatedSet, set, frozenset)):
-            new_field = annotation(targets)
-
-        elif isinstance(targets, (list, tuple, np.ndarray)):
-            if len(unique_targets := set(targets)) < len(targets):
-                log.warning(
-                    f"`QuantumInstruction` has duplicate targets {targets}. Duplicates have been removed."
-                )
-            new_field = annotation(unique_targets)
-
-        elif isinstance(targets, (str, int)):
-            new_field = annotation({targets})
-        else:
-            raise TypeError(
-                f"Expected `targets` to be a set, list, tuple, or string, got {type(targets)}."
-            )
-
-        if isinstance(data, QuantumInstruction):
-            setattr(data, field_name, new_field)
-        elif isinstance(data, dict):
-            data[field_name] = new_field
-
-        return data
+    model_config = ConfigDict(validate_by_name=True, populate_by_name=True)
 
     def __repr__(self):
         return (
             f"{self.__class__.__name__}(duration={self.duration}, targets={self.targets})"
         )
 
+    @property
+    def target(self):
+        return next(iter(self.targets))
+
 
 class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
     instructions: ValidatedList[QuantumInstruction] = []
-    targets: ValidatedSet[str] = ValidatedSet()
+    targets: Annotated[ValidatedSet[str], BeforeValidator(_validate_set)] = ValidatedSet[
+        str
+    ]()
     _duration_per_target: dict[str, float] = defaultdict(lambda: 0.0, dict())
 
     def add(self, *instructions: QuantumInstruction):
@@ -425,23 +400,13 @@ class PhaseShift(QuantumInstruction):
     the pulse channel.
     """
 
-    targets: ValidatedSet[str] = Field(max_length=1)
     phase: float = 0.0
-
-    @property
-    def target(self):
-        return next(iter(self.targets))
 
 
 class FrequencyShift(QuantumInstruction):
     """Change the frequency of a pulse channel."""
 
-    targets: ValidatedSet[str] = Field(max_length=1)
     frequency: float = 0.0
-
-    @property
-    def target(self):
-        return next(iter(self.targets))
 
 
 class Delay(QuantumInstruction):
@@ -453,6 +418,8 @@ class Synchronize(QuantumInstruction):
     Tells the QPU to wait for all the target channels to be free before continuing
     execution on any of them.
     """
+
+    targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] = Field(min_length=2)
 
 
 class PhaseReset(QuantumInstruction):
@@ -468,23 +435,23 @@ class PhaseSet(QuantumInstruction):
     the phase relative to the current phase.
     """
 
-    targets: ValidatedSet[str] = Field(max_length=1)
     phase: float = 0.0
-
-    @property
-    def target(self):
-        return next(iter(self.targets))
 
 
 class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
-    targets: ValidatedSet[str] = Field(max_length=0, default=ValidatedSet[str](set()))
-    qubit_targets: Union[QubitId, set[QubitId]]
+    targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] = Field(
+        max_length=0, default=FrozenSet[str](set())
+    )
+    qubit_targets: Annotated[FrozenSet[QubitId], BeforeValidator(_validate_set)] = Field(
+        min_length=1, max_length=1, alias="qubit_target"
+    )
 
-    @model_validator(mode="after")
-    def validate_targets(self):
-        if isinstance(self.qubit_targets, int):
-            self.qubit_targets = set({self.qubit_targets})
+    @property
+    def target(self):
+        return None
 
-        return self
+    @property
+    def qubit_target(self):
+        return next(iter(self.qubit_targets))

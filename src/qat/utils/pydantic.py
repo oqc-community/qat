@@ -247,6 +247,14 @@ class ValidatedList(PydListBase):
         self.root.remove(value)
 
 
+def _validate_set(value: float | int | str | Iterable | None):
+    if isinstance(value, (float, int, str)):
+        value = {value}
+    elif isinstance(value, (list, ValidatedList, tuple)):
+        value = set(value)
+    return value
+
+
 class PydSetBase(RootModel[set[V]]):
     root: set[V] = set[V]()
 
@@ -307,7 +315,7 @@ class FrozenSet(PydSetBase):
     A Pydantic set that is immutable after instantiation.
     """
 
-    root: frozenset[V]
+    root: frozenset[V] = frozenset[V]()
 
 
 class ValidatedSet(PydSetBase):

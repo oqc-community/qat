@@ -153,18 +153,18 @@ class InstructionBuilder(ABC):
                 f"Invalid type, expected '(PulseChannel | Qubit | List[PulseChannel | Qubit])' but got {type(targets)}."
             )
 
-        qubit_ids = []
         pulse_channel_ids = []
         for target in targets:
             if isinstance(target, Qubit):
-                qubit_ids.append(self._qubit_index_by_uuid[target.uuid])
+                self.add(Reset(qubit_target=self._qubit_index_by_uuid[target.uuid]))
                 pulse_channel_ids.extend([pc.uuid for pc in target.all_pulse_channels])
             else:
                 pulse_channel_ids.append(target.uuid)
 
-        return self.add(
-            Reset(qubit_targets=qubit_ids), PhaseReset(targets=pulse_channel_ids)
-        )
+        for pulse_ch_id in pulse_channel_ids:
+            self.add(PhaseReset(target=pulse_ch_id))
+
+        return self
 
     def assign(self, name: str, value):
         return self.add(Assign(name=name, value=value))
@@ -445,6 +445,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             filter = Pulse(
                 waveform=SampledWaveform(samples=acquire_channel.acquire.weights),
                 duration=acquire_duration,
+                target=None,
             )
         else:
             filter = None
@@ -482,10 +483,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             targets = [targets]
 
         target_ids = {self._qubit_index_by_uuid[target.uuid] for target in targets}
-        target_ids = MeasureBlock.validate_targets(
-            {"qubit_targets": target_ids}, field_name="qubit_targets"
-        )["qubit_targets"]
-
         measure_block = MeasureBlock(qubit_targets=target_ids)
 
         all_pulse_channels = [
@@ -783,8 +780,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 raise TypeError(
                     "Please provide :class:`Qubit`s or :class:`PulseChannel`s as targets."
                 )
-
-        return self.add(Synchronize(targets=pulse_channel_ids))
+        if len(pulse_channel_ids) > 1:
+            return self.add(Synchronize(targets=pulse_channel_ids))
+        else:
+            log.warning(
+                f"Ignored synchronisation of a single pulse channel with id {next(iter(pulse_channel_ids))}."
+            )
+            return self
 
     def controlled(
         self, controllers: Union[Qubit, list[Qubit]], builder: InstructionBuilder

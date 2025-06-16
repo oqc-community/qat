@@ -9,7 +9,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
 
 from tests.unit.purr.integrations.test_qir import _get_qir_path
-from tests.unit.utils.instruction import count_number_of_non_sync_instructions
+from tests.unit.utils.instruction import (
+    count_number_of_non_sync_non_phase_reset_instructions,
+)
 
 n_qubits = 32
 linear_topology = []
@@ -47,6 +49,6 @@ class TestQIRParser:
         pyd_builder = pyd_parser.parse(qir_string)
         leg_builder = leg_parser.parse(qir_string)
 
-        assert count_number_of_non_sync_instructions(
+        assert count_number_of_non_sync_non_phase_reset_instructions(
             pyd_builder._ir
-        ) == count_number_of_non_sync_instructions(leg_builder.instructions)
+        ) == count_number_of_non_sync_non_phase_reset_instructions(leg_builder.instructions)

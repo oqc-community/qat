@@ -2,10 +2,11 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 import numpy as np
 from pydantic import (
+    BeforeValidator,
     Field,
     PrivateAttr,
     field_validator,
@@ -22,11 +23,10 @@ from qat.ir.waveforms import Pulse
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
-from qat.utils.pydantic import QubitId, ValidatedSet
+from qat.utils.pydantic import QubitId, ValidatedSet, _validate_set
 
 
 class Acquire(QuantumInstruction):
-    targets: ValidatedSet[str] = Field(max_length=1)
     suffix_incrementor: int = 0
     duration: float = 1e-6
     mode: AcquireMode = AcquireMode.INTEGRATOR
@@ -109,7 +109,9 @@ class MeasureBlock(QuantumInstructionBlock):
     measurement such as a measure pulse, an acquire or a synchronize.
     """
 
-    qubit_targets: ValidatedSet[QubitId] = ValidatedSet()
+    qubit_targets: Annotated[ValidatedSet[QubitId], BeforeValidator(_validate_set)] = (
+        ValidatedSet()
+    )
     _output_variables: list[str] = PrivateAttr(default=[])
     _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = PrivateAttr(
         default=(
@@ -133,12 +135,6 @@ class MeasureBlock(QuantumInstructionBlock):
                 raise TypeError(
                     f"Instruction {instruction} not suitable for `MeasureBlock`. Instruction type should be in {self._valid_instructions}."
                 )
-
-    @model_validator(mode="before")
-    def validate_targets(cls, data, field_name="qubit_targets"):
-        data = super().validate_targets(data, field_name="targets")
-        data = super().validate_targets(data, field_name="qubit_targets")
-        return data
 
     @property
     def output_variables(self):

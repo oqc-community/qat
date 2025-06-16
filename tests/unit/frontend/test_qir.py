@@ -147,7 +147,7 @@ class TestQIRFrontend:
         "model_type, builder_type, instruction_count",
         [
             ("legacy_model", LegInstructionBuilder, 181),
-            ("pyd_model", PydInstructionBuilder, 178),
+            ("pyd_model", PydInstructionBuilder, 184),
         ],
     )
     def test_base_profile_ops(self, request, model_type, builder_type, instruction_count):

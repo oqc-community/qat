@@ -144,9 +144,9 @@ class TestPydPhaseOptimisation:
     def test_merged_identical_phase_resets(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         qubit = self.hw.qubit_with_index(0)
-        targets = [pulse_ch.uuid for pulse_ch in qubit.all_pulse_channels]
+        target = qubit.drive_pulse_channel.uuid
 
-        phase_reset = PydPhaseReset(targets=targets)
+        phase_reset = PydPhaseReset(targets=target)
         builder.add(phase_reset)
         builder.add(phase_reset)
         assert builder.number_of_instructions == 2
@@ -157,27 +157,6 @@ class TestPydPhaseOptimisation:
         # The two phase resets should be merged to one.
         assert builder.number_of_instructions == 1
         # assert set(builder.instructions[0].quantum_targets) == set(phase_reset.quantum_targets)
-
-    def test_merged_phase_resets(self):
-        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
-
-        targets_q1 = set(
-            [pulse_ch.uuid for pulse_ch in self.hw.qubit_with_index(0).all_pulse_channels]
-        )
-        targets_q2 = set(
-            [pulse_ch.uuid for pulse_ch in self.hw.qubit_with_index(1).all_pulse_channels]
-        )
-        builder.add(PydPhaseReset(targets=targets_q1))
-        builder.add(PydPhaseReset(targets=targets_q2))
-
-        PydPhaseOptimisation().run(
-            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
-        )
-        # The two phase resets should be merged to one, and the targets of both phase resets should be merged.
-        assert builder.number_of_instructions == 1
-        merged_targets = targets_q1 | targets_q2
-
-        assert builder.instructions[0].targets == merged_targets
 
 
 class TestPydPostProcessingSanitisation:

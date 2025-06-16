@@ -9,7 +9,7 @@ from numpydantic import NDArray, Shape
 from pydantic import Field, model_validator
 
 from qat.ir.instructions import QuantumInstruction
-from qat.utils.pydantic import AllowExtraFieldsModel, FrozenSet, find_all_subclasses
+from qat.utils.pydantic import AllowExtraFieldsModel, find_all_subclasses
 from qat.utils.waveform import (
     BlackmanFunction,
     ComplexFunction,
@@ -191,7 +191,6 @@ class Pulse(QuantumInstruction):
     (e.g. a drive or measure pulse) can be specified using the type.
     """
 
-    targets: FrozenSet[str] = Field(max_length=1)
     ignore_channel_scale: bool = False
     waveform: Union[waveform_classes]
 

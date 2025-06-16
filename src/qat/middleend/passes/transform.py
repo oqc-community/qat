@@ -68,11 +68,13 @@ class PydPhaseOptimisation(TransformPass):
                 for target in instruction.targets:
                     accum_phaseshifts.pop(target, None)
 
-                if isinstance(previous_instruction, PydPhaseReset):
-                    unseen_targets = instruction.targets - previous_instruction.targets
-                    previous_instruction.targets.update(unseen_targets)
-                else:
-                    optimized_instructions.append(instruction)
+                if (
+                    isinstance(previous_instruction, PydPhaseReset)
+                    and previous_instruction.target == instruction.target
+                ):
+                    continue
+
+                optimized_instructions.append(instruction)
 
             else:
                 optimized_instructions.append(instruction)
