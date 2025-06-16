@@ -28,3 +28,18 @@ class InitableEngine(NativeEngine):
 
     def execute(self, package: Executable) -> dict[str, np.ndarray]:
         return {}
+
+
+class BrokenEngine(NativeEngine):
+    @validate_call
+    def __init__(
+        self,
+        x="default_x",
+        y="default_y",
+        z: int = 3,
+        cblam: CblamConfig | None = None,
+    ):
+        raise ValueError("This engine is broken intentionally.")
+
+    def execute(self, package: Executable) -> dict[str, np.ndarray]:
+        return {}

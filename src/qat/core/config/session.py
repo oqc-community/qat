@@ -103,7 +103,7 @@ class QatSessionConfig(QatConfig):
         if len(pipelines) == 0:
             return pipelines
 
-        hardware_loader_names = {hld.name for hld in info.data["HARDWARE"]}
+        hardware_loader_names = {hld.name for hld in info.data.get("HARDWARE", [])}
         for Pdesc in pipelines:
             expected_loader = getattr(Pdesc, "hardware_loader", None)
             if expected_loader and expected_loader not in hardware_loader_names:

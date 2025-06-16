@@ -1,0 +1,22 @@
+MAX_REPEATS_LIMIT: 10
+PIPELINES:
+- name: echo6b
+  pipeline: tests.qat.utils.pipelines.get_pipeline
+  hardware_loader: echo6loader
+  default: true
+  engine: 
+    type: tests.unit.utils.engines.InitableEngine
+    config:
+      x : 10
+      cblam: 
+        host: someurl.com
+        timeout: 60
+  hardware_loader: broken
+
+HARDWARE:
+- name: broken
+  type: tests.unit.utils.loaders.BrokenLoader
+  config:
+    on_init: true
+    on_load: false
+    qubit_count: 6

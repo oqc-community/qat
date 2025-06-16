@@ -1,0 +1,7 @@
+PIPELINES:
+- name: echo8i
+  pipeline: qat.pipelines.echo.echo8
+  default: true
+HARDWARE:
+- name: nonexistent
+  type: nope.this.doesnt.exist

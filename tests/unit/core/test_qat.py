@@ -16,6 +16,7 @@ from compiler_config.config import (
     TketOptimizations,
     get_optimizer_config,
 )
+from pydantic import ValidationError
 
 import qat.pipelines.echo
 from qat import QAT
@@ -511,6 +512,30 @@ class TestQATPipelineSetup:
 
         q = QAT(qatconfig=QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware))
         assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
+
+    def test_make_invalid_qatconfig_brokenengine_yaml(self, testpath):
+        path = str(testpath / "files/qatconfig/invalid_brokenengine.yaml")
+        with pytest.raises(ValueError, match="This engine is broken intentionally."):
+            QAT(qatconfig=path)
+
+    def test_make_invalid_qatconfig_brokenloader_yaml(self, testpath):
+        path = str(testpath / "files/qatconfig/invalid_brokenloader.yaml")
+        with pytest.raises(
+            ValueError, match="This loader is broken intentionally on init."
+        ):
+            QAT(qatconfig=path)
+
+    def test_make_invalid_qatconfig_nohardware_yaml(self, testpath):
+        path = str(testpath / "files/qatconfig/invalid_nonexistenthardware.yaml")
+        with pytest.raises(ValidationError, match="No module named"):
+            QAT(qatconfig=path)
+
+    def test_make_invalid_qatconfig_brokenloader_onload_yaml(self, testpath):
+        path = str(testpath / "files/qatconfig/invalid_brokenloader_onload.yaml")
+        with pytest.raises(
+            ValueError, match="This loader is broken intentionally on load."
+        ):
+            QAT(qatconfig=path)
 
     def test_make_qatconfig_yaml(self, testpath):
         path = str(testpath / "files/qatconfig/pipelines.yaml")
