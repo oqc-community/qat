@@ -144,6 +144,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
@@ -1586,6 +1587,8 @@
       <li><a href="qat.model.convert_legacy.html#qat.model.convert_legacy.convert_legacy_echo_hw_to_pydantic">convert_legacy_echo_hw_to_pydantic() (in module qat.model.convert_legacy)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert_parameter">convert_parameter() (TketToQatIRConverter static method)</a>
+</li>
+      <li><a href="qat.ir.conversion.html#qat.ir.conversion.ConvertToPydanticIR">ConvertToPydanticIR (class in qat.ir.conversion)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Cos">Cos (class in qat.purr.backends.utilities)</a>
 
@@ -4713,6 +4716,8 @@
 </li>
         <li><a href="qat.ir.html#module-qat.ir">qat.ir</a>
 </li>
+        <li><a href="qat.ir.conversion.html#module-qat.ir.conversion">qat.ir.conversion</a>
+</li>
         <li><a href="qat.ir.gates.html#module-qat.ir.gates">qat.ir.gates</a>
 </li>
         <li><a href="qat.ir.gates.base.html#module-qat.ir.gates.base">qat.ir.gates.base</a>
@@ -6473,6 +6478,13 @@
 </li>
       </ul></li>
       <li>
+    qat.ir.conversion
+
+      <ul>
+        <li><a href="qat.ir.conversion.html#module-qat.ir.conversion">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.ir.gates
 
       <ul>
@@ -6941,6 +6953,8 @@
         <li><a href="qat.purr.backends.qblox.codegen_base.html#module-qat.purr.backends.qblox.codegen_base">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.config
 
@@ -6948,8 +6962,6 @@
         <li><a href="qat.purr.backends.qblox.config.html#module-qat.purr.backends.qblox.config">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.constants
 
@@ -8155,8 +8167,6 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.returns">returns (Executable attribute)</a>
 
       <ul>
@@ -8169,6 +8179,8 @@
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.returns">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.returns">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.returns">returns() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.returns">[1]</a>
 
       <ul>
@@ -8239,8 +8251,12 @@
       </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency">rotating_frame_frequency (RTCSQubit property)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.rotation">rotation (ThresholdedAcqConfig attribute)</a>
+      <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.rotation">rotation (Acquire attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.rotation">(ThresholdedAcqConfig attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.ROUNDED_SQUARE">ROUNDED_SQUARE (PulseShapeType attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.RoundedSquareFunction">RoundedSquareFunction (class in qat.purr.backends.utilities)</a>
@@ -8287,6 +8303,8 @@
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs.run">(CalibrationWithArgs method)</a>
 </li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.CFGPass.run">(CFGPass method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGPass.run">[1]</a>
+</li>
+        <li><a href="qat.ir.conversion.html#qat.ir.conversion.ConvertToPydanticIR.run">(ConvertToPydanticIR method)</a>
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.Decompose2QToCNOTs.run">(Decompose2QToCNOTs method)</a>
 </li>
@@ -9275,9 +9293,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.threshold">threshold (BinnedAcqData attribute)</a>
+      <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.threshold">threshold (Acquire attribute)</a>
 
       <ul>
+        <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData.threshold">(BinnedAcqData attribute)</a>
+</li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.discriminate.params.threshold">(qat.runtime.post_processing.discriminate parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.threshold">(ThresholdedAcqConfig attribute)</a>

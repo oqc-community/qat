@@ -20,6 +20,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.ir.conversion
    qat.ir.instruction_builder
    qat.ir.instructions
    qat.ir.lowered
