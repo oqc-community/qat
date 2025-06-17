@@ -213,8 +213,8 @@ class InstructionBuilder(ABC):
         return self._ir.instructions
 
     @instructions.setter
-    def instructions(self, instructons: ValidatedList[Instruction]):
-        self._ir.instructions = instructons
+    def instructions(self, instructions: ValidatedList[Instruction]):
+        self._ir.instructions = instructions
 
     @property
     def number_of_instructions(self):

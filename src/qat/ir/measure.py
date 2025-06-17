@@ -33,6 +33,8 @@ class Acquire(QuantumInstruction):
     delay: Optional[float] = 0.0
     filter: Optional[Pulse] = Field(default=None)
     output_variable: str | None = None
+    rotation: Optional[float] = 0.0
+    threshold: Optional[float] = 0.0
 
     @property
     def pulse_channel(self):

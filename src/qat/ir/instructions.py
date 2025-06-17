@@ -298,6 +298,9 @@ class Assign(Instruction):
                 return (value.name, value.index)
             elif isinstance(value, LegacyVariable):
                 return value.name
+            # TODO: Support for BinaryOperator, most importatntly Plus, as needed for Label-Jump
+            # COMPILER-590
+            # elif isinstance(value, LegacyBinaryOperator):...
             return value
 
         return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
