@@ -219,9 +219,7 @@ class TestConvertToPydanticIRPass:
             new_value = getattr(converted_value, name)
             if name == "value":
                 if isinstance(value, instructions.BinaryOperator):
-                    # TODO: Support converting binary operators in Assign in the pydantic stack.
-                    # COMPILER-590
-                    continue
+                    value = str(value).replace("variable ", "")
                 elif isinstance(value, instructions.Variable):
                     value = value.name
                 elif (
@@ -298,6 +296,10 @@ class TestConvertToPydanticIRPass:
         "legacy_instruction",
         [
             pytest.param(instructions.Assign("name_1", 8e-9), id="Assign-float"),
+            pytest.param(
+                instructions.Assign("name_2", instructions.Plus("name_2", 1)),
+                id="Assign-plus",
+            ),
             # TODO: Support Sweep and EndSweep in the pydantic stack.
             pytest.param(
                 instructions.Sweep,

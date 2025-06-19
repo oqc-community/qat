@@ -19,7 +19,7 @@ from pydantic import (
     field_validator,
 )
 
-# The following things from legacy instructions are unchanged, so just import for now.
+from qat.purr.compiler.instructions import BinaryOperator as LegacyBinaryOperator
 from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
 from qat.purr.compiler.instructions import Variable as LegacyVariable
 from qat.purr.utils.logger import get_default_logger
@@ -298,9 +298,8 @@ class Assign(Instruction):
                 return (value.name, value.index)
             elif isinstance(value, LegacyVariable):
                 return value.name
-            # TODO: Support for BinaryOperator, most importatntly Plus, as needed for Label-Jump
-            # COMPILER-590
-            # elif isinstance(value, LegacyBinaryOperator):...
+            elif isinstance(value, LegacyBinaryOperator):
+                return str(value).replace("variable ", "")
             return value
 
         return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
