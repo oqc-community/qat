@@ -46,7 +46,11 @@ class LanguageFrontend(abc.ABC):
     ):
         instructions = (
             get_builder(hardware)
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
+            .repeat(
+                compiler_config.repeats,
+                compiler_config.repetition_period,
+                compiler_config.passive_reset_time,
+            )
             .add(quantum_builder)
         )
         return instructions

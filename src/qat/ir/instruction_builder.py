@@ -131,10 +131,8 @@ class InstructionBuilder(ABC):
     @abstractmethod
     def ECR(self, control: Qubit, target: Qubit): ...
 
-    def repeat(self, repeat_count: int, repetition_period: float = None):
-        return self.add(
-            Repeat(repeat_count=repeat_count, repetition_period=repetition_period)
-        )
+    def repeat(self, repeat_count: int):
+        return self.add(Repeat(repeat_count=repeat_count))
 
     def returns(self, variables: list[str] = None):
         """Add return statement."""

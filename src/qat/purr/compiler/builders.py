@@ -366,8 +366,8 @@ class InstructionBuilder:
     def jump(self, label: Union[str, Label], condition=None):
         return self.add(Jump(label, condition))
 
-    def repeat(self, repeat_value: int, repetition_period=None):
-        return self.add(Repeat(repeat_value, repetition_period))
+    def repeat(self, repeat_value: int, repetition_period=None, passive_reset_time=None):
+        return self.add(Repeat(repeat_value, repetition_period, passive_reset_time))
 
     def assign(self, name, value):
         return self.add(Assign(name, value))

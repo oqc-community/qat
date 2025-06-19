@@ -52,8 +52,9 @@ class PartitionByPulseChannel(LoweringPass):
             partitioned_ir.shots = ir.shots
             partitioned_ir.compiled_shots = ir.compiled_shots
 
-        if hasattr(ir, "repetition_period"):
-            partitioned_ir.repetition_period = ir.repetition_period
+        partitioned_ir.repetition_period = getattr(ir, "repetition_period", None)
+
+        partitioned_ir.passive_reset_time = getattr(ir, "passive_reset_time", None)
 
         def add_to_all(inst: Instruction) -> None:
             shared_instructions.append(inst)
@@ -112,17 +113,22 @@ class PartitionByPulseChannel(LoweringPass):
                 if partitioned_ir.shots is None:
                     partitioned_ir.shots = inst.repeat_count
                     partitioned_ir.compiled_shots = inst.repeat_count
-                partitioned_ir.repetition_period = inst.repetition_period
+                if partitioned_ir.repetition_period is None:
+                    partitioned_ir.repetition_period = inst.repetition_period
+                if partitioned_ir.passive_reset_time is None:
+                    partitioned_ir.passive_reset_time = inst.passive_reset_time
                 repeat_seen = True
 
             elif isinstance(inst, Jump):
                 if isinstance(inst.condition, GreaterThan):
                     if repeat_seen:
                         raise ValueError("Multiple Repeat or Jump instructions found.")
+
                     if partitioned_ir.shots is None:
                         limit = inst.condition.left
                         partitioned_ir.shots = limit
                         partitioned_ir.compiled_shots = limit
+
                 add_to_all(inst)
 
             elif isinstance(inst, Label):

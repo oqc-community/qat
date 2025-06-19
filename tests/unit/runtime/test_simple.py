@@ -10,6 +10,7 @@ from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 from qat.runtime import SimpleRuntime
 from qat.runtime.passes.transform import (
@@ -35,7 +36,7 @@ class TestSimpleRuntime:
             output_variable="test",
         )
         builder.returns("test")
-        builder = RepeatTranslation(model).run(builder)
+        builder = RepeatTranslation(TargetData.default()).run(builder)
         return WaveformV1Backend(model).emit(builder)
 
     @pytest.mark.parametrize("shots", [500, 1000, 1007, 2000])
@@ -63,7 +64,7 @@ class TestSimpleRuntime:
                 output_variable=f"qubit{i}",
             )
         builder.returns("qubit0")
-        builder = RepeatTranslation(model).run(builder)
+        builder = RepeatTranslation(TargetData.default()).run(builder)
 
         # Test with default pipeline
         package = WaveformV1Backend(model).emit(builder)

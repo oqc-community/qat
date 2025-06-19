@@ -149,7 +149,11 @@ class Parse(TransformPass):
 
         return (
             self.hardware.create_builder()
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
+            .repeat(
+                compiler_config.repeats,
+                repetition_period=compiler_config.repetition_period,
+                passive_reset_time=compiler_config.passive_reset_time,
+            )
             .add(builder)
         )
 

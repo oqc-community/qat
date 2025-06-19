@@ -13,7 +13,6 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.legacy.transform import LoopCount
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.model.loaders.legacy import EchoModelLoader
@@ -211,6 +210,20 @@ class TestConvertToPydanticIRPass:
             )
             self._check_conversion(value, getattr(converted_value, name))
 
+    @_check_conversion.register(instructions.Repeat)
+    def _(self, legacy_value, converted_value):
+        """Check that the value of a legacy repeat instruction matches the converted instruction."""
+        self._check_updated_class(legacy_value, converted_value)
+        additional_data: dict = {}
+        for name, value in vars(legacy_value).items():
+            if name in ("repetition_period", "passive_reset_time"):
+                additional_data[name] = value
+            else:
+                self._check_conversion(value, value)
+        assert self.converter_pass._additional_data == additional_data, (
+            f"Additional data does not match: {self.converter_pass._additional_data} != {additional_data}"
+        )
+
     @_check_conversion.register(instructions.Assign)
     def _(self, legacy_value, converted_value):
         """Check that the value of a legacy assign instruction matches the converted assign instruction."""
@@ -241,16 +254,6 @@ class TestConvertToPydanticIRPass:
         legacy_ir = pipe.backend.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         converted_ir = self.converter_pass.run(legacy_ir)
-
-        assert isinstance(converted_ir, PartitionedIR)
-        assert len(legacy_ir.target_map) == len(converted_ir.target_map)
-        assert legacy_ir.shots == converted_ir.shots
-        assert legacy_ir.compiled_shots == converted_ir.compiled_shots
-        assert len(legacy_ir.returns) == len(converted_ir.returns)
-        assert len(legacy_ir.assigns) == len(converted_ir.assigns)
-        assert len(legacy_ir.acquire_map) == len(converted_ir.acquire_map)
-        assert len(legacy_ir.pp_map) == len(converted_ir.pp_map)
-        assert len(legacy_ir.rp_map) == len(converted_ir.rp_map)
         self._check_conversion(legacy_ir, converted_ir)
 
     # TODO: Ensure that the legacy instruction builder is compatible with the pydantic version.
@@ -315,6 +318,14 @@ class TestConvertToPydanticIRPass:
             pytest.param(
                 instructions.Repeat(205, repetition_period=1e-6),
                 id="Repeat-with-repetition_period",
+            ),
+            pytest.param(
+                instructions.Repeat(210, repetition_period=1e-6, passive_reset_time=0.5),
+                id="Repeat-with-repetition_period-and-passive_reset_time",
+            ),
+            pytest.param(
+                instructions.Repeat(215, passive_reset_time=0.5),
+                id="Repeat-with-passive_reset_time",
             ),
             # TODO: Support `EndRepeat` in the pydantic stack.
             pytest.param(

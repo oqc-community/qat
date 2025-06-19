@@ -30,6 +30,7 @@ from qat.purr.compiler.instructions import (
     Jump,
     PostProcessing,
     Pulse,
+    Repeat,
     Reset,
     ResultsProcessing,
     Variable,
@@ -47,6 +48,7 @@ class ConvertToPydanticIR(TransformPass):
         self.legacy_model = legacy_model
         self.pyd_model = pyd_model
         self._create_pulse_channel_map()
+        self._additional_data: dict = {}
 
     def _create_pulse_channel_map(self):
         """Create a mapping of legacy pulse channels to Pydantic pulse channels."""
@@ -83,12 +85,15 @@ class ConvertToPydanticIR(TransformPass):
             )
 
     def run(self, ir: InstructionBuilder | PartitionedIR, *args, **kwargs):
+        self._additional_data = {}
         if isinstance(ir, PartitionedIR):
             new_ir = self._convert_partitioned_ir(ir)
         elif isinstance(ir, InstructionBuilder):
             new_ir = self._convert_instruction_builder(ir)
         else:
             raise TypeError(f"Unsupported IR type: {type(ir)}")
+        for key, value in self._additional_data.items():
+            setattr(new_ir, key, value)
         return new_ir
 
     def _convert_partitioned_ir(self, ir: PartitionedIR) -> PartitionedIR:
@@ -255,6 +260,21 @@ class ConvertToPydanticIR(TransformPass):
         for instruction in value.instructions:
             new_block.add(self._convert_element(instruction))
         return new_block
+
+    @_convert_element.register(Repeat)
+    def _(
+        self,
+        value: Repeat,
+    ):
+        """Convert a Repeat instance."""
+        data = dict()
+        for name, var in vars(value).items():
+            if name == "repeat_count":
+                repeat = pyd_instructions.Repeat(repeat_count=self._convert_element(var))
+            else:
+                data[name] = self._convert_element(var)
+        self._additional_data.update(data)
+        return repeat
 
     @_convert_element.register(Reset)
     def _(

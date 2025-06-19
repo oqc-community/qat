@@ -54,13 +54,16 @@ class WaveformV1Executable(ChannelExecutable):
     :param int shots: The number of times the program is executed.
     :param float repetition_time: The amount of time to wait between shots for the QPU to
         reset.
+    :param PositiveInt compiled_shots: When the required number of shots exceeds the
+        allowed amount by the target machine, shots can be batched into groups. This states
+        how many shots to do in each batch.
     :param post_processing: Contains the post-processing information for each acquisition.
     :type post_processing: dict[str, list[PostProcessing]]
     :param results_processing: Contains the information for how results should be formatted.
     :type results_processing: dict[str, InlineResultsProcessing]
     :param assigns: Assigns results to given variables.
     :type assigns: list[Assign]
-    :param returns: Which acqusitions/variables should be returned.
+    :param returns: Which acquisitions/variables should be returned.
     :type returns: list[str]
     """
 

@@ -173,7 +173,7 @@ class QiskitBuilder(InstructionBuilder):
 
         return self
 
-    def repeat(self, repeat_value: int = None, repetition_period=None):
+    def repeat(self, repeat_value: int = None, *args, **kwargs):
         # Compiler config may attempt to pass None
         if repeat_value is not None:
             self.shot_count = repeat_value

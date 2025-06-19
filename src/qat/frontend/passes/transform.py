@@ -77,7 +77,7 @@ class PydParse(TransformPass):
 
         return (
             QuantumInstructionBuilder(self.hw_model)
-            .repeat(compiler_config.repeats, compiler_config.repetition_period)
+            .repeat(compiler_config.repeats)
             .__add__(builder)
         )
 

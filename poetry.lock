@@ -3913,6 +3913,7 @@ description = "Python-based data acquisition framework developed by the Copenhag
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
+markers = "python_version < \"3.11\""
 files = [
     {file = "qcodes-0.52.0-py3-none-any.whl", hash = "sha256:de11fb04626b36503cca19f075bb7d73c4c6c16d78906fa5e4f3e938910b211e"},
     {file = "qcodes-0.52.0.tar.gz", hash = "sha256:add998d3817ff5bbc96665291a615bc230fa39fcac52b19ef315c8f1553c0a6e"},
@@ -3944,10 +3945,7 @@ typing_extensions = ">=4.6.0"
 uncertainties = ">=3.1.4"
 versioningit = ">=2.2.1"
 websockets = ">=11.0"
-wrapt = [
-    {version = ">=1.14.0", markers = "python_version < \"3.12\""},
-    {version = ">=1.16.0", markers = "python_version >= \"3.12\""},
-]
+wrapt = {version = ">=1.14.0", markers = "python_version < \"3.12\""}
 xarray = ">=2022.06.0"
 
 [package.extras]
@@ -3955,6 +3953,58 @@ docs = ["PyVisa-sim (>=0.6.0)", "autodocsumm (>=0.2.9)", "furo (>=2024.8.6)", "j
 loop = ["qcodes_loop (>=0.1.2)"]
 refactor = ["libcst (>=1.2.0)"]
 test = ["PyVisa-sim (>=0.6.0)", "coverage[toml] (>=6.0.0)", "deepdiff (>=5.0.2)", "hypothesis (>=6.85.0)", "jinja2 (>=3.1.3)", "libcst (>=1.2.0)", "lxml (>=4.8.0)", "lxml-stubs (>=0.4.0)", "mypy (>=0.971)", "pandas-stubs (>=1.2.0.1)", "pytest (>=7.2.0)", "pytest-asyncio (>=0.19.0)", "pytest-cov (>=3.0.0)", "pytest-mock (>=3.0.0)", "pytest-rerunfailures (>=10.0)", "pytest-xdist (>=2.5.0)", "qcodes_loop (>=0.1.1)", "sphinx (>=4.5.0)", "types-jsonschema (>=4.16.0)", "types-tabulate (>=0.1.0)", "types-tqdm (>=4.64.6)", "types_pywin32 (>=305.0.0.7)", "types_requests (>=0.1.8)", "zhinst.qcodes (>=0.5)"]
+zurichinstruments = ["zhinst-qcodes (>=0.3)"]
+
+[[package]]
+name = "qcodes"
+version = "0.53.0"
+description = "Python-based data acquisition framework developed by the Copenhagen / Delft / Sydney / Microsoft quantum computing consortium"
+optional = false
+python-versions = ">=3.11"
+groups = ["main"]
+markers = "python_version >= \"3.11\""
+files = [
+    {file = "qcodes-0.53.0-py3-none-any.whl", hash = "sha256:a1029cc3f8cf5e6eda827ec2150f955a37b9d21296ed6d582d289e71f406210f"},
+    {file = "qcodes-0.53.0.tar.gz", hash = "sha256:bc0791e2d206fac7d0cf1642c542361fe41f7d29c540128a83875bf188a18e52"},
+]
+
+[package.dependencies]
+broadbean = ">=0.11.0"
+cf_xarray = ">=0.8.4"
+dask = ">=2022.1.0"
+h5netcdf = ">=0.14.1"
+h5py = ">=3.8.0"
+ipykernel = ">=6.12.0"
+ipython = ">=8.10.0"
+ipywidgets = ">=8.0.0,<9.0.0"
+jsonschema = ">=4.9.0"
+matplotlib = ">=3.6.0"
+numpy = ">=1.22.4"
+opentelemetry-api = ">=1.17.0"
+packaging = ">=20.0"
+pandas = ">=1.5.0"
+pillow = ">=9.2.0"
+pyarrow = ">=11.0.0"
+pyvisa = ">=1.11.0,<1.16.0"
+"ruamel.yaml" = ">=0.16.0,<0.16.6 || >0.16.6"
+tabulate = ">=0.9.0"
+tornado = ">=6.3.3"
+tqdm = ">=4.59.0"
+typing_extensions = ">=4.6.0"
+uncertainties = ">=3.2.0"
+versioningit = ">=2.2.1"
+websockets = ">=11.0"
+wrapt = [
+    {version = ">=1.15.0", markers = "python_version < \"3.12\""},
+    {version = ">=1.16.0", markers = "python_version >= \"3.12\""},
+]
+xarray = ">=2022.06.0"
+
+[package.extras]
+docs = ["PyVisa-sim (>=0.6.0)", "autodocsumm (>=0.2.9)", "furo (>=2024.8.6)", "jinja2 (>=3.1.3)", "nbsphinx (>=0.8.9)", "qcodes_loop (>=0.1.1)", "scipy (>=1.10.0)", "sphinx (>=7.3.5)", "sphinx-favicon (>=1.0)", "sphinx-issues (>=3.0.1)", "sphinx-jsonschema (>=1.19.1)", "sphinxcontrib-towncrier (>=0.5.0a0)", "towncrier (>=24.8.0,<25.0.0)"]
+loop = ["qcodes_loop (>=0.1.2)"]
+refactor = ["libcst (>=1.2.0)"]
+test = ["PyVisa-sim (>=0.6.0)", "coverage[toml] (>=6.3.0)", "deepdiff (>=5.0.2)", "hypothesis (>=6.130.0)", "jinja2 (>=3.1.3)", "libcst (>=1.2.0)", "lxml (>=4.9.4)", "lxml-stubs (>=0.4.0)", "mypy (>=1.16.0)", "pandas-stubs (>=1.2.0.1)", "pytest (>=8.2.0)", "pytest-asyncio (>=0.24.0)", "pytest-cov (>=4.1.0)", "pytest-mock (>=3.12.0)", "pytest-rerunfailures (>=10.3)", "pytest-xdist (>=3.1.0)", "qcodes_loop (>=0.1.1)", "sphinx (>=4.5.0)", "types-jsonschema (>=4.16.0)", "types-tabulate (>=0.1.0)", "types-tqdm (>=4.64.6)", "types_pywin32 (>=305.0.0.7)", "types_requests (>=0.1.8)", "zhinst.qcodes (>=0.5)"]
 zurichinstruments = ["zhinst-qcodes (>=0.3)"]
 
 [[package]]
@@ -4687,10 +4737,8 @@ files = [
     {file = "rustworkx-0.16.0-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:476a6c67b0142acd941691943750cc6737a48372304489969c2b62d30aaf4c27"},
     {file = "rustworkx-0.16.0-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:bef2ef42870f806af93979b457e240f6dfa4f867ca33965c620f3a804409ed3a"},
     {file = "rustworkx-0.16.0-cp39-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0db3a73bf68b3e66c08322a2fc95d3aa663d037d9b4e49c3509da4898d3529cc"},
-    {file = "rustworkx-0.16.0-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4f12a13d7486234fa2a84746d5e41f436bf9df43548043e7a232f48804ff8c61"},
     {file = "rustworkx-0.16.0-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:89efd5c3a4653ddacc55ca39f28b261d43deec7d678f8f8fc6b76b5087f1dfea"},
     {file = "rustworkx-0.16.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ec0c12aac8c54910ace20ac6ada4b890cd39f95f69100514715f8ad7af9041e4"},
-    {file = "rustworkx-0.16.0-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:d650e39fc1a1534335f7517358ebfc3478bb235428463cfcd7c5750d50377b33"},
     {file = "rustworkx-0.16.0-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:293180b83509ee9bff4c3af7ccc1024f6528d61b65d0cb7320bd31924f10cb71"},
     {file = "rustworkx-0.16.0-cp39-abi3-win32.whl", hash = "sha256:040c4368729cf502f756a3b0ff5f1c6915fc389f74dcc6afc6c3833688c97c01"},
     {file = "rustworkx-0.16.0-cp39-abi3-win_amd64.whl", hash = "sha256:905df608843c32fa45ac023687769fe13056edf7584474c801d5c50705d76e9b"},
@@ -5550,14 +5598,14 @@ test = ["pytest", "pytest_codspeed", "pytest_cov", "scipy"]
 
 [[package]]
 name = "urllib3"
-version = "2.4.0"
+version = "2.5.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev", "docs", "release"]
 files = [
-    {file = "urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813"},
-    {file = "urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466"},
+    {file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"},
+    {file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760"},
 ]
 
 [package.extras]
@@ -5861,4 +5909,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "ee7d14ed9584f9f96334b53bafbf9b157dea290ffc1d0d8e8bae7fb6c1ec6bfe"
+content-hash = "be34b78502352cab89eb4a95a47716b051c67824dc8839fb29232d77dc4b31f3"

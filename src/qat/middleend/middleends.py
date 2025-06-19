@@ -192,7 +192,7 @@ class DefaultMiddleend(CustomMiddleend):
             | InstructionLengthSanitisation(target_data)
             | BatchedShots(target_data)
             | ScopeSanitisation()
-            | RepeatTranslation(model)
+            | RepeatTranslation(target_data)
         )
 
 

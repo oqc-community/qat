@@ -117,13 +117,10 @@ class TestInstructionBlock:
 
 
 class TestRepeat:
-    @pytest.mark.parametrize(
-        ["repeat_count", "repetition_period"], product([0, 10, 1024], [10, None])
-    )
-    def test_init(self, repeat_count, repetition_period):
-        inst = Repeat(repeat_count=repeat_count, repetition_period=repetition_period)
+    @pytest.mark.parametrize("repeat_count", [0, 10, 1024])
+    def test_init(self, repeat_count):
+        inst = Repeat(repeat_count=repeat_count)
         assert inst.repeat_count == repeat_count
-        assert inst.repetition_period == repetition_period
 
 
 class TestAssign:
@@ -344,7 +341,7 @@ class TestInstructionSerialisationDeserialisation:
             PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06),
             FrequencyShift(targets={"t2"}, frequency=1.0, duration=2.3e-06),
             Delay(targets={"t3"}, duration=1e-8),
-            Repeat(repeat_count=10, repetition_period=0.01),
+            Repeat(repeat_count=10),
             Assign(name="var1", value=42),
             Return(variables=["var1"]),
         ],

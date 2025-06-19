@@ -168,14 +168,15 @@ class RepeatTranslation(TransformPass):
     :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
     and :class:`Assign` and :class:`Jump` instructions at the end."""
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, target_data: TargetData):
+        self.target_data = target_data
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
         instructions: list[Instruction] = []
         label_data: OrderedDict[Label, dict[str, Repeat | Variable]] = OrderedDict()
         repetition_period = None
+        passive_reset_time = None
 
         def _close_repeat(label: Label, data: dict, index: int = None) -> None:
             # TODO: Adjust so that closing is done before finishing instructions such as
@@ -195,6 +196,8 @@ class RepeatTranslation(TransformPass):
                 instructions.extend([var, assign, label])
                 if repetition_period is None and inst.repetition_period is not None:
                     repetition_period = inst.repetition_period
+                if passive_reset_time is None and inst.passive_reset_time is not None:
+                    passive_reset_time = inst.passive_reset_time
             elif isinstance(inst, EndRepeat):
                 if len(label_data) < 1:
                     raise ValueError("EndRepeat found without associated Repeat.")
@@ -206,7 +209,11 @@ class RepeatTranslation(TransformPass):
         for label, data in reversed(label_data.items()):
             _close_repeat(label, data)
 
-        ir.repetition_period = repetition_period or self.model.default_repetition_period
+        if passive_reset_time is None and repetition_period is None:
+            passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
+        ir.repetition_period = repetition_period
+        ir.passive_reset_time = passive_reset_time
+
         ir.instructions = instructions
         return ir
 
@@ -976,19 +983,18 @@ class RepeatSanitisation(TransformPass):
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-
         repeats = [i for i, inst in enumerate(ir._instructions) if isinstance(inst, Repeat)]
         if repeats:
             for i in repeats:
                 rep = ir._instructions[i]
                 if rep.repeat_count is None:
                     rep.repeat_count = self.target_data.default_shots
-                if rep.repetition_period is None:
-                    rep.repetition_period = self.target_data.QUBIT_DATA.passive_reset_time
+                if rep.passive_reset_time is None and rep.repetition_period is None:
+                    rep.passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
         else:
             ir.repeat(
                 self.target_data.default_shots,
-                self.target_data.QUBIT_DATA.passive_reset_time,
+                passive_reset_time=self.target_data.QUBIT_DATA.passive_reset_time,
             )
         return ir
 

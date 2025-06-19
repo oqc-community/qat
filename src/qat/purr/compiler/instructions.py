@@ -137,10 +137,11 @@ class Repeat(Instruction):
     value of the current operations, also known as shots.
     """
 
-    def __init__(self, repeat_count, repetition_period=None):
+    def __init__(self, repeat_count, repetition_period=None, passive_reset_time=None):
         super().__init__()
         self.repeat_count = repeat_count
         self.repetition_period = repetition_period
+        self.passive_reset_time = passive_reset_time
 
         # TODO: Change in next major release of QAT. COMPILER-428
         if repetition_period:
@@ -150,7 +151,9 @@ class Repeat(Instruction):
             )
 
     def __repr__(self):
-        return f"repeat {self.repeat_count},{self.repetition_period}"
+        return (
+            f"repeat {self.repeat_count},{self.repetition_period},{self.passive_reset_time}"
+        )
 
 
 class EndRepeat(Instruction):

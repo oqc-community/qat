@@ -1594,7 +1594,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add(EndRepeat())
 
-        ir = RepeatTranslation(self.hw).run(builder)
+        ir = RepeatTranslation(TargetData.default()).run(builder)
 
         assert len(ir.existing_names) == 1
 
@@ -1608,7 +1608,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add([EndRepeat(), EndRepeat()])
 
-        ir = RepeatTranslation(self.hw).run(builder)
+        ir = RepeatTranslation(TargetData.default()).run(builder)
 
         assert len(ir.existing_names) == 2
 
@@ -1667,7 +1667,7 @@ class TestRepeatTranslation:
             if not explicit_close:
                 close_indices = [i + fifth for i in close_indices]
 
-        ir = RepeatTranslation(self.hw).run(builder)
+        ir = RepeatTranslation(TargetData.default()).run(builder)
 
         self._check_loop_start(ir, start_indices)
         self._check_loop_close(ir, close_indices, [1000, 300])
@@ -1695,27 +1695,29 @@ class TestRepeatSanitisation:
             # To make sure the parameters are different from the default params.
             shots = shots - 1
             passive_reset_time = passive_reset_time - 1e-04
-            builder.repeat(shots, passive_reset_time)
+            builder.repeat(shots, passive_reset_time=passive_reset_time)
+        else:
+            default = target_data
 
         RepeatSanitisationValidation().run(builder)
         ir = RepeatSanitisation(model, target_data).run(builder)
         assert isinstance(repeat := ir.instructions[-1], Repeat)
         assert repeat.repeat_count == shots
-        # TODO: Change to `passive_reset_time`. 428, 455
-        assert repeat.repetition_period == passive_reset_time
+        passive_reset_time
+        assert repeat.passive_reset_time == passive_reset_time
 
     def test_repeat_instructions_are_sanitised(self):
         model = EchoModelLoader().load()
-        target_data = TargetData.random()
+        target_data = TargetData.default()
 
         builder = model.create_builder()
         builder.X(model.qubits[0])
-        builder.repeat(None, None)
+        builder.repeat(None, passive_reset_time=None)
 
         builder = RepeatSanitisation(model, target_data).run(builder)
         assert isinstance(repeat := builder.instructions[-1], Repeat)
         assert repeat.repeat_count == target_data.default_shots
-        assert repeat.repetition_period == target_data.QUBIT_DATA.passive_reset_time
+        assert repeat.passive_reset_time == target_data.QUBIT_DATA.passive_reset_time
 
 
 class TestFreqShiftSanitisation:

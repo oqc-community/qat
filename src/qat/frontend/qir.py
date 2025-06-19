@@ -145,14 +145,18 @@ class QIRFrontend(BaseFrontend, ABC):
 
             builder = (
                 self.model.create_builder()
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .repeat(
+                    compiler_config.repeats,
+                    repetition_period=compiler_config.repetition_period,
+                    passive_reset_time=compiler_config.passive_reset_time,
+                )
                 .add(builder)
             )
         elif isinstance(self.model, PydHardwareModel):
             builder = self.parser.parse(src)
             builder = (
                 PydQuantumInstructionBuilder(self.model)
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .repeat(compiler_config.repeats)
                 .__add__(builder)
             )
         return builder

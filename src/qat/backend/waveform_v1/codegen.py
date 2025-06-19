@@ -98,15 +98,16 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         for _return in ir.returns:
             returns.extend(_return.variables)
 
+        if ir.passive_reset_time is not None:
+            repetition_time = timeline_res.total_duration + ir.passive_reset_time
+        else:
+            repetition_time = ir.repetition_period
+
         return WaveformV1Executable(
             channel_data=channels,
             shots=ir.shots,
             compiled_shots=ir.compiled_shots,
-            repetition_time=(
-                ir.repetition_period
-                if ir.repetition_period is not None
-                else self.model.default_repetition_period
-            ),
+            repetition_time=repetition_time,
             post_processing={
                 var: [PostProcessing._from_legacy(pp) for pp in pp_list]
                 for var, pp_list in ir.pp_map.items()

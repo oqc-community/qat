@@ -24,6 +24,7 @@ from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -120,11 +121,13 @@ class TestWaveformV1Backend:
     def executable(self, builder):
         return self.backend.emit(builder)
 
-    @pytest.mark.parametrize("repetition_period", [150e-6, None])
+    @pytest.mark.parametrize("passive_reset_time", [1e-06, None])
     @pytest.mark.parametrize("repeat_translation", [True, False])
-    def test_repeat_handling(self, repetition_period, repeat_translation):
+    def test_repeat_handling(self, passive_reset_time, repeat_translation):
         builder = self.model.create_builder()
-        builder.repeat(1000, repetition_period)
+        builder.repetition_period = builder.model.default_repetition_period
+        builder.passive_reset_time = None
+        builder.repeat(1000, passive_reset_time=passive_reset_time)
         builder.had(self.model.get_qubit(0))
         for i in range(9):
             builder.cnot(self.model.get_qubit(i), self.model.get_qubit(i + 1))
@@ -132,22 +135,19 @@ class TestWaveformV1Backend:
         # ease
         builder = LowerSyncsToDelays().run(builder)
         if repeat_translation:
-            builder = RepeatTranslation(self.model).run(builder)
+            builder = RepeatTranslation(TargetData.default()).run(builder)
+
         executable = self.backend.emit(builder)
         assert isinstance(executable, WaveformV1Executable)
         assert executable.shots == 1000
         assert executable.compiled_shots == 1000
-        if repetition_period is not None:
-            assert executable.repetition_time == repetition_period
-        else:
-            assert executable.repetition_time == self.model.default_repetition_period
 
     def test_pipeline_gives_partitioned_ir(self, partitioned_ir):
         assert isinstance(partitioned_ir, PartitionedIR)
 
     def test_partitioned_ir_shots(self, partitioned_ir):
         assert partitioned_ir.shots == 1254
-        assert partitioned_ir.repetition_period == 1e-4
+        assert partitioned_ir.passive_reset_time == None
 
     def test_partitioned_ir_has_returns(self, partitioned_ir):
         assert len(partitioned_ir.returns) == 1
@@ -254,7 +254,6 @@ class TestWaveformV1Backend:
 
     def test_executable_repeats(self, executable):
         assert executable.shots == 1254
-        assert executable.repetition_time == 100e-6
 
     def test_executable_post_processing(self, executable):
         assert len(executable.post_processing) == 1

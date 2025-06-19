@@ -145,7 +145,6 @@ class Repeat(Instruction):
     """
 
     repeat_count: Optional[int] = None
-    repetition_period: Optional[float] = None
 
 
 class Return(Instruction):

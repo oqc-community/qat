@@ -10,6 +10,7 @@ from qat.middleend.passes.legacy.transform import (
     RepeatTranslation,
 )
 from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 
 
@@ -35,7 +36,7 @@ class TestEchoEngine:
             delay=measure_acquire["delay"],
             time=measure_acquire["width"],
         )
-        builder = RepeatTranslation(model).run(builder)
+        builder = RepeatTranslation(TargetData.default()).run(builder)
         package = WaveformV1Backend(model).emit(builder)
 
         # Test the shapes and values match up
@@ -94,7 +95,7 @@ class TestEchoEngine:
             time=2 * width,
             output_variable="test2",
         )
-        builder = RepeatTranslation(model).run(builder)
+        builder = RepeatTranslation(TargetData.default()).run(builder)
         package = WaveformV1Backend(model).emit(builder)
 
         # Test the shapes and values match up
@@ -144,7 +145,7 @@ class TestEchoEngine:
                 delay=measure_acquire["delay"],
                 time=measure_acquire["width"],
             )
-        builder = RepeatTranslation(model).run(builder)
+        builder = RepeatTranslation(TargetData.default()).run(builder)
         package = WaveformV1Backend(model).emit(builder)
 
         # Test the shapes and values match up

@@ -324,7 +324,10 @@ class LiveDeviceEngine(QuantumExecutionEngine):
             self.model.control_hardware.set_data(data)
 
             repetitions = package.repeat.repeat_count
-            repetition_time = package.repeat.repetition_period
+            if (prt := package.repeat.passive_reset_time) is not None:
+                repetition_time = self._calculate_repetition_time(prt, position_map)
+            else:
+                repetition_time = package.repeat.repetition_period
 
             for aqs in aq_map.values():
                 if len(aqs) > 1:
@@ -371,6 +374,14 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                     )
                     sweep_iterator.insert_result_at_sweep_position(var_result, response)
         return results
+
+    def _calculate_repetition_time(self, passive_reset_time, position_map) -> float:
+        pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
+        durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
+
+        circuit_duration = max([duration for duration in durations.values()])
+
+        return circuit_duration + passive_reset_time
 
     def optimize(self, instructions):
         with log_duration("Instructions optimized in {} seconds."):

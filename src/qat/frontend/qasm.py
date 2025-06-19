@@ -179,13 +179,17 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         if isinstance(self.model, QuantumHardwareModel):
             return (
                 self.model.create_builder()
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .repeat(
+                    compiler_config.repeats,
+                    repetition_period=compiler_config.repetition_period,
+                    passive_reset_time=compiler_config.passive_reset_time,
+                )
                 .add(builder)
             )
         elif isinstance(self.model, PydHardwareModel):
             return (
                 PydQuantumInstructionBuilder(self.model)
-                .repeat(compiler_config.repeats, compiler_config.repetition_period)
+                .repeat(compiler_config.repeats)
                 .__add__(builder)
             )
         return None
