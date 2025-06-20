@@ -224,27 +224,6 @@ class TestConvertToPydanticIRPass:
             f"Additional data does not match: {self.converter_pass._additional_data} != {additional_data}"
         )
 
-    @_check_conversion.register(instructions.Assign)
-    def _(self, legacy_value, converted_value):
-        """Check that the value of a legacy assign instruction matches the converted assign instruction."""
-        self._check_updated_class(legacy_value, converted_value)
-        for name, value in vars(legacy_value).items():
-            new_value = getattr(converted_value, name)
-            if name == "value":
-                if isinstance(value, instructions.BinaryOperator):
-                    value = str(value).replace("variable ", "")
-                elif isinstance(value, instructions.Variable):
-                    value = value.name
-                elif (
-                    isinstance(value, list)
-                    and len(value) > 0
-                    and isinstance(value[0], instructions.Variable)
-                ):
-                    # Convert list of variables to list of variable names
-                    value = [var.name for var in value]
-
-            self._check_conversion(value, new_value)
-
     def test_covert_partitioned_ir(self):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
@@ -266,13 +245,6 @@ class TestConvertToPydanticIRPass:
         pipe = get_pipeline(self.legacy_model, "echo")
         legacy_builder = pipe.frontend.emit(get_qasm2("15qb.qasm"), res_mgr, met_mgr)
         legacy_builder = pipe.middleend.emit(legacy_builder, res_mgr, met_mgr)
-
-        legacy_builder._instructions = list(
-            filter(
-                lambda inst: not isinstance(inst, instructions.Variable),
-                legacy_builder._instructions,
-            )
-        )
         legacy_builder.add(instructions.Reset(self.legacy_model.qubits[:2]))
 
         converted_builder = self.converter_pass.run(legacy_builder)
@@ -300,7 +272,9 @@ class TestConvertToPydanticIRPass:
         [
             pytest.param(instructions.Assign("name_1", 8e-9), id="Assign-float"),
             pytest.param(
-                instructions.Assign("name_2", instructions.Plus("name_2", 1)),
+                instructions.Assign(
+                    "name_2", instructions.Plus(instructions.Variable("name_2"), 1)
+                ),
                 id="Assign-plus",
             ),
             # TODO: Support Sweep and EndSweep in the pydantic stack.

@@ -22,7 +22,6 @@ from qat.purr.compiler.devices import (
 )
 from qat.purr.compiler.hardware_models import HardwareModel
 from qat.purr.compiler.instructions import (
-    Assign,
     BinaryOperator,
     CustomPulse,
     Instruction,
@@ -297,12 +296,11 @@ class ConvertToPydanticIR(TransformPass):
             for target in qubit_targets
         ]
 
-    @_convert_element.register(Assign)
     @_convert_element.register(ResultsProcessing)
     @_convert_element.register(PostProcessing)
     def _(
         self,
-        value: Assign | ResultsProcessing | PostProcessing,
+        value: ResultsProcessing | PostProcessing,
     ):
         """Convert an Assign instance."""
         return self._get_pyd_class(value)._from_legacy(value)

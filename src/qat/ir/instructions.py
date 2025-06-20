@@ -180,7 +180,7 @@ class ResultsProcessing(Instruction):
 
 
 ### Variables
-class Variable(NoExtraFieldsModel):
+class Variable(Instruction):
     """
     States that this value is actually a variable that should be fetched instead.
     """
