@@ -20,9 +20,12 @@ from qat.backend.waveform_v1.executable import (
 )
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
+from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.instructions import Assign
 from qat.ir.lowered import PartitionedIR
 from qat.ir.measure import PostProcessing
+from qat.model.hardware_model import PhysicalHardwareModel
+from qat.model.target_data import TargetData
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -235,6 +238,29 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                     )
                 )
         return acquire_dict
+
+
+class ExperimentalWaveformV1Backend(WaveformV1Backend):
+    # TODO: Fully convert to Pydantic stack COMPILER-601
+    def __init__(
+        self,
+        model: QuantumHardwareModel,
+        pyd_model: PhysicalHardwareModel,
+        target_data: TargetData = TargetData.default(),
+    ):
+        self.model = model
+        self.pyd_model = pyd_model
+
+    def build_pass_pipeline(self, *args, **kwargs):
+        # TODO: Adjust as ore passes are implemented in Pydantic stack
+        return (
+            PassManager()
+            | NoAcquireWeightsValidation()  # COMPILER-381
+            | PartitionByPulseChannel()
+            | TimelineAnalysis()  # COMPILER-383
+            | IntermediateFrequencyAnalysis(self.model)  # COMPILER-384
+            | ConvertToPydanticIR(self.model, self.pyd_model)
+        )
 
 
 class WaveformContext:

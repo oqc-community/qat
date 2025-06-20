@@ -216,6 +216,7 @@ filterwarnings = [
 ]
 markers = [
   "ab_test",
+  "experimental",
 ]
 
 [tool.jupytext.formats]

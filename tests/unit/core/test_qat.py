@@ -38,6 +38,7 @@ from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
+from qat.pipelines.echo import get_experimental_pipeline as get_experimental_echo_pipeline
 from qat.pipelines.echo import get_pipeline as get_echo_pipeline
 from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
 from qat.purr.compiler.emitter import InstructionEmitter
@@ -138,6 +139,10 @@ qasm3_files = set(get_all_qasm3_paths()) - set(skip_qasm3)
 
 skip_qir = [get_test_file_path(ProgramFileType.QIR, file_name) for file_name in skip_qir]
 qir_files = set(get_all_qir_paths()) - set(skip_qir)
+
+mixed_files = (
+    set(list(qasm2_files)[::3]) | set(list(qasm3_files)[::3]) | set(list(qir_files)[::3])
+)
 
 
 def equivalent_vars(self, other):
@@ -666,6 +671,11 @@ def get_echo_model_without_acquire_delays():
     return model
 
 
+@pytest.mark.parametrize(
+    "program_file",
+    qasm2_files,  # TODO: update to mixed_files COMPILER-608
+    ids=short_file_name,
+)
 class TestQatEchoPipelines:
     """
     Parity tests specifically targeted at the echo engine in `purr` and new QAT. Aims to test:
@@ -695,30 +705,29 @@ class TestQatEchoPipelines:
         pipe = get_echo_pipeline(self.model, "new")
         self.core.pipelines.add(pipe)
 
-    def get_legacy_ir(self, request, qasm_file):
+    def get_legacy_ir(self, request, program_file):
         key = request.node.callspec.id
         if key not in self.legacy_ir:
-            legacy_ir, _ = self.core.compile(str(qasm_file), self.config, pipeline="legacy")
+            legacy_ir, _ = self.core.compile(
+                str(program_file), self.config, pipeline="legacy"
+            )
             self.legacy_ir[key] = legacy_ir
 
         return self.legacy_ir[key]
 
-    def get_executable(self, request, qasm_file):
+    def get_executable(self, request, program_file):
         key = request.node.callspec.id
         if key not in self.executables:
-            executable, _ = self.core.compile(str(qasm_file), self.config, pipeline="new")
+            executable, _ = self.core.compile(
+                str(program_file), self.config, pipeline="new"
+            )
             self.executables[key] = executable
 
         return self.executables[key]
 
-    @pytest.mark.parametrize(
-        "qasm_file",
-        qasm2_files,
-        ids=short_file_name,
-    )
-    def test_code_generation(self, request, qasm_file):
-        ir = self.get_legacy_ir(request, qasm_file)
-        executable = self.get_executable(request, qasm_file)
+    def test_code_generation(self, request, program_file):
+        ir = self.get_legacy_ir(request, program_file)
+        executable = self.get_executable(request, program_file)
 
         engine = self.model.create_engine()
         qatfile = InstructionEmitter().emit(ir.instructions, self.model)
@@ -760,14 +769,9 @@ class TestQatEchoPipelines:
             assert acquire_purr.mode == AcquireMode.RAW
             assert acquire.mode == acquire.mode.INTEGRATOR
 
-    @pytest.mark.parametrize(
-        "qasm_file",
-        qasm2_files,
-        ids=short_file_name,
-    )
-    def test_results_formatting(self, request, qasm_file):
-        ir = self.get_legacy_ir(request, qasm_file)
-        package = self.get_executable(request, qasm_file)
+    def test_results_formatting(self, request, program_file):
+        ir = self.get_legacy_ir(request, program_file)
+        package = self.get_executable(request, program_file)
 
         purr_results, _ = self.core.execute(ir, self.config, pipeline="legacy")
         echo_results, _ = self.core.execute(package, self.config, pipeline="new")
@@ -775,33 +779,118 @@ class TestQatEchoPipelines:
 
         for key in purr_results.keys():
             assert purr_results[key] == echo_results[key]
-        assert purr_results.keys() == echo_results.keys()
 
-    @pytest.mark.parametrize(
-        "qasm_file",
-        qasm2_files,
-        ids=short_file_name,
-    )
-    def test_qat_execute_rejects_different_hw_models(self, request, qasm_file):
-        package = self.get_executable(request, qasm_file)
+    def test_qat_execute_rejects_different_hw_models(self, request, program_file):
+        package = self.get_executable(request, program_file)
         package.calibration_id = "different_id"
 
         with pytest.raises(MismatchingHardwareModelException):
             self.core.execute(package, pipeline="new")
 
     @pytest.mark.parametrize(
-        "qasm_file",
-        qasm2_files,
-        ids=short_file_name,
-    )
-    @pytest.mark.parametrize(
         "pipeline",
         ["legacy", "new"],
     )
-    def test_serialised_executable(self, qasm_file, pipeline):
+    def test_serialised_executable(self, program_file, pipeline):
         """Test that the executable can be serialized and deserialized."""
         package, _ = self.core.compile(
-            str(qasm_file), self.config, pipeline=pipeline, to_json=True
+            str(program_file), self.config, pipeline=pipeline, to_json=True
+        )
+        assert isinstance(package, str)
+        results, _ = self.core.execute(package, self.config, pipeline=pipeline)
+        assert isinstance(results, dict)
+
+
+@pytest.mark.experimental
+@pytest.mark.parametrize(
+    "program_file",
+    qasm2_files,  # TODO: update to mixed_files COMPILER-608
+    ids=short_file_name,
+)
+class TestExperimentalEchoPipelines:
+    """
+    Parity tests specifically targeted at the echo engine in new QAT and the
+    experimental stack that incrementally uses the Pydantic stack. Aims to test:
+
+        - New echo pipelines: Does compile and execute work in the way we expect using the new
+          QAT infrastructure?
+        - Code generation to a "waveform" executable: do the buffers we send to the target machine
+          match those generated by legacy execution engines?
+        - Execution and results processing: are the results outputted in consistent formats?
+    """
+
+    model = get_echo_model_without_acquire_delays()
+    config = CompilerConfig(
+        results_format=QuantumResultsFormat().binary_count(),
+        repeats=TargetData.default().default_shots,
+        repetition_period=TargetData.default().QUBIT_DATA.passive_reset_time,
+    )
+    core: QAT = None
+    stable_executables = {}
+    experimental_executables = {}
+
+    def setup_class(self):
+        """Setup the QAT instance and pipelines for the tests."""
+        self.core = QAT()
+        pipe = get_echo_pipeline(self.model, "stable")
+        self.core.pipelines.add(pipe)
+        pipe = get_experimental_echo_pipeline(self.model, "experimental")
+        self.core.pipelines.add(pipe)
+
+    def get_stable_executable(self, request, program_file):
+        key = request.node.callspec.id
+        if key not in self.stable_executables:
+            executable, _ = self.core.compile(
+                str(program_file), self.config, pipeline="stable"
+            )
+            self.stable_executables[key] = executable
+
+        return self.stable_executables[key]
+
+    def get_experimental_executable(self, request, program_file):
+        key = request.node.callspec.id
+        if key not in self.experimental_executables:
+            executable, _ = self.core.compile(
+                str(program_file), self.config, pipeline="experimental"
+            )
+            self.experimental_executables[key] = executable
+
+        return self.experimental_executables[key]
+
+    def test_code_generation(self, request, program_file):
+        stable_exe = self.get_stable_executable(request, program_file)
+        experimental_exe = self.get_experimental_executable(request, program_file)
+
+        assert stable_exe == experimental_exe
+
+    def test_results_formatting(self, request, program_file):
+        stable_exe = self.get_stable_executable(request, program_file)
+        experimental_exe = self.get_experimental_executable(request, program_file)
+
+        stable_results, _ = self.core.execute(stable_exe, self.config, pipeline="stable")
+        experimental_results, _ = self.core.execute(
+            experimental_exe, self.config, pipeline="experimental"
+        )
+        assert stable_results.keys() == experimental_results.keys()
+
+        for key in stable_results.keys():
+            assert stable_results[key] == experimental_results[key]
+
+    def test_qat_execute_rejects_different_hw_models(self, request, program_file):
+        package = self.get_experimental_executable(request, program_file)
+        package.calibration_id = "different_id"
+
+        with pytest.raises(MismatchingHardwareModelException):
+            self.core.execute(package, pipeline="experimental")
+
+    @pytest.mark.parametrize(
+        "pipeline",
+        ["stable", "experimental"],
+    )
+    def test_serialised_executable(self, program_file, pipeline):
+        """Test that the executable can be serialized and deserialized."""
+        package, _ = self.core.compile(
+            str(program_file), self.config, pipeline=pipeline, to_json=True
         )
         assert isinstance(package, str)
         results, _ = self.core.execute(package, self.config, pipeline=pipeline)
