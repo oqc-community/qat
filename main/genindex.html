@@ -64,6 +64,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -3307,6 +3308,8 @@
 </li>
         <li><a href="qat.backend.passes.lowering.html#qat.backend.passes.lowering.PartitionByPulseChannel.run.params.ir">(qat.backend.passes.lowering.PartitionByPulseChannel.run parameter)</a>
 </li>
+        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquireWeightsValidation.run.params.ir">(qat.backend.passes.validation.NoAcquireWeightsValidation.run parameter)</a>
+</li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_acquire_dict parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">(qat.backend.waveform_v1.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
@@ -4642,6 +4645,8 @@
 </li>
         <li><a href="qat.backend.passes.lowering.html#module-qat.backend.passes.lowering">qat.backend.passes.lowering</a>
 </li>
+        <li><a href="qat.backend.passes.validation.html#module-qat.backend.passes.validation">qat.backend.passes.validation</a>
+</li>
         <li><a href="qat.backend.waveform_v1.html#module-qat.backend.waveform_v1">qat.backend.waveform_v1</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#module-qat.backend.waveform_v1.codegen">qat.backend.waveform_v1.codegen</a>
@@ -5152,7 +5157,11 @@
       <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoAcquiresWithDifferentWeightsValidation">NoAcquiresWithDifferentWeightsValidation (class in qat.backend.passes.legacy.validation)</a>
 </li>
       <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoAcquireWeightsValidation">NoAcquireWeightsValidation (class in qat.backend.passes.legacy.validation)</a>
+
+      <ul>
+        <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquireWeightsValidation">(class in qat.backend.passes.validation)</a>
 </li>
+      </ul></li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel">NoExtraFieldsFrozenModel (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel">NoExtraFieldsModel (class in qat.utils.pydantic)</a>
@@ -6007,6 +6016,8 @@
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PydLogicalHardwareModel">PydLogicalHardwareModel (in module qat.model.hardware_model)</a>
 </li>
+      <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.PydNoAcquireWeightsValidation">PydNoAcquireWeightsValidation (in module qat.backend.passes.validation)</a>
+</li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation">PydNoMidCircuitMeasurementValidation (class in qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydParse">PydParse (class in qat.frontend.passes.transform)</a>
@@ -6186,6 +6197,13 @@
 
       <ul>
         <li><a href="qat.backend.passes.lowering.html#module-qat.backend.passes.lowering">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.backend.passes.validation
+
+      <ul>
+        <li><a href="qat.backend.passes.validation.html#module-qat.backend.passes.validation">module</a>
 </li>
       </ul></li>
       <li>
@@ -8376,7 +8394,7 @@
 </li>
         <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoAcquiresWithDifferentWeightsValidation.run">(NoAcquiresWithDifferentWeightsValidation method)</a>
 </li>
-        <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoAcquireWeightsValidation.run">(NoAcquireWeightsValidation method)</a>
+        <li><a href="qat.backend.passes.legacy.validation.html#qat.backend.passes.legacy.validation.NoAcquireWeightsValidation.run">(NoAcquireWeightsValidation method)</a>, <a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquireWeightsValidation.run">[1]</a>
 </li>
         <li><a href="qat.middleend.passes.gates.validation.html#qat.middleend.passes.gates.validation.NoMidCircuitMeasurements.run">(NoMidCircuitMeasurements method)</a>
 </li>

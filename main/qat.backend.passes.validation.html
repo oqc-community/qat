@@ -20,7 +20,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.backend.waveform_v1 package" href="qat.backend.waveform_v1.html" />
+    <link rel="prev" title="qat.backend.passes.lowering module" href="qat.backend.passes.lowering.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,7 +46,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
@@ -53,10 +55,10 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">src</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.html">qat package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.legacy.html">qat.backend.passes.legacy package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.analysis.html">qat.backend.passes.legacy.analysis module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.lowering.html">qat.backend.passes.legacy.lowering module</a></li>
@@ -65,6 +67,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.backend.passes.validation module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -351,6 +354,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.backend.html">qat.backend package</a></li>
+          <li class="breadcrumb-item"><a href="qat.backend.passes.html">qat.backend.passes package</a></li>
       <li class="breadcrumb-item active">qat.backend.passes.validation module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/qat.backend.passes.validation.rst.txt" rel="nofollow"> View page source</a>
@@ -363,15 +370,42 @@
              
 
 
-  <section id="qat-backend-passes-validation-module">
-<h1>qat.backend.passes.validation module<a class="headerlink" href="#qat-backend-passes-validation-module" title="Link to this heading"></a></h1>
+  <section id="module-qat.backend.passes.validation">
+<span id="qat-backend-passes-validation-module"></span><h1>qat.backend.passes.validation module<a class="headerlink" href="#module-qat.backend.passes.validation" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.passes.validation.NoAcquireWeightsValidation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoAcquireWeightsValidation</span></span><a class="headerlink" href="#qat.backend.passes.validation.NoAcquireWeightsValidation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.ValidationPass" title="qat.core.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Some target machines do not support <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions that contain weights.
+This pass can be used to validate that this is the case.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.passes.validation.NoAcquireWeightsValidation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.validation.NoAcquireWeightsValidation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.passes.validation.NoAcquireWeightsValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.validation.NoAcquireWeightsValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.passes.validation.PydNoAcquireWeightsValidation">
+<span class="sig-name descname"><span class="pre">PydNoAcquireWeightsValidation</span></span><a class="headerlink" href="#qat.backend.passes.validation.PydNoAcquireWeightsValidation" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.backend.passes.validation.NoAcquireWeightsValidation" title="qat.backend.passes.validation.NoAcquireWeightsValidation"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoAcquireWeightsValidation</span></code></a></p>
+</dd></dl>
+
 </section>
 
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.backend.passes.lowering.html" class="btn btn-neutral float-left" title="qat.backend.passes.lowering module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.backend.waveform_v1.html" class="btn btn-neutral float-right" title="qat.backend.waveform_v1 package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

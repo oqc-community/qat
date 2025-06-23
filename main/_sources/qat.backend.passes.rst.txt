@@ -21,3 +21,4 @@ Submodules
    :maxdepth: 4
 
    qat.backend.passes.lowering
+   qat.backend.passes.validation
