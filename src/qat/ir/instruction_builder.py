@@ -752,7 +752,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         if delay is None:
             kwargs["delay"] = pulse_channel.acquire.delay
 
-        return self.add(Acquire(targets=pulse_channel.uuid, **kwargs))
+        return self.add(Acquire(target=pulse_channel.uuid, **kwargs))
 
     def delay(self, target: Qubit | PulseChannel, duration: float):
         pulse_channel = target.drive_pulse_channel if isinstance(target, Qubit) else target
