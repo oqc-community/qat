@@ -20,5 +20,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.backend.passes.analysis
    qat.backend.passes.lowering
    qat.backend.passes.validation

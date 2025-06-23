@@ -63,6 +63,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.legacy.validation.html">qat.backend.passes.legacy.validation module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
 </ul>
@@ -2515,7 +2516,7 @@
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation">FreqShiftSanitisation (class in qat.middleend.passes.legacy.transform)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyResult.frequencies">frequencies (IntermediateFrequencyResult attribute)</a>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyResult.frequencies">frequencies (IntermediateFrequencyResult attribute)</a>
 </li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.Cos.frequency">frequency (Cos attribute)</a>
 
@@ -3253,9 +3254,13 @@
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation">IntegratorAcquireSanitisation (class in qat.middleend.passes.legacy.transform)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis">IntermediateFrequencyAnalysis (class in qat.backend.passes.legacy.analysis)</a>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis">IntermediateFrequencyAnalysis (class in qat.backend.passes.analysis)</a>
+
+      <ul>
+        <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis">(class in qat.backend.passes.legacy.analysis)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyResult">IntermediateFrequencyResult (class in qat.backend.passes.legacy.analysis)</a>
+      </ul></li>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyResult">IntermediateFrequencyResult (class in qat.backend.passes.analysis)</a>
 </li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.Cos.internal_phase">internal_phase (Cos attribute)</a>
 
@@ -3283,9 +3288,11 @@
 </li>
       <li><a href="qat.model.device.html#qat.model.device.IQBias">IQBias (class in qat.model.device)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run.params.ir">ir (qat.backend.passes.legacy.analysis.BindingPass.run parameter)</a>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis.run.params.ir">ir (qat.backend.passes.analysis.IntermediateFrequencyAnalysis.run parameter)</a>
 
       <ul>
+        <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run.params.ir">(qat.backend.passes.legacy.analysis.BindingPass.run parameter)</a>
+</li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.CFGPass.run.params.ir">(qat.backend.passes.legacy.analysis.CFGPass.run parameter)</a>
 </li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.ir">(qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run parameter)</a>
@@ -4132,6 +4139,8 @@
 </li>
         <li><a href="qat.backend.fallthrough.html#qat.backend.fallthrough.FallthroughBackend.params.model">(qat.backend.fallthrough.FallthroughBackend parameter)</a>
 </li>
+        <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis.params.model">(qat.backend.passes.analysis.IntermediateFrequencyAnalysis parameter)</a>
+</li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.params.model">(qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.ExperimentalWaveformV1Backend.params.model">(qat.backend.waveform_v1.codegen.ExperimentalWaveformV1Backend parameter)</a>
@@ -4632,6 +4641,8 @@
         <li><a href="qat.backend.graph.html#module-qat.backend.graph">qat.backend.graph</a>
 </li>
         <li><a href="qat.backend.passes.html#module-qat.backend.passes">qat.backend.passes</a>
+</li>
+        <li><a href="qat.backend.passes.analysis.html#module-qat.backend.passes.analysis">qat.backend.passes.analysis</a>
 </li>
         <li><a href="qat.backend.passes.legacy.html#module-qat.backend.passes.legacy">qat.backend.passes.legacy</a>
 </li>
@@ -6012,6 +6023,8 @@
 </li>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydInputOptimisation">PydInputOptimisation (class in qat.frontend.passes.transform)</a>
 </li>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.PydIntermediateFrequencyAnalysis">PydIntermediateFrequencyAnalysis (in module qat.backend.passes.analysis)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase">PydListBase (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PydLogicalHardwareModel">PydLogicalHardwareModel (in module qat.model.hardware_model)</a>
@@ -6155,6 +6168,13 @@
 
       <ul>
         <li><a href="qat.backend.passes.html#module-qat.backend.passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.backend.passes.analysis
+
+      <ul>
+        <li><a href="qat.backend.passes.analysis.html#module-qat.backend.passes.analysis">module</a>
 </li>
       </ul></li>
       <li>
@@ -6976,6 +6996,8 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#module-qat.purr.backends.qblox.codegen">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.codegen_base
 
@@ -6983,8 +7005,6 @@
         <li><a href="qat.purr.backends.qblox.codegen_base.html#module-qat.purr.backends.qblox.codegen_base">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.config
 
@@ -7957,9 +7977,11 @@
       </ul></li>
       <li><a href="qat.core.config.validators.html#qat.core.config.validators.requires_model">requires_model() (in module qat.core.config.validators)</a>
 </li>
-      <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run.params.res_mgr">res_mgr (qat.backend.passes.legacy.analysis.BindingPass.run parameter)</a>
+      <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis.run.params.res_mgr">res_mgr (qat.backend.passes.analysis.IntermediateFrequencyAnalysis.run parameter)</a>
 
       <ul>
+        <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run.params.res_mgr">(qat.backend.passes.legacy.analysis.BindingPass.run parameter)</a>
+</li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.CFGPass.run.params.res_mgr">(qat.backend.passes.legacy.analysis.CFGPass.run parameter)</a>
 </li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run.params.res_mgr">(qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run parameter)</a>
@@ -8378,7 +8400,7 @@
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run">(IntegratorAcquireSanitisation method)</a>
 </li>
-        <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run">(IntermediateFrequencyAnalysis method)</a>
+        <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyAnalysis.run">(IntermediateFrequencyAnalysis method)</a>, <a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.IntermediateFrequencyAnalysis.run">[1]</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.LegacyPhaseOptimisation.run">(LegacyPhaseOptimisation method)</a>
 </li>
