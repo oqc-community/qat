@@ -12,12 +12,13 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.graph import ControlFlowGraph
+from qat.backend.passes.analysis import IntermediateFrequencyResult
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
 from qat.ir.lowered import PartitionedIR
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -753,11 +754,6 @@ class TimelineAnalysis(AnalysisPass):
             np.round(durations / channel.block_time, decimals=4)
         ).astype(np.int64)
         return block_numbers * channel.block_size
-
-
-@dataclass
-class IntermediateFrequencyResult(ResultInfoMixin):
-    frequencies: Dict[PhysicalChannel, float]
 
 
 class IntermediateFrequencyAnalysis(AnalysisPass):
