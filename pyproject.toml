@@ -17,6 +17,7 @@ authors = [
     { name = "Benjamin Sach", email = "bsach@oqc.tech" },
     { name = "Daria Van Hende", email = "dvanhende@oqc.tech" },
     { name = "Luke Causer", email = "lcauser@oqc.tech" },
+    { name = "Russell Rundle", email = "rrundle@oqc.tech"}
 ]
 
 [project.urls]
