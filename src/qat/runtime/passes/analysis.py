@@ -28,12 +28,8 @@ class IndexMappingAnalysis(AnalysisPass):
     """
 
     def __init__(self, model: PhysicalHardwareModel):
-        """:param model: The hardware model that is needed for the qubit mapping."""
-        # TODO: searching for classical registers feels a little shaky. Guessing there are
-        # changes to make at a higher level to faciliate improvements here.
-        # TODO: should the output_variable -> qubit mapping be separate from the classical
-        # register extraction? The former might be useful for a compiliation analysis pass.
-        # Only used here right now, so let's worry about this later.
+        """:param model: The hardware model is needed for the qubit mapping."""
+
         self.model = model
         pulse_to_phys_channel_map: dict[str, str] = {}
         for qubit in self.model.qubits.values():

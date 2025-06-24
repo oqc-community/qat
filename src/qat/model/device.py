@@ -159,6 +159,12 @@ class PulseChannel(Component):
         return self.__class__.__name__.replace("PulseChannel", "").lower()
 
 
+class QubitPulseChannel(PulseChannel): ...
+
+
+class ResonatorPulseChannel(PulseChannel): ...
+
+
 class CalibratablePulse(NoExtraFieldsModel):
     waveform_type: WaveformType = GaussianWaveform
     width: CalibratablePositiveFloat = Field(default=100e-09, ge=0)
@@ -177,7 +183,7 @@ class CalibratableAcquire(NoExtraFieldsModel):
     use_weights: bool = False
 
 
-class DrivePulseChannel(PulseChannel):
+class DrivePulseChannel(QubitPulseChannel):
     """
     The pulse channel that drives the qubit from |0> -> |1>.
 
@@ -192,7 +198,7 @@ class DrivePulseChannel(PulseChannel):
     )
 
 
-class MeasurePulseChannel(PulseChannel):
+class MeasurePulseChannel(ResonatorPulseChannel):
     """
     The pulse channel that measures the quantum state of the resonator.
 
@@ -202,20 +208,20 @@ class MeasurePulseChannel(PulseChannel):
     pulse: CalibratablePulse = Field(default=CalibratablePulse(width=1e-06), frozen=True)
 
 
-class AcquirePulseChannel(PulseChannel):
+class AcquirePulseChannel(ResonatorPulseChannel):
     acquire: CalibratableAcquire = Field(default=CalibratableAcquire(), frozen=True)
 
 
 class MeasureAcquirePulseChannel(MeasurePulseChannel, AcquirePulseChannel): ...
 
 
-class SecondStatePulseChannel(PulseChannel): ...
+class SecondStatePulseChannel(QubitPulseChannel): ...
 
 
-class FreqShiftPulseChannel(PulseChannel): ...
+class FreqShiftPulseChannel(QubitPulseChannel): ...
 
 
-class CrossResonancePulseChannel(PulseChannel):
+class CrossResonancePulseChannel(QubitPulseChannel):
     auxiliary_qubit: QubitId
     zx_pi_4_pulse: CalibratablePulse = Field(
         default=CalibratablePulse(
@@ -228,7 +234,7 @@ class CrossResonancePulseChannel(PulseChannel):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
 
 
-class CrossResonanceCancellationPulseChannel(PulseChannel):
+class CrossResonanceCancellationPulseChannel(QubitPulseChannel):
     auxiliary_qubit: QubitId
 
     def __repr__(self):
