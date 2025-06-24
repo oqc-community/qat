@@ -5,18 +5,16 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
-from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
-from qat.ir.instructions import Return as PydReturn
-from qat.ir.measure import Acquire as PydAcquire
-from qat.ir.measure import Pulse as PydPulse
-from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.instructions import Return
+from qat.ir.measure import Acquire, Pulse
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
 
-class PydNoMidCircuitMeasurementValidation(ValidationPass):
+class NoMidCircuitMeasurementValidation(ValidationPass):
     """
     Validates that there are no mid-circuit measurements by checking that no qubit
     has an acquire instruction that is later followed by a pulse instruction.
@@ -24,7 +22,7 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
 
     def __init__(
         self,
-        model: PydHardwareModel,
+        model: PhysicalHardwareModel,
         no_mid_circuit_measurement: bool | None = None,
         *args,
         **kwargs,
@@ -56,11 +54,11 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
         }
 
         for instr in ir:
-            if isinstance(instr, PydAcquire):
+            if isinstance(instr, Acquire):
                 consumed_acquire_pc.add(instr.target)
 
             # Check if we have a measure in the middle of the circuit somewhere.
-            elif isinstance(instr, PydPulse):
+            elif isinstance(instr, Pulse):
                 acq_pc = drive_acq_pc_map.get(instr.target, None)
 
                 if acq_pc and acq_pc in consumed_acquire_pc:
@@ -70,10 +68,10 @@ class PydNoMidCircuitMeasurementValidation(ValidationPass):
         return ir
 
 
-class PydHardwareConfigValidity(ValidationPass):
+class HardwareConfigValidity(ValidationPass):
     """Validates the :class:`CompilerConfig` against the hardware model."""
 
-    def __init__(self, hardware_model: PydHardwareModel, max_shots: int | None = None):
+    def __init__(self, hardware_model: PhysicalHardwareModel, max_shots: int | None = None):
         """Instantiate the pass with a hardware model.
 
         :param hardware_model: The hardware model.
@@ -104,7 +102,7 @@ class PydHardwareConfigValidity(ValidationPass):
             )
 
     def _validate_error_mitigation(
-        self, hardware_model: PydHardwareModel, compiler_config: CompilerConfig
+        self, hardware_model: PhysicalHardwareModel, compiler_config: CompilerConfig
     ):
         if (
             compiler_config.error_mitigation
@@ -119,16 +117,21 @@ class PydHardwareConfigValidity(ValidationPass):
                 )
 
 
-class PydReturnSanitisationValidation(ValidationPass):
+class ReturnSanitisationValidation(ValidationPass):
     """Validates that the IR has a :class:`Return` instruction."""
 
-    def run(self, ir: PydInstructionBuilder, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
-        returns = [inst for inst in ir.instructions if isinstance(inst, PydReturn)]
+        returns = [inst for inst in ir.instructions if isinstance(inst, Return)]
 
         if not returns:
             raise ValueError("Could not find any return instructions.")
         elif len(returns) > 1:
             raise ValueError("Found multiple return instructions.")
         return ir
+
+
+PydHardwareConfigValidity = HardwareConfigValidity
+PydNoMidCircuitMeasurementValidation = NoMidCircuitMeasurementValidation
+PydReturnSanitisationValidation = ReturnSanitisationValidation
