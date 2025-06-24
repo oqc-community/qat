@@ -302,6 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.passes.html">qat.runtime.passes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.legacy.html">qat.runtime.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.legacy.analysis.html">qat.runtime.passes.legacy.analysis module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.legacy.transform.html">qat.runtime.passes.legacy.transform module</a></li>
 </ul>
 </li>
@@ -519,6 +520,8 @@
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">acquisitions (qat.runtime.passes.analysis.IndexMappingAnalysis.run parameter)</a>
 
       <ul>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run.params.acquisitions">(qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run parameter)</a>
+</li>
         <li><a href="qat.runtime.passes.legacy.transform.html#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.acquisitions">(qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.legacy.transform.html#qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run.params.acquisitions">(qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run parameter)</a>
@@ -1128,7 +1131,7 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.calibration_definition">calibration_definition() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.calibration_definition">[1]</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.CalibrationAnalysisResult.calibration_executables">calibration_executables (CalibrationAnalysisResult attribute)</a>
+      <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.CalibrationAnalysisResult.calibration_executables">calibration_executables (CalibrationAnalysisResult attribute)</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.calibration_grammar_declaration">calibration_grammar_declaration() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.calibration_grammar_declaration">[1]</a>
 </li>
@@ -1144,9 +1147,9 @@
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.OpenPulseContext.calibration_methods">calibration_methods (OpenPulseContext attribute)</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.CalibrationAnalysis">CalibrationAnalysis (class in qat.runtime.passes.analysis)</a>
+      <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.CalibrationAnalysis">CalibrationAnalysis (class in qat.runtime.passes.legacy.analysis)</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.CalibrationAnalysisResult">CalibrationAnalysisResult (class in qat.runtime.passes.analysis)</a>
+      <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.CalibrationAnalysisResult">CalibrationAnalysisResult (class in qat.runtime.passes.legacy.analysis)</a>
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs">CalibrationWithArgs (class in qat.purr.compiler.runtime)</a>
 </li>
@@ -3119,9 +3122,17 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.IndexAccessor">IndexAccessor (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis">IndexMappingAnalysis (class in qat.runtime.passes.analysis)</a>
+
+      <ul>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis">(class in qat.runtime.passes.legacy.analysis)</a>
 </li>
+      </ul></li>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingResult">IndexMappingResult (class in qat.runtime.passes.analysis)</a>
+
+      <ul>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingResult">(class in qat.runtime.passes.legacy.analysis)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.indices">indices (Section attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.INFO">INFO (LoggerLevel attribute)</a>
@@ -3794,7 +3805,7 @@
 </li>
       <li><a href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode.MANUAL">MANUAL (ConnectionMode attribute)</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingResult.mapping">mapping (IndexMappingResult attribute)</a>
+      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingResult.mapping">mapping (IndexMappingResult attribute)</a>, <a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingResult.mapping">[1]</a>
 </li>
       <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ThresholdedAcqConfig.marker_address">marker_address (ThresholdedAcqConfig attribute)</a>
 </li>
@@ -4216,6 +4227,8 @@
         <li><a href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_results_pipeline.params.model">(qat.pipelines.legacy.qiskit.get_results_pipeline parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.params.model">(qat.runtime.passes.analysis.IndexMappingAnalysis parameter)</a>
+</li>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.params.model">(qat.runtime.passes.legacy.analysis.IndexMappingAnalysis parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.model">(QbloxLiveEngineAdapter attribute)</a>
 </li>
@@ -5002,6 +5015,8 @@
 </li>
         <li><a href="qat.runtime.passes.legacy.html#module-qat.runtime.passes.legacy">qat.runtime.passes.legacy</a>
 </li>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#module-qat.runtime.passes.legacy.analysis">qat.runtime.passes.legacy.analysis</a>
+</li>
         <li><a href="qat.runtime.passes.legacy.transform.html#module-qat.runtime.passes.legacy.transform">qat.runtime.passes.legacy.transform</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#module-qat.runtime.passes.transform">qat.runtime.passes.transform</a>
@@ -5415,6 +5430,8 @@
         <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime.execute.params.package">(qat.runtime.legacy.LegacyRuntime.execute parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package">(qat.runtime.passes.analysis.IndexMappingAnalysis.run parameter)</a>
+</li>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run.params.package">(qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.legacy.transform.html#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping.params.package">(qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping parameter)</a>
 </li>
@@ -6996,8 +7013,6 @@
         <li><a href="qat.purr.backends.qblox.codegen.html#module-qat.purr.backends.qblox.codegen">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.codegen_base
 
@@ -7005,6 +7020,8 @@
         <li><a href="qat.purr.backends.qblox.codegen_base.html#module-qat.purr.backends.qblox.codegen_base">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.qblox.config
 
@@ -7430,6 +7447,13 @@
 
       <ul>
         <li><a href="qat.runtime.passes.legacy.html#module-qat.runtime.passes.legacy">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.runtime.passes.legacy.analysis
+
+      <ul>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#module-qat.runtime.passes.legacy.analysis">module</a>
 </li>
       </ul></li>
       <li>
@@ -8054,6 +8078,8 @@
 </li>
         <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.res_mgr">(qat.runtime.passes.analysis.IndexMappingAnalysis.run parameter)</a>
 </li>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run.params.res_mgr">(qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run parameter)</a>
+</li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation.run.params.res_mgr">(qat.runtime.passes.transform.ErrorMitigation.run parameter)</a>
 </li>
         <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime.execute.params.res_mgr">(qat.runtime.simple.SimpleRuntime.execute parameter)</a>
@@ -8348,7 +8374,7 @@
 </li>
         <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.BindingPass.run">(BindingPass method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass.run">[1]</a>
 </li>
-        <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.CalibrationAnalysis.run">(CalibrationAnalysis method)</a>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.CalibrationAnalysis.run">(CalibrationAnalysis method)</a>
 </li>
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs.run">(CalibrationWithArgs method)</a>
 </li>
@@ -8382,7 +8408,7 @@
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InactivePulseChannelSanitisation.run">(InactivePulseChannelSanitisation method)</a>
 </li>
-        <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run">(IndexMappingAnalysis method)</a>
+        <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.run">(IndexMappingAnalysis method)</a>, <a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.run">[1]</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.InitialPhaseResetSanitisation.run">(InitialPhaseResetSanitisation method)</a>
 </li>
@@ -9647,19 +9673,23 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.value">(Variable attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values">values() (PydDictBase method)</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_executable">var_to_physical_channel_executable() (IndexMappingAnalysis static method)</a>
+      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_executable">var_to_physical_channel_executable() (IndexMappingAnalysis static method)</a>, <a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.var_to_physical_channel_executable">[1]</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir">var_to_physical_channel_qat_ir() (IndexMappingAnalysis static method)</a>
+      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir">var_to_physical_channel_qat_ir() (IndexMappingAnalysis method)</a>
+
+      <ul>
+        <li><a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir">(IndexMappingAnalysis static method)</a>
 </li>
-      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_qubit_map">var_to_qubit_map() (IndexMappingAnalysis method)</a>
+      </ul></li>
+      <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_qubit_map">var_to_qubit_map() (IndexMappingAnalysis method)</a>, <a href="qat.runtime.passes.legacy.analysis.html#qat.runtime.passes.legacy.analysis.IndexMappingAnalysis.var_to_qubit_map">[1]</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.var_type">var_type (Variable attribute)</a>
 </li>

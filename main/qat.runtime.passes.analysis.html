@@ -305,6 +305,7 @@
 <li class="toctree-l3 current"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="qat.runtime.passes.html">qat.runtime.passes package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.legacy.html">qat.runtime.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.legacy.analysis.html">qat.runtime.passes.legacy.analysis module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.legacy.transform.html">qat.runtime.passes.legacy.transform module</a></li>
 </ul>
 </li>
@@ -374,28 +375,6 @@
   <section id="module-qat.runtime.passes.analysis">
 <span id="qat-runtime-passes-analysis-module"></span><h1>qat.runtime.passes.analysis module<a class="headerlink" href="#module-qat.runtime.passes.analysis" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.passes.analysis.CalibrationAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibrationAnalysis</span></span><a class="headerlink" href="#qat.runtime.passes.analysis.CalibrationAnalysis" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.passes.analysis.CalibrationAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.CalibrationAnalysis.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.passes.analysis.CalibrationAnalysisResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CalibrationAnalysisResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration_executables=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.CalibrationAnalysisResult" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.passes.analysis.CalibrationAnalysisResult.calibration_executables">
-<span class="sig-name descname"><span class="pre">calibration_executables</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs" title="qat.purr.compiler.runtime.CalibrationWithArgs"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalibrationWithArgs</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.CalibrationAnalysisResult.calibration_executables" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingAnalysis">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndexMappingAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
@@ -405,7 +384,7 @@ Also looks for classical registers of the form <code class="code docutils litera
 <p>Supports both <code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code> packages and <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is needed for the qubit mapping.</p>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model that is needed for the qubit mapping.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -414,9 +393,9 @@ Also looks for classical registers of the form <code class="code docutils litera
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the target machine.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the target machine.</p></li>
 <li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The results manager to save the mapping.</p></li>
-<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a>, <a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>]</span>) – The executable program containing the results-processing
+<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a>, <a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>]</span>) – The executable program containing the results-processing
 information should be passed as a keyword argument.</p></li>
 </ul>
 </dd>
@@ -428,17 +407,17 @@ information should be passed as a keyword argument.</p></li>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_to_physical_channel_executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_executable" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_to_physical_channel_qat_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">var_to_physical_channel_qat_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -446,7 +425,8 @@ information should be passed as a keyword argument.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_qubit_map">
 <span class="sig-name descname"><span class="pre">var_to_qubit_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_qubit_map" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Maps the variables in the mapping to qubit indices.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -456,7 +436,7 @@ information should be passed as a keyword argument.</p></li>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingResult.mapping">
-<span class="sig-name descname"><span class="pre">mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingResult.mapping" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingResult.mapping" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

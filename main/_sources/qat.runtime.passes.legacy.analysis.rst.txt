@@ -1,0 +1,7 @@
+qat.runtime.passes.legacy.analysis module
+=========================================
+
+.. automodule:: qat.runtime.passes.legacy.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
