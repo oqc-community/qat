@@ -10,7 +10,7 @@ from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.runtime import SimpleRuntime
-from qat.runtime.passes.analysis import IndexMappingAnalysis
+from qat.runtime.passes.legacy.analysis import IndexMappingAnalysis
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     ErrorMitigation,

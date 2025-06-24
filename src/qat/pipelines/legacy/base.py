@@ -20,7 +20,7 @@ from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.legacy import LegacyRuntime
-from qat.runtime.passes.analysis import CalibrationAnalysis, IndexMappingAnalysis
+from qat.runtime.passes.legacy.analysis import CalibrationAnalysis, IndexMappingAnalysis
 from qat.runtime.passes.transform import ErrorMitigation, ResultTransform
 
 

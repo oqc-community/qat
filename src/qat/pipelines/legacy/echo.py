@@ -20,7 +20,7 @@ from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import get_results_pipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.legacy import LegacyRuntime
-from qat.runtime.passes.analysis import CalibrationAnalysis
+from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
 
 
 def get_middleend_pipeline(

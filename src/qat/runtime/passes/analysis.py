@@ -1,43 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
-import re
-from dataclasses import dataclass, field
-from typing import Dict, List, Union
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from compiler_config.config import CompilerConfig
+import re
+from dataclasses import dataclass
+from typing import Union
 
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.purr.backends.calibrations.remote import find_calibration
-from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import Acquire
-from qat.purr.compiler.runtime import CalibrationWithArgs
+from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.measure import Acquire
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.runtime.executables import Executable
 
 
 @dataclass
-class CalibrationAnalysisResult(ResultInfoMixin):
-    calibration_executables: List[CalibrationWithArgs] = field(default_factory=list)
-
-
-class CalibrationAnalysis(AnalysisPass):
-    def run(
-        self,
-        ir: InstructionBuilder,
-        res_mgr: ResultManager,
-        *args,
-        compiler_config: CompilerConfig,
-        **kwargs,
-    ):
-        cal_blocks = [find_calibration(arg) for arg in compiler_config.active_calibrations]
-        res_mgr.add(CalibrationAnalysisResult(cal_blocks))
-        return ir
-
-
-@dataclass
 class IndexMappingResult(ResultInfoMixin):
-    mapping: Dict[str, int]
+    mapping: dict[str, int]
 
 
 class IndexMappingAnalysis(AnalysisPass):
@@ -49,19 +27,28 @@ class IndexMappingAnalysis(AnalysisPass):
     Supports both :class:`Executable` packages and :class:`InstructionBuilder`.
     """
 
-    def __init__(self, model: QuantumHardwareModel):
-        """:param model: The hardware model is needed for the qubit mapping."""
+    def __init__(self, model: PhysicalHardwareModel):
+        """:param model: The hardware model that is needed for the qubit mapping."""
         # TODO: searching for classical registers feels a little shaky. Guessing there are
         # changes to make at a higher level to faciliate improvements here.
-        # TODO: support with pydantic instructions and hardware.
         # TODO: should the output_variable -> qubit mapping be separate from the classical
         # register extraction? The former might be useful for a compiliation analysis pass.
         # Only used here right now, so let's worry about this later.
         self.model = model
+        pulse_to_phys_channel_map: dict[str, str] = {}
+        for qubit in self.model.qubits.values():
+            for pulse_ch in qubit.all_pulse_channels:
+                pulse_to_phys_channel_map[pulse_ch.uuid] = qubit.physical_channel.uuid
+
+            for pulse_ch in qubit.resonator.all_pulse_channels:
+                pulse_to_phys_channel_map[pulse_ch.uuid] = (
+                    qubit.resonator.physical_channel.uuid
+                )
+        self.pulse_to_phys_channel_map = pulse_to_phys_channel_map
 
     def run(
         self,
-        acquisitions: Dict[str, any],
+        acquisitions: dict[str, any],
         res_mgr: ResultManager,
         *args,
         package: Union[InstructionBuilder, Executable],
@@ -75,12 +62,12 @@ class IndexMappingAnalysis(AnalysisPass):
         """
         # Determine a mapping from output variable - > qubit index.
         if isinstance(package, Executable):
-            var_to_channel_map = self.var_to_physical_channel_executable(package)
+            var_to_phys_channel_map = self.var_to_physical_channel_executable(package)
         else:
-            var_to_channel_map = self.var_to_physical_channel_qat_ir(package)
-        var_to_qubit_map = self.var_to_qubit_map(var_to_channel_map)
+            var_to_phys_channel_map = self.var_to_physical_channel_qat_ir(package)
+        var_to_qubit_map = self.var_to_qubit_map(var_to_phys_channel_map)
 
-        # Search for classical registers defined in e.g. QASM
+        # Search for classical registers defined in e.g. QASM.
         pattern = re.compile(r"(.*)\[([0-9]+)\]")
         for var in list(var_to_qubit_map.keys()):
             result = pattern.match(var)
@@ -91,34 +78,39 @@ class IndexMappingAnalysis(AnalysisPass):
         return acquisitions
 
     @staticmethod
-    def var_to_physical_channel_executable(package: Executable) -> Dict[str, str]:
-        mapping: Dict[str, str] = {}
+    def var_to_physical_channel_executable(package: Executable) -> dict[str, str]:
+        mapping: dict[str, str] = {}
         for channel_id, channel_data in package.channel_data.items():
             for acquire in channel_data.acquires:
                 mapping[acquire.output_variable] = channel_id
         return mapping
 
-    @staticmethod
-    def var_to_physical_channel_qat_ir(package: InstructionBuilder) -> Dict[str, str]:
-        mapping: Dict[str, str] = {}
+    def var_to_physical_channel_qat_ir(self, package: InstructionBuilder) -> dict[str, str]:
+        mapping: dict[str, str] = {}
         for instruction in package.instructions:
-            if not isinstance(instruction, Acquire):
-                continue
-            mapping[instruction.output_variable] = instruction.channel.physical_channel_id
+            if isinstance(instruction, Acquire):
+                mapping[instruction.output_variable] = self.pulse_to_phys_channel_map[
+                    instruction.target
+                ]
         return mapping
 
-    def var_to_qubit_map(self, mapping: Dict[str, str]):
-        chan_to_qubit_map: Dict[str, int] = {}
-        for chan in set(mapping.values()):
-            qubits = [
-                qubit
-                for qubit in self.model.qubits
-                if qubit.get_acquire_channel().physical_channel_id == chan
+    def var_to_qubit_map(self, mapping: dict[str, str]):
+        """
+        Maps the variables in the mapping to qubit indices.
+        """
+
+        var_to_qubit_map: dict[str, int] = {}
+        for var, phys_ch_id in mapping.items():
+            acquired_qubits = [
+                idx
+                for idx, qubit in self.model.qubits.items()
+                if qubit.resonator.physical_channel.uuid == phys_ch_id
             ]
 
-            if len(qubits) == 0:
-                raise ValueError(f"Could not find any qubits with acquire channel {chan}.")
-            chan_to_qubit_map[chan] = qubits[0].index
+            if len(acquired_qubits) == 0:
+                raise ValueError(
+                    f"Could not find any qubits with acquire channel {phys_ch_id}."
+                )
+            var_to_qubit_map[var] = acquired_qubits[0]
 
-        var_to_qubit_map = {var: chan_to_qubit_map[chan] for var, chan in mapping.items()}
         return var_to_qubit_map

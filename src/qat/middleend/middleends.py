@@ -50,7 +50,7 @@ from qat.middleend.passes.validation import (
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.passes.analysis import CalibrationAnalysis
+from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
 
 
 class BaseMiddleend(abc.ABC):
