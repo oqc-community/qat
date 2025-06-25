@@ -22,6 +22,7 @@ import qat.pipelines.echo
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
+from qat.backend.waveform_v1.executable import WaveformV1Executable
 from qat.core.config.configure import get_config
 from qat.core.config.descriptions import (
     HardwareLoaderDescription,
@@ -921,8 +922,10 @@ class TestExperimentalEchoPipelines:
     def test_serialised_executable(self, program_file, pipeline):
         """Test that the executable can be serialized and deserialized."""
         package, _ = self.core.compile(
-            str(program_file), self.config, pipeline=pipeline, to_json=True
+            str(program_file), self.config, pipeline=pipeline, to_json=False
         )
-        assert isinstance(package, str)
+        json_blob = package.serialize()
+        package2 = WaveformV1Executable.deserialize(json_blob)
+        assert package == package2
         results, _ = self.core.execute(package, self.config, pipeline=pipeline)
         assert isinstance(results, dict)

@@ -137,6 +137,20 @@ class TestAssign:
             Assign(name="test", value=("test1", 2)),
             Assign(name="test", value=[("test1", 1), ("test1", 2)]),
             Assign(name="test", value=[("test1", 1), ("test2", 2), "test3"]),
+            Assign(
+                name="test",
+                value=[
+                    Variable(name="var1", value=42),
+                    Variable(name="var2", value=3.14),
+                    [
+                        Variable(name="var3", value=2.54),
+                        [
+                            Variable(name="var4", value=1.618),
+                            Variable(name="var5", value=0.577),
+                        ],
+                    ],
+                ],
+            ),
         ],
     )
     def test_serialization_round_trip(self, inst):

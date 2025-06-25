@@ -18,6 +18,7 @@ from pydantic import (
     field_serializer,
     field_validator,
 )
+from typing_extensions import TypeAliasType
 
 from qat.purr.compiler.instructions import BinaryOperator as LegacyBinaryOperator
 from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
@@ -257,53 +258,6 @@ class Jump(Instruction):
             return f"jump -> {str(self.target)}"
 
 
-class Assign(Instruction):
-    """
-    Assigns a value to a variable.
-
-    This is used to assign some value (e.g. the results from an acquisition) to a variable.
-    In the legacy instructions, `Assign` could be given a `Variable` that declares the value
-    as another variable. It could also be given more complex structures, should as a list of
-    `Variables`, or an `IndexAccessor`. For example, this could be used to assign each of the
-    qubit acquisitions to a single register,
-
-    ```
-        c = [
-            Qubit 1 measurements,
-            Qubit 2 measurements,
-            ...
-        ]
-    ```
-
-    In general, declarations and allocations could be improved in future iterations, and
-    functionality may change with improvements to the front end. For now, `Assign` has been
-    adapted to support the required front end behaviour. The value is allowed to be a list
-    (with recurssions supported) of strings that declare what Variable to point to, or a tuple
-    for `IndexAccessor`.
-    """
-
-    # set as any for now... not sure what the restrictions would be here
-    name: str
-    value: Any
-
-    @classmethod
-    def _from_legacy(cls, legacy_assign):
-        # private as we dont want to support this in the long-term
-
-        def recursively_strip(value):
-            if isinstance(value, list):
-                return [recursively_strip(val) for val in value]
-            elif isinstance(value, LegacyIndexAccessor):
-                return (value.name, value.index)
-            elif isinstance(value, LegacyVariable):
-                return value.name
-            elif isinstance(value, LegacyBinaryOperator):
-                return str(value).replace("variable ", "")
-            return value
-
-        return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
-
-
 class LoopCount(int): ...
 
 
@@ -351,6 +305,61 @@ class Plus(BinaryOperator):
     # TODO: Improve operators in Pydantic version
     def __repr__(self):
         return f"{str(self.left)} + {str(self.right)}"
+
+
+AssignTypes = int | float | str | Variable | BinaryOperator
+RecursiveAssignTypes = TypeAliasType(
+    "ResursiveAssignTypes", "AssignTypes | list[RecursiveAssignTypes]"
+)
+
+
+class Assign(Instruction):
+    """
+    Assigns a value to a variable.
+
+    This is used to assign some value (e.g. the results from an acquisition) to a variable.
+    In the legacy instructions, `Assign` could be given a `Variable` that declares the value
+    as another variable. It could also be given more complex structures, should as a list of
+    `Variables`, or an `IndexAccessor`. For example, this could be used to assign each of the
+    qubit acquisitions to a single register,
+
+    ```
+        c = [
+            Qubit 1 measurements,
+            Qubit 2 measurements,
+            ...
+        ]
+    ```
+
+    In general, declarations and allocations could be improved in future iterations, and
+    functionality may change with improvements to the front end. For now, `Assign` has been
+    adapted to support the required front end behaviour. The value is allowed to be a list
+    (with recurssions supported) of strings that declare what Variable to point to, or a tuple
+    for `IndexAccessor`.
+    """
+
+    name: str
+    value: RecursiveAssignTypes
+
+    @classmethod
+    def _from_legacy(cls, legacy_assign):
+        # private as we dont want to support this in the long-term
+
+        def recursively_strip(value):
+            if isinstance(value, list):
+                return [recursively_strip(val) for val in value]
+            elif isinstance(value, LegacyIndexAccessor):
+                return (value.name, value.index)
+            elif isinstance(value, LegacyVariable):
+                return value.name
+            elif isinstance(value, LegacyBinaryOperator):
+                return str(value).replace("variable ", "")
+            return value
+
+        return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
+
+    def __repr__(self):
+        return f"assign {self.name} = {str(self.value)}"
 
 
 ### Quantum Instructions

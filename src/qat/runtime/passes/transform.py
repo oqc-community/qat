@@ -12,6 +12,7 @@ from compiler_config.config import (
 
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
+from qat.ir.instructions import Variable
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -106,14 +107,13 @@ class AssignResultsTransform(TransformPass):
     Extracted from :meth:`purr.compiler.execution.QuantumExecutionEngine._process_assigns`.
     """
 
-    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
+    def run(self, acquisitions: dict[str, any], *args, package: Executable, **kwargs):
         """
         :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.
         """
 
-        # TODO: refactor
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
             if isinstance(value, List):
@@ -122,6 +122,8 @@ class AssignResultsTransform(TransformPass):
                 return results_map[value[0]][value[1]]
             elif isinstance(value, str):
                 return results_map[value]
+            elif isinstance(value, Variable):
+                return results_map[value.name]
             else:
                 return value
 

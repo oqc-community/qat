@@ -3,6 +3,8 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat.ir.instructions import Assign as PydAssign
+from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import PostProcessing
 from qat.purr.compiler.instructions import (
     AcquireMode,
@@ -118,3 +120,64 @@ class TestAssignResultsTransform:
         results = AssignResultsTransform().run(results, package=package)
         assert "q0" in results
         assert "q1" not in results
+
+    def test_assigns_with_variables(self):
+        results = {
+            "q0": np.asarray([1] * 100),
+            "q1": np.asarray([2] * 100),
+            "q2": np.asarray([3] * 100),
+        }
+        package = ChannelExecutable(
+            returns=set(["c"]),
+            assigns=[
+                PydAssign(
+                    name="c",
+                    value=[
+                        PydVariable(name="q0"),
+                        PydVariable(name="q1"),
+                        [PydVariable(name="q2")],
+                    ],
+                )
+            ],
+            channel_data={
+                "CH1": ChannelData(
+                    acquires=AcquireData(
+                        output_variable="q0",
+                        length=100,
+                        position=0,
+                        mode=AcquireMode.INTEGRATOR,
+                    )
+                ),
+                "CH2": ChannelData(
+                    acquires=AcquireData(
+                        output_variable="q1",
+                        length=100,
+                        position=0,
+                        mode=AcquireMode.INTEGRATOR,
+                    )
+                ),
+                "CH3": ChannelData(
+                    acquires=AcquireData(
+                        output_variable="q2",
+                        length=100,
+                        position=0,
+                        mode=AcquireMode.INTEGRATOR,
+                    )
+                ),
+            },
+        )
+        results = AssignResultsTransform().run(results, package=package)
+        assert len(results) == 1
+        assert "c" in results
+        results = results["c"]
+        assert len(results) == 3
+        assert isinstance(results[0], np.ndarray)
+        assert np.allclose(results[0], 1)
+        assert len(results[0]) == 100
+        assert isinstance(results[1], np.ndarray)
+        assert np.allclose(results[1], 2)
+        assert len(results[1]) == 100
+        assert isinstance(results[2], list)
+        assert isinstance(results[2][0], np.ndarray)
+        assert np.allclose(results[2][0], 3)
+        assert len(results[2][0]) == 100
