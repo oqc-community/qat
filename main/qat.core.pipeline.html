@@ -90,6 +90,11 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.core.pipeline module</a></li>
@@ -216,9 +221,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -318,6 +326,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
 </ul>
@@ -388,83 +397,21 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.get_loader">
+<span class="sig-name descname"><span class="pre">get_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.get_loader" title="Link to this definition"></a></dt>
+<dd><p>Returns a hardware model loader by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.loaders.base.html#qat.model.loaders.base.BaseModelLoader" title="qat.model.loaders.base.BaseModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModelLoader</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.load">
 <span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders.load" title="Link to this definition"></a></dt>
 <dd><p>Loads a hardware model, using the internal cache unless <cite>allow_cache=False</cite>.</p>
 </dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.Pipeline" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Pipeline that compiles high-level language specific, but target-agnostic, input (QASM, QIR, …)
-to target-specific instructions that are executed on our hardware.
-:param _sphinx_paramlinks_qat.core.pipeline.Pipeline.frontend: Compiles a high-level language-specific, but target-agnostic,</p>
-<blockquote>
-<div><p>input <code class="xref py py-class docutils literal notranslate"><span class="pre">QatInput</span></code> to a target-agnostic intermediate representation (IR)
-<code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.core.pipeline.Pipeline.params.middleend"></span><strong>middleend</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.Pipeline.params.middleend">¶</a> – Takes an intermediate representation (IR) <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> and alters it based
-on optimisation and/or validation passes within this pipeline.</p></li>
-<li><p><span class="target" id="qat.core.pipeline.Pipeline.params.backend"></span><strong>backend</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.Pipeline.params.backend">¶</a> – Converts an intermediate representation (IR) to code for a given target machine.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.backend">
-<span class="sig-name descname"><span class="pre">backend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBackend</span></code></a></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.backend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.consistent_model">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">consistent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.Pipeline.consistent_model" title="Link to this definition"></a></dt>
-<dd><p>Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.from_description">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.Pipeline.from_description" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.frontend">
-<span class="sig-name descname"><span class="pre">frontend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend" title="qat.frontend.base.BaseFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseFrontend</span></code></a></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.frontend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.middleend">
-<span class="sig-name descname"><span class="pre">middleend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend" title="qat.middleend.middleends.BaseMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMiddleend</span></code></a></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.middleend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.model">
-<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.model" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True,</span> <span class="pre">'frozen':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.core.pipeline.Pipeline.runtime">
-<span class="sig-name descname"><span class="pre">runtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.runtime.base.html#qat.runtime.base.BaseRuntime" title="qat.runtime.base.BaseRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></em><a class="headerlink" href="#qat.core.pipeline.Pipeline.runtime" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -479,7 +426,7 @@ validated to form a valid model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.core.pipeline.PipelineSet.add.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.add.params.pipeline">¶</a> (<a class="reference internal" href="#qat.core.pipeline.Pipeline" title="qat.core.pipeline.Pipeline"><em>Pipeline</em></a>) – A pipeline instance to add, indexed by pipeline.name</p></li>
+<li><p><span class="target" id="qat.core.pipeline.PipelineSet.add.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.add.params.pipeline">¶</a> (<a class="reference internal" href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline" title="qat.pipelines.base.AbstractPipeline"><em>AbstractPipeline</em></a>) – A pipeline instance to add, indexed by pipeline.name</p></li>
 <li><p><span class="target" id="qat.core.pipeline.PipelineSet.add.params.default"></span><strong>default</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.add.params.default">¶</a> (<em>bool</em><em>, </em><em>optional</em>) – Set the added pipeline as the default, defaults to False</p></li>
 </ul>
 </dd>
@@ -503,7 +450,7 @@ validated to form a valid model.</p>
 <dd><p>Gets a stored pipeline by name (str) or passes through a pipeline instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.core.pipeline.PipelineSet.get.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.get.params.pipeline">¶</a> (<a class="reference internal" href="#qat.core.pipeline.Pipeline" title="qat.core.pipeline.Pipeline"><em>Pipeline</em></a><em> | </em><em>str</em>) – A pipeline instance or the string name of a stored pipeline</p>
+<dd class="field-odd"><p><span class="target" id="qat.core.pipeline.PipelineSet.get.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.get.params.pipeline">¶</a> (<a class="reference internal" href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline" title="qat.pipelines.base.AbstractPipeline"><em>AbstractPipeline</em></a><em> | </em><em>str</em>) – A pipeline instance or the string name of a stored pipeline</p>
 </dd>
 </dl>
 </dd></dl>
@@ -525,7 +472,7 @@ validated to form a valid model.</p>
 <dd><p>Remove a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.core.pipeline.PipelineSet.remove.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.remove.params.pipeline">¶</a> (<a class="reference internal" href="#qat.core.pipeline.Pipeline" title="qat.core.pipeline.Pipeline"><em>Pipeline</em></a><em> | </em><em>str</em>) – The name of a pipeline or a pipeline instance to remove</p>
+<dd class="field-odd"><p><span class="target" id="qat.core.pipeline.PipelineSet.remove.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.pipeline.PipelineSet.remove.params.pipeline">¶</a> (<a class="reference internal" href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline" title="qat.pipelines.base.AbstractPipeline"><em>AbstractPipeline</em></a><em> | </em><em>str</em>) – The name of a pipeline or a pipeline instance to remove</p>
 </dd>
 </dl>
 </dd></dl>

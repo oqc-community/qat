@@ -90,6 +90,11 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
@@ -216,9 +221,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -318,6 +326,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
 </ul>
@@ -413,6 +422,17 @@ validated to form a valid model.</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.model.target_data.DefaultTargetData">
+<span class="sig-name descname"><span class="pre">DefaultTargetData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DefaultTargetData" title="Link to this definition"></a></dt>
+<dd><p>Returns a default TargetData instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.target_data.DeviceDescription">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.DeviceDescription" title="Link to this definition"></a></dt>
@@ -427,19 +447,11 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.waveform_memory_size"></span><strong>waveform_memory_size</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.waveform_memory_size">¶</a> – The max. memory that can be used for waveforms, in clock cycles.</p></li>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_duration_min"></span><strong>pulse_duration_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_duration_min">¶</a> – The minimal pulse duration for all pulse channels.</p></li>
 <li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_duration_max"></span><strong>pulse_duration_max</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_duration_max">¶</a> – The maximal pulse duration for all pulse channels.</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_channel_lo_freq_min"></span><strong>pulse_channel_lo_freq_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_channel_lo_freq_min">¶</a> – The minimal LO frequency for a pulse channel.</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_channel_lo_freq_max"></span><strong>pulse_channel_lo_freq_max</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_channel_lo_freq_max">¶</a> – The maximal LO frequency for a pulse channel.</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_channel_if_freq_min"></span><strong>pulse_channel_if_freq_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_channel_if_freq_min">¶</a> – The minimal intermediate frequency for a pulse channel.</p></li>
+<li><p><span class="target" id="qat.model.target_data.DeviceDescription.params.pulse_channel_if_freq_max"></span><strong>pulse_channel_if_freq_max</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.DeviceDescription.params.pulse_channel_if_freq_max">¶</a> – The maximal intermediate frequency for a pulse channel.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Pulse_channel_lo_freq_min<span class="colon">:</span></dt>
-<dd class="field-even"><p>The minimal LO frequency for a pulse channel.</p>
-</dd>
-<dt class="field-odd">Pulse_channel_lo_freq_max<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The maximal LO frequency for a pulse channel.</p>
-</dd>
-<dt class="field-even">Pulse_channel_if_freq_min<span class="colon">:</span></dt>
-<dd class="field-even"><p>The minimal intermediate frequency for a pulse channel.</p>
-</dd>
-<dt class="field-odd">Pulse_channel_if_freq_max<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The maximal intermediate frequency for a pulse channel.</p>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -605,7 +617,12 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.default">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.default" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.instruction_memory_size">
@@ -621,7 +638,12 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.random">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.random" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.validate_clock_cycles">

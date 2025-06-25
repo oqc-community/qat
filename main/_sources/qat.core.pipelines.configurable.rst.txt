@@ -1,0 +1,7 @@
+qat.core.pipelines.configurable module
+======================================
+
+.. automodule:: qat.core.pipelines.configurable
+   :members:
+   :undoc-members:
+   :show-inheritance:

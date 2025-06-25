@@ -90,6 +90,11 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
@@ -216,9 +221,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -318,6 +326,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
 </ul>
@@ -374,68 +383,55 @@
 
   <section id="module-qat.pipelines.legacy.qiskit">
 <span id="qat-pipelines-legacy-qiskit-module"></span><h1>qat.pipelines.legacy.qiskit module<a class="headerlink" href="#module-qat.pipelines.legacy.qiskit" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline">
-<span class="sig-name descname"><span class="pre">get_middleend_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline" title="Link to this definition"></a></dt>
-<dd><p>A factory for creating middleend pipelines for legacy qiskit models.</p>
-<p>Includes a list of passes that replicate the responsibilities of
-<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.validate" title="qat.purr.backends.qiskit_simulator.QiskitEngine.validate"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine.validate</span></code></a>
-and
-<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine.optimize" title="qat.purr.backends.qiskit_simulator.QiskitEngine.optimize"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine.optimize</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LegacyQiskitPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline" title="qat.pipelines.updateable.UpdateablePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipeline</span></code></a></p>
+<p>A pipeline that executes programs using the <code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine</span></code> and the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyRuntime</span></code>.</p>
+<p>Implements a custom pipeline to make instructions suitable for the legacy Qiskit engine,
+and has a custom post-processing pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model is required for validation.</p></li>
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_middleend_pipeline.params.engine">¶</a> – The echo engine is required to perform validation.</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.config"></span><strong>config</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.config">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.pipelines.updateable.html#qat.pipelines.updateable.PipelineConfig" title="qat.pipelines.updateable.PipelineConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineConfig</span></code></a></span>) – The pipeline configuration with the name of the pipeline, and any
+additional parameters that can be configured in the pipeline.</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a>, <a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – The hardware model to feed into the pipeline, cannot be used
+simultaneously with loader, defaults to None.</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.loader"></span><strong>loader</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.loader">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.model.loaders.base.html#qat.model.loaders.base.BaseModelLoader" title="qat.model.loaders.base.BaseModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModelLoader</span></code></a>]</span>) – The hardware loader used to load the hardware model which can be used
+to later refresh the hardware model. Cannot be used simultaneously with the
+model, defaults to None.</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.target_data"></span><strong>target_data</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.target_data">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.model.target_data.html#qat.model.target_data.TargetData" title="qat.model.target_data.TargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></a>]</span>) – The data concerning the target device, defaults to None</p></li>
+<li><p><span class="target" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.engine"></span><strong>engine</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline.params.engine">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a>]</span>) – The engine to use for the pipeline, defaults to None.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The pipeline as a pass manager.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If neither model nor loader is provided, or if both are
+provided.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_pipeline">
-<span class="sig-name descname"><span class="pre">get_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'legacy_qiskit'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_pipeline" title="Link to this definition"></a></dt>
-<dd><p>Create a default pipeline using the legacy Qiskit backend.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The Qiskit hardware model</p></li>
-<li><p><span class="target" id="qat.pipelines.legacy.qiskit.get_pipeline.params.name"></span><strong>name</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_pipeline.params.name">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The name of the pipeline, defaults to “legacy”</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pipeline.html#qat.core.pipeline.Pipeline" title="qat.core.pipeline.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The complete pipeline.</p>
-</dd>
-</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LegacyQiskitPipelineConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.pipelines.updateable.html#qat.pipelines.updateable.PipelineConfig" title="qat.pipelines.updateable.PipelineConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineConfig</span></code></a></p>
+<p>Configuration for the <a class="reference internal" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline" title="qat.pipelines.legacy.qiskit.LegacyQiskitPipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyQiskitPipeline</span></code></a>.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.get_results_pipeline">
-<span class="sig-name descname"><span class="pre">get_results_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.qiskit.get_results_pipeline" title="Link to this definition"></a></dt>
-<dd><p>A factory for creating results pipelines for the <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyRuntime</span></code> to execute
-with the legacy <a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine" title="qat.purr.backends.qiskit_simulator.QiskitEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine</span></code></a>.</p>
-<p>Contains passes that carry out the responibilities in the legacy
-<a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitRuntime" title="qat.purr.backends.qiskit_simulator.QiskitRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitRuntime</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.pipelines.legacy.qiskit.get_results_pipeline.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.legacy.qiskit.get_results_pipeline.params.model">¶</a> – The hardware model.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A pipeline containing the runtime passes.</p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>

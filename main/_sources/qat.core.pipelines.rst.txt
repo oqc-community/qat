@@ -1,0 +1,16 @@
+qat.core.pipelines package
+==========================
+
+.. automodule:: qat.core.pipelines
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.core.pipelines.configurable
+   qat.core.pipelines.factory

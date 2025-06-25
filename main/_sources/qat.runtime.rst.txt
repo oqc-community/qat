@@ -25,5 +25,6 @@ Submodules
    qat.runtime.executables
    qat.runtime.legacy
    qat.runtime.post_processing
+   qat.runtime.results_pipeline
    qat.runtime.results_processing
    qat.runtime.simple

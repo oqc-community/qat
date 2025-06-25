@@ -1,0 +1,7 @@
+qat.core.pipelines.factory module
+=================================
+
+.. automodule:: qat.core.pipelines.factory
+   :members:
+   :undoc-members:
+   :show-inheritance:

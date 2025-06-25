@@ -1,0 +1,7 @@
+qat.pipelines.updateable module
+===============================
+
+.. automodule:: qat.pipelines.updateable
+   :members:
+   :undoc-members:
+   :show-inheritance:

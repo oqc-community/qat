@@ -20,6 +20,9 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.pipelines.base
    qat.pipelines.echo
+   qat.pipelines.pipeline
    qat.pipelines.qiskit
    qat.pipelines.rtcs
+   qat.pipelines.updateable

@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.core.config
+   qat.core.pipelines
 
 Submodules
 ----------

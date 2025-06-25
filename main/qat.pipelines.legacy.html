@@ -90,6 +90,11 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
@@ -216,9 +221,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
@@ -318,6 +326,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
 </ul>
@@ -378,23 +387,42 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qat.pipelines.legacy.base.html">qat.pipelines.legacy.base module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_middleend_pipeline"><code class="docutils literal notranslate"><span class="pre">get_middleend_pipeline()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_pipeline"><code class="docutils literal notranslate"><span class="pre">get_pipeline()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.get_results_pipeline"><code class="docutils literal notranslate"><span class="pre">get_results_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.LegacyPipeline"><code class="docutils literal notranslate"><span class="pre">LegacyPipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.LegacyPipelineConfig"><code class="docutils literal notranslate"><span class="pre">LegacyPipelineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.LegacyPipelineConfig.connection_mode"><code class="docutils literal notranslate"><span class="pre">LegacyPipelineConfig.connection_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.LegacyPipelineConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LegacyPipelineConfig.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.LegacyPipelineConfig.name"><code class="docutils literal notranslate"><span class="pre">LegacyPipelineConfig.name</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_middleend_pipeline"><code class="docutils literal notranslate"><span class="pre">get_middleend_pipeline()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_pipeline"><code class="docutils literal notranslate"><span class="pre">get_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.LegacyEchoPipeline"><code class="docutils literal notranslate"><span class="pre">LegacyEchoPipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.LegacyEchoPipelineConfig"><code class="docutils literal notranslate"><span class="pre">LegacyEchoPipelineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.LegacyEchoPipelineConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LegacyEchoPipelineConfig.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.LegacyEchoPipelineConfig.name"><code class="docutils literal notranslate"><span class="pre">LegacyEchoPipelineConfig.name</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_middleend_pipeline"><code class="docutils literal notranslate"><span class="pre">get_middleend_pipeline()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_pipeline"><code class="docutils literal notranslate"><span class="pre">get_pipeline()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_results_pipeline"><code class="docutils literal notranslate"><span class="pre">get_results_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.LegacyQiskitPipeline"><code class="docutils literal notranslate"><span class="pre">LegacyQiskitPipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig"><code class="docutils literal notranslate"><span class="pre">LegacyQiskitPipelineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LegacyQiskitPipelineConfig.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.LegacyQiskitPipelineConfig.name"><code class="docutils literal notranslate"><span class="pre">LegacyQiskitPipelineConfig.name</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html#qat.pipelines.legacy.rtcs.LegacyRTCSPipeline"><code class="docutils literal notranslate"><span class="pre">LegacyRTCSPipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html#qat.pipelines.legacy.rtcs.LegacyRTCSPipelineConfig"><code class="docutils literal notranslate"><span class="pre">LegacyRTCSPipelineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html#qat.pipelines.legacy.rtcs.LegacyRTCSPipelineConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LegacyRTCSPipelineConfig.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html#qat.pipelines.legacy.rtcs.LegacyRTCSPipelineConfig.name"><code class="docutils literal notranslate"><span class="pre">LegacyRTCSPipelineConfig.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
