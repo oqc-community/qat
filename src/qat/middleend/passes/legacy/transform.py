@@ -26,6 +26,7 @@ from qat.purr.compiler.instructions import (
     Assign,
     CustomPulse,
     Delay,
+    DeviceUpdate,
     EndRepeat,
     EndSweep,
     GreaterThan,
@@ -1298,4 +1299,66 @@ class ScopeSanitisation(TransformPass):
         ]
 
         ir.instructions = head + tail + delimiters[::-1]
+        return ir
+
+
+class DeviceUpdateSanitisation(TransformPass):
+    """
+    Duplicate DeviceUpdate instructions upsets the device injection mechanism, which causes corruption
+    of the HW model.
+
+    In fact, a DeviceInjector is currently 1-1 associated with a DeviceUpdate instruction. When multiple
+    DeviceUpdate instructions (sequentially) inject the same "target", the first DeviceInjector assigns the
+    (correct) value of the attribute (on the target) to the revert_value. At this point the HW model (or any
+    other target kind) is dirty, and any subsequent DeviceInjector updater would surely assign
+    the (wrong, usually a placeholder `Variable`) to its revert_value. This results in a corrupt HW model whereby
+    reversion wouldn't have the desired effect.
+
+    This pass is a (lazy) fix, which is to analyse when such cases happen and eliminate duplicate DeviceUpdate
+    instructions that target THE SAME "attribute" on THE SAME "target" with THE SAME variable.
+    """
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        target_attr2value = defaultdict(list)
+        for inst in ir.instructions:
+            if isinstance(inst, DeviceUpdate):
+                # target already validated to be a QuantumComponent during initialisation
+                if not hasattr(inst.target, inst.attribute):
+                    raise ValueError(
+                        f"Attempting to assign {inst.value} to non existing attribute {inst.attribute}"
+                    )
+
+                if isinstance(inst.value, Variable):
+                    target_attr2value[(inst.target, inst.attribute)].append(inst.value)
+
+        for (target, attr), values in target_attr2value.items():
+            if len(values) > 1:
+                log.warning(
+                    f"Multiple DeviceUpdate instructions attempting to update the same attribute '{attr}' on {target}"
+                )
+
+            unique_values = set(values)
+            if len(unique_values) > 1:
+                raise ValueError(
+                    f"Cannot update the same attribute '{attr}' on {target} with distinct values {unique_values}"
+                )
+
+        new_instructions = []
+        for inst in ir.instructions:
+            if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
+                if next(iter(target_attr2value[(inst.target, inst.attribute)]), None):
+                    target_attr2value[(inst.target, inst.attribute)].clear()
+                    new_instructions.append(inst)
+            else:
+                new_instructions.append(inst)
+
+        ir.instructions = new_instructions
+
         return ir
