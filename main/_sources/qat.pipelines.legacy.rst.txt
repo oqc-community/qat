@@ -14,5 +14,6 @@ Submodules
 
    qat.pipelines.legacy.base
    qat.pipelines.legacy.echo
+   qat.pipelines.legacy.qblox
    qat.pipelines.legacy.qiskit
    qat.pipelines.legacy.rtcs

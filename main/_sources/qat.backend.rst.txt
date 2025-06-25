@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.backend.passes
+   qat.backend.qblox
    qat.backend.waveform_v1
 
 Submodules

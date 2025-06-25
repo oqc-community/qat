@@ -1,0 +1,7 @@
+qat.backend.qblox.data.acquisition module
+=========================================
+
+.. automodule:: qat.backend.qblox.data.acquisition
+   :members:
+   :undoc-members:
+   :show-inheritance:

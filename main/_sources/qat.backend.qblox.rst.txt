@@ -1,0 +1,26 @@
+qat.backend.qblox package
+=========================
+
+.. automodule:: qat.backend.qblox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.qblox.data
+   qat.backend.qblox.passes
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.qblox.codegen
+   qat.backend.qblox.config
+   qat.backend.qblox.ir

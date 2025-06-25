@@ -1,0 +1,7 @@
+qat.backend.qblox.codegen module
+================================
+
+.. automodule:: qat.backend.qblox.codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

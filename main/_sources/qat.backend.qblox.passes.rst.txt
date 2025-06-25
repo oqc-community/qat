@@ -1,0 +1,15 @@
+qat.backend.qblox.passes package
+================================
+
+.. automodule:: qat.backend.qblox.passes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.qblox.passes.analysis

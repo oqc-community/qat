@@ -1,0 +1,7 @@
+qat.backend.qblox.ir module
+===========================
+
+.. automodule:: qat.backend.qblox.ir
+   :members:
+   :undoc-members:
+   :show-inheritance:
