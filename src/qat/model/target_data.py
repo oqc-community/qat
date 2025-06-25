@@ -21,10 +21,10 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
     :param waveform_memory_size: The max. memory that can be used for waveforms, in clock cycles.
     :param pulse_duration_min: The minimal pulse duration for all pulse channels.
     :param pulse_duration_max: The maximal pulse duration for all pulse channels.
-    :pulse_channel_lo_freq_min: The minimal LO frequency for a pulse channel.
-    :pulse_channel_lo_freq_max: The maximal LO frequency for a pulse channel.
-    :pulse_channel_if_freq_min: The minimal intermediate frequency for a pulse channel.
-    :pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse channel.
+    :param pulse_channel_lo_freq_min: The minimal LO frequency for a pulse channel.
+    :param pulse_channel_lo_freq_max: The maximal LO frequency for a pulse channel.
+    :param pulse_channel_if_freq_min: The minimal intermediate frequency for a pulse channel.
+    :param pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse channel.
     """
 
     sample_time: PositiveFloat
@@ -169,7 +169,7 @@ class TargetData(AbstractTargetData):
         return self
 
     @classmethod
-    def random(cls, seed: int = 42):
+    def random(cls, seed: int = 42) -> "TargetData":
         return cls(
             max_shots=random.Random(seed).randint(200, 1000),
             default_shots=random.Random(seed).randint(1, 100),
@@ -178,7 +178,7 @@ class TargetData(AbstractTargetData):
         )
 
     @classmethod
-    def default(cls):
+    def default(cls) -> "TargetData":
         return TargetData(
             max_shots=10_000,
             default_shots=1_000,
@@ -208,3 +208,8 @@ class TargetData(AbstractTargetData):
                 pulse_channel_if_freq_max=1e10,
             ),
         )
+
+
+def DefaultTargetData() -> TargetData:
+    """Returns a default TargetData instance."""
+    return TargetData.default()

@@ -4,8 +4,8 @@ from compiler_config.config import CompilerConfig as CompilerConfig
 
 from qat.core.config.configure import get_config
 from qat.core.config.session import QatSessionConfig as QatSessionConfig
-from qat.core.pipeline import Pipeline as Pipeline
 from qat.core.qat import QAT as QAT
+from qat.pipelines.pipeline import Pipeline as Pipeline
 from qat.purr.qat import execute as execute
 from qat.purr.qat import execute_qasm as execute_qasm
 from qat.purr.qat import execute_qasm_with_metrics as execute_qasm_with_metrics

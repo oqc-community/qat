@@ -7,13 +7,13 @@ from qat.core.config.configure import get_config, override_config
 from qat.core.config.session import QatSessionConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
-from qat.core.pipeline import Pipeline
 from qat.core.qat import QAT
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.engines.waveform_v1.echo import EchoEngine
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.model.loaders.legacy.echo import EchoModelLoader
+from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction
 from qat.runtime.simple import SimpleRuntime

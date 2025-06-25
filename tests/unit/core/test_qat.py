@@ -18,7 +18,6 @@ from compiler_config.config import (
 )
 from pydantic import ValidationError
 
-import qat.pipelines.echo
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
@@ -26,13 +25,12 @@ from qat.backend.waveform_v1.executable import WaveformV1Executable
 from qat.core.config.configure import get_config
 from qat.core.config.descriptions import (
     HardwareLoaderDescription,
-    PipelineFactoryDescription,
     PipelineInstanceDescription,
+    UpdateablePipelineDescription,
 )
 from qat.core.config.session import QatSessionConfig
 from qat.core.config.validators import MismatchingHardwareModelException
 from qat.core.pass_base import PassManager
-from qat.core.pipeline import Pipeline
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
@@ -40,9 +38,9 @@ from qat.ir.instructions import Variable as PydVariable
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
-from qat.pipelines.echo import get_experimental_pipeline as get_experimental_echo_pipeline
-from qat.pipelines.echo import get_pipeline as get_echo_pipeline
-from qat.pipelines.legacy.echo import get_pipeline as get_legacy_echo_pipeline
+from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig, ExperimentalEchoPipeline
+from qat.pipelines.legacy.echo import LegacyEchoPipeline, LegacyEchoPipelineConfig
+from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.emitter import InstructionEmitter
 from qat.purr.compiler.frontends import QIRFrontend
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
@@ -416,8 +414,10 @@ class TestQATParity:
             instructions, hardware=hardware_model, compiler_config=compiler_config
         )
 
-        pipe = get_legacy_echo_pipeline(hardware_model, name="test")
-        pipe = pipe.model_copy(update={"frontend": FallthroughFrontend()})
+        pipe = LegacyEchoPipeline(
+            LegacyEchoPipelineConfig(name="test"), model=hardware_model
+        )
+        pipe.pipeline._frontend = FallthroughFrontend()
 
         q = QAT()
         q.pipelines.add(pipe)
@@ -442,8 +442,8 @@ class MockEngine(NativeEngine):
 
 @pytest.fixture
 def echo_pipeline(qubit_count=32):
-    model = EchoModelLoader(qubit_count=qubit_count).load()
-    yield qat.pipelines.echo.get_pipeline(model)
+    loader = EchoModelLoader(qubit_count=qubit_count)
+    yield EchoPipeline(config=EchoPipelineConfig(name="echo"), loader=loader)
 
 
 @pytest.fixture
@@ -502,9 +502,9 @@ class TestQATPipelineSetup:
             PipelineInstanceDescription(
                 name="echo32i", pipeline="qat.pipelines.echo.echo32"
             ),
-            PipelineFactoryDescription(
+            UpdateablePipelineDescription(
                 name="echo6b",
-                pipeline="qat.pipelines.echo.get_pipeline",
+                pipeline="qat.pipelines.echo.EchoPipeline",
                 hardware_loader="echo6loader",
             ),
         ]
@@ -551,6 +551,7 @@ class TestQATPipelineSetup:
             "echo8i",
             "echo16i",
             "echo6b",
+            "echo6factory",
             "echo-defaultfrontend",
             "echocustomconfig",
         }
@@ -568,6 +569,7 @@ class TestQATPipelineSetup:
             "echo8i",
             "echo16i",
             "echo6b",
+            "echo6factory",
             "echo-defaultfrontend",
             "echocustomconfig",
         }
@@ -618,8 +620,8 @@ class TestQATPipelineSetup:
         assert echo_pipeline.name not in q.pipelines.list()
 
     def test_add_pipeline_set_default(self, fallthrough_pipeline):
-        pipe1 = fallthrough_pipeline.model_copy(update={"name": "pipe1"})
-        pipe2 = fallthrough_pipeline.model_copy(update={"name": "pipe2"})
+        pipe1 = fallthrough_pipeline.copy_with_name("pipe1")
+        pipe2 = fallthrough_pipeline.copy_with_name("pipe2")
         q = QAT()
         q.pipelines.add(pipe1, default=True)
         assert q.pipelines.default == pipe1.name
@@ -627,9 +629,9 @@ class TestQATPipelineSetup:
         assert q.pipelines.default == pipe1.name
 
     def test_set_default(self, fallthrough_pipeline):
-        pipe1 = fallthrough_pipeline.model_copy(update={"name": "pipe1"})
-        pipe2 = fallthrough_pipeline.model_copy(update={"name": "pipe2"})
-        pipe3 = fallthrough_pipeline.model_copy(update={"name": "pipe3"})
+        pipe1 = fallthrough_pipeline.copy_with_name("pipe1")
+        pipe2 = fallthrough_pipeline.copy_with_name("pipe2")
+        pipe3 = fallthrough_pipeline.copy_with_name("pipe3")
         q = QAT()
         q.pipelines.add(pipe1)
         q.pipelines.add(pipe2)
@@ -702,9 +704,11 @@ class TestQatEchoPipelines:
     def setup_class(self):
         """Setup the QAT instance and pipelines for the tests."""
         self.core = QAT()
-        pipe = get_legacy_echo_pipeline(self.model, "legacy")
+        pipe = LegacyEchoPipeline(
+            config=LegacyEchoPipelineConfig(name="legacy"), model=self.model
+        )
         self.core.pipelines.add(pipe)
-        pipe = get_echo_pipeline(self.model, "new")
+        pipe = EchoPipeline(config=EchoPipelineConfig(name="new"), model=self.model)
         self.core.pipelines.add(pipe)
 
     def get_legacy_ir(self, request, program_file):
@@ -834,9 +838,11 @@ class TestExperimentalEchoPipelines:
     def setup_class(self):
         """Setup the QAT instance and pipelines for the tests."""
         self.core = QAT()
-        pipe = get_echo_pipeline(self.model, "stable")
+        pipe = EchoPipeline(config=EchoPipelineConfig(name="stable"), model=self.model)
         self.core.pipelines.add(pipe)
-        pipe = get_experimental_echo_pipeline(self.model, "experimental")
+        pipe = ExperimentalEchoPipeline(
+            config=EchoPipelineConfig(name="experimental"), model=self.model
+        )
         self.core.pipelines.add(pipe)
         pyd_model = pipe.backend.pyd_model
         self.physical_channel_map = {}

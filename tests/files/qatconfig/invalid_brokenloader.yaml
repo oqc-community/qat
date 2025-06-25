@@ -1,7 +1,7 @@
 MAX_REPEATS_LIMIT: 10
 PIPELINES:
 - name: echo6b
-  pipeline: tests.qat.utils.pipelines.get_pipeline
+  pipeline: tests.unit.utils.pipelines.MockPipeline
   hardware_loader: echo6loader
   default: true
   engine: 

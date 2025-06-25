@@ -10,7 +10,7 @@ PIPELINES:
   pipeline: qat.pipelines.echo.echo32
   default: false
 - name: echo6-alt
-  pipeline: qat.pipelines.echo.get_pipeline
+  pipeline: qat.pipelines.echo.EchoPipeline
   hardware_loader: echo6loader
   default: false
 

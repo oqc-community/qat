@@ -6,7 +6,7 @@ import inspect
 
 def is_pipeline_instance(value: type):
     """A validator which raises when the input not a Pipeline instance."""
-    from qat.core.pipeline import Pipeline
+    from qat.pipelines.pipeline import Pipeline
 
     if not isinstance(value, Pipeline):
         raise ValueError(f"{value} is not a valid Pipeline instance")
@@ -70,6 +70,21 @@ def is_engine(value: type):
     return value
 
 
+def is_target_data(value: type):
+    """A validator which raises when the input not a TargetData. Allows both TargetData
+    classes and functions which return TargetData instances."""
+
+    from qat.model.target_data import AbstractTargetData
+
+    if inspect.isclass(value) and issubclass(value, AbstractTargetData):
+        return value
+    if callable(value) and issubclass(
+        inspect.signature(value).return_annotation, AbstractTargetData
+    ):
+        return value
+    raise ValueError(f"{value} is not a valid TargetData")
+
+
 def is_passmanager(value: type):
     """A validator which raises when the input not an PassManager."""
     from qat.core.pass_base import PassManager
@@ -99,11 +114,19 @@ def is_hardwareloader(value: type):
 
 def is_pipeline_factory(value: type):
     """A validator which raises when the input not function which returns a Pipeline."""
-    from qat.core.pipeline import Pipeline
+    from qat.pipelines.pipeline import Pipeline
 
     if not (callable(value) and inspect.signature(value).return_annotation is Pipeline):
         raise ValueError(f"{value} does not a return a Pipeline")
+    return value
 
+
+def is_updateable_pipeline(value: type):
+    """A validator which raises when the input not an UpdateablePipeline instance."""
+    from qat.pipelines.updateable import UpdateablePipeline
+
+    if not (inspect.isclass(value) and issubclass(value, UpdateablePipeline)):
+        raise ValueError(f"{value} is not a valid UpdateablePipeline.")
     return value
 
 
@@ -111,9 +134,18 @@ def requires_model(value: type) -> bool:
     """Determines whether a class or function expects a model
 
     In future we will also inspect the type is a hardware model but currently
-    we are not constent enough with type hinting for this.
+    we are not consistent enough with type hinting for this.
     """
     return "model" in inspect.signature(value).parameters
+
+
+def requires_target_data(value: type) -> bool:
+    """Determines whether a class or function expects target data.
+
+    In future we will also inspect the type is a target data but currently we are not
+    consistent enough with type hinting for this.
+    """
+    return "target_data" in inspect.signature(value).parameters
 
 
 class MismatchingHardwareModelException(Exception): ...

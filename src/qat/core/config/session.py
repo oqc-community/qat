@@ -10,6 +10,7 @@ from qat.core.config.descriptions import (
     PipelineClassDescription,
     PipelineFactoryDescription,
     PipelineInstanceDescription,
+    UpdateablePipelineDescription,
 )
 from qat.extensions import QatExtension
 from qat.purr.qatconfig import QatConfig
@@ -59,6 +60,7 @@ class QatSessionConfig(QatConfig):
     PIPELINES: (
         list[
             PipelineInstanceDescription
+            | UpdateablePipelineDescription
             | PipelineFactoryDescription
             | PipelineClassDescription
         ]

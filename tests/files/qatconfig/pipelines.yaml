@@ -7,7 +7,11 @@ PIPELINES:
   pipeline: qat.pipelines.echo.echo16
   default: true
 - name: echo6b
-  pipeline: qat.pipelines.echo.get_pipeline
+  pipeline: qat.pipelines.echo.EchoPipeline
+  hardware_loader: echo6loader
+  default: false
+- name: echo6factory
+  pipeline: tests.unit.utils.pipelines.get_mock_pipeline
   hardware_loader: echo6loader
   default: false
 - name: echo-defaultfrontend

@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
 from qat.core.pass_base import PassManager
-from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import (
@@ -17,59 +16,87 @@ from qat.middleend.passes.legacy.validation import (
 )
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
-from qat.pipelines.legacy.base import get_results_pipeline
+from qat.pipelines.legacy.base import LegacyPipeline
+from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.updateable import PipelineConfig
+from qat.purr.backends.echo import EchoEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.utils.logger import get_default_logger
 from qat.runtime.legacy import LegacyRuntime
 from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
 
-
-def get_middleend_pipeline(
-    model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
-) -> PassManager:
-    """Factory for creating middleend pipelines for legacy echo models.
-
-    Includes a list of passes that replicate the responsibilities of
-    :meth:`EchoEngine.optimize <qat.purr.backends.echo.EchoEngine.optimize>` and
-    :meth:`EchoEngine.validate <qat.purr.backends.echo.EchoEngine.validate>`.
-
-    :param model: The hardware model is required for validation.
-    :param engine: The echo engine is required to perform validation.
-    :return: The pipeline as a pass manager.
-    """
-    return (
-        PassManager()
-        | HardwareConfigValidity(model)
-        | CalibrationAnalysis()
-        | PhaseOptimisation()
-        | IntegratorAcquireSanitisation()
-        | PostProcessingSanitisation()
-        | InstructionValidation(target_data)
-        | ReadoutValidation(model)
-    )
+log = get_default_logger()
 
 
-def get_pipeline(model: QuantumHardwareModel, name: str = "legacy_echo") -> Pipeline:
-    """A factory for creating pipelines that performs the responsibilites of the legacy
-    :class:`EchoEngine <qat.purr.backends.echo.EchoEngine>` using the
-    :class:`LegacyRuntime`.
+class LegacyEchoPipelineConfig(PipelineConfig):
+    """Configuration for the :class:`LegacyEchoPipeline`."""
 
-    :param model: The echo hardware model.
-    :param name: The name of the pipeline, defaults to "legacy_echo"
-    :return: The complete pipeline, including the runtime and engine.
+    name: str = "legacy_echo"
+
+
+class LegacyEchoPipeline(LegacyPipeline):
+    """A pipeline that compiles programs using the legacy echo backend and executes them
+    using the :class:`LegacyRuntime`.
+
+    Implements a custom pipeline to make instructions suitable for the legacy echo engine,
+    and cannot be configured with a custom engine.
     """
 
-    engine = model.create_engine()
+    @staticmethod
+    def _build_pipeline(
+        config: LegacyEchoPipelineConfig,
+        model: QuantumHardwareModel,
+        target_data: TargetData | None = None,
+        engine=None,
+    ) -> Pipeline:
+        if engine is not None:
+            log.warning(
+                "An engine was provided to the LegacyEchoPipeline, but it will be ignored. "
+                "The legacy EchoEngine is used directly."
+            )
 
-    return Pipeline(
-        name=name,
-        frontend=AutoFrontend(model),
-        middleend=CustomMiddleend(model, pipeline=get_middleend_pipeline(model)),
-        backend=FallthroughBackend(model),
-        runtime=LegacyRuntime(engine=engine, results_pipeline=get_results_pipeline(model)),
-        model=model,
-    )
+        target_data = target_data if target_data is not None else TargetData.default()
+        return Pipeline(
+            name=config.name,
+            model=model,
+            target_data=target_data,
+            frontend=AutoFrontend(model),
+            middleend=CustomMiddleend(
+                model,
+                pipeline=LegacyEchoPipeline._middleend_pipeline(
+                    model=model, target_data=target_data
+                ),
+            ),
+            backend=FallthroughBackend(model),
+            runtime=LegacyRuntime(
+                engine=EchoEngine(model=model),
+                results_pipeline=LegacyEchoPipeline._results_pipeline(model),
+            ),
+        )
+
+    @staticmethod
+    def _middleend_pipeline(
+        model: QuantumHardwareModel, target_data: TargetData | None = None
+    ) -> PassManager:
+        return (
+            PassManager()
+            | HardwareConfigValidity(model)
+            | CalibrationAnalysis()
+            | PhaseOptimisation()
+            | IntegratorAcquireSanitisation()
+            | PostProcessingSanitisation()
+            | InstructionValidation(target_data)
+            | ReadoutValidation(model)
+        )
 
 
-legacy_echo8 = get_pipeline(EchoModelLoader(qubit_count=8).load(), name="legacy_echo8")
-legacy_echo16 = get_pipeline(EchoModelLoader(qubit_count=16).load(), name="legacy_echo16")
-legacy_echo32 = get_pipeline(EchoModelLoader(qubit_count=32).load(), name="legacy_echo32")
+def _create_pipeline_instance(num_qubits: int) -> Pipeline:
+    return LegacyEchoPipeline(
+        config=LegacyEchoPipelineConfig(name=f"legacy_echo{num_qubits}"),
+        loader=EchoModelLoader(qubit_count=num_qubits),
+    ).pipeline
+
+
+legacy_echo8 = _create_pipeline_instance(8)
+legacy_echo16 = _create_pipeline_instance(16)
+legacy_echo32 = _create_pipeline_instance(32)

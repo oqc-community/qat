@@ -2,6 +2,7 @@ import numpy as np
 from pydantic import BaseModel, validate_call
 
 from qat.engines.native import NativeEngine
+from qat.engines.zero import ZeroEngine
 from qat.runtime.executables import Executable
 
 
@@ -43,3 +44,10 @@ class BrokenEngine(NativeEngine):
 
     def execute(self, package: Executable) -> dict[str, np.ndarray]:
         return {}
+
+
+class MockEngineWithModel(ZeroEngine):
+    """A mock engine that takes a model."""
+
+    def __init__(self, model):
+        self.model = model

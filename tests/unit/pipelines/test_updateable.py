@@ -1,0 +1,438 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import pytest
+
+from qat.backend import WaveformV1Backend
+from qat.engines import ZeroEngine
+from qat.engines.waveform_v1 import EchoEngine
+from qat.frontend import AutoFrontend
+from qat.middleend import DefaultMiddleend
+from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.legacy.base import BaseLegacyModelLoader
+from qat.model.target_data import TargetData
+from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.runtime import SimpleRuntime
+
+from tests.unit.utils.engines import MockEngineWithModel
+
+
+class MockModelLoader(BaseLegacyModelLoader):
+    """A mock model loader used to test the UpdateablePipeline infrastructure. Each load
+    will add an extra qubit."""
+
+    def __init__(self):
+        self.num_qubits = 1
+
+    def load(self):
+        self.num_qubits += 1
+        return EchoModelLoader(qubit_count=self.num_qubits).load()
+
+
+class MockPipelineConfig(PipelineConfig):
+    name: str = "test"
+    test_attr: bool = False
+
+
+class MockUpdateablePipeline(UpdateablePipeline):
+    """A mock updateable pipeline for testing purposes."""
+
+    @staticmethod
+    def _build_pipeline(
+        config: MockPipelineConfig, model, target_data=None, engine=None
+    ) -> Pipeline:
+        engine = engine if engine is not None else ZeroEngine()
+        target_data = target_data if target_data is not None else TargetData.default()
+        return Pipeline(
+            name=config.name,
+            model=model,
+            frontend=AutoFrontend(model=model),
+            middleend=DefaultMiddleend(model=model),
+            backend=WaveformV1Backend(model=model),
+            runtime=SimpleRuntime(engine=engine),
+            target_data=target_data,
+        )
+
+
+class TestUpdateablePipeline:
+    """Designed to test the infrastructure of the UpdateablePipeline. The implementation
+    of how the pipeline is built is the responsibility of the subclass, and should be tested
+    there."""
+
+    def test_initialization_with_loader(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        assert isinstance(pipeline, MockUpdateablePipeline)
+        assert pipeline._loader == model_loader
+        assert pipeline.name == "test"
+        assert pipeline.engine == engine
+        assert pipeline.target_data == target_data
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, DefaultMiddleend)
+        assert isinstance(pipeline.backend, WaveformV1Backend)
+        assert isinstance(pipeline.runtime, SimpleRuntime)
+        assert isinstance(pipeline.model, QuantumHardwareModel)
+        assert pipeline.config == config
+
+    def test_initialization_with_model(self):
+        model = EchoModelLoader(qubit_count=4).load()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, model=model, target_data=target_data, engine=engine
+        )
+
+        assert isinstance(pipeline, MockUpdateablePipeline)
+        assert pipeline.name == "test"
+        assert pipeline._loader is None
+        assert pipeline.engine == engine
+        assert pipeline.target_data == target_data
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, DefaultMiddleend)
+        assert isinstance(pipeline.backend, WaveformV1Backend)
+        assert isinstance(pipeline.runtime, SimpleRuntime)
+        assert pipeline.model is model
+        assert pipeline.config == config
+
+    def test_initialization_with_config_as_dict(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = {"name": "testing"}
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert pipeline.name == "testing"
+        assert isinstance(pipeline.config, PipelineConfig)
+
+    def test_initialization_with_no_model_or_loader_raises_error(self):
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        with pytest.raises(ValueError):
+            MockUpdateablePipeline(config=config, target_data=target_data, engine=engine)
+
+    def test_initialization_with_model_and_loader_raises_error(self):
+        model = EchoModelLoader(qubit_count=4).load()
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        with pytest.raises(ValueError):
+            MockUpdateablePipeline(
+                config=config,
+                model=model,
+                loader=model_loader,
+                target_data=target_data,
+                engine=engine,
+            )
+
+    def test_initalization_with_loader_engine_that_requires_model(self):
+        """Tests that the engine doesn't fail validation."""
+        loader = EchoModelLoader(qubit_count=4)
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        engine = MockEngineWithModel(model=loader.load())
+        old_model = engine.model
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+        assert pipeline.engine.model is not old_model
+
+    def test_update_with_config(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        new_config = MockPipelineConfig(name="test", test_attr=True)
+        pipeline.update(config=new_config)
+        assert pipeline.config == new_config
+
+    def test_update_with_config_as_dict(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        new_config_dict = {"test_attr": True}
+        pipeline.update(config=new_config_dict)
+        assert pipeline.config.name == "test"
+        assert pipeline.config.test_attr is True
+
+    def test_update_with_model(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert len(pipeline.model.qubits) == 2
+
+        new_model = EchoModelLoader(qubit_count=5).load()
+        pipeline.update(model=new_model)
+        assert len(pipeline.model.qubits) == 5
+
+    def test_update_with_loader(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert pipeline._loader is model_loader
+        assert len(pipeline.model.qubits) == 2
+
+        new_loader = EchoModelLoader(qubit_count=5)
+        pipeline.update(loader=new_loader)
+        assert pipeline._loader is new_loader
+        assert len(pipeline.model.qubits) == 5
+
+    def test_update_with_reload(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert len(pipeline.model.qubits) == 2
+
+        pipeline.update(reload_model=True)
+        assert len(pipeline.model.qubits) == 3
+
+    def test_update_with_target_data(self):
+        model_loader = MockModelLoader()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+
+        target_data = TargetData.default()
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert pipeline.target_data == target_data
+
+        new_target_data = TargetData.random()
+        assert new_target_data != target_data
+        model = pipeline.model
+        pipeline.update(target_data=new_target_data)
+        assert pipeline.target_data == new_target_data
+        assert pipeline.model is model
+
+    def test_update_with_engine(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+
+        engine = EchoEngine()
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert pipeline.engine == engine
+
+        new_engine = ZeroEngine()
+        model = pipeline.model
+        pipeline.update(engine=new_engine)
+        assert pipeline.engine == new_engine
+        assert pipeline.model is model
+
+    def test_update_model_with_engine_that_requires_model(self):
+        model = EchoModelLoader(qubit_count=4).load()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+
+        engine = MockEngineWithModel(model=model)
+        pipeline = MockUpdateablePipeline(
+            config=config, model=model, target_data=target_data, engine=engine
+        )
+        assert pipeline.engine == engine
+        assert pipeline.engine.model == model
+
+        new_model = EchoModelLoader(qubit_count=5).load()
+        pipeline.update(model=new_model)
+        assert pipeline.engine.model == new_model
+
+    def test_update_with_model_and_loader_raises_error(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        new_loader = EchoModelLoader(qubit_count=5)
+        new_model = new_loader.load()
+        with pytest.raises(ValueError):
+            pipeline.update(model=new_model, loader=model_loader)
+
+    def test_update_with_model_and_reload_model_raises_error(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        new_model = EchoModelLoader(qubit_count=5).load()
+        with pytest.raises(ValueError):
+            pipeline.update(model=new_model, reload_model=True)
+
+    def test_copy(self):
+        loader = EchoModelLoader(qubit_count=4)
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        copied_pipeline = pipeline.copy()
+
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == pipeline.name
+        assert copied_pipeline._loader == pipeline._loader
+        assert copied_pipeline.engine == pipeline.engine
+        assert copied_pipeline.config == pipeline.config
+
+    def test_copy_with_config(self):
+        loader = EchoModelLoader(qubit_count=4)
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_config = MockPipelineConfig(name="new_test", test_attr=True)
+        copied_pipeline = pipeline.copy_with(config=new_config)
+
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == "new_test"
+        assert copied_pipeline._loader == pipeline._loader
+        assert copied_pipeline.engine == pipeline.engine
+        assert copied_pipeline.target_data == pipeline.target_data
+        assert copied_pipeline.config == new_config
+        assert new_config != config
+
+    def test_copy_with_model(self):
+        loader = EchoModelLoader(qubit_count=4)
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_model = EchoModelLoader(qubit_count=6).load()
+        copied_pipeline = pipeline.copy_with(model=new_model)
+
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == pipeline.name
+        assert copied_pipeline._loader == None
+        assert copied_pipeline.engine == pipeline.engine
+        assert copied_pipeline.target_data == pipeline.target_data
+        assert copied_pipeline.model is new_model
+
+    def test_copy_with_loader(self):
+        loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_loader = EchoModelLoader(qubit_count=6)
+        copied_pipeline = pipeline.copy_with(loader=new_loader)
+
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == pipeline.name
+        assert copied_pipeline._loader == new_loader
+        assert copied_pipeline.engine == pipeline.engine
+        assert copied_pipeline.target_data == pipeline.target_data
+        assert len(copied_pipeline.model.qubits) == 6
+
+    def test_copy_with_target_data(self):
+        loader = EchoModelLoader(qubit_count=4)
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        target_data = TargetData.default()
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_target_data = TargetData.random()
+        copied_pipeline = pipeline.copy_with(target_data=new_target_data)
+
+        assert target_data is not new_target_data
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == pipeline.name
+        assert copied_pipeline._loader == pipeline._loader
+        assert copied_pipeline.engine == pipeline.engine
+        assert copied_pipeline.target_data == new_target_data
+
+    def test_copy_with_engine(self):
+        loader = EchoModelLoader(qubit_count=4)
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        engine = EchoEngine()
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_engine = ZeroEngine()
+        copied_pipeline = pipeline.copy_with(engine=new_engine)
+
+        assert copied_pipeline is not pipeline
+        assert copied_pipeline.name == pipeline.name
+        assert copied_pipeline._loader == pipeline._loader
+        assert copied_pipeline.target_data == pipeline.target_data
+        assert copied_pipeline.engine == new_engine
+
+    def test_copy_with_engine_that_requires_model(self):
+        model = EchoModelLoader(qubit_count=4).load()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+
+        engine = MockEngineWithModel(model=model)
+        pipeline = MockUpdateablePipeline(
+            config=config, model=model, target_data=target_data, engine=engine
+        )
+        assert pipeline.engine == engine
+        assert pipeline.engine.model == model
+
+        new_model = EchoModelLoader(qubit_count=5).load()
+        copied_pipeline = pipeline.copy_with(model=new_model)
+        assert copied_pipeline.engine.model == new_model
+
+    def test_copy_with_model_and_loader_raises_error(self):
+        loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
+
+        new_loader = EchoModelLoader(qubit_count=5)
+        new_model = new_loader.load()
+        with pytest.raises(ValueError):
+            pipeline.copy_with(model=new_model, loader=new_loader)

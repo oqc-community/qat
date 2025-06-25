@@ -1,7 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat import QAT
-from qat.pipelines.legacy.qiskit import legacy_qiskit8
+from qat.backend import FallthroughBackend
+from qat.frontend import AutoFrontend
+from qat.middleend import CustomMiddleend
+from qat.model.loaders.legacy import QiskitModelLoader
+from qat.pipelines.legacy.qiskit import (
+    LegacyQiskitPipeline,
+    LegacyQiskitPipelineConfig,
+    legacy_qiskit8,
+)
+from qat.pipelines.pipeline import Pipeline
+from qat.purr.backends.qiskit_simulator import QiskitEngine
+from qat.runtime import LegacyRuntime
 
 from tests.unit.utils.qasm_qir import get_qasm2
 
@@ -15,6 +26,23 @@ class TestQiskitPipelines:
 
     Qiskit builders in `purr` cannot be serialized, so we don't test any of that here.
     """
+
+    def test_build_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = QiskitModelLoader(qubit_count=8).load()
+        pipeline = LegacyQiskitPipeline._build_pipeline(
+            config=LegacyQiskitPipelineConfig(),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, Pipeline)
+        assert pipeline.name == "legacy_qiskit"
+        assert pipeline.model == model
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, CustomMiddleend)
+        assert isinstance(pipeline.backend, FallthroughBackend)
+        assert isinstance(pipeline.runtime, LegacyRuntime)
+        assert isinstance(pipeline.engine, QiskitEngine)
 
     def test_ghz_gives_expected_results(self):
         """Basic execution of a QASM file to test the pipeline works as expected."""

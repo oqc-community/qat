@@ -16,7 +16,7 @@ from qat.ir.instruction_builder import InstructionBuilder
 from qat.middleend.passes.legacy.transform import LoopCount
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.pipelines.echo import get_pipeline
+from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
 from qat.purr.compiler import instructions
 from qat.purr.compiler.devices import (
     PulseChannel,
@@ -227,7 +227,7 @@ class TestConvertToPydanticIRPass:
     def test_covert_partitioned_ir(self):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        pipe = get_pipeline(self.legacy_model, "echo")
+        pipe = EchoPipeline(config=EchoPipelineConfig(name="echo"), model=self.legacy_model)
         builder = pipe.frontend.emit(get_qasm2("15qb.qasm"), res_mgr, met_mgr)
         builder = pipe.middleend.emit(builder, res_mgr, met_mgr)
         legacy_ir = pipe.backend.run_pass_pipeline(builder, res_mgr, met_mgr)
@@ -242,7 +242,7 @@ class TestConvertToPydanticIRPass:
         """Test converting instruction builder."""
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        pipe = get_pipeline(self.legacy_model, "echo")
+        pipe = EchoPipeline(config=EchoPipelineConfig(name="echo"), model=self.legacy_model)
         legacy_builder = pipe.frontend.emit(get_qasm2("15qb.qasm"), res_mgr, met_mgr)
         legacy_builder = pipe.middleend.emit(legacy_builder, res_mgr, met_mgr)
         legacy_builder.add(instructions.Reset(self.legacy_model.qubits[:2]))

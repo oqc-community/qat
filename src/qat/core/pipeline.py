@@ -1,67 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-
-from pydantic import BaseModel, ValidationInfo, field_validator
-
-from qat.backend.base import BaseBackend
 from qat.core.config.descriptions import (
     HardwareLoaderDescription,
     PipelineFactoryDescription,
     PipelineInstanceDescription,
+    UpdateablePipelineDescription,
 )
-from qat.frontend import BaseFrontend
-from qat.middleend.middleends import BaseMiddleend
 from qat.model.loaders.base import BaseModelLoader
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.base import BaseRuntime
-
-
-class Pipeline(BaseModel, arbitrary_types_allowed=True, frozen=True):
-    """
-    Pipeline that compiles high-level language specific, but target-agnostic, input (QASM, QIR, ...)
-    to target-specific instructions that are executed on our hardware.
-    :param frontend: Compiles a high-level language-specific, but target-agnostic,
-                    input :class:`QatInput` to a target-agnostic intermediate representation (IR)
-                    :class:`QatIR`.
-    :param middleend: Takes an intermediate representation (IR) :class:`QatIR` and alters it based
-                    on optimisation and/or validation passes within this pipeline.
-    :param backend: Converts an intermediate representation (IR) to code for a given target machine.
-    """
-
-    name: str
-    frontend: BaseFrontend
-    middleend: BaseMiddleend
-    backend: BaseBackend
-    runtime: BaseRuntime
-    model: QuantumHardwareModel
-
-    @field_validator("model", mode="before")
-    @classmethod
-    def consistent_model(cls, model: QuantumHardwareModel, info: ValidationInfo):
-        """Validates that the hardware model supplied to the Pipeline matches the hardware model embedded in other fields."""
-
-        for component in [
-            info.data["frontend"],
-            info.data["middleend"],
-            info.data["backend"],
-            info.data["runtime"],
-            info.data["runtime"].engine,
-        ]:
-            if hasattr(component, "model") and component.model not in {model, None}:
-                raise ValueError(f"{model} hardware does not match supplied hardware")
-
-        return model
-
-    @classmethod
-    def from_description(cls, desc: PipelineInstanceDescription):
-        return desc.pipeline.model_copy(update={"name": desc.name})
+from qat.pipelines.base import AbstractPipeline
 
 
 class HardwareLoaders:
     def __init__(self, hardware_loaders: dict[str, BaseModelLoader] = {}):
         self._loaders = dict(**hardware_loaders)
         self._loaded_models = {}
+
+    def get_loader(self, loader_name: str, default=None) -> BaseModelLoader:
+        """Returns a hardware model loader by name."""
+        loader = self._loaders.get(loader_name)
+        if loader is None:
+            return default
+        return loader
 
     def load(self, loader_name: str, default=None, allow_cache=True):
         """Loads a hardware model, using the internal cache unless `allow_cache=False`."""
@@ -87,7 +47,7 @@ class HardwareLoaders:
 
 
 class PipelineSet:
-    def __init__(self, pipelines: list[Pipeline] = []):
+    def __init__(self, pipelines: list[AbstractPipeline] = []):
         self._pipelines = {}
 
         for P in pipelines:
@@ -97,7 +57,9 @@ class PipelineSet:
     def from_descriptions(
         cls,
         pipeline_descriptions: list[
-            PipelineInstanceDescription | PipelineFactoryDescription
+            PipelineInstanceDescription
+            | PipelineFactoryDescription
+            | UpdateablePipelineDescription
         ],
         available_hardware: HardwareLoaders,
     ):
@@ -108,12 +70,13 @@ class PipelineSet:
         pipes = []
         for Pdesc in pipeline_descriptions:
             if hasattr(Pdesc, "hardware_loader"):
-                model = available_hardware.load(Pdesc.hardware_loader)
-                if model is None:
+                loader = available_hardware.get_loader(Pdesc.hardware_loader)
+                if loader is None:
                     raise Exception(
                         f"Hardware Model Loader {Pdesc.hardware_loader} not found"
                     )
-                P = Pdesc.construct(model)
+
+                P = Pdesc.construct(loader)
             else:
                 P = Pdesc.construct()
 
@@ -125,8 +88,8 @@ class PipelineSet:
 
         return pipelinesset
 
-    def set_default(self, pipeline: Pipeline | str):
-        if isinstance(pipeline, Pipeline):
+    def set_default(self, pipeline: AbstractPipeline | str):
+        if isinstance(pipeline, AbstractPipeline):
             name = pipeline.name
             if name not in self._pipelines:
                 raise Exception("Add pipeline using add_pipeline before setting default")
@@ -142,11 +105,11 @@ class PipelineSet:
         """Returns the name of the current default pipeline"""
         return self._default_pipeline
 
-    def add(self, pipeline: Pipeline, default=False):
+    def add(self, pipeline: AbstractPipeline, default=False):
         """Adds a pipeline for subsequent use for compilation and execution
 
         :param pipeline: A pipeline instance to add, indexed by pipeline.name
-        :type pipeline: Pipeline
+        :type pipeline: AbstractPipeline
         :param default: Set the added pipeline as the default, defaults to False
         :type default: bool, optional
         """
@@ -154,18 +117,18 @@ class PipelineSet:
         if default:
             self.set_default(pipeline)
 
-    def remove(self, pipeline: Pipeline | str):
+    def remove(self, pipeline: AbstractPipeline | str):
         """Remove a pipeline
 
         :param pipeline: The name of a pipeline or a pipeline instance to remove
-        :type pipeline: Pipeline | str
+        :type pipeline: AbstractPipeline | str
         """
-        name = pipeline.name if isinstance(pipeline, Pipeline) else pipeline
+        name = pipeline.name if isinstance(pipeline, AbstractPipeline) else pipeline
 
         if name not in self._pipelines:
             raise Exception(f"Pipeline {pipeline.name} not found")
 
-        if isinstance(pipeline, Pipeline):
+        if isinstance(pipeline, AbstractPipeline):
             if pipeline is not self._pipelines[name]:
                 raise Exception(
                     f"Pipeline {pipeline.name} is not the same as stored pipeline with the same name"
@@ -176,11 +139,11 @@ class PipelineSet:
 
         del self._pipelines[name]
 
-    def get(self, pipeline: Pipeline | str):
+    def get(self, pipeline: AbstractPipeline | str):
         """Gets a stored pipeline by name (str) or passes through a pipeline instance
 
         :param pipeline: A pipeline instance or the string name of a stored pipeline
-        :type pipeline: Pipeline | str
+        :type pipeline: AbstractPipeline | str
         """
 
         if isinstance(pipeline, str):
