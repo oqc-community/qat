@@ -35,6 +35,7 @@ from qat.core.pipeline import Pipeline
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend, DefaultFrontend, FallthroughFrontend
+from qat.ir.instructions import Variable as PydVariable
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import TargetData
@@ -836,6 +837,16 @@ class TestExperimentalEchoPipelines:
         self.core.pipelines.add(pipe)
         pipe = get_experimental_echo_pipeline(self.model, "experimental")
         self.core.pipelines.add(pipe)
+        pyd_model = pipe.backend.pyd_model
+        self.physical_channel_map = {}
+        for index, qubit in pyd_model.qubits.items():
+            legacy_qubit = self.model.get_qubit(index)
+            self.physical_channel_map[legacy_qubit.physical_channel.id] = (
+                qubit.physical_channel.uuid
+            )
+            self.physical_channel_map[legacy_qubit.measure_device.physical_channel.id] = (
+                qubit.resonator.physical_channel.uuid
+            )
 
     def get_stable_executable(self, request, program_file):
         key = request.node.callspec.id
@@ -861,7 +872,27 @@ class TestExperimentalEchoPipelines:
         stable_exe = self.get_stable_executable(request, program_file)
         experimental_exe = self.get_experimental_executable(request, program_file)
 
-        assert stable_exe == experimental_exe
+        assert stable_exe.acquires == experimental_exe.acquires
+        for stable, experimental in zip(stable_exe.assigns, experimental_exe.assigns):
+            assert stable.name == experimental.name
+            if isinstance(stable.value, list):
+                for sv, ev in zip(stable.value, experimental.value):
+                    assert sv == (ev.name if isinstance(ev, PydVariable) else ev)
+            else:
+                assert stable.value == experimental.value.name
+        assert stable_exe.calibration_id == experimental_exe.calibration_id
+        for key, stable_data in stable_exe.channel_data.items():
+            new_key = self.physical_channel_map[key]
+            assert new_key in experimental_exe.channel_data
+            stable_data = stable_data.model_copy(update={"physical_channel": new_key})
+            experimental_data = experimental_exe.channel_data[new_key]
+            assert stable_data == experimental_data
+        assert stable_exe.compiled_shots == experimental_exe.compiled_shots
+        assert stable_exe.post_processing == experimental_exe.post_processing
+        assert stable_exe.repetition_time == experimental_exe.repetition_time
+        assert stable_exe.results_processing == experimental_exe.results_processing
+        assert stable_exe.returns == experimental_exe.returns
+        assert stable_exe.shots == experimental_exe.shots
 
     def test_results_formatting(self, request, program_file):
         stable_exe = self.get_stable_executable(request, program_file)

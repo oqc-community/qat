@@ -58,6 +58,10 @@ class PartitionByPulseChannel(LoweringPass):
                 target_list.append(inst)
             partitioned_ir.target_map.default_factory = shared_instructions.copy
 
+        partitioned_ir.repetition_period = getattr(ir, "repetition_period", None)
+
+        partitioned_ir.passive_reset_time = getattr(ir, "passive_reset_time", None)
+
         repeat_seen = False
         for instr in ir:
             handled = False

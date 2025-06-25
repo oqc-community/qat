@@ -232,7 +232,7 @@ class TestConvertToPydanticIRPass:
         builder = pipe.middleend.emit(builder, res_mgr, met_mgr)
         legacy_ir = pipe.backend.run_pass_pipeline(builder, res_mgr, met_mgr)
 
-        converted_ir = self.converter_pass.run(legacy_ir)
+        converted_ir = self.converter_pass.run(legacy_ir, res_mgr, met_mgr)
         self._check_conversion(legacy_ir, converted_ir)
 
     # TODO: Ensure that the legacy instruction builder is compatible with the pydantic version.
@@ -247,7 +247,7 @@ class TestConvertToPydanticIRPass:
         legacy_builder = pipe.middleend.emit(legacy_builder, res_mgr, met_mgr)
         legacy_builder.add(instructions.Reset(self.legacy_model.qubits[:2]))
 
-        converted_builder = self.converter_pass.run(legacy_builder)
+        converted_builder = self.converter_pass.run(legacy_builder, res_mgr, met_mgr)
         assert isinstance(converted_builder, InstructionBuilder)
         self._check_conversion(
             legacy_builder._instructions, converted_builder.instructions

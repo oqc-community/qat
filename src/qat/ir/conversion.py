@@ -5,10 +5,14 @@ from functools import singledispatchmethod
 from numbers import Number
 from types import NoneType
 
+import numpy as np
+
 import qat.ir.instructions as pyd_instructions
 import qat.ir.measure as pyd_measure
 import qat.ir.waveforms as pyd_waveforms
+from qat.backend.passes.legacy.analysis import PulseChannelTimeline
 from qat.core.pass_base import TransformPass
+from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.legacy.transform import LoopCount
@@ -83,7 +87,13 @@ class ConvertToPydanticIR(TransformPass):
                 resonator.acquire_pulse_channel.uuid
             )
 
-    def run(self, ir: InstructionBuilder | PartitionedIR, *args, **kwargs):
+    def run(
+        self,
+        ir: InstructionBuilder | PartitionedIR,
+        res_mgr: ResultManager,
+        *args,
+        **kwargs,
+    ):
         self._additional_data = {}
         if isinstance(ir, PartitionedIR):
             new_ir = self._convert_partitioned_ir(ir)
@@ -93,6 +103,7 @@ class ConvertToPydanticIR(TransformPass):
             raise TypeError(f"Unsupported IR type: {type(ir)}")
         for key, value in self._additional_data.items():
             setattr(new_ir, key, value)
+        self._convert_result_manager(res_mgr)
         return new_ir
 
     def _convert_partitioned_ir(self, ir: PartitionedIR) -> PartitionedIR:
@@ -115,12 +126,53 @@ class ConvertToPydanticIR(TransformPass):
             setattr(new_ir, attr, self._convert_element(value))
         return new_ir
 
+    def _convert_result_manager(self, res_mgr: ResultManager):
+        """Convert the ResultManager to a Pydantic-compatible format."""
+        if res_mgr is None:
+            return
+        if not isinstance(res_mgr, ResultManager):
+            raise TypeError(f"Unsupported ResultManager type: {type(res_mgr)}")
+        for result in res_mgr._results:
+            self._convert_element(result._result)
+        return
+
     @singledispatchmethod
     def _convert_element(self, value):
         """Default method for converting elements. This will raise an error if no specific
         conversion is defined for the type of `value`.
         """
         raise TypeError(f"Unsupported type for conversion: {type(value)}")
+
+    @_convert_element.register(ResultInfoMixin)
+    def _(
+        self,
+        value: ResultInfoMixin,
+    ):
+        """Convert a ResultInfoMixin instance."""
+        for attr, val in vars(value).items():
+            if attr == "value":
+                # The value is already in the correct format.
+                continue
+            elif attr == "id":
+                # The id is a UUID, which is already compatible with Pydantic.
+                continue
+            elif attr == "name":
+                # The name is a string, which is already compatible with Pydantic.
+                continue
+            else:
+                # For any other attributes, we convert them using the _convert_element method.
+                setattr(value, attr, self._convert_element(val))
+        return value
+
+    @_convert_element.register(PulseChannelTimeline)
+    def _(
+        self,
+        value: PulseChannelTimeline,
+    ):
+        """Convert a PulseChannelTimeline instance."""
+        for attr, val in vars(value).items():
+            setattr(value, attr, self._convert_element(val))
+        return value
 
     @_convert_element.register(type)
     def _(
@@ -136,6 +188,7 @@ class ConvertToPydanticIR(TransformPass):
     @_convert_element.register(Number)
     @_convert_element.register(str)
     @_convert_element.register(NoneType)
+    @_convert_element.register(np.ndarray)
     def _(
         self,
         value: Number | str | None,

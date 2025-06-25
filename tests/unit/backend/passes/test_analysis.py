@@ -140,27 +140,27 @@ class TestIntermediateFrequencyAnalysisParity:
         )
 
         # run the pass: should pass
-        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
         IntermediateFrequencyAnalysis(leg_model).run(leg_ir, res_mgr)
         PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
         # fix IF for one channel: should pass
         pulse_channel_1.fixed_if = True
-        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
         IntermediateFrequencyAnalysis(leg_model).run(leg_ir, res_mgr)
         PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
         # fix IF for one channel: should pass
         pulse_channel_1.fixed_if = False
         pulse_channel_2.fixed_if = True
-        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
         IntermediateFrequencyAnalysis(leg_model).run(leg_ir, res_mgr)
         PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
         # fix IF for both channels: should fail
         pulse_channel_1.fixed_if = True
         with pytest.raises(ValueError):
-            ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+            ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
             IntermediateFrequencyAnalysis(leg_model).run(leg_ir, res_mgr)
             PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
@@ -187,7 +187,7 @@ class TestIntermediateFrequencyAnalysisParity:
         )
 
         # run the pass
-        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
         IntermediateFrequencyAnalysis(leg_model).run(leg_ir, res_mgr)
         PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
@@ -211,7 +211,7 @@ class TestIntermediateFrequencyAnalysisParity:
             }
         )
 
-        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir)
+        ir = ConvertToPydanticIR(leg_model, model).run(leg_ir, res_mgr)
         model.qubits[0].drive_pulse_channel.fixed_if = True
         model.qubits[1].drive_pulse_channel.fixed_if = False
 
@@ -261,9 +261,9 @@ class TestTimelineAnalysis:
         builder = LegInstructionGranularitySanitisation(leg_model, target_data).run(builder)
         builder = LegLowerSyncsToDelays().run(builder)
 
-        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder)
-
         res_mgr = ResultManager()
+        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder, res_mgr)
+
         ir = PydPartitionByPulseChannel().run(pyd_builder, res_mgr)
         PydTimelineAnalysis(pyd_model, target_data).run(ir, res_mgr)
         res = res_mgr.lookup_by_type(PydTimelineAnalysisResult)
@@ -356,7 +356,7 @@ class TestTimelineAnalysis:
         LegInstructionGranularitySanitisation(leg_model, target_data).run(builder, res_mgr)
         LegLowerSyncsToDelays().run(builder, res_mgr)
 
-        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder)
+        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder, res_mgr)
 
         ir = PydPartitionByPulseChannel().run(pyd_builder, res_mgr)
         PydTimelineAnalysis(pyd_model, target_data).run(ir, res_mgr)
@@ -458,8 +458,8 @@ class TestTimelineAnalysisParity:
         builder = LegInstructionGranularitySanitisation(leg_model, target_data).run(builder)
         builder = LegLowerSyncsToDelays().run(builder)
 
-        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder)
         pyd_res_mgr = ResultManager()
+        pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder, pyd_res_mgr)
 
         pyd_ir = PydPartitionByPulseChannel().run(pyd_builder, pyd_res_mgr)
         PydIntermediateFrequencyAnalysis(pyd_model).run(pyd_ir, pyd_res_mgr)

@@ -9,6 +9,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
+from qat.ir.conversion import ConvertToPydanticIR
 from qat.middleend.passes.legacy.analysis import (
     ActivePulseChannelAnalysis,
 )
@@ -193,6 +194,79 @@ class DefaultMiddleend(CustomMiddleend):
             | BatchedShots(target_data)
             | ScopeSanitisation()
             | RepeatTranslation(target_data)
+        )
+
+
+class ExperimentalDefaultMiddleend(CustomMiddleend):
+    """
+    Validates the compiler settings against the hardware model, finds calibrations within the IR,
+    compresses contiguous :class:`PhaseShift` instructions, checks that the :class:`PostProcessing`
+    instructions that follow an acquisition are suitable for the acquisition mode, validates that
+    there are no mid-circuit measurements.
+    """
+
+    def __init__(
+        self,
+        model: QuantumHardwareModel,
+        pyd_model: PydHardwareModel,
+        target_data: TargetData = TargetData.default(),
+    ):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
+        :param clock_cycle: The period for a single sequencer clock cycle.
+        """
+        pipeline = self.build_pass_pipeline(model, pyd_model, target_data)
+        self.target_data = target_data
+        self.pyd_model = pyd_model
+        super().__init__(model=model, pipeline=pipeline)
+
+    @staticmethod
+    def build_pass_pipeline(
+        legacy_model: QuantumHardwareModel,
+        pyd_model: PydHardwareModel,
+        target_data: TargetData = TargetData.default(),
+    ) -> PassManager:
+        """
+        Builds the default middle end pass pipeline.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
+        :return: A :class:`PassManager` containing a sequence of passes.
+        """
+        return (
+            PassManager()
+            | HardwareConfigValidity(legacy_model)
+            | FrequencyValidation(legacy_model, target_data)  # TODO: COMPILER-380
+            | ActivePulseChannelAnalysis(legacy_model)  # TODO: COMPILER-393
+            # Sanitising input IR to make it complete
+            | RepeatSanitisation(
+                legacy_model, target_data
+            )  # TODO: COMPILER-553, COMPILER-347
+            | ReturnSanitisation()
+            | SynchronizeTask()  # TODO: COMPILER-549
+            # Corrections / optimisations to the IR
+            | PostProcessingSanitisation()  # TODO: COMPILER-540
+            | ReadoutValidation(legacy_model)  # TODO: COMPILER-556
+            | AcquireSanitisation()  # TODO: COMPILER-292
+            | MeasurePhaseResetSanitisation()  # TODO: COMPILER-547
+            | InstructionGranularitySanitisation(
+                legacy_model, target_data
+            )  # TODO: COMPILER-394
+            # Preparing for codegen
+            | EvaluatePulses()  # TODO: COMPILER-552
+            | LowerSyncsToDelays()  # TODO: COMPILER-409
+            | InactivePulseChannelSanitisation()  # TODO: COMPILER-410
+            | FreqShiftSanitisation(legacy_model)  # TODO: COMPILER-554
+            | InitialPhaseResetSanitisation()  # TODO: COMPILER-546
+            | PhaseOptimisation()  # TODO: COMPILER-545
+            | EndOfTaskResetSanitisation()  # TODO: COMPILER-550
+            | ResetsToDelays(target_data)  # TODO: COMPILER-551
+            | SquashDelaysOptimisation()  # TODO: COMPILER-411
+            | InstructionLengthSanitisation(target_data)  # TODO: COMPILER-548
+            | BatchedShots(target_data)  # TODO: COMPILER-543
+            | ScopeSanitisation()
+            | RepeatTranslation(target_data)  # TODO: COMPILER-544
+            | ConvertToPydanticIR(legacy_model, pyd_model)
         )
 
 

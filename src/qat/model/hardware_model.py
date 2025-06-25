@@ -82,17 +82,25 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._ids_to_pulse_channels = {
-            pulse_channel.uuid: pulse_channel
-            for qubit in self.qubits.values()
-            for pulse_channel in qubit.all_pulse_channels
-            + qubit.resonator.all_pulse_channels
-        }
-        self._ids_to_physical_channels = {
-            phys_channel.uuid: phys_channel
-            for qubit in self.qubits.values()
-            for phys_channel in [qubit.physical_channel, qubit.resonator.physical_channel]
-        }
+        self._generate_mappings()
+
+    def _generate_mappings(self):
+        self._ids_to_pulse_channels = {}
+        self._ids_to_physical_channels = {}
+        self._pulse_channel_ids_to_physical_channel = {}
+        self._pulse_channel_ids_to_device = {}
+
+        for qubit in self.qubits.values():
+            for device in [qubit, qubit.resonator]:
+                phys_channel = device.physical_channel
+                self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
+
+                for pulse_channel in device.all_pulse_channels:
+                    self._ids_to_pulse_channels[pulse_channel.uuid] = pulse_channel
+                    self._pulse_channel_ids_to_physical_channel[pulse_channel.uuid] = (
+                        phys_channel
+                    )
+                    self._pulse_channel_ids_to_device[pulse_channel.uuid] = device
 
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):
@@ -231,6 +239,12 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     def physical_channel_with_id(self, id_: str):
         return self._ids_to_physical_channels.get(id_, None)
+
+    def physical_channel_for_pulse_channel_id(self, id_: str):
+        return self._pulse_channel_ids_to_physical_channel.get(id_, None)
+
+    def device_for_pulse_channel_id(self, id_: str):
+        return self._pulse_channel_ids_to_device.get(id_, None)
 
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:
