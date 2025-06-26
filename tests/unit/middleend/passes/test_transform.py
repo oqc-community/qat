@@ -11,7 +11,21 @@ from compiler_config.config import MetricsType
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.instructions import PhaseReset, PhaseShift, Repeat, Return
+from qat.ir.instructions import (
+    Assign,
+    EndRepeat,
+    GreaterThan,
+    Instruction,
+    Jump,
+    Label,
+    LoopCount,
+    PhaseReset,
+    PhaseShift,
+    Plus,
+    Repeat,
+    Return,
+    Variable,
+)
 from qat.ir.measure import (
     Acquire,
     AcquireMode,
@@ -25,11 +39,140 @@ from qat.middleend.passes.transform import (
     BatchedShots,
     PhaseOptimisation,
     PostProcessingSanitisation,
+    RepeatTranslation,
     ReturnSanitisation,
 )
 from qat.middleend.passes.validation import ReturnSanitisationValidation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
-from qat.model.target_data import AbstractTargetData
+from qat.model.target_data import AbstractTargetData, TargetData
+
+
+@pytest.mark.parametrize("explicit_close", [False, True])
+class TestRepeatTranslation:
+    hw = PydEchoModelLoader(1).load()
+
+    @staticmethod
+    def _check_loop_start(ir: QuantumInstructionBuilder, indices: list[int]):
+        for index in indices:
+            # Create Variable
+            assert isinstance(var := ir.instructions[index], Variable)
+            assert var.var_type == LoopCount
+            name_base = var.name.removesuffix("_count")
+
+            # Assign with 0 to start
+            assert isinstance(assign := ir.instructions[index + 1], Assign)
+            assert name_base in assign.name
+            assert assign.value == 0
+
+            # Create Label
+            assert isinstance(label := ir.instructions[index + 2], Label)
+            assert name_base == label.name
+
+    @staticmethod
+    def _check_loop_close(
+        ir: QuantumInstructionBuilder, indices: list[int], repeats: list[int]
+    ):
+        for index, repeat in zip(indices, repeats):
+            # Increment LoopCount Variable with 1
+            assert isinstance(assign := ir.instructions[index], Assign)
+            name_base = assign.name.removesuffix("_count")
+            assert isinstance(plus := assign.value, Plus)
+            assert isinstance(var := plus.left, Variable)
+            assert name_base in var.name
+            assert var.var_type == LoopCount
+            assert plus.right == 1
+
+            # Conditional Jump
+            assert isinstance(jump := ir.instructions[index + 1], Jump)
+            assert name_base == jump.target
+            assert isinstance(condition := jump.condition, GreaterThan)
+            assert condition.right == var
+            assert condition.left == repeat
+
+    def test_single_repeat(self, explicit_close):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        builder.repeat(1000)
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        ir = RepeatTranslation(TargetData.default()).run(builder)
+
+        # assert len(ir.existing_names) == 1
+
+        self._check_loop_start(ir, [0])
+        self._check_loop_close(ir, [3], [1000])
+
+    def test_multiple_repeat(self, explicit_close):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        builder.repeat(1000).repeat(200)
+
+        if explicit_close:
+            builder.add(*[EndRepeat(), EndRepeat()])
+
+        ir = RepeatTranslation(TargetData.default()).run(builder)
+
+        # assert len(ir.existing_names) == 2
+
+        self._check_loop_start(ir, [0, 3])
+        self._check_loop_close(ir, [8, 6], [1000, 200])
+
+    @pytest.mark.parametrize("first", [0, 2])
+    @pytest.mark.parametrize("second", [0, 3])
+    @pytest.mark.parametrize("third", [0, 5])
+    @pytest.mark.parametrize("fourth", [0, 1])
+    @pytest.mark.parametrize("fifth", [0, 4])
+    def test_with_other_instructions(
+        self, explicit_close, first, second, third, fourth, fifth
+    ):
+        """Test all possible combinations of having additional instructions, before,
+        between, and after the repeats, with and without explicitly closing scopes.
+
+        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>, <fifth>]
+        """
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        start_indices = [0, 3]
+        close_indices = [8, 6]
+
+        if first > 0:
+            builder.add(*[Instruction()] * first)
+            start_indices = [i + first for i in start_indices]
+            close_indices = [i + first for i in close_indices]
+
+        builder.repeat(1000)
+
+        if second > 0:
+            builder.add(*[Instruction()] * second)
+            start_indices[1] += second
+            close_indices = [i + second for i in close_indices]
+
+        builder.repeat(300)
+
+        if third > 0:
+            builder.add(*[Instruction()] * third)
+            close_indices = [i + third for i in close_indices]
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        if fourth > 0:
+            builder.add(*[Instruction()] * fourth)
+            if not explicit_close:
+                close_indices[1] += fourth
+            close_indices[0] += fourth
+
+        if explicit_close:
+            builder.add(EndRepeat())
+
+        if fifth > 0:
+            builder.add(*[Instruction()] * fifth)
+            if not explicit_close:
+                close_indices = [i + fifth for i in close_indices]
+
+        ir = RepeatTranslation(TargetData.default()).run(builder)
+
+        self._check_loop_start(ir, start_indices)
+        self._check_loop_close(ir, close_indices, [1000, 300])
 
 
 class TestPydPhaseOptimisation:

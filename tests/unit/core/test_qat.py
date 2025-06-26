@@ -807,7 +807,7 @@ class TestQatEchoPipelines:
         assert isinstance(results, dict)
 
 
-@pytest.mark.experimental
+# @pytest.mark.experimental
 @pytest.mark.parametrize(
     "program_file",
     qasm2_files,  # TODO: update to mixed_files COMPILER-608
@@ -829,7 +829,7 @@ class TestExperimentalEchoPipelines:
     config = CompilerConfig(
         results_format=QuantumResultsFormat().binary_count(),
         repeats=TargetData.default().default_shots,
-        repetition_period=TargetData.default().QUBIT_DATA.passive_reset_time,
+        passive_reset_time=2e-08,
     )
     core: QAT = None
     stable_executables = {}

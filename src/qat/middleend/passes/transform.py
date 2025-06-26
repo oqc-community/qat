@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import itertools
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+from functools import singledispatchmethod
 
 import numpy as np
 from compiler_config.config import MetricsType
@@ -10,7 +11,24 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.ir.instructions import PhaseReset, PhaseShift, Repeat, Return
+from qat.ir.instruction_builder import (
+    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
+)
+from qat.ir.instructions import (
+    Assign,
+    EndRepeat,
+    GreaterThan,
+    Instruction,
+    Jump,
+    Label,
+    LoopCount,
+    PhaseReset,
+    PhaseShift,
+    Plus,
+    Repeat,
+    Return,
+    Variable,
+)
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse
 from qat.model.target_data import TargetData
@@ -22,6 +40,81 @@ from qat.purr.compiler.instructions import (
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+class RepeatTranslation(TransformPass):
+    """Transform :class:`Repeat` instructions so that they are replaced with:
+    :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
+    and :class:`Assign` and :class:`Jump` instructions at the end."""
+
+    def __init__(self, target_data: TargetData):
+        self.target_data = target_data
+
+    def run(
+        self, ir: PydQuantumInstructionBuilder, *args, **kwargs
+    ) -> PydQuantumInstructionBuilder:
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        handler = RepeatTranslationHandler()
+        for inst in ir.instructions:
+            handler.run(inst)
+
+        handler.close_repeats()
+
+        if getattr(ir, "passive_reset_time", None) is None:
+            ir.passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
+        ir.instructions = handler.instructions
+        return ir
+
+
+class RepeatTranslationHandler:
+    """
+    Handler used by PydRepeatTranslation to manage the translation of Repeat and EndRepeat instructions.
+    """
+
+    def __init__(self):
+        self.instructions: list[Instruction] = []
+        self.label_data: OrderedDict[Label, dict[str, Repeat | Variable]] = OrderedDict()
+
+    @singledispatchmethod
+    def run(self, instruction):
+        """
+        Default handler for instructions that do not have a specific repeat translation.
+        """
+        raise NotImplementedError(f"No repeat translation for {type(instruction)}")
+
+    @run.register(Instruction)
+    def _(self, instruction: Instruction):
+        self.instructions.append(instruction)
+
+    @run.register(Repeat)
+    def _(self, instruction: Repeat):
+        label = Label.with_random_name()
+        var = Variable(name=label.name + "_count", var_type=LoopCount)
+        assign = Assign(name=var.name, value=0)
+
+        self.instructions.extend([var, assign, label])
+        self.label_data[label.name] = {"repeat": instruction, "var": var}
+
+    @run.register(EndRepeat)
+    def _(self, instruction: EndRepeat):
+        if len(self.label_data) < 1:
+            raise ValueError("EndRepeat found without associated Repeat.")
+        label, data = self.label_data.popitem()
+        self.instructions.extend(self._close_repeat(label, data))
+
+    def close_repeats(self):
+        for label, data in reversed(self.label_data.items()):
+            self.instructions.extend(self._close_repeat(label, data))
+
+    @staticmethod
+    def _close_repeat(label: Label, data: dict):
+        # TODO: Adjust so that closing is done before finishing instructions such as
+        #   returns and postprocessing. COMPILER-452
+        repeat = data["repeat"]
+        var = data["var"]
+        assign = Assign(name=var.name, value=Plus(left=var, right=1))
+        jump = Jump(label=label, condition=GreaterThan(left=repeat.repeat_count, right=var))
+        return [assign, jump]
 
 
 class PhaseOptimisation(TransformPass):
@@ -261,3 +354,4 @@ PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
 PydBatchedShots = BatchedShots
+PydRepeatTranslation = RepeatTranslation

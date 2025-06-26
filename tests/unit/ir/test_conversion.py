@@ -301,11 +301,9 @@ class TestConvertToPydanticIRPass:
                 instructions.Repeat(215, passive_reset_time=0.5),
                 id="Repeat-with-passive_reset_time",
             ),
-            # TODO: Support `EndRepeat` in the pydantic stack.
             pytest.param(
                 instructions.EndRepeat(),
                 id="EndRepeat",
-                marks=pytest.mark.skip("EndRepeat not supported yet"),
             ),
             pytest.param(instructions.Return(), id="Return-no-args"),
             pytest.param(instructions.Return(["var_1", "var_2"]), id="Return-with-args"),

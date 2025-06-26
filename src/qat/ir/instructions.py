@@ -148,6 +148,9 @@ class Repeat(Instruction):
     repeat_count: Optional[int] = None
 
 
+class EndRepeat(Instruction): ...
+
+
 class Return(Instruction):
     """A statement defining what to return from a quantum execution."""
 
@@ -228,7 +231,7 @@ class Label(Instruction):
     name: str
 
     @staticmethod
-    def with_random_name(self):
+    def with_random_name():
         return Label(name=f"label_{uuid.uuid4()}")
 
 

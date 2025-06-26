@@ -42,6 +42,7 @@ from qat.middleend.passes.legacy.validation import (
 )
 from qat.middleend.passes.transform import (
     PydPhaseOptimisation,
+    PydRepeatTranslation,
     PydReturnSanitisation,
 )
 from qat.middleend.passes.validation import (
@@ -265,8 +266,8 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | InstructionLengthSanitisation(target_data)  # TODO: COMPILER-548
             | BatchedShots(target_data)  # TODO: COMPILER-543
             | ScopeSanitisation()
-            | RepeatTranslation(target_data)  # TODO: COMPILER-544
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydRepeatTranslation(target_data)
         )
 
 
