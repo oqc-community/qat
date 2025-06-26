@@ -807,7 +807,7 @@ class TestQatEchoPipelines:
         assert isinstance(results, dict)
 
 
-# @pytest.mark.experimental
+@pytest.mark.experimental
 @pytest.mark.parametrize(
     "program_file",
     qasm2_files,  # TODO: update to mixed_files COMPILER-608

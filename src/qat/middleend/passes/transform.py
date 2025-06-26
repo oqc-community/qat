@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import itertools
 from collections import OrderedDict, defaultdict
+from copy import deepcopy
 from functools import singledispatchmethod
 
 import numpy as np
@@ -11,11 +12,9 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.ir.instruction_builder import (
-    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
-)
 from qat.ir.instructions import (
     Assign,
+    Delay,
     EndRepeat,
     GreaterThan,
     Instruction,
@@ -30,7 +29,7 @@ from qat.ir.instructions import (
     Variable,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
-from qat.ir.waveforms import Pulse
+from qat.ir.waveforms import Pulse, SquareWaveform
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
     AcquireMode,
@@ -50,9 +49,7 @@ class RepeatTranslation(TransformPass):
     def __init__(self, target_data: TargetData):
         self.target_data = target_data
 
-    def run(
-        self, ir: PydQuantumInstructionBuilder, *args, **kwargs
-    ) -> PydQuantumInstructionBuilder:
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
         handler = RepeatTranslationHandler()
         for inst in ir.instructions:
@@ -260,6 +257,81 @@ class PostProcessingSanitisation(TransformPass):
         return True
 
 
+class InstructionLengthSanitisation(TransformPass):
+    """
+    Checks if quantum instructions are too long and splits if necessary.
+    """
+
+    def __init__(self, target_data: TargetData):
+        """
+        :param duration_limit: The maximum allowed clock cycles per instruction.
+
+        .. warning::
+
+            The pass will assume that the durations of instructions are sanitised to the
+            granularity of the pulse channels. If instructions that do not meet the criteria are
+            provided, it might produce incorrect instructions (i.e., instructions that are shorter than
+            the clock cycle). This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+            pass.
+        """
+        self.duration_limit = target_data.QUBIT_DATA.pulse_duration_max
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
+
+        new_instructions = []
+        for instr in ir.instructions:
+            if isinstance(instr, Delay) and instr.duration > self.duration_limit:
+                new_instructions.extend(self._batch_delay(instr, self.duration_limit))
+
+            elif (
+                isinstance(instr, Pulse)
+                and isinstance(instr.waveform, SquareWaveform)
+                and instr.waveform.width > self.duration_limit
+            ):
+                new_instructions.extend(
+                    self._batch_square_pulse(instr, self.duration_limit)
+                )
+            else:
+                new_instructions.append(instr)
+        ir.instructions = new_instructions
+        return ir
+
+    @staticmethod
+    def _batch_delay(instruction: Delay, max_duration: float):
+        n_instr = int(instruction.duration // max_duration)
+        remainder = instruction.duration % max_duration
+
+        batch_instr = []
+        for _ in range(n_instr):
+            batch_instr.append(Delay(target=instruction.targets, duration=max_duration))
+
+        if remainder > 0.0:
+            batch_instr.append(Delay(target=instruction.targets, duration=remainder))
+
+        return batch_instr
+
+    @staticmethod
+    def _batch_square_pulse(instruction: Pulse, max_width: float):
+        n_instr = int(instruction.waveform.width // max_width)
+        remainder = instruction.waveform.width % max_width
+
+        batch_instr = []
+        pulse = deepcopy(instruction)
+        pulse.update_duration(max_width)
+        for _ in range(n_instr):
+            batch_instr.append(deepcopy(pulse))
+
+        if remainder > 0.0:
+            pulse = deepcopy(pulse)
+            pulse.update_duration(remainder)
+            batch_instr.append(pulse)
+
+        return batch_instr
+
+
 class ReturnSanitisation(TransformPass):
     """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
     with all acquisitions if none is found."""
@@ -355,3 +427,4 @@ PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
 PydBatchedShots = BatchedShots
 PydRepeatTranslation = RepeatTranslation
+PydInstructionLengthSanitisation = InstructionLengthSanitisation

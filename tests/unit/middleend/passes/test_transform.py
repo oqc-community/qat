@@ -13,6 +13,7 @@ from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     Assign,
+    Delay,
     EndRepeat,
     GreaterThan,
     Instruction,
@@ -34,9 +35,10 @@ from qat.ir.measure import (
     PostProcessType,
     ProcessAxis,
 )
-from qat.ir.waveforms import GaussianWaveform, SquareWaveform
+from qat.ir.waveforms import GaussianWaveform, Pulse, SquareWaveform
 from qat.middleend.passes.transform import (
     BatchedShots,
+    InstructionLengthSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
     RepeatTranslation,
@@ -44,7 +46,12 @@ from qat.middleend.passes.transform import (
 )
 from qat.middleend.passes.validation import ReturnSanitisationValidation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
-from qat.model.target_data import AbstractTargetData, TargetData
+from qat.model.target_data import (
+    AbstractTargetData,
+    QubitDescription,
+    ResonatorDescription,
+    TargetData,
+)
 
 
 @pytest.mark.parametrize("explicit_close", [False, True])
@@ -380,6 +387,113 @@ class TestPydPostProcessingSanitisation:
         pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
         assert len(pp) == 2
         assert pp[0].output_variable != pp[1].output_variable
+
+
+@pytest.mark.parametrize("seed", [1, 2, 3, 4])
+class TestInstructionLengthSanitisation:
+    hw = PydEchoModelLoader(8).load()
+
+    def test_delay_not_sanitised(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+        pulse_ch = self.hw.qubit_with_index(0).acquire_pulse_channel
+
+        valid_duration = target_data.QUBIT_DATA.pulse_duration_max / 2
+        builder.add(Delay(target=pulse_ch.uuid, duration=valid_duration))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(target_data).run(builder)
+        assert len(builder.instructions) == 1
+        assert builder.instructions[0].duration == valid_duration
+
+    def test_delay_sanitised_zero_remainder(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+        pulse_ch = self.hw.qubit_with_index(0).acquire_pulse_channel
+
+        invalid_duration = target_data.QUBIT_DATA.pulse_duration_max * 2
+        builder.add(Delay(target=pulse_ch.uuid, duration=invalid_duration))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(target_data).run(builder)
+        assert len(builder.instructions) == 2
+        for instr in builder.instructions:
+            assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
+
+    def test_delay_sanitised(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+        pulse_ch = self.hw.qubit_with_index(0).acquire_pulse_channel
+
+        remainder = random.uniform(1e-06, 2e-06)
+        invalid_duration = target_data.QUBIT_DATA.pulse_duration_max * 2 + remainder
+        builder.add(Delay(target=pulse_ch.uuid, duration=invalid_duration))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(target_data).run(builder)
+        assert len(builder.instructions) == 3
+        for instr in builder.instructions[:-1]:
+            assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
+        assert math.isclose(builder.instructions[-1].duration, remainder)
+
+    def test_square_pulse_not_sanitised(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+        pulse_ch = self.hw.qubit_with_index(0).acquire_pulse_channel
+
+        valid_width = target_data.QUBIT_DATA.pulse_duration_max / 2
+        builder.add(Pulse(target=pulse_ch.uuid, waveform=SquareWaveform(width=valid_width)))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(target_data).run(builder)
+        assert len(builder.instructions) == 1
+        assert builder.instructions[0].waveform.width == valid_width
+
+    def test_square_pulse_sanitised(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed),
+        )
+        pulse_ch = self.hw.qubit_with_index(0).acquire_pulse_channel
+
+        remainder = random.uniform(1e-06, 2e-06)
+        invalid_width = target_data.QUBIT_DATA.pulse_duration_max * 2 + remainder
+        builder.add(
+            Pulse(target=pulse_ch.uuid, waveform=SquareWaveform(width=invalid_width))
+        )
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(target_data).run(builder)
+        assert len(builder.instructions) == 3
+
+        for instr in builder.instructions[:-1]:
+            assert instr.waveform.width == target_data.QUBIT_DATA.pulse_duration_max
+            assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
+        assert math.isclose(builder.instructions[-1].waveform.width, remainder)
+        assert math.isclose(builder.instructions[-1].duration, remainder)
 
 
 class TestPydReturnSanitisation:

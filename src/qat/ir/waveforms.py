@@ -206,6 +206,16 @@ class Pulse(QuantumInstruction):
     def __repr__(self):
         return f"{self.__class__.__name__} on targets {set(self.targets)} with {self.waveform}."
 
+    def update_duration(self, duration: float):
+        if isinstance(self.waveform, SquareWaveform):
+            self.duration = duration
+            self.waveform.width = duration
+        else:
+            raise ValueError(
+                f"{type(self.waveform)} does not support updating duration."
+                f"Can only apply with a SquareWaveform"
+            )
+
     @property
     def target(self):
         return next(iter(self.targets))
