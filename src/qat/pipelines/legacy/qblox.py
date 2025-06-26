@@ -3,7 +3,6 @@
 
 from qat.backend.qblox.codegen import QbloxBackend
 from qat.core.pass_base import PassManager
-from qat.core.pipeline import Pipeline
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import (
@@ -16,32 +15,83 @@ from qat.middleend.passes.legacy.validation import (
     ReadoutValidation,
 )
 from qat.model.target_data import TargetData
-from qat.pipelines.legacy.base import get_results_pipeline
+from qat.pipelines.legacy.base import LegacyPipeline
+from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.updateable import PipelineConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.utils.logger import get_default_logger
 from qat.runtime.legacy import LegacyRuntime
 
+log = get_default_logger()
 
-def get_middleend_pipeline(
-    model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
-) -> PassManager:
-    """Factory for creating middleend pipelines for Qblox legacy models.
 
-    Includes a list of passes that replicate the responsibilities of
-    :meth:`LiveDeviceEngine.optimize <qat.purr.backends.live.LiveDeviceEngine.optimize>` and
-    :meth:`LiveDeviceEngine.validate <qat.purr.backends.live.LiveDeviceEngine.validate>`.
+class LegacyQbloxPipelineConfig(PipelineConfig):
+    """Configuration for the :class:`LegacyQbloxPipeline`."""
 
-    :param model: The hardware model is required for ReadoutValidation.
-    :return: The pipeline as a pass manager.
+    name: str = "legacy_qblox"
+
+
+class LegacyQbloxPipeline(LegacyPipeline):
+    """A pipeline that compiles programs using the legacy qblox backend and executes them
+    using the :class:`LegacyRuntime`.
+
+    Implements a custom pipeline to make instructions suitable for the legacy qblox engine,
+    and cannot be configured with a custom engine.
     """
 
-    return (
-        PassManager()
-        | PhaseOptimisation()
-        | PostProcessingSanitisation()
-        | DeviceUpdateSanitisation()
-        | InstructionValidation(target_data)
-        | ReadoutValidation(model)
-    )
+    @staticmethod
+    def _build_pipeline(
+        config: LegacyQbloxPipelineConfig,
+        model: QuantumHardwareModel,
+        target_data: TargetData | None = None,
+        engine=None,
+    ) -> Pipeline:
+        if engine is not None:
+            log.warning(
+                "An engine was provided to the LegacyQbloxPipeline, but it will be ignored. "
+                "The legacy QbloxEngine is used directly."
+            )
+
+        target_data = target_data if target_data is not None else TargetData.default()
+        return Pipeline(
+            name=config.name,
+            model=model,
+            target_data=target_data,
+            frontend=AutoFrontend(model),
+            middleend=CustomMiddleend(
+                model,
+                pipeline=LegacyQbloxPipeline._middleend_pipeline(
+                    model=model, target_data=target_data
+                ),
+            ),
+            backend=QbloxBackend(model),
+            runtime=LegacyRuntime(
+                engine=model.create_engine(),
+                results_pipeline=LegacyQbloxPipeline._results_pipeline(model),
+            ),
+        )
+
+    @staticmethod
+    def _middleend_pipeline(
+        model: QuantumHardwareModel, target_data: TargetData | None = None
+    ) -> PassManager:
+        """Factory for creating middleend pipelines for Qblox legacy models.
+
+        Includes a list of passes that replicate the responsibilities of
+        :meth:`LiveDeviceEngine.optimize <qat.purr.backends.live.LiveDeviceEngine.optimize>` and
+        :meth:`LiveDeviceEngine.validate <qat.purr.backends.live.LiveDeviceEngine.validate>`.
+
+        :param model: The hardware model is required for ReadoutValidation.
+        :return: The pipeline as a pass manager.
+        """
+        return (
+            PassManager()
+            | PhaseOptimisation()
+            | PostProcessingSanitisation()
+            | DeviceUpdateSanitisation()
+            | InstructionValidation(target_data)
+            | ReadoutValidation(model)
+        )
 
 
 def get_pipeline(model: QuantumHardwareModel, name: str = "legacy_qblox") -> Pipeline:
@@ -52,14 +102,6 @@ def get_pipeline(model: QuantumHardwareModel, name: str = "legacy_qblox") -> Pip
     :param name: The name of the pipeline, defaults to "legacy_qblox"
     :return: The complete pipeline, including the runtime and engine.
     """
-
-    engine = model.create_engine()
-
-    return Pipeline(
-        name=name,
-        frontend=AutoFrontend(model),
-        middleend=CustomMiddleend(model, pipeline=get_middleend_pipeline(model)),
-        backend=QbloxBackend(model),
-        runtime=LegacyRuntime(engine=engine, results_pipeline=get_results_pipeline(model)),
-        model=model,
-    )
+    return LegacyQbloxPipeline(
+        config=LegacyQbloxPipelineConfig(name=name), model=model
+    ).pipeline
