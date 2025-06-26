@@ -178,6 +178,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
@@ -1372,6 +1373,8 @@
       </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.close_logger">close_logger() (in module qat.purr.utils.logger)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslationHandler.close_repeats">close_repeats() (RepeatTranslationHandler method)</a>
+</li>
       <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.CloudQasmParser">CloudQasmParser (class in qat.frontend.parsers.qasm.qasm2)</a>
 
       <ul>
@@ -1542,14 +1545,14 @@
 </li>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_connection">configure_connection() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_lo">configure_lo() (QcmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_lo">[1]</a>
 
       <ul>
         <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_lo">(QrmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_lo">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_mixer">configure_mixer() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_mixer">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_module">configure_module() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_module">[1]</a>
@@ -2368,8 +2371,12 @@
       </ul></li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EndOfTaskResetSanitisation">EndOfTaskResetSanitisation (class in qat.middleend.passes.legacy.transform)</a>
 </li>
-      <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndRepeat">EndRepeat (class in qat.purr.compiler.instructions)</a>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.EndRepeat">EndRepeat (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndRepeat">(class in qat.purr.compiler.instructions)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndSweep">EndSweep (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline.engine">engine (AbstractPipeline property)</a>
@@ -2422,10 +2429,10 @@
       </ul></li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_repeat">enter_repeat() (NewQbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_repeat">[1]</a>
 </li>
-      <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">[1]</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Equals">Equals (class in qat.ir.instructions)</a>
 
       <ul>
@@ -3605,6 +3612,8 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslation.run.params.ir">(qat.middleend.passes.transform.RepeatTranslation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation.run.params.ir">(qat.middleend.passes.transform.ReturnSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.NoMidCircuitMeasurementValidation.run.params.ir">(qat.middleend.passes.validation.NoMidCircuitMeasurementValidation.run parameter)</a>
@@ -4595,6 +4604,8 @@
 </li>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ECR.model_config">(ECR attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.EndRepeat.model_config">(EndRepeat attribute)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Equals.model_config">(Equals attribute)</a>
 </li>
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.model_config">(ErrorMitigation attribute)</a>
@@ -5107,6 +5118,8 @@
         <li><a href="qat.ir.measure.html#module-qat.ir.measure">qat.ir.measure</a>
 </li>
         <li><a href="qat.ir.qat_ir.html#module-qat.ir.qat_ir">qat.ir.qat_ir</a>
+</li>
+        <li><a href="qat.ir.utils.html#module-qat.ir.utils">qat.ir.utils</a>
 </li>
         <li><a href="qat.ir.waveforms.html#module-qat.ir.waveforms">qat.ir.waveforms</a>
 </li>
@@ -6517,6 +6530,8 @@
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.PydQuantumInstructionBuilder">PydQuantumInstructionBuilder (in module qat.ir.instruction_builder)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydRepeatTranslation">PydRepeatTranslation (in module qat.middleend.passes.transform)</a>
+</li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation">PydReturnSanitisation (in module qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReturnSanitisationValidation">PydReturnSanitisationValidation (in module qat.middleend.passes.validation)</a>
@@ -7205,6 +7220,13 @@
 
       <ul>
         <li><a href="qat.ir.qat_ir.html#module-qat.ir.qat_ir">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.ir.utils
+
+      <ul>
+        <li><a href="qat.ir.utils.html#module-qat.ir.utils">module</a>
 </li>
       </ul></li>
       <li>
@@ -8645,6 +8667,12 @@
       <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.RepeatSanitisationValidation">RepeatSanitisationValidation (class in qat.middleend.passes.legacy.validation)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation">RepeatTranslation (class in qat.middleend.passes.legacy.transform)</a>
+
+      <ul>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslation">(class in qat.middleend.passes.transform)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslationHandler">RepeatTranslationHandler (class in qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.repetition_time">repetition_time (qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 
@@ -9175,7 +9203,9 @@
 </li>
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.RepeatSanitisationValidation.run">(RepeatSanitisationValidation method)</a>
 </li>
-        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation.run">(RepeatTranslation method)</a>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.RepeatTranslation.run">(RepeatTranslation method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslation.run">[1]</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslationHandler.run">(RepeatTranslationHandler method)</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.ResetsToDelays.run">(ResetsToDelays method)</a>
 </li>

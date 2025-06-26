@@ -26,4 +26,5 @@ Submodules
    qat.ir.lowered
    qat.ir.measure
    qat.ir.qat_ir
+   qat.ir.utils
    qat.ir.waveforms
