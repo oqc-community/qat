@@ -3,6 +3,7 @@
 
 import math
 import random
+from collections import defaultdict
 
 import numpy as np
 import pytest
@@ -43,6 +44,8 @@ from qat.middleend.passes.transform import (
     PostProcessingSanitisation,
     RepeatTranslation,
     ReturnSanitisation,
+    ScopeSanitisation,
+    SquashDelaysOptimisation,
 )
 from qat.middleend.passes.validation import ReturnSanitisationValidation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
@@ -595,3 +598,111 @@ class TestPydBatchedShots:
         num_batches = np.ceil(ir.shots / ir.compiled_shots)
         assert num_batches * ir.compiled_shots >= num_shots
         assert (num_batches - 1) * ir.compiled_shots < num_shots
+
+
+class TestSquashDelaysOptimisation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader().load()
+
+    @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
+    @pytest.mark.parametrize("with_phase", [True, False])
+    def test_multiple_delays_on_one_channel(self, num_delays, with_phase, model):
+        delay_times = np.random.rand(num_delays)
+
+        drive_pulse_ch = model.qubit_with_index(0).drive_pulse_channel
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        for delay in delay_times:
+            builder.delay(target=drive_pulse_ch, duration=delay)
+            if with_phase:
+                builder.phase_shift(target=drive_pulse_ch, theta=np.random.rand())
+
+        builder = SquashDelaysOptimisation().run(builder, ResultManager(), MetricsManager())
+        assert builder.number_of_instructions == 1 + with_phase * num_delays
+        delay_instructions = [
+            inst for inst in builder.instructions if isinstance(inst, Delay)
+        ]
+        assert len(delay_instructions) == 1
+        assert np.isclose(delay_instructions[0].duration, sum(delay_times))
+
+    @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
+    @pytest.mark.parametrize("with_phase", [True, False])
+    def test_multiple_delays_on_multiple_channels(self, num_delays, with_phase, model):
+        pulse_channels = [qubit.drive_pulse_channel for qubit in model.qubits.values()]
+        num_pulse_ch = len(pulse_channels)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        accumulated_delays = defaultdict(float)
+        for _ in range(num_delays):
+            random.shuffle(pulse_channels)
+            for pulse_ch in pulse_channels:
+                delay = np.random.rand()
+                accumulated_delays[pulse_ch.uuid] += delay
+                builder.delay(pulse_ch, delay)
+                if with_phase:
+                    builder.phase_shift(pulse_ch, np.random.rand())
+
+        builder = SquashDelaysOptimisation().run(builder, ResultManager(), MetricsManager())
+        assert (
+            builder.number_of_instructions == (1 + with_phase * num_delays) * num_pulse_ch
+        )
+        delay_instructions = [
+            inst for inst in builder.instructions if isinstance(inst, Delay)
+        ]
+        assert len(delay_instructions) == num_pulse_ch
+        for delay in delay_instructions:
+            assert delay.duration == accumulated_delays[delay.target]
+
+    def test_optimize_with_pulse(self, model):
+        delay_times = np.random.rand(5)
+
+        pulse_ch = model.qubit_with_index(0).drive_pulse_channel
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.delay(pulse_ch, delay_times[0])
+        builder.delay(pulse_ch, delay_times[1])
+        builder.pulse(target=pulse_ch.uuid, waveform=SquareWaveform(width=80e-9))
+        builder.delay(pulse_ch, delay_times[2])
+        builder.delay(pulse_ch, delay_times[3])
+        builder.delay(pulse_ch, delay_times[4])
+        builder = SquashDelaysOptimisation().run(builder, ResultManager(), MetricsManager())
+        assert builder.number_of_instructions == 3
+        assert isinstance(builder.instructions[0], Delay)
+        assert np.isclose(builder.instructions[0].duration, np.sum(delay_times[0:2]))
+        assert isinstance(builder.instructions[1], Pulse)
+        assert isinstance(builder.instructions[2], Delay)
+        assert np.isclose(builder.instructions[2].duration, np.sum(delay_times[2:5]))
+
+    def test_delay_with_multiple_channels(self, model):
+        delay_times = np.random.rand(2)
+
+        pulse_ch1 = model.qubit_with_index(0).drive_pulse_channel
+        pulse_ch2 = model.qubit_with_index(0).measure_pulse_channel
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.add(Delay(target=pulse_ch1.uuid, duration=5))
+        builder.add(Delay(target=pulse_ch2.uuid, duration=5))
+        builder.delay(pulse_ch1, delay_times[0])
+        builder.delay(pulse_ch2, delay_times[1])
+        builder = SquashDelaysOptimisation().run(builder, ResultManager(), MetricsManager())
+        assert builder.number_of_instructions == 2
+        assert builder.instructions[0].duration == 5 + delay_times[0]
+        assert builder.instructions[1].duration == 5 + delay_times[1]
+
+
+class TestScopeSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader().load()
+
+    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
+    def test_repeats_are_shifted_to_the_beginning(self, num_repeats, model):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.X(model.qubit_with_index(0))
+        for i in range(num_repeats):
+            builder.repeat(i + 1)
+        builder = ScopeSanitisation().run(builder)
+
+        for i in range(num_repeats):
+            assert isinstance(builder.instructions[i], Repeat)
+            assert builder.instructions[i].repeat_count == i + 1

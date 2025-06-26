@@ -7,6 +7,7 @@ from functools import singledispatchmethod
 
 import numpy as np
 from compiler_config.config import MetricsType
+from more_itertools import partition
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
@@ -22,8 +23,10 @@ from qat.ir.instructions import (
     Label,
     LoopCount,
     PhaseReset,
+    PhaseSet,
     PhaseShift,
     Plus,
+    QuantumInstruction,
     Repeat,
     Return,
     Variable,
@@ -422,9 +425,99 @@ class BatchedShots(TransformPass):
         return ir
 
 
+class SquashDelaysOptimisation(TransformPass):
+    """Looks for consecutive :class:`Delay` instructions on a pulse channel and squashes
+    them into a single instruction.
+
+    Because :class:`Synchronize` instructions across multiple pulse channels are used so
+    frequently to ensure pulses play at the correct timings, it means we can have sequences
+    of many delays. Reducing the number of delays will simplify timing analysis later in
+    the compilation.
+
+    :class:`Delay` instructions commute with phase related instructions, so the only
+    instructions that separate delays in a meaningful way are: :class:`Pulse`:,
+    :class:`CustomPulse` and :class:`Acquire` instructions. We also need to be careful to
+    not squash delays that contain a variable time.
+    """
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to save the analysis results.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
+        delimiter_types = (
+            Acquire,
+            Assign,
+            Delay,
+            Jump,
+            Label,
+            PhaseReset,
+            PhaseSet,
+            Pulse,
+        )
+        accumulated_delays: dict[str, float] = defaultdict(float)
+        instructions: list[Instruction] = []
+        for inst in ir:
+            if isinstance(inst, Delay):
+                accumulated_delays[inst.target] += inst.duration
+
+            elif isinstance(inst, delimiter_types):
+                if isinstance(inst, QuantumInstruction):
+                    targets = {inst.target}
+                else:
+                    targets = accumulated_delays.keys()
+                for target in targets:
+                    if (duration := accumulated_delays[target]) > 0.0:
+                        instructions.append(Delay(target=target, duration=duration))
+                        accumulated_delays[target] = 0.0
+                instructions.append(inst)
+            else:
+                instructions.append(inst)
+
+        for target, duration in accumulated_delays.items():
+            if duration != 0.0:
+                instructions.append(Delay(target=target, duration=duration))
+        ir.instructions = instructions
+
+        met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(instructions))
+        return ir
+
+
+class ScopeSanitisation(TransformPass):
+    """Bubbles up all sweeps and repeats to the beginning of the list and adds delimiter
+    instructions to the repeats and sweeps signifying the end of their scopes.
+
+    .. warning::
+
+        This pass is intended for use with legacy builders that do not use
+        :class:`EndRepeat` and :class:`EndSweep` instructions. It will add a delimiter
+        instruction for each :class:`Repeat` and :class:`Sweep` found in the IR.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        tail, head = partition(lambda inst: isinstance(inst, Repeat), ir.instructions)
+        tail, head = list(tail), list(head)
+
+        ir.instructions = head + tail
+        return ir
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
 PydBatchedShots = BatchedShots
+PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
+PydScopeSanitisation = ScopeSanitisation
