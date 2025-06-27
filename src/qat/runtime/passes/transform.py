@@ -13,6 +13,7 @@ from compiler_config.config import (
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.ir.instructions import Variable
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -211,7 +212,7 @@ class ErrorMitigation(TransformPass):
     Extracted from :meth:`qat.purr.compiler.runtime.QuantumRuntime._apply_error_mitigation`.
     """
 
-    def __init__(self, hardware_model: QuantumHardwareModel):
+    def __init__(self, hardware_model: QuantumHardwareModel | PhysicalHardwareModel):
         """
         :param hardware_model: The hardware model contains the error mitigation properties.
         """

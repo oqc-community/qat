@@ -33,9 +33,11 @@ from qat.purr.compiler.instructions import (
     Jump,
     PostProcessing,
     Pulse,
+    QuantumInstruction,
     Repeat,
     Reset,
     ResultsProcessing,
+    Synchronize,
     Variable,
 )
 
@@ -280,6 +282,7 @@ class ConvertToPydanticIR(TransformPass):
 
     @_convert_element.register(Instruction)
     @_convert_element.register(BinaryOperator)
+    @_convert_element.register(Synchronize)
     def _(
         self,
         value: Instruction | BinaryOperator,
@@ -296,6 +299,38 @@ class ConvertToPydanticIR(TransformPass):
         pyd_class = self._get_pyd_class(value)
         return pyd_class(**data)
 
+    @_convert_element.register(QuantumInstruction)
+    def _(self, value: QuantumInstruction):
+        """Convert a QuantumInstruction instance."""
+        data = dict()
+        for name, var in vars(value).items():
+            if name == "quantum_targets":
+                targets = self._convert_element(var)
+            elif name == "time":
+                data["duration"] = self._convert_element(var)
+            else:
+                data[name] = self._convert_element(var)
+        pyd_class = self._get_pyd_class(value)
+        return [pyd_class(target=target, **data) for target in targets]
+
+    @_convert_element.register(Reset)
+    def _(self, value: Reset):
+        """Convert a Reset instance."""
+        qubit_targets = set(
+            [
+                self._pulse_channel_to_qubit_index_map[target.id]
+                for target in value.quantum_targets
+            ]
+        )
+        duration = self._convert_element(value.duration)
+        return [
+            pyd_instructions.Reset(
+                qubit_target=target,
+                duration=duration,
+            )
+            for target in qubit_targets
+        ]
+
     @_convert_element.register(InstructionBlock)
     def _(
         self,
@@ -310,7 +345,7 @@ class ConvertToPydanticIR(TransformPass):
             )
         new_block = pyd_class(**extra_data)
         for instruction in value.instructions:
-            new_block.add(self._convert_element(instruction))
+            new_block.add(*self._convert_element(instruction))
         return new_block
 
     @_convert_element.register(Repeat)
@@ -327,27 +362,6 @@ class ConvertToPydanticIR(TransformPass):
                 data[name] = self._convert_element(var)
         self._additional_data.update(data)
         return repeat
-
-    @_convert_element.register(Reset)
-    def _(
-        self,
-        value: Reset,
-    ):
-        """Convert a Reset instance."""
-        qubit_targets = set(
-            [
-                self._pulse_channel_to_qubit_index_map[target.id]
-                for target in value.quantum_targets
-            ]
-        )
-        duration = self._convert_element(value.duration)
-        return [
-            pyd_instructions.Reset(
-                qubit_targets=target,
-                duration=duration,
-            )
-            for target in qubit_targets
-        ]
 
     @_convert_element.register(ResultsProcessing)
     @_convert_element.register(PostProcessing)

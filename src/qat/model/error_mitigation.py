@@ -4,6 +4,7 @@
 from typing import Optional
 
 import numpy as np
+from numpy.typing import NDArray
 from pydantic import ConfigDict, field_validator
 
 from qat.utils.pydantic import (
@@ -30,9 +31,11 @@ class ReadoutMitigation(NoExtraFieldsModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     linear: FrozenDict[QubitId, CalibratableUnitInterval2x2Array]
+    matrix: NDArray | None = None
     m3_available: bool = False
 
     @field_validator("linear")
+    @classmethod
     def validate_linear(cls, linear):
         for qubit_idx, qubit_map in linear.items():
             if not np.allclose(np.sum(qubit_map, axis=0), np.ones(qubit_map.shape[0])):

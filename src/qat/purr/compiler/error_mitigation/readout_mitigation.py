@@ -95,7 +95,8 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
                     probability * inv_noise_matrix[other_bit_value, bit_value]
                 )
 
-        # TODO - check validity of ignoring negative probabilities
+        # TODO - for 1 qubit, setting negative value to 0 is fine. If we want to support multiple qubits in the future,
+        #  we need to normalize the results following Subproblem 1 in https://arxiv.org/pdf/1106.5458
         corrected_results = {
             key: probability
             for key, probability in corrected_results.items()

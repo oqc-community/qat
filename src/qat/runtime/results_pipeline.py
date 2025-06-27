@@ -50,5 +50,5 @@ def get_experimental_results_pipeline(
         | AssignResultsTransform()
         | ResultTransform()
         | PydIndexMappingAnalysis(pyd_model)
-        | ErrorMitigation(model)  # TODO: COMPILER-607
+        | ErrorMitigation(pyd_model)
     )

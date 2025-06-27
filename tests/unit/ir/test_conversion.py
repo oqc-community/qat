@@ -394,7 +394,12 @@ class TestConvertToPydanticIRPass:
         channel = self.legacy_model.get_pulse_channel_from_id(channel_id)
         legacy_inst = instruction_type(channel, **inst_data)
         converted_inst = self.converter_pass._convert_element(legacy_inst)
-        self._check_conversion(legacy_inst, converted_inst)  # Ensure all fields match
+        if isinstance(converted_inst, list):
+            # If the converted instruction is a list, it means it has been split into multiple instructions.
+            for conv_inst in converted_inst:
+                self._check_conversion(legacy_inst, conv_inst)
+        else:
+            self._check_conversion(legacy_inst, converted_inst)  # Ensure all fields match
 
     @pytest.mark.parametrize(
         "targets",
