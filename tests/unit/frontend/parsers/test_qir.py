@@ -3,6 +3,8 @@
 import pytest
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
+from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.ir.instructions import Return
 from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
 from qat.purr.backends.echo import apply_setup_to_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -52,3 +54,16 @@ class TestQIRParser:
         assert count_number_of_non_sync_non_phase_reset_instructions(
             pyd_builder._ir
         ) == count_number_of_non_sync_non_phase_reset_instructions(leg_builder.instructions)
+
+    def test_results_variables_are_cleaned(self):
+        parser = PydQIRParser(pyd_hw_model)
+        qir_string = _get_qir_path("bell_psi_plus.ll")
+        builder = parser.parse(qir_string)
+        assert isinstance(builder, QuantumInstructionBuilder)
+        assert parser.result_variables == []
+        return_insts = [inst for inst in builder.instructions if isinstance(inst, Return)]
+        assert len(return_insts) > 0
+        vars = []
+        for inst in return_insts:
+            vars.extend(inst.variables)
+        assert len(vars) > 0

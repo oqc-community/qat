@@ -243,4 +243,5 @@ class QIRParser:
 
             complete_builder = self.builder
             self.builder = get_builder(self.hardware)
+            self.result_variables = []
             return complete_builder

@@ -231,4 +231,5 @@ class QIRParser:
 
             complete_builder = self.builder
             self.builder = QuantumInstructionBuilder(self.hw_model)
+            self.result_variables = []
             return complete_builder
