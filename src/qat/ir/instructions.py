@@ -54,6 +54,9 @@ class Instruction(AllowExtraFieldsModel):
     def __iter__(self):
         yield self
 
+    def __reversed__(self):
+        yield self
+
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
@@ -82,8 +85,14 @@ class InstructionBlock(Instruction, Iterable):
                 self.instructions.append(instruction)
 
     def __iter__(self):
+        """Iterator over the flattened instructions in the block."""
         for instruction in self.instructions:
             yield from instruction
+
+    def __reversed__(self):
+        """Reversed iterator over the flattened instructions in the block."""
+        for instruction in reversed(self.instructions):
+            yield from reversed(instruction)
 
     @property
     def number_of_instructions(self):

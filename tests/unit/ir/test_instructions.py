@@ -115,6 +115,34 @@ class TestInstructionBlock:
         for instr, ref_instr in zip(comp_instr, instructions):
             assert instr == ref_instr
 
+    def test_iterator(self):
+        comp_instr = InstructionBlock()
+
+        instructions = [
+            Instruction(),
+            PhaseShift(target=None),
+            Delay(target=None),
+            InstructionBlock(
+                instructions=[Instruction(), Delay(target=None), Instruction()]
+            ),
+        ]
+        comp_instr.add(*instructions)
+
+        ref_instr = [
+            Instruction(),
+            PhaseShift(target=None),
+            Delay(target=None),
+            Instruction(),
+            Delay(target=None),
+            Instruction(),
+        ]
+
+        for instr, ref_instr in zip(comp_instr, ref_instr):
+            assert instr == ref_instr
+
+        for instr, ref_instr in zip(reversed(comp_instr), reversed(ref_instr)):
+            assert instr == ref_instr
+
 
 class TestRepeat:
     @pytest.mark.parametrize("repeat_count", [0, 10, 1024])

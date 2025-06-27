@@ -89,8 +89,11 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._ids_to_physical_channels = {}
         self._pulse_channel_ids_to_physical_channel = {}
         self._pulse_channel_ids_to_device = {}
+        self._qubits_to_qubit_ids = {}
 
-        for qubit in self.qubits.values():
+        for qubit_id, qubit in self.qubits.items():
+            self._qubits_to_qubit_ids[qubit] = qubit_id
+
             for device in [qubit, qubit.resonator]:
                 phys_channel = device.physical_channel
                 self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
@@ -233,6 +236,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     def qubit_with_index(self, index: int | QubitId) -> Qubit:
         return self.qubits[index]
+
+    def index_of_qubit(self, qubit: Qubit) -> QubitId:
+        """Returns the index of the given qubit in the hardware model."""
+        return self._qubits_to_qubit_ids.get(qubit, None)
 
     def pulse_channel_with_id(self, id_: str):
         return self._ids_to_pulse_channels.get(id_, None)

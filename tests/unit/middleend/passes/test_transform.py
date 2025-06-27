@@ -41,6 +41,7 @@ from qat.ir.waveforms import GaussianWaveform, Pulse, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.transform import (
     BatchedShots,
+    EndOfTaskResetSanitisation,
     InstructionLengthSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
@@ -836,3 +837,113 @@ class TestScopeSanitisation:
         for i in range(num_repeats):
             assert isinstance(builder.instructions[i], Repeat)
             assert builder.instructions[i].repeat_count == i + 1
+
+
+class TestEndOfTaskResetSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader().load()
+
+    @pytest.mark.parametrize("reset_q1", [False, True])
+    @pytest.mark.parametrize("reset_q2", [False, True])
+    def test_resets_added(self, reset_q1, reset_q2, model):
+        qubits = [model.qubit_with_index(0), model.qubit_with_index(1)]
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.had(qubits[0])
+        builder.cnot(*qubits)
+        builder.measure(qubits[0])
+        builder.measure(qubits[1])
+        if reset_q1:
+            builder.reset(qubits[0])
+        if reset_q2:
+            builder.reset(qubits[1])
+
+        res = ActivePulseChannelResults()
+        for qubit in qubits:
+            res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+            res.target_map[qubit.measure_pulse_channel.uuid] = qubit
+            res.target_map[qubit.acquire_pulse_channel.uuid] = qubit
+        res.target_map[qubits[0].cross_resonance_pulse_channels[1].uuid] = qubits[0]
+        res.target_map[qubits[1].cross_resonance_cancellation_pulse_channels[0].uuid] = (
+            qubits[1]
+        )
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = builder.number_of_instructions
+        builder = EndOfTaskResetSanitisation(model).run(builder, res_mgr)
+        assert before + (not reset_q1) + (not reset_q2) == builder.number_of_instructions
+
+        reset_qubits = [
+            inst.qubit_target for inst in builder.instructions if isinstance(inst, Reset)
+        ]
+        assert len(reset_qubits) == 2
+        assert set(reset_qubits) == {0, 1}
+
+    def test_mid_circuit_reset_is_ignored(self, model):
+        qubit = model.qubit_with_index(0)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.had(qubit)
+        builder.reset(qubit)
+        builder.had(qubit)
+
+        res = ActivePulseChannelResults()
+        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = builder.number_of_instructions
+        builder = EndOfTaskResetSanitisation(model).run(builder, res_mgr)
+        assert before + 1 == builder.number_of_instructions
+
+        reset_qubits = [inst.qubit_target for inst in builder if isinstance(inst, Reset)]
+        # Only the first qubit is active.
+        assert len(reset_qubits) == 2
+        assert set(reset_qubits) == {0}
+
+    def test_inactive_instruction_after_reset_ignored(self, model):
+        qubit = model.qubit_with_index(0)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.had(qubit)
+        builder.reset(qubit)
+        # Phase shift is a 'virtual' (non-pulse based) instruction,
+        # so should not trigger a new `Reset` instruction.
+        builder.phase_shift(qubit.drive_pulse_channel, np.pi)
+
+        res = ActivePulseChannelResults()
+        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = builder.number_of_instructions
+        builder = EndOfTaskResetSanitisation(model).run(builder, res_mgr)
+        assert before == len(builder.instructions)
+
+        reset_qubits = [inst.qubit_target for inst in builder if isinstance(inst, Reset)]
+        assert len(reset_qubits) == 1
+        assert reset_qubits == [0]
+
+    def test_reset_with_no_drive_channel(self, model):
+        qubit = model.qubit_with_index(0)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.pulse(
+            target=qubit.measure_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
+        )
+
+        res = ActivePulseChannelResults()
+        res.target_map[qubit.measure_pulse_channel.uuid] = qubit
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        builder = EndOfTaskResetSanitisation(model).run(builder, res_mgr)
+        reset_instrs = [instr for instr in builder if isinstance(instr, Reset)]
+        assert len(reset_instrs) == 1
+        assert reset_instrs[0].qubit_target == 0
