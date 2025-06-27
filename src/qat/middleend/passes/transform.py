@@ -28,11 +28,14 @@ from qat.ir.instructions import (
     Plus,
     QuantumInstruction,
     Repeat,
+    Reset,
     Return,
     Variable,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse, SquareWaveform
+from qat.middleend.passes.analysis import ActivePulseChannelResults
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
     AcquireMode,
@@ -425,6 +428,53 @@ class BatchedShots(TransformPass):
         return ir
 
 
+class ResetsToDelays(TransformPass):
+    """
+    Transforms :class:`Reset` operations to :class:`Delay`s.
+
+    Note that the delays do not necessarily agree with the granularity of the underlying target machine.
+    This can be enforced using the :class:`InstructionGranularitySanitisation` pass.
+    """
+
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param target_data: Target-related information.
+        """
+        self.model = model
+        self.passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+        active_pulse_channels: ActivePulseChannelResults = res_mgr.lookup_by_type(
+            ActivePulseChannelResults
+        )
+        print(active_pulse_channels)
+
+        new_instructions = []
+        for instr in ir:
+            if isinstance(instr, Reset):
+                qubit = self.model.qubits[instr.qubit_target]
+                for pulse_ch in active_pulse_channels.from_qubit(qubit):
+                    new_instructions.append(
+                        Delay(
+                            target=pulse_ch.uuid,
+                            duration=self.passive_reset_time,
+                        )
+                    )
+
+            else:
+                new_instructions.append(instr)
+
+        ir.instructions = new_instructions
+        return ir
+
+
 class SquashDelaysOptimisation(TransformPass):
     """Looks for consecutive :class:`Delay` instructions on a pulse channel and squashes
     them into a single instruction.
@@ -517,6 +567,7 @@ PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
 PydBatchedShots = BatchedShots
+PydResetsToDelays = ResetsToDelays
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
