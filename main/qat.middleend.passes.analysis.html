@@ -20,7 +20,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.middleend.passes.transform module" href="qat.middleend.passes.transform.html" />
+    <link rel="prev" title="qat.middleend.passes.legacy.validation module" href="qat.middleend.passes.legacy.validation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,7 +46,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
@@ -53,8 +55,8 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">src</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.html">qat package</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.legacy.html">qat.backend.passes.legacy package</a><ul>
@@ -183,14 +185,14 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="qat.middleend.decompositions.html">qat.middleend.decompositions package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.base.html">qat.middleend.decompositions.base module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.gates.html">qat.middleend.decompositions.gates module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.pulses.html">qat.middleend.decompositions.pulses module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.middleend.passes.html">qat.middleend.passes package</a><ul>
+<li class="toctree-l4 current"><a class="reference internal" href="qat.middleend.passes.html">qat.middleend.passes package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.gates.html">qat.middleend.passes.gates package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.transform.html">qat.middleend.passes.gates.transform module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.validation.html">qat.middleend.passes.gates.validation module</a></li>
@@ -202,6 +204,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html">qat.middleend.passes.legacy.validation module</a></li>
 </ul>
 </li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">qat.middleend.passes.analysis module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
@@ -386,6 +389,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.middleend.html">qat.middleend package</a></li>
+          <li class="breadcrumb-item"><a href="qat.middleend.passes.html">qat.middleend.passes package</a></li>
       <li class="breadcrumb-item active">qat.middleend.passes.analysis module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/qat.middleend.passes.analysis.rst.txt" rel="nofollow"> View page source</a>
@@ -398,15 +405,68 @@
              
 
 
-  <section id="qat-middleend-passes-analysis-module">
-<h1>qat.middleend.passes.analysis module<a class="headerlink" href="#qat-middleend-passes-analysis-module" title="Link to this heading"></a></h1>
+  <section id="module-qat.middleend.passes.analysis">
+<span id="qat-middleend-passes-analysis-module"></span><h1>qat.middleend.passes.analysis module<a class="headerlink" href="#module-qat.middleend.passes.analysis" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActivePulseChannelResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unassigned=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Stores the active pulse channels in a task, which is defined by pulse channels that
+are acted on by a pulse or acquisition.</p>
+<p>Results are stored as a map between pulse channels and the qubit they belong to. Rogue
+pulse channels are stored in the <cite>unassigned</cite> attribute. Various helper properties
+and methods can be used to fetch the complete lists of active pulse channels and qubits.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.from_qubit">
+<span class="sig-name descname"><span class="pre">from_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.from_qubit" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of pulse channels that belong to a qubit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannel" title="qat.model.device.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.physical_qubit_indices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_qubit_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.physical_qubit_indices" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of all active physical qubit indices.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.qubits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><span class="pre">Qubit</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.qubits" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of all active qubits.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.target_map">
+<span class="sig-name descname"><span class="pre">target_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.target_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.targets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannel" title="qat.model.device.PulseChannel"><span class="pre">PulseChannel</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.targets" title="Link to this definition"></a></dt>
+<dd><p>Returns a dictionary of all pulse channels with their full id as a key.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.analysis.ActivePulseChannelResults.unassigned">
+<span class="sig-name descname"><span class="pre">unassigned</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.middleend.passes.analysis.ActivePulseChannelResults.unassigned" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.middleend.passes.legacy.validation.html" class="btn btn-neutral float-left" title="qat.middleend.passes.legacy.validation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.middleend.passes.transform.html" class="btn btn-neutral float-right" title="qat.middleend.passes.transform module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
