@@ -588,6 +588,8 @@
         <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Sequence.acquisitions">(Sequence attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.acquisitions">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.active">active (FreqShiftPulseChannel attribute)</a>
+</li>
       <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.active_targets">active_targets (TriageResult attribute)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults">ActiveChannelResults (class in qat.middleend.passes.legacy.analysis)</a>
@@ -656,7 +658,7 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.add_ecr">add_ecr() (Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_ecr">[1]</a>
 </li>
-      <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.add_freq_shift_to_ir">add_freq_shift_to_ir() (FreqShiftSanitisation static method)</a>
+      <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.add_freq_shift_to_ir">add_freq_shift_to_ir() (FreqShiftSanitisation static method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.add_freq_shift_to_ir">[1]</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.add_if">add_if() (Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_if">[1]</a>
 </li>
@@ -745,6 +747,8 @@
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.amp">amp (CalibratablePulse attribute)</a>
 
       <ul>
+        <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.amp">(FreqShiftPulseChannel attribute)</a>
+</li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.amp">(SetupHoldFunction attribute)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.amp">(Waveform attribute)</a>
@@ -2219,6 +2223,8 @@
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.duration">(SampledWaveform property)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.duration">(Synchronize attribute)</a>
+</li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.duration">(Waveform property)</a>
 </li>
       </ul></li>
@@ -2720,10 +2726,10 @@
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.freq_shift">(QubitPulseChannels attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.freq_shift_pulse_channel">freq_shift_pulse_channel (Qubit property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.model.device)</a>
 
       <ul>
@@ -2733,7 +2739,11 @@
       <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.validate_frequency_ranges.params.freqshifts">freqshifts (qat.middleend.passes.legacy.validation.FrequencyValidation.validate_frequency_ranges parameter)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation">FreqShiftSanitisation (class in qat.middleend.passes.legacy.transform)</a>
+
+      <ul>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation">(class in qat.middleend.passes.transform)</a>
 </li>
+      </ul></li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.IntermediateFrequencyResult.frequencies">frequencies (IntermediateFrequencyResult attribute)</a>
 </li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.Cos.frequency">frequency (Cos attribute)</a>
@@ -2930,6 +2940,8 @@
       </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.get_acquires">get_acquires() (MeasureBlock method)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.get_active_freq_shift_pulse_channels">get_active_freq_shift_pulse_channels() (FreqShiftSanitisation static method)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_all_channels">get_all_channels() (Qubit method)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.get_annotated_array">get_annotated_array() (in module qat.utils.pydantic)</a>
@@ -2982,10 +2994,10 @@
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_default_pulse_channel">get_default_pulse_channel() (QuantumDevice method)</a>
 </li>
-      <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.get_default_qiskit_hardware">get_default_qiskit_hardware() (in module qat.purr.backends.qiskit_simulator)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.get_default_qiskit_hardware">get_default_qiskit_hardware() (in module qat.purr.backends.qiskit_simulator)</a>
+</li>
       <li><a href="qat.runtime.results_pipeline.html#qat.runtime.results_pipeline.get_default_results_pipeline">get_default_results_pipeline() (in module qat.runtime.results_pipeline)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_default_RTCS_hardware">get_default_RTCS_hardware() (in module qat.purr.backends.realtime_chip_simulator)</a>
@@ -3641,6 +3653,8 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.ir">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.run.params.ir">(qat.middleend.passes.transform.FreqShiftSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation.run.params.ir">(qat.middleend.passes.transform.InstructionLengthSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
@@ -3780,7 +3794,7 @@
       </ul></li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.JUMP">JUMP (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.JUMP">[1]</a>
 </li>
-      <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.jump">jump() (InstructionBuilder method)</a>
+      <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.jump">jump() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.jump">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.JUMP_GREATER_EQUALS">JUMP_GREATER_EQUALS (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.JUMP_GREATER_EQUALS">[1]</a>
 </li>
@@ -4538,6 +4552,8 @@
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.params.model">(qat.middleend.passes.legacy.validation.FrequencyValidation parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.params.model">(qat.middleend.passes.transform.EndOfTaskResetSanitisation parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.params.model">(qat.middleend.passes.transform.FreqShiftSanitisation parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.params.model">(qat.middleend.passes.transform.ResetsToDelays parameter)</a>
 </li>
@@ -6015,9 +6031,11 @@
       </ul></li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Phase">Phase (class in qat.ir.gates.gates_1q)</a>
 </li>
-      <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.phase">phase (PhaseSet attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.phase">phase (FreqShiftPulseChannel attribute)</a>
 
       <ul>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.phase">(PhaseSet attribute)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.phase">(PhaseShift attribute)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.params.phase">(qat.purr.compiler.instructions.PhaseSet parameter)</a>
@@ -6576,6 +6594,8 @@
       <li><a href="qat.model.loaders.converted.html#qat.model.loaders.converted.PydEchoModelLoader">PydEchoModelLoader (in module qat.model.loaders.converted)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydEndOfTaskResetSanitisation">PydEndOfTaskResetSanitisation (in module qat.middleend.passes.transform)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydFreqShiftSanitisation">PydFreqShiftSanitisation (in module qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity">PydHardwareConfigValidity (in module qat.middleend.passes.validation)</a>
 </li>
@@ -8860,6 +8880,8 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EndOfTaskResetSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.EndOfTaskResetSanitisation.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.run.params.res_mgr">(qat.middleend.passes.transform.FreqShiftSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.res_mgr">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr">(qat.middleend.passes.transform.ResetsToDelays.run parameter)</a>
@@ -9214,7 +9236,7 @@
 </li>
         <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.EvaluatePulses.run">(EvaluatePulses method)</a>
 </li>
-        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.run">(FreqShiftSanitisation method)</a>
+        <li><a href="qat.middleend.passes.legacy.transform.html#qat.middleend.passes.legacy.transform.FreqShiftSanitisation.run">(FreqShiftSanitisation method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.FreqShiftSanitisation.run">[1]</a>
 </li>
         <li><a href="qat.middleend.passes.legacy.validation.html#qat.middleend.passes.legacy.validation.FrequencyValidation.run">(FrequencyValidation method)</a>
 </li>
