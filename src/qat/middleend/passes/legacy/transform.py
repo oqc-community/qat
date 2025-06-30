@@ -4,7 +4,6 @@ import itertools
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from numbers import Number
-from typing import List
 
 import numpy as np
 from compiler_config.config import MetricsType
@@ -115,44 +114,32 @@ class LegacyPhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        previous_instruction = None
-        accum_phaseshifts: dict[PulseChannel, float] = defaultdict(float)
+        accum_phaseshifts: dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
             ):
-                accum_phaseshifts[instruction.channel] += instruction.phase
-            elif isinstance(instruction, (Pulse, CustomPulse, PhaseShift)):
+                if accum_phaseshift := accum_phaseshifts.get(instruction.channel, None):
+                    accum_phaseshift.phase += instruction.phase
+                else:
+                    accum_phaseshifts[instruction.channel] = PhaseShift(
+                        instruction.channel, instruction.phase
+                    )
+            elif isinstance(instruction, (Pulse, CustomPulse)):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, list):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
-                    if not np.isclose(accum_phaseshifts[quantum_target] % (2 * np.pi), 0.0):
-                        optimized_instructions.append(
-                            PhaseShift(
-                                quantum_target, accum_phaseshifts.pop(quantum_target)
-                            )
-                        )
+                    if quantum_target in accum_phaseshifts:
+                        optimized_instructions.append(accum_phaseshifts.pop(quantum_target))
                 optimized_instructions.append(instruction)
-
             elif isinstance(instruction, PhaseReset):
                 for channel in instruction.quantum_targets:
                     accum_phaseshifts.pop(channel, None)
-
-                if isinstance(previous_instruction, PhaseReset):
-                    unseen_targets = list(
-                        set(instruction.quantum_targets)
-                        - set(previous_instruction.quantum_targets)
-                    )
-                    previous_instruction.quantum_targets.extend(unseen_targets)
-                else:
-                    optimized_instructions.append(instruction)
-
+                optimized_instructions.append(instruction)
             else:
                 optimized_instructions.append(instruction)
-
-            previous_instruction = instruction
 
         ir.instructions = optimized_instructions
         met_mgr.record_metric(
@@ -260,7 +247,7 @@ class PhaseOptimisation(TransformPass):
                 instruction, (CustomPulse, Pulse, Acquire, PhaseSet, PhaseShift)
             ):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
-                if not isinstance(quantum_targets, List):
+                if not isinstance(quantum_targets, list):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
                     if quantum_target.partial_id() in accum_phaseshifts:

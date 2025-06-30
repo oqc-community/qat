@@ -204,3 +204,85 @@ def filename_ids(val):
         return str(val.name)
     else:
         return str(val)
+
+
+def short_file_name(path):
+    return "-".join([path.parent.name, path.name])
+
+
+# Files that are not expected to pass tests are skipped.
+skip_qasm2 = [
+    "over_index_register.qasm",
+    "invalid_w3x_couplings.qasm",
+    "20qb.qasm",
+    "huge.qasm",
+    "mid_circuit_measure.qasm",
+    "example_if.qasm",
+]
+
+
+skip_qasm3 = [
+    "invalid_version.qasm",
+    "no_header.qasm",
+    "invalid_waveform.qasm",
+    "invalid_port.qasm",
+    "invalid_syntax.qasm",
+    "invalid_frames.qasm",
+    "invalid_couplings.qasm",
+    "u_gate.qasm",
+    "invalid_pulse_length.qasm",
+]
+
+
+skip_qir = [
+    "teleportchain.ll",
+    "bell_qir_measure.bc",
+    "cudaq-ghz.ll",  # test is designed to fail for no TKET optims
+    "base64_bitcode_ghz",
+]
+
+
+skip_exec = [
+    (ProgramFileType.QASM3, "lark_parsing_test.qasm"),
+    (ProgramFileType.QASM3, "ecr_override_test.qasm"),
+    (ProgramFileType.QASM3, "tmp.qasm"),
+    (ProgramFileType.QASM3, "cx_override_test.qasm"),
+    (ProgramFileType.QASM3, "cnot_override_test.qasm"),
+    (ProgramFileType.QASM3, "invalid_pulse_length.qasm"),
+    (ProgramFileType.QIR, "complicated.ll"),
+    (ProgramFileType.QIR, "base_profile_ops.ll"),
+]
+
+
+multi_reg_files = [
+    "qasm2-split_measure_assign.qasm",
+    "qasm2-basic_results_formats.qasm",
+    "qasm2-ordered_cregs.qasm",
+    "qasm2-example.qasm",
+    "qasm2-decoupled.qasm",
+]
+
+
+no_acquire_files = [
+    "qasm3-delay.qasm",
+    "qasm3-ecr_test.qasm",
+    "qasm3-redefine_defcal.qasm",
+    "qasm3-arb_waveform.qasm",
+    "qasm3-complex_gates_test.qasm",
+]
+
+
+skip_qasm2 = [
+    get_test_file_path(ProgramFileType.QASM2, file_name) for file_name in skip_qasm2
+]
+qasm2_files = set(get_all_qasm2_paths()) - set(skip_qasm2)
+
+skip_qasm3 = [
+    get_test_file_path(ProgramFileType.QASM3, file_name) for file_name in skip_qasm3
+]
+qasm3_files = set(get_all_qasm3_paths()) - set(skip_qasm3)
+
+skip_qir = [get_test_file_path(ProgramFileType.QIR, file_name) for file_name in skip_qir]
+qir_files = set(get_all_qir_paths()) - set(skip_qir)
+
+skip_exec = [get_test_file_path(file_type, file_name) for file_type, file_name in skip_exec]

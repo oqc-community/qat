@@ -6,8 +6,7 @@ from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
 from qat.middleend.passes.legacy.transform import (
     IntegratorAcquireSanitisation,
-    PhaseOptimisation,
-    PostProcessingSanitisation,
+    LegacyPhaseOptimisation,
 )
 from qat.middleend.passes.legacy.validation import (
     HardwareConfigValidity,
@@ -82,9 +81,8 @@ class LegacyEchoPipeline(LegacyPipeline):
             PassManager()
             | HardwareConfigValidity(model)
             | CalibrationAnalysis()
-            | PhaseOptimisation()
+            | LegacyPhaseOptimisation()
             | IntegratorAcquireSanitisation()
-            | PostProcessingSanitisation()
             | InstructionValidation(target_data)
             | ReadoutValidation(model)
         )

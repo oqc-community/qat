@@ -95,39 +95,6 @@ from tests.unit.utils.pulses import pulse_attributes
 class TestLegacyPhaseOptimisation:
     hw = EchoModelLoader(qubit_count=4).load()
 
-    def test_merged_identical_phase_resets(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
-
-        phase_reset = PhaseReset(self.hw.qubits)
-        builder.add(phase_reset)
-        builder.add(phase_reset)
-        assert len(builder.instructions) == 2
-
-        LegacyPhaseOptimisation().run(
-            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
-        )
-        # The two phase resets should be merged to one.
-        assert len(builder.instructions) == 1
-        assert set(builder.instructions[0].quantum_targets) == set(
-            phase_reset.quantum_targets
-        )
-
-    def test_merged_phase_resets(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
-
-        targets_q1 = self.hw.qubits[0].get_all_channels()
-        targets_q2 = self.hw.qubits[1].get_all_channels()
-        builder.add(PhaseReset(targets_q1))
-        builder.add(PhaseReset(targets_q2))
-
-        LegacyPhaseOptimisation().run(
-            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
-        )
-        # The two phase resets should be merged to one, and the targets of both phase resets should be merged.
-        assert len(builder.instructions) == 1
-        merged_targets = set(targets_q1) | set(targets_q2)
-        assert set(builder.instructions[0].quantum_targets) == merged_targets
-
     def test_empty_constructor(self):
         hw = EchoModelLoader(8).load()
         builder = hw.create_builder()
@@ -136,27 +103,6 @@ class TestLegacyPhaseOptimisation:
             builder, ResultManager(), MetricsManager()
         )
         assert len(builder_optimised.instructions) == 0
-
-    @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
-    @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_zero_phase(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
-        builder = hw.create_builder()
-        for qubit in hw.qubits:
-            builder.add(PhaseShift(qubit.get_drive_channel(), phase))
-            if pulse_enabled:
-                builder.pulse(
-                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
-                )
-
-        builder_optimised = LegacyPhaseOptimisation().run(
-            builder, ResultManager(), MetricsManager()
-        )
-
-        if pulse_enabled:
-            assert len(builder_optimised.instructions) == len(hw.qubits)
-        else:
-            assert len(builder_optimised.instructions) == 0
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])

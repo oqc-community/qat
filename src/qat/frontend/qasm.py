@@ -4,7 +4,7 @@ import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from compiler_config.config import CompilerConfig
+from compiler_config.config import CompilerConfig, InlineResultsProcessing
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -202,6 +202,8 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         """
         if compiler_config.results_format.format is not None:
             self.parser.results_format = compiler_config.results_format.format
+        else:
+            self.parser.results_format = InlineResultsProcessing.Program
 
     def emit(
         self,
