@@ -218,7 +218,10 @@ class MeasureAcquirePulseChannel(MeasurePulseChannel, AcquirePulseChannel): ...
 class SecondStatePulseChannel(QubitPulseChannel): ...
 
 
-class FreqShiftPulseChannel(QubitPulseChannel): ...
+class FreqShiftPulseChannel(QubitPulseChannel):
+    active: bool = False
+    amp: float = 1.0
+    phase: float = 0.0
 
 
 class CrossResonancePulseChannel(QubitPulseChannel):

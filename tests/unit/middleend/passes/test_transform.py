@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-
 import math
 import random
 from collections import defaultdict
+from copy import deepcopy
 
 import numpy as np
 import pytest
@@ -20,11 +20,13 @@ from qat.ir.instructions import (
     Instruction,
     Jump,
     Label,
+    LessThan,
     LoopCount,
     PhaseReset,
     PhaseSet,
     PhaseShift,
     Plus,
+    QuantumInstruction,
     Repeat,
     Reset,
     Return,
@@ -44,6 +46,7 @@ from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.transform import (
     BatchedShots,
     EndOfTaskResetSanitisation,
+    FreqShiftSanitisation,
     InitialPhaseResetSanitisation,
     InstructionLengthSanitisation,
     PhaseOptimisation,
@@ -1026,6 +1029,187 @@ class TestEndOfTaskResetSanitisation:
         reset_instrs = [instr for instr in builder if isinstance(instr, Reset)]
         assert len(reset_instrs) == 1
         assert reset_instrs[0].qubit_target == 0
+
+
+class TestFreqShiftSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        hw = PydEchoModelLoader().load()
+        for q_idx in range(2):
+            hw.qubit_with_index(q_idx).freq_shift_pulse_channel.active = True
+        return hw
+
+    @pytest.fixture(scope="class")
+    def model_no_freq_shift(self):
+        return PydEchoModelLoader().load()
+
+    @pytest.fixture(scope="class")
+    def freq_shift_pulse_channels(self, model):
+        """Model with frequency shift channels added."""
+        fs_pulse_channels = set()
+        for qubit in model.qubits.values():
+            if qubit.freq_shift_pulse_channel.active:
+                fs_pulse_channels.add(qubit.freq_shift_pulse_channel)
+        return fs_pulse_channels
+
+    @pytest.fixture(scope="class")
+    def basic_builder(self, model):
+        """Creates a builder with only classical instructions."""
+
+        var = Variable(name="repeat_count", var_type=LoopCount)
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.add(var)
+        builder.assign("repeat_count", 0)
+        builder.assign("repeat_count", Plus(left=var, right=1))
+        builder.returns(["test"])
+        return builder
+
+    @pytest.fixture(scope="class")
+    def builder_x_and_measure(self, basic_builder):
+        """Mocks an X gate and a measure for a builder."""
+        new_builder = deepcopy(basic_builder)
+        qubit = new_builder.hw.qubit_with_index(0)
+        drive_pulse_ch = qubit.drive_pulse_channel
+        measure_pulse_ch = qubit.measure_pulse_channel
+        acquire_pulse_ch = qubit.acquire_pulse_channel
+
+        new_builder.pulse(target=drive_pulse_ch.uuid, waveform=SquareWaveform(width=40e-9))
+        new_builder.pulse(target=drive_pulse_ch.uuid, waveform=SquareWaveform(width=40e-9))
+        new_builder.delay(measure_pulse_ch, 80e-9)
+        new_builder.delay(acquire_pulse_ch, 128e-9)
+        new_builder.pulse(
+            target=measure_pulse_ch.uuid, waveform=SquareWaveform(width=400e-9)
+        )
+        new_builder.acquire(qubit, delay=48e-9, duration=352e-9)
+        new_builder.delay(drive_pulse_ch, 400e-9)
+        return new_builder
+
+    @pytest.fixture(scope="class")
+    def builder(self, model, builder_x_and_measure):
+        """Creates a basic builder free of control flow."""
+        comp_builder = QuantumInstructionBuilder(hardware_model=model)
+        comp_builder += builder_x_and_measure
+        comp_builder.returns(["test"])
+        return comp_builder
+
+    @pytest.fixture(scope="class")
+    def repeat_builder(self, model, builder_x_and_measure):
+        """Creates a builder with a repeat scope."""
+
+        qubit = model.qubit_with_index(0)
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.add(Repeat(repeat_count=1000))
+        builder.phase_shift(qubit, np.pi / 4)
+        builder += builder_x_and_measure
+        builder.add(EndRepeat())
+        builder.returns(["test"])
+        return builder
+
+    @pytest.fixture(scope="class")
+    def jump_builder(self, model, builder_x_and_measure):
+        """Creates a builder with a label and jump to replicate the behaviour of repeats."""
+
+        qubit = model.qubit_with_index(0)
+        var = Variable(name="repeat_count", var_type=LoopCount)
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.add(var)
+        builder.assign("repeat_count", 0)
+        builder.add(Label(name="repeats"))
+        builder.phase_shift(qubit, np.pi / 4)
+        builder += builder_x_and_measure
+        builder.assign("repeat_count", Plus(left=var, right=1))
+        builder.jump("repeats", LessThan(left=var, right=1000))
+        builder.returns(["test"])
+        return builder
+
+    def test_get_freq_shift_channels(self, model, freq_shift_pulse_channels):
+        found_pulse_channels = FreqShiftSanitisation.get_active_freq_shift_pulse_channels(
+            model
+        )
+        assert freq_shift_pulse_channels == set(found_pulse_channels.keys())
+        assert set(found_pulse_channels.values()) == set(
+            [model.qubit_with_index(i) for i in range(2)]
+        )
+
+    def test_add_freq_shift_to_block_ignored_for_no_quantum_instructions(
+        self, basic_builder, freq_shift_pulse_channels
+    ):
+        builder = FreqShiftSanitisation.add_freq_shift_to_ir(
+            basic_builder, freq_shift_pulse_channels
+        )
+        assert all([not isinstance(inst, Pulse) for inst in builder])
+
+    def test_add_freq_shift_to_block_ignored_for_no_duration(
+        self, model, freq_shift_pulse_channels
+    ):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        qubit = model.qubit_with_index(0)
+        builder.phase_shift(qubit.drive_pulse_channel, np.pi / 4)
+        assert builder.number_of_instructions == 1
+
+        builder = FreqShiftSanitisation(model).add_freq_shift_to_ir(
+            builder, freq_shift_pulse_channels
+        )
+        assert builder.number_of_instructions == 1
+        assert isinstance(builder._ir.head, PhaseShift)
+
+    def test_active_results_updated(self, model, freq_shift_pulse_channels):
+        qubits = [model.qubit_with_index(i) for i in range(2)]
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.delay(qubits[0].drive_pulse_channel, 80e-9)
+        res = ActivePulseChannelResults(
+            target_map={qubits[0].drive_pulse_channel.uuid: qubits[0]}
+        )
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = FreqShiftSanitisation(model).run(builder, res_mgr)
+        for fq_pulse_ch in freq_shift_pulse_channels:
+            assert fq_pulse_ch.uuid in res.target_map
+            assert res.target_map[fq_pulse_ch.uuid] in qubits
+
+    @pytest.mark.parametrize(
+        "builder_fixture", ["builder", "repeat_builder", "jump_builder"]
+    )
+    def test_add_freq_shift(
+        self, request, builder_fixture, model, freq_shift_pulse_channels
+    ):
+        """Considers builders that only have a single block with quantum instructions, and
+        ensures the correct frequency shift pulses are added."""
+        builder = request.getfixturevalue(builder_fixture)
+        pass_ = FreqShiftSanitisation(model)
+        builder = pass_.run(builder, ResultManager())
+
+        # Index of the first quantum instruction.
+        idx = [i for i, inst in enumerate(builder) if isinstance(inst, QuantumInstruction)][
+            0
+        ]
+
+        for fq_pulse_ch in freq_shift_pulse_channels:
+            pulses = []
+            for j, inst in enumerate(builder):
+                if isinstance(inst, Pulse) and inst.target == fq_pulse_ch.uuid:
+                    assert j >= idx
+                    pulses.append(inst)
+
+            assert len(pulses) == 1
+            assert pulses[0].duration == 480e-9
+
+    def test_no_freq_shift_pulse_channel(self, model_no_freq_shift):
+        builder = QuantumInstructionBuilder(hardware_model=model_no_freq_shift)
+        for qubit in model_no_freq_shift.qubits.values():
+            builder.X(qubit)
+
+        ref_instructions = builder.instructions
+        builder = FreqShiftSanitisation(model_no_freq_shift).run(builder, ResultManager())
+
+        # No instructions added since we do not have freq shift pulse channels.
+        assert builder.instructions == ref_instructions
+
+    def test_freq_shift_empty_target(self, model_no_freq_shift):
+        res_mgr = ResultManager()
+        builder = QuantumInstructionBuilder(hardware_model=model_no_freq_shift)
+        builder = FreqShiftSanitisation(model_no_freq_shift).run(builder, res_mgr=res_mgr)
+        assert builder.number_of_instructions == 0
 
 
 class TestPhaseResetSanitisation:

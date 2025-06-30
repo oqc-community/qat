@@ -7,7 +7,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from functools import cached_property
 from pydoc import locate
-from typing import Annotated, Any, List, Optional, Union
+from typing import Annotated, Any, List, Literal, Optional, Union
 
 from compiler_config.config import InlineResultsProcessing
 from pydantic import (
@@ -440,6 +440,8 @@ class Synchronize(QuantumInstruction):
     Tells the QPU to wait for all the target channels to be free before continuing
     execution on any of them.
     """
+
+    duration: Literal[0] = 0
 
     targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] = Field(min_length=2)
 

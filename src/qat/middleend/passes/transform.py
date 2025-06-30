@@ -36,7 +36,7 @@ from qat.ir.instructions import (
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
-from qat.model.device import Qubit
+from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
@@ -643,6 +643,102 @@ class EndOfTaskResetSanitisation(TransformPass):
         return ir
 
 
+class FreqShiftSanitisation(TransformPass):
+    """
+    Looks for any active frequency shift pulse channels in the hardware model and adds
+    square pulses for the duration.
+
+    .. warning::
+
+        This pass assumes the following, which is achieved via other passes:
+
+        * :class:`Synchronize` instructions have already been lowered to :class:`Delay`
+          instructions.
+        * Durations are static.
+    """
+
+    def __init__(self, model: PhysicalHardwareModel):
+        """:param model: The hardware model containing the frequency shift channels."""
+
+        self.model = model
+        self.active_freq_shift_pulse_channels = self.get_active_freq_shift_pulse_channels(
+            model
+        )
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The QatIR as an instruction builder.
+        :param res_mgr: The results manager.
+        """
+
+        freq_shift_channels = self.active_freq_shift_pulse_channels
+        if len(freq_shift_channels) == 0:
+            return ir
+        ir = self.add_freq_shift_to_ir(ir, set(freq_shift_channels.keys()))
+
+        if res_mgr.check_for_type(ActivePulseChannelResults):
+            res: ActivePulseChannelResults = res_mgr.lookup_by_type(
+                ActivePulseChannelResults
+            )
+            res.target_map.update(
+                {
+                    fs_pulse_ch.uuid: qubit
+                    for fs_pulse_ch, qubit in freq_shift_channels.items()
+                }
+            )
+
+        return ir
+
+    @staticmethod
+    def get_active_freq_shift_pulse_channels(model) -> dict[FreqShiftPulseChannel, Qubit]:
+        """Returns all active frequency shift pulse channels found in the hardware model."""
+        pulse_channels = dict()
+        for qubit in model.qubits.values():
+            freq_shift_pulse_ch = qubit.freq_shift_pulse_channel
+            if freq_shift_pulse_ch.active:
+                pulse_channels[freq_shift_pulse_ch] = qubit
+
+        return pulse_channels
+
+    @staticmethod
+    def add_freq_shift_to_ir(
+        ir: InstructionBuilder, freq_shift_channels: set[PulseChannel]
+    ) -> InstructionBuilder:
+        """Adds frequency shift instructions to the instruction builder."""
+
+        durations = defaultdict(float)
+        idx = None  # Index of first quantum instruction.
+        new_instructions = []
+        for i, inst in enumerate(ir):
+            if isinstance(inst, QuantumInstruction):
+                if idx is None:
+                    idx = i
+
+                if (duration := inst.duration) > 0:
+                    durations[inst.target] += duration
+
+            new_instructions.append(inst)
+
+        # If no quantum instructions found, return the IR as is.
+        if len(durations) == 0:
+            return ir
+
+        max_duration = max(durations.values())
+        for pulse_ch in freq_shift_channels:
+            pulse = Pulse(
+                target=pulse_ch.uuid,
+                waveform=SquareWaveform(
+                    amp=pulse_ch.amp, width=max_duration, phase=pulse_ch.phase
+                ),
+            )
+            new_instructions.insert(idx, pulse)
+
+        ir.instructions = new_instructions
+        return ir
+
+
 class InitialPhaseResetSanitisation(TransformPass):
     """
     Checks if every active pulse channel has a phase reset in the beginning.
@@ -679,4 +775,5 @@ PydRepeatTranslation = RepeatTranslation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
 PydScopeSanitisation = ScopeSanitisation
 PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation
+PydFreqShiftSanitisation = FreqShiftSanitisation
 PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation

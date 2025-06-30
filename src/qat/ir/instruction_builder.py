@@ -12,10 +12,13 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.ir.instructions import (
     Assign,
+    BinaryOperator,
     Delay,
     FrequencyShift,
     Instruction,
     InstructionBlock,
+    Jump,
+    Label,
     PhaseReset,
     PhaseShift,
     Repeat,
@@ -167,6 +170,9 @@ class InstructionBuilder(ABC):
     def assign(self, name: str, value):
         return self.add(Assign(name=name, value=value))
 
+    def jump(self, label: Union[str, Label], condition: BinaryOperator | None = None):
+        return self.add(Jump(label=label, condition=condition))
+
     def results_processing(self, variable: str, res_format: InlineResultsProcessing):
         return self.add(ResultsProcessing(variable=variable, results_processing=res_format))
 
@@ -179,13 +185,16 @@ class InstructionBuilder(ABC):
         return self
 
     def __add__(self, other: QuantumInstructionBuilder):
+        comp_builder = self.__class__(
+            hardware_model=self.hw, instructions=self._ir.instructions.model_copy()
+        )
         if isinstance(other, InstructionBuilder):
-            self.add(*other.instructions)
+            comp_builder.add(*other._ir.instructions)
         else:
             raise TypeError(
                 "Only another `{self.__class__.__name__}` can be added to this builder."
             )
-        return self
+        return comp_builder
 
     @staticmethod
     def constrain(angle: float):

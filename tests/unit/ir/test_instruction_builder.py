@@ -32,6 +32,33 @@ class TestInstructionBuilder:
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         assert builder.number_of_instructions == 0
 
+    def test_add_two_builders(self):
+        builder1 = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder2 = QuantumInstructionBuilder(hardware_model=hw_model)
+
+        builder1.X(target=hw_model.qubit_with_index(0))
+        builder2.Y(target=hw_model.qubit_with_index(1))
+        before1 = builder1.number_of_instructions
+        before2 = builder2.number_of_instructions
+
+        combined_builder = builder1 + builder2
+        assert combined_builder.number_of_instructions == before1 + before2
+        assert builder1.number_of_instructions == before1
+        assert builder2.number_of_instructions == before2
+
+    def test_radd(self):
+        builder1 = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder2 = QuantumInstructionBuilder(hardware_model=hw_model)
+
+        builder1.X(target=hw_model.qubit_with_index(0))
+        builder2.Y(target=hw_model.qubit_with_index(1))
+        before1 = builder1.number_of_instructions
+        before2 = builder2.number_of_instructions
+
+        builder1 += builder2
+        assert builder1.number_of_instructions == before1 + before2
+        assert builder2.number_of_instructions == before2
+
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
 class TestPauliGates:
