@@ -30,6 +30,7 @@ from qat.ir.instructions import (
     Repeat,
     Reset,
     Return,
+    Synchronize,
     Variable,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
@@ -141,43 +142,67 @@ class PhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        accum_phaseshifts: dict[str, float] = defaultdict(float)
-        optimized_instructions: list = []
-        previous_instruction = None
+        handler = PhaseOptimisationHandler()
         for instruction in ir:
-            if isinstance(instruction, PhaseShift):
-                accum_phaseshifts[instruction.target] += instruction.phase
+            handler.run(instruction)
 
-            elif isinstance(instruction, Pulse):
-                target = instruction.target
-                if not np.isclose(accum_phaseshifts[target] % (2 * np.pi), 0.0):
-                    optimized_instructions.append(
-                        PhaseShift(targets=target, phase=accum_phaseshifts.pop(target))
-                    )
-                optimized_instructions.append(instruction)
-
-            elif isinstance(instruction, PhaseReset):
-                for target in instruction.targets:
-                    accum_phaseshifts.pop(target, None)
-
-                if (
-                    isinstance(previous_instruction, PhaseReset)
-                    and previous_instruction.target == instruction.target
-                ):
-                    continue
-
-                optimized_instructions.append(instruction)
-
-            else:
-                optimized_instructions.append(instruction)
-
-            previous_instruction = instruction
-
-        ir.instructions = optimized_instructions
+        ir.instructions = handler.optimized_instructions
         met_mgr.record_metric(
-            MetricsType.OptimizedInstructionCount, len(optimized_instructions)
+            MetricsType.OptimizedInstructionCount, ir.number_of_instructions
         )
         return ir
+
+
+class PhaseOptimisationHandler:
+    def __init__(self):
+        self.accum_phaseshifts: dict[str, float] = defaultdict(float)
+        self.optimized_instructions: list = []
+        self.previous_phase_instruction_is_phase_set = defaultdict(bool)
+
+    @singledispatchmethod
+    def run(self, instruction):
+        self.optimized_instructions.append(instruction)
+
+    @run.register(PhaseShift)
+    def _(self, instruction: PhaseShift):
+        self.accum_phaseshifts[instruction.target] += instruction.phase
+
+    @run.register(PhaseReset)
+    def _(self, instruction: PhaseReset):
+        for target in instruction.targets:
+            self.accum_phaseshifts[target] = 0.0
+            self.previous_phase_instruction_is_phase_set[target] = True
+
+    @run.register(PhaseSet)
+    def _(self, instruction: PhaseSet):
+        self.accum_phaseshifts[instruction.target] = instruction.phase
+        self.previous_phase_instruction_is_phase_set[instruction.target] = True
+
+    @run.register(Pulse)
+    @run.register(Acquire)
+    def _(self, instruction: Pulse | Acquire):
+        target = instruction.target
+        if not np.isclose(self.accum_phaseshifts[target] % (2 * np.pi), 0.0):
+            phase = self.accum_phaseshifts.pop(target)
+            if self.previous_phase_instruction_is_phase_set[target]:
+                phase_op = PhaseSet(target=target, phase=phase)
+            else:
+                phase_op = PhaseShift(target=target, phase=phase)
+            self.optimized_instructions.append(phase_op)
+
+        self.optimized_instructions.append(instruction)
+        self.previous_phase_instruction_is_phase_set[target] = False
+
+    @run.register(Delay)
+    @run.register(Synchronize)
+    def _(self, instruction: Delay | Synchronize):
+        for target in instruction.targets:
+            if self.previous_phase_instruction_is_phase_set[target]:
+                self.optimized_instructions.append(
+                    PhaseSet(target=target, phase=self.accum_phaseshifts.pop(target))
+                )
+                self.previous_phase_instruction_is_phase_set[target] = False
+        self.optimized_instructions.append(instruction)
 
 
 class PostProcessingSanitisation(TransformPass):

@@ -265,8 +265,8 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | InactivePulseChannelSanitisation()  # TODO: COMPILER-410
             | FreqShiftSanitisation(legacy_model)  # TODO: COMPILER-554
             | InitialPhaseResetSanitisation()  # TODO: COMPILER-546
-            | PhaseOptimisation()  # TODO: COMPILER-545
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydPhaseOptimisation()
             | PydEndOfTaskResetSanitisation(pyd_model)
             | PydResetsToDelays(pyd_model, target_data)
             | PydSquashDelaysOptimisation()

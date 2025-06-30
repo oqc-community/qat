@@ -12,6 +12,11 @@ from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.ir.conversion import ConvertToPydanticIR
+from qat.ir.instructions import Delay as PydDelay
+from qat.ir.instructions import PhaseSet as PydPhaseSet
+from qat.ir.instructions import PhaseShift as PydPhaseShift
+from qat.ir.instructions import Synchronize as PydSynchronize
 from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
 from qat.middleend.passes.legacy.analysis import (
     ActiveChannelResults,
@@ -44,6 +49,8 @@ from qat.middleend.passes.legacy.validation import (
     RepeatSanitisationValidation,
     ReturnSanitisationValidation,
 )
+from qat.middleend.passes.transform import PydPhaseOptimisation
+from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.model.target_data import (
     AbstractTargetData,
@@ -460,6 +467,261 @@ class TestPhaseOptimisation:
         assert len(phase_shifts) == 1
         assert phase_shifts[0].channel.id == "test"
         assert phase_shifts[0].phase == np.pi / 4
+
+
+class TestPhaseOptimisationParityWithPyd:
+    hw = EchoModelLoader(qubit_count=4).load()
+    pyd_hw = PydEchoModelLoader(4).load()
+
+    def _get_optimized_builders(self, builder):
+        pyd_builder = ConvertToPydanticIR(self.hw, self.pyd_hw).run(
+            builder, ResultManager()
+        )
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+        pyd_builder = PydPhaseOptimisation().run(
+            pyd_builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+        return builder_optimised, pyd_builder
+
+    def test_merged_identical_phase_resets(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        target = self.hw.get_qubit(0).get_pulse_channel()
+        phase_reset = PhaseReset(target)
+        builder.add(phase_reset)
+        builder.add(phase_reset)
+        builder.delay(target, 1e-3)  # to stop them being deleted
+        assert len(builder.instructions) == 3
+
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        assert pyd_builder.number_of_instructions == len(builder_optimised.instructions)
+
+    def test_empty_constructor(self):
+        builder = self.hw.create_builder()
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        assert len(builder_optimised.instructions) == 0
+        assert pyd_builder.number_of_instructions == 0
+
+    @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_zero_phase(self, phase, pulse_enabled):
+        builder = self.hw.create_builder()
+        for qubit in self.hw.qubits:
+            builder.add(PhaseShift(qubit.get_drive_channel(), phase))
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        if pulse_enabled:
+            assert len(builder_optimised.instructions) == len(self.hw.qubits)
+            assert pyd_builder.number_of_instructions == len(self.hw.qubits)
+        else:
+            assert len(builder_optimised.instructions) == 0
+            assert pyd_builder.number_of_instructions == 0
+
+    @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_single_phase(self, phase, pulse_enabled):
+        builder = self.hw.create_builder()
+        for qubit in self.hw.qubits:
+            builder.phase_shift(qubit, phase)
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+
+        pyd_phase_shifts = [
+            instr for instr in pyd_builder.instructions if isinstance(instr, PydPhaseShift)
+        ]
+
+        if pulse_enabled:
+            assert len(phase_shifts) == len(self.hw.qubits)
+            assert len(pyd_phase_shifts) == len(phase_shifts)
+        else:
+            assert len(phase_shifts) == 0
+            assert len(pyd_phase_shifts) == 0
+
+    @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
+    @pytest.mark.parametrize("pulse_enabled", [False, True])
+    def test_accumulate_phases(self, phase, pulse_enabled):
+        hw = self.hw
+        builder = hw.create_builder()
+        qubits = hw.qubits
+        for qubit in qubits:
+            builder.phase_shift(qubit, phase)
+
+        random.shuffle(hw.qubits)
+        for qubit in qubits:
+            builder.phase_shift(qubit, phase + 0.3)
+            if pulse_enabled:
+                builder.pulse(
+                    qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
+                )
+
+        pyd_builder = ConvertToPydanticIR(self.hw, self.pyd_hw).run(
+            builder, ResultManager()
+        )
+        builder_optimised = PhaseOptimisation().run(
+            builder, ResultManager(), MetricsManager()
+        )
+        pyd_builder = PydPhaseOptimisation().run(
+            pyd_builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+        pyd_phase_shifts = [
+            instr for instr in pyd_builder.instructions if isinstance(instr, PydPhaseShift)
+        ]
+
+        if pulse_enabled:
+            assert len(phase_shifts) == len(hw.qubits)
+            assert len(pyd_phase_shifts) == len(phase_shifts)
+            for phase_shift in phase_shifts:
+                assert math.isclose(phase_shift.phase, 2 * phase + 0.3)
+            for pyd_phase_shift in pyd_phase_shifts:
+                assert math.isclose(pyd_phase_shift.phase, 2 * phase + 0.3)
+        else:
+            assert len(phase_shifts) == 0
+            assert len(pyd_phase_shifts) == 0
+            # Phase shifts without a pulse/reset afterwards are removed.
+
+    def test_phase_reset(self):
+        hw = self.hw
+        builder = hw.create_builder()
+        qubits = list(hw.qubits)
+
+        for qubit in qubits:
+            builder.phase_shift(qubit, 0.5)
+            builder.reset(qubit)
+
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        phase_shifts = [
+            instr
+            for instr in builder_optimised.instructions
+            if isinstance(instr, PhaseShift)
+        ]
+
+        pyd_phase_shifts = [
+            instr for instr in pyd_builder.instructions if isinstance(instr, PydPhaseShift)
+        ]
+        assert len(phase_shifts) == 0
+        assert len(pyd_phase_shifts) == 0
+
+    def test_reset_and_shift_become_set(self):
+        hw = EchoModelLoader(2).load()
+        ir = hw.create_builder()
+        chan = hw.qubits[0].get_drive_channel()
+
+        ir.add(PhaseReset(chan))
+        ir.add(PhaseShift(chan, np.pi / 4))
+        ir.pulse(chan, shape=PulseShapeType.SQUARE, width=80e-9)
+
+        ir, pyd_ir = self._get_optimized_builders(ir)
+
+        assert len(ir.instructions) == 2
+        assert pyd_ir.number_of_instructions == 2
+        assert isinstance(ir.instructions[0], PhaseSet)
+        assert isinstance(pyd_ir.instructions[0], PydPhaseSet)
+        assert np.isclose(ir.instructions[0].phase, np.pi / 4)
+        assert np.isclose(pyd_ir.instructions[0].phase, np.pi / 4)
+
+    def test_phaseset_does_not_commute_through_delay(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        chan = self.hw.qubits[0].get_drive_channel()
+        builder.add(PhaseReset(chan))
+        builder.delay(chan, 1e-3)
+        builder.add(PhaseSet(chan, np.pi / 2))
+        builder.delay(chan, 1e-3)
+        builder.add(PhaseShift(chan, np.pi / 4))
+        builder.delay(chan, 1e-3)
+
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Delay,
+            Delay,
+        ]
+
+        assert [type(inst) for inst in pyd_builder.instructions] == [
+            PydPhaseSet,
+            PydDelay,
+            PydPhaseSet,
+            PydDelay,
+            PydDelay,
+        ]
+
+    def test_phaseset_does_not_commute_through_sync(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        chan1 = self.hw.qubits[0].get_drive_channel()
+        chan2 = self.hw.qubits[0].get_measure_channel()
+        builder.add(PhaseReset(chan1))
+        builder.add(PhaseReset(chan2))
+        builder.delay(chan1, 1e-3)
+        builder.synchronize([chan1, chan2])
+        builder.add(PhaseSet(chan1, np.pi / 2))
+        builder.add(PhaseSet(chan2, np.pi / 2))
+        builder.delay(chan2, 1e-3)
+        builder.synchronize([chan1, chan2])
+        builder.add(PhaseShift(chan1, np.pi / 4))
+        builder.add(PhaseShift(chan2, np.pi / 4))
+
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+        ]
+        assert [type(inst) for inst in pyd_builder.instructions] == [
+            PydPhaseSet,
+            PydDelay,
+            PydPhaseSet,
+            PydSynchronize,
+            PydPhaseSet,
+            PydDelay,
+            PydPhaseSet,
+            PydSynchronize,
+        ]
+
+        assert [
+            inst.quantum_targets[0]
+            for inst in builder.instructions
+            if isinstance(inst, PhaseSet)
+        ] == [chan1, chan2, chan2, chan1]
+
+        target_1 = self.pyd_hw.qubits[0].drive_pulse_channel.uuid
+        target_2 = self.pyd_hw.qubits[0].measure_pulse_channel.uuid
+
+        assert [
+            inst.target
+            for inst in pyd_builder.instructions
+            if isinstance(inst, PydPhaseSet)
+        ] == [target_1, target_2, target_2, target_1]
 
 
 class TestPostProcessingSanitisation:

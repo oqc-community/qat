@@ -22,11 +22,13 @@ from qat.ir.instructions import (
     Label,
     LoopCount,
     PhaseReset,
+    PhaseSet,
     PhaseShift,
     Plus,
     Repeat,
     Reset,
     Return,
+    Synchronize,
     Variable,
 )
 from qat.ir.measure import (
@@ -192,6 +194,26 @@ class TestRepeatTranslation:
 class TestPydPhaseOptimisation:
     hw = PydEchoModelLoader(8).load()
 
+    def test_merged_identical_phase_resets(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+        target = qubit.drive_pulse_channel.uuid
+
+        phase_reset = PhaseReset(target=target)
+        builder.add(phase_reset)
+        builder.add(phase_reset)
+        builder.add(Delay(target=target, duration=1e-3))
+        assert builder.number_of_instructions == 3
+
+        PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
+        # The two phase resets should be merged to one.
+        assert builder.number_of_instructions == 2
+
+        for inst in builder.instructions[:-1]:
+            assert isinstance(inst, PhaseSet)
+        channels = set([inst.target for inst in builder.instructions[:-1]])
+        assert len(channels) == builder.number_of_instructions - 1
+
     def test_empty_constructor(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
 
@@ -205,7 +227,7 @@ class TestPydPhaseOptimisation:
     def test_zero_phase(self, phase, pulse_enabled):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         for qubit in self.hw.qubits.values():
-            builder.add(PhaseShift(targets=qubit.drive_pulse_channel.uuid, phase=phase))
+            builder.add(PhaseShift(target=qubit.drive_pulse_channel.uuid, phase=phase))
             if pulse_enabled:
                 builder.pulse(
                     targets=qubit.drive_pulse_channel.uuid,
@@ -262,7 +284,7 @@ class TestPydPhaseOptimisation:
             if pulse_enabled:
                 builder.pulse(
                     targets=qubit.drive_pulse_channel.uuid,
-                    waveform=SquareWaveform(),
+                    waveform=SquareWaveform(width=80e-9),
                 )
 
         builder_optimised = PhaseOptimisation().run(
@@ -298,20 +320,76 @@ class TestPydPhaseOptimisation:
         ]
         assert len(phase_shifts) == 0
 
-    def test_merged_identical_phase_resets(self):
+    def test_reset_and_shift_become_set(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        target = self.hw.qubit_with_index(0).drive_pulse_channel.uuid
+
+        builder.add(PhaseReset(target=target))
+        builder.add(PhaseShift(target=target, phase=np.pi / 4))
+        builder.add(Pulse(target=target, waveform=SquareWaveform(width=80e-9)))
+
+        builder = PhaseOptimisation().run(builder, ResultManager(), MetricsManager())
+
+        assert len(builder.instructions) == 2
+        assert isinstance(builder.instructions[0], PhaseSet)
+        assert np.isclose(builder.instructions[0].phase, np.pi / 4)
+
+    def test_phaseset_does_not_commute_through_delay(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         qubit = self.hw.qubit_with_index(0)
         target = qubit.drive_pulse_channel.uuid
 
-        phase_reset = PhaseReset(targets=target)
-        builder.add(phase_reset)
-        builder.add(phase_reset)
-        assert builder.number_of_instructions == 2
+        builder.add(PhaseReset(target=target))
+        builder.add(Delay(target=target, duration=1e-3))
+        builder.add(PhaseSet(target=target, phase=np.pi / 2))
+        builder.add(Delay(target=target, duration=1e-3))
+        builder.add(PhaseShift(target=target, phase=np.pi / 4))
+        builder.add(Delay(target=target, duration=1e-3))
 
         PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
-        # The two phase resets should be merged to one.
-        assert builder.number_of_instructions == 1
-        # assert set(builder.instructions[0].quantum_targets) == set(phase_reset.quantum_targets)
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Delay,
+            Delay,
+        ]
+
+    def test_phaseset_does_not_commute_through_sync(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+        target1 = qubit.drive_pulse_channel.uuid
+        target2 = qubit.measure_pulse_channel.uuid
+
+        builder.add(PhaseReset(target=target1))
+        builder.add(PhaseReset(target=target2))
+        builder.add(Delay(target=target1, duration=1e-3))
+        builder.add(Synchronize(targets=[target1, target2]))
+        builder.add(PhaseSet(target=target1, phase=np.pi / 2))
+        builder.add(PhaseSet(target=target2, phase=np.pi / 2))
+        builder.add(Delay(target=target2, duration=1e-3))
+        builder.add(Synchronize(targets=[target1, target2]))
+        builder.add(PhaseShift(target=target1, phase=np.pi / 4))
+        builder.add(PhaseShift(target=target2, phase=np.pi / 4))
+
+        builder = PhaseOptimisation().run(
+            builder, res_mgr=ResultManager(), met_mgr=MetricsManager()
+        )
+
+        assert [type(inst) for inst in builder.instructions] == [
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+            PhaseSet,
+            Delay,
+            PhaseSet,
+            Synchronize,
+        ]
+        assert [
+            inst.target for inst in builder.instructions if isinstance(inst, PhaseSet)
+        ] == [target1, target2, target2, target1]
 
 
 class TestPydPostProcessingSanitisation:
