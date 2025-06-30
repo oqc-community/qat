@@ -3,6 +3,7 @@
 from enum import Enum
 from functools import singledispatchmethod
 from numbers import Number
+from pydoc import locate
 from types import NoneType
 
 import numpy as np
@@ -134,12 +135,15 @@ class ConvertToPydanticIR(TransformPass):
             return
         if not isinstance(res_mgr, ResultManager):
             raise TypeError(f"Unsupported ResultManager type: {type(res_mgr)}")
+        new_res_mgr = ResultManager()
         for result in res_mgr._results:
-            self._convert_element(result._result)
+            new_res_mgr.add(self._convert_element(result._result))
+        res_mgr._results.clear()
+        res_mgr.update(new_res_mgr)
         return
 
     @singledispatchmethod
-    def _convert_element(self, value):
+    def _convert_element(self, value, *args, **kwargs):
         """Default method for converting elements. This will raise an error if no specific
         conversion is defined for the type of `value`.
         """
@@ -149,27 +153,30 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: ResultInfoMixin,
+        *args,
+        **kwargs,
     ):
         """Convert a ResultInfoMixin instance."""
+        data = dict()
+        kwargs["as_index"] = False
         for attr, val in vars(value).items():
-            if attr == "value":
-                # The value is already in the correct format.
-                continue
-            elif attr == "id":
-                # The id is a UUID, which is already compatible with Pydantic.
-                continue
-            elif attr == "name":
-                # The name is a string, which is already compatible with Pydantic.
-                continue
-            else:
-                # For any other attributes, we convert them using the _convert_element method.
-                setattr(value, attr, self._convert_element(val))
-        return value
+            data[attr] = self._convert_element(val, *args, **kwargs)
+
+        class_name = value.__class__.__name__
+        # If the value is an ActiveChannelResults, convert it to ActivePulseChannelResults
+        if class_name == "ActiveChannelResults":
+            class_name = "ActivePulseChannelResults"
+        # Check non-legacy path for class name first, if not found, use legacy path
+        class_path = value.__class__.__module__.replace(".legacy", "") + "." + class_name
+        cls_ = locate(class_path) or value.__class__
+        return cls_(**data)
 
     @_convert_element.register(PulseChannelTimeline)
     def _(
         self,
         value: PulseChannelTimeline,
+        *args,
+        **kwargs,
     ):
         """Convert a PulseChannelTimeline instance."""
         for attr, val in vars(value).items():
@@ -180,6 +187,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: type,
+        *args,
+        **kwargs,
     ):
         """Convert a type to its Pydantic equivalent."""
         pyd_class = self._get_pyd_class(value.__name__, allow_none=True)
@@ -194,6 +203,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Number | str | None,
+        *args,
+        **kwargs,
     ):
         return value
 
@@ -201,6 +212,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: LoopCount,
+        *args,
+        **kwargs,
     ):
         """Convert a LoopCount instance."""
         return pyd_instructions.LoopCount(value)
@@ -211,6 +224,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: list | tuple | set,
+        *args,
+        **kwargs,
     ):
         if all(isinstance(v, (Number, str)) for v in value):
             return value
@@ -230,21 +245,25 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: dict,
+        *args,
+        **kwargs,
     ):
         """Convert a dictionary by iterating over its items."""
         new_dict = {}
         for key, val in value.items():
-            new_key = self._convert_element(key)
+            new_key = self._convert_element(key, *args, **kwargs)
             if isinstance(val, (int, float, str)):
                 new_dict[new_key] = val
             else:
-                new_dict[new_key] = self._convert_element(val)
+                new_dict[new_key] = self._convert_element(val, *args, **kwargs)
         return new_dict
 
     @_convert_element.register(HardwareModel)
     def _(
         self,
         value: HardwareModel,
+        *args,
+        **kwargs,
     ):
         return self.pyd_model
 
@@ -252,14 +271,16 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Variable,
+        *args,
+        **kwargs,
     ):
         """Convert a Variable instance."""
         if value.var_type is LoopCount and isinstance(value.value, int):
             value.value = LoopCount(value.value)
         new_var = pyd_instructions.Variable(
             name=value.name,
-            var_type=self._convert_element(value.var_type),
-            value=self._convert_element(value.value),
+            var_type=self._convert_element(value.var_type, *args, **kwargs),
+            value=self._convert_element(value.value, *args, **kwargs),
         )
         return new_var
 
@@ -268,6 +289,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: PulseChannelView | PulseChannel,
+        *args,
+        **kwargs,
     ):
         """Convert a PulseChannelView instance."""
         return self._pulse_channel_map[value.id]
@@ -276,9 +299,14 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Qubit,
+        *args,
+        as_index: bool = True,
+        **kwargs,
     ):
         """Convert a Qubit instance."""
-        return value.index
+        if as_index:
+            return value.index
+        return self.pyd_model.qubit_with_index(value.index)
 
     @_convert_element.register(Instruction)
     @_convert_element.register(BinaryOperator)
@@ -286,35 +314,37 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Instruction | BinaryOperator,
+        *args,
+        **kwargs,
     ):
         """Convert an Instruction instance."""
         data = dict()
         for name, var in vars(value).items():
             if name == "quantum_targets":
-                data["targets"] = frozenset(self._convert_element(var))
+                data["targets"] = frozenset(self._convert_element(var, *args, **kwargs))
             elif name == "time":
-                data["duration"] = self._convert_element(var)
+                data["duration"] = self._convert_element(var, *args, **kwargs)
             else:
-                data[name] = self._convert_element(var)
+                data[name] = self._convert_element(var, *args, **kwargs)
         pyd_class = self._get_pyd_class(value)
         return pyd_class(**data)
 
     @_convert_element.register(QuantumInstruction)
-    def _(self, value: QuantumInstruction):
+    def _(self, value: QuantumInstruction, *args, **kwargs):
         """Convert a QuantumInstruction instance."""
         data = dict()
         for name, var in vars(value).items():
             if name == "quantum_targets":
-                targets = self._convert_element(var)
+                targets = self._convert_element(var, *args, **kwargs)
             elif name == "time":
-                data["duration"] = self._convert_element(var)
+                data["duration"] = self._convert_element(var, *args, **kwargs)
             else:
-                data[name] = self._convert_element(var)
+                data[name] = self._convert_element(var, *args, **kwargs)
         pyd_class = self._get_pyd_class(value)
         return [pyd_class(target=target, **data) for target in targets]
 
     @_convert_element.register(Reset)
-    def _(self, value: Reset):
+    def _(self, value: Reset, *args, **kwargs):
         """Convert a Reset instance."""
         qubit_targets = set(
             [
@@ -322,7 +352,7 @@ class ConvertToPydanticIR(TransformPass):
                 for target in value.quantum_targets
             ]
         )
-        duration = self._convert_element(value.duration)
+        duration = self._convert_element(value.duration, *args, **kwargs)
         return [
             pyd_instructions.Reset(
                 qubit_target=target,
@@ -335,31 +365,37 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: InstructionBlock,
+        *args,
+        **kwargs,
     ):
         """Convert an InstructionBlock instance."""
         pyd_class = self._get_pyd_class(value)
         extra_data = {}
         if "qubit_targets" in pyd_class.model_fields:
             extra_data["qubit_targets"] = frozenset(
-                self._convert_element(value.quantum_targets)
+                self._convert_element(value.quantum_targets, *args, **kwargs)
             )
         new_block = pyd_class(**extra_data)
         for instruction in value.instructions:
-            new_block.add(*self._convert_element(instruction))
+            new_block.add(*self._convert_element(instruction, *args, **kwargs))
         return new_block
 
     @_convert_element.register(Repeat)
     def _(
         self,
         value: Repeat,
+        *args,
+        **kwargs,
     ):
         """Convert a Repeat instance."""
         data = dict()
         for name, var in vars(value).items():
             if name == "repeat_count":
-                repeat = pyd_instructions.Repeat(repeat_count=self._convert_element(var))
+                repeat = pyd_instructions.Repeat(
+                    repeat_count=self._convert_element(var, *args, **kwargs)
+                )
             else:
-                data[name] = self._convert_element(var)
+                data[name] = self._convert_element(var, *args, **kwargs)
         self._additional_data.update(data)
         return repeat
 
@@ -368,6 +404,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: ResultsProcessing | PostProcessing,
+        *args,
+        **kwargs,
     ):
         """Convert an Assign instance."""
         return self._get_pyd_class(value)._from_legacy(value)
@@ -376,17 +414,21 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Jump,
+        *args,
+        **kwargs,
     ):
         """Convert a Jump instance."""
         return pyd_instructions.Jump(
-            label=self._convert_element(value.target),
-            condition=self._convert_element(value.condition),
+            label=self._convert_element(value.target, *args, **kwargs),
+            condition=self._convert_element(value.condition, *args, **kwargs),
         )
 
     @_convert_element.register(Enum)
     def _(
         self,
         value: Enum,
+        *args,
+        **kwargs,
     ):
         """Convert an Enum instance."""
         pyd_class = self._get_pyd_class(value)
@@ -396,6 +438,8 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: PulseShapeType,
+        *args,
+        **kwargs,
     ):
         """Convert a PulseShapeType instance."""
         if value.name == "GAUSSIAN_DRAG":
@@ -411,11 +455,15 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: CustomPulse,
+        *args,
+        **kwargs,
     ):
         """Convert a CustomPulse instance."""
         return pyd_waveforms.Pulse(
             waveform=pyd_waveforms.SampledWaveform(samples=value.samples),
-            targets=frozenset(self._convert_element(value.quantum_targets)),
+            targets=frozenset(
+                self._convert_element(value.quantum_targets, *args, **kwargs)
+            ),
             ignore_channel_scale=value.ignore_channel_scale,
             duration=value.duration,
         )
@@ -424,17 +472,21 @@ class ConvertToPydanticIR(TransformPass):
     def _(
         self,
         value: Pulse,
+        *args,
+        **kwargs,
     ):
         """Convert a Pulse instance."""
         waveform_data = dict()
         pulse_data = dict()
         for name, var in vars(value).items():
             if name == "quantum_targets":
-                pulse_data["targets"] = frozenset(self._convert_element(var))
+                pulse_data["targets"] = frozenset(
+                    self._convert_element(var, *args, **kwargs)
+                )
             elif name in ("ignore_channel_scale", "duration"):
                 pulse_data[name] = var
             else:
-                waveform_data[name] = self._convert_element(var)
+                waveform_data[name] = self._convert_element(var, *args, **kwargs)
         waveform_class = waveform_data.pop("shape")
         return pyd_waveforms.Pulse(
             waveform=waveform_class(**waveform_data),

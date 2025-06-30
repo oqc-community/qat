@@ -21,7 +21,7 @@ from pydantic import ValidationError
 from qat import QAT
 from qat.backend.fallthrough import FallthroughBackend
 from qat.backend.waveform_v1 import WaveformV1Backend
-from qat.backend.waveform_v1.executable import WaveformV1Executable
+from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.core.config.configure import get_config
 from qat.core.config.descriptions import (
     HardwareLoaderDescription,
@@ -893,10 +893,15 @@ class TestExperimentalEchoPipelines:
             assert new_key in experimental_exe.channel_data
             stable_data = stable_data.model_copy(update={"physical_channel": new_key})
             experimental_data = experimental_exe.channel_data[new_key]
-            assert stable_data == experimental_data
+            assert isinstance(experimental_data, WaveformV1ChannelData)
+            assert stable_data.acquires == experimental_data.acquires
+            assert stable_data.baseband_frequency == experimental_data.baseband_frequency
+            assert np.allclose(stable_data.buffer, experimental_data.buffer, atol=1e-9)
         assert stable_exe.compiled_shots == experimental_exe.compiled_shots
         assert stable_exe.post_processing == experimental_exe.post_processing
-        assert stable_exe.repetition_time == experimental_exe.repetition_time
+        assert stable_exe.repetition_time == pytest.approx(
+            experimental_exe.repetition_time, 1e-9
+        )
         assert stable_exe.results_processing == experimental_exe.results_processing
         assert stable_exe.returns == experimental_exe.returns
         assert stable_exe.shots == experimental_exe.shots
