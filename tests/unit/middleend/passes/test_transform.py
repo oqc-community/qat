@@ -44,6 +44,7 @@ from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.transform import (
     BatchedShots,
     EndOfTaskResetSanitisation,
+    InitialPhaseResetSanitisation,
     InstructionLengthSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
@@ -1025,3 +1026,77 @@ class TestEndOfTaskResetSanitisation:
         reset_instrs = [instr for instr in builder if isinstance(instr, Reset)]
         assert len(reset_instrs) == 1
         assert reset_instrs[0].qubit_target == 0
+
+
+class TestPhaseResetSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader().load()
+
+    @pytest.mark.parametrize("reset_qubits", [False, True])
+    def test_phase_reset_shot(self, model, reset_qubits):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+
+        active_targets = {}
+        for ind in model.qubits:
+            qubit = model.qubit_with_index(ind)
+            drive_pulse_ch_id = qubit.drive_pulse_channel.uuid
+            if reset_qubits:
+                builder.add(PhaseReset(target=drive_pulse_ch_id))
+            builder.X(target=qubit)
+            active_targets[drive_pulse_ch_id] = qubit
+
+        n_instr_before = builder.number_of_instructions
+
+        res_mgr = ResultManager()
+        # Mock some active targets, i.e., the drive pulse channels of the qubits.
+        res_mgr.add(ActivePulseChannelResults(target_map=active_targets))
+        InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
+
+        assert builder.number_of_instructions == n_instr_before + len(active_targets)
+        for key, instr in zip(active_targets.keys(), builder.instructions):
+            assert isinstance(instr, PhaseReset)
+            assert instr.target == key
+
+    def test_phase_reset_shot_leading_non_quantum_instructions(self, model):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+
+        active_targets = {}
+        for ind in model.qubits:
+            qubit = model.qubit_with_index(ind)
+            drive_pulse_ch_id = qubit.drive_pulse_channel.uuid
+            # Add a non-quantum instruction before the quantum instructions.
+            builder.add(Repeat(repeat_count=42))
+            builder.X(target=qubit)
+            active_targets[drive_pulse_ch_id] = qubit
+
+        n_instr_before = builder.number_of_instructions
+
+        res_mgr = ResultManager()
+        # Mock some active targets, i.e., the drive pulse channels of the qubits.
+        res_mgr.add(ActivePulseChannelResults(target_map=active_targets))
+        InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
+
+        assert builder.number_of_instructions == n_instr_before + len(active_targets)
+        assert isinstance(builder.instructions[0], Repeat)
+        for key, instr in zip(active_targets.keys(), builder.instructions[1:]):
+            assert isinstance(instr, PhaseReset)
+            assert instr.target == key
+
+    def test_phase_reset_shot_no_active_pulse_channels(self, model):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+
+        for ind in model.qubits:
+            qubit = model.qubit_with_index(ind)
+            builder.X(target=qubit)
+
+        n_instr_before = builder.number_of_instructions
+
+        res_mgr = ResultManager()
+        # Mock some active targets, i.e., the drive pulse channels of the qubits.
+        res_mgr.add(ActivePulseChannelResults())
+        InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
+
+        # No phase reset added since there are no active targets.
+        assert builder.number_of_instructions == n_instr_before
+        assert not isinstance(builder.instructions[0], PhaseReset)

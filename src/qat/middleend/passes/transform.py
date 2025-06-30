@@ -643,6 +643,32 @@ class EndOfTaskResetSanitisation(TransformPass):
         return ir
 
 
+class InitialPhaseResetSanitisation(TransformPass):
+    """
+    Checks if every active pulse channel has a phase reset in the beginning.
+
+    .. warning::
+
+        This pass implies that an `ActivePulseChannelAnalysis` is performed prior to this pass.
+    """
+
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        active_targets = list(res_mgr.lookup_by_type(ActivePulseChannelResults).targets)
+
+        if active_targets:
+            index = next(
+                filter(
+                    lambda tup: True if isinstance(tup[1], QuantumInstruction) else None,
+                    enumerate(ir.instructions),
+                )
+            )[0]
+            head, tail = ir.instructions[:index], ir.instructions[index:]
+            resets = [PhaseReset(target=target) for target in active_targets]
+            ir.instructions = head + resets + tail
+
+        return ir
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
@@ -653,3 +679,4 @@ PydRepeatTranslation = RepeatTranslation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
 PydScopeSanitisation = ScopeSanitisation
 PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation
+PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation
