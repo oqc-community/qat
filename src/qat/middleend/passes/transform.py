@@ -289,6 +289,51 @@ class PostProcessingSanitisation(TransformPass):
         return True
 
 
+class InactivePulseChannelSanitisation(TransformPass):
+    """Removes instructions that act on inactive pulse channels.
+
+    Many channels that aren't actually needed to execute the program contain instructions,
+    mainly :class:`Synchronize` instructions and :class:`PhaseShift` instructions which
+    can happen when either of the instructions are applied to qubits. To simplify analysis
+    and optimisations in later passes, it makes sense to filter these out to reduce the
+    overall instruction amount.
+
+    .. note::
+
+        This pass requires results from the
+        :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
+        to be stored in the results manager.
+    """
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+
+        active_channels = [
+            target for target in res_mgr.lookup_by_type(ActivePulseChannelResults).targets
+        ]
+        instructions: list[Instruction] = []
+        for inst in ir.instructions:
+            if isinstance(inst, Synchronize):
+                # inactive channels need stripping from syncs
+                targets = [target for target in inst.targets if target in active_channels]
+                if len(targets) > 1:
+                    inst.targets = targets
+                    instructions.append(inst)
+            elif isinstance(inst, QuantumInstruction):
+                # other instructions need their targets checking
+                if inst.target in active_channels:
+                    instructions.append(inst)
+            else:
+                instructions.append(inst)
+        ir.instructions = instructions
+        return ir
+
+
 class InstructionLengthSanitisation(TransformPass):
     """
     Checks if quantum instructions are too long and splits if necessary.
@@ -772,6 +817,7 @@ PydBatchedShots = BatchedShots
 PydResetsToDelays = ResetsToDelays
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
+PydInactivePulseChannelSanitisation = InactivePulseChannelSanitisation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
 PydScopeSanitisation = ScopeSanitisation
 PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation

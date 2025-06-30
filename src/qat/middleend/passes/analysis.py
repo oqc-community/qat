@@ -25,7 +25,7 @@ class ActivePulseChannelResults(ResultInfoMixin):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def targets(self) -> list[PulseChannel]:
+    def targets(self) -> list[str]:
         """Returns a dictionary of all pulse channels with their full id as a key."""
         return list(self.target_map.keys()) + self.unassigned
 

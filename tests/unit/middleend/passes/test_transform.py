@@ -47,6 +47,7 @@ from qat.middleend.passes.transform import (
     BatchedShots,
     EndOfTaskResetSanitisation,
     FreqShiftSanitisation,
+    InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionLengthSanitisation,
     PhaseOptimisation,
@@ -476,6 +477,142 @@ class TestPydPostProcessingSanitisation:
         pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
         assert len(pp) == 2
         assert pp[0].output_variable != pp[1].output_variable
+
+
+class TestInactivePulseChannelSanitisation:
+    hw = PydEchoModelLoader(10).load()
+
+    def test_sync_on_one_qubit_with_one_pulse_channel_is_removed(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+        builder.X(target=qubit)
+        builder.synchronize(targets=qubit)
+
+        sync_inst = [
+            inst for inst in builder.instructions if isinstance(inst, Synchronize)
+        ][0]
+        assert len(sync_inst.targets) > 1
+
+        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        sync_inst = [inst for inst in builder.instructions if isinstance(inst, Synchronize)]
+        assert len(sync_inst) == 0
+
+    def test_sync_on_one_qubit_with_multiple_pulses_is_sanitised(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+        builder.X(target=qubit)
+        builder.synchronize(targets=qubit)
+
+        sync_inst = [
+            inst for inst in builder.instructions if isinstance(inst, Synchronize)
+        ][0]
+        assert len(sync_inst.targets) > 1
+
+        res = ActivePulseChannelResults(
+            target_map={
+                qubit.drive_pulse_channel.uuid: qubit,
+                qubit.measure_pulse_channel.uuid: qubit,
+                qubit.acquire_pulse_channel.uuid: qubit,
+            }
+        )
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        sync_inst = [inst for inst in builder.instructions if isinstance(inst, Synchronize)]
+        assert len(sync_inst) == 1
+
+    def test_sync_on_multiple_qubits_is_sanitised(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit1 = self.hw.qubit_with_index(0)
+        qubit2 = self.hw.qubit_with_index(1)
+        builder.X(target=qubit1)
+        builder.X(target=qubit2)
+        builder.synchronize(targets=[qubit1, qubit2])
+
+        sync_inst = [
+            inst for inst in builder.instructions if isinstance(inst, Synchronize)
+        ][0]
+        assert len(sync_inst.targets) > 1
+
+        res = ActivePulseChannelResults(
+            target_map={
+                qubit1.drive_pulse_channel.uuid: qubit1,
+                qubit2.drive_pulse_channel.uuid: qubit2,
+            }
+        )
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        sync_inst = [inst for inst in builder.instructions if isinstance(inst, Synchronize)]
+        assert len(sync_inst) == 1
+        assert len(sync_inst[0].targets) == 2
+        assert qubit1.drive_pulse_channel.uuid in sync_inst[0].targets
+        assert qubit2.drive_pulse_channel.uuid in sync_inst[0].targets
+
+    def test_delays_are_sanitized(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+
+        builder.pulse(
+            target=qubit.drive_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
+        )
+
+        builder.delay(target=qubit.measure_pulse_channel, duration=80e-9)
+
+        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        assert len(builder.instructions) == 1
+        assert isinstance(builder.instructions[0], Pulse)
+
+    def test_phase_shifts_are_sanitized(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+
+        builder.pulse(
+            target=qubit.drive_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
+        )
+
+        builder.phase_shift(target=qubit.measure_pulse_channel, theta=np.pi)
+
+        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+        assert len(builder.instructions) == 1
+        assert isinstance(builder.instructions[0], Pulse)
+
+    def test_Z_is_sanitized(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+
+        builder.pulse(
+            target=qubit.drive_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
+        )
+
+        builder.Z(target=qubit, theta=np.pi)
+
+        num_phase_shifts_before = len(
+            [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        )
+
+        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
+
+        num_phase_shifts_after = len(
+            [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        )
+
+        assert num_phase_shifts_after < num_phase_shifts_before
+        assert num_phase_shifts_after == 1
 
 
 @pytest.mark.parametrize("seed", [1, 2, 3, 4])
