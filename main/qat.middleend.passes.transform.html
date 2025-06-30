@@ -547,6 +547,40 @@ instructions.</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Removes instructions that act on inactive pulse channels.</p>
+<p>Many channels that aren’t actually needed to execute the program contain instructions,
+mainly <code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code> instructions and <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions which
+can happen when either of the instructions are applied to qubits. To simplify analysis
+and optimisations in later passes, it makes sense to filter these out to reduce the
+overall instruction amount.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This pass requires results from the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code>
+to be stored in the results manager.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InitialPhaseResetSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InitialPhaseResetSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.InitialPhaseResetSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
@@ -665,6 +699,12 @@ optimisation.</p></li>
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PydFreqShiftSanitisation">
 <span class="sig-name descname"><span class="pre">PydFreqShiftSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PydFreqShiftSanitisation" title="Link to this definition"></a></dt>
 <dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.transform.FreqShiftSanitisation" title="qat.middleend.passes.transform.FreqShiftSanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">FreqShiftSanitisation</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.PydInactivePulseChannelSanitisation">
+<span class="sig-name descname"><span class="pre">PydInactivePulseChannelSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PydInactivePulseChannelSanitisation" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.transform.InactivePulseChannelSanitisation" title="qat.middleend.passes.transform.InactivePulseChannelSanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation</span></code></a></p>
 </dd></dl>
 
 <dl class="py attribute">
