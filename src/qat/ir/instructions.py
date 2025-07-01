@@ -446,12 +446,6 @@ class Synchronize(QuantumInstruction):
     targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] = Field(min_length=2)
 
 
-class PhaseReset(QuantumInstruction):
-    """
-    Reset the phase shift of given pulse channels, or the pulse channels of given qubits.
-    """
-
-
 class PhaseSet(QuantumInstruction):
     """Sets the phase for a pulse channel.
 
@@ -460,6 +454,10 @@ class PhaseSet(QuantumInstruction):
     """
 
     phase: float = 0.0
+
+
+class PhaseReset(PhaseSet):
+    phase: Literal[0.0] = 0.0
 
 
 class Reset(QuantumInstruction):
