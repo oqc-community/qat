@@ -810,6 +810,84 @@ class InitialPhaseResetSanitisation(TransformPass):
         return ir
 
 
+class LowerSyncsToDelays(TransformPass):
+    """Lowers :class:`Synchronize` instructions to :class:`Delay` instructions with static
+    times.
+
+    Increments through the instruction list, keeping track of the cumulative duration.
+    When :class:`Synchronize` instructions are encountered, it is replaced with
+    :class:`Delay` instructions with timings calculated from the cumulative durations.
+
+    .. warning::
+
+        Any manipulations of the instruction set that will alter the timeline and occur
+        after this pass could invalidate the intention of the :class:`Synchronize`
+        instruction.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        durations: dict[str, float] = defaultdict(float)
+        new_instructions: list[Instruction] = []
+
+        for inst in ir.instructions:
+            self.process_instruction(inst, new_instructions, durations)
+
+        ir.instructions = new_instructions
+        return ir
+
+    @singledispatchmethod
+    def process_instruction(
+        self, instruction, new_instructions: list[Instruction], durations: dict[str, float]
+    ):
+        raise NotImplementedError(
+            f"No processing method for instruction type {type(instruction)}"
+        )
+
+    @process_instruction.register(Instruction)
+    def _(
+        self,
+        instruction: Instruction,
+        new_instructions: list[Instruction],
+        durations: dict[str, float],
+    ):
+        """Default handler for instructions that do not have a specific processing
+        method."""
+        new_instructions.append(instruction)
+
+    @process_instruction.register(QuantumInstruction)
+    def _(
+        self,
+        instruction: QuantumInstruction,
+        new_instructions: list[Instruction],
+        durations: dict[str, float],
+    ):
+        """Processes QuantumInstructions by updating their target durations."""
+        durations[instruction.target] += instruction.duration
+        new_instructions.append(instruction)
+
+    @process_instruction.register(Synchronize)
+    def _(
+        self,
+        instruction: Synchronize,
+        new_instructions: list[Instruction],
+        durations: dict[str, float],
+    ):
+        """Process Synchronize instructions by converting them to Delay instructions."""
+        targets = instruction.targets
+        current_durations = np.asarray([durations[target] for target in targets])
+        max_duration = np.max(current_durations)
+        sync_durations = max_duration - current_durations
+        delay_instrs = [
+            Delay(target=target, duration=sync_durations[i])
+            for i, target in enumerate(targets)
+            if sync_durations[i] > 0.0
+        ]
+        new_instructions.extend(delay_instrs)
+        durations.update({target: max_duration for target in targets})
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
@@ -823,3 +901,4 @@ PydScopeSanitisation = ScopeSanitisation
 PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation
 PydFreqShiftSanitisation = FreqShiftSanitisation
 PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation
+PydLowerSyncsToDelays = LowerSyncsToDelays

@@ -50,6 +50,7 @@ from qat.middleend.passes.transform import (
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     InstructionLengthSanitisation,
+    LowerSyncsToDelays,
     PhaseOptimisation,
     PostProcessingSanitisation,
     RepeatTranslation,
@@ -1421,3 +1422,87 @@ class TestPhaseResetSanitisation:
         # No phase reset added since there are no active targets.
         assert builder.number_of_instructions == n_instr_before
         assert not isinstance(builder.instructions[0], PhaseReset)
+
+
+class TestLowerSyncsToDelays:
+    @pytest.mark.parametrize(
+        "inst",
+        [
+            Assign(name="test", value=1.0),
+            Return(variables=["test"]),
+            Repeat(repeat_count=254),
+        ],
+    )
+    def test_process_instruction(self, inst):
+        """Test that LowerSyncsToDelays passes on a select number of non-quantum
+        instructions."""
+        durations = defaultdict(float)
+        new_insts = []
+        LowerSyncsToDelays().process_instruction(inst, new_insts, durations)
+        assert len(durations) == 0
+        assert len(new_insts) == 1
+        assert new_insts[0] == inst
+
+    @pytest.mark.parametrize(
+        "inst",
+        [
+            Delay(target="test", duration=1e-6),
+            Pulse(target="test", waveform=SquareWaveform(width=1e-6)),
+            Acquire(target="test", duration=1e-6, delay=0.0),
+        ],
+    )
+    def test_process_quantum_instruction(self, inst):
+        """Test that LowerSyncsToDelays does not pass on quantum instructions."""
+        durations = defaultdict(float)
+        new_insts = []
+        LowerSyncsToDelays().process_instruction(inst, new_insts, durations)
+        assert len(durations) == 1
+        assert "test" in durations
+        assert durations["test"] == inst.duration
+        assert len(new_insts) == 1
+        assert new_insts[0] == inst
+
+    def test_process_sync(self):
+        """Tests that a synchronize instruction is converted to delays, and the durations
+        dict is updated accordingly. Tests the case when a channel hasn't yet been seen."""
+        durations = defaultdict(float)
+        durations["test1"] = 80e-9
+        durations["test2"] = 120e-9
+        new_insts = []
+        inst = Synchronize(targets=["test1", "test2", "test3"])
+        LowerSyncsToDelays().process_instruction(inst, new_insts, durations)
+        assert len(durations) == 3
+        assert "test3" in durations
+        assert all(np.isclose(val, 120e-9) for val in durations.values())
+        assert len(new_insts) == 2
+        for inst in new_insts:
+            assert isinstance(inst, Delay)
+            assert inst.target in ["test1", "test3"]
+            if inst.target == "test1":
+                assert np.isclose(inst.duration, 40e-9)
+            else:
+                assert np.isclose(inst.duration, 120e-9)
+
+    def test_sync_with_two_channels(self):
+        model = PydEchoModelLoader().load()
+        chan1 = model.qubits[0].drive_pulse_channel
+        chan2 = model.qubits[1].drive_pulse_channel
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.pulse(target=chan1.uuid, waveform=SquareWaveform(width=120e-9))
+        builder.delay(chan1, 48e-9)
+        builder.delay(chan2, 72e-9)
+        builder.pulse(target=chan2.uuid, waveform=SquareWaveform(width=168e-9))
+        builder.synchronize([chan1, chan2])
+
+        LowerSyncsToDelays().run(builder)
+        assert len(builder.instructions) == 5
+        assert [type(inst) for inst in builder.instructions] == [
+            Pulse,
+            Delay,
+            Delay,
+            Pulse,
+            Delay,
+        ]
+        times = [inst.duration for inst in builder.instructions]
+        assert times[0] + times[1] + times[4] == times[2] + times[3]

@@ -47,6 +47,7 @@ from qat.middleend.passes.transform import (
     PydInactivePulseChannelSanitisation,
     PydInitialPhaseResetSanitisation,
     PydInstructionLengthSanitisation,
+    PydLowerSyncsToDelays,
     PydPhaseOptimisation,
     PydRepeatTranslation,
     PydResetsToDelays,
@@ -264,8 +265,8 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             )  # TODO: COMPILER-394
             # Preparing for codegen
             | EvaluatePulses()  # TODO: COMPILER-552
-            | LowerSyncsToDelays()  # TODO: COMPILER-409
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydLowerSyncsToDelays()
             | PydInactivePulseChannelSanitisation()
             | PydFreqShiftSanitisation(pyd_model)
             | PydInitialPhaseResetSanitisation()
