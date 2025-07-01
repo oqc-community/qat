@@ -393,6 +393,26 @@ class AbstractContext(ABC):
 
         return pulse
 
+    def _evaluate_square_pulse(self, pulse: Pulse, target: PulseChannel):
+        bias = target.bias
+        scale = 1.0 + 0.0j if pulse.ignore_channel_scale else target.scale
+
+        pulse_amp = pulse.scale_factor * pulse.amp
+        pulse_amp = scale * pulse_amp + bias
+
+        if np.abs(pulse_amp.real) > 1 or np.abs(pulse_amp.imag) > 1:
+            raise ValueError(
+                f"""
+                Voltage range for I or Q exceeded. Current values:
+                waveform.scale_factor: {pulse.scale_factor}
+                waveform.amp: {pulse.amp}
+                (Channel) scale: {scale}
+                (Channel) bias: {bias}
+                """
+            )
+
+        return pulse_amp
+
     def _register_signal(self, waveform, target, data, name):
         index = self.sequence_builder.lookup_waveform_by_data(data)
         if index is not None:
@@ -560,12 +580,7 @@ class AbstractContext(ABC):
                 i_steps = self.alloc_mgr.registers[pulse_amp.name]
                 q_steps = self.alloc_mgr.registers["zero"]
             else:
-                bias = target.bias
-                scale = 1.0 + 0.0j if waveform.ignore_channel_scale else target.scale
-
-                pulse_amp = waveform.scale_factor * waveform.amp
-                pulse_amp = scale * pulse_amp + bias
-
+                pulse_amp = self._evaluate_square_pulse(waveform, target)
                 i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
                 q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
 
@@ -577,6 +592,15 @@ class AbstractContext(ABC):
                 self._upd_param_reg(pulse_width)
             else:
                 pulse_width = int(calculate_duration(waveform))
+                if pulse_width < Constants.GRID_TIME:
+                    log.debug(
+                        f"""
+                        Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
+                        Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                        This pulse will be ignored.
+                        """
+                    )
+                    return
                 self._upd_param_imm(pulse_width)
 
             self.sequence_builder.set_awg_offs(0, 0)
