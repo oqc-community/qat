@@ -7,14 +7,22 @@ from qat.core.config.descriptions import (
     PipelineInstanceDescription,
     UpdateablePipelineDescription,
 )
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
+from qat.model.loaders.cache import CacheAccessLoader
 from qat.pipelines.base import AbstractPipeline
+from qat.pipelines.updateable import UpdateablePipeline
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 class HardwareLoaders:
     def __init__(self, hardware_loaders: dict[str, BaseModelLoader] = {}):
         self._loaders = dict(**hardware_loaders)
         self._loaded_models = {}
+
+    def __getitem__(self, model_name: str) -> QuantumHardwareModel | PhysicalHardwareModel:
+        """Allows indexing to get a hardware model by name."""
+        return self.load(model_name, allow_cache=True)
 
     def get_loader(self, loader_name: str, default=None) -> BaseModelLoader:
         """Returns a hardware model loader by name."""
@@ -37,6 +45,19 @@ class HardwareLoaders:
 
     def clear_cache(self):
         self._loaded_models = {}
+
+    def reload_model(
+        self, loader_name: str
+    ) -> QuantumHardwareModel | PhysicalHardwareModel:
+        """Reloads a hardware model from its loader, updating the model in the cache."""
+        if loader_name not in self._loaders:
+            raise Exception(f"Hardware Model Loader {loader_name} not found")
+        return self.load(loader_name, allow_cache=False)
+
+    def reload_all_models(self):
+        """Reloads all hardware models from their respective loaders, updating the cache."""
+        for loader_name in self._loaders:
+            self.reload_model(loader_name)
 
     @classmethod
     def from_descriptions(
@@ -70,7 +91,7 @@ class PipelineSet:
         pipes = []
         for Pdesc in pipeline_descriptions:
             if hasattr(Pdesc, "hardware_loader"):
-                loader = available_hardware.get_loader(Pdesc.hardware_loader)
+                loader = CacheAccessLoader(available_hardware, Pdesc.hardware_loader)
                 if loader is None:
                     raise Exception(
                         f"Hardware Model Loader {Pdesc.hardware_loader} not found"
@@ -157,6 +178,28 @@ class PipelineSet:
             pipeline = self._pipelines[pipeline]
 
         return pipeline
+
+    def reload_model(self, pipeline: str):
+        """Refreshes a pipeline by updating the models from its cache.
+
+        :param pipeline: The name of the pipeline to refresh.
+        """
+
+        pipeline = self._pipelines[pipeline]
+        if not (isinstance(pipeline, UpdateablePipeline) and pipeline.has_loader):
+            raise Exception(
+                f"The pipeline {pipeline} is not an Updateable pipelines equipped with a "
+                "loader."
+            )
+        pipeline.update(reload_model=True)
+
+    def reload_all_models(self):
+        """Refreshes all :class:`UpdateablePipeline` instances with hardware model loaders
+        by updating the models from their caches."""
+
+        for pipeline in self._pipelines.values():
+            if isinstance(pipeline, UpdateablePipeline) and pipeline.has_loader:
+                pipeline.update(reload_model=True)
 
     def list(self) -> list[str]:
         """Returns a list of available pipeline names"""

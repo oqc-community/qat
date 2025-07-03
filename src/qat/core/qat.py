@@ -125,3 +125,8 @@ class QAT:
                 pkg, compiler_config=compiler_config, pipeline=P
             )
             return result, execute_metrics.merge(compile_metrics)
+
+    def reload_all_models(self):
+        """Reloads all hardware models and updates the pipelines."""
+        self._available_hardware.reload_all_models()
+        self.pipelines.reload_all_models()

@@ -17,6 +17,7 @@ from qat.core.config.descriptions import (
     UpdateablePipelineDescription,
 )
 from qat.core.config.session import QatSessionConfig
+from qat.core.pipeline import HardwareLoaders, PipelineSet
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import DefaultFrontend, FallthroughFrontend
@@ -253,3 +254,42 @@ class TestQATPipelineSetup:
         q.pipelines.add(fallthrough_pipeline)
         res, _ = q.execute(pkg, pipeline="fallthrough")
         assert res == {}
+
+
+class TestQATHardwareModelReloading:
+    @pytest.fixture(autouse=True)
+    def qat(self):
+        """Fixture to create a QAT instance with a specific configuration."""
+        return QAT("tests/files/qatconfig/modelreloading.yaml")
+
+    def test_models_are_instantiated_correctly(self, qat):
+        hardware = qat._available_hardware
+        assert isinstance(hardware, HardwareLoaders)
+        assert len(hardware._loaded_models) == 2
+        assert ("loader1", "loader2") == tuple(hardware._loaded_models.keys())
+        assert len(hardware["loader1"].qubits) == 2
+        assert len(hardware["loader2"].qubits) == 6
+
+    def test_pipelines_are_instantiated_correctly(self, qat):
+        pipelines = qat.pipelines
+        hardware = qat._available_hardware
+        assert isinstance(pipelines, PipelineSet)
+        assert len(pipelines._pipelines) == 3
+        assert ("pipeline1", "pipeline2", "pipeline3") == tuple(pipelines.list())
+
+        assert pipelines.get("pipeline1").model == hardware.load("loader1")
+        assert pipelines.get("pipeline2").model == hardware.load("loader1")
+        assert pipelines.get("pipeline3").model == hardware.load("loader2")
+
+    def test_reload_models(self, qat):
+        """This tests that hardware models in the pipeline are the expected instances,
+        and the number of qubits is only incremented by, the number of loads is the number
+        of hardware loaders, and not the number of pipelines."""
+        qat.reload_all_models()
+        hardware = qat._available_hardware
+        pipelines = qat.pipelines
+        assert pipelines.get("pipeline1").model == hardware.load("loader1")
+        assert pipelines.get("pipeline2").model == hardware.load("loader1")
+        assert pipelines.get("pipeline3").model == hardware.load("loader2")
+        assert len(hardware["loader1"].qubits) == 3
+        assert len(hardware["loader2"].qubits) == 7

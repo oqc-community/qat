@@ -154,6 +154,11 @@ class UpdateablePipeline(AbstractPipeline):
         """Return the engine of the pipeline."""
         return self._pipeline.engine
 
+    @property
+    def has_loader(self) -> bool:
+        """Check if the pipeline has a loader."""
+        return self._loader is not None
+
     def update(
         self,
         config: PipelineConfig | None = None,

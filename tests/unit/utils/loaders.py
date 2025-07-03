@@ -1,3 +1,4 @@
+from qat.model.loaders.legacy.base import BaseLegacyModelLoader
 from qat.model.loaders.legacy.echo import EchoModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
@@ -23,3 +24,15 @@ class BrokenLoader(EchoModelLoader):
         if self.on_load:
             raise ValueError("This loader is broken intentionally on load.")
         return super().load()
+
+
+class MockModelLoader(BaseLegacyModelLoader):
+    """A mock model loader used to test the UpdateablePipeline infrastructure. Each load
+    will add an extra qubit."""
+
+    def __init__(self, num_qubits: int = 1):
+        self.num_qubits = num_qubits
+
+    def load(self):
+        self.num_qubits += 1
+        return EchoModelLoader(qubit_count=self.num_qubits).load()

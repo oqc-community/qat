@@ -1,0 +1,21 @@
+MAX_REPEATS_LIMIT: 1000
+PIPELINES:
+- name: pipeline1
+  pipeline: qat.pipelines.echo.EchoPipeline
+  hardware_loader: loader1
+  default: true
+- name: pipeline2 
+  pipeline: qat.pipelines.echo.EchoPipeline
+  hardware_loader: loader1
+- name: pipeline3
+  pipeline: qat.pipelines.echo.EchoPipeline
+  hardware_loader: loader2
+HARDWARE:
+- name: loader1
+  type: tests.unit.utils.loaders.MockModelLoader
+  config:
+    num_qubits: 1
+- name: loader2
+  type: tests.unit.utils.loaders.MockModelLoader
+  config:
+    num_qubits: 5

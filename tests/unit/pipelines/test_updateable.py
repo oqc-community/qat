@@ -8,51 +8,14 @@ from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.legacy import EchoModelLoader
-from qat.model.loaders.legacy.base import BaseLegacyModelLoader
 from qat.model.target_data import TargetData
-from qat.pipelines.pipeline import Pipeline
-from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
+from qat.pipelines.updateable import PipelineConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.engines import MockEngineWithModel
-
-
-class MockModelLoader(BaseLegacyModelLoader):
-    """A mock model loader used to test the UpdateablePipeline infrastructure. Each load
-    will add an extra qubit."""
-
-    def __init__(self):
-        self.num_qubits = 1
-
-    def load(self):
-        self.num_qubits += 1
-        return EchoModelLoader(qubit_count=self.num_qubits).load()
-
-
-class MockPipelineConfig(PipelineConfig):
-    name: str = "test"
-    test_attr: bool = False
-
-
-class MockUpdateablePipeline(UpdateablePipeline):
-    """A mock updateable pipeline for testing purposes."""
-
-    @staticmethod
-    def _build_pipeline(
-        config: MockPipelineConfig, model, target_data=None, engine=None
-    ) -> Pipeline:
-        engine = engine if engine is not None else ZeroEngine()
-        target_data = target_data if target_data is not None else TargetData.default()
-        return Pipeline(
-            name=config.name,
-            model=model,
-            frontend=AutoFrontend(model=model),
-            middleend=DefaultMiddleend(model=model),
-            backend=WaveformV1Backend(model=model),
-            runtime=SimpleRuntime(engine=engine),
-            target_data=target_data,
-        )
+from tests.unit.utils.loaders import MockModelLoader
+from tests.unit.utils.pipelines import MockPipelineConfig, MockUpdateablePipeline
 
 
 class TestUpdateablePipeline:
@@ -436,3 +399,18 @@ class TestUpdateablePipeline:
         new_model = new_loader.load()
         with pytest.raises(ValueError):
             pipeline.copy_with(model=new_model, loader=new_loader)
+
+    def test_has_loader(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+        assert pipeline.has_loader
+
+        pipeline = MockUpdateablePipeline(
+            config=config, model=model_loader.load(), target_data=target_data, engine=engine
+        )
+        assert pipeline.has_loader is False

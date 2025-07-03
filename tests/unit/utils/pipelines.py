@@ -3,8 +3,9 @@ from qat.engines.native import NativeEngine
 from qat.engines.zero import ZeroEngine
 from qat.frontend.auto import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
+from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
-from qat.pipelines.updateable import UpdateablePipeline
+from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
 from qat.runtime.results_pipeline import get_default_results_pipeline
 from qat.runtime.simple import SimpleRuntime
 
@@ -41,3 +42,28 @@ def get_mock_pipeline(model, name="test") -> Pipeline:
             results_pipeline=get_default_results_pipeline(model),
         ),
     )
+
+
+class MockPipelineConfig(PipelineConfig):
+    name: str = "test"
+    test_attr: bool = False
+
+
+class MockUpdateablePipeline(UpdateablePipeline):
+    """A mock updateable pipeline for testing purposes."""
+
+    @staticmethod
+    def _build_pipeline(
+        config: MockPipelineConfig, model, target_data=None, engine=None
+    ) -> Pipeline:
+        engine = engine if engine is not None else ZeroEngine()
+        target_data = target_data if target_data is not None else TargetData.default()
+        return Pipeline(
+            name=config.name,
+            model=model,
+            frontend=AutoFrontend(model=model),
+            middleend=DefaultMiddleend(model=model),
+            backend=WaveformV1Backend(model=model),
+            runtime=SimpleRuntime(engine=engine),
+            target_data=target_data,
+        )
