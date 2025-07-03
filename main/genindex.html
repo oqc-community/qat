@@ -594,7 +594,11 @@
 </li>
       </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.active">active (FreqShiftPulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.active">(SecondStatePulseChannel attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.backend.passes.legacy.analysis.html#qat.backend.passes.legacy.analysis.TriageResult.active_targets">active_targets (TriageResult attribute)</a>
 </li>
       <li><a href="qat.middleend.passes.legacy.analysis.html#qat.middleend.passes.legacy.analysis.ActiveChannelResults">ActiveChannelResults (class in qat.middleend.passes.legacy.analysis)</a>
@@ -1561,10 +1565,10 @@
       </ul></li>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_awg">configure_awg() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_connection">configure_connection() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_lo">configure_lo() (QcmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_lo">[1]</a>
 
       <ul>
@@ -1700,6 +1704,14 @@
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_waveform_idx_path0">cont_mode_waveform_idx_path0 (AwgConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path0">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_waveform_idx_path1">cont_mode_waveform_idx_path1 (AwgConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.cont_mode_waveform_idx_path1">[1]</a>
+</li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.container_type">container_type() (PydListBase method)</a>
+
+      <ul>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.container_type">(PydSetBase method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.container_types">container_types() (PydDictBase method)</a>
 </li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister.contents">contents (BitRegister property)</a>
 
@@ -2045,8 +2057,12 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.delay">delay (SimpleAcquire attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.delay">delay (SecondStatePulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.delay">(SimpleAcquire attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AbstractContext.delay">delay() (AbstractContext method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext.delay">[1]</a>
 
       <ul>
@@ -3147,8 +3163,6 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.get_tensor">get_tensor() (RealtimeChipSimEngine method)</a>
 </li>
-      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.get_validator_from_annotated">get_validator_from_annotated() (in module qat.utils.pydantic)</a>
-</li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.get_verification_model">get_verification_model() (in module qat.purr.backends.verification)</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.get_waveform_samples">get_waveform_samples() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.get_waveform_samples">[1]</a>
@@ -3478,6 +3492,8 @@
       <ul>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.instructions">(InstructionBuilder property)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions">[1]</a>
 </li>
+        <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.instructions">(MeasureBlock attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.instructions">(MeasureBlock property)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.PydWaveformV1Backend.create_pulse_channel_buffer.params.instructions">(qat.backend.waveform_v1.codegen.PydWaveformV1Backend.create_pulse_channel_buffer parameter)</a>
@@ -3545,10 +3561,10 @@
       </ul></li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt">Interrupt (class in qat.purr.compiler.interrupt)</a>
 </li>
-      <li><a href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.InterruptableExecutingMixin">InterruptableExecutingMixin (class in qat.purr.compiler.experimental.frontends)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.InterruptableExecutingMixin">InterruptableExecutingMixin (class in qat.purr.compiler.experimental.frontends)</a>
+</li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.InterruptError">InterruptError</a>
 </li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.InvokerMixin">InvokerMixin (class in qat.core.pass_base)</a>
@@ -5022,6 +5038,10 @@
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_post_init">(ExtraSoftSquareFunction method)</a>
 </li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.model_post_init">(FrozenDict method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet.model_post_init">(FrozenSet method)</a>
+</li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction.model_post_init">(GaussianFunction method)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.GaussianSquareFunction.model_post_init">(GaussianSquareFunction method)</a>
@@ -5031,6 +5051,12 @@
         <li><a href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.model_post_init">(MeasureBlock method)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.NumericFunction.model_post_init">(NumericFunction method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.model_post_init">(PydDictBase method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.model_post_init">(PydListBase method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.model_post_init">(PydSetBase method)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_post_init">(QiskitSimulationConfig method)</a>
 </li>
@@ -5051,6 +5077,12 @@
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.SoftSquareFunction.model_post_init">(SoftSquareFunction method)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.model_post_init">(SquareFunction method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.model_post_init">(ValidatedDict method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.model_post_init">(ValidatedList method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.model_post_init">(ValidatedSet method)</a>
 </li>
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.modify">modify() (Qasm2Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.modify">[1]</a>
@@ -6528,6 +6560,8 @@
         <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.params.pulse">(qat.model.device.MeasurePulseChannel parameter)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.Qubit.params.pulse">(qat.model.device.Qubit parameter)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.pulse">(SecondStatePulseChannel attribute)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.pulse">pulse() (InstructionBuilder method)</a>
@@ -10693,6 +10727,16 @@
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling">validate_qubit_coupling() (in module qat.utils.pydantic)</a>
 </li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.validate_root">validate_root() (ValidatedDict method)</a>
+
+      <ul>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.validate_root">(ValidatedList method)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.validate_root">(ValidatedSet method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_value">validate_value() (in module qat.utils.pydantic)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_waveform_type">validate_waveform_type() (in module qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict">ValidatedDict (class in qat.utils.pydantic)</a>
@@ -10719,10 +10763,10 @@
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Variable.value">(Variable attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin.value">value() (ResultInfoMixin method)</a>, <a href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin.value">[1]</a>
+</li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values">values() (PydDictBase method)</a>
