@@ -12,7 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   qat.backend.qblox.data
+   qat.backend.qblox.config
    qat.backend.qblox.passes
 
 Submodules
@@ -21,6 +21,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.backend.qblox.acquisition
    qat.backend.qblox.codegen
-   qat.backend.qblox.config
+   qat.backend.qblox.execution
    qat.backend.qblox.ir
+   qat.backend.qblox.visualisation

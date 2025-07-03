@@ -72,20 +72,21 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.html">qat.backend.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.data.html">qat.backend.qblox.data package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html">qat.backend.qblox.data.acquisition module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.constants.html">qat.backend.qblox.data.constants module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.execution.html">qat.backend.qblox.data.execution module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.visualisation.html">qat.backend.qblox.data.visualisation module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.constants.html">qat.backend.qblox.config.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -122,6 +123,7 @@
 <li class="toctree-l3 current"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.engines.qblox package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -423,7 +425,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentMixin"><code class="docutils literal notranslate"><span class="pre">InstrumentMixin</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentMixin.collect"><code class="docutils literal notranslate"><span class="pre">InstrumentMixin.collect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentMixin.playback"><code class="docutils literal notranslate"><span class="pre">InstrumentMixin.playback()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentMixin.upload"><code class="docutils literal notranslate"><span class="pre">InstrumentMixin.upload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentMixin.setup"><code class="docutils literal notranslate"><span class="pre">InstrumentMixin.setup()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentModel"><code class="docutils literal notranslate"><span class="pre">InstrumentModel</span></code></a><ul>
@@ -433,7 +435,30 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.InstrumentModel.name"><code class="docutils literal notranslate"><span class="pre">InstrumentModel.name</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.LeafInstrument"><code class="docutils literal notranslate"><span class="pre">LeafInstrument</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.LeafInstrument"><code class="docutils literal notranslate"><span class="pre">LeafInstrument</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.instrument_base.html#qat.engines.qblox.instrument_base.LeafInstrument.model_config"><code class="docutils literal notranslate"><span class="pre">LeafInstrument.model_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.CompositeQbloxInstrument"><code class="docutils literal notranslate"><span class="pre">CompositeQbloxInstrument</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxEngine"><code class="docutils literal notranslate"><span class="pre">QbloxEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxEngine.combine_playbacks"><code class="docutils literal notranslate"><span class="pre">QbloxEngine.combine_playbacks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxEngine.execute"><code class="docutils literal notranslate"><span class="pre">QbloxEngine.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.allocate_resources"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.allocate_resources()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.configure"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.configure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.connect"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.connect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.disconnect"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.disconnect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.model_config"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.model_post_init"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.playback"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.playback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.setup"><code class="docutils literal notranslate"><span class="pre">QbloxInstrument.setup()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

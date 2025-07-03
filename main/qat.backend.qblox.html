@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.backend.qblox.data package" href="qat.backend.qblox.data.html" />
+    <link rel="next" title="qat.backend.qblox.config package" href="qat.backend.qblox.config.html" />
     <link rel="prev" title="qat.backend.passes.validation module" href="qat.backend.passes.validation.html" /> 
 </head>
 
@@ -72,20 +72,21 @@
 </ul>
 </li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.backend.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.data.html">qat.backend.qblox.data package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html">qat.backend.qblox.data.acquisition module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.constants.html">qat.backend.qblox.data.constants module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.execution.html">qat.backend.qblox.data.execution module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.data.visualisation.html">qat.backend.qblox.data.visualisation module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.constants.html">qat.backend.qblox.config.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
@@ -122,6 +123,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -411,29 +413,37 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.data.html">qat.backend.qblox.data package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.data.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html">qat.backend.qblox.data.acquisition module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.AcqData"><code class="docutils literal notranslate"><span class="pre">AcqData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.Acquisition"><code class="docutils literal notranslate"><span class="pre">Acquisition</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.BinnedAcqData"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.IntegData"><code class="docutils literal notranslate"><span class="pre">IntegData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.PathData"><code class="docutils literal notranslate"><span class="pre">PathData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.acquisition.html#qat.backend.qblox.data.acquisition.ScopeAcqData"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.constants.html">qat.backend.qblox.config.constants module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants"><code class="docutils literal notranslate"><span class="pre">Constants</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.QbloxTargetData"><code class="docutils literal notranslate"><span class="pre">QbloxTargetData</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.data.constants.html">qat.backend.qblox.data.constants module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.constants.html#qat.backend.qblox.data.constants.Constants"><code class="docutils literal notranslate"><span class="pre">Constants</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.data.execution.html">qat.backend.qblox.data.execution module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.execution.html#qat.backend.qblox.data.execution.QbloxExecutable"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.execution.html#qat.backend.qblox.data.execution.QbloxPackage"><code class="docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.data.visualisation.html">qat.backend.qblox.data.visualisation module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.visualisation.html#qat.backend.qblox.data.visualisation.plot_acquisitions"><code class="docutils literal notranslate"><span class="pre">plot_acquisitions()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.data.visualisation.html#qat.backend.qblox.data.visualisation.plot_packages"><code class="docutils literal notranslate"><span class="pre">plot_packages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AttConfig"><code class="docutils literal notranslate"><span class="pre">AttConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AwgConfig"><code class="docutils literal notranslate"><span class="pre">AwgConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ConnectionConfig"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.GainConfig"><code class="docutils literal notranslate"><span class="pre">GainConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.LoConfig"><code class="docutils literal notranslate"><span class="pre">LoConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.MixerConfig"><code class="docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ModuleConfig"><code class="docutils literal notranslate"><span class="pre">ModuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.NcoConfig"><code class="docutils literal notranslate"><span class="pre">NcoConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.OffsetConfig"><code class="docutils literal notranslate"><span class="pre">OffsetConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.QbloxConfig"><code class="docutils literal notranslate"><span class="pre">QbloxConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ScopeAcqConfig"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig"><code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SquareWeightAcq"><code class="docutils literal notranslate"><span class="pre">SquareWeightAcq</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ThresholdedAcqConfig"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.TtlAcqConfig"><code class="docutils literal notranslate"><span class="pre">TtlAcqConfig</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -443,6 +453,9 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.passes.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.AllocationManager"><code class="docutils literal notranslate"><span class="pre">AllocationManager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenPass"><code class="docutils literal notranslate"><span class="pre">PreCodegenPass</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenResult"><code class="docutils literal notranslate"><span class="pre">PreCodegenResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.QbloxLegalisationPass"><code class="docutils literal notranslate"><span class="pre">QbloxLegalisationPass</span></code></a></li>
 </ul>
 </li>
@@ -457,6 +470,49 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.AcqData"><code class="docutils literal notranslate"><span class="pre">AcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.AcqData.bins"><code class="docutils literal notranslate"><span class="pre">AcqData.bins</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.AcqData.model_config"><code class="docutils literal notranslate"><span class="pre">AcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.AcqData.scope"><code class="docutils literal notranslate"><span class="pre">AcqData.scope</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition"><code class="docutils literal notranslate"><span class="pre">Acquisition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.accumulate"><code class="docutils literal notranslate"><span class="pre">Acquisition.accumulate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.acq_data"><code class="docutils literal notranslate"><span class="pre">Acquisition.acq_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.index"><code class="docutils literal notranslate"><span class="pre">Acquisition.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.model_config"><code class="docutils literal notranslate"><span class="pre">Acquisition.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.name"><code class="docutils literal notranslate"><span class="pre">Acquisition.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAcqData"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAcqData.avg_count"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.avg_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAcqData.integration"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.integration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAcqData.model_config"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAcqData.threshold"><code class="docutils literal notranslate"><span class="pre">BinnedAcqData.threshold</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.IntegData"><code class="docutils literal notranslate"><span class="pre">IntegData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.IntegData.i"><code class="docutils literal notranslate"><span class="pre">IntegData.i</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.IntegData.model_config"><code class="docutils literal notranslate"><span class="pre">IntegData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.IntegData.q"><code class="docutils literal notranslate"><span class="pre">IntegData.q</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData"><code class="docutils literal notranslate"><span class="pre">PathData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.avg_count"><code class="docutils literal notranslate"><span class="pre">PathData.avg_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.data"><code class="docutils literal notranslate"><span class="pre">PathData.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.model_config"><code class="docutils literal notranslate"><span class="pre">PathData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.oor"><code class="docutils literal notranslate"><span class="pre">PathData.oor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.ScopeAcqData"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.ScopeAcqData.i"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.i</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.ScopeAcqData.model_config"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.ScopeAcqData.q"><code class="docutils literal notranslate"><span class="pre">ScopeAcqData.q</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AbstractContext"><code class="docutils literal notranslate"><span class="pre">AbstractContext</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AbstractContext.clear"><code class="docutils literal notranslate"><span class="pre">AbstractContext.clear()</span></code></a></li>
@@ -478,15 +534,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AbstractContext.waveform"><code class="docutils literal notranslate"><span class="pre">AbstractContext.waveform()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager"><code class="docutils literal notranslate"><span class="pre">AllocationManager</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.label_gen"><code class="docutils literal notranslate"><span class="pre">AllocationManager.label_gen()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.labels"><code class="docutils literal notranslate"><span class="pre">AllocationManager.labels</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.reg_alloc"><code class="docutils literal notranslate"><span class="pre">AllocationManager.reg_alloc()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.reg_borrow"><code class="docutils literal notranslate"><span class="pre">AllocationManager.reg_borrow()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.reg_free"><code class="docutils literal notranslate"><span class="pre">AllocationManager.reg_free()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.AllocationManager.registers"><code class="docutils literal notranslate"><span class="pre">AllocationManager.registers</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_repeat"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.enter_repeat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_sweep"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.enter_sweep()</span></code></a></li>
@@ -495,20 +542,16 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.measure_acquire"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext.measure_acquire()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxEmitter"><code class="docutils literal notranslate"><span class="pre">NewQbloxEmitter</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxEmitter.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">NewQbloxEmitter.build_pass_pipeline()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxEmitter.emit_packages"><code class="docutils literal notranslate"><span class="pre">NewQbloxEmitter.emit_packages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend1"><code class="docutils literal notranslate"><span class="pre">QbloxBackend1</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend1.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">QbloxBackend1.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend1.emit"><code class="docutils literal notranslate"><span class="pre">QbloxBackend1.emit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.PreCodegenPass"><code class="docutils literal notranslate"><span class="pre">PreCodegenPass</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.PreCodegenPass.run"><code class="docutils literal notranslate"><span class="pre">PreCodegenPass.run()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend2"><code class="docutils literal notranslate"><span class="pre">QbloxBackend2</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend2.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">QbloxBackend2.build_pass_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend2.emit"><code class="docutils literal notranslate"><span class="pre">QbloxBackend2.emit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.PreCodegenResult"><code class="docutils literal notranslate"><span class="pre">PreCodegenResult</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.PreCodegenResult.alloc_mgrs"><code class="docutils literal notranslate"><span class="pre">PreCodegenResult.alloc_mgrs</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxBackend"><code class="docutils literal notranslate"><span class="pre">QbloxBackend</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxCFGWalker"><code class="docutils literal notranslate"><span class="pre">QbloxCFGWalker</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxCFGWalker.enter"><code class="docutils literal notranslate"><span class="pre">QbloxCFGWalker.enter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxCFGWalker.exit"><code class="docutils literal notranslate"><span class="pre">QbloxCFGWalker.exit()</span></code></a></li>
@@ -518,190 +561,20 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.measure_acquire"><code class="docutils literal notranslate"><span class="pre">QbloxContext.measure_acquire()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxEmitter"><code class="docutils literal notranslate"><span class="pre">QbloxEmitter</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxEmitter.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">QbloxEmitter.build_pass_pipeline()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxEmitter.emit_packages"><code class="docutils literal notranslate"><span class="pre">QbloxEmitter.emit_packages()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxPackage"><code class="docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxPackage.sequence"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.sequence</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxPackage.sequencer_config"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.sequencer_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxPackage.target"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.target</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxPackage.timeline"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.timeline</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxExecutable"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxExecutable.acquires"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable.acquires</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxExecutable.model_config"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxExecutable.packages"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable.packages</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxExecutable.triage_result"><code class="docutils literal notranslate"><span class="pre">QbloxExecutable.triage_result</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AttConfig"><code class="docutils literal notranslate"><span class="pre">AttConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AttConfig.in0"><code class="docutils literal notranslate"><span class="pre">AttConfig.in0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AttConfig.out0"><code class="docutils literal notranslate"><span class="pre">AttConfig.out0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AttConfig.out1"><code class="docutils literal notranslate"><span class="pre">AttConfig.out1</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig"><code class="docutils literal notranslate"><span class="pre">AwgConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_en_path0"><code class="docutils literal notranslate"><span class="pre">AwgConfig.cont_mode_en_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_en_path1"><code class="docutils literal notranslate"><span class="pre">AwgConfig.cont_mode_en_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_waveform_idx_path0"><code class="docutils literal notranslate"><span class="pre">AwgConfig.cont_mode_waveform_idx_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.cont_mode_waveform_idx_path1"><code class="docutils literal notranslate"><span class="pre">AwgConfig.cont_mode_waveform_idx_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.gain_path0"><code class="docutils literal notranslate"><span class="pre">AwgConfig.gain_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.gain_path1"><code class="docutils literal notranslate"><span class="pre">AwgConfig.gain_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.mod_en"><code class="docutils literal notranslate"><span class="pre">AwgConfig.mod_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.offset_path0"><code class="docutils literal notranslate"><span class="pre">AwgConfig.offset_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.offset_path1"><code class="docutils literal notranslate"><span class="pre">AwgConfig.offset_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.upsample_rate_path0"><code class="docutils literal notranslate"><span class="pre">AwgConfig.upsample_rate_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.AwgConfig.upsample_rate_path1"><code class="docutils literal notranslate"><span class="pre">AwgConfig.upsample_rate_path1</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.acq"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.acq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.acq_I"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.acq_I</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.acq_Q"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.acq_Q</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.bulk_value"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.bulk_value</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.out0"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.out0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.out1"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.out1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.out2"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.out2</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ConnectionConfig.out3"><code class="docutils literal notranslate"><span class="pre">ConnectionConfig.out3</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.GainConfig"><code class="docutils literal notranslate"><span class="pre">GainConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.GainConfig.in0"><code class="docutils literal notranslate"><span class="pre">GainConfig.in0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.GainConfig.in1"><code class="docutils literal notranslate"><span class="pre">GainConfig.in1</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig"><code class="docutils literal notranslate"><span class="pre">LoConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out0_en"><code class="docutils literal notranslate"><span class="pre">LoConfig.out0_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out0_freq"><code class="docutils literal notranslate"><span class="pre">LoConfig.out0_freq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out0_in0_en"><code class="docutils literal notranslate"><span class="pre">LoConfig.out0_in0_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out0_in0_freq"><code class="docutils literal notranslate"><span class="pre">LoConfig.out0_in0_freq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out1_en"><code class="docutils literal notranslate"><span class="pre">LoConfig.out1_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.LoConfig.out1_freq"><code class="docutils literal notranslate"><span class="pre">LoConfig.out1_freq</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.MixerConfig"><code class="docutils literal notranslate"><span class="pre">MixerConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.MixerConfig.gain_ratio"><code class="docutils literal notranslate"><span class="pre">MixerConfig.gain_ratio</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.MixerConfig.phase_offset"><code class="docutils literal notranslate"><span class="pre">MixerConfig.phase_offset</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig"><code class="docutils literal notranslate"><span class="pre">ModuleConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.attenuation"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.attenuation</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.gain"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.gain</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.lo"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.lo</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.marker_inverts"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.marker_inverts</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.offset"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.offset</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ModuleConfig.scope_acq"><code class="docutils literal notranslate"><span class="pre">ModuleConfig.scope_acq</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.NcoConfig"><code class="docutils literal notranslate"><span class="pre">NcoConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.NcoConfig.freq"><code class="docutils literal notranslate"><span class="pre">NcoConfig.freq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.NcoConfig.phase_offs"><code class="docutils literal notranslate"><span class="pre">NcoConfig.phase_offs</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.NcoConfig.prop_delay_comp"><code class="docutils literal notranslate"><span class="pre">NcoConfig.prop_delay_comp</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.NcoConfig.prop_delay_comp_en"><code class="docutils literal notranslate"><span class="pre">NcoConfig.prop_delay_comp_en</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig"><code class="docutils literal notranslate"><span class="pre">OffsetConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.in0"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.in0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.in0_path0"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.in0_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.in0_path1"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.in0_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.in1"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.in1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out0"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out0_path0"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out0_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out0_path1"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out0_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out1"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out1_path0"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out1_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out1_path1"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out1_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out2"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out2</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.OffsetConfig.out3"><code class="docutils literal notranslate"><span class="pre">OffsetConfig.out3</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfig"><code class="docutils literal notranslate"><span class="pre">QbloxConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfig.module"><code class="docutils literal notranslate"><span class="pre">QbloxConfig.module</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfig.sequencers"><code class="docutils literal notranslate"><span class="pre">QbloxConfig.sequencers</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfig.slot_idx"><code class="docutils literal notranslate"><span class="pre">QbloxConfig.slot_idx</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.calibrate_lo_leakage"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.calibrate_lo_leakage()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.calibrate_mixer"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.calibrate_mixer()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.calibrate_sideband"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.calibrate_sideband()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_awg"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_awg()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_connection"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_connection()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_mixer"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_mixer()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_module"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_module()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_nco"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_nco()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QbloxConfigHelper.configure_sequencer"><code class="docutils literal notranslate"><span class="pre">QbloxConfigHelper.configure_sequencer()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmConfigHelper</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.calibrate_lo_leakage"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.calibrate_lo_leakage()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_attenuation"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_attenuation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_lo"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_lo()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_module"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_module()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_offset"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_offset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QcmRfConfigHelper.configure_sequencer"><code class="docutils literal notranslate"><span class="pre">QcmRfConfigHelper.configure_sequencer()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmConfigHelper.configure_scope_acq"><code class="docutils literal notranslate"><span class="pre">QrmConfigHelper.configure_scope_acq()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.calibrate_lo_leakage"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.calibrate_lo_leakage()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_acq"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_acq()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_attenuation"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_attenuation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_lo"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_lo()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_module"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_module()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_offset"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_offset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.QrmRfConfigHelper.configure_sequencer"><code class="docutils literal notranslate"><span class="pre">QrmRfConfigHelper.configure_sequencer()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.avg_mode_en_path0"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.avg_mode_en_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.avg_mode_en_path1"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.avg_mode_en_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.sequencer_select"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.sequencer_select</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.trigger_level_path0"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.trigger_level_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.trigger_level_path1"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.trigger_level_path1</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.trigger_mode_path0"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.trigger_mode_path0</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ScopeAcqConfig.trigger_mode_path1"><code class="docutils literal notranslate"><span class="pre">ScopeAcqConfig.trigger_mode_path1</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig"><code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.awg"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.awg</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.connection"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.connection</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.demod_en_acq"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.demod_en_acq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.marker_ovr_en"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.marker_ovr_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.marker_ovr_value"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.marker_ovr_value</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.mixer"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.mixer</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.nco"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.nco</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.square_weight_acq"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.square_weight_acq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.sync_en"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.sync_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.thresholded_acq"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.thresholded_acq</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.trigger_count_thresholds"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.trigger_count_thresholds</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.trigger_threshold_inverts"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.trigger_threshold_inverts</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SequencerConfig.ttl_acq"><code class="docutils literal notranslate"><span class="pre">SequencerConfig.ttl_acq</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SquareWeightAcq"><code class="docutils literal notranslate"><span class="pre">SquareWeightAcq</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.SquareWeightAcq.integration_length"><code class="docutils literal notranslate"><span class="pre">SquareWeightAcq.integration_length</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.marker_address"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.marker_address</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.marker_en"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.marker_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.marker_invert"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.marker_invert</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.rotation"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.rotation</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.threshold"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.threshold</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.trigger_address"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.trigger_address</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.trigger_en"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.trigger_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.ThresholdedAcqConfig.trigger_invert"><code class="docutils literal notranslate"><span class="pre">ThresholdedAcqConfig.trigger_invert</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.TtlAcqConfig"><code class="docutils literal notranslate"><span class="pre">TtlAcqConfig</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.TtlAcqConfig.auto_bin_incr_en"><code class="docutils literal notranslate"><span class="pre">TtlAcqConfig.auto_bin_incr_en</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.TtlAcqConfig.input_select"><code class="docutils literal notranslate"><span class="pre">TtlAcqConfig.input_select</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.config.html#qat.backend.qblox.config.TtlAcqConfig.threshold"><code class="docutils literal notranslate"><span class="pre">TtlAcqConfig.threshold</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxPackage"><code class="docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxPackage.sequence"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.sequence</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxPackage.sequencer_config"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.sequencer_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxPackage.timeline"><code class="docutils literal notranslate"><span class="pre">QbloxPackage.timeline</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -792,6 +665,11 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.visualisation.html#qat.backend.qblox.visualisation.plot_acquisitions"><code class="docutils literal notranslate"><span class="pre">plot_acquisitions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.backend.qblox.visualisation.html#qat.backend.qblox.visualisation.plot_executable"><code class="docutils literal notranslate"><span class="pre">plot_executable()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -803,7 +681,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.backend.passes.validation.html" class="btn btn-neutral float-left" title="qat.backend.passes.validation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.backend.qblox.data.html" class="btn btn-neutral float-right" title="qat.backend.qblox.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.backend.qblox.config.html" class="btn btn-neutral float-right" title="qat.backend.qblox.config package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
