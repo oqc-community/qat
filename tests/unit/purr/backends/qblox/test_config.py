@@ -18,7 +18,7 @@ from qat.purr.backends.qblox.config import (
 )
 from qat.purr.backends.qblox.constants import Constants
 
-from tests.unit.backend.qblox.conftest import random_resource
+from tests.unit.purr.backends.qblox.conftest import random_resource
 
 
 class TestQbloxConfigMixin:

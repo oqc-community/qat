@@ -1,20 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from typing import Dict, List
 
 import numpy as np
 from matplotlib import pyplot as plt
 
-from qat.backend.qblox.codegen import QbloxPackage
-from qat.backend.qblox.data.acquisition import Acquisition
+from qat.backend.qblox.acquisition import Acquisition
+from qat.backend.qblox.execution import QbloxExecutable
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
 
-def plot_packages(packages: List[QbloxPackage]):
+def plot_executable(executable: QbloxExecutable):
+    packages = executable.packages
+
     if not packages:
         return
 

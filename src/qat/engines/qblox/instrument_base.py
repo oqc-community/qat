@@ -26,7 +26,7 @@ class InstrumentMixin(ConnectionMixin):
     Basic APIs through which an instrument must be able to interact with
     """
 
-    def upload(self, *args, **kwargs):
+    def setup(self, *args, **kwargs):
         pass
 
     def playback(self, *args, **kwargs):
@@ -36,12 +36,7 @@ class InstrumentMixin(ConnectionMixin):
         pass
 
 
-class LeafInstrument(InstrumentMixin):
-    def __init__(self, instrument_model: InstrumentModel):
-        self.id: str = instrument_model.id
-        self.name: str = instrument_model.name
-        self.address: str = str(instrument_model.address)
-
+class LeafInstrument(InstrumentModel, InstrumentMixin):
     def __repr__(self):
         return f"{self.id}_{self.name}_{self.address}"
 
@@ -51,34 +46,34 @@ class LeafInstrument(InstrumentMixin):
 
 class CompositeInstrument(InstrumentMixin):
     def __init__(self):
-        self.components: Dict[str, LeafInstrument] = {}
+        self._components: Dict[str, LeafInstrument] = {}
 
     def connect(self):
-        for comp in self.components.values():
+        for comp in self._components.values():
             comp.connect()
 
     def disconnect(self):
-        for comp in self.components.values():
+        for comp in self._components.values():
             comp.disconnect()
 
     def add(self, component: LeafInstrument):
         comp = next(
-            (comp for comp in self.components.values() if comp.id == component.id),
+            (comp for comp in self._components.values() if comp.id == component.id),
             None,
         )
         if comp:
-            log.warning(f"Instrument {component} already exists")
+            raise ValueError(f"Instrument {component} already exists")
         else:
-            self.components[component.id] = component
+            self._components[component.id] = component
 
     def remove(self, component: LeafInstrument):
-        if component.id in self.components:
-            del self.components[component.id]
+        if component.id in self._components:
+            del self._components[component.id]
         else:
-            log.warning(f"Could not find instrument {component}")
+            log.warning(f"Instrument {component} could not be found, nothing to do")
 
     def lookup_by_name(self, name: str) -> LeafInstrument:
-        comp = next((comp for comp in self.components.values() if comp.name == name), None)
+        comp = next((comp for comp in self._components.values() if comp.name == name), None)
         if not comp:
             raise ValueError(f"Could not find instrument with name {name}")
         return comp

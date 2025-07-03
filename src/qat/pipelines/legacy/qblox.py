@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from qat.backend.qblox.codegen import QbloxBackend
+from qat.backend.qblox.codegen import QbloxBackend2
+from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
@@ -14,7 +15,6 @@ from qat.middleend.passes.legacy.validation import (
     InstructionValidation,
     ReadoutValidation,
 )
-from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import LegacyPipeline
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import PipelineConfig
@@ -43,7 +43,7 @@ class LegacyQbloxPipeline(LegacyPipeline):
     def _build_pipeline(
         config: LegacyQbloxPipelineConfig,
         model: QuantumHardwareModel,
-        target_data: TargetData | None = None,
+        target_data: QbloxTargetData = None,
         engine=None,
     ) -> Pipeline:
         if engine is not None:
@@ -52,7 +52,7 @@ class LegacyQbloxPipeline(LegacyPipeline):
                 "The legacy QbloxEngine is used directly."
             )
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data or QbloxTargetData.default()
         return Pipeline(
             name=config.name,
             model=model,
@@ -64,7 +64,7 @@ class LegacyQbloxPipeline(LegacyPipeline):
                     model=model, target_data=target_data
                 ),
             ),
-            backend=QbloxBackend(model),
+            backend=QbloxBackend2(model),
             runtime=LegacyRuntime(
                 engine=model.create_engine(),
                 results_pipeline=LegacyQbloxPipeline._results_pipeline(model),
@@ -73,7 +73,7 @@ class LegacyQbloxPipeline(LegacyPipeline):
 
     @staticmethod
     def _middleend_pipeline(
-        model: QuantumHardwareModel, target_data: TargetData | None = None
+        model: QuantumHardwareModel, target_data: QbloxTargetData
     ) -> PassManager:
         """Factory for creating middleend pipelines for Qblox legacy models.
 
@@ -86,9 +86,9 @@ class LegacyQbloxPipeline(LegacyPipeline):
         """
         return (
             PassManager()
+            | DeviceUpdateSanitisation()
             | PhaseOptimisation()
             | PostProcessingSanitisation()
-            | DeviceUpdateSanitisation()
             | InstructionValidation(target_data)
             | ReadoutValidation(model)
         )

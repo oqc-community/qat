@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
+from qat.model.target_data import TargetData
 
 
 class Constants:
@@ -95,3 +97,7 @@ class Constants:
     """
     Maximum offset for QRM-RF
     """
+
+
+class QbloxTargetData(TargetData):
+    pass

@@ -1,18 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
+from bisect import insort
 from collections import defaultdict
+from contextlib import contextmanager
 from copy import deepcopy
-from typing import Dict, Set
+from dataclasses import dataclass, field
+from itertools import chain
+from typing import Dict, List, Set
 
 import numpy as np
 
 from qat.backend.passes.legacy.analysis import BindingResult, IterBound, TriageResult
-from qat.backend.qblox.data.constants import Constants
+from qat.backend.qblox.config.constants import Constants
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseShapeType
+from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
     Delay,
@@ -233,3 +237,91 @@ class QbloxLegalisationPass(AnalysisPass):
 
             # TODO: the proper way is to produce a new result and invalidate the old one
             binding_result.iter_bound_results[target] = legal_bound_result
+
+
+@dataclass
+class AllocationManager:
+    _reg_pool: List[str] = field(
+        default_factory=lambda: sorted(
+            f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
+        )
+    )
+    _lbl_counters: Dict[str, int] = field(default_factory=dict)
+
+    registers: Dict[str, str] = field(default_factory=dict)
+    labels: Dict[str, str] = field(default_factory=dict)
+
+    def reg_alloc(self, name: str) -> str:
+        if name in self.registers:
+            log.warning(f"Returning a register already allocated for Variable {name}")
+            register = self.registers[name]
+        elif len(self._reg_pool) < 1:
+            raise IndexError(
+                "Out of registers. Attempting to use more registers than available in the Q1 sequence processor"
+            )
+        else:
+            register = self._reg_pool.pop(0)
+            self.registers[name] = register
+
+        return register
+
+    def reg_free(self, register: str) -> None:
+        if register in self._reg_pool:
+            raise RuntimeError(f"Cannot free register '{register}' as it's not in use")
+        insort(self._reg_pool, register)
+        self.registers = {
+            var: reg for var, reg in self.registers.items() if reg != register
+        }
+
+    @contextmanager
+    def reg_borrow(self, name: str):
+        """
+        Short-lived register allocation
+        """
+
+        register = self.reg_alloc(name)
+        yield register
+        self.reg_free(register)
+
+    def label_gen(self, name: str):
+        counter = self._lbl_counters.setdefault(name, 0)
+        self._lbl_counters[name] += 1
+        label = f"{name}_{counter}"
+        self.labels[name] = label
+        return label
+
+
+@dataclass
+class PreCodegenResult:
+    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
+        default_factory=lambda: defaultdict(lambda: AllocationManager())
+    )
+
+
+class PreCodegenPass(AnalysisPass):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        Precedes assembly codegen.
+        Performs a naive register allocation through a manager object.
+        Computes useful information in the form of attributes.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        result = PreCodegenResult()
+
+        for target in triage_result.target_map:
+            alloc_mgr = result.alloc_mgrs[target]
+            iter_bound_result = binding_result.iter_bound_results[target]
+            reads = binding_result.rw_results[target].reads
+            writes = binding_result.rw_results[target].writes
+
+            alloc_mgr.reg_alloc("zero")
+            names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
+            for name in names:
+                alloc_mgr.reg_alloc(name)
+                alloc_mgr.label_gen(name)
+
+        res_mgr.add(result)
+
+        return ir

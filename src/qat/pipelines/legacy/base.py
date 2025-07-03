@@ -92,7 +92,7 @@ class LegacyPipeline(UpdateablePipeline):
 
     @staticmethod
     def _middleend_pipeline(
-        model: QuantumHardwareModel, target_data: TargetData | None = None
+        model: QuantumHardwareModel, target_data: TargetData
     ) -> PassManager:
         return (
             PassManager()

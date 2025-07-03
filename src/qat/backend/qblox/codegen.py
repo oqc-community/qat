@@ -2,15 +2,13 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC
-from bisect import insort
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from contextlib import ExitStack, contextmanager
-from dataclasses import dataclass, field
-from itertools import chain
 from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
+from compiler_config.config import CompilerConfig
 
 from qat.backend.base import BaseBackend
 from qat.backend.codegen_base import DfsTraversal
@@ -21,17 +19,21 @@ from qat.backend.passes.legacy.analysis import (
     ScopingResult,
     TILegalisationPass,
 )
-from qat.backend.qblox.config import SequencerConfig
-from qat.backend.qblox.data.constants import Constants
-from qat.backend.qblox.ir import Opcode, Sequence, SequenceBuilder
+from qat.backend.qblox.config.constants import Constants
+from qat.backend.qblox.config.specification import SequencerConfig
+from qat.backend.qblox.execution import QbloxExecutable, QbloxPackage
+from qat.backend.qblox.ir import Opcode, SequenceBuilder
 from qat.backend.qblox.passes.analysis import (
+    AllocationManager,
     BindingResult,
     IterBound,
+    PreCodegenPass,
+    PreCodegenResult,
     QbloxLegalisationPass,
     TriageResult,
 )
 from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import AnalysisPass, InvokerMixin, PassManager
+from qat.core.pass_base import InvokerMixin, PassManager
 from qat.core.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
@@ -61,68 +63,9 @@ from qat.purr.compiler.instructions import (
     calculate_duration,
 )
 from qat.purr.utils.logger import get_default_logger
+from qat.runtime.executables import Executable
 
 log = get_default_logger()
-
-
-@dataclass
-class QbloxPackage:
-    target: PulseChannel = None
-    sequence: Sequence = None
-    sequencer_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
-    timeline: np.ndarray = None
-
-
-@dataclass
-class AllocationManager:
-    _reg_pool: List[str] = field(
-        default_factory=lambda: sorted(
-            f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
-        )
-    )
-    _lbl_counters: Dict[str, int] = field(default_factory=dict)
-
-    registers: Dict[str, str] = field(default_factory=dict)
-    labels: Dict[str, str] = field(default_factory=dict)
-
-    def reg_alloc(self, name: str) -> str:
-        if name in self.registers:
-            log.warning(f"Returning a register already allocated for Variable {name}")
-            register = self.registers[name]
-        elif len(self._reg_pool) < 1:
-            raise IndexError(
-                "Out of registers. Attempting to use more registers than available in the Q1 sequence processor"
-            )
-        else:
-            register = self._reg_pool.pop(0)
-            self.registers[name] = register
-
-        return register
-
-    def reg_free(self, register: str) -> None:
-        if register in self._reg_pool:
-            raise RuntimeError(f"Cannot free register '{register}' as it's not in use")
-        insort(self._reg_pool, register)
-        self.registers = {
-            var: reg for var, reg in self.registers.items() if reg != register
-        }
-
-    @contextmanager
-    def reg_borrow(self, name: str):
-        """
-        Short-lived register allocation
-        """
-
-        register = self.reg_alloc(name)
-        yield register
-        self.reg_free(register)
-
-    def label_gen(self, name: str):
-        counter = self._lbl_counters.setdefault(name, 0)
-        self._lbl_counters[name] += 1
-        label = f"{name}_{counter}"
-        self.labels[name] = label
-        return label
 
 
 class AbstractContext(ABC):
@@ -160,9 +103,9 @@ class AbstractContext(ABC):
 
         ValueError("Cannot determine phase statically in dynamic settings")
 
-    def create_package(self, target: PulseChannel):
+    def create_package(self):
         sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
+        return QbloxPackage(sequence, self.sequencer_config, self._timeline)
 
     def is_empty(self):
         """
@@ -397,6 +340,26 @@ class AbstractContext(ABC):
 
         return pulse
 
+    def _evaluate_square_pulse(self, pulse: Pulse, target: PulseChannel):
+        bias = target.bias
+        scale = 1.0 + 0.0j if pulse.ignore_channel_scale else target.scale
+
+        pulse_amp = pulse.scale_factor * pulse.amp
+        pulse_amp = scale * pulse_amp + bias
+
+        if np.abs(pulse_amp.real) > 1 or np.abs(pulse_amp.imag) > 1:
+            raise ValueError(
+                f"""
+                Voltage range for I or Q exceeded. Current values:
+                waveform.scale_factor: {pulse.scale_factor}
+                waveform.amp: {pulse.amp}
+                (Channel) scale: {scale}
+                (Channel) bias: {bias}
+                """
+            )
+
+        return pulse_amp
+
     def _register_signal(self, waveform, target, data, name):
         index = self.sequence_builder.lookup_waveform_by_data(data)
         if index is not None:
@@ -564,12 +527,7 @@ class AbstractContext(ABC):
                 i_steps = self.alloc_mgr.registers[pulse_amp.name]
                 q_steps = self.alloc_mgr.registers["zero"]
             else:
-                bias = target.bias
-                scale = 1.0 + 0.0j if waveform.ignore_channel_scale else target.scale
-
-                pulse_amp = waveform.scale_factor * waveform.amp
-                pulse_amp = scale * pulse_amp + bias
-
+                pulse_amp = self._evaluate_square_pulse(waveform, target)
                 i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
                 q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
 
@@ -581,6 +539,15 @@ class AbstractContext(ABC):
                 self._upd_param_reg(pulse_width)
             else:
                 pulse_width = int(calculate_duration(waveform))
+                if pulse_width < Constants.GRID_TIME:
+                    log.debug(
+                        f"""
+                        Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
+                        Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                        This pulse will be ignored.
+                        """
+                    )
+                    return
                 self._upd_param_imm(pulse_width)
 
             self.sequence_builder.set_awg_offs(0, 0)
@@ -753,7 +720,7 @@ class QbloxContext(AbstractContext):
         acq_width = int(calculate_duration(acquire))
         acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         self.sequencer_config.square_weight_acq.integration_length = acq_width
-        self.sequencer_config.thresholded_acq.rotation = acquire.rotation
+        self.sequencer_config.thresholded_acq.rotation = np.rad2deg(acquire.rotation)
         self.sequencer_config.thresholded_acq.threshold = acquire.threshold
 
         i_steps, q_steps = None, None
@@ -948,185 +915,6 @@ class NewQbloxContext(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxEmitter(InvokerMixin):
-    def build_pass_pipeline(self, *args, **kwargs):
-        pass
-
-    def emit_packages(
-        self,
-        ir: InstructionBuilder,
-        res_mgr: ResultManager,
-        met_mgr: MetricsManager,
-        ignore_empty=True,
-    ) -> Dict[int, List[QbloxPackage]]:
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        sweeps = triage_result.sweeps
-
-        switerator = SweepIterator.from_sweeps(sweeps)
-        dinjectors = DeviceInjectors(triage_result.device_updates)
-        iter2packages: Dict[int, List[QbloxPackage]] = OrderedDict()
-        try:
-            dinjectors.inject()
-            while not switerator.is_finished():
-                switerator.do_sweep(triage_result.quantum_instructions)
-                iter2packages[switerator.accumulated_sweep_iteration] = self._do_emit(
-                    triage_result, ignore_empty
-                )
-            return iter2packages
-        except BaseException as e:
-            raise e
-        finally:
-            switerator.revert(triage_result.quantum_instructions)
-            dinjectors.revert()
-
-    def _do_emit(
-        self, triage_result: TriageResult, ignore_empty=True
-    ) -> List[QbloxPackage]:
-        repeat = next(iter(triage_result.repeats))
-        contexts: Dict[PulseChannel, QbloxContext] = {}
-
-        with ExitStack() as stack:
-            inst_iter = iter(triage_result.quantum_instructions)
-            while (inst := next(inst_iter, None)) is not None:
-                if isinstance(inst, PostProcessing):
-                    continue  # Ignore postprocessing
-
-                if isinstance(inst, Synchronize):
-                    for target in inst.quantum_targets:
-                        if not isinstance(target, PulseChannel):
-                            raise ValueError(f"{target} is not a PulseChannel")
-                        contexts.setdefault(
-                            target, stack.enter_context(QbloxContext(repeat))
-                        )
-                    QbloxContext.synchronize(inst, contexts)
-                    continue
-
-                for target in inst.quantum_targets:
-                    if not isinstance(target, PulseChannel):
-                        raise ValueError(f"{target} is not a PulseChannel")
-
-                    context = contexts.setdefault(
-                        target, stack.enter_context(QbloxContext(repeat))
-                    )
-
-                    if isinstance(inst, DeviceUpdate):
-                        context.device_update(inst)
-                    elif isinstance(inst, PhaseReset):
-                        context.reset_phase()
-                    elif isinstance(inst, MeasurePulse):
-                        acquire = next(inst_iter, None)
-                        if acquire is None or not isinstance(acquire, Acquire):
-                            raise ValueError(
-                                "Found a MeasurePulse but no Acquire instruction followed"
-                            )
-                        post_procs = triage_result.pp_map[acquire.output_variable]
-                        context.measure_acquire(inst, acquire, post_procs, target)
-                    elif isinstance(inst, Waveform):
-                        context.waveform(inst, target)
-                    elif isinstance(inst, Delay):
-                        context.delay(inst)
-                    elif isinstance(inst, PhaseShift):
-                        context.shift_phase(inst)
-                    elif isinstance(inst, FrequencyShift):
-                        context.shift_frequency(inst, target)
-                    elif isinstance(inst, Id):
-                        context.id()
-
-        if ignore_empty:
-            return [
-                context.create_package(target)
-                for target, context in contexts.items()
-                if not context.is_empty()
-            ]
-        else:
-            return [context.create_package(target) for target, context in contexts.items()]
-
-
-@dataclass
-class PreCodegenResult:
-    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
-        default_factory=lambda: defaultdict(lambda: AllocationManager())
-    )
-
-
-class PreCodegenPass(AnalysisPass):
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Precedes assembly codegen.
-        Performs a naive register allocation through a manager object.
-        Computes useful information in the form of attributes.
-        """
-
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        result = PreCodegenResult()
-
-        for target in triage_result.target_map:
-            alloc_mgr = result.alloc_mgrs[target]
-            iter_bound_result = binding_result.iter_bound_results[target]
-            reads = binding_result.rw_results[target].reads
-            writes = binding_result.rw_results[target].writes
-
-            alloc_mgr.reg_alloc("zero")
-            names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
-            for name in names:
-                alloc_mgr.reg_alloc(name)
-                alloc_mgr.label_gen(name)
-
-        res_mgr.add(result)
-
-        return ir
-
-
-class NewQbloxEmitter(InvokerMixin):
-    def build_pass_pipeline(self, *args, **kwargs):
-        return PassManager() | PreCodegenPass() | CFGPass()
-
-    def emit_packages(
-        self,
-        ir: InstructionBuilder,
-        res_mgr: ResultManager,
-        met_mgr: MetricsManager,
-        ignore_empty=True,
-    ) -> List[QbloxPackage]:
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
-        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
-
-        scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
-        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
-            binding_result.iter_bound_results
-        )
-        alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
-
-        with ExitStack() as stack:
-            contexts = {
-                t: stack.enter_context(
-                    NewQbloxContext(
-                        alloc_mgr=alloc_mgrs[t],
-                        scoping_result=scoping_results[t],
-                        rw_result=rw_results[t],
-                        iter_bounds=iter_bound_results[t],
-                    )
-                )
-                for t in triage_result.target_map
-            }
-            QbloxCFGWalker(contexts).run(cfg_result.cfg)
-
-        if ignore_empty:
-            return [
-                context.create_package(target)
-                for target, context in contexts.items()
-                if not context.is_empty()
-            ]
-        else:
-            return [context.create_package(target) for target, context in contexts.items()]
-
-
 class QbloxCFGWalker(DfsTraversal):
     def __init__(self, contexts: Dict[PulseChannel, NewQbloxContext]):
         super().__init__()
@@ -1180,5 +968,141 @@ class QbloxCFGWalker(DfsTraversal):
                 NewQbloxContext.exit_sweep(inst, self.contexts)
 
 
-class QbloxBackend(BaseBackend, InvokerMixin):
-    pass
+class QbloxBackend1(BaseBackend, InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        pass
+
+    def emit(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: Optional[ResultManager] = None,
+        met_mgr: Optional[MetricsManager] = None,
+        compiler_config: Optional[CompilerConfig] = None,
+    ) -> Dict[int, QbloxExecutable]:
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        sweeps = triage_result.sweeps
+
+        switerator = SweepIterator.from_sweeps(sweeps)
+        dinjectors = DeviceInjectors(triage_result.device_updates)
+        ordered_executables: Dict[int, QbloxExecutable] = OrderedDict()
+        try:
+            dinjectors.inject()
+            while not switerator.is_finished():
+                switerator.do_sweep(triage_result.quantum_instructions)
+                ordered_executables[switerator.accumulated_sweep_iteration] = self._do_emit(
+                    triage_result
+                )
+        except BaseException as e:
+            raise e
+        finally:
+            switerator.revert(triage_result.quantum_instructions)
+            dinjectors.revert()
+
+        return ordered_executables
+
+    def _do_emit(self, triage_result: TriageResult) -> QbloxExecutable:
+        repeat = next(iter(triage_result.repeats))
+        contexts: Dict[PulseChannel, QbloxContext] = {}
+
+        with ExitStack() as stack:
+            inst_iter = iter(triage_result.quantum_instructions)
+            while (inst := next(inst_iter, None)) is not None:
+                if isinstance(inst, PostProcessing):
+                    continue  # Ignore postprocessing
+
+                if isinstance(inst, Synchronize):
+                    for target in inst.quantum_targets:
+                        if not isinstance(target, PulseChannel):
+                            raise ValueError(f"{target} is not a PulseChannel")
+                        contexts.setdefault(
+                            target, stack.enter_context(QbloxContext(repeat))
+                        )
+                    QbloxContext.synchronize(inst, contexts)
+                    continue
+
+                for target in inst.quantum_targets:
+                    if not isinstance(target, PulseChannel):
+                        raise ValueError(f"{target} is not a PulseChannel")
+
+                    context = contexts.setdefault(
+                        target, stack.enter_context(QbloxContext(repeat))
+                    )
+
+                    if isinstance(inst, DeviceUpdate):
+                        context.device_update(inst)
+                    elif isinstance(inst, PhaseReset):
+                        context.reset_phase()
+                    elif isinstance(inst, MeasurePulse):
+                        acquire = next(inst_iter, None)
+                        if acquire is None or not isinstance(acquire, Acquire):
+                            raise ValueError(
+                                "Found a MeasurePulse but no Acquire instruction followed"
+                            )
+                        post_procs = triage_result.pp_map[acquire.output_variable]
+                        context.measure_acquire(inst, acquire, post_procs, target)
+                    elif isinstance(inst, Waveform):
+                        context.waveform(inst, target)
+                    elif isinstance(inst, Delay):
+                        context.delay(inst)
+                    elif isinstance(inst, PhaseShift):
+                        context.shift_phase(inst)
+                    elif isinstance(inst, FrequencyShift):
+                        context.shift_frequency(inst, target)
+                    elif isinstance(inst, Id):
+                        context.id()
+
+        packages = {
+            target: context.create_package()
+            for target, context in contexts.items()
+            if not context.is_empty()
+        }
+
+        return QbloxExecutable(packages=packages, triage_result=triage_result)
+
+
+class QbloxBackend2(BaseBackend, InvokerMixin):
+    def build_pass_pipeline(self, *args, **kwargs):
+        return PassManager() | PreCodegenPass() | CFGPass()
+
+    def emit(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: Optional[ResultManager] = None,
+        met_mgr: Optional[MetricsManager] = None,
+        compiler_config: Optional[CompilerConfig] = None,
+    ) -> Executable:
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
+        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
+
+        scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
+        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
+            binding_result.iter_bound_results
+        )
+        alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
+
+        with ExitStack() as stack:
+            contexts = {
+                t: stack.enter_context(
+                    NewQbloxContext(
+                        alloc_mgr=alloc_mgrs[t],
+                        scoping_result=scoping_results[t],
+                        rw_result=rw_results[t],
+                        iter_bounds=iter_bound_results[t],
+                    )
+                )
+                for t in triage_result.target_map
+            }
+            QbloxCFGWalker(contexts).run(cfg_result.cfg)
+
+        packages = {
+            target: context.create_package()
+            for target, context in contexts.items()
+            if not context.is_empty()
+        }
+
+        return QbloxExecutable(packages=packages, triage_result=triage_result)
