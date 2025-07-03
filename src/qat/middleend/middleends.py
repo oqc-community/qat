@@ -43,6 +43,7 @@ from qat.middleend.passes.legacy.validation import (
 from qat.middleend.passes.transform import (
     PydBatchedShots,
     PydEndOfTaskResetSanitisation,
+    PydEvaluateWaveforms,
     PydFreqShiftSanitisation,
     PydInactivePulseChannelSanitisation,
     PydInitialPhaseResetSanitisation,
@@ -264,8 +265,8 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
                 legacy_model, target_data
             )  # TODO: COMPILER-394
             # Preparing for codegen
-            | EvaluatePulses()  # TODO: COMPILER-552
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydEvaluateWaveforms(pyd_model, target_data)
             | PydLowerSyncsToDelays()
             | PydInactivePulseChannelSanitisation()
             | PydFreqShiftSanitisation(pyd_model)

@@ -41,11 +41,12 @@ from qat.ir.measure import (
     PostProcessType,
     ProcessAxis,
 )
-from qat.ir.waveforms import GaussianWaveform, Pulse, SquareWaveform
+from qat.ir.waveforms import GaussianWaveform, Pulse, SampledWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.transform import (
     BatchedShots,
     EndOfTaskResetSanitisation,
+    EvaluateWaveforms,
     FreqShiftSanitisation,
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
@@ -67,6 +68,8 @@ from qat.model.target_data import (
     ResonatorDescription,
     TargetData,
 )
+
+from tests.unit.utils.pulses import test_waveforms
 
 
 @pytest.mark.parametrize("explicit_close", [False, True])
@@ -1506,3 +1509,261 @@ class TestLowerSyncsToDelays:
         ]
         times = [inst.duration for inst in builder.instructions]
         assert times[0] + times[1] + times[4] == times[2] + times[3]
+
+
+class TestEvaluateWaveforms:
+    @pytest.fixture(scope="class")
+    def model(self):
+        model = PydEchoModelLoader().load()
+        model.qubit_with_index(0).drive_pulse_channel.scale = 2.0
+        return model
+
+    @pytest.fixture(scope="class")
+    def target_data(self):
+        return TargetData.default()
+
+    @pytest.fixture(scope="class")
+    def pass_(self, model, target_data):
+        return EvaluateWaveforms(
+            model, target_data=target_data, ignored_shapes=SquareWaveform
+        )
+
+    def test_sanitise_ignore_shapes_default(self):
+        ignored = EvaluateWaveforms._sanitise_ignored_shapes(None, (SquareWaveform,))
+        assert ignored == (SquareWaveform,)
+
+    def test_sanitise_ignore_shapes_single_item(self):
+        ignored = EvaluateWaveforms._sanitise_ignored_shapes(
+            GaussianWaveform, (SquareWaveform,)
+        )
+        assert ignored == (GaussianWaveform,)
+
+    def test_extract_pulse_channel_features(self, model, target_data):
+        scales, sample_times = EvaluateWaveforms._extract_pulse_channel_features(
+            model, target_data
+        )
+        for qubit in model.qubits.values():
+            for pulse_channel in qubit.pulse_channels.all_pulse_channels:
+                assert pulse_channel.uuid in scales
+                assert pulse_channel.uuid in sample_times
+                assert scales[pulse_channel.uuid] == pulse_channel.scale
+                assert (
+                    sample_times[pulse_channel.uuid] == target_data.QUBIT_DATA.sample_time
+                )
+            for pulse_channel in qubit.resonator.pulse_channels.all_pulse_channels:
+                assert pulse_channel.uuid in scales
+                assert pulse_channel.uuid in sample_times
+                assert scales[pulse_channel.uuid] == pulse_channel.scale
+                assert (
+                    sample_times[pulse_channel.uuid]
+                    == target_data.RESONATOR_DATA.sample_time
+                )
+
+        assert model.qubit_with_index(0).drive_pulse_channel.scale == 2.0
+
+    def test_evaluate_sampled_waveform_no_scale(self, pass_):
+        samples = np.random.rand(100)
+        wf = SampledWaveform(samples=samples)
+        new_wf = pass_.evaluate_waveform(wf, scale=1.0)
+        assert new_wf.samples is samples
+
+    def test_evaluate_sampled_waveform_with_scale(self, pass_):
+        samples = np.random.rand(100)
+        wf = SampledWaveform(samples=samples)
+        new_wf = pass_.evaluate_waveform(wf, scale=0.5)
+        assert np.allclose(new_wf.samples, samples * 0.5)
+
+    def test_evaluate_waveform_for_ignored_shape(self, pass_):
+        wf = SquareWaveform(width=800e-9, amp=0.5)
+        new_wf = pass_.evaluate_waveform(
+            wf,
+            ignored_shapes=(SquareWaveform,),
+            scale=1.0,
+            target="test",
+            waveform_lookup={},
+        )
+        assert new_wf == wf
+
+    @pytest.mark.parametrize(
+        "waveform",
+        [wf for wf in test_waveforms if not isinstance(wf, SquareWaveform)],
+        ids=lambda wf: f"{wf.__class__.__name__}",
+    )
+    def test_evaluate_waveform_for_non_ignored_shape(self, model, pass_, waveform):
+        target = model.qubit_with_index(0).drive_pulse_channel.uuid
+        new_wf = pass_.evaluate_waveform(
+            waveform,
+            ignored_shapes=(SquareWaveform,),
+            scale=1.0,
+            target=target,
+            waveform_lookup=defaultdict(dict),
+        )
+        assert isinstance(new_wf, SampledWaveform)
+
+        scaled_wf = pass_.evaluate_waveform(
+            waveform,
+            ignored_shapes=(SquareWaveform,),
+            scale=0.5,
+            target=target,
+            waveform_lookup=defaultdict(dict),
+        )
+        assert np.allclose(0.5 * new_wf.samples, scaled_wf.samples)
+
+    def test_evaluate_waveform_is_cached(self, model, pass_):
+        target = model.qubit_with_index(0).drive_pulse_channel.uuid
+        waveform = GaussianWaveform(width=80e-9, amp=0.5, rise=1 / 3)
+        waveform_lookup = defaultdict(dict)
+
+        # First evaluation should not be cached.
+        new_wf = pass_.evaluate_waveform(
+            waveform,
+            ignored_shapes=(SquareWaveform,),
+            scale=1.0,
+            target=target,
+            waveform_lookup=waveform_lookup,
+        )
+        assert isinstance(new_wf, SampledWaveform)
+        assert target in waveform_lookup
+        assert waveform in waveform_lookup[target]
+        assert new_wf.samples is waveform_lookup[target][waveform]
+
+        # Second evaluation should use the cached waveform.
+        cached_wf = pass_.evaluate_waveform(
+            waveform,
+            ignored_shapes=(SquareWaveform,),
+            scale=1.0,
+            target=target,
+            waveform_lookup=waveform_lookup,
+        )
+        assert cached_wf.samples is new_wf.samples
+
+    @pytest.mark.parametrize(
+        "instruction",
+        [
+            Delay(target="test", duration=1e-6),
+            Assign(name="test", value=1.0),
+            PhaseShift(target="test", theta=np.pi / 2),
+        ],
+    )
+    def test_process_instruction_passes_on_instruction(self, pass_, instruction):
+        new_instruction = pass_.process_instruction(instruction)
+        assert new_instruction == instruction
+
+    @pytest.mark.parametrize("ignore_channel_scale", [True, False])
+    @pytest.mark.parametrize(
+        "waveform",
+        [wf for wf in test_waveforms if not isinstance(wf, SquareWaveform)],
+        ids=lambda wf: f"{wf.__class__.__name__}",
+    )
+    def test_process_instruction_on_pulse(
+        self, pass_, model, ignore_channel_scale, waveform
+    ):
+        qubit = model.qubit_with_index(0)
+        pulse = Pulse(
+            target=qubit.drive_pulse_channel.uuid,
+            waveform=waveform,
+            ignore_channel_scale=ignore_channel_scale,
+        )
+        new_instruction = pass_.process_instruction(
+            pulse, waveform_lookup=defaultdict(dict)
+        )
+        assert isinstance(new_instruction, Pulse)
+        assert isinstance(new_instruction.waveform, SampledWaveform)
+        assert new_instruction.target == qubit.drive_pulse_channel.uuid
+
+    @pytest.mark.parametrize("ignore_channel_scale", [True, False])
+    def test_process_instruction_on_pulse_with_ignored_shape(
+        self, pass_, model, ignore_channel_scale
+    ):
+        qubit = model.qubit_with_index(0)
+        waveform = SquareWaveform(width=800e-9, amp=0.5)
+        pulse = Pulse(
+            target=qubit.drive_pulse_channel.uuid,
+            waveform=waveform,
+            ignore_channel_scale=ignore_channel_scale,
+        )
+        new_instruction = pass_.process_instruction(
+            pulse, waveform_lookup=defaultdict(dict)
+        )
+        assert isinstance(new_instruction, Pulse)
+        assert new_instruction.target == qubit.drive_pulse_channel.uuid
+        assert new_instruction.ignore_channel_scale == True
+        assert new_instruction.waveform.amp == (0.5 if ignore_channel_scale else 1.0)
+        if ignore_channel_scale:
+            assert new_instruction.waveform == waveform
+
+    @pytest.mark.parametrize("ignore_channel_scale", [True, False])
+    def test_process_instruction_on_pulse_with_sampled_pulse(
+        self, pass_, model, ignore_channel_scale
+    ):
+        qubit = model.qubit_with_index(0)
+        samples = np.random.rand(100)
+        waveform = SampledWaveform(samples=samples)
+        pulse = Pulse(
+            target=qubit.drive_pulse_channel.uuid,
+            waveform=waveform,
+            ignore_channel_scale=ignore_channel_scale,
+        )
+        new_instruction = pass_.process_instruction(
+            pulse, waveform_lookup=defaultdict(dict)
+        )
+        assert isinstance(new_instruction, Pulse)
+        assert isinstance(new_instruction.waveform, SampledWaveform)
+        assert new_instruction.target == qubit.drive_pulse_channel.uuid
+        assert new_instruction.ignore_channel_scale == True
+        if ignore_channel_scale:
+            assert new_instruction.waveform.samples is samples
+        else:
+            assert np.allclose(new_instruction.waveform.samples, samples * 2.0)
+
+    def test_process_instruction_on_acquire(self, pass_, model):
+        """Test that the acquire instruction is processed correctly."""
+        qubit = model.qubit_with_index(0)
+        target = qubit.acquire_pulse_channel.uuid
+        acquire = Acquire(
+            target=target,
+            duration=1e-6,
+            delay=0.0,
+            filter=Pulse(target=target, waveform=SquareWaveform(width=1e-6, amp=0.5)),
+        )
+        new_instruction = pass_.process_instruction(
+            acquire, waveform_lookup=defaultdict(dict)
+        )
+        assert isinstance(new_instruction, Acquire)
+        assert isinstance(new_instruction.filter, Pulse)
+        assert isinstance(new_instruction.filter.waveform, SampledWaveform)
+        assert np.allclose(new_instruction.filter.waveform.samples, 0.5)
+
+    def test_run(self, pass_, model):
+        """Test that the EvaluateWaveforms pass runs correctly on a builder."""
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        qubit = model.qubit_with_index(0)
+        target = qubit.drive_pulse_channel
+        acquire_target = qubit.acquire_pulse_channel
+        builder.phase_shift(target=target, theta=np.pi / 4)
+        builder.pulse(
+            target=target.uuid, waveform=GaussianWaveform(width=80e-9, amp=0.5, rise=1 / 3)
+        )
+        builder.pulse(target=target.uuid, waveform=SquareWaveform(width=80e-9, amp=0.5))
+        builder.delay(target, 100e-9)
+        builder.acquire(
+            qubit,
+            delay=0.0,
+            duration=200e-9,
+            filter=Pulse(
+                target=acquire_target.uuid, waveform=SquareWaveform(width=200e-9, amp=0.5)
+            ),
+        )
+
+        waveform_lookup = defaultdict(dict)
+        new_builder = pass_.run(builder, waveform_lookup=waveform_lookup)
+
+        assert isinstance(new_builder.instructions[0], PhaseShift)
+        assert isinstance(new_builder.instructions[1], Pulse)
+        assert isinstance(new_builder.instructions[1].waveform, SampledWaveform)
+        assert isinstance(new_builder.instructions[2], Pulse)
+        assert isinstance(new_builder.instructions[2].waveform, SquareWaveform)
+        assert isinstance(new_builder.instructions[3], Delay)
+        assert isinstance(new_builder.instructions[4], Acquire)
+        assert isinstance(new_builder.instructions[4].filter, Pulse)
+        assert isinstance(new_builder.instructions[4].filter.waveform, SampledWaveform)

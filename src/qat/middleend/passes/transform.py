@@ -8,6 +8,7 @@ from functools import singledispatchmethod
 import numpy as np
 from compiler_config.config import MetricsType
 from more_itertools import partition
+from numpy.typing import NDArray
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
@@ -34,7 +35,7 @@ from qat.ir.instructions import (
     Variable,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
-from qat.ir.waveforms import Pulse, SquareWaveform
+from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, Waveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -882,6 +883,178 @@ class LowerSyncsToDelays(TransformPass):
         durations.update({target: max_duration for target in targets})
 
 
+class EvaluateWaveforms(TransformPass):
+    """Evaluates the amplitudes of :class:`Waveform`s within :class:`Pulse` instructions,
+    replacing them with a :class:`SampledmWaveform` and accounting for the scale of the
+    pulse channel.
+
+    :class:`Waveform` dataclasses are defined by (often many) parameters. With the exception
+    of specific shapes, they cannot be implemented directly on hardware. Instead, we
+    evaluate the waveform at discrete times, and communicate these values to the target.
+    This pass evaluates pulses early in the compilation pipeline.
+
+    The resulting :class:`Pulse` instructions will have :code:`ignore_channel_scale=True`.
+    """
+
+    def __init__(
+        self,
+        model: PhysicalHardwareModel,
+        target_data: TargetData,
+        ignored_shapes: tuple[type] | None = None,
+        acquire_ignored_shapes: tuple[type] | None = None,
+    ):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits,
+            which is required to extract the scale factor of pulse channels.
+        :param target_data: Target-related information, which is used to extract the sample
+            time of the pulse channels.
+        :param ignored_shapes: A list of pulse shapes that are not evaluated to a custom
+            pulse, defaults to `[PulseShapeType.SQUARE]`.
+        :param acquire_ignored_shapes: A list of pulse shapes that are not evaluated to a
+            custom pulse for :class:`Acquire` filters, defaults to `[]`.
+        """
+
+        self.ignored_shapes = self._sanitise_ignored_shapes(ignored_shapes, SquareWaveform)
+        self.acquire_ignored_shapes = self._sanitise_ignored_shapes(
+            acquire_ignored_shapes, ()
+        )
+        self.scales_map, self.sample_times = self._extract_pulse_channel_features(
+            model, target_data
+        )
+
+    @staticmethod
+    def _sanitise_ignored_shapes(
+        ignored_shapes: tuple[type] | type, default: tuple[type] | type
+    ) -> tuple[type]:
+        """Sanitises the ignored shapes to ensure they are a list of types."""
+        ignored_shapes = ignored_shapes if ignored_shapes is not None else default
+        return ignored_shapes if isinstance(ignored_shapes, tuple) else (ignored_shapes,)
+
+    @staticmethod
+    def _extract_pulse_channel_features(
+        model: PhysicalHardwareModel, target_data: TargetData
+    ) -> dict[str, float]:
+        """Extracts the scale factor and sample rate for all pulse channels as dicts, with
+        pulse channel IDs as keys."""
+
+        scales_map = {}
+        sample_times = {}
+        for qubit in model.qubits.values():
+            sample_time = target_data.QUBIT_DATA.sample_time
+            for pulse_channel in qubit.pulse_channels.all_pulse_channels:
+                scales_map[pulse_channel.uuid] = pulse_channel.scale
+                sample_times[pulse_channel.uuid] = sample_time
+
+            sample_time = target_data.RESONATOR_DATA.sample_time
+            for pulse_channel in qubit.resonator.pulse_channels.all_pulse_channels:
+                scales_map[pulse_channel.uuid] = pulse_channel.scale
+                sample_times[pulse_channel.uuid] = sample_time
+
+        return scales_map, sample_times
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """:param ir: The list of instructions as an instruction builder."""
+
+        waveform_lookup = defaultdict(dict)
+        instructions = []
+        for inst in ir.instructions:
+            new_inst = self.process_instruction(inst, waveform_lookup=waveform_lookup)
+            instructions.append(new_inst)
+        ir.instructions = instructions
+        return ir
+
+    @singledispatchmethod
+    def process_instruction(self, instruction: Instruction, **kwargs):
+        """Default handler for instructions that do not have a waveform evaluation."""
+        return instruction
+
+    @process_instruction.register(Acquire)
+    def _(self, instruction: Acquire, **kwargs) -> Acquire:
+        """Implements the waveform evaluation on the filter for an :class:`Acquire`
+        instruction."""
+
+        instruction.filter = self.process_instruction(
+            instruction.filter, ignored_shapes=self.acquire_ignored_shapes, **kwargs
+        )
+        return instruction
+
+    @process_instruction.register(Pulse)
+    def _(self, instruction: Pulse, **kwargs) -> Pulse:
+        """Evaluates the waveform within the :class:`Pulse` and handles the channel scale
+        factor if required."""
+
+        scale = (
+            self.scales_map[instruction.target]
+            if not instruction.ignore_channel_scale
+            else 1.0
+        )
+
+        instruction.waveform = self.evaluate_waveform(
+            instruction.waveform,
+            ignored_shapes=kwargs.pop("ignored_shapes", self.ignored_shapes),
+            target=instruction.target,
+            scale=scale,
+            **kwargs,
+        )
+        instruction.ignore_channel_scale = True
+        return instruction
+
+    @singledispatchmethod
+    def evaluate_waveform(self, waveform, **kwargs):
+        """Default handler for waveform evaluation that does not have a specific
+        implementation."""
+        return ValueError(
+            f"No waveform evaluation method for waveform type {type(waveform)}."
+        )
+
+    @evaluate_waveform.register(Waveform)
+    def _(
+        self,
+        waveform: Waveform,
+        ignored_shapes: list[type],
+        waveform_lookup: dict[str, dict[str, NDArray]],
+        target: str,
+        scale: float = 1.0,
+    ) -> Waveform | SampledWaveform:
+        """Implements the waveform evaluation for :class:`Waveform`s."""
+
+        # We cannot bake the waveform type into singledispatch here as the ignored shapes
+        # is dynamic..
+        if isinstance(waveform, ignored_shapes):
+            if np.isclose(scale, 1.0):
+                return waveform
+            else:
+                # We reinstantiate a new waveform as a preacaution against accidently
+                # accidently shared instances.
+                attrs = waveform.model_dump()
+                attrs["amp"] *= scale
+                return type(waveform)(**attrs)
+
+        samples = waveform_lookup[target].get(waveform, None)
+        if samples is not None:
+            new_waveform = SampledWaveform(samples=samples)
+        else:
+            # Evaluate the waveform at discrete times
+            sample_time = self.sample_times[target]
+            edge = waveform.duration / 2.0 - sample_time * 0.5
+            num_samples = int(np.ceil(waveform.duration / sample_time - 1e-10))
+            t = np.linspace(start=-edge, stop=edge, num=num_samples)
+            new_waveform = waveform.sample(t)
+            waveform_lookup[target][waveform] = new_waveform.samples
+
+        if not np.isclose(scale, 1.0):
+            new_waveform.samples = new_waveform.samples * scale
+        return new_waveform
+
+    @evaluate_waveform.register(SampledWaveform)
+    def _(self, waveform: SampledWaveform, scale: float = 1.0, **kwargs) -> SampledWaveform:
+        """Multiplies the waveform by a scale factor if required."""
+
+        if not np.isclose(scale, 1.0):
+            waveform.samples = waveform.samples * scale
+        return waveform
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
@@ -896,3 +1069,4 @@ PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation
 PydFreqShiftSanitisation = FreqShiftSanitisation
 PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation
 PydLowerSyncsToDelays = LowerSyncsToDelays
+PydEvaluateWaveforms = EvaluateWaveforms

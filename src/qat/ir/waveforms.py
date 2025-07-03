@@ -99,6 +99,26 @@ class Waveform(AbstractWaveform):
 
         return SampledWaveform(samples=samples)
 
+    def __hash__(self):
+        return hash(
+            (
+                self.__class__.__name__,
+                self.width,
+                self.amp,
+                self.phase,
+                self.drag,
+                self.rise,
+                self.amp_setup,
+                self.scale_factor,
+                self.zero_at_edges,
+                self.beta,
+                self.frequency,
+                self.internal_phase,
+                self.std_dev,
+                self.square_width,
+            )
+        )
+
 
 class SampledWaveform(AbstractWaveform):
     """

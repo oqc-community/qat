@@ -2,6 +2,21 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import numpy as np
 
+from qat.ir.waveforms import (
+    BlackmanWaveform,
+    CosWaveform,
+    ExtraSoftSquareWaveform,
+    GaussianWaveform,
+    GaussianZeroEdgeWaveform,
+    RoundedSquareWaveform,
+    SechWaveform,
+    SetupHoldWaveform,
+    SinWaveform,
+    SofterGaussianWaveform,
+    SofterSquareWaveform,
+    SoftSquareWaveform,
+    SquareWaveform,
+)
 from qat.purr.compiler.instructions import PulseShapeType
 
 # Different pulse shapes with properties chosen to give reasonable waveforms
@@ -43,4 +58,20 @@ pulse_attributes = [
         "frequency": 2 / 400e-9,
         "internal_phase": np.pi / 2,
     },
+]
+
+test_waveforms = [
+    SquareWaveform(amp=0.5, width=400e-9),
+    GaussianWaveform(width=400e-9, amp=0.5, rise=1 / 3),
+    SofterGaussianWaveform(width=400e-9, amp=0.5, rise=1 / 3),
+    GaussianZeroEdgeWaveform(width=400e-9, amp=0.5, std_dev=1 / 3, zero_at_edges=True),
+    SoftSquareWaveform(amp=0.5, width=400e-9, rise=50e-9),
+    SofterSquareWaveform(amp=0.5, width=400e-9, rise=100e-9),
+    ExtraSoftSquareWaveform(amp=0.5, width=400e-9, rise=100e-9),
+    RoundedSquareWaveform(amp=0.5, width=400e-9, rise=10e-9, std_dev=50e-9),
+    BlackmanWaveform(amp=0.5, width=400e-9),
+    SetupHoldWaveform(amp=0.5, width=400e-9, rise=100e-9, amp_setup=0.5, std_dev=100e-9),
+    SechWaveform(amp=0.5, width=400e-9, std_dev=100e-9),
+    SinWaveform(amp=0.5, width=400e-9, frequency=2 / 400e-9, internal_phase=np.pi / 2),
+    CosWaveform(amp=0.5, width=400e-9, frequency=2 / 400e-9, internal_phase=np.pi / 2),
 ]

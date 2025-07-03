@@ -248,7 +248,7 @@ class RoundedSquareFunction(ComplexFunction):
     """
 
     width: float
-    rise_time: float
+    rise: float
     std_dev: float
 
     def step(self, val):
@@ -259,12 +259,12 @@ class RoundedSquareFunction(ComplexFunction):
         x1 = (self.width - self.std_dev) / 2
         x2 = (self.width + self.std_dev) / 2
         rescaling = (
-            self.step((self.width / 2 - x1) / self.rise_time)
-            + self.step(-(self.width / 2 - x2) / self.rise_time)
+            self.step((self.width / 2 - x1) / self.rise)
+            + self.step(-(self.width / 2 - x2) / self.rise)
             - 1
         )
         return rescaling * (
-            self.step((x - x1) / self.rise_time) + self.step(-(x - x2) / self.rise_time) - 1
+            self.step((x - x1) / self.rise) + self.step(-(x - x2) / self.rise) - 1
         )
 
     def derivative(self, x: np.ndarray, _=None):
