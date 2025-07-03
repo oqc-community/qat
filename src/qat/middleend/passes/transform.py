@@ -167,12 +167,6 @@ class PhaseOptimisationHandler:
     def _(self, instruction: PhaseShift):
         self.accum_phaseshifts[instruction.target] += instruction.phase
 
-    @run.register(PhaseReset)
-    def _(self, instruction: PhaseReset):
-        for target in instruction.targets:
-            self.accum_phaseshifts[target] = 0.0
-            self.previous_phase_instruction_is_phase_set[target] = True
-
     @run.register(PhaseSet)
     def _(self, instruction: PhaseSet):
         self.accum_phaseshifts[instruction.target] = instruction.phase
