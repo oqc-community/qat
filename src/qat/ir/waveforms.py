@@ -219,7 +219,7 @@ class Pulse(QuantumInstruction):
         # The duration of a pulse is equal to the width of the underlying waveform of the pulse.
         # Since `SampledWaveform`s do not have a width, only a set of samples, we cannot derive a
         # duration from such custom waveform and the duration must be supplied to the pulse.
-        if isinstance(data["waveform"], Waveform):
+        if isinstance(data, dict) and isinstance(data.get("waveform"), Waveform):
             data["duration"] = data["waveform"].duration
         return data
 

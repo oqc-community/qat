@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Optional, Union
 
 import numpy as np
 from pydantic import (
@@ -23,7 +23,7 @@ from qat.ir.waveforms import Pulse
 
 # The following things from legacy instructions are unchanged, so just import for now.
 from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
-from qat.utils.pydantic import QubitId, ValidatedSet, _validate_set
+from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet, _validate_set
 
 
 class Acquire(QuantumInstruction):
@@ -46,22 +46,23 @@ class Acquire(QuantumInstruction):
 
     @model_validator(mode="before")
     def _validate_filter(cls, data: dict):
-        duration = data.get("duration")
-        filter = data.get("filter")
+        if isinstance(data, dict):
+            duration = data.get("duration")
+            filter = data.get("filter")
 
-        if filter:
-            filter_duration = (
-                filter.duration if isinstance(filter, Pulse) else filter["duration"]
-            )
-
-            if filter_duration == 0:  # < 0 condition already tested in `Waveform`
-                raise ValueError("Filter duration cannot be equal to zero.")
-
-            if not np.isclose(filter_duration, duration, atol=1e-9):
-                raise ValueError(
-                    f"Filter duration '{filter_duration}' must be equal to Acquire "
-                    f"duration '{duration}'."
+            if filter:
+                filter_duration = (
+                    filter.duration if isinstance(filter, Pulse) else filter["duration"]
                 )
+
+                if filter_duration == 0:  # < 0 condition already tested in `Waveform`
+                    raise ValueError("Filter duration cannot be equal to zero.")
+
+                if not np.isclose(filter_duration, duration, atol=1e-9):
+                    raise ValueError(
+                        f"Filter duration '{filter_duration}' must be equal to Acquire "
+                        f"duration '{duration}'."
+                    )
 
         return data
 
@@ -104,6 +105,9 @@ class PostProcessing(Instruction):
         return np.asarray(args).tolist()
 
 
+VALID_MEASURE_INSTR = Union[Synchronize, Acquire, Pulse]
+
+
 class MeasureBlock(QuantumInstructionBlock):
     """
     Encapsulates a measurement of a single (or multiple) qubit(s).
@@ -111,32 +115,22 @@ class MeasureBlock(QuantumInstructionBlock):
     measurement such as a measure pulse, an acquire or a synchronize.
     """
 
-    qubit_targets: Annotated[ValidatedSet[QubitId], BeforeValidator(_validate_set)] = (
-        ValidatedSet()
-    )
-    _output_variables: list[str] = PrivateAttr(default=[])
-    _valid_instructions: Literal[(Synchronize, Pulse, Acquire)] = PrivateAttr(
-        default=(
-            Synchronize,
-            Pulse,
-            Acquire,
-        )
+    instructions: ValidatedList[VALID_MEASURE_INSTR] = Field(
+        default_factory=lambda: ValidatedList[VALID_MEASURE_INSTR]()
     )
 
+    qubit_targets: Annotated[ValidatedSet[QubitId], BeforeValidator(_validate_set)] = Field(
+        default_factory=lambda: ValidatedSet()
+    )
+    _output_variables: list[str] = PrivateAttr(default=[])
+
     def add(self, *instructions: QuantumInstruction):
-        self._validate_instruction(*instructions)
         for instruction in instructions:
             if isinstance(instruction, Acquire):
                 self._duration_per_target[instruction.target] += instruction.delay
                 self._output_variables.append(instruction.output_variable)
-            QuantumInstructionBlock.add(self, instruction)
-
-    def _validate_instruction(self, *instructions: QuantumInstruction):
-        for instruction in instructions:
-            if not isinstance(instruction, self._valid_instructions):
-                raise TypeError(
-                    f"Instruction {instruction} not suitable for `MeasureBlock`. Instruction type should be in {self._valid_instructions}."
-                )
+            super().add(instruction)
+        return self
 
     @property
     def output_variables(self):

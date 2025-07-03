@@ -83,6 +83,7 @@ class InstructionBlock(Instruction, Iterable):
                     self.instructions.append(sub_instruction)
             else:
                 self.instructions.append(instruction)
+        return self
 
     def __iter__(self):
         """Iterator over the flattened instructions in the block."""
@@ -135,6 +136,7 @@ class InstructionBlock(Instruction, Iterable):
         for instr in instructions:
             if isinstance(instr, dict):
                 instr_type_str = instr.get("instr_type", BASE_INSTR)
+
                 if instr_type_str not in type_cache:
                     type_cache[instr_type_str] = locate(instr_type_str)
                 instr_type = type_cache[instr_type_str]
@@ -145,6 +147,7 @@ class InstructionBlock(Instruction, Iterable):
                 raise TypeError(
                     f"Instruction must be an Instruction instance or dict, got {type(instr)}."
                 )
+
         return rehydrated
 
 
@@ -401,9 +404,9 @@ class QuantumInstruction(Instruction):
 
 class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
     instructions: ValidatedList[QuantumInstruction] = []
-    targets: Annotated[ValidatedSet[str], BeforeValidator(_validate_set)] = ValidatedSet[
-        str
-    ]()
+    targets: Annotated[ValidatedSet[str], BeforeValidator(_validate_set)] = Field(
+        default_factory=lambda: ValidatedSet[str]()
+    )
     _duration_per_target: dict[str, float] = defaultdict(lambda: 0.0, dict())
 
     def add(self, *instructions: QuantumInstruction):
@@ -414,6 +417,8 @@ class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
                 self._duration_per_target[target] += instruction.duration
 
             self.duration = max(self._duration_per_target.values())
+
+        return self
 
 
 class PhaseShift(QuantumInstruction):

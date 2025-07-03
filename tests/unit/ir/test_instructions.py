@@ -143,6 +143,26 @@ class TestInstructionBlock:
         for instr, ref_instr in zip(reversed(comp_instr), reversed(ref_instr)):
             assert instr == ref_instr
 
+    def test_rehydrating_gives_validated_list(self):
+        comp_instr = InstructionBlock()
+
+        instructions = [
+            Instruction(),
+            PhaseShift(target="f"),
+            Delay(target="o"),
+            FrequencyShift(target="o"),
+        ]
+        comp_instr.add(*instructions)
+
+        blob = comp_instr.model_dump()
+        rehydrated = InstructionBlock(**blob)
+
+        assert isinstance(rehydrated.instructions, ValidatedList[Instruction])
+        assert rehydrated.number_of_instructions == len(instructions)
+
+        for instr, ref_instr in zip(rehydrated, instructions):
+            assert instr == ref_instr
+
 
 class TestRepeat:
     @pytest.mark.parametrize("repeat_count", [0, 10, 1024])
@@ -400,7 +420,7 @@ class TestInstructionSerialisationDeserialisation:
         instructions = [inst1, inst2]
 
         if validated:
-            instructions = ValidatedList(instructions)
+            instructions = ValidatedList[Instruction](instructions)
 
         block = InstructionBlock(instructions=instructions)
 

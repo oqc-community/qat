@@ -72,7 +72,7 @@ class TestBaseContainer:
 @pytest.mark.parametrize("seed", [6, 7, 8, 9])
 class TestValidatedContainer:
     def test_validated_calibratable_set(self, seed):
-        s = ValidatedSet[CalibratablePositiveFloat](set())
+        s = ValidatedSet[CalibratablePositiveFloat]()
 
         valid_value = random.Random(seed).uniform(0, 1e10)
         s.add(valid_value)
@@ -80,6 +80,9 @@ class TestValidatedContainer:
         invalid_value = random.Random(seed).uniform(-1e-06, -1e10)
         with pytest.raises(ValueError):
             s.add(invalid_value)
+
+        with pytest.raises(ValueError):
+            ValidatedSet[CalibratablePositiveFloat]({-1.3})
 
     def test_validated_qubitid_set(self, seed):
         s = ValidatedSet[QubitId]()
@@ -99,7 +102,7 @@ class TestValidatedContainer:
             s.add("a")
 
     def test_validated_calibratable_dict(self, seed):
-        d = ValidatedDict[QubitId, CalibratableUnitInterval]({})
+        d = ValidatedDict[QubitId, CalibratableUnitInterval]()
 
         valid_value = random.Random(seed).uniform(0, 1)
         d[1] = valid_value
@@ -117,6 +120,16 @@ class TestValidatedContainer:
 
         with pytest.raises(TypeError):
             d.update({2: "a"})
+
+        with pytest.raises(ValidationError):
+            ValidatedDict[QubitId, CalibratableUnitInterval](
+                {"a": 0.5}
+            )  # Key is not a QubitId
+
+        with pytest.raises(ValueError):
+            ValidatedDict[QubitId, CalibratableUnitInterval](
+                {0: invalid_value}
+            )  # Value is not within [0, 1]
 
 
 @pytest.mark.parametrize("seed", [10, 11, 12, 13])

@@ -358,11 +358,20 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 "Generic ZX gate not implemented yet! Please use `theta` = pi/4 or -pi/4."
             )
 
-    def _hw_X_pi_2(self, target: Qubit, pulse_channel: DrivePulseChannel = None):
+    def _hw_X_pi_2(
+        self, target: Qubit, pulse_channel: DrivePulseChannel = None, amp_scale: float = 1.0
+    ):
         pulse_channel = pulse_channel or target.drive_pulse_channel
-        pulse_waveform = pulse_channel.pulse.waveform_type(
-            **pulse_channel.pulse.model_dump()
-        )
+
+        try:
+            pulse_waveform = pulse_channel.pulse.waveform_type(
+                **pulse_channel.pulse.model_dump()
+            )
+            pulse_waveform.amp *= amp_scale
+        except AttributeError as e:
+            raise ValueError(
+                f"Pulse channel {pulse_channel} does not have a valid pulse calibration."
+            ) from e
 
         return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 

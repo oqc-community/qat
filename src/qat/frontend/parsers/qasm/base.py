@@ -5,6 +5,7 @@ import itertools as it
 from typing import Any, Iterable, Union
 
 from compiler_config.config import InlineResultsProcessing, Languages
+from pydantic import Field
 
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
 from qat.ir.instruction_builder import QuantumInstructionBuilder
@@ -23,8 +24,10 @@ class QasmContext(NoExtraFieldsModel):
     """
 
     registers: Registers = Registers()
-    variables: ValidatedDict[str, Variable] = ValidatedDict[str, Variable]()
-    gates: dict[str, Any] = dict()
+    variables: ValidatedDict[str, Variable] = Field(
+        default_factory=lambda: ValidatedDict[str, Variable]()
+    )
+    gates: dict[str, Any] = Field(default_factory=dict)
 
 
 class ParseResults(NoExtraFieldsModel):

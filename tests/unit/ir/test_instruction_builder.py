@@ -62,6 +62,17 @@ class TestInstructionBuilder:
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
 class TestPauliGates:
+    @pytest.mark.parametrize("amp_scale", [0.5, 1.0, 2.0])
+    def test_amp_scale_hw_X_pi_2(self, qubit_index, amp_scale):
+        qubit = hw_model.qubit_with_index(qubit_index)
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        pulse = builder._hw_X_pi_2(target=qubit, amp_scale=amp_scale)[0]
+
+        assert isinstance(pulse, Pulse)
+        assert pulse.target == qubit.drive_pulse_channel.uuid
+        assert pulse.waveform.amp == qubit.drive_pulse_channel.pulse.amp * amp_scale
+
     def test_X_pi_2(self, qubit_index):
         qubit = hw_model.qubit_with_index(qubit_index)
 

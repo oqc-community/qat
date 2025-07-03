@@ -215,7 +215,16 @@ class AcquirePulseChannel(ResonatorPulseChannel):
 class MeasureAcquirePulseChannel(MeasurePulseChannel, AcquirePulseChannel): ...
 
 
-class SecondStatePulseChannel(QubitPulseChannel): ...
+class SecondStatePulseChannel(QubitPulseChannel):
+    active: bool = False
+    delay: float = 0.0
+
+    pulse: CalibratablePulse = Field(
+        default=CalibratablePulse(
+            waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
+        ),
+        frozen=True,
+    )
 
 
 class FreqShiftPulseChannel(QubitPulseChannel):

@@ -1,20 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import Literal
+from typing import Union, get_args
 
 import numpy as np
 import pytest
 from pydantic import Field, ValidationError
 
 from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
+from qat.ir.measure import VALID_MEASURE_INSTR, Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
 from qat.model.loaders.legacy import EchoModelLoader
 from qat.purr.compiler.instructions import Acquire as LegacyAcquire
 from qat.purr.compiler.instructions import PostProcessing as LegacyPostProcessing
 from qat.purr.compiler.instructions import PostProcessType, ProcessAxis
 from qat.utils.hardware_model import generate_hw_model
-from qat.utils.pydantic import QubitId, ValidatedSet
+from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet
 
 model = generate_hw_model(4)
 qubits = [qubit for qubit in model.qubits.values()]
@@ -232,10 +232,14 @@ class TestMeasureBlock:
             def target(self):
                 return next(iter(self.targets))
 
+        VALID_CUSTOM_INSTR = Union[
+            tuple(list(get_args(VALID_MEASURE_INSTR)) + [AdditionalQuantumInstructionBlock])
+        ]
+
         class CustomMeasureBlock(MeasureBlock):
-            _valid_instructions: Literal[
-                (Synchronize, Pulse, Acquire, AdditionalQuantumInstructionBlock)
-            ] = (Synchronize, Pulse, Acquire, AdditionalQuantumInstructionBlock)
+            instructions: ValidatedList[VALID_CUSTOM_INSTR] = Field(
+                default_factory=lambda: ValidatedList[VALID_CUSTOM_INSTR]()
+            )
 
         qubit_indices = list(model.qubits.keys())
         custom_mb = CustomMeasureBlock(qubit_targets=qubit_indices)

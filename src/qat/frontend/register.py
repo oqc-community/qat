@@ -1,11 +1,13 @@
 from typing import Any
 
+from pydantic import Field
+
 from qat.model.device import Qubit
 from qat.utils.pydantic import NoExtraFieldsModel, ValidatedDict, ValidatedList
 
 
 class QubitRegister(NoExtraFieldsModel):
-    qubits: ValidatedList[Qubit] = ValidatedList[Qubit]()
+    qubits: ValidatedList[Qubit] = Field(default_factory=lambda: ValidatedList[Qubit]())
 
     @property
     def contents(self):
@@ -33,7 +35,9 @@ class CregIndexValue(NoExtraFieldsModel):
 
 
 class BitRegister(NoExtraFieldsModel):
-    bits: ValidatedList[CregIndexValue] = ValidatedList[CregIndexValue]()
+    bits: ValidatedList[CregIndexValue] = Field(
+        default_factory=lambda: ValidatedList[CregIndexValue]()
+    )
 
     @property
     def contents(self):
@@ -44,8 +48,12 @@ class BitRegister(NoExtraFieldsModel):
 
 
 class Registers(NoExtraFieldsModel):
-    quantum: ValidatedDict[str, QubitRegister] = ValidatedDict[str, QubitRegister]()
-    classic: ValidatedDict[str, BitRegister] = ValidatedDict[str, BitRegister]()
+    quantum: ValidatedDict[str, QubitRegister] = Field(
+        default_factory=lambda: ValidatedDict[str, QubitRegister]()
+    )
+    classic: ValidatedDict[str, BitRegister] = Field(
+        default_factory=lambda: ValidatedDict[str, BitRegister]()
+    )
 
     def __repr__(self):
         return "quantum: " + str(self.quantum) + "\nclassic: " + str(self.classic)
