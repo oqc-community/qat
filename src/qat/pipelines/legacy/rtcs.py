@@ -5,17 +5,17 @@ from qat.backend.fallthrough import FallthroughBackend
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     IntegratorAcquireSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
 )
-from qat.middleend.passes.legacy.validation import (
+from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
     InstructionValidation,
     ReadoutValidation,
 )
-from qat.model.loaders.legacy import RTCSModelLoader
+from qat.model.loaders.purr import RTCSModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import LegacyPipeline
 from qat.pipelines.pipeline import Pipeline
@@ -24,7 +24,7 @@ from qat.purr.backends.realtime_chip_simulator import RealtimeSimHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime.legacy import LegacyRuntime
-from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
+from qat.runtime.passes.purr.analysis import CalibrationAnalysis
 
 log = get_default_logger()
 

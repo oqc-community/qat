@@ -14,7 +14,7 @@ from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
-from qat.backend.passes.legacy.analysis import TILegalisationPass
+from qat.backend.passes.purr.analysis import TILegalisationPass
 from qat.backend.qblox.acquisition import Acquisition
 from qat.backend.qblox.codegen import QbloxPackage
 from qat.backend.qblox.config.constants import Constants

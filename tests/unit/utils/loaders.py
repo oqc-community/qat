@@ -1,5 +1,5 @@
-from qat.model.loaders.legacy.base import BaseLegacyModelLoader
-from qat.model.loaders.legacy.echo import EchoModelLoader
+from qat.model.loaders.purr.base import BaseLegacyModelLoader
+from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 

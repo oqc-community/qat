@@ -7,7 +7,7 @@ import pytest
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction, Repeat, Sweep
 

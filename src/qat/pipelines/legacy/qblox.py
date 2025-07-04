@@ -6,12 +6,12 @@ from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     DeviceUpdateSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
 )
-from qat.middleend.passes.legacy.validation import (
+from qat.middleend.passes.purr.validation import (
     InstructionValidation,
     ReadoutValidation,
 )

@@ -12,7 +12,7 @@ from compiler_config.config import CompilerConfig
 
 from qat.backend.base import BaseBackend
 from qat.backend.codegen_base import DfsTraversal
-from qat.backend.passes.legacy.analysis import (
+from qat.backend.passes.purr.analysis import (
     CFGPass,
     CFGResult,
     ReadWriteResult,

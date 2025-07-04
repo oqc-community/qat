@@ -6,7 +6,7 @@ from qat.backend import WaveformV1Backend
 from qat.engines import ZeroEngine
 from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import SimpleRuntime

@@ -18,7 +18,7 @@ from qat.core.result_base import ResultManager
 from qat.frontend.parsers import CloudQasmParser as PydCloudQasmParser
 from qat.frontend.parsers import Qasm3Parser as PydQasm3Parser
 from qat.frontend.passes.analysis import InputAnalysisResult
-from qat.frontend.passes.legacy.transform import InputOptimisation
+from qat.frontend.passes.purr.transform import InputOptimisation
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel

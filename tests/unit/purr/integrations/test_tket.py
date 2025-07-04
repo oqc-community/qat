@@ -8,7 +8,7 @@ from compiler_config.config import Qasm2Optimizations, Tket, TketOptimizations
 from pytket import Circuit
 from pytket.architecture import Architecture, RingArch
 
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.devices import Qubit
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation

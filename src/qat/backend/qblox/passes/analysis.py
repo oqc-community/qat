@@ -11,7 +11,7 @@ from typing import Dict, List, Set
 
 import numpy as np
 
-from qat.backend.passes.legacy.analysis import BindingResult, IterBound, TriageResult
+from qat.backend.passes.purr.analysis import BindingResult, IterBound, TriageResult
 from qat.backend.qblox.config.constants import Constants
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultManager

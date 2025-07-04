@@ -4,8 +4,8 @@ from qat.backend.waveform_v1.codegen import PydWaveformV1Backend, WaveformV1Back
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend, ExperimentalDefaultMiddleend
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
@@ -86,7 +86,7 @@ class ExperimentalEchoPipeline(UpdateablePipeline):
             )
 
         target_data = target_data if target_data is not None else TargetData.default()
-        pyd_model = convert_legacy_echo_hw_to_pydantic(model)
+        pyd_model = convert_purr_echo_hw_to_pydantic(model)
         results_pipeline = get_experimental_results_pipeline(model, pyd_model)
         return Pipeline(
             model=model,

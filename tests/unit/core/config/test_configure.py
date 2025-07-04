@@ -12,7 +12,7 @@ from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.engines.waveform_v1.echo import EchoEngine
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.model.loaders.legacy.echo import EchoModelLoader
+from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.instructions import Instruction

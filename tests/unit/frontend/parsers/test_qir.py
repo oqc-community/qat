@@ -5,7 +5,7 @@ import pytest
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Return
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.purr.backends.echo import apply_setup_to_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
@@ -24,7 +24,7 @@ for q in range(n_qubits):
 leg_hw_model = apply_setup_to_hardware(
     QuantumHardwareModel(), qubit_count=n_qubits, connectivity=linear_topology
 )
-pyd_hw_model = convert_legacy_echo_hw_to_pydantic(leg_hw_model)
+pyd_hw_model = convert_purr_echo_hw_to_pydantic(leg_hw_model)
 
 
 class TestQIRParser:

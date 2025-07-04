@@ -6,10 +6,10 @@ import pytest
 from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
 from qat.engines.waveform_v1 import EchoEngine
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     RepeatTranslation,
 )
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 from qat.runtime import SimpleRuntime

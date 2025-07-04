@@ -1,5 +1,5 @@
 from qat.frontend.fallthrough import FallthroughFrontend
-from qat.model.loaders.legacy.echo import Connectivity, EchoModelLoader
+from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 
 

@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BasePhysicalModelLoader
 from qat.purr.backends.echo import Connectivity
 
-from .legacy.echo import EchoModelLoader as LegacyEchoModelLoader
+from .purr.echo import EchoModelLoader as LegacyEchoModelLoader
 
 
 class EchoModelLoader(BasePhysicalModelLoader):
@@ -20,7 +20,7 @@ class EchoModelLoader(BasePhysicalModelLoader):
 
     def load(self) -> PhysicalHardwareModel:
         legacy_model = self._legacy.load()
-        return convert_legacy_echo_hw_to_pydantic(legacy_model)
+        return convert_purr_echo_hw_to_pydantic(legacy_model)
 
 
 PydEchoModelLoader = EchoModelLoader

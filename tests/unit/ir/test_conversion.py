@@ -13,9 +13,9 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.middleend.passes.legacy.transform import LoopCount
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.middleend.passes.purr.transform import LoopCount
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
 from qat.purr.compiler import instructions
 from qat.purr.compiler.devices import (
@@ -31,7 +31,7 @@ from tests.unit.utils.qasm_qir import get_qasm2
 class TestConvertToPydanticIRPass:
     def setup_class(self):
         self.legacy_model = EchoModelLoader(qubit_count=16).load()
-        self.pyd_model = convert_legacy_echo_hw_to_pydantic(self.legacy_model)
+        self.pyd_model = convert_purr_echo_hw_to_pydantic(self.legacy_model)
         self.converter_pass = ConvertToPydanticIR(self.legacy_model, self.pyd_model)
 
     def _check_updated_class(self, legacy_element, converted_element):

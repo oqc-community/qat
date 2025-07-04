@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import (
     AnalysisPass,

@@ -14,7 +14,7 @@ from qblox_instruments import Cluster, DummyBinnedAcquisitionData, DummyScopeAcq
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
-from qat.backend.passes.legacy.analysis import TILegalisationPass
+from qat.backend.passes.purr.analysis import TILegalisationPass
 from qat.purr.backends.live_devices import ControlHardware, Instrument, LivePhysicalBaseband
 from qat.purr.backends.qblox.acquisition import Acquisition
 from qat.purr.backends.qblox.codegen import QbloxPackage

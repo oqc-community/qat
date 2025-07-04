@@ -12,15 +12,15 @@ from qat.backend.passes.analysis import (
     PydTimelineAnalysis,
     PydTimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.analysis import (
+from qat.backend.passes.lowering import PydPartitionByPulseChannel
+from qat.backend.passes.purr.analysis import (
     IntermediateFrequencyAnalysis,
     IntermediateFrequencyResult,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.lowering import PartitionByPulseChannel
-from qat.backend.passes.legacy.validation import NoAcquireWeightsValidation
-from qat.backend.passes.lowering import PydPartitionByPulseChannel
+from qat.backend.passes.purr.lowering import PartitionByPulseChannel
+from qat.backend.passes.purr.validation import NoAcquireWeightsValidation
 from qat.backend.passes.validation import PydNoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import (
     WaveformV1ChannelData,

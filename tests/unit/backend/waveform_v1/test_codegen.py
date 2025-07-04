@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from compiler_config.config import InlineResultsProcessing
 
-from qat.backend.passes.legacy.analysis import (
+from qat.backend.passes.purr.analysis import (
     IntermediateFrequencyResult,
     PulseChannelTimeline,
     TimelineAnalysisResult,
@@ -19,11 +19,11 @@ from qat.backend.waveform_v1.codegen import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.lowered import PartitionedIR
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays,
     RepeatTranslation,
 )
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (

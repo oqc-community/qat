@@ -10,10 +10,10 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
-from qat.middleend.passes.legacy.analysis import (
+from qat.middleend.passes.purr.analysis import (
     ActivePulseChannelAnalysis,
 )
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     AcquireSanitisation,
     BatchedShots,
     EndOfTaskResetSanitisation,
@@ -35,7 +35,7 @@ from qat.middleend.passes.legacy.transform import (
     SquashDelaysOptimisation,
     SynchronizeTask,
 )
-from qat.middleend.passes.legacy.validation import (
+from qat.middleend.passes.purr.validation import (
     FrequencyValidation,
     HardwareConfigValidity,
     ReadoutValidation,
@@ -63,7 +63,7 @@ from qat.middleend.passes.validation import (
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
+from qat.runtime.passes.purr.analysis import CalibrationAnalysis
 
 
 class BaseMiddleend(abc.ABC):

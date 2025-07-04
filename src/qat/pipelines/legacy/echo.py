@@ -4,16 +4,16 @@ from qat.backend.fallthrough import FallthroughBackend
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend.middleends import CustomMiddleend
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     IntegratorAcquireSanitisation,
     LegacyPhaseOptimisation,
 )
-from qat.middleend.passes.legacy.validation import (
+from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
     InstructionValidation,
     ReadoutValidation,
 )
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import LegacyPipeline
 from qat.pipelines.pipeline import Pipeline
@@ -22,7 +22,7 @@ from qat.purr.backends.echo import EchoEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime.legacy import LegacyRuntime
-from qat.runtime.passes.legacy.analysis import CalibrationAnalysis
+from qat.runtime.passes.purr.analysis import CalibrationAnalysis
 
 log = get_default_logger()
 

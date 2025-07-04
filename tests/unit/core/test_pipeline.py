@@ -1,6 +1,6 @@
 from qat.core.pipeline import HardwareLoaders, PipelineSet
-from qat.model.loaders.legacy.echo import EchoModelLoader
-from qat.model.loaders.legacy.qiskit import QiskitModelLoader
+from qat.model.loaders.purr.echo import EchoModelLoader
+from qat.model.loaders.purr.qiskit import QiskitModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 from tests.unit.utils.loaders import MockModelLoader

@@ -22,7 +22,7 @@ from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.qatconfig import QatConfig
@@ -110,7 +110,7 @@ class TestQATPipelineSetup:
         hardware = [
             HardwareLoaderDescription(
                 name="echo6loader",
-                type="qat.model.loaders.legacy.EchoModelLoader",
+                type="qat.model.loaders.purr.EchoModelLoader",
                 config={"qubit_count": 6},
             )
         ]

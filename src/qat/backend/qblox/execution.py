@@ -7,7 +7,7 @@ from typing import Dict
 import numpy as np
 from pydantic import ConfigDict
 
-from qat.backend.passes.legacy.analysis import TriageResult
+from qat.backend.passes.purr.analysis import TriageResult
 from qat.backend.qblox.config.specification import SequencerConfig
 from qat.backend.qblox.ir import Sequence
 from qat.model.device import PulseChannel

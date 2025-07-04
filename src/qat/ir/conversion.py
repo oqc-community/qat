@@ -11,12 +11,12 @@ import numpy as np
 import qat.ir.instructions as pyd_instructions
 import qat.ir.measure as pyd_measure
 import qat.ir.waveforms as pyd_waveforms
-from qat.backend.passes.legacy.analysis import PulseChannelTimeline
+from qat.backend.passes.purr.analysis import PulseChannelTimeline
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.lowered import PartitionedIR
-from qat.middleend.passes.legacy.transform import LoopCount
+from qat.middleend.passes.purr.transform import LoopCount
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import (

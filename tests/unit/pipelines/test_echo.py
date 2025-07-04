@@ -13,7 +13,7 @@ from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
 from qat.middleend import DefaultMiddleend
 from qat.middleend.middleends import ExperimentalDefaultMiddleend
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig, ExperimentalEchoPipeline
 from qat.pipelines.pipeline import Pipeline

@@ -19,8 +19,8 @@ from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.ir.instructions import Repeat as PydRepeat
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.model.loaders.legacy.echo import Connectivity, EchoModelLoader
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
 
@@ -178,7 +178,7 @@ class TestQasm2Frontend:
         assert isinstance(builder.instructions[0], Repeat)
 
         # Pydantic hardware model.
-        builder = Qasm2Frontend(convert_legacy_echo_hw_to_pydantic(model)).emit(qasm2_str)
+        builder = Qasm2Frontend(convert_purr_echo_hw_to_pydantic(model)).emit(qasm2_str)
         assert isinstance(builder, PydQuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], PydRepeat)
 
@@ -275,7 +275,7 @@ class TestQasm3Frontend:
         assert isinstance(builder.instructions[0], Repeat)
 
         # Pydantic hardware model.
-        builder = Qasm3Frontend(convert_legacy_echo_hw_to_pydantic(model)).emit(qasm3_str)
+        builder = Qasm3Frontend(convert_purr_echo_hw_to_pydantic(model)).emit(qasm3_str)
         assert isinstance(builder, PydQuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], PydRepeat)
 

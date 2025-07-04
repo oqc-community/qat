@@ -2,7 +2,7 @@ import pytest
 
 from qat.core.pass_base import PassManager
 from qat.frontend.custom import CustomFrontend
-from qat.model.loaders.legacy.echo import EchoModelLoader
+from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 
 

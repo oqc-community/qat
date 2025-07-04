@@ -20,7 +20,7 @@ from qat.engines import ZeroEngine
 from qat.frontend import FallthroughFrontend
 from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.base import BaseModelLoader
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime import SimpleRuntime
 
@@ -111,7 +111,7 @@ class TestPipelineFactoryDescription:
             hardware_loader="echo8a",
         )
 
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
         factory = desc.construct(loader=loader)
@@ -157,7 +157,7 @@ class TestUpdateablePipelineDescription:
             engine="qat.engines.ZeroEngine",
         )
 
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
         pipeline = desc.construct(loader=loader)
@@ -168,14 +168,14 @@ class TestUpdateablePipelineDescription:
 class TestHardwareLoaderDescription:
     def test_valid_description(self):
         desc = HardwareLoaderDescription(
-            name="somehardware", type="qat.model.loaders.legacy.EchoModelLoader"
+            name="somehardware", type="qat.model.loaders.purr.EchoModelLoader"
         )
         assert isinstance(desc.construct(), BaseModelLoader)
 
     def test_custom_config(self):
         desc = HardwareLoaderDescription(
             name="somehardware",
-            type="qat.model.loaders.legacy.EchoModelLoader",
+            type="qat.model.loaders.purr.EchoModelLoader",
             config={"qubit_count": 8},
         )
 
@@ -186,7 +186,7 @@ class TestHardwareLoaderDescription:
 
 class TestPipelineClassDescription:
     def test_valid_description(self):
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -202,7 +202,7 @@ class TestPipelineClassDescription:
         assert isinstance(desc.construct(loader=loader), ConfigurablePipeline)
 
     def test_end_from_dict(self):
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -218,7 +218,7 @@ class TestPipelineClassDescription:
         assert isinstance(desc.construct(loader=loader), ConfigurablePipeline)
 
     def test_custom_config(self):
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -337,7 +337,7 @@ class TestQATConfig:
         hardware = [
             HardwareLoaderDescription(
                 name="echo6loader",
-                type="qat.model.loaders.legacy.EchoModelLoader",
+                type="qat.model.loaders.purr.EchoModelLoader",
                 config={"qubit_count": 6},
             )
         ]
@@ -372,7 +372,7 @@ class TestQATConfig:
         hardware = [
             HardwareLoaderDescription(
                 name="echo6loader",
-                type="qat.model.loaders.legacy.EchoModelLoader",
+                type="qat.model.loaders.purr.EchoModelLoader",
                 config={"qubit_count": 6},
             )
         ]
@@ -398,7 +398,7 @@ class TestQATConfig:
         hardware = [
             HardwareLoaderDescription(
                 name="notwhatwearelookingfor",
-                type="qat.model.loaders.legacy.EchoModelLoader",
+                type="qat.model.loaders.purr.EchoModelLoader",
                 config={"qubit_count": 6},
             )
         ]
@@ -409,7 +409,7 @@ class TestQATConfig:
     def test_yaml_custom_config(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "customconfig.yaml")
 
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -423,7 +423,7 @@ class TestQATConfig:
     def test_yaml_legacy_pipeline(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "legacyengine.yaml")
 
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -434,7 +434,7 @@ class TestQATConfig:
 
     def test_yaml_factory_with_engine(self, qatconfig_testfiles):
         from qat.core.config.descriptions import UpdateablePipelineDescription
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         from tests.unit.utils.engines import InitableEngine
         from tests.unit.utils.pipelines import MockPipeline
@@ -459,7 +459,7 @@ class TestQATConfig:
             qatconfig_testfiles / "customresultspipeline.yaml"
         )
 
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
 
@@ -473,7 +473,7 @@ class TestQATConfig:
         assert dummypass.some_int == 12
 
     def test_yaml_custom_config_from_env(self, monkeypatch, qatconfig_testfiles):
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         monkeypatch.setenv("SOME_ENV_VAR", "A_VALUE")
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
@@ -490,7 +490,7 @@ class TestQATConfig:
         from qat.engines import DefaultEngine
         from qat.frontend import DefaultFrontend
         from qat.middleend import DefaultMiddleend
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
         from qat.runtime import DefaultRuntime
 
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "defaults.yaml")
@@ -515,7 +515,7 @@ class TestQATConfig:
         """Check that invalid config (types) raise exceptions
 
         Config is only validated on pipeline construction"""
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidtype.yaml")
         desc = qatconfig.PIPELINES[0]
@@ -528,7 +528,7 @@ class TestQATConfig:
         """Check that invalid config (types) raise exceptions
 
         Config is only validated on pipeline construction"""
-        from qat.model.loaders.legacy import EchoModelLoader
+        from qat.model.loaders.purr import EchoModelLoader
 
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidarg.yaml")
         desc = qatconfig.PIPELINES[0]

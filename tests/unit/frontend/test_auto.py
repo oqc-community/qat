@@ -13,8 +13,8 @@ from qat.frontend.qir import QIRFrontend, load_qir_file
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.model.loaders.legacy.echo import Connectivity, EchoModelLoader
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import Pulse, Repeat
@@ -182,7 +182,7 @@ class TestAutoFrontend:
     )
     def test_legacy_vs_pydantic_hw(self, program):
         leg_hw = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
-        pyd_hw = convert_legacy_echo_hw_to_pydantic(leg_hw)
+        pyd_hw = convert_purr_echo_hw_to_pydantic(leg_hw)
 
         leg_frontend = AutoFrontend(leg_hw)
         leg_builder = leg_frontend.emit(program)

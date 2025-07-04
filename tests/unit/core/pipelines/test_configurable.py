@@ -8,7 +8,7 @@ from qat.core.pipelines.configurable import ConfigurablePipeline
 from qat.engines import ZeroEngine
 from qat.frontend import DefaultFrontend
 from qat.middleend import DefaultMiddleend
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import DefaultTargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import DefaultRuntime

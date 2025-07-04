@@ -10,7 +10,7 @@ from qat.engines import ZeroEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import DefaultFrontend
 from qat.middleend import DefaultMiddleend
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import DefaultTargetData, TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import DefaultRuntime

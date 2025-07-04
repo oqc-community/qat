@@ -7,26 +7,26 @@ from qat.backend.passes.analysis import (
     PydTimelineAnalysis,
     PydTimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.analysis import (
+from qat.backend.passes.lowering import PydPartitionByPulseChannel
+from qat.backend.passes.purr.analysis import (
     IntermediateFrequencyAnalysis,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.legacy.lowering import PartitionByPulseChannel
-from qat.backend.passes.lowering import PydPartitionByPulseChannel
+from qat.backend.passes.purr.lowering import PartitionByPulseChannel
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.instructions import Delay
 from qat.ir.lowered import PartitionedIR
 from qat.ir.waveforms import Pulse
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     InstructionGranularitySanitisation as LegInstructionGranularitySanitisation,
 )
-from qat.middleend.passes.legacy.transform import (
+from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays as LegLowerSyncsToDelays,
 )
 from qat.model.loaders.converted import PydEchoModelLoader
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import Delay as LegDelay
 

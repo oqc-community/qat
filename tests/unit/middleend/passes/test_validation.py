@@ -12,7 +12,7 @@ from compiler_config.config import (
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
-from qat.middleend.passes.legacy.validation import (
+from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
 )
 from qat.middleend.passes.validation import (
@@ -21,7 +21,7 @@ from qat.middleend.passes.validation import (
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 

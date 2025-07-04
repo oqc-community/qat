@@ -14,8 +14,8 @@ from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
 from qat.ir.instructions import Assign as PydAssign
-from qat.model.convert_legacy import convert_legacy_echo_hw_to_pydantic
-from qat.model.loaders.legacy.echo import EchoModelLoader
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder as LegInstructionBuilder
 from qat.purr.compiler.devices import QubitCoupling
 from qat.purr.compiler.instructions import Assign, Pulse, ResultsProcessing
@@ -84,7 +84,7 @@ class TestQIRFrontend:
 
     @pytest.fixture(scope="class")
     def pyd_model(self, legacy_model):
-        return convert_legacy_echo_hw_to_pydantic(legacy_model)
+        return convert_purr_echo_hw_to_pydantic(legacy_model)
 
     @pytest.mark.parametrize(
         "model_type, parser_type",

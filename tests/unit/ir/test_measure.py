@@ -9,7 +9,7 @@ from pydantic import Field, ValidationError
 from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
 from qat.ir.measure import VALID_MEASURE_INSTR, Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
-from qat.model.loaders.legacy import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.instructions import Acquire as LegacyAcquire
 from qat.purr.compiler.instructions import PostProcessing as LegacyPostProcessing
 from qat.purr.compiler.instructions import PostProcessType, ProcessAxis

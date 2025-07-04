@@ -5,7 +5,7 @@ from qat.core.pass_base import PassManager
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.passes.analysis import IndexMappingAnalysis as PydIndexMappingAnalysis
-from qat.runtime.passes.legacy.analysis import IndexMappingAnalysis
+from qat.runtime.passes.purr.analysis import IndexMappingAnalysis
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     ErrorMitigation,
