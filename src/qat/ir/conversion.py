@@ -167,7 +167,7 @@ class ConvertToPydanticIR(TransformPass):
         if class_name == "ActiveChannelResults":
             class_name = "ActivePulseChannelResults"
         # Check non-legacy path for class name first, if not found, use legacy path
-        class_path = value.__class__.__module__.replace(".legacy", "") + "." + class_name
+        class_path = value.__class__.__module__.replace(".purr", "") + "." + class_name
         cls_ = locate(class_path) or value.__class__
         return cls_(**data)
 
