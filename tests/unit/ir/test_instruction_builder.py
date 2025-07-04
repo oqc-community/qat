@@ -269,8 +269,8 @@ class TestTwoQubitGates:
                 )
             ]
 
-            assert len(builder._ir.instructions) == 3
-            assert len(synchronizes) == 1
+            assert len(builder._ir.instructions) == 4
+            assert len(synchronizes) == 2
             assert len(cr_pulses) == 1
             assert len(crc_pulses) == 1
 
@@ -305,11 +305,43 @@ class TestTwoQubitGates:
             ]
             phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
 
-            assert len(builder._ir.instructions) == 7
-            assert len(synchronizes) == 1
+            assert len(builder._ir.instructions) == 8
+            assert len(synchronizes) == 2
             assert len(cr_pulses) == 1
             assert len(crc_pulses) == 1
             assert len(phase_shifts) == 4
+
+    def test_ECR(self):
+        target1_id = 5
+        target1 = hw_model.qubit_with_index(target1_id)
+        target2_id = next(iter(hw_model.physical_connectivity[target1_id]))
+        target2 = hw_model.qubit_with_index(target2_id)
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.ECR(target1, target2)
+
+        synchronizes = [instr for instr in builder._ir if isinstance(instr, Synchronize)]
+        cr_pulses = [
+            instr
+            for instr in builder._ir
+            if isinstance(instr, Pulse)
+            and isinstance(
+                hw_model.pulse_channel_with_id(instr.target), CrossResonancePulseChannel
+            )
+        ]
+        crc_pulses = [
+            instr
+            for instr in builder._ir
+            if isinstance(instr, Pulse)
+            and isinstance(
+                hw_model.pulse_channel_with_id(instr.target),
+                CrossResonanceCancellationPulseChannel,
+            )
+        ]
+
+        assert len(synchronizes) == 2 * 2  # 2 synchronizes per ZX_pi_4 gate
+        assert len(cr_pulses) == 2
+        assert len(crc_pulses) == 2
 
 
 class TestMeasure:

@@ -425,16 +425,21 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 f"No `zx_pi_4_pulse` available on {target1} with index {target1_id}."
             )
 
+        sync = Synchronize(
+            targets=[
+                pulse_ch.uuid
+                for pulse_ch in target1.all_pulse_channels
+                + target1.resonator.all_pulse_channels
+                + target2.all_pulse_channels
+                + target2.resonator.all_pulse_channels
+            ]
+        )
+
         return [
-            Synchronize(targets=[target1_pulse_channel.uuid, target2_pulse_channel.uuid]),
-            Pulse(
-                targets=target1_pulse_channel.uuid,
-                waveform=waveform_type(**pulse),
-            ),
-            Pulse(
-                targets=target2_pulse_channel.uuid,
-                waveform=waveform_type(**pulse),
-            ),
+            sync,
+            Pulse(target=target1_pulse_channel.uuid, waveform=waveform_type(**pulse)),
+            Pulse(target=target2_pulse_channel.uuid, waveform=waveform_type(**pulse)),
+            sync,
         ]
 
     def _generate_measure_acquire(
@@ -735,22 +740,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 f"Qubits {self._qubit_index_by_uuid[control.uuid]} and {target_id} are not coupled."
             )
 
-        pulse_channels = [
-            control.drive_pulse_channel.uuid,
-            control.cross_resonance_pulse_channels[target_id].uuid,
-            control.cross_resonance_cancellation_pulse_channels[target_id].uuid,
-            target.drive_pulse_channel.uuid,
-        ]
-        sync_instruction = Synchronize(targets=pulse_channels)
-
         return (
-            self.add(sync_instruction)
-            .ZX(control, target, theta=np.pi / 4.0)
-            .add(sync_instruction)
+            self.ZX(control, target, theta=np.pi / 4.0)
             .X(control, theta=np.pi)
-            .add(sync_instruction)
             .ZX(control, target, theta=-np.pi / 4.0)
-            .add(sync_instruction)
         )
 
     def swap(self, target: Qubit, destination: Qubit):
