@@ -13,7 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.middleend.passes.gates
-   qat.middleend.passes.legacy
+   qat.middleend.passes.purr
 
 Submodules
 ----------

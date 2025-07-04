@@ -1,0 +1,7 @@
+qat.model.loaders.purr.lucy module
+==================================
+
+.. automodule:: qat.model.loaders.purr.lucy
+   :members:
+   :undoc-members:
+   :show-inheritance:

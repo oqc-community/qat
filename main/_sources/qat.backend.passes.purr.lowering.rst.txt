@@ -1,0 +1,7 @@
+qat.backend.passes.purr.lowering module
+=======================================
+
+.. automodule:: qat.backend.passes.purr.lowering
+   :members:
+   :undoc-members:
+   :show-inheritance:

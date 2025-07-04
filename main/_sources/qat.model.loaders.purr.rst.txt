@@ -1,0 +1,20 @@
+qat.model.loaders.purr package
+==============================
+
+.. automodule:: qat.model.loaders.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.model.loaders.purr.base
+   qat.model.loaders.purr.echo
+   qat.model.loaders.purr.file
+   qat.model.loaders.purr.lucy
+   qat.model.loaders.purr.qiskit
+   qat.model.loaders.purr.rtcs

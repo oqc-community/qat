@@ -1,0 +1,7 @@
+qat.model.convert\_purr module
+==============================
+
+.. automodule:: qat.model.convert_purr
+   :members:
+   :undoc-members:
+   :show-inheritance:

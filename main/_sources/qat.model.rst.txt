@@ -21,7 +21,7 @@ Submodules
    :maxdepth: 4
 
    qat.model.builder
-   qat.model.convert_legacy
+   qat.model.convert_purr
    qat.model.device
    qat.model.error_mitigation
    qat.model.hardware_model

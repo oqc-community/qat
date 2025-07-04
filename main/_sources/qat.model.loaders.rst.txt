@@ -12,7 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   qat.model.loaders.legacy
+   qat.model.loaders.purr
 
 Submodules
 ----------

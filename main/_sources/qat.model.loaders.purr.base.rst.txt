@@ -1,0 +1,7 @@
+qat.model.loaders.purr.base module
+==================================
+
+.. automodule:: qat.model.loaders.purr.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -12,6 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.middleend.passes.legacy.analysis
    qat.middleend.passes.legacy.transform
    qat.middleend.passes.legacy.validation

@@ -1,0 +1,17 @@
+qat.middleend.passes.purr package
+=================================
+
+.. automodule:: qat.middleend.passes.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.middleend.passes.purr.analysis
+   qat.middleend.passes.purr.transform
+   qat.middleend.passes.purr.validation

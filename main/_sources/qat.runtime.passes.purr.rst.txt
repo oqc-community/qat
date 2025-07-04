@@ -1,0 +1,16 @@
+qat.runtime.passes.purr package
+===============================
+
+.. automodule:: qat.runtime.passes.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.runtime.passes.purr.analysis
+   qat.runtime.passes.purr.transform

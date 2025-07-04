@@ -1,0 +1,7 @@
+qat.model.loaders.purr.qiskit module
+====================================
+
+.. automodule:: qat.model.loaders.purr.qiskit
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,18 @@
+qat.backend.passes.purr package
+===============================
+
+.. automodule:: qat.backend.passes.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.passes.purr.analysis
+   qat.backend.passes.purr.lowering
+   qat.backend.passes.purr.transform
+   qat.backend.passes.purr.validation

@@ -1,0 +1,7 @@
+qat.backend.passes.purr.analysis module
+=======================================
+
+.. automodule:: qat.backend.passes.purr.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:

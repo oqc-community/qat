@@ -1,0 +1,7 @@
+qat.middleend.passes.purr.validation module
+===========================================
+
+.. automodule:: qat.middleend.passes.purr.validation
+   :members:
+   :undoc-members:
+   :show-inheritance:

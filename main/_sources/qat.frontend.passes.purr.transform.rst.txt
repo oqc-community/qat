@@ -1,0 +1,7 @@
+qat.frontend.passes.purr.transform module
+=========================================
+
+.. automodule:: qat.frontend.passes.purr.transform
+   :members:
+   :undoc-members:
+   :show-inheritance:
