@@ -125,6 +125,11 @@ def _execute_with_metrics(
     hardware=None,
     compiler_config: CompilerConfig = None,
 ):
+    log.warning(
+        "execute methods in qat.purr.qat are now deprecated."
+        "Please execute using qat.core.qat.QAT instead."
+        "For precompiled instructions, use QAT.execute, otherwise use QAT.run",
+    )
     metrics = CompilationMetrics()
     qatconfig = get_config()
 
