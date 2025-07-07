@@ -30,8 +30,14 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
     logical_connectivity = defaultdict(set)
 
     for qubit in legacy_hw.qubits:
-        # Add topology of qubit
-        coupled_q_indices = [q.index for q in qubit.coupled_qubits]
+        # Add topology of qubit. Since the topology is not always stored both in
+        # the `qubit_direction_couplings`, look into `coupled_qubits` as well.
+        if couplings := legacy_hw.qubit_direction_couplings:
+            coupled_q_indices = [
+                c.direction[1] for c in couplings if c.direction[0] == qubit.index
+            ]
+        else:
+            coupled_q_indices = [q.index for q in qubit.coupled_qubits]
         logical_connectivity[qubit.index].update(coupled_q_indices)
 
         # Physical baseband
@@ -73,7 +79,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             pulse=CalibratablePulse(**pulse_measure),
         )
 
-        if qubit.measure_acquire["weights"] is None:
+        if qubit.measure_acquire.get("weights") is None:
             qubit.measure_acquire["weights"] = []
 
         acquire_pulse_channel = qubit.measure_device.get_pulse_channel(ChannelType.acquire)
@@ -141,6 +147,9 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 and pulse_channel.auxiliary_devices
             ):
                 aux_qubit = pulse_channel.auxiliary_devices[0].index
+
+                if aux_qubit not in coupled_q_indices:
+                    continue
 
                 if pulse_channel.channel_type == ChannelType.cross_resonance:
                     new_cr_pulse_channel = CrossResonancePulseChannel(

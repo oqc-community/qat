@@ -173,6 +173,7 @@ class CalibratablePulse(NoExtraFieldsModel):
     drag: float = 0.0
     rise: float = 0.0
     amp_setup: float = 0.0
+    std_dev: float = 0.0
 
 
 class CalibratableAcquire(NoExtraFieldsModel):
