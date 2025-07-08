@@ -885,7 +885,7 @@ class LowerSyncsToDelays(TransformPass):
 
 class EvaluateWaveforms(TransformPass):
     """Evaluates the amplitudes of :class:`Waveform`s within :class:`Pulse` instructions,
-    replacing them with a :class:`SampledmWaveform` and accounting for the scale of the
+    replacing them with a :class:`SampledWaveform` and accounting for the scale of the
     pulse channel.
 
     :class:`Waveform` dataclasses are defined by (often many) parameters. With the exception
