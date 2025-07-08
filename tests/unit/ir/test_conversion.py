@@ -158,6 +158,7 @@ class TestConvertToPydanticIRPass:
             self._check_conversion(value, getattr(converted_value, name))
 
     @_check_conversion.register(instructions.Waveform)
+    @_check_conversion.register(instructions.CustomPulse)
     def _(self, legacy_value, converted_value):
         """Check that the value of a legacy waveform matches the converted waveform."""
         for name, value in vars(legacy_value).items():
@@ -180,6 +181,8 @@ class TestConvertToPydanticIRPass:
                     value = "draggaussian"
                 else:
                     value = value.value.lower().replace("_", "")
+            elif name[0] == "_":
+                continue
             else:
                 new_value = getattr(converted_value.waveform, name)
             self._check_conversion(value, new_value)

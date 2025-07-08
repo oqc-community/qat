@@ -318,16 +318,32 @@ class CustomPulse(Waveform):
     def __init__(
         self,
         quantum_target: "PulseChannel",
-        samples: List[np.complex],  # FIXME - List <> np.ndarray confusion
+        samples: list | np.ndarray,
         ignore_channel_scale: bool = False,
     ):
         super().__init__(quantum_target)
-        self.samples: List[np.complex] = samples
+        self._is_np = isinstance(samples, np.ndarray)
+        self._samples: list = samples.tolist() if self._is_np else samples
         self.ignore_channel_scale: bool = ignore_channel_scale
 
     @property
     def duration(self):
         return len(self.samples) * self.channel.sample_time
+
+    @property
+    def samples(self):
+        if self._is_np:
+            return np.asarray(self._samples)
+        return self._samples
+
+    @samples.setter
+    def samples(self, samples):
+        if isinstance(samples, np.ndarray):
+            self._is_np = True
+            self._samples = samples.tolist()
+        else:
+            self._is_np = False
+            self._samples = samples
 
     def __repr__(self):
         id_ = self.channel.full_id()
