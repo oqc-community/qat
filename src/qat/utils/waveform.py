@@ -170,16 +170,18 @@ class DragGaussianFunction(ComplexFunction):
     Drag Gaussian, tighter on one side and long tail on the other.
     """
 
-    width: float
+    std_dev: float
     beta: float
     zero_at_edges: bool
 
     @_validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        zae_chunk = -self.zero_at_edges * (np.exp(-0.5 * (self.width / self.width) ** 2))
-        beta_chunk = 1 - 1j * self.beta * x / self.width**2
+        zae_chunk = -self.zero_at_edges * (
+            np.exp(-0.5 * (self.std_dev / self.std_dev) ** 2)
+        )
+        beta_chunk = 1 - 1j * self.beta * x / self.std_dev**2
         coef = beta_chunk / (1 - zae_chunk)
-        gauss = np.exp(-0.5 * (x / (2 * self.width)) ** 2)
+        gauss = np.exp(-0.5 * (x / (2 * self.std_dev)) ** 2)
         return coef * (gauss - zae_chunk)
 
     def derivative(self, x: np.ndarray, _=None):
