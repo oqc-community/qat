@@ -310,7 +310,6 @@ class ConvertToPydanticIR(TransformPass):
 
     @_convert_element.register(Instruction)
     @_convert_element.register(BinaryOperator)
-    @_convert_element.register(Synchronize)
     def _(
         self,
         value: Instruction | BinaryOperator,
@@ -324,6 +323,20 @@ class ConvertToPydanticIR(TransformPass):
                 data["targets"] = frozenset(self._convert_element(var, *args, **kwargs))
             elif name == "time":
                 data["duration"] = self._convert_element(var, *args, **kwargs)
+            else:
+                data[name] = self._convert_element(var, *args, **kwargs)
+        pyd_class = self._get_pyd_class(value)
+        return pyd_class(**data)
+
+    @_convert_element.register(Synchronize)
+    def _(self, value: Synchronize, *args, **kwargs):
+        """Convert a Synchronize instance."""
+        data = dict()
+        for name, var in vars(value).items():
+            if name == "quantum_targets":
+                data["targets"] = frozenset(self._convert_element(var, *args, **kwargs))
+                if len(data["targets"]) <= 1:
+                    return []
             else:
                 data[name] = self._convert_element(var, *args, **kwargs)
         pyd_class = self._get_pyd_class(value)

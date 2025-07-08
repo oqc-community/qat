@@ -286,3 +286,126 @@ skip_qir = [get_test_file_path(ProgramFileType.QIR, file_name) for file_name in 
 qir_files = set(get_all_qir_paths()) - set(skip_qir)
 
 skip_exec = [get_test_file_path(file_type, file_name) for file_type, file_name in skip_exec]
+
+
+### Files for pipeline testing
+### Signature is circuit_name: (number_returned_acquires, number_registers)
+
+qasm2_expected_results = {
+    "basic_results_formats.qasm": (1, 2),
+    "basic_single_measures.qasm": (2, 1),
+    "bell_psi_plus.qasm": (2, 1),
+    "decoupled.qasm": (2, 2),
+    "ecr_exists.qasm": (2, 1),
+    "example.qasm": (6, 2),
+    "ghz.qasm": (4, 1),
+    "logic_example.qasm": (2, 1),
+    "ordered_cregs.qasm": (2, 3),
+    "primitives.qasm": (2, 1),
+    "qft_5q.qasm": (5, 1),
+    "random_n5_d5.qasm": (5, 1),
+    "split_measure_assign.qasm": (2, 2),
+    "valid_custom_gate.qasm": (3, 1),
+}
+
+qir_expected_results = {
+    "basic.ll": (2, 1),
+    "basic_cudaq.ll": (1, 1),
+    "bell_psi_minus.ll": (2, 1),
+    "cudaq-ghz.ll": (3, 1),
+    "generator-bell.ll": (2, 1),
+    "hello.bc": (0, 0),
+    "out_of_order_measure.ll": (2, 1),
+    "select.bc": (0, 0),
+}
+
+qasm3_expected_results = {
+    "arb_waveform.qasm": (0, 0),
+    "bell_psi_plus.qasm": (2, 1),
+    "cnot_override_test.qasm": (0, 0),
+    "complex_gates_test.qasm": (0, 0),
+    "delay.qasm": (0, 0),
+    "ecr_override_test.qasm": (0, 0),
+    "ecr_test.qasm": (0, 0),
+    "ghz.qasm": (4, 1),
+    "lark_parsing_test.qasm": (2, 1),
+    "named_defcal_arg.qasm": (1, 1),
+    "redefine_defcal.qasm": (0, 0),
+    "tmp.qasm": (0, 0),
+    "waveform_tests/gaussian_square.qasm": (0, 0),
+    "waveform_tests/internal_waveform_tests.qasm": (1, 1),
+    "waveform_tests/openpulse_waveform_tests.qasm": (0, 0),
+    "waveform_tests/sech_waveform.qasm": (0, 0),
+    "waveform_tests/waveform_test_mix.qasm": (0, 0),
+    "waveform_tests/waveform_test_phase_shift.qasm": (0, 0),
+    "waveform_tests/waveform_test_scale.qasm": (0, 0),
+    "waveform_tests/waveform_test_sum.qasm": (0, 0),
+    "openqasm_tests/barrier_timing_test.qasm": (0, 0),
+    "openqasm_tests/gate_timing_test.qasm": (0, 0),
+    "openpulse_tests/acquire.qasm": (1, 2),
+    "openpulse_tests/constant_wf.qasm": (1, 1),
+    "openpulse_tests/detune_gate.qasm": (1, 1),
+    "openpulse_tests/freq.qasm": (0, 0),
+    "openpulse_tests/set_frequency.qasm": (1, 1),
+    "openpulse_tests/shift_phase.qasm": (1, 1),
+}
+
+qasm3_custom_pulse_channels = [
+    "arb_waveform.qasm",
+    "cnot_override_test.qasm",
+    "cx_override_test.qasm",
+    "ecr_override_test.qasm",
+    "lark_parsing_test.qasm",
+    "redefine_defcal.qasm",
+    "tmp.qasm",
+    "waveform_tests/gaussian_square.qasm",
+    "waveform_tests/internal_waveform_tests.qasm",
+    "waveform_tests/openpulse_waveform_tests.qasm",
+    "waveform_tests/sech_waveform.qasm",
+    "waveform_tests/waveform_test_mix.qasm",
+    "waveform_tests/waveform_test_phase_shift.qasm",
+    "waveform_tests/waveform_test_scale.qasm",
+    "waveform_tests/waveform_test_sum.qasm",
+    "openqasm_tests/barrier_timing_test.qasm",
+    "openqasm_tests/gate_timing_test.qasm",
+    "openpulse_tests/freq.qasm",
+]
+
+
+def get_pipeline_tests(
+    qasm2: bool = True,
+    qasm3: bool = True,
+    qir: bool = True,
+    disable_custom_pulse_channels: bool = True,
+):
+    """Returns a dictionary of tests, with each item being a tuple containing the
+    factory for loading the file, the expected number of readouts, and the expected number
+    of registers."""
+
+    tests = {}
+    if qasm2:
+        for file_name, (num_acquires, num_registers) in qasm2_expected_results.items():
+            tests[f"qasm2-{file_name}"] = (
+                get_qasm2_path(file_name),
+                num_acquires,
+                num_registers,
+            )
+
+    if qasm3:
+        for file_name, (num_acquires, num_registers) in qasm3_expected_results.items():
+            if disable_custom_pulse_channels and file_name in qasm3_custom_pulse_channels:
+                continue
+            tests[f"qasm3-{file_name}"] = (
+                get_qasm3_path(file_name),
+                num_acquires,
+                num_registers,
+            )
+
+    if qir:
+        for file_name, (num_acquires, num_registers) in qir_expected_results.items():
+            tests[f"qir-{file_name}"] = (
+                get_qir_path(file_name),
+                num_acquires,
+                num_registers,
+            )
+    return tests

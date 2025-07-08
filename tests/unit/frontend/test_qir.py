@@ -193,8 +193,8 @@ class TestQIRFrontend:
         qir_str = QIRFrontend(legacy_model).check_and_return_source(qir_path)
         assert qir_str
         assert qir_str != qir_path
-        qasm_str2 = QIRFrontend(legacy_model).check_and_return_source(qir_str)
-        assert qir_str == qasm_str2
+        qir_str2 = QIRFrontend(legacy_model).check_and_return_source(qir_str)
+        assert qir_str == qir_str2
 
     @pytest.mark.parametrize(
         "qasm_path",

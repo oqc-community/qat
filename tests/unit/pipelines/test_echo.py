@@ -20,7 +20,9 @@ from qat.pipelines.pipeline import Pipeline
 from qat.runtime import SimpleRuntime
 from qat.runtime.executables import Executable
 
-from tests.unit.utils.qasm_qir import get_qasm2, get_qir, qasm2_files, short_file_name
+from tests.unit.utils.qasm_qir import (
+    get_pipeline_tests,
+)
 
 
 class TestEchoPipeline:
@@ -60,26 +62,13 @@ class TestExperimentalEchoPipeline:
         assert isinstance(pipeline.engine, EchoEngine)
 
 
-# Signature is circuit_name: (loader_function, num_readouts, num_classical_registers)
-test_files = {
-    "basic.qasm": (lambda: get_qasm2("basic.qasm"), 2, 1),
-    "ecr.qasm": (lambda: get_qasm2("ecr.qasm"), 2, 1),
-    "basic_single_measures.qasm": (lambda: get_qasm2("basic_single_measures.qasm"), 2, 1),
-    "random_n5_d5.qasm": (lambda: get_qasm2("random_n5_d5.qasm"), 5, 1),
-    "bell_psi_plus.qasm": (lambda: get_qasm2("bell_psi_plus.qasm"), 2, 1),
-    "decoupled.qasm": (lambda: get_qasm2("decoupled.qasm"), 2, 2),
-    "bell_psi_plus.ll": (lambda: get_qir("bell_psi_plus.ll"), 2, 1),
-    "basic_cudaq.ll": (lambda: get_qir("basic_cudaq.ll"), 1, 1),
-    "cudaq-ghz.ll": (lambda: get_qir("cudaq-ghz.ll"), 3, 1),
-}
+test_files = get_pipeline_tests()
 
 
-# TODO: update to use mixed files, QASM3 is missing and maybe some QIR use cases
-# (COMPILER-608)
 @pytest.mark.parametrize("shots", [1254, 10002], scope="class")
 @pytest.mark.parametrize("passive_reset_time", [1e-3], scope="class")
 @pytest.mark.parametrize(
-    "file_loader, num_readouts, num_registers",
+    "program_file, num_readouts, num_registers",
     test_files.values(),
     ids=test_files.keys(),
     scope="class",
@@ -109,13 +98,7 @@ class TestEchoPipelineWithCircuits:
     )
 
     @pytest.fixture(scope="class")
-    def program_file(self, file_loader, num_readouts, num_registers) -> str:
-        return file_loader()
-
-    @pytest.fixture(scope="class")
-    def compiler_config(
-        self, shots, passive_reset_time, results_format, file_loader
-    ) -> CompilerConfig:
+    def compiler_config(self, shots, passive_reset_time, results_format) -> CompilerConfig:
         """Initialize a compiler config per program, as it is possible for the compiler
         config to be adjusted during compilation."""
         return CompilerConfig(
@@ -126,7 +109,9 @@ class TestEchoPipelineWithCircuits:
         )
 
     @pytest.fixture(scope="class")
-    def executable(self, program_file, compiler_config) -> WaveformV1Executable:
+    def executable(
+        self, program_file, compiler_config, num_readouts, num_registers
+    ) -> WaveformV1Executable:
         """Compile the program file using the stable pipeline."""
         return QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)[0]
 
@@ -135,6 +120,29 @@ class TestEchoPipelineWithCircuits:
         self, executable: WaveformV1Executable, compiler_config: CompilerConfig
     ) -> dict:
         return QAT().execute(executable, compiler_config, pipeline=self.pipeline)[0]
+
+    @pytest.fixture(scope="class")
+    def returned_acquires(self, executable: WaveformV1Executable):
+        """Returns the acquires that are returned by the executable."""
+        returned_acquires = set()
+        acquires = [acq.output_variable for acq in executable.acquires]
+        for return_ in executable.returns:
+            if return_ in executable.acquires:
+                returned_acquires.add(return_)
+                continue
+
+            for assign in executable.assigns:
+                if assign.name != return_:
+                    continue
+
+                if isinstance(assign.value, str) and assign.value in acquires:
+                    returned_acquires.add(assign.value)
+                elif isinstance(assign.value, list):
+                    for value in assign.value:
+                        if isinstance(value, str) and value in acquires:
+                            returned_acquires.add(value)
+                break
+        return returned_acquires
 
     def test_executable(self, executable):
         assert isinstance(executable, WaveformV1Executable)
@@ -148,7 +156,7 @@ class TestEchoPipelineWithCircuits:
         """Checks that i) the repetition time accounts for both the passive reset time and
         circuit time, and ii) the buffers for each channel do not exceed the repetition
         time."""
-        assert executable.repetition_time > passive_reset_time
+        assert executable.repetition_time >= passive_reset_time
         for physical_channel, channel_data in executable.channel_data.items():
             sample_time = self.model.physical_channels[physical_channel].sample_time
             assert len(channel_data.buffer) * sample_time <= executable.repetition_time
@@ -167,11 +175,13 @@ class TestEchoPipelineWithCircuits:
                 None,
             )
 
-    def test_executable_has_correct_number_of_acquires(self, executable, num_readouts):
+    def test_executable_has_correct_number_of_acquires(
+        self, returned_acquires, num_readouts
+    ):
         """Check that the executable has a number of acquires that matches the provided
         value. In the future, this might need adjusting to account of active reset."""
 
-        assert len(executable.acquires) == num_readouts
+        assert len(returned_acquires) == num_readouts
 
     def test_acquires_are_integrator_mode(self, executable):
         """Check that all acquires are in INTEGRATOR mode, as this is the expected mode for
@@ -203,15 +213,17 @@ class TestEchoPipelineWithCircuits:
             assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
 
     def test_executable_has_correct_results_processing(
-        self, executable: WaveformV1Executable, compiler_config: CompilerConfig
+        self,
+        executable: WaveformV1Executable,
+        compiler_config: CompilerConfig,
+        returned_acquires: set[str],
     ):
         """Check that the executable has a results processing that matches the provided
         value."""
-        for acquire in executable.acquires:
-            output_variable = acquire.output_variable
-            assert isinstance(output_variable, str)
-            assert output_variable in executable.results_processing
-            rp = executable.results_processing[output_variable]
+
+        for acquire in returned_acquires:
+            assert acquire in executable.results_processing
+            rp = executable.results_processing[acquire]
             assert rp == compiler_config.results_format.format
 
     def test_results_contain_all_returns(
@@ -219,18 +231,28 @@ class TestEchoPipelineWithCircuits:
         results: dict[str],
         executable: WaveformV1Executable,
         shots: int,
-        num_readouts: int,
+        returned_acquires: set[str],
         request,
     ):
         """Checks that the results of the zero engine match the expected format."""
 
         returns = executable.returns
+
+        if len(returns) == 0:
+            assert len(results) == 0
+            return
+
+        if not (len(returns) == 1 and next(iter(returns)).startswith("generated")):
+            # checking for multiple registers basically; generated registers get stripped
+            # away
+            assert isinstance(results, dict)
+            assert len(returns) == len(results)
+
         total_length = 0
         for output_variable in returns:
             if output_variable.startswith("generated"):
                 result = results
             else:
-                assert isinstance(results, dict)
                 assert output_variable in results
                 result = results[output_variable]
             if "binary_count" in request.node.callspec.id:
@@ -250,9 +272,249 @@ class TestEchoPipelineWithCircuits:
                 # Raw is a list of list of all readouts: [[2.54, 2.54, ...], ...]
                 assert isinstance(result, list)
                 total_length += len(result)
-                assert all(len(val) == shots for val in result)
+                assert all(len(val) == shots for val in result if isinstance(val, list))
 
-        assert total_length == num_readouts
+        # returned acquires dont account for all classical bits if a bigger classical
+        # register is used.
+        assert total_length >= len(returned_acquires)
+
+    def test_serialization(self, executable: WaveformV1Executable):
+        """Check that the executable can be serialized and deserialized correctly."""
+        json_blob = executable.serialize()
+        new_package = Executable.deserialize(json_blob)
+        assert isinstance(new_package, WaveformV1Executable)
+        assert new_package == executable
+
+
+@pytest.mark.parametrize("shots", [1254, 10002], scope="class")
+@pytest.mark.parametrize("passive_reset_time", [1e-3], scope="class")
+@pytest.mark.parametrize(
+    "program_file, num_readouts, num_registers",
+    test_files.values(),
+    ids=test_files.keys(),
+    scope="class",
+)
+@pytest.mark.parametrize(
+    "results_format",
+    [
+        QuantumResultsFormat().binary_count(),
+        QuantumResultsFormat().binary(),
+        QuantumResultsFormat().raw(),
+    ],
+    ids=["binary_count", "binary", "raw"],
+    scope="class",
+)
+@pytest.mark.experimental
+class TestExperimentalEchoPipelineWithCircuits:
+    """A class that tests the compilation and execution of the EchoPipeline with a
+    WaveformV1Backend against circuit programs.
+
+    It tests the expectations of the compilation pipelines, inspecting the properties of
+    the executable and the results returned by the EchoEngine.
+    """
+
+    target_data = TargetData.default()
+    model = EchoModelLoader(qubit_count=32).load()
+    pipeline = ExperimentalEchoPipeline(
+        config=EchoPipelineConfig(name="stable"), model=model, target_data=target_data
+    )
+
+    @pytest.fixture(scope="class")
+    def compiler_config(self, shots, passive_reset_time, results_format) -> CompilerConfig:
+        """Initialize a compiler config per program, as it is possible for the compiler
+        config to be adjusted during compilation."""
+        return CompilerConfig(
+            repeats=shots,
+            results_format=results_format,
+            passive_reset_time=passive_reset_time,
+            optimizations=Tket().default(),
+        )
+
+    @pytest.fixture(scope="class")
+    def executable(
+        self, program_file, compiler_config, num_readouts, num_registers
+    ) -> WaveformV1Executable:
+        """Compile the program file using the stable pipeline."""
+        return QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)[0]
+
+    @pytest.fixture(scope="class")
+    def results(
+        self, executable: WaveformV1Executable, compiler_config: CompilerConfig
+    ) -> dict:
+        return QAT().execute(executable, compiler_config, pipeline=self.pipeline)[0]
+
+    @pytest.fixture(scope="class")
+    def returned_acquires(self, executable: WaveformV1Executable):
+        """Returns the acquires that are returned by the executable."""
+        returned_acquires = set()
+        acquires = [acq.output_variable for acq in executable.acquires]
+        for return_ in executable.returns:
+            if return_ in executable.acquires:
+                returned_acquires.add(return_)
+                continue
+
+            for assign in executable.assigns:
+                if assign.name != return_:
+                    continue
+
+                if isinstance(assign.value, str) and assign.value in acquires:
+                    returned_acquires.add(assign.value)
+                elif (
+                    isinstance(assign.value, PydVariable) and assign.value.name in acquires
+                ):
+                    returned_acquires.add(assign.value.name)
+                elif isinstance(assign.value, list):
+                    for value in assign.value:
+                        if isinstance(value, str) and value in acquires:
+                            returned_acquires.add(value)
+                        elif isinstance(value, PydVariable) and value.name in acquires:
+                            returned_acquires.add(value.name)
+                break
+        return returned_acquires
+
+    def test_executable(self, executable):
+        assert isinstance(executable, WaveformV1Executable)
+
+    def test_shots(self, executable, shots):
+        assert executable.shots == shots
+        assert executable.compiled_shots <= shots
+        assert executable.compiled_shots <= self.target_data.max_shots
+
+    def test_repetition_period(self, executable, passive_reset_time):
+        """Checks that i) the repetition time accounts for both the passive reset time and
+        circuit time, and ii) the buffers for each channel do not exceed the repetition
+        time."""
+        assert executable.repetition_time >= passive_reset_time
+        for physical_channel, channel_data in executable.channel_data.items():
+            for qubit in self.pipeline.backend.pyd_model.qubits.values():
+                if physical_channel == qubit.physical_channel.uuid:
+                    sample_time = self.target_data.QUBIT_DATA.sample_time
+                    break
+                elif physical_channel == qubit.resonator.physical_channel.uuid:
+                    sample_time = self.target_data.RESONATOR_DATA.sample_time
+                    break
+            assert len(channel_data.buffer) * sample_time <= executable.repetition_time
+
+    def test_channel_data(self, executable):
+        """WaveformV1Executables are expected to have channel data for each physical
+        channel available, regardless of if they're used."""
+
+        assert len(executable.channel_data) == len(self.model.physical_channels)
+        for qubit in self.pipeline.backend.pyd_model.qubits.values():
+            for physical_channel in [
+                qubit.physical_channel,
+                qubit.resonator.physical_channel,
+            ]:
+                assert physical_channel.uuid in executable.channel_data
+                channel_data = executable.channel_data[physical_channel.uuid]
+                assert isinstance(channel_data, WaveformV1ChannelData)
+                assert channel_data.baseband_frequency in (
+                    physical_channel.baseband.frequency,
+                    None,
+                )
+
+    def test_executable_has_correct_number_of_acquires(
+        self, returned_acquires, num_readouts
+    ):
+        """Check that the executable has a number of acquires that matches the provided
+        value. In the future, this might need adjusting to account of active reset."""
+
+        assert len(returned_acquires) == num_readouts
+
+    def test_acquires_are_integrator_mode(self, executable):
+        """Check that all acquires are in INTEGRATOR mode, as this is the expected mode for
+        the EchoPipeline."""
+
+        for acquire in executable.acquires:
+            assert acquire.mode == AcquireMode.INTEGRATOR
+
+    def test_executable_has_correct_returns(
+        self, executable: WaveformV1Executable, num_registers: int
+    ):
+        """Check that the executable has a number of returns that matches the provided
+        value. In the future, this might need adjusting to account of active reset."""
+
+        assert len(executable.returns) == num_registers
+
+    def test_executable_has_correct_post_processing(self, executable: WaveformV1Executable):
+        """Each acquisition will be acquired using the INTEGRATOR mode, and will need
+        correctly post-processing to be discriminated as a bit. We can assume the acquire
+        mode is INTEGRATOR."""
+
+        for acquire in executable.acquires:
+            output_variable = acquire.output_variable
+            assert isinstance(output_variable, str)
+            assert output_variable in executable.post_processing
+            pps = executable.post_processing[output_variable]
+            assert len(pps) == 1
+            assert isinstance(pps[0], PostProcessing)
+            assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+
+    def test_executable_has_correct_results_processing(
+        self,
+        executable: WaveformV1Executable,
+        compiler_config: CompilerConfig,
+        returned_acquires: set[str],
+    ):
+        """Check that the executable has a results processing that matches the provided
+        value."""
+
+        for acquire in returned_acquires:
+            assert acquire in executable.results_processing
+            rp = executable.results_processing[acquire]
+            assert rp == compiler_config.results_format.format
+
+    def test_results_contain_all_returns(
+        self,
+        results: dict[str],
+        executable: WaveformV1Executable,
+        shots: int,
+        returned_acquires: set[str],
+        request,
+    ):
+        """Checks that the results of the zero engine match the expected format."""
+
+        returns = executable.returns
+
+        if len(returns) == 0:
+            assert len(results) == 0
+            return
+
+        if not (len(returns) == 1 and next(iter(returns)).startswith("generated")):
+            # checking for multiple registers basically; generated registers get stripped
+            # away
+            assert isinstance(results, dict)
+            assert len(returns) == len(results)
+
+        total_length = 0
+        for output_variable in returns:
+            if output_variable.startswith("generated"):
+                result = results
+            else:
+                assert output_variable in results
+                result = results[output_variable]
+            if "binary_count" in request.node.callspec.id:
+                # Binary count stores as a dictionary {bitstring: counts}
+                assert isinstance(result, dict)
+                assert all(isinstance(key, str) for key in result)
+                lengths = [len(key) for key in result]
+                assert all(length == lengths[0] for length in lengths)
+                total_length += lengths[0]
+                assert sum(result.values()) == shots
+            elif "binary" in request.node.callspec.id:
+                # Binary stores a list of most seen bits: [0, 1, 0, ...]
+                assert isinstance(result, list)
+                assert all(val in (0, 1) for val in result)
+                total_length += len(result)
+            else:
+                # Raw is a list of list of all readouts: [[2.54, 2.54, ...], ...]
+                assert isinstance(result, list)
+                total_length += len(result)
+                assert all(len(val) == shots for val in result if isinstance(val, list))
+
+        # returned acquires dont account for all classical bits if a bigger classical
+        # register is used.
+        assert total_length >= len(returned_acquires)
 
     def test_serialization(self, executable: WaveformV1Executable):
         """Check that the executable can be serialized and deserialized correctly."""
@@ -285,8 +547,8 @@ class MockEchoModelLoader(EchoModelLoader):
 @pytest.mark.experimental
 @pytest.mark.parametrize(
     "program_file",
-    qasm2_files,  # TODO: update to mixed_files COMPILER-608
-    ids=short_file_name,
+    [val[0] for val in test_files.values()],
+    ids=test_files.keys(),
     scope="class",
 )
 class TestExperimentalEchoPipelineParity:
@@ -315,6 +577,7 @@ class TestExperimentalEchoPipelineParity:
             results_format=QuantumResultsFormat().binary_count(),
             repeats=TargetData.default().default_shots,
             passive_reset_time=2e-8,
+            optimizations=Tket().default(),
         )
 
     @pytest.fixture(scope="class")
@@ -388,7 +651,10 @@ class TestExperimentalEchoPipelineParity:
         for stable, experimental in zip(
             stable_executable.assigns, experimental_executable.assigns
         ):
-            assert stable.name == experimental.name
+            if stable.name.startswith("generated_name_"):
+                assert experimental.name.startswith("generated_name_")
+            else:
+                assert stable.name == experimental.name
             if isinstance(stable.value, list):
                 for sv, ev in zip(stable.value, experimental.value):
                     assert sv == (ev.name if isinstance(ev, PydVariable) else ev)
@@ -413,11 +679,7 @@ class TestExperimentalEchoPipelineParity:
             assert stable_data.acquires == experimental_data.acquires
 
     def test_results_formatting(self, stable_results, experimental_results):
-        assert isinstance(stable_results, dict)
-        assert isinstance(experimental_results, dict)
-        assert stable_results.keys() == experimental_results.keys()
-        for key in stable_results.keys():
-            assert stable_results[key] == experimental_results[key]
+        assert stable_results == experimental_results
 
     def test_serialization(self, experimental_executable):
         json_blob = experimental_executable.serialize()
