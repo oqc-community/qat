@@ -284,6 +284,41 @@ class PostProcessingSanitisation(TransformPass):
         return True
 
 
+class MeasurePhaseResetSanitisation(TransformPass):
+    """
+    Adds a phase reset before every measure pulse.
+    """
+
+    def __init__(self, hardware_model: PhysicalHardwareModel):
+        """
+        :param hardware_model: The hardware model that holds calibrated information on the qubits on the QPU.
+        """
+        self.measure_pulse_channels = self._get_measure_pulse_channels(hardware_model)
+
+    @staticmethod
+    def _get_measure_pulse_channels(hardware_model: PhysicalHardwareModel):
+        """
+        Returns a list of pulse channels that are used for measure pulses.
+        """
+        measure_pulse_channels = {}
+        for qubit_id, qubit in hardware_model.qubits.items():
+            measure_pulse_channels[qubit_id] = qubit.measure_pulse_channel.uuid
+        return measure_pulse_channels
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        new_instructions = []
+        for instr in ir.instructions:
+            if isinstance(instr, MeasureBlock):
+                for qubit_target in instr.qubit_targets:
+                    new_instructions.append(
+                        PhaseReset(target=self.measure_pulse_channels[qubit_target])
+                    )
+            new_instructions.append(instr)
+
+        ir.instructions = new_instructions
+        return ir
+
+
 class InactivePulseChannelSanitisation(TransformPass):
     """Removes instructions that act on inactive pulse channels.
 
@@ -1192,6 +1227,7 @@ PydBatchedShots = BatchedShots
 PydResetsToDelays = ResetsToDelays
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
+PydMeasurePhaseResetSanitisation = MeasurePhaseResetSanitisation
 PydInactivePulseChannelSanitisation = InactivePulseChannelSanitisation
 PydInstructionGranularitySanitisation = InstructionGranularitySanitisation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation

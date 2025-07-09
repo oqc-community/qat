@@ -53,6 +53,7 @@ from qat.middleend.passes.transform import (
     InstructionGranularitySanitisation,
     InstructionLengthSanitisation,
     LowerSyncsToDelays,
+    MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
     RepeatTranslation,
@@ -482,6 +483,61 @@ class TestPydPostProcessingSanitisation:
         pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
         assert len(pp) == 2
         assert pp[0].output_variable != pp[1].output_variable
+
+
+class TestMeasurePhaseResetSanitisation:
+    hw = PydEchoModelLoader(qubit_count=4).load()
+
+    def test_measure_phase_reset(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        for qubit in self.hw.qubits.values():
+            builder.X(target=qubit)
+            builder.measure(qubit)
+
+        n_instr_before = builder.number_of_instructions
+
+        ir = MeasurePhaseResetSanitisation(self.hw).run(builder)
+
+        # A phase reset should be added for each measure instruction.
+        assert ir.number_of_instructions == n_instr_before + self.hw.number_of_qubits
+
+        ref_measure_pulse_channels = set(
+            [qubit.measure_pulse_channel.uuid for qubit in self.hw.qubits.values()]
+        )
+        measure_pulse_channels = set()
+
+        for i, instr in enumerate(ir.instructions):
+            if isinstance(instr, MeasureBlock):
+                assert isinstance(ir.instructions[i - 1], PhaseReset)
+                measure_pulse_channels.update(ir.instructions[i - 1].targets)
+
+        assert measure_pulse_channels == ref_measure_pulse_channels
+
+    def test_measure_phase_reset_with_subset_of_qubits(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        number_of_measured_qubits = 2
+        ref_measure_pulse_channels = set()
+
+        for i in range(number_of_measured_qubits):
+            qubit = self.hw.qubit_with_index(0)
+            builder.X(target=qubit)
+            builder.measure(qubit)
+            ref_measure_pulse_channels.add(qubit.measure_pulse_channel.uuid)
+
+        n_instr_before = builder.number_of_instructions
+        ir = MeasurePhaseResetSanitisation(self.hw).run(builder)
+
+        # A phase reset should be added for each measure instruction.
+        assert ir.number_of_instructions == n_instr_before + number_of_measured_qubits
+
+        measure_pulse_channels = set()
+        for i, instr in enumerate(ir.instructions):
+            if isinstance(instr, MeasureBlock):
+                assert isinstance(ir.instructions[i - 1], PhaseReset)
+                measure_pulse_channels.update(ir.instructions[i - 1].targets)
+
+        assert measure_pulse_channels == ref_measure_pulse_channels
 
 
 class TestInactivePulseChannelSanitisation:
