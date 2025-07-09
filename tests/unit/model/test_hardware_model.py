@@ -371,10 +371,16 @@ class Test_HW_Connectivity:
         blob = hw.model_dump()
 
         q = random.Random(seed).sample(list(range(0, n_qubits)), 1)[0]
-        changed_connectivity = set(deepcopy(blob["logical_connectivity"][q]))
+
+        changed_connectivity = set(deepcopy(blob["physical_connectivity"][q]))
+        changed_connectivity.update({100: {1, 2, 3}})
+        blob["physical_connectivity"][q] = changed_connectivity
+        with pytest.raises(ValidationError):
+            PhysicalHardwareModel(**blob)
+
+        changed_connectivity = set(deepcopy(blob["physical_connectivity"][q]))
         changed_connectivity.pop()
         blob["logical_connectivity"][q] = changed_connectivity
-
         with pytest.raises(ValidationError):
             PhysicalHardwareModel(**blob)
 

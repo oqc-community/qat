@@ -64,7 +64,7 @@ class PhysicalHardwareModelBuilder:
 
         qubits = {}
         for qubit_id in unique_qubit_indices:
-            qubit_connectivity = logical_connectivity.get(qubit_id, set())
+            qubit_connectivity = physical_connectivity.get(qubit_id, set())
 
             bb_q = self._build_uncalibrated_baseband()
             bb_r = self._build_uncalibrated_baseband()

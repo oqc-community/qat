@@ -7,7 +7,7 @@ from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.purr.compiler.devices import ChannelType
 from qat.utils.hardware_model import (
     apply_setup_to_echo_hardware,
-    random_directed_connectivity,
+    random_connectivity,
 )
 
 channel_type_mapping = {
@@ -22,15 +22,15 @@ channel_type_mapping = {
 
 
 def get_echo_hw_pair(n_qubits, seed=42):
-    logical_connectivity = random_directed_connectivity(n_qubits, seed=seed)
-    logical_connectivity = [
+    physical_connectivity = random_connectivity(n_qubits, seed=seed)
+    physical_connectivity = [
         (q1_index, q2_index)
-        for q1_index in logical_connectivity
-        for q2_index in logical_connectivity[q1_index]
+        for q1_index in physical_connectivity
+        for q2_index in physical_connectivity[q1_index]
     ]
 
     hw_legacy_echo = apply_setup_to_echo_hardware(
-        qubit_count=n_qubits, connectivity=logical_connectivity
+        qubit_count=n_qubits, connectivity=physical_connectivity
     )
     hw_pyd_echo = convert_purr_echo_hw_to_pydantic(hw_legacy_echo)
     return (hw_pyd_echo, hw_legacy_echo)

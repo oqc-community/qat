@@ -157,9 +157,9 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                     "Logical connectivity must be a subgraph of the physical connectivity."
                 )
 
-        # Check if qubit cross resonance (cancellation) pulse channels agree with logical connectivity.
-        logical_connectivities = {
-            (src, tgt) for (src, tgts) in self.logical_connectivity.items() for tgt in tgts
+        # Check if qubit cross resonance (cancellation) pulse channels agree with the physical connectivity.
+        physical_connectivities = {
+            (src, tgt) for (src, tgts) in self.physical_connectivity.items() for tgt in tgts
         }
         cross_resonance_edges = {
             (src, chan.auxiliary_qubit)
@@ -175,11 +175,11 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         assert cross_resonance_edges == cross_cancellation_edges, (
             "Cross resonance channels mismatch cross resonance cancellation channels."
         )
-        assert logical_connectivities == cross_resonance_edges, (
-            "Cross resonance channels mismatch logical connectivity."
+        assert physical_connectivities == cross_resonance_edges, (
+            "Cross resonance channels mismatch physical connectivity."
         )
-        assert logical_connectivities == cross_cancellation_edges, (
-            "Cross resonance cancellation channels mismatch logical connectivity."
+        assert physical_connectivities == cross_cancellation_edges, (
+            "Cross resonance cancellation channels mismatch physical connectivity."
         )
 
         return self

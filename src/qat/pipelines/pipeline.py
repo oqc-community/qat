@@ -31,6 +31,7 @@ class Pipeline(AbstractPipeline):
         backend: BaseBackend,
         runtime: BaseRuntime,
         target_data: TargetData = TargetData.default(),
+        disable_model_validation: bool = False,
     ):
         self._name = name
         self._model = model
@@ -40,9 +41,15 @@ class Pipeline(AbstractPipeline):
         self._backend = backend
         self._runtime = runtime
 
-        self._validate_consistent_model(
-            model, frontend, middleend, backend, runtime, runtime.engine
-        )
+        if not disable_model_validation:
+            self._validate_consistent_model(
+                model,
+                frontend,
+                middleend,
+                backend,
+                runtime,
+                runtime.engine,
+            )
 
     @property
     def name(self) -> str:
@@ -85,7 +92,11 @@ class Pipeline(AbstractPipeline):
         return self._runtime.engine
 
     @staticmethod
-    def _validate_consistent_model(model: QuantumHardwareModel, *args):
+    def _validate_consistent_model(
+        model: QuantumHardwareModel,
+        *args,
+        allow_type_mismatch=False,
+    ):
         """Validates that the hardware model supplied to the Pipeline matches the hardware
         model embedded in other fields."""
 

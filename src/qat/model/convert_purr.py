@@ -22,6 +22,7 @@ from qat.model.device import (
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView
+from qat.purr.compiler.instructions import CustomPulse
 from qat.utils.pydantic import FrozenDict
 
 
@@ -79,8 +80,11 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             pulse=CalibratablePulse(**pulse_measure),
         )
 
-        if qubit.measure_acquire.get("weights") is None:
-            qubit.measure_acquire["weights"] = []
+        meas_acq = deepcopy(qubit.measure_acquire)
+        if meas_acq.get("weights") is None:
+            meas_acq["weights"] = []
+        elif isinstance(meas_acq.get("weights"), CustomPulse):
+            meas_acq["weights"] = meas_acq["weights"].samples
 
         acquire_pulse_channel = qubit.measure_device.get_pulse_channel(ChannelType.acquire)
         new_acquire_pulse_channel = AcquirePulseChannel(
@@ -89,7 +93,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             scale=acquire_pulse_channel.scale,
             fixed_if=acquire_pulse_channel.fixed_if,
             phase_iq_offset=phys_channel_r.phase_offset,
-            acquire=CalibratableAcquire(**qubit.measure_acquire),
+            acquire=CalibratableAcquire(**meas_acq),
         )
 
         new_res_pulse_channels = ResonatorPulseChannels(
@@ -148,9 +152,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             ):
                 aux_qubit = pulse_channel.auxiliary_devices[0].index
 
-                if aux_qubit not in coupled_q_indices:
-                    continue
-
                 if pulse_channel.channel_type == ChannelType.cross_resonance:
                     new_cr_pulse_channel = CrossResonancePulseChannel(
                         auxiliary_qubit=aux_qubit,
@@ -180,6 +181,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         new_cross_resonance_cancellation_pulse_channels = FrozenDict(
             new_cross_resonance_cancellation_pulse_channels
         )
+
         new_qubit_pulse_channels = QubitPulseChannels(
             drive=new_drive_pulse_channel,
             freq_shift=new_freqshift_pulse_channel,
