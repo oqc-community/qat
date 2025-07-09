@@ -726,10 +726,6 @@ santisiation is done for all instructions simultaneously using numpy for perform
 with zero amplitude at the end. For other relevant instructions, we round down: this is
 for compatibility with calibration files that are calibrated using legacy code. However,
 in the future we might consider changing this to round up for consistency.</p>
-<p>The Pydantic version of the pass will require the (pydantic equivalent) pass
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code>
-to have run, with results saved to the results manager to extract pulse channel
-information.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This pass has the potential to invalidate the timings for sequences of instructions
@@ -787,7 +783,7 @@ down to the nearest clock cycle.</p>
 <p>The pass will assume that the durations of instructions are sanitised to the
 granularity of the pulse channels. If instructions that do not meet the criteria are
 provided, it might produce incorrect instructions (i.e., instructions that are shorter than
-the clock cycle). This can be enforced using the <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation</span></code>
+the clock cycle). This can be enforced using the <a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="qat.middleend.passes.transform.InstructionGranularitySanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation</span></code></a>
 pass.</p>
 </div>
 <dl class="py method">
