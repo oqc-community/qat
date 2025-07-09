@@ -393,11 +393,6 @@ class InstructionGranularitySanitisation(TransformPass):
     for compatibility with calibration files that are calibrated using legacy code. However,
     in the future we might consider changing this to round up for consistency.
 
-    The Pydantic version of the pass will require the (pydantic equivalent) pass
-    :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
-    to have run, with results saved to the results manager to extract pulse channel
-    information.
-
     .. warning::
 
         This pass has the potential to invalidate the timings for sequences of instructions
@@ -406,10 +401,6 @@ class InstructionGranularitySanitisation(TransformPass):
         :class:`Acquire` instructions have no delay. This can be forced explicitly using the
         :class:`AcquireSanitisation` pass.
     """
-
-    # TODO: PydInstructionGranularitySanitisation: will require the PydActivePulseChannelAnalysis
-    # to extract the pulse/physical channel information (COMPILER-394)
-    # TODO: replace clock_cycle with target data (COMPILER-395)
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """:param target_data: Target-related information."""

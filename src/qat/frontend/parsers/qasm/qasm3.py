@@ -1544,6 +1544,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
             ut_pulse_blob = deepcopy(ut_pulse.model_dump())
             ut_pulse_blob["targets"] |= {pulse_target.uuid}
+            # TODO: Review for COMPILER-642 changes
             ut_pulse = UntargetedPulse(**ut_pulse_blob)
 
             self.builder.add(ut_pulse)

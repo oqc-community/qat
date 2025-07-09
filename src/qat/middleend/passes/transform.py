@@ -329,6 +329,136 @@ class InactivePulseChannelSanitisation(TransformPass):
         return ir
 
 
+class InstructionGranularitySanitisation(TransformPass):
+    """Rounds the durations of quantum instructions so they are multiples of the clock
+    cycle.
+
+    Only supports quantum instructions with static non-zero durations. Assumes that
+    instructions with a non-zero duration only act on a single pulse channel. The
+    santisiation is done for all instructions simultaneously using numpy for performance.
+
+    For :class:`Pulse` instructions with :class:`SampledWaveform` waveforms, the durations
+    are rounded up by padding the pulse with zero amplitude at the end. For other relevant
+    instructions, we round down: this is for compatibility with calibration files that are
+    calibrated using legacy code. However, in the future we might consider changing this
+    to round up for consistency.
+
+    .. warning::
+
+        This pass has the potential to invalidate the timings for sequences of instructions
+        that are time-sensitive. For example, if a pulse has an invalid time, it will round
+        it up to the nearest integer multiple. Furthemore, it will assume that
+        :class:`Acquire` instructions have no delay. This can be forced explicitly using the
+        :class:`AcquireSanitisation` pass.
+    """
+
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+        """:param target_data: Target-related information."""
+
+        self.clock_cycle = target_data.clock_cycle
+        qubit_sample_time = target_data.QUBIT_DATA.sample_time
+        res_sample_time = target_data.RESONATOR_DATA.sample_time
+        self.sample_times = {
+            pulse_channel.uuid: (
+                qubit_sample_time if isinstance(device, Qubit) else res_sample_time
+            )
+            for device in model.quantum_devices
+            for pulse_channel in device.all_pulse_channels
+        }
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
+
+        self.sanitise_quantum_instructions(
+            [
+                inst
+                for inst in ir.instructions
+                if (
+                    isinstance(inst, (Acquire, Delay))
+                    or (
+                        isinstance(inst, Pulse)
+                        and not isinstance(inst.waveform, SampledWaveform)
+                    )
+                )
+            ]
+        )
+        self.sanitise_custom_pulses(
+            [
+                inst
+                for inst in ir.instructions
+                if (isinstance(inst, Pulse) and isinstance(inst.waveform, SampledWaveform))
+            ]
+        )
+        return ir
+
+    def sanitise_quantum_instructions(self, instructions: list[Pulse | Acquire | Delay]):
+        """Sanitises the durations quantum instructions with non-zero duration by rounding
+        down to the nearest clock cycle."""
+
+        durations = np.asarray([inst.duration for inst in instructions])
+        multiples = durations / self.clock_cycle
+        rounded_multiples = np.floor(multiples + 1e-10).astype(int)
+        # 1e-10 for floating point errors
+        durations_equal = np.isclose(multiples, rounded_multiples)
+
+        invalid_instructions: set[str] = set()
+        for idx in np.where(np.logical_not(durations_equal))[0]:
+            inst = instructions[idx]
+            invalid_instructions.add(str(inst))
+            new_duration = rounded_multiples[idx] * self.clock_cycle
+            if isinstance(inst, Pulse):
+                inst.update_duration(new_duration)
+            else:
+                # TODO: Review for COMPILER-642 changes
+                if isinstance(inst, Acquire) and inst.filter is not None:
+                    # Acquire instructions with filters have a duration equal to the filter
+                    # duration, so we need to update the filter as well.
+                    inst.filter.update_duration(new_duration)
+                inst.duration = new_duration
+
+        if len(invalid_instructions) >= 1:
+            log.info(
+                "The following instructions do not have durations that are integer "
+                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
+                "down: " + ", ".join(set(invalid_instructions))
+            )
+
+    def sanitise_custom_pulses(self, instructions: list[Pulse]):
+        """Sanitises the durations of :class:`SampledWaveform`s by padding the
+        waveforms with zero amplitudes."""
+
+        # TODO: Review for COMPILER-642 changes
+        durations = np.asarray(
+            [
+                self.sample_times[inst.target] * len(inst.waveform.samples)
+                for inst in instructions
+            ]
+        )
+        multiples = durations / self.clock_cycle
+        # 1e-10 for floating point errors
+        rounded_multiples = np.ceil(multiples - 1e-10).astype(int)
+        durations_equal = np.isclose(multiples, rounded_multiples)
+
+        invalid_instructions: set[str] = set()
+        for idx in np.where(np.logical_not(durations_equal))[0]:
+            inst = instructions[idx]
+            invalid_instructions.add(str(inst))
+            new_duration = rounded_multiples[idx] * self.clock_cycle
+
+            # TODO: Review for COMPILER-642 changes
+            inst.update_duration(new_duration, self.sample_times[inst.target])
+
+        if len(invalid_instructions) > 1:
+            log.info(
+                "The following sampled waveform pulses do not have durations that are integer "
+                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
+                "up by padding with zero amplitudes: "
+                + ", ".join(set(invalid_instructions))
+            )
+
+
 class InstructionLengthSanitisation(TransformPass):
     """
     Checks if quantum instructions are too long and splits if necessary.
@@ -1063,6 +1193,7 @@ PydResetsToDelays = ResetsToDelays
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
 PydInactivePulseChannelSanitisation = InactivePulseChannelSanitisation
+PydInstructionGranularitySanitisation = InstructionGranularitySanitisation
 PydInstructionLengthSanitisation = InstructionLengthSanitisation
 PydScopeSanitisation = ScopeSanitisation
 PydEndOfTaskResetSanitisation = EndOfTaskResetSanitisation

@@ -133,6 +133,7 @@ class SampledWaveform(AbstractWaveform):
         # TODO: Calculating this duration requires knowledge of the pulse channel, which
         # is not stored here. I think what we should actually be doing is calculating
         # the duration of a Pulse instruction when we calculate the position map.
+        # TODO: Review for COMPILER-642 changes
         return 0.0
 
     def __repr__(self):
@@ -219,6 +220,7 @@ class Pulse(QuantumInstruction):
         # The duration of a pulse is equal to the width of the underlying waveform of the pulse.
         # Since `SampledWaveform`s do not have a width, only a set of samples, we cannot derive a
         # duration from such custom waveform and the duration must be supplied to the pulse.
+        # TODO: Review for COMPILER-642 changes
         if isinstance(data, dict) and isinstance(data.get("waveform"), Waveform):
             data["duration"] = data["waveform"].duration
         return data
@@ -226,14 +228,35 @@ class Pulse(QuantumInstruction):
     def __repr__(self):
         return f"{self.__class__.__name__} on targets {set(self.targets)} with {self.waveform}."
 
-    def update_duration(self, duration: float):
-        if isinstance(self.waveform, SquareWaveform):
+    def update_duration(self, duration: float, sample_time: float | None = None):
+        if isinstance(self.waveform, Waveform):
             self.duration = duration
             self.waveform.width = duration
+        elif isinstance(self.waveform, SampledWaveform):
+            # TODO: Review for COMPILER-642 changes
+            if sample_time is None:
+                raise ValueError(
+                    "Updating the duration of a pulse with 'SampledWaveform' waveform "
+                    "requires 'sample_time' but None was provided."
+                )
+            current_duration = sample_time * self.waveform.samples.size
+            if current_duration > duration:
+                raise NotImplementedError(
+                    "Cannot update the duration of a SampledWaveform to a smaller value. "
+                    "This would require removing samples, which is not supported."
+                )
+            # If the new duration is larger, we can pad the samples with zeros.
+            padding = int(np.round((duration - current_duration) / sample_time, 0))
+            self.waveform.samples = np.pad(
+                self.waveform.samples,
+                (0, padding),
+                mode="constant",
+                constant_values=0,
+            )
         else:
             raise ValueError(
-                f"{type(self.waveform)} does not support updating duration."
-                f"Can only apply with a SquareWaveform"
+                f"{type(self.waveform)} does not support updating duration. "
+                "Can only apply with a Waveform or SampledWaveform."
             )
 
     @property
