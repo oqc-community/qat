@@ -63,7 +63,7 @@ class TestQasm2Parser:
     def test_example(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
         builder = parse_qasm2_and_apply_optimisations("example.qasm", hw)
-        assert 357 == builder.number_of_instructions
+        assert 363 == builder.number_of_instructions
 
     def test_parallel(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)

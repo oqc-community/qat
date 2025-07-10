@@ -6,7 +6,13 @@ import numpy as np
 import pytest
 from pydantic import Field, ValidationError
 
-from qat.ir.instructions import PhaseReset, PhaseShift, QuantumInstructionBlock, Synchronize
+from qat.ir.instructions import (
+    Delay,
+    PhaseReset,
+    PhaseShift,
+    QuantumInstructionBlock,
+    Synchronize,
+)
 from qat.ir.measure import VALID_MEASURE_INSTR, Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
 from qat.model.loaders.purr import EchoModelLoader
@@ -202,6 +208,27 @@ class TestMeasureBlock:
         mb.add(Acquire(targets=acquire_channel.uuid, duration=1e-09))
         assert mb.number_of_instructions == 2
 
+    def test_add_instruction_with_delay(self):
+        qubit_id = list(model.qubits.keys())[0]
+        qubit = model.qubits[qubit_id]
+        measure_channel = qubit.measure_pulse_channel
+        acquire_channel = qubit.acquire_pulse_channel
+
+        mb = MeasureBlock(qubit_targets=qubit_id)
+        mb.add(
+            Pulse(
+                waveform=measure_channel.pulse.waveform_type(
+                    **measure_channel.pulse.model_dump()
+                ),
+                duration=1e-03,
+                targets=measure_channel.uuid,
+            )
+        )
+        assert mb.number_of_instructions == 1
+
+        mb.add(Acquire(targets=acquire_channel.uuid, duration=1e-09, delay=1e-09))
+        assert mb.number_of_instructions == 3
+
     def add_invalid_instruction(self):
         qubit_id = list(model.qubits.keys())[0]
         qubit = model.qubits[qubit_id]
@@ -287,3 +314,50 @@ class TestMeasureBlock:
                 found_additional_block = True
 
         assert found_additional_block
+
+    def test_acquire_with_no_delay_is_unchanged(self):
+        qubit_id, qubit = list(model.qubits.items())[0]
+        acquire_chan = qubit.acquire_pulse_channel
+
+        mb = MeasureBlock(qubit_targets=qubit_id)
+
+        mb.add(Acquire(targets=acquire_chan.uuid, duration=10, delay=0.0))
+
+        assert mb.number_of_instructions == 1
+        assert isinstance(mb.instructions[0], Acquire)
+
+    def test_acquire_with_delay_is_decomposed(self):
+        qubit_id, qubit = list(model.qubits.items())[0]
+        acquire_chan = qubit.acquire_pulse_channel
+
+        mb = MeasureBlock(qubit_targets=qubit_id)
+        mb.add(Acquire(targets=acquire_chan.uuid, duration=10, delay=10))
+
+        assert mb.number_of_instructions == 2
+        assert isinstance(mb.instructions[0], Delay)
+        assert isinstance(mb.instructions[1], Acquire)
+
+    def test_acquire_with_delay_two_chans_is_decomposed(self):
+        qubit_ids = list(model.qubits.keys())[:2]
+        qubits = list(model.qubits.values())[:2]
+
+        mb = MeasureBlock(qubit_targets=qubit_ids)
+
+        for qubit in (0, 1):
+            acquire_chan = qubits[qubit].acquire_pulse_channel
+            mb.add(
+                Acquire(
+                    targets=acquire_chan.uuid, duration=10 + qubit, delay=10 + 2 * qubit
+                )
+            )
+
+        assert mb.number_of_instructions == 4
+        assert isinstance(mb.instructions[0], Delay)
+        assert mb.instructions[0].duration == 10
+        assert isinstance(mb.instructions[1], Acquire)
+        assert mb.instructions[1].delay == 0
+        assert isinstance(mb.instructions[2], Delay)
+        assert mb.instructions[2].duration == 12
+        assert isinstance(mb.instructions[3], Acquire)
+        assert mb.instructions[3].delay == 0
+        assert mb.duration == 23

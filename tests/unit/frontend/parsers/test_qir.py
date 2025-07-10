@@ -12,7 +12,7 @@ from qat.purr.integrations.qir import QIRParser as LegQIRParser
 
 from tests.unit.purr.integrations.test_qir import _get_qir_path
 from tests.unit.utils.instruction import (
-    count_number_of_non_sync_non_phase_reset_instructions,
+    count_number_of_non_sync_non_phase_reset_non_delay_instructions,
 )
 
 n_qubits = 32
@@ -51,9 +51,11 @@ class TestQIRParser:
         pyd_builder = pyd_parser.parse(qir_string)
         leg_builder = leg_parser.parse(qir_string)
 
-        assert count_number_of_non_sync_non_phase_reset_instructions(
+        assert count_number_of_non_sync_non_phase_reset_non_delay_instructions(
             pyd_builder._ir
-        ) == count_number_of_non_sync_non_phase_reset_instructions(leg_builder.instructions)
+        ) == count_number_of_non_sync_non_phase_reset_non_delay_instructions(
+            leg_builder.instructions
+        )
 
     def test_results_variables_are_cleaned(self):
         parser = PydQIRParser(pyd_hw_model)

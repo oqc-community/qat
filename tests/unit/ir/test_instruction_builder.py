@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.instructions import PhaseShift, Synchronize
+from qat.ir.instructions import Delay, PhaseShift, Synchronize
 from qat.ir.measure import (
     Acquire,
     AcquireMode,
@@ -398,7 +398,7 @@ class TestMeasure:
         assert measure_block
 
         assert (
-            measure_block.number_of_instructions == 4
+            measure_block.number_of_instructions == 5
         )  # 2 synchonises, 1 measure and 1 acquire
         assert isinstance(measure_block.instructions[0], Synchronize) and isinstance(
             measure_block.instructions[-1], Synchronize
@@ -407,12 +407,16 @@ class TestMeasure:
             hw_model.pulse_channel_with_id(measure.target), MeasurePulseChannel
         )
         assert (
-            isinstance(acquire := measure_block.instructions[2], Acquire)
-            and measure_block.instructions[2].mode == mode
+            isinstance(delay := measure_block.instructions[2], Delay)
+            and measure_block.instructions[3].mode == mode
+        )
+        assert (
+            isinstance(acquire := measure_block.instructions[3], Acquire)
+            and measure_block.instructions[3].mode == mode
         )
 
         assert measure_block.duration == max(
-            measure.duration, acquire.duration + acquire.delay
+            measure.duration, acquire.duration + delay.duration
         )
 
     @pytest.mark.parametrize("axis", list(ProcessAxis))
@@ -475,15 +479,18 @@ class TestMeasure:
             if isinstance(composite_instr, MeasureBlock):
                 measure_block = composite_instr
 
-        assert measure_block
-        assert measure_block.number_of_instructions == 4 * len(
+        assert measure_block is not None
+        assert measure_block.number_of_instructions == 5 * len(
             qubits
-        )  # 2 synchonises, 1 measure and 1 acquire per qubit
+        )  # 2 synchronises, 1 measure, 1 delay and 1 acquire per qubit
 
         max_duration = 0.0
-        for instruction in measure_block:
+        for i, instruction in enumerate(measure_block):
             if isinstance(instruction, Acquire):
-                max_duration = max(max_duration, instruction.duration + instruction.delay)
+                max_duration = max(
+                    max_duration,
+                    instruction.duration + measure_block.instructions[i - 1].duration,
+                )
             else:
                 max_duration = max(max_duration, instruction.duration)
 
@@ -503,15 +510,18 @@ class TestMeasure:
             if isinstance(composite_instr, MeasureBlock):
                 measure_block = composite_instr
 
-        assert measure_block
-        assert measure_block.number_of_instructions == 2 + 2 * len(
+        assert measure_block is not None
+        assert measure_block.number_of_instructions == 2 + 3 * len(
             qubits
-        )  # 2 synchonises in total, 1 measure and 1 acquire per qubit
+        )  # 2 synchronises in total; 1 measure, 1 delay and 1 acquire per qubit
 
         max_duration = 0.0
-        for instruction in measure_block:
+        for i, instruction in enumerate(measure_block):
             if isinstance(instruction, Acquire):
-                max_duration = max(max_duration, instruction.duration + instruction.delay)
+                max_duration = max(
+                    max_duration,
+                    instruction.duration + measure_block.instructions[i - 1].duration,
+                )
             else:
                 max_duration = max(max_duration, instruction.duration)
 

@@ -14,6 +14,7 @@ from pydantic import (
 )
 
 from qat.ir.instructions import (
+    Delay,
     Instruction,
     QuantumInstruction,
     QuantumInstructionBlock,
@@ -105,7 +106,7 @@ class PostProcessing(Instruction):
         return np.asarray(args).tolist()
 
 
-VALID_MEASURE_INSTR = Union[Synchronize, Acquire, Pulse]
+VALID_MEASURE_INSTR = Union[Synchronize, Acquire, Pulse, Delay]
 
 
 class MeasureBlock(QuantumInstructionBlock):
@@ -126,9 +127,10 @@ class MeasureBlock(QuantumInstructionBlock):
 
     def add(self, *instructions: QuantumInstruction):
         for instruction in instructions:
-            if isinstance(instruction, Acquire):
-                self._duration_per_target[instruction.target] += instruction.delay
+            if isinstance(instruction, Acquire) and (delay := instruction.delay) > 0.0:
                 self._output_variables.append(instruction.output_variable)
+                super().add(Delay(target=instruction.target, duration=delay))
+                instruction.delay = 0.0
             super().add(instruction)
         return self
 
