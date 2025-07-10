@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from collections import defaultdict
 from numbers import Number
 from typing import List
 
@@ -8,6 +9,8 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat, Results
 
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
+from qat.core.result_base import ResultManager
+from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.model.target_data import TargetData
 from qat.purr.backends.live import LiveHardwareModel
 from qat.purr.backends.qiskit_simulator import QiskitBuilder
@@ -345,13 +348,9 @@ class HardwareConfigValidity(ValidationPass):
         return ir
 
 
-class FrequencyValidation(ValidationPass):
-    """This validation pass checks two things:
-
-    #. Frequency shifts do not move the frequency of a pulse channel outside of its
-       allowed range.
-    #. Frequency shifts do not occur on pulse channels that have a fixed IF, or share a
-       physical channel with a pulse channel that has a fixed IF.
+class FrequencySetupValidation(ValidationPass):
+    """Validates the baseband frequencies and intermediate frequencies of pulse channels
+    against the target data.
     """
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
@@ -361,74 +360,309 @@ class FrequencyValidation(ValidationPass):
         :param target_data: Target-related information.
         """
 
-        # TODO: replace with new hardware models as our refactors mature.
-        self.model = model
-        qubit_freq_limits = {
-            pulse_ch: (
-                target_data.QUBIT_DATA.pulse_channel_lo_freq_min,
-                target_data.QUBIT_DATA.pulse_channel_lo_freq_max,
-            )
-            for qubit in model.qubits
-            for pulse_ch in qubit.pulse_channels.values()
-        }
-        res_freq_limits = {
-            pulse_ch: (
-                target_data.RESONATOR_DATA.pulse_channel_lo_freq_min,
-                target_data.RESONATOR_DATA.pulse_channel_lo_freq_max,
-            )
-            for res in model.resonators
-            for pulse_ch in res.pulse_channels.values()
-        }
-        self.freq_shift_limits = qubit_freq_limits | res_freq_limits
+        # Extract limits from the target data.
+        self.qubit_lo_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_lo_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_lo_freq_max,
+        )
+        self.resonator_lo_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_lo_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_lo_freq_max,
+        )
+        self.qubit_if_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_if_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_if_freq_max,
+        )
+        self.resonator_if_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
+        )
 
-    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        # Calculate mappings for physical and pulse channels for quick lookup
+        self._baseband_frequencies = self._create_baseband_frequency_map(model)
+        self._is_resonator = self._create_resonator_map(model)
+        self._pulse_channel_ifs = self._create_pulse_channel_if_map(model)
+        self._pulse_to_physical_channel = (
+            self._create_pulse_channel_to_physical_channel_map(model)
+        )
+
+        # Do validation prior to runtime
+        self._baseband_valid = self._validate_baseband_frequencies(
+            self._baseband_frequencies,
+            self._is_resonator,
+            self.qubit_lo_freq_limits,
+            self.resonator_lo_freq_limits,
+        )
+
+        self._pulse_channels_valid = self._validate_pulse_channel_ifs(
+            self._pulse_channel_ifs,
+            self._is_resonator,
+            self._pulse_to_physical_channel,
+            self.qubit_if_freq_limits,
+            self.resonator_if_freq_limits,
+        )
+
+    @staticmethod
+    def _create_baseband_frequency_map(model: QuantumHardwareModel) -> dict[str, float]:
+        """Creates a map of baseband frequencies for each physical channel in the model."""
+        return {
+            device.physical_channel.id: device.physical_channel.baseband_frequency
+            for device in model.quantum_devices.values()
+        }
+
+    @staticmethod
+    def _create_resonator_map(model: QuantumHardwareModel) -> dict[str, bool]:
+        """Creates a map to lookup if physical channels belong to resonators.."""
+        return {
+            device.physical_channel.id: not isinstance(device, Qubit)
+            for device in model.quantum_devices.values()
+        }
+
+    @staticmethod
+    def _create_pulse_channel_if_map(model: QuantumHardwareModel) -> dict[str, float]:
+        """Creates a map of pulse channel intermediate frequencies for each pulse channel
+        in the model."""
+        return {
+            pulse_channel.partial_id(): (
+                pulse_channel.frequency - pulse_channel.physical_channel.baseband_frequency
+            )
+            for pulse_channel in model.pulse_channels.values()
+        }
+
+    @staticmethod
+    def _create_pulse_channel_to_physical_channel_map(
+        model: QuantumHardwareModel,
+    ) -> dict[str, str]:
+        """Creates a map of pulse channels to their physical channels."""
+        return {
+            pulse_channel.partial_id(): pulse_channel.physical_channel.id
+            for pulse_channel in model.pulse_channels.values()
+        }
+
+    @staticmethod
+    def _validate_baseband_frequencies(
+        frequencies: dict[str, float],
+        is_resonator: dict[str, bool],
+        qubit_lo_freq_limits: tuple[float, float],
+        resonator_lo_freq_limits: tuple[float, float],
+    ) -> dict[str, bool]:
+        """Validates that the frequencies in the dictionary are within the specified range."""
+
+        baseband_validation = {}
+        for key, frequency in frequencies.items():
+            lower, upper = (
+                qubit_lo_freq_limits if not is_resonator[key] else resonator_lo_freq_limits
+            )
+            baseband_validation[key] = lower <= frequency <= upper
+        return baseband_validation
+
+    @staticmethod
+    def _validate_pulse_channel_ifs(
+        pulse_channel_ifs: dict[str, float],
+        is_resonator: dict[str, bool],
+        pulse_channel_to_physical_channel_map: dict[str, str],
+        qubit_if_freq_limits: tuple[float, float],
+        resonator_if_freq_limits: tuple[float, float],
+    ) -> dict[str, bool]:
+        """Validates that the pulse channel frequencies are within the specified range."""
+
+        pulse_channel_validation = {}
+        for pulse_channel, frequency in pulse_channel_ifs.items():
+            lower, upper = (
+                qubit_if_freq_limits
+                if not is_resonator[pulse_channel_to_physical_channel_map[pulse_channel]]
+                else resonator_if_freq_limits
+            )
+            pulse_channel_validation[pulse_channel] = bool(
+                lower <= np.abs(frequency) <= upper
+            )
+        return pulse_channel_validation
+
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         """
 
-        freqshifts = [inst for inst in ir.instructions if isinstance(inst, FrequencyShift)]
-        targets = set([inst.channel for inst in freqshifts])
-        self.validate_frequency_ranges(targets, freqshifts, self.freq_shift_limits)
-        self.validate_no_freqshifts_on_fixed_if(targets)
-        return ir
+        active_channel_res: ActiveChannelResults = res_mgr.lookup_by_type(
+            ActiveChannelResults
+        )
+        pulse_channels = active_channel_res.targets
+        physical_channels = set(
+            [pulse_channel.physical_channel for pulse_channel in pulse_channels]
+        )
 
-    @staticmethod
-    def validate_frequency_ranges(
-        targets: List[PulseChannel],
-        freqshifts: List[FrequencyShift],
-        freq_limits: dict[PulseChannel, tuple[int, int]],
-    ):
-        """Validates that a pulse channel remains within its allowed frequency range.
-
-        :param targets: List of pulse channels to validate.
-        :param freqshifts: List of frequency shift instructions.
-        """
-        for target in targets:
-            freq_shifts = [inst.frequency for inst in freqshifts if inst.channel == target]
-            freqs = target.frequency + np.cumsum(freq_shifts)
-            min_freq, max_freq = freq_limits[target]
-            violations = np.logical_or(freqs > max_freq, freqs < min_freq)
-            if np.any(violations):
-                raise ValueError(
-                    f"Frequency shifts will change the pulse channel frequency to fall "
-                    f"out of the allowed range between {min_freq} and "
-                    f"{max_freq} for pulse channel {target.full_id()}."
+        violations = []
+        for physical_channel in physical_channels:
+            if not self._baseband_valid[physical_channel.id]:
+                freq_range = (
+                    self.qubit_lo_freq_limits
+                    if not self._is_resonator[physical_channel.id]
+                    else self.resonator_lo_freq_limits
+                )
+                violations.append(
+                    f"Physical channel {physical_channel.full_id()} with baseband frequency "
+                    f"{self._baseband_frequencies[physical_channel.id]} is out of the valid "
+                    f"range {freq_range}."
                 )
 
-    def validate_no_freqshifts_on_fixed_if(self, targets: List[PulseChannel]):
-        """Validates that frequency shifts do not occur on pulse channels with fixed IFs.
+        for pulse_channel in pulse_channels:
+            if pulse_channel.partial_id() in self._pulse_channels_valid:
+                valid = self._pulse_channels_valid[pulse_channel.partial_id()]
+                if_freq = self._pulse_channel_ifs[pulse_channel.partial_id()]
+            else:
+                # We have to handle custom pulse channels manually
+                if_freq = (
+                    pulse_channel.frequency
+                    - pulse_channel.physical_channel.baseband_frequency
+                )
+                if self._is_resonator[pulse_channel.physical_channel.id]:
+                    lower, upper = self.resonator_if_freq_limits
+                else:
+                    lower, upper = self.qubit_if_freq_limits
+                valid = bool(lower <= np.abs(if_freq) <= upper)
 
-        :param targets: List of pulse channels to validate.
+            if not valid:
+                freq_range = (
+                    self.qubit_if_freq_limits
+                    if not self._is_resonator[pulse_channel.physical_channel.id]
+                    else self.resonator_if_freq_limits
+                )
+                violations.append(
+                    f"Pulse channel {pulse_channel.full_id()} with IF {if_freq} is out of "
+                    f"the valid range {freq_range}."
+                )
+
+        if len(violations) > 0:
+            raise ValueError(
+                "Frequency validation of the hardware model against the target data failed "
+                "with the following violations: \n" + "\n".join(violations)
+            )
+        return ir
+
+
+class DynamicFrequencyValidation(ValidationPass):
+    """Validates the setting or shifting frequencies does not move the intermediate
+    frequency of a pulse channel outside the allowed limits."""
+
+    def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model.
+        :param target_data: Target-related information.
         """
-        for target in targets:
-            for channel in self.model.get_pulse_channels_from_physical_channel(
-                target.physical_channel
+        self.model = model
+        self._is_resonator = self._create_resonator_map(model)
+
+        # Extract limits from the target data.
+        self.qubit_if_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_if_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_if_freq_max,
+        )
+        self.resonator_if_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
+        )
+
+    @staticmethod
+    def _create_resonator_map(model: QuantumHardwareModel) -> dict[str, bool]:
+        """Creates a map to lookup if physical channels belong to resonators.."""
+        return {
+            device.physical_channel.id: not isinstance(device, Qubit)
+            for device in model.quantum_devices.values()
+        }
+
+    def _validate_frequency_shifts(self, pulse_channel: PulseChannel, ifs: list[float]):
+        """Validates that the frequency shifts do not exceed the allowed limits."""
+
+        if_limits = (
+            self.qubit_if_freq_limits
+            if not self._is_resonator[pulse_channel.physical_channel.id]
+            else self.resonator_if_freq_limits
+        )
+
+        return [
+            if_value
+            for if_value in ifs
+            if not (if_limits[0] <= np.abs(if_value) <= if_limits[1])
+        ]
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        ifs = defaultdict(list)
+        for instruction in ir.instructions:
+            if isinstance(instruction, FrequencyShift):
+                shifts = ifs[instruction.channel]
+                freq = (
+                    shifts[-1]
+                    if len(shifts) > 0
+                    else instruction.channel.frequency
+                    - instruction.channel.physical_channel.baseband_frequency
+                )
+                shifts.append(freq + instruction.frequency)
+            # TODO: Add support for frequency set (COMPILER-644)
+
+        violations = []
+        for pulse_channel, if_values in ifs.items():
+            if any(
+                if_violations := self._validate_frequency_shifts(pulse_channel, if_values)
             ):
-                if channel.fixed_if:
-                    raise NotImplementedError(
-                        "Hardware does not currently support frequency shifts on the "
-                        f"physical channel {target.physical_channel}."
+                violations.append(
+                    f"The IF of pulse channel {pulse_channel.full_id()} is frequency "
+                    f"shifted to values {if_violations} that exceed the allowed limits."
+                )
+
+        if len(violations) > 0:
+            raise ValueError(
+                "Dynamic frequency validation failed with the following violations:\n"
+                + "\n".join(violations)
+            )
+        return ir
+
+
+class FixedIntermediateFrequencyValidation(ValidationPass):
+    """Checks that no frequency shifts or sets are applied to pulse channels that have
+    a fixed intermediate frequency, or share a physical channel with a pulse channel."""
+
+    def __init__(self, model: QuantumHardwareModel):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model.
+        """
+        self.model = model
+        self._fixed_ifs = self._create_fixed_if_map(model)
+
+    @staticmethod
+    def _create_fixed_if_map(model: QuantumHardwareModel) -> dict[str, bool]:
+        """Creates a map of fixed intermediate frequencies for each pulse channel in the model."""
+        fixed_ifs = {}
+        for pulse_channel in model.pulse_channels.values():
+            fixed_ifs[pulse_channel.physical_channel.id] = (
+                pulse_channel.fixed_if
+                or fixed_ifs.get(pulse_channel.physical_channel.id, False)
+            )
+
+        return fixed_ifs
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        violations = set()
+        for instruction in ir.instructions:
+            if isinstance(instruction, FrequencyShift):
+                pulse_channel = instruction.channel
+                if self._fixed_ifs[pulse_channel.physical_channel.id]:
+                    violations.add(
+                        f"Pulse channel {pulse_channel.full_id()} has a fixed IF and "
+                        "cannot be frequency shifted."
                     )
+
+        if len(violations) > 0:
+            raise ValueError(
+                "Fixed intermediate frequency validation failed with the following "
+                "violations:\n".join(list(violations))
+            )
+        return ir
 
 
 class ReturnSanitisationValidation(ValidationPass):

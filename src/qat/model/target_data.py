@@ -5,7 +5,13 @@ from functools import cached_property
 from pathlib import Path
 
 import piny
-from pydantic import NonNegativeFloat, PositiveFloat, PositiveInt, model_validator
+from pydantic import (
+    NonNegativeFloat,
+    NonNegativeInt,
+    PositiveFloat,
+    PositiveInt,
+    model_validator,
+)
 
 from qat.utils.piny import VeryStrictMatcher
 from qat.utils.pydantic import NoExtraFieldsFrozenModel
@@ -33,10 +39,10 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
     waveform_memory_size: PositiveInt
     pulse_duration_min: PositiveFloat
     pulse_duration_max: PositiveFloat
-    pulse_channel_lo_freq_min: PositiveInt
-    pulse_channel_lo_freq_max: PositiveInt
-    pulse_channel_if_freq_min: PositiveInt
-    pulse_channel_if_freq_max: PositiveInt
+    pulse_channel_lo_freq_min: NonNegativeInt
+    pulse_channel_lo_freq_max: NonNegativeInt
+    pulse_channel_if_freq_min: NonNegativeInt
+    pulse_channel_if_freq_max: NonNegativeInt
 
     @model_validator(mode="after")
     def validate_durations(self):
@@ -192,7 +198,7 @@ class TargetData(AbstractTargetData):
                 pulse_duration_max=1e-03,
                 pulse_channel_lo_freq_min=1e06,
                 pulse_channel_lo_freq_max=1e10,
-                pulse_channel_if_freq_min=1e06,
+                pulse_channel_if_freq_min=0,
                 pulse_channel_if_freq_max=1e10,
             ),
             RESONATOR_DATA=ResonatorDescription(
@@ -204,7 +210,7 @@ class TargetData(AbstractTargetData):
                 pulse_duration_max=1e-03,
                 pulse_channel_lo_freq_min=1e06,
                 pulse_channel_lo_freq_max=1e10,
-                pulse_channel_if_freq_min=1e06,
+                pulse_channel_if_freq_min=0,
                 pulse_channel_if_freq_max=1e10,
             ),
         )

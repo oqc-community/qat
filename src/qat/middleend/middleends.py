@@ -36,7 +36,8 @@ from qat.middleend.passes.purr.transform import (
     SynchronizeTask,
 )
 from qat.middleend.passes.purr.validation import (
-    FrequencyValidation,
+    DynamicFrequencyValidation,
+    FrequencySetupValidation,
     HardwareConfigValidity,
     ReadoutValidation,
 )
@@ -182,8 +183,9 @@ class DefaultMiddleend(CustomMiddleend):
         return (
             PassManager()
             | HardwareConfigValidity(model)
-            | FrequencyValidation(model, target_data)
             | ActivePulseChannelAnalysis(model)
+            | FrequencySetupValidation(model, target_data)
+            | DynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
             | RepeatSanitisation(model, target_data)
             | ReturnSanitisation()
@@ -250,8 +252,9 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
         return (
             PassManager()
             | HardwareConfigValidity(legacy_model)
-            | FrequencyValidation(legacy_model, target_data)  # TODO: COMPILER-380
             | ActivePulseChannelAnalysis(legacy_model)  # TODO: COMPILER-393
+            | FrequencySetupValidation(legacy_model, target_data)  # TODO: COMPILER-380
+            | DynamicFrequencyValidation(legacy_model, target_data)  # TODO: COMPILER-648
             # Sanitising input IR to make it complete
             | RepeatSanitisation(
                 legacy_model, target_data

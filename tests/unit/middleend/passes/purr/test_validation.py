@@ -7,9 +7,12 @@ import pytest
 
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
+from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.middleend.passes.purr.transform import EvaluatePulses
 from qat.middleend.passes.purr.validation import (
-    FrequencyValidation,
+    DynamicFrequencyValidation,
+    FixedIntermediateFrequencyValidation,
+    FrequencySetupValidation,
     InstructionValidation,
     PhysicalChannelAmplitudeValidation,
     ReadoutValidation,
@@ -372,141 +375,532 @@ class TestPhysicalChannelAmplitudeValidation:
             PhysicalChannelAmplitudeValidation().run(builder)
 
 
-class TestFrequencyValidation:
-    res_mgr = ResultManager()
-    model = EchoModelLoader().load()
+class TestFrequencySetupValidation:
     target_data = TargetData.default()
 
-    def get_single_pulse_channel(self):
-        return next(iter(self.model.pulse_channels.values()))
-
-    def get_two_pulse_channels_from_single_physical_channel(self):
-        physical_channel = next(iter(self.model.physical_channels.values()))
-        pulse_channels = iter(
-            self.model.get_pulse_channels_from_physical_channel(physical_channel)
-        )
-        return next(pulse_channels), next(pulse_channels)
-
-    def get_two_pulse_channels_from_different_physical_channels(self):
-        physical_channels = iter(self.model.physical_channels.values())
-        pulse_channel_1 = next(
-            iter(
-                self.model.get_pulse_channels_from_physical_channel(next(physical_channels))
-            )
-        )
-        pulse_channel_2 = next(
-            iter(
-                self.model.get_pulse_channels_from_physical_channel(next(physical_channels))
-            )
-        )
-        return pulse_channel_1, pulse_channel_2
-
-    def set_frequency_range(self, target_data, pulse_channel, lower_tol, upper_tol):
+    @staticmethod
+    def target_data_with_non_zero_if_min():
+        target_data = TargetData.default()
         return target_data.model_copy(
             update={
                 "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(
-                    update={
-                        "pulse_channel_lo_freq_max": pulse_channel.frequency + upper_tol,
-                        "pulse_channel_lo_freq_min": pulse_channel.frequency - lower_tol,
-                    }
+                    update={"pulse_channel_if_freq_min": 1e6}
                 ),
                 "RESONATOR_DATA": target_data.RESONATOR_DATA.model_copy(
-                    update={
-                        "pulse_channel_lo_freq_max": pulse_channel.frequency + upper_tol,
-                        "pulse_channel_lo_freq_min": pulse_channel.frequency - lower_tol,
-                    }
+                    update={"pulse_channel_if_freq_min": 1e6}
                 ),
             }
         )
 
-    @pytest.mark.parametrize("freq", [-1e-9, -1e-8, 0, 1e8, 1e9])
-    def test_raises_no_error_when_freq_shift_in_range(self, freq):
-        channel = self.get_single_pulse_channel()
-        target_data = self.set_frequency_range(self.target_data, channel, 1e9, 1e9)
-        builder = self.model.create_builder()
-        builder.frequency_shift(channel, freq)
-        FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+    def test_create_baseband_frequency_map(self):
+        model = EchoModelLoader().load()
+        baseband_frequencies = FrequencySetupValidation._create_baseband_frequency_map(
+            model
+        )
+        assert len(baseband_frequencies) == len(model.physical_channels)
 
-    @pytest.mark.parametrize("freq", [-1e9, 1e9])
-    def test_raises_value_error_when_freq_shift_out_of_range(self, freq):
-        channel = self.get_single_pulse_channel()
-        target_data = self.set_frequency_range(self.target_data, channel, 1e8, 1e8)
-        builder = self.model.create_builder()
-        builder.frequency_shift(channel, freq)
-        with pytest.raises(ValueError):
-            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+    def test_create_resonator_map(self):
+        model = EchoModelLoader().load()
+        is_resonator = FrequencySetupValidation._create_resonator_map(model)
+        assert len([val for val in is_resonator.values() if val]) == len(
+            [val for val in is_resonator.values() if not val]
+        )
+        assert len(is_resonator) == len(model.physical_channels)
 
-    @pytest.mark.parametrize("freq", [-2e8, 2e8])
-    def test_moves_out_and_in_raises_value_error(self, freq):
-        channel = self.get_single_pulse_channel()
-        target_data = self.set_frequency_range(self.target_data, channel, 1e8, 1e8)
-        builder = self.model.create_builder()
-        builder.frequency_shift(channel, freq)
-        builder.frequency_shift(channel, -freq)
+    def test_create_pulse_channel_if_map(self):
+        model = EchoModelLoader().load()
+        pulse_channel_ifs = FrequencySetupValidation._create_pulse_channel_if_map(model)
+        assert len(pulse_channel_ifs) == len(model.pulse_channels)
+
+    def test_validate_baseband_frequencies(self):
+        is_resonator = {
+            "test1": False,
+            "test2": False,
+            "test3": False,
+            "test4": True,
+            "test5": True,
+            "test6": True,
+        }
+        qubit_lo_freq_limits = (
+            self.target_data.QUBIT_DATA.pulse_channel_lo_freq_min,
+            self.target_data.QUBIT_DATA.pulse_channel_lo_freq_max,
+        )
+        resonator_lo_freq_limits = (
+            self.target_data.RESONATOR_DATA.pulse_channel_lo_freq_min,
+            self.target_data.RESONATOR_DATA.pulse_channel_lo_freq_max,
+        )
+        freqs = {
+            "test1": 0.9 * qubit_lo_freq_limits[0],
+            "test2": 1.1 * qubit_lo_freq_limits[1],
+            "test3": 0.99 * qubit_lo_freq_limits[1],
+            "test4": 0.9 * resonator_lo_freq_limits[0],
+            "test5": 1.1 * resonator_lo_freq_limits[1],
+            "test6": 0.99 * resonator_lo_freq_limits[1],
+        }
+        baseband_validations = FrequencySetupValidation._validate_baseband_frequencies(
+            freqs, is_resonator, qubit_lo_freq_limits, resonator_lo_freq_limits
+        )
+        assert len(baseband_validations) == 6
+        for i in range(6):
+            assert f"test{i + 1}" in baseband_validations
+            assert baseband_validations[f"test{i + 1}"] == (True if i in (2, 5) else False)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_validate_pulse_channel_ifs(self, sign):
+        model = EchoModelLoader().load()
+        target_data = self.target_data_with_non_zero_if_min()
+        qubits = model.qubits[0:2]
+        physical_channels = [
+            qubits[0].physical_channel,
+            qubits[1].physical_channel,
+            qubits[0].measure_device.physical_channel,
+            qubits[1].measure_device.physical_channel,
+        ]
+        pulse_channels = [
+            qubits[0].get_drive_channel(),
+            qubits[0].get_cross_resonance_channel(model.qubits[1]),
+            qubits[1].get_drive_channel(),
+            qubits[0].get_measure_channel(),
+            qubits[0].get_acquire_channel(),
+            qubits[1].get_acquire_channel(),
+        ]
+
+        qubit_if_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_if_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_if_freq_max,
+        )
+        resonator_if_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
+        )
+
+        pulse_channel_ifs = {
+            pulse_channels[0].partial_id(): sign * 0.99 * qubit_if_freq_limits[0],
+            pulse_channels[1].partial_id(): sign * 1.1 * qubit_if_freq_limits[1],
+            pulse_channels[2].partial_id(): (
+                sign * 0.5 * (qubit_if_freq_limits[0] + qubit_if_freq_limits[1])
+            ),
+            pulse_channels[3].partial_id(): sign * 0.99 * resonator_if_freq_limits[0],
+            pulse_channels[4].partial_id(): sign * 1.1 * resonator_if_freq_limits[1],
+            pulse_channels[5].partial_id(): (
+                sign * 0.5 * (resonator_if_freq_limits[0] + resonator_if_freq_limits[1])
+            ),
+        }
+
+        is_resonator = {
+            physical_channels[0].id: False,
+            physical_channels[1].id: False,
+            physical_channels[2].id: True,
+            physical_channels[3].id: True,
+        }
+
+        pulse_to_physical_channels = {
+            pulse_channel.partial_id(): pulse_channel.physical_channel.id
+            for pulse_channel in pulse_channels
+        }
+
+        validate_ifs = FrequencySetupValidation._validate_pulse_channel_ifs(
+            pulse_channel_ifs,
+            is_resonator,
+            pulse_to_physical_channels,
+            qubit_if_freq_limits,
+            resonator_if_freq_limits,
+        )
+
+        for pulse_channel, validation in validate_ifs.items():
+            if pulse_channel in (
+                pulse_channels[2].partial_id(),
+                pulse_channels[5].partial_id(),
+            ):
+                assert validation is True
+            else:
+                assert validation is False
+
+    @pytest.mark.parametrize("violation_type", ["lower", "higher"])
+    @pytest.mark.parametrize("channel_type", ["qubit", "resonator"])
+    def test_raises_error_for_invalid_baseband_frequency(
+        self, violation_type, channel_type
+    ):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+
+        # Sets up a channel to have a bad baseband freq but not a bad IF freq.
+        if channel_type == "qubit":
+            channel = qubit.get_drive_channel()
+            if_freq = 0.5 * (
+                self.target_data.QUBIT_DATA.pulse_channel_if_freq_min
+                + self.target_data.QUBIT_DATA.pulse_channel_if_freq_max
+            )
+            if violation_type == "lower":
+                channel.physical_channel.baseband.frequency = (
+                    0.99 * self.target_data.QUBIT_DATA.pulse_channel_lo_freq_min
+                )
+            elif violation_type == "higher":
+                channel.physical_channel.baseband.frequency = (
+                    1.1 * self.target_data.QUBIT_DATA.pulse_channel_lo_freq_max
+                )
+            channel.frequency = channel.physical_channel.baseband.frequency + if_freq
+        elif channel_type == "resonator":
+            channel = qubit.get_measure_channel()
+            if_freq = 0.5 * (
+                self.target_data.RESONATOR_DATA.pulse_channel_if_freq_min
+                + self.target_data.RESONATOR_DATA.pulse_channel_if_freq_max
+            )
+            if violation_type == "lower":
+                channel.physical_channel.baseband.frequency = (
+                    0.99 * self.target_data.RESONATOR_DATA.pulse_channel_lo_freq_min
+                )
+            elif violation_type == "higher":
+                channel.physical_channel.baseband.frequency = (
+                    1.1 * self.target_data.RESONATOR_DATA.pulse_channel_lo_freq_max
+                )
+            channel.frequency = channel.physical_channel.baseband.frequency + if_freq
+
+        builder = model.create_builder()
+        builder.pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+            FrequencySetupValidation(model, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("violation_type", ["lower", "higher"])
+    @pytest.mark.parametrize("channel_type", ["qubit", "resonator"])
+    def test_raises_error_for_invalid_if(self, violation_type, channel_type):
+        model = EchoModelLoader().load()
+        target_data = self.target_data_with_non_zero_if_min()
+        qubit = model.qubits[0]
+
+        # Sets up a channel to have a bad IF freq but not a bad baseband freq.
+        if channel_type == "qubit":
+            channel = qubit.get_drive_channel()
+            baseband_freq = channel.physical_channel.baseband.frequency
+            if violation_type == "lower":
+                channel.frequency = (
+                    0.99 * target_data.QUBIT_DATA.pulse_channel_if_freq_min + baseband_freq
+                )
+            elif violation_type == "higher":
+                channel.frequency = (
+                    1.1 * target_data.QUBIT_DATA.pulse_channel_if_freq_max + baseband_freq
+                )
+        elif channel_type == "resonator":
+            channel = qubit.get_measure_channel()
+            baseband_freq = channel.physical_channel.baseband.frequency
+            if violation_type == "lower":
+                channel.frequency = (
+                    0.99 * target_data.RESONATOR_DATA.pulse_channel_if_freq_min
+                    + baseband_freq
+                )
+            elif violation_type == "higher":
+                channel.frequency = (
+                    1.1 * target_data.RESONATOR_DATA.pulse_channel_if_freq_max
+                    + baseband_freq
+                )
+
+        builder = model.create_builder()
+        builder.pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            FrequencySetupValidation(model, target_data).run(builder, res_mgr)
+
+    def test_with_custom_pulse_channel(self):
+        model = EchoModelLoader().load()
+        qubit = model.qubits[0]
+        physical_channel = qubit.get_drive_channel().physical_channel
+        channel = physical_channel.create_pulse_channel("custom")
+        channel.frequency = (
+            channel.physical_channel.baseband_frequency
+            + 1.1 * self.target_data.QUBIT_DATA.pulse_channel_if_freq_max
+        )
+
+        builder = model.create_builder()
+        builder.add(Pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE))
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            FrequencySetupValidation(model, self.target_data).run(builder, res_mgr)
+
+
+class TestDynamicFrequencyValidation:
+    target_data = TargetData.default()
+
+    @staticmethod
+    def get_single_pulse_channel(model):
+        return next(iter(model.pulse_channels.values()))
+
+    @staticmethod
+    def get_two_pulse_channels_from_single_physical_channel(model):
+        physical_channel = next(iter(model.physical_channels.values()))
+        pulse_channels = iter(
+            model.get_pulse_channels_from_physical_channel(physical_channel)
+        )
+        return next(pulse_channels), next(pulse_channels)
+
+    @staticmethod
+    def get_two_pulse_channels_from_different_physical_channels(model):
+        physical_channels = iter(model.physical_channels.values())
+        pulse_channel_1 = next(
+            iter(model.get_pulse_channels_from_physical_channel(next(physical_channels)))
+        )
+        pulse_channel_2 = next(
+            iter(model.get_pulse_channels_from_physical_channel(next(physical_channels)))
+        )
+        return pulse_channel_1, pulse_channel_2
+
+    @staticmethod
+    def target_data_with_non_zero_if_min():
+        target_data = TargetData.default()
+        return target_data.model_copy(
+            update={
+                "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(
+                    update={"pulse_channel_if_freq_min": 1e6}
+                ),
+                "RESONATOR_DATA": target_data.RESONATOR_DATA.model_copy(
+                    update={"pulse_channel_if_freq_min": 1e6}
+                ),
+            }
+        )
+
+    def test_create_resonator_map(self):
+        model = EchoModelLoader().load()
+        is_resonator = FrequencySetupValidation._create_resonator_map(model)
+        assert len([val for val in is_resonator.values() if val]) == len(
+            [val for val in is_resonator.values() if not val]
+        )
+        assert len(is_resonator) == len(model.physical_channels)
+
+    @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
+    def test_raises_no_error_when_freq_shift_in_range(self, scale):
+        """Shifts the frequency in the range [min_if, max_if] to check it does not fail."""
+        model = EchoModelLoader().load()
+        channel = self.get_single_pulse_channel(model)
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            channel.physical_channel.baseband_frequency
+            + scale * qubit_data.pulse_channel_lo_freq_max
+            - (1 - scale) * qubit_data.pulse_channel_lo_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = model.create_builder()
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_lower_than_min(self, sign):
+        model = EchoModelLoader().load()
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel(model)
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        target_freq = (
+            channel.physical_channel.baseband_frequency
+            + sign * 0.5 * qubit_data.pulse_channel_lo_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = model.create_builder()
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            DynamicFrequencyValidation(model, target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_higher_than_max(self, sign):
+        model = EchoModelLoader().load()
+        channel = self.get_single_pulse_channel(model)
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            channel.physical_channel.baseband_frequency
+            + sign * 1.1 * qubit_data.pulse_channel_lo_freq_max
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = model.create_builder()
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_moving_out_and_back_in_of_range(self, sign):
+        model = EchoModelLoader().load()
+        channel = self.get_single_pulse_channel(model)
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            channel.physical_channel.baseband_frequency
+            + sign * 1.1 * qubit_data.pulse_channel_lo_freq_max
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = model.create_builder()
+        builder.frequency_shift(channel, delta_freq)
+        builder.frequency_shift(channel, -delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_no_value_error_for_two_channels_same_physical_channel(self, sign):
-        channels = self.get_two_pulse_channels_from_single_physical_channel()
-        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
-        builder = self.model.create_builder()
+        model = EchoModelLoader().load()
+        channels = self.get_two_pulse_channels_from_single_physical_channel(model)
+        builder = model.create_builder()
+
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+        )
 
         # interweave with random instructions
         builder.phase_shift(channels[0], np.pi)
-        builder.frequency_shift(channels[0], sign * 1e8)
+        builder.frequency_shift(channels[0], sign * delta_freq)
         builder.phase_shift(channels[1], -np.pi)
-        builder.frequency_shift(channels[1], sign * 2e8)
-        builder.frequency_shift(channels[0], sign * 3e8)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 3 * delta_freq)
         builder.phase_shift(channels[1], -2.54)
-        builder.frequency_shift(channels[1], sign * 4e8)
-        FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_same_physical_channel(self, sign):
-        channels = self.get_two_pulse_channels_from_single_physical_channel()
-        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
-        builder = self.model.create_builder()
+        model = EchoModelLoader().load()
+        channels = self.get_two_pulse_channels_from_single_physical_channel(model)
+        builder = model.create_builder()
+
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+        )
 
         # interweave with random instructions
         builder.phase_shift(channels[0], np.pi)
-        builder.frequency_shift(channels[0], sign * 5e8)
+        builder.frequency_shift(channels[0], sign * 10 * delta_freq)
         builder.phase_shift(channels[1], -np.pi)
-        builder.frequency_shift(channels[1], sign * 6e8)
-        builder.frequency_shift(channels[0], sign * 1e8)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 16 * delta_freq)
         builder.phase_shift(channels[1], -2.54)
-        builder.frequency_shift(channels[1], sign * 5e8)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
         with pytest.raises(ValueError):
-            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+            DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_different_physical_channel(self, sign):
-        channels = self.get_two_pulse_channels_from_different_physical_channels()
-        target_data = self.set_frequency_range(self.target_data, channels[0], 1e9, 1e9)
-        target_data = self.set_frequency_range(self.target_data, channels[1], 5e8, 5e8)
-        builder = self.model.create_builder()
-        builder.frequency_shift(channels[0], sign * 4e8)
-        builder.frequency_shift(channels[1], sign * 1e8)
-        builder.frequency_shift(channels[0], sign * 7e8)
-        builder.frequency_shift(channels[1], sign * 4e8)
-        with pytest.raises(ValueError):
-            FrequencyValidation(self.model, target_data).run(builder, self.res_mgr)
+        model = EchoModelLoader().load()
+        channels = self.get_two_pulse_channels_from_different_physical_channels(model)
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+        )
 
-    def test_fixed_if_raises_not_implemented_error(self):
-        channels = self.get_two_pulse_channels_from_different_physical_channels()
-        builder = self.model.create_builder()
+        builder = model.create_builder()
+
+        # interweave with random instructions
+        builder.phase_shift(channels[0], np.pi)
+        builder.frequency_shift(channels[0], sign * 10 * delta_freq)
+        builder.phase_shift(channels[1], -np.pi)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 16 * delta_freq)
+        builder.phase_shift(channels[1], -2.54)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        with pytest.raises(ValueError):
+            DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
+
+    def test_small_change_to_if_is_valid(self):
+        """Lil' regression test to test a bug fix for a bug found in pipeline tests.
+
+        Does a little change to the IF frequency - ensures the current IF value is added.
+        """
+
+        target_data = self.target_data_with_non_zero_if_min()
+        model = EchoModelLoader().load()
+        channel = model.qubits[0].get_drive_channel()
+        channel.frequency = channel.physical_channel.baseband.frequency + 1e7
+        builder = model.create_builder()
+        builder.frequency_shift(channel, 1e3)
+        builder.pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        DynamicFrequencyValidation(model, target_data).run(builder, res_mgr)
+
+
+class TestFixedIntermediateFrequencyValidation:
+    @staticmethod
+    def get_two_pulse_channels_from_different_physical_channels(model):
+        physical_channels = iter(model.physical_channels.values())
+        pulse_channel_1 = next(
+            iter(model.get_pulse_channels_from_physical_channel(next(physical_channels)))
+        )
+        pulse_channel_2 = next(
+            iter(model.get_pulse_channels_from_physical_channel(next(physical_channels)))
+        )
+        return pulse_channel_1, pulse_channel_2
+
+    def test_create_fixed_if_map(self):
+        model = EchoModelLoader().load()
+        fixed_if_channels = [qubit.get_drive_channel() for qubit in model.qubits[0:2]]
+        for pulse_channel in model.pulse_channels.values():
+            pulse_channel.fixed_if = pulse_channel in fixed_if_channels
+        fixed_ifs = FixedIntermediateFrequencyValidation._create_fixed_if_map(model)
+        assert len(fixed_ifs) == len(model.physical_channels)
+        for channel in fixed_if_channels:
+            assert fixed_ifs[channel.physical_channel.id] is True
+
+    def test_fixed_if_raises_error(self):
+        model = EchoModelLoader().load()
+        channels = self.get_two_pulse_channels_from_different_physical_channels(model)
+        builder = model.create_builder()
         channels[0].fixed_if = True
         builder.frequency_shift(channels[0], 1e8)
         builder.frequency_shift(channels[1], 1e8)
-        with pytest.raises(NotImplementedError):
-            FrequencyValidation(self.model, self.target_data).run(builder, self.res_mgr)
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        with pytest.raises(ValueError):
+            FixedIntermediateFrequencyValidation(model).run(builder, res_mgr)
 
     def test_fixed_if_does_not_affect_other_channel(self):
-        channels = self.get_two_pulse_channels_from_different_physical_channels()
-        builder = self.model.create_builder()
+        model = EchoModelLoader().load()
+        channels = self.get_two_pulse_channels_from_different_physical_channels(model)
+        builder = model.create_builder()
         channels[0].fixed_if = True
+        builder.pulse(
+            channels[0],
+            width=80e-9,
+            shape=PulseShapeType.SQUARE,
+        )
         builder.frequency_shift(channels[1], 1e8)
-        FrequencyValidation(self.model, self.target_data).run(builder, self.res_mgr)
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActiveChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        FixedIntermediateFrequencyValidation(model).run(builder, res_mgr)
 
 
 class TestReadoutValidation:
