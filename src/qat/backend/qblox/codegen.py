@@ -992,13 +992,12 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
                 ordered_executables[switerator.accumulated_sweep_iteration] = self._do_emit(
                     triage_result
                 )
+            return ordered_executables
         except BaseException as e:
             raise e
         finally:
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()
-
-        return ordered_executables
 
     def _do_emit(self, triage_result: TriageResult) -> QbloxExecutable:
         repeat = next(iter(triage_result.repeats))

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from abc import abstractmethod
 from collections import defaultdict
 from functools import reduce
 from itertools import groupby
@@ -18,7 +19,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriagePass,
     TriageResult,
 )
-from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
+from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter, QbloxPackage
 from qat.purr.backends.qblox.metrics_base import MetricsManager
 from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
 from qat.purr.backends.qblox.result_base import ResultManager
@@ -204,16 +205,16 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         for target, acquisitions in playback.items():
             acquires = acquire_map[target]
             for name, acquisition in acquisitions.items():
-                scope_data = acquisition.acq_data.scope
-                integ_data = acquisition.acq_data.bins.integration
-                thrld_data = acquisition.acq_data.bins.threshold
+                scope_data = acquisition.acquisition.scope
+                integ_data = acquisition.acquisition.bins.integration
+                thrld_data = acquisition.acquisition.bins.threshold
 
                 acquire = next((inst for inst in acquires if inst.output_variable == name))
                 if acquire.mode in [AcquireMode.SCOPE, AcquireMode.RAW]:
                     repeat_counts.clear()
-                    response = scope_data.i.data + 1j * scope_data.q.data
+                    response = scope_data.path0.data + 1j * scope_data.path1.data
                 elif acquire.mode == AcquireMode.INTEGRATOR:
-                    response = integ_data.i + 1j * integ_data.q
+                    response = integ_data.path0 + 1j * integ_data.path1
                 else:
                     raise ValueError(f"Unrecognised acquire mode {acquire.mode}")
 
@@ -244,8 +245,33 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
         return results
 
+    @abstractmethod
+    def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager): ...
 
-class QbloxLiveEngine(AbstractQbloxLiveEngine):
+    def execute_packages(self, packages) -> Dict[PulseChannel, Dict[str, Acquisition]]: ...
+
+    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
+        self._model_exists()
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+
+        with log_duration("Codegen run in {} seconds."):
+            packages = self.invoke_backend(builder, res_mgr, met_mgr)
+
+        with log_duration("QPU returned results in {} seconds."):
+            playback = self.execute_packages(packages)
+            results = self.process_playback(playback, res_mgr)
+            return results
+
+
+class QbloxLiveEngine1(AbstractQbloxLiveEngine):
+    """
+    Legacy engine that runs a loop nest statically. It pregenerates packages for each iteration and runs
+    them in the same lexicographical order. This generates lots of playbacks that are then combined later.
+
+    See QbloxBackend1
+    """
+
     def build_pass_pipeline(self, *args, **kwargs):
         return (
             PassManager()
@@ -254,44 +280,33 @@ class QbloxLiveEngine(AbstractQbloxLiveEngine):
             | TriagePass()
         )
 
-    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
-        self._model_exists()
+    def invoke_backend(self, builder, res_mgr: ResultManager, met_mgr: MetricsManager):
+        ir = QatIR(builder)
+        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
 
-        with log_duration("Codegen run in {} seconds."):
-            res_mgr = ResultManager()
-            met_mgr = MetricsManager()
-            ir = QatIR(builder)
-            self.run_pass_pipeline(ir, res_mgr, met_mgr)
-            iter2packages = QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
-
-        with log_duration("QPU returned results in {} seconds."):
-            playbacks: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
-            for packages in iter2packages.values():
-                self.model.control_hardware.set_data(packages)
-                payback: Dict[PulseChannel, List[Acquisition]] = (
-                    self.model.control_hardware.start_playback(None, None)
-                )
-                for target, acquisitions in payback.items():
-                    playbacks[target] += acquisitions
-
-            playback: Dict[PulseChannel, Dict[str, Acquisition]] = self.combine_playbacks(
-                playbacks
+    def execute_packages(self, iter2packages):
+        playbacks: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
+        for packages in iter2packages.values():
+            self.model.control_hardware.set_data(packages)
+            payback: Dict[PulseChannel, List[Acquisition]] = (
+                self.model.control_hardware.start_playback(None, None)
             )
-            results = self.process_playback(playback, res_mgr)
-            return results
+            for target, acquisitions in payback.items():
+                playbacks[target] += acquisitions
+
+        return self.combine_playbacks(playbacks)
 
 
-class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
+class QbloxLiveEngine2(AbstractQbloxLiveEngine):
     """
+    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
+    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
+
     Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
     It leverages Q1's programming model to accelerate a handful of pulse-level algorithms.
 
-    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
-    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
-    Nevertheless, there should be a hybrid JIT-like reconciliation in the future that can run both IR features
-    that still need static iteration while being able to accelerate programs whenever possible.
-
-    See QbloxLiveEngine and QbloxLiveEngineAdapter.
+    See QbloxBackend2
     """
 
     def build_pass_pipeline(self, *args, **kwargs):
@@ -306,9 +321,7 @@ class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
             | QbloxLegalisationPass()
         )
 
-    def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
-        self._model_exists()
-
+    def invoke_backend(self, builder, res_mgr: ResultManager, met_mgr: MetricsManager):
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
         remaining, static_dus = partition(
@@ -323,29 +336,24 @@ class NewQbloxLiveEngine(AbstractQbloxLiveEngine):
 
         try:
             injectors.inject()
-            with log_duration("Codegen run in {} seconds."):
-                res_mgr = ResultManager()
-                met_mgr = MetricsManager()
-                ir = QatIR(builder)
-                self.run_pass_pipeline(ir, res_mgr, met_mgr)
-                packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+            res_mgr = res_mgr or ResultManager()
+            met_mgr = met_mgr or MetricsManager()
+            ir = QatIR(builder)
+            self.run_pass_pipeline(ir, res_mgr, met_mgr)
+            return NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
         finally:
             injectors.revert()
 
-        with log_duration("QPU returned results in {} seconds."):
-            self.model.control_hardware.set_data(packages)
-            playbacks: Dict[PulseChannel, List[Acquisition]] = (
-                self.model.control_hardware.start_playback(None, None)
-            )
+    def execute_packages(self, packages: List[QbloxPackage]):
+        self.model.control_hardware.set_data(packages)
+        playbacks: Dict[PulseChannel, List[Acquisition]] = (
+            self.model.control_hardware.start_playback(None, None)
+        )
 
-            playback: Dict[PulseChannel, Dict[str, Acquisition]] = self.combine_playbacks(
-                playbacks
-            )
-            results = self.process_playback(playback, res_mgr)
-            return results
+        return self.combine_playbacks(playbacks)
 
 
-class QbloxLiveEngineAdapter(LiveDeviceEngine):
+class QbloxLiveEngineAdapter(AbstractQbloxLiveEngine):
     """
     A manual adapter of the new and legacy engines. Users can switch on and off HW acceleration by using
     the `enable_hax` flag.
@@ -353,6 +361,12 @@ class QbloxLiveEngineAdapter(LiveDeviceEngine):
     There should be a proper hybrid, dynamic, JIT-like engine in the future that can leverage the HW to accelerate
     programs whenever possible.
     """
+
+    def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):
+        pass
+
+    def build_pass_pipeline(self, *args, **kwargs) -> PassManager:
+        pass
 
     model: QbloxLiveHardwareModel
 
@@ -363,8 +377,8 @@ class QbloxLiveEngineAdapter(LiveDeviceEngine):
         enable_hax=False,
     ):
         super().__init__(model, startup_engine)
-        self._legacy_engine = QbloxLiveEngine(model, False)
-        self._new_engine = NewQbloxLiveEngine(model, False)
+        self._legacy_engine = QbloxLiveEngine1(model, False)
+        self._new_engine = QbloxLiveEngine2(model, False)
         self.enable_hax = enable_hax
 
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):

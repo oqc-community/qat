@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from qat.purr.backends.qblox.acquisition import (
-    AcqData,
     Acquisition,
     BinnedAcqData,
+    BinnedAndScopeAcqData,
     IntegData,
     PathData,
     ScopeAcqData,
@@ -17,30 +17,30 @@ def test_default_constructors():
     acquisition = Acquisition()
 
     assert not acquisition.index
-    assert acquisition.acq_data == AcqData()
+    assert acquisition.acquisition == BinnedAndScopeAcqData()
 
-    scope_data = acquisition.acq_data.scope
+    scope_data = acquisition.acquisition.scope
     assert scope_data == ScopeAcqData()
 
-    assert scope_data.i == PathData()
-    assert not scope_data.i.avg_count
-    assert scope_data.i.data.size == 0
-    assert not scope_data.i.oor
+    assert scope_data.path0 == PathData()
+    assert not scope_data.path0.avg_cnt
+    assert scope_data.path0.data.size == 0
+    assert not scope_data.path0.oor
 
-    assert scope_data.q == PathData()
-    assert not scope_data.q.avg_count
-    assert scope_data.q.data.size == 0
-    assert not scope_data.q.oor
+    assert scope_data.path1 == PathData()
+    assert not scope_data.path1.avg_cnt
+    assert scope_data.path1.data.size == 0
+    assert not scope_data.path1.oor
 
-    bin_data = acquisition.acq_data.bins
+    bin_data = acquisition.acquisition.bins
     assert bin_data == BinnedAcqData()
-    assert bin_data.avg_count.size == 0
+    assert bin_data.avg_cnt.size == 0
     assert bin_data.threshold.size == 0
     assert bin_data.integration == IntegData()
 
     integ_data = bin_data.integration
-    assert integ_data.i.size == 0
-    assert integ_data.q.size == 0
+    assert integ_data.path0.size == 0
+    assert integ_data.path1.size == 0
 
 
 def test_serialisation(testpath):
@@ -50,10 +50,15 @@ def test_serialisation(testpath):
 
     assert acquisition.index == 0
 
-    scope_data = acquisition.acq_data.scope
-    assert len(scope_data.i.data) == len(scope_data.q.data)
-    assert len(scope_data.i.data) == Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
+    scope_data = acquisition.acquisition.scope
+    assert len(scope_data.path0.data) == len(scope_data.path1.data)
+    assert len(scope_data.path0.data) == Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
 
-    bin_data = acquisition.acq_data.bins
-    assert len(bin_data.integration.i) == len(bin_data.integration.q)
-    assert len(bin_data.threshold) == len(bin_data.integration.i)
+    bin_data = acquisition.acquisition.bins
+    assert len(bin_data.integration.path0) == len(bin_data.integration.path1)
+    assert len(bin_data.threshold) == len(bin_data.integration.path0)
+
+    json_str = acquisition.model_dump_json()
+    deserialised_acquisition = Acquisition.model_validate_json(json_str)
+
+    assert deserialised_acquisition == acquisition

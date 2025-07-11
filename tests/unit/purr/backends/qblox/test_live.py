@@ -6,8 +6,8 @@ import pytest
 from qat import qatconfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.live import (
-    NewQbloxLiveEngine,
-    QbloxLiveEngine,
+    QbloxLiveEngine1,
+    QbloxLiveEngine2,
     QbloxLiveEngineAdapter,
 )
 from qat.purr.compiler.devices import PulseShapeType
@@ -350,5 +350,5 @@ class TestQbloxLiveEngineAdapter:
         engine = runtime.engine
 
         assert isinstance(engine, QbloxLiveEngineAdapter)
-        assert isinstance(engine._legacy_engine, QbloxLiveEngine)
-        assert isinstance(engine._new_engine, NewQbloxLiveEngine)
+        assert isinstance(engine._legacy_engine, QbloxLiveEngine1)
+        assert isinstance(engine._new_engine, QbloxLiveEngine2)

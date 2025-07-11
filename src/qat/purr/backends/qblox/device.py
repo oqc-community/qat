@@ -321,13 +321,13 @@ class QbloxControlHardware(ControlHardware):
                             acquisition = Acquisition.model_validate(acquisition)
                             acquisition.name = name
 
-                            scope_data = acquisition.acq_data.scope
-                            scope_data.i.data = scope_data.i.data[start:end]
-                            scope_data.q.data = scope_data.q.data[start:end]
+                            scope_data = acquisition.acquisition.scope
+                            scope_data.path0.data = scope_data.path0.data[start:end]
+                            scope_data.path1.data = scope_data.path1.data[start:end]
 
-                            integ_data = acquisition.acq_data.bins.integration
-                            integ_data.i /= integ_length
-                            integ_data.q /= integ_length
+                            integ_data = acquisition.acquisition.bins.integration
+                            integ_data.path0 /= integ_length
+                            integ_data.path1 /= integ_length
 
                             results[target].append(acquisition)
 
