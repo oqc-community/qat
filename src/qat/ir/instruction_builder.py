@@ -232,6 +232,9 @@ class InstructionBuilder(ABC):
     def __iter__(self):
         return self._ir.__iter__()
 
+    def __reversed__(self):
+        return self._ir.__reversed__()
+
 
 class QuantumInstructionBuilder(InstructionBuilder):
     @InstructionBuilder._check_identity_operation

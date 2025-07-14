@@ -126,6 +126,9 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 scale=freqshift_pulse_channel.scale,
                 fixed_if=freqshift_pulse_channel.fixed_if,
                 phase_iq_offset=phys_channel_q.phase_offset,
+                active=freqshift_pulse_channel.active,
+                amp=freqshift_pulse_channel.amp,
+                phase=getattr(freqshift_pulse_channel.pulse_channel, "phase", 0.0),
             )
         except KeyError:
             new_freqshift_pulse_channel = FreqShiftPulseChannel()

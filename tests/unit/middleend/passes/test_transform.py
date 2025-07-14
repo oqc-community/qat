@@ -738,6 +738,37 @@ class TestPydInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
         assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
+    # TODO: Review for COMPILER-488 changes.
+    def test_acquire_with_filter_samples_get_cut_off(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+
+        clock_cycle = self.target_data.clock_cycle
+        acquire_time = np.random.randint(1, 10) * clock_cycle + 0.5 * clock_cycle
+
+        n_samples_weights = int(
+            np.ceil(acquire_time / self.target_data.RESONATOR_DATA.sample_time)
+        )
+        builder.add(
+            Acquire(
+                target=self.acquire_chan.uuid,
+                duration=acquire_time,
+                filter=Pulse(
+                    target="test",
+                    duration=acquire_time,
+                    waveform=SampledWaveform(samples=[1.0 + 2.0j] * n_samples_weights),
+                ),
+            )
+        )
+        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        assert ir.number_of_instructions == 1
+
+        granular_duration = int(np.floor(acquire_time / clock_cycle)) * clock_cycle
+        n_cut_off_samples = int(
+            np.floor(granular_duration / self.target_data.RESONATOR_DATA.sample_time)
+        )
+        assert len(ir._ir.head.filter.waveform.samples) < n_samples_weights
+        assert len(ir._ir.head.filter.waveform.samples) == n_cut_off_samples
+
     def test_custom_pulses_with_correct_length_are_unchanged(self):
         sample_time = self.qubit.physical_channel.sample_time
         builder = QuantumInstructionBuilder(hardware_model=self.hw)

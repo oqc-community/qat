@@ -95,11 +95,9 @@ class Pipeline(AbstractPipeline):
     def _validate_consistent_model(
         model: QuantumHardwareModel,
         *args,
-        allow_type_mismatch=False,
     ):
         """Validates that the hardware model supplied to the Pipeline matches the hardware
         model embedded in other fields."""
-
         for component in args:
             if hasattr(component, "model") and component.model not in {model, None}:
                 raise ValueError(f"{model} hardware does not match supplied hardware")

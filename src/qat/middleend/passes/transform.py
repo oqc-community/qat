@@ -450,7 +450,25 @@ class InstructionGranularitySanitisation(TransformPass):
                 if isinstance(inst, Acquire) and inst.filter is not None:
                     # Acquire instructions with filters have a duration equal to the filter
                     # duration, so we need to update the filter as well.
-                    inst.filter.update_duration(new_duration)
+                    if (
+                        isinstance(inst.filter.waveform, SampledWaveform)
+                        and new_duration < inst.duration
+                    ):
+                        # This is a temporary workaround due to the fact that the acquire duration gets rounded
+                        # down to the nearest clock cycle, which results in cutting off the sample.
+                        # TODO: Review for COMPILER-488 changes.
+                        n_samples = int(
+                            np.floor(new_duration / self.sample_times[inst.target])
+                        )
+                        inst.filter.waveform.samples = inst.filter.waveform.samples[
+                            :n_samples
+                        ]
+                        inst.filter.duration = new_duration
+
+                    else:
+                        inst.filter.update_duration(
+                            new_duration, sample_time=self.sample_times[inst.target]
+                        )
                 inst.duration = new_duration
 
         if len(invalid_instructions) >= 1:

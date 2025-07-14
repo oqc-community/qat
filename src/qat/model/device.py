@@ -180,7 +180,7 @@ class CalibratableAcquire(NoExtraFieldsModel):
     delay: CalibratablePositiveFloat = Field(default=180e-08, ge=0)
     width: CalibratablePositiveFloat = Field(default=1e-06, ge=0)
     sync: bool = True
-    weights: list[float, complex] = []
+    weights: list[float | complex] = Field(default_factory=list)
     use_weights: bool = False
 
 
