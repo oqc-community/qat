@@ -753,6 +753,14 @@ it up to the nearest integer multiple. Furthemore, it will assume that
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.purr.transform.InstructionGranularitySanitisation.sanitise_acquire_filters">
+<span class="sig-name descname"><span class="pre">sanitise_acquire_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.purr.transform.InstructionGranularitySanitisation.sanitise_acquire_filters" title="Link to this definition"></a></dt>
+<dd><p>Sanitises the durations of <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> filters by matching it to the
+duration of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code>. For <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code> filters, this strips
+away the samples that are not needed.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.purr.transform.InstructionGranularitySanitisation.sanitise_custom_pulses">
 <span class="sig-name descname"><span class="pre">sanitise_custom_pulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.purr.transform.InstructionGranularitySanitisation.sanitise_custom_pulses" title="Link to this definition"></a></dt>
 <dd><p>Sanitises the durations of <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomPulse</span></code> instructions by padding the
