@@ -479,7 +479,17 @@ class InstructionGranularitySanitisation(TransformPass):
                     0,
                 )
             )
-            inst.samples.extend([0.0 + 0.0j] * padding)
+
+            if isinstance(inst.samples, list):
+                inst.samples.extend([0.0 + 0.0j] * padding)
+            elif isinstance(inst.samples, np.ndarray):
+                inst.samples = np.append(
+                    inst.samples, np.zeros(padding, dtype=inst.samples.dtype)
+                )
+            else:
+                raise TypeError(
+                    f"Unsupported type for samples in CustomPulse: {type(inst.samples)}"
+                )
 
         if len(invalid_instructions) > 1:
             log.info(

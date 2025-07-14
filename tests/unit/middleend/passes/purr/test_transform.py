@@ -956,7 +956,8 @@ class TestInstructionGranularitySanitisation:
         assert ir.instructions[0].samples == samples
 
     @pytest.mark.parametrize("seed", [1, 2, 3, 4])
-    def test_custom_pulses_with_invalid_length_are_padded(self, seed):
+    @pytest.mark.parametrize("samples_type", ["list", "np_array"])
+    def test_custom_pulses_with_invalid_length_are_padded(self, seed, samples_type):
         # Mock up some channels and a builder
         model = EchoModelLoader(10).load()
         target_data = TargetData(
@@ -976,6 +977,8 @@ class TestInstructionGranularitySanitisation:
         num_samples = np.random.randint(1, 100) * supersampling
 
         samples = [1.0] * (num_samples + np.random.randint(1, supersampling - 1))
+        if samples_type == "np_array":
+            samples = np.array(samples)
         builder.add(CustomPulse(drive_chan, samples))
         assert len(builder.instructions[0].samples) == len(samples)
 
