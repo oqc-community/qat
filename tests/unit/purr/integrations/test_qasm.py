@@ -267,7 +267,7 @@ class TestQASM3:
         ess_pulses = [
             inst
             for inst in qasm_inst
-            if hasattr(inst, "shape") and (inst.shape is PulseShapeType.EXTRA_SOFT_SQUARE)
+            if hasattr(inst, "shape") and (inst.shape is PulseShapeType.SQUARE)
         ]
         assert len(ess_pulses) == 2
         assert all([len(inst.quantum_targets) == 1 for inst in ess_pulses])
@@ -459,8 +459,8 @@ class TestQASM3:
     @pytest.mark.parametrize(
         "file_name,test_value",
         (
-            ("sum", 5.0),
-            ("mix", 6.0),
+            ("sum", 5e-3),
+            ("mix", 6e-4),
         ),
     )
     def test_waveform_processing(self, file_name, test_value):

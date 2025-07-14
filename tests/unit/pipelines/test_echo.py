@@ -62,7 +62,7 @@ class TestExperimentalEchoPipeline:
         assert isinstance(pipeline.engine, EchoEngine)
 
 
-test_files = get_pipeline_tests()
+test_files = get_pipeline_tests(openpulse=True)
 
 
 @pytest.mark.parametrize("shots", [1254, 10002], scope="class")
@@ -183,9 +183,12 @@ class TestEchoPipelineWithCircuits:
 
         assert len(returned_acquires) == num_readouts
 
-    def test_acquires_are_integrator_mode(self, executable):
+    def test_acquires_are_integrator_mode(self, executable, request):
         """Check that all acquires are in INTEGRATOR mode, as this is the expected mode for
         the EchoPipeline."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires:
             assert acquire.mode == AcquireMode.INTEGRATOR
@@ -198,10 +201,15 @@ class TestEchoPipelineWithCircuits:
 
         assert len(executable.returns) == num_registers
 
-    def test_executable_has_correct_post_processing(self, executable: WaveformV1Executable):
+    def test_executable_has_correct_post_processing(
+        self, executable: WaveformV1Executable, request
+    ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
         correctly post-processing to be discriminated as a bit. We can assume the acquire
         mode is INTEGRATOR."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires:
             output_variable = acquire.output_variable
@@ -421,9 +429,12 @@ class TestExperimentalEchoPipelineWithCircuits:
 
         assert len(returned_acquires) == num_readouts
 
-    def test_acquires_are_integrator_mode(self, executable):
+    def test_acquires_are_integrator_mode(self, executable, request):
         """Check that all acquires are in INTEGRATOR mode, as this is the expected mode for
         the EchoPipeline."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires:
             assert acquire.mode == AcquireMode.INTEGRATOR
@@ -436,10 +447,15 @@ class TestExperimentalEchoPipelineWithCircuits:
 
         assert len(executable.returns) == num_registers
 
-    def test_executable_has_correct_post_processing(self, executable: WaveformV1Executable):
+    def test_executable_has_correct_post_processing(
+        self, executable: WaveformV1Executable, request
+    ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
         correctly post-processing to be discriminated as a bit. We can assume the acquire
         mode is INTEGRATOR."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires:
             output_variable = acquire.output_variable

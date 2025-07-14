@@ -161,11 +161,11 @@ class ResultsAggregator:
         for acquire in acquires:
             match acquire.mode:
                 case AcquireMode.RAW:
-                    result = np.zeros((0, acquire.length))
+                    result = np.zeros((0, acquire.length), dtype=complex)
                 case AcquireMode.INTEGRATOR:
-                    result = np.zeros(0)
+                    result = np.zeros(0, dtype=complex)
                 case AcquireMode.SCOPE:
-                    result = np.zeros(acquire.length)
+                    result = np.zeros(acquire.length, dtype=complex)
 
             self._results[acquire.output_variable] = {
                 "mode": acquire.mode,

@@ -1,3 +1,4 @@
+OPENQASM 3;
 defcalgrammar "openpulse";
 
 cal {

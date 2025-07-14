@@ -15,18 +15,18 @@ defcal rz(theta) $1 {
 }
 
 defcal sx $0 {
-   waveform sx_wf = drag(1e-6, 160dt, 40dt, 0.05);
+   waveform sx_wf = drag(1e-7, 160dt, 40dt, 0.05);
    play(q0_drive, sx_wf);
 }
 
 defcal sx $1 {
-   waveform sx_wf = drag(1e-6, 160dt, 40dt, 0.1);
+   waveform sx_wf = drag(1e-7, 160dt, 40dt, 0.1);
    play(q1_drive, sx_wf);
 }
 
 defcal cx $1, $0 {
-   waveform CR90p = square(1e-6, 560dt);
-   waveform CR90m = gaussian(1e-6, 560dt, 240dt);
+   waveform CR90p = square(1e-7, 560dt);
+   waveform CR90m = gaussian(1e-7, 560dt, 240dt);
 
    rz(pi/2) $0; rz(-pi/2) $1;
    sx $0; sx $1;
@@ -42,7 +42,7 @@ defcal cx $1, $0 {
 }
 
 defcal Y90p $0 {
-   waveform y90p = drag(1e-6, 160dt, 40dt, 0.05);
+   waveform y90p = drag(1e-7, 160dt, 40dt, 0.05);
    play(q0_drive, y90p);
 }
 

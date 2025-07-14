@@ -8,7 +8,11 @@ import pytest
 from qat.frontend.parsers.qasm import Qasm3Parser
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Return
-from qat.ir.waveforms import ExtraSoftSquareWaveform, Pulse, SoftSquareWaveform
+from qat.ir.waveforms import (
+    Pulse,
+    SoftSquareWaveform,
+    SquareWaveform,
+)
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.utils.graphs import generate_cyclic_connectivity
 from qat.utils.hardware_model import generate_hw_model
@@ -147,12 +151,11 @@ class TestQasm3Parser:
         qasm_inst = builder.instructions
         qasm_inst_names = [str(inst) for inst in qasm_inst]
 
-        # test the extra_soft_square pulses are as expected
+        # test the square pulses are as expected
         ess_pulses = [
             inst
             for inst in qasm_inst
-            if isinstance(inst, Pulse)
-            and isinstance(inst.waveform, ExtraSoftSquareWaveform)
+            if isinstance(inst, Pulse) and isinstance(inst.waveform, SquareWaveform)
         ]
         assert len(ess_pulses) == 2
         assert all([len(inst.targets) == 1 for inst in ess_pulses])

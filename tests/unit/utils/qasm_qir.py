@@ -320,18 +320,22 @@ qir_expected_results = {
 }
 
 qasm3_expected_results = {
-    "arb_waveform.qasm": (0, 0),
+    "ecr_test.qasm": (0, 0),
+    "ghz.qasm": (4, 1),
     "bell_psi_plus.qasm": (2, 1),
+}
+
+
+openpulse_expected_results = {
+    "arb_waveform.qasm": (0, 0),
     "cnot_override_test.qasm": (0, 0),
     "complex_gates_test.qasm": (0, 0),
     "delay.qasm": (0, 0),
     "ecr_override_test.qasm": (0, 0),
     "ecr_test.qasm": (0, 0),
     "ghz.qasm": (4, 1),
-    "lark_parsing_test.qasm": (2, 1),
     "named_defcal_arg.qasm": (1, 1),
     "redefine_defcal.qasm": (0, 0),
-    "tmp.qasm": (0, 0),
     "waveform_tests/gaussian_square.qasm": (0, 0),
     "waveform_tests/internal_waveform_tests.qasm": (1, 1),
     "waveform_tests/openpulse_waveform_tests.qasm": (0, 0),
@@ -340,8 +344,6 @@ qasm3_expected_results = {
     "waveform_tests/waveform_test_phase_shift.qasm": (0, 0),
     "waveform_tests/waveform_test_scale.qasm": (0, 0),
     "waveform_tests/waveform_test_sum.qasm": (0, 0),
-    "openqasm_tests/barrier_timing_test.qasm": (0, 0),
-    "openqasm_tests/gate_timing_test.qasm": (0, 0),
     "openpulse_tests/acquire.qasm": (1, 2),
     "openpulse_tests/constant_wf.qasm": (1, 1),
     "openpulse_tests/detune_gate.qasm": (1, 1),
@@ -350,62 +352,54 @@ qasm3_expected_results = {
     "openpulse_tests/shift_phase.qasm": (1, 1),
 }
 
-qasm3_custom_pulse_channels = [
-    "arb_waveform.qasm",
-    "cnot_override_test.qasm",
-    "cx_override_test.qasm",
-    "ecr_override_test.qasm",
-    "lark_parsing_test.qasm",
-    "redefine_defcal.qasm",
-    "tmp.qasm",
-    "waveform_tests/gaussian_square.qasm",
-    "waveform_tests/internal_waveform_tests.qasm",
-    "waveform_tests/openpulse_waveform_tests.qasm",
-    "waveform_tests/sech_waveform.qasm",
-    "waveform_tests/waveform_test_mix.qasm",
-    "waveform_tests/waveform_test_phase_shift.qasm",
-    "waveform_tests/waveform_test_scale.qasm",
-    "waveform_tests/waveform_test_sum.qasm",
-    "openqasm_tests/barrier_timing_test.qasm",
-    "openqasm_tests/gate_timing_test.qasm",
-    "openpulse_tests/freq.qasm",
-]
-
 
 def get_pipeline_tests(
     qasm2: bool = True,
     qasm3: bool = True,
     qir: bool = True,
-    disable_custom_pulse_channels: bool = True,
+    openpulse: bool = False,
+    skips: list[str] = None,
 ):
     """Returns a dictionary of tests, with each item being a tuple containing the
     factory for loading the file, the expected number of readouts, and the expected number
     of registers."""
 
+    skips = skips if skips is not None else []
+
     tests = {}
     if qasm2:
         for file_name, (num_acquires, num_registers) in qasm2_expected_results.items():
-            tests[f"qasm2-{file_name}"] = (
-                get_qasm2_path(file_name),
-                num_acquires,
-                num_registers,
-            )
+            if file_name not in skips:
+                tests[f"qasm2-{file_name}"] = (
+                    get_qasm2_path(file_name),
+                    num_acquires,
+                    num_registers,
+                )
 
     if qasm3:
         for file_name, (num_acquires, num_registers) in qasm3_expected_results.items():
-            if disable_custom_pulse_channels and file_name in qasm3_custom_pulse_channels:
-                continue
-            tests[f"qasm3-{file_name}"] = (
-                get_qasm3_path(file_name),
-                num_acquires,
-                num_registers,
-            )
+            if file_name not in skips:
+                tests[f"qasm3-{file_name}"] = (
+                    get_qasm3_path(file_name),
+                    num_acquires,
+                    num_registers,
+                )
 
     if qir:
         for file_name, (num_acquires, num_registers) in qir_expected_results.items():
-            tests[f"qir-{file_name}"] = (
-                get_qir_path(file_name),
-                num_acquires,
-                num_registers,
-            )
+            if file_name not in skips:
+                tests[f"qir-{file_name}"] = (
+                    get_qir_path(file_name),
+                    num_acquires,
+                    num_registers,
+                )
+
+    if openpulse:
+        for file_name, (num_acquires, num_registers) in openpulse_expected_results.items():
+            if file_name not in skips:
+                tests[f"openpulse-{file_name}"] = (
+                    get_qasm3_path(file_name),
+                    num_acquires,
+                    num_registers,
+                )
     return tests
