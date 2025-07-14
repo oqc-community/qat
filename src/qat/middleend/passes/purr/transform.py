@@ -427,6 +427,9 @@ class InstructionGranularitySanitisation(TransformPass):
         self.sanitise_custom_pulses(
             [inst for inst in ir.instructions if isinstance(inst, CustomPulse)]
         )
+        self.sanitise_acquire_filters(
+            [inst for inst in ir.instructions if isinstance(inst, Acquire)]
+        )
         return ir
 
     def sanitise_quantum_instructions(self, instructions: list[Pulse | Acquire | Delay]):
@@ -498,6 +501,31 @@ class InstructionGranularitySanitisation(TransformPass):
                 "up by padding with zero amplitudes: "
                 + ", ".join(set(invalid_instructions))
             )
+
+    def sanitise_acquire_filters(self, instructions: list[Acquire]):
+        """Sanitises the durations of :class:`Acquire` filters by matching it to the
+        duration of the :class:`Acquire`. For :class:`CustomPulse` filters, this strips
+        away the samples that are not needed."""
+        for instruction in instructions:
+            if isinstance(instruction.filter, Pulse):
+                instruction.filter.width = instruction.duration
+            elif isinstance(instruction.filter, CustomPulse):
+                num_samples = int(
+                    np.round(
+                        instruction.duration
+                        / self.sample_times[instruction.quantum_targets[0].physical_channel]
+                    )
+                )
+                if instruction.filter.duration > instruction.duration:
+                    # if the filter is longer than the acquire, truncate it
+                    instruction.filter.samples = instruction.filter.samples[:num_samples]
+                else:
+                    # if the filter is shorter than the acquire, pad it with zeros
+                    new_filter = np.zeros(num_samples, dtype=np.complex128)
+                    new_filter[: len(instruction.filter.samples)] = (
+                        instruction.filter.samples
+                    )
+                    instruction.filter.samples = new_filter
 
 
 class InitialPhaseResetSanitisation(TransformPass):

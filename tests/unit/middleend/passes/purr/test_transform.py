@@ -4,6 +4,7 @@
 import math
 import random
 from collections import defaultdict
+from copy import deepcopy
 from enum import Enum
 
 import numpy as np
@@ -986,6 +987,118 @@ class TestInstructionGranularitySanitisation:
         n = num_samples + supersampling
 
         assert len(ir.instructions[0].samples) == n
+
+    def test_acquires_with_too_large_custom_pulse_filters_are_sanitised(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(),
+        )
+
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        sample_time = target_data.RESONATOR_DATA.sample_time
+
+        # Make some instructions to test
+        clock_cycle = target_data.clock_cycle
+        supersampling = int(np.round(clock_cycle / sample_time, 0))
+
+        # Make the times
+        num_clock_cycles = np.random.randint(1, 100)
+        num_samples = num_clock_cycles * supersampling + 3
+        acquire_time = num_samples * sample_time
+
+        # Create the builder
+        builder = model.create_builder()
+        filter = CustomPulse(acquire_chan, np.random.rand(num_samples))
+        acquire = Acquire(acquire_chan, time=acquire_time, delay=0.0, filter=filter)
+        builder.add(acquire)
+
+        ir = InstructionGranularitySanitisation(model, target_data).run(builder)
+        assert isinstance(ir.instructions[0], Acquire)
+        assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
+        assert isinstance(ir.instructions[0].filter, CustomPulse)
+        assert len(ir.instructions[0].filter.samples) == num_clock_cycles * supersampling
+        assert np.isclose(ir.instructions[0].duration, ir.instructions[0].filter.duration)
+        assert np.allclose(
+            ir.instructions[0].filter.samples,
+            filter.samples[0 : len(ir.instructions[0].filter.samples)],
+        )
+
+    def test_acquires_with_too_small_custom_pulse_filters_are_sanitised(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(),
+        )
+
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        sample_time = target_data.RESONATOR_DATA.sample_time
+
+        # Make some instructions to test
+        clock_cycle = target_data.clock_cycle
+        supersampling = int(np.round(clock_cycle / sample_time, 0))
+
+        # Make the times
+        num_clock_cycles = np.random.randint(1, 100)
+        num_samples = num_clock_cycles * supersampling + 3
+        acquire_time = num_samples * sample_time
+
+        # Create the builder
+        builder = model.create_builder()
+        filter = CustomPulse(acquire_chan, np.random.rand(num_samples))
+        acquire = Acquire(acquire_chan, time=acquire_time, delay=0.0, filter=filter)
+        builder.add(acquire)
+        filter.samples = filter.samples[: num_samples - 5]
+        samples = deepcopy(filter.samples)
+
+        ir = InstructionGranularitySanitisation(model, target_data).run(builder)
+        assert isinstance(ir.instructions[0], Acquire)
+        assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
+        assert isinstance(ir.instructions[0].filter, CustomPulse)
+        assert len(ir.instructions[0].filter.samples) == num_clock_cycles * supersampling
+        assert np.isclose(ir.instructions[0].duration, ir.instructions[0].filter.duration)
+        assert np.allclose(ir.instructions[0].filter.samples[-2:], [0.0, 0.0])
+        assert np.allclose(ir.instructions[0].filter.samples[:-2], samples)
+
+    def test_acuqires_with_square_filters_are_sanitised(self):
+        # Mock up some channels and a builder
+        model = EchoModelLoader(10).load()
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=10,
+            QUBIT_DATA=QubitDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(),
+        )
+
+        acquire_chan = model.qubits[0].get_acquire_channel()
+        sample_time = target_data.RESONATOR_DATA.sample_time
+
+        # Make some instructions to test
+        clock_cycle = target_data.clock_cycle
+        supersampling = int(np.round(clock_cycle / sample_time, 0))
+
+        # Make the times
+        num_clock_cycles = np.random.randint(1, 100)
+        num_samples = num_clock_cycles * supersampling + 3
+        acquire_time = num_samples * sample_time
+
+        # Create the builder
+        builder = model.create_builder()
+        filter = Pulse(acquire_chan, shape=PulseShapeType.SQUARE, width=acquire_time)
+        acquire = Acquire(acquire_chan, time=acquire_time, delay=0.0, filter=filter)
+        builder.add(acquire)
+
+        ir = InstructionGranularitySanitisation(model, target_data).run(builder)
+        assert isinstance(ir.instructions[0], Acquire)
+        assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
+        assert isinstance(ir.instructions[0].filter, Pulse)
+        assert np.isclose(ir.instructions[0].duration, ir.instructions[0].filter.duration)
 
 
 class TestPhaseResetSanitisation:
