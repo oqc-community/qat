@@ -67,8 +67,8 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 1
-        assert len(res.unassigned) == 1
-        assert res.targets == res.unassigned
+        assert pulse_chan in res.targets
+        assert res.target_map[pulse_chan].physical_channel == phys_chan
 
     def test_no_active_qubits(self):
         builder = self.model.create_builder()

@@ -20,13 +20,12 @@ class ActiveChannelResults(ResultInfoMixin):
     """Stores the active pulse channels in a task, which is defined by pulse channels that
     are acted on by a pulse or acquisition.
 
-    Results are stored as a map between pulse channels and the qubit they belong to. Rogue
-    pulse channels are stored in the `unassigned` attribute. Various helper properties
-    and methods can be used to fetch the complete lists of active pulse channels and qubits.
+    Results are stored as a map between pulse channels and the qubit they belong to. Various
+    helper properties and methods can be used to fetch the complete lists of active pulse
+    channels and qubits.
     """
 
     target_map: dict[PulseChannel, Qubit] = field(default_factory=lambda: dict())
-    unassigned: list[PulseChannel] = field(default_factory=lambda: [])
 
     @property
     def physical_qubit_indices(self) -> set[int]:
@@ -36,7 +35,7 @@ class ActiveChannelResults(ResultInfoMixin):
     @property
     def targets(self) -> list[PulseChannel]:
         """Returns a dictionary of all pulse channels with their full id as a key."""
-        return list(self.target_map.keys()) + self.unassigned
+        return list(self.target_map.keys())
 
     @property
     def qubits(self) -> list[Qubit]:
@@ -91,18 +90,20 @@ class ActivePulseChannelAnalysis(AnalysisPass):
             devices = self.model.get_devices_from_pulse_channel(target)
 
             if len(devices) == 0:
-                device = None
-            else:
-                if len(devices) > 1:
-                    log.warning(
-                        f"Multiple targets found with pulse channel {target}: "
-                        + ", ".join([str(device) for device in devices])
-                        + f". Defaulting to the first quantum device found, {devices[0]}."
-                    )
+                devices = self.model.get_devices_from_physical_channel(
+                    target.physical_channel
+                )
 
-                device = devices[0]
-                if isinstance(device, Resonator):
-                    device = self.model._map_resonator_to_qubit(device)
+            if len(devices) > 1:
+                log.warning(
+                    f"Multiple targets found with pulse channel {target}: "
+                    + ", ".join([str(device) for device in devices])
+                    + f". Defaulting to the first quantum device found, {devices[0]}."
+                )
+
+            device = devices[0]
+            if isinstance(device, Resonator):
+                device = self.model._map_resonator_to_qubit(device)
 
             if device:
                 result.target_map[target] = device

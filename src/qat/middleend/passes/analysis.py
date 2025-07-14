@@ -11,13 +11,12 @@ class ActivePulseChannelResults(ResultInfoMixin):
     """Stores the active pulse channels in a task, which is defined by pulse channels that
     are acted on by a pulse or acquisition.
 
-    Results are stored as a map between pulse channels and the qubit they belong to. Rogue
-    pulse channels are stored in the `unassigned` attribute. Various helper properties
-    and methods can be used to fetch the complete lists of active pulse channels and qubits.
+    Results are stored as a map between pulse channels and the qubit they belong to. Various
+    helper properties and methods can be used to fetch the complete lists of active pulse
+    channels and qubits.
     """
 
     target_map: dict[str, Qubit] = field(default_factory=lambda: dict())
-    unassigned: list[str] = field(default_factory=lambda: [])
 
     @property
     def physical_qubit_indices(self) -> set[int]:
@@ -27,7 +26,7 @@ class ActivePulseChannelResults(ResultInfoMixin):
     @property
     def targets(self) -> list[str]:
         """Returns a dictionary of all pulse channels with their full id as a key."""
-        return list(self.target_map.keys()) + self.unassigned
+        return list(self.target_map.keys())
 
     @property
     def qubits(self) -> list[Qubit]:
