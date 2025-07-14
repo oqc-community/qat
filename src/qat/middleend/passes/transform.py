@@ -499,7 +499,7 @@ class InstructionLengthSanitisation(TransformPass):
     Checks if quantum instructions are too long and splits if necessary.
     """
 
-    def __init__(self, target_data: TargetData):
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """
         :param duration_limit: The maximum allowed clock cycles per instruction.
 
@@ -512,6 +512,22 @@ class InstructionLengthSanitisation(TransformPass):
             pass.
         """
         self.duration_limit = target_data.QUBIT_DATA.pulse_duration_max
+        self.qubit_sample_time = target_data.QUBIT_DATA.sample_time
+        self.resonator_sample_time = target_data.RESONATOR_DATA.sample_time
+        self.is_resonator = self._create_resonator_map(model)
+
+    @staticmethod
+    def _create_resonator_map(model: PhysicalHardwareModel) -> dict[str, bool]:
+        """Creates a mapping between physical channel and pulse channel to specify if the
+        channel is a resonator or not."""
+
+        is_resonator = {}
+        for qubit in model.qubits.values():
+            for pulse_channel in qubit.all_pulse_channels:
+                is_resonator[pulse_channel.uuid] = False
+            for pulse_channel in qubit.resonator.all_pulse_channels:
+                is_resonator[pulse_channel.uuid] = True
+        return is_resonator
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
@@ -531,6 +547,16 @@ class InstructionLengthSanitisation(TransformPass):
                 new_instructions.extend(
                     self._batch_square_pulse(instr, self.duration_limit)
                 )
+
+            elif (
+                isinstance(instr, Pulse)
+                and isinstance(instr.waveform, SampledWaveform)
+                and instr.duration > self.duration_limit
+            ):
+                new_instructions.extend(
+                    self._batch_custom_waveform(instr, self.duration_limit)
+                )
+
             else:
                 new_instructions.append(instr)
         ir.instructions = new_instructions
@@ -564,6 +590,47 @@ class InstructionLengthSanitisation(TransformPass):
         if remainder > 0.0:
             pulse = deepcopy(pulse)
             pulse.update_duration(remainder)
+            batch_instr.append(pulse)
+
+        return batch_instr
+
+    def _batch_custom_waveform(self, instruction: Pulse, max_duration: float):
+        """Breaks up a custom pulse into multiple custom pulses with none exceeding the
+        maximum duration."""
+
+        n_instr = int(instruction.duration // max_duration)
+        remainder = instruction.duration % max_duration
+        sample_time = (
+            self.resonator_sample_time
+            if self.is_resonator[instruction.target]
+            else self.qubit_sample_time
+        )
+        max_samples = int(round(max_duration / sample_time))
+
+        batch_instr = []
+        for i in range(n_instr):
+            waveform = SampledWaveform(
+                samples=instruction.waveform.samples[
+                    i * max_samples : (i + 1) * max_samples
+                ]
+            )
+            pulse = Pulse(
+                targets=instruction.target,
+                waveform=waveform,
+                ignore_channel_scale=instruction.ignore_channel_scale,
+                duration=max_duration,
+            )
+            batch_instr.append(pulse)
+
+        if remainder:
+            num_samples = int(round(remainder / sample_time))
+            waveform = SampledWaveform(samples=instruction.waveform.samples[-num_samples:])
+            pulse = Pulse(
+                targets=instruction.target,
+                waveform=waveform,
+                ignore_channel_scale=instruction.ignore_channel_scale,
+                duration=remainder,
+            )
             batch_instr.append(pulse)
 
         return batch_instr

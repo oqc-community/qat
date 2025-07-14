@@ -1152,51 +1152,45 @@ class TestInactivePulseChannelSanitisation:
 class TestInstructionLengthSanitisation:
     hw = EchoModelLoader(8).load()
 
-    def test_delay_not_sanitised(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
-        target_data = TargetData(
+    @staticmethod
+    def get_target_data(seed):
+        return TargetData(
             max_shots=1000,
             default_shots=10,
             QUBIT_DATA=QubitDescription.random(seed),
             RESONATOR_DATA=ResonatorDescription.random(seed),
         )
+
+    def test_delay_not_sanitised(self, seed):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = self.get_target_data(seed)
         pulse_ch = self.hw.qubits[0].get_acquire_channel()
 
         valid_duration = target_data.QUBIT_DATA.pulse_duration_max / 2
         builder.add(Delay(pulse_ch, valid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(target_data).run(builder)
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
         assert len(builder.instructions) == 1
         assert builder.instructions[0].duration == valid_duration
 
     def test_delay_sanitised_zero_remainder(self, seed):
         builder = QuantumInstructionBuilder(self.hw)
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(seed),
-            RESONATOR_DATA=ResonatorDescription.random(seed),
-        )
+        target_data = self.get_target_data(seed)
         pulse_ch = self.hw.qubits[0].get_acquire_channel()
 
         invalid_duration = target_data.QUBIT_DATA.pulse_duration_max * 2
         builder.add(Delay(pulse_ch, invalid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(target_data).run(builder)
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
         assert len(builder.instructions) == 2
         for instr in builder.instructions:
             assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
 
     def test_delay_sanitised(self, seed):
         builder = QuantumInstructionBuilder(self.hw)
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(seed),
-            RESONATOR_DATA=ResonatorDescription.random(seed),
-        )
+        target_data = self.get_target_data(seed)
         pulse_ch = self.hw.qubits[0].get_acquire_channel()
 
         remainder = random.uniform(1e-06, 2e-06)
@@ -1204,7 +1198,7 @@ class TestInstructionLengthSanitisation:
         builder.add(Delay(pulse_ch, invalid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(target_data).run(builder)
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
         assert len(builder.instructions) == 3
         for instr in builder.instructions[:-1]:
             assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
@@ -1212,30 +1206,20 @@ class TestInstructionLengthSanitisation:
 
     def test_square_pulse_not_sanitised(self, seed):
         builder = QuantumInstructionBuilder(self.hw)
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(seed),
-            RESONATOR_DATA=ResonatorDescription.random(seed),
-        )
+        target_data = self.get_target_data(seed)
         pulse_ch = self.hw.qubits[0].get_acquire_channel()
 
         valid_width = target_data.QUBIT_DATA.pulse_duration_max / 2
         builder.add(Pulse(pulse_ch, shape=PulseShapeType.SQUARE, width=valid_width))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(target_data).run(builder)
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
         assert len(builder.instructions) == 1
         assert builder.instructions[0].width == valid_width
 
     def test_square_pulse_sanitised(self, seed):
         builder = QuantumInstructionBuilder(self.hw)
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(seed),
-            RESONATOR_DATA=ResonatorDescription.random(seed),
-        )
+        target_data = self.get_target_data(seed)
         pulse_ch = self.hw.qubits[0].get_acquire_channel()
 
         remainder = random.uniform(1e-06, 2e-06)
@@ -1243,12 +1227,68 @@ class TestInstructionLengthSanitisation:
         builder.add(Pulse(pulse_ch, shape=PulseShapeType.SQUARE, width=invalid_width))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(target_data).run(builder)
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
         assert len(builder.instructions) == 3
 
         for instr in builder.instructions[:-1]:
             assert instr.width == target_data.QUBIT_DATA.pulse_duration_max
         assert math.isclose(builder.instructions[-1].width, remainder)
+
+    @pytest.mark.parametrize("resonator", [False, True])
+    def test_custom_pulse_not_sanitised(self, seed, resonator):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = self.get_target_data(seed)
+        if resonator:
+            channel = self.hw.qubits[0].get_acquire_channel()
+            max_length = target_data.RESONATOR_DATA.pulse_duration_max
+            sample_time = target_data.RESONATOR_DATA.sample_time
+        else:
+            channel = self.hw.qubits[0].get_drive_channel()
+            max_length = target_data.QUBIT_DATA.pulse_duration_max
+            sample_time = target_data.QUBIT_DATA.sample_time
+
+        samples_per_max_length = int(np.round(max_length / sample_time))
+        num_samples = np.random.randint(1, samples_per_max_length - 1)
+        samples = np.random.rand(num_samples)
+        builder.add(CustomPulse(channel, samples))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        assert len(builder.instructions) == 1
+        assert np.allclose(builder.instructions[0].samples, samples)
+
+    @pytest.mark.parametrize("resonator", [False, True])
+    def test_custom_pulse_sanitised(self, seed, resonator):
+        builder = QuantumInstructionBuilder(self.hw)
+        target_data = self.get_target_data(seed)
+        if resonator:
+            channel = self.hw.qubits[0].get_acquire_channel()
+            max_length = target_data.RESONATOR_DATA.pulse_duration_max
+            sample_time = target_data.RESONATOR_DATA.sample_time
+        else:
+            channel = self.hw.qubits[0].get_drive_channel()
+            max_length = target_data.QUBIT_DATA.pulse_duration_max
+            sample_time = target_data.QUBIT_DATA.sample_time
+
+        samples_per_max_length = int(np.round(max_length / sample_time))
+        excess_samples = np.random.randint(1, samples_per_max_length - 1)
+        time = 2 * max_length + excess_samples * sample_time
+        num_samples = int(round(time / sample_time))
+        samples = np.random.rand(num_samples)
+        builder.add(CustomPulse(channel, samples))
+        assert len(builder.instructions) == 1
+
+        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        assert len(builder.instructions) == 3
+
+        max_samples = int(np.round(max_length / sample_time))
+        for i, instr in enumerate(builder.instructions[:2]):
+            assert len(instr.samples) == max_samples
+            assert np.allclose(
+                instr.samples, samples[i * max_samples : (i + 1) * max_samples]
+            )
+        assert len(builder.instructions[-1].samples) == excess_samples
+        assert np.allclose(builder.instructions[-1].samples, samples[-excess_samples:])
 
 
 class TestSynchronizeTask:
