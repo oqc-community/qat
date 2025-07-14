@@ -56,6 +56,8 @@ class InstructionBuilder(ABC):
             qubit.uuid: idx for (idx, qubit) in hardware_model.qubits.items()
         }
         self._ir = InstructionBlock(instructions=instructions)
+        self.compiled_shots: int | None = None
+        self.shots: int | None = None
 
     @abstractmethod
     def X(

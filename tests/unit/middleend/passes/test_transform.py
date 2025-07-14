@@ -1063,8 +1063,8 @@ class TestPydBatchedShots:
         target_data = AbstractTargetData(max_shots=10000, default_shots=100)
         ir = BatchedShots(target_data).run(builder)
         assert len([inst for inst in ir if isinstance(inst, Repeat)]) == 0
-        assert not hasattr(ir, "shots")
-        assert not hasattr(ir, "compiled_shots")
+        assert ir.shots is None
+        assert ir.compiled_shots is None
 
     @pytest.mark.parametrize("num_shots", [1, 1000, 999, 10000])
     def test_not_batched_with_possible_amount(self, num_shots, model):
