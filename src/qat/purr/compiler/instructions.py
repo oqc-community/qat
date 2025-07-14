@@ -146,8 +146,8 @@ class Repeat(Instruction):
         # TODO: Change in next major release of QAT. COMPILER-428
         if repetition_period:
             log.warning(
-                "The `repetition_period` in `Repeat` will soon be removed in favour of \
-                        `passive_reset_time` in the compiler config."
+                "The `repetition_period` in `Repeat` will soon be removed in favour of "
+                "`passive_reset_time` in the compiler config."
             )
 
     def __repr__(self):
@@ -198,6 +198,19 @@ class PhaseShift(QuantumInstruction):
 
     def __repr__(self):
         return f"phaseshift {self.channel},{self.phase}"
+
+
+class FrequencySet(QuantumInstruction):
+    def __init__(self, channel: "PulseChannel", frequency: float):
+        super().__init__(channel)
+        self.frequency: float = frequency
+
+    @property
+    def channel(self) -> "PulseChannel":
+        return self.quantum_targets[0]
+
+    def __repr__(self):
+        return f"frequencyset {self.channel},{self.frequency}"
 
 
 class FrequencyShift(QuantumInstruction):

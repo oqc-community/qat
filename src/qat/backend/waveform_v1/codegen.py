@@ -47,6 +47,7 @@ from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     CustomPulse,
+    FrequencySet,
     FrequencyShift,
     Instruction,
     PhaseReset,
@@ -175,6 +176,8 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                 context.process_phasereset()
             elif isinstance(instruction, Reset):
                 context.process_reset()
+            elif isinstance(instruction, FrequencySet):
+                context.process_frequencyset(instruction.frequency)
             elif isinstance(instruction, FrequencyShift):
                 context.process_frequencyshift(instruction.frequency)
             else:
@@ -359,6 +362,9 @@ class WaveformContext:
             "The WaveformV1Backend uses a `repetition_time` for resetting, so the reset "
             "instruction will be ignored."
         )
+
+    def process_frequencyset(self, frequency: float):
+        self._frequency = frequency
 
     def process_frequencyshift(self, frequency: float):
         self._frequency += frequency
@@ -705,6 +711,9 @@ class PydWaveformContext:
             "The PydWaveformV1Backend uses a `repetition_time` for resetting, so the reset "
             "instruction will be ignored."
         )
+
+    def process_frequencyset(self, frequency: float):
+        self._frequency = frequency
 
     def process_frequencyshift(self, frequency: float):
         self._frequency += frequency

@@ -430,6 +430,12 @@ class PhaseShift(QuantumInstruction):
     phase: float = 0.0
 
 
+class FrequencySet(QuantumInstruction):
+    """Set the frequency of a pulse channel."""
+
+    frequency: float = 0.0
+
+
 class FrequencyShift(QuantumInstruction):
     """Change the frequency of a pulse channel."""
 

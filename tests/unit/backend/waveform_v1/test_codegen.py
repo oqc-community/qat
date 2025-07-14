@@ -342,6 +342,13 @@ class TestWaveformContext:
         context.process_frequencyshift(0.1 * freq_before)
         assert np.isclose(context._frequency, 1.1 * freq_before)
 
+    def test_frequencyset(self):
+        context = WaveformContext(self.channel, 100)
+        freq_before = context._frequency
+        new_freq = 0.75 * freq_before
+        context.process_frequencyset(new_freq)
+        assert np.isclose(context._frequency, new_freq)
+
     @pytest.mark.parametrize("fixed_if", [True, False])
     def test_upconvert(self, fixed_if):
         # Prepare the channel
