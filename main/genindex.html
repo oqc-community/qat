@@ -1314,6 +1314,8 @@
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.channel">channel (Acquire property)</a>
 
       <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencySet.channel">(FrequencySet property)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift.channel">(FrequencyShift property)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.channel">(PhaseSet property)</a>
@@ -1597,10 +1599,10 @@
         <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmRfConfigHelper.configure_attenuation">(QrmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_attenuation">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.configure_awg">configure_awg() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.configure_awg">configure_awg() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg">[1]</a>
+</li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.configure_connection">configure_connection() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmRfConfigHelper.configure_lo">configure_lo() (QcmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_lo">[1]</a>
@@ -2813,10 +2815,10 @@
         <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.freq_shift">(QubitPulseChannels attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.freq_shift_pulse_channel">freq_shift_pulse_channel (Qubit property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel">FreqShiftPulseChannel (class in qat.model.device)</a>
 
       <ul>
@@ -2834,6 +2836,8 @@
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.Cos.frequency">frequency (Cos attribute)</a>
 
       <ul>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet.frequency">(FrequencySet attribute)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.frequency">(FrequencyShift attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.frequency">(PhysicalBaseband attribute)</a>
@@ -2855,6 +2859,12 @@
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift">frequency_shift() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.frequency_shift">[1]</a>
 </li>
+      <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet">FrequencySet (class in qat.ir.instructions)</a>
+
+      <ul>
+        <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencySet">(class in qat.purr.compiler.instructions)</a>
+</li>
+      </ul></li>
       <li><a href="qat.middleend.passes.purr.validation.html#qat.middleend.passes.purr.validation.FrequencySetupValidation">FrequencySetupValidation (class in qat.middleend.passes.purr.validation)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift">FrequencyShift (class in qat.ir.instructions)</a>
@@ -4836,6 +4846,8 @@
 </li>
         <li><a href="qat.model.device.html#qat.model.device.FreqShiftPulseChannel.model_config">(FreqShiftPulseChannel attribute)</a>
 </li>
+        <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet.model_config">(FrequencySet attribute)</a>
+</li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.model_config">(FrequencyShift attribute)</a>
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.model_config">(FrozenDict attribute)</a>
@@ -6460,8 +6472,6 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.middleend.passes.purr.transform)</a>
 
       <ul>
@@ -6470,6 +6480,8 @@
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.PostProcessingTransform">PostProcessingTransform (class in qat.runtime.passes.transform)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType">PostProcessType (class in qat.purr.compiler.instructions)</a>
@@ -6520,6 +6532,12 @@
         <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.process_delay">(Qasm2Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.process_delay">[1]</a>
 </li>
         <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.process_delay">(WaveformContext method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.PydWaveformContext.process_frequencyset">process_frequencyset() (PydWaveformContext method)</a>
+
+      <ul>
+        <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformContext.process_frequencyset">(WaveformContext method)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.PydWaveformContext.process_frequencyshift">process_frequencyshift() (PydWaveformContext method)</a>
