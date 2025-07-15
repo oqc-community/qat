@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import itertools
 from collections import OrderedDict, defaultdict
-from copy import deepcopy
+from copy import copy, deepcopy
 from numbers import Number
 
 import numpy as np
@@ -508,7 +508,9 @@ class InstructionGranularitySanitisation(TransformPass):
         away the samples that are not needed."""
         for instruction in instructions:
             if isinstance(instruction.filter, Pulse):
-                instruction.filter.width = instruction.duration
+                new_filter = copy(instruction.filter)
+                new_filter.width = instruction.duration
+                instruction.filter = new_filter
             elif isinstance(instruction.filter, CustomPulse):
                 num_samples = int(
                     np.round(
@@ -518,14 +520,16 @@ class InstructionGranularitySanitisation(TransformPass):
                 )
                 if instruction.filter.duration > instruction.duration:
                     # if the filter is longer than the acquire, truncate it
-                    instruction.filter.samples = instruction.filter.samples[:num_samples]
+                    samples = instruction.filter.samples[:num_samples]
                 else:
                     # if the filter is shorter than the acquire, pad it with zeros
-                    new_filter = np.zeros(num_samples, dtype=np.complex128)
-                    new_filter[: len(instruction.filter.samples)] = (
-                        instruction.filter.samples
-                    )
-                    instruction.filter.samples = new_filter
+                    samples = np.zeros(num_samples, dtype=np.complex128)
+                    samples[: len(instruction.filter.samples)] = instruction.filter.samples
+                instruction.filter = CustomPulse(
+                    instruction.filter.channel,
+                    samples,
+                    instruction.filter.ignore_channel_scale,
+                )
 
 
 class InitialPhaseResetSanitisation(TransformPass):

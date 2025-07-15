@@ -1026,6 +1026,7 @@ class TestInstructionGranularitySanitisation:
             ir.instructions[0].filter.samples,
             filter.samples[0 : len(ir.instructions[0].filter.samples)],
         )
+        assert ir.instructions[0].filter is not filter
 
     def test_acquires_with_too_small_custom_pulse_filters_are_sanitised(self):
         # Mock up some channels and a builder
@@ -1065,8 +1066,9 @@ class TestInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[0].duration, ir.instructions[0].filter.duration)
         assert np.allclose(ir.instructions[0].filter.samples[-2:], [0.0, 0.0])
         assert np.allclose(ir.instructions[0].filter.samples[:-2], samples)
+        assert ir.instructions[0].filter is not filter
 
-    def test_acuqires_with_square_filters_are_sanitised(self):
+    def test_acquires_with_square_filters_are_sanitised(self):
         # Mock up some channels and a builder
         model = EchoModelLoader(10).load()
         target_data = TargetData(
@@ -1099,6 +1101,7 @@ class TestInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
         assert isinstance(ir.instructions[0].filter, Pulse)
         assert np.isclose(ir.instructions[0].duration, ir.instructions[0].filter.duration)
+        assert ir.instructions[0].filter is not filter
 
 
 class TestPhaseResetSanitisation:
