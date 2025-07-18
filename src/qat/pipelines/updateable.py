@@ -7,6 +7,7 @@ from pydantic import BaseModel, TypeAdapter
 from qat.backend.base import BaseBackend
 from qat.core.metrics_base import MetricsManager
 from qat.engines.native import NativeEngine
+from qat.executables import Executable
 from qat.frontend.base import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -16,7 +17,6 @@ from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.base import BaseRuntime
-from qat.runtime.executables import Executable
 
 
 class PipelineConfig(BaseModel):

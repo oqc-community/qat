@@ -6,13 +6,13 @@ from qat.backend import WaveformV1Backend
 from qat.backend.base import BaseBackend
 from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
+from qat.executables import AcquireData, AcquireMode, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
 from qat.middleend import DefaultMiddleend, FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import SimpleRuntime
-from qat.runtime.executables import AcquireData, AcquireMode, Executable
 
 
 class MockExecutable(Executable):

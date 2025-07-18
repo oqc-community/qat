@@ -4,8 +4,8 @@
 import numpy as np
 
 from qat.engines.zero import ZeroEngine, readout_shape
+from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.purr.compiler.instructions import AcquireMode
-from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 
 
 class TestReadoutShape:

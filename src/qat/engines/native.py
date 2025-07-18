@@ -5,7 +5,7 @@ from typing import Dict
 
 import numpy as np
 
-from qat.runtime.executables import Executable
+from qat.executables import Executable
 
 
 class NativeEngine(ABC):

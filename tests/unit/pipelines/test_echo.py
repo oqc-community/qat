@@ -8,6 +8,7 @@ from qat import QAT
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend, WaveformV1Backend
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.engines.waveform_v1 import EchoEngine
+from qat.executables import Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
@@ -18,7 +19,6 @@ from qat.model.target_data import TargetData
 from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig, ExperimentalEchoPipeline
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import SimpleRuntime
-from qat.runtime.executables import Executable
 
 from tests.unit.utils.qasm_qir import (
     get_pipeline_tests,

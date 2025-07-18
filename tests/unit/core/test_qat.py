@@ -20,6 +20,7 @@ from qat.core.config.session import QatSessionConfig
 from qat.core.pipeline import HardwareLoaders, PipelineSet
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
+from qat.executables import ChannelExecutable, Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
@@ -27,7 +28,6 @@ from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
-from qat.runtime.executables import ChannelExecutable, Executable
 
 
 class MockEngine(NativeEngine):

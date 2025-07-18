@@ -3,6 +3,7 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.ir.instructions import Assign as PydAssign
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import PostProcessing
@@ -11,7 +12,6 @@ from qat.purr.compiler.instructions import (
     PostProcessType,
     ProcessAxis,
 )
-from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     InlineResultsProcessingTransform,

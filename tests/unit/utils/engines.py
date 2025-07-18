@@ -3,7 +3,7 @@ from pydantic import BaseModel, validate_call
 
 from qat.engines.native import NativeEngine
 from qat.engines.zero import ZeroEngine
-from qat.runtime.executables import Executable
+from qat.executables import Executable
 
 
 class CblamConfig(BaseModel):

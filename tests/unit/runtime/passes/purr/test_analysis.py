@@ -2,9 +2,9 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.core.result_base import ResultManager
+from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.ir.measure import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.purr.analysis import IndexMappingAnalysis, IndexMappingResult
 
 

@@ -35,6 +35,7 @@ from qat.backend.qblox.passes.analysis import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import InvokerMixin, PassManager
 from qat.core.result_base import ResultManager
+from qat.executables import Executable
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -63,7 +64,6 @@ from qat.purr.compiler.instructions import (
     calculate_duration,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.runtime.executables import Executable
 
 log = get_default_logger()
 

@@ -3,9 +3,9 @@
 import numpy as np
 
 from qat.engines.native import NativeEngine
+from qat.executables import AcquireData, Executable
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
-from qat.runtime.executables import AcquireData, Executable
 
 log = get_default_logger()
 

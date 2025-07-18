@@ -12,13 +12,13 @@ from compiler_config.config import (
 
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
+from qat.executables import Executable
 from qat.ir.instructions import Variable
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import is_generated_name
-from qat.runtime.executables import Executable
 from qat.runtime.passes.purr.analysis import IndexMappingResult
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
 from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list

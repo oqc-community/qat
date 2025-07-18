@@ -18,6 +18,7 @@ from qat.backend.waveform_v1.codegen import (
 )
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.executables import AcquireData
 from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays,
@@ -38,7 +39,6 @@ from qat.purr.compiler.instructions import (
     ResultsProcessing,
     Return,
 )
-from qat.runtime.executables import AcquireData
 
 from tests.unit.utils.pulses import pulse_attributes
 

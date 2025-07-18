@@ -8,9 +8,9 @@ from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.executables import Executable
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.executables import Executable
 
 
 class BaseBackend(abc.ABC):

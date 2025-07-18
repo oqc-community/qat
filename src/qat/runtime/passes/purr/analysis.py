@@ -8,12 +8,12 @@ from compiler_config.config import CompilerConfig
 
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
+from qat.executables import Executable
 from qat.purr.backends.calibrations.remote import find_calibration
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import CalibrationWithArgs
-from qat.runtime.executables import Executable
 
 
 @dataclass

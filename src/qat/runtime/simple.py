@@ -7,9 +7,9 @@ import numpy as np
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.executables import Executable
 from qat.runtime import BaseRuntime, ResultsAggregator
 from qat.runtime.connection import ConnectionMode
-from qat.runtime.executables import Executable
 
 
 class SimpleRuntime(BaseRuntime):

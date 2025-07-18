@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
+from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.utils.pydantic import ComplexNDArray
 
 

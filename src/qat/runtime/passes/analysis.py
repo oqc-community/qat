@@ -7,10 +7,10 @@ from typing import Union
 
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
+from qat.executables import Executable
 from qat.ir.instruction_builder import InstructionBuilder
 from qat.ir.measure import Acquire
 from qat.model.hardware_model import PhysicalHardwareModel
-from qat.runtime.executables import Executable
 
 
 @dataclass

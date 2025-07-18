@@ -9,9 +9,9 @@ import numpy as np
 from qat.core.config.configure import get_config
 from qat.core.pass_base import PassManager
 from qat.engines import ConnectionMixin, NativeEngine
+from qat.executables import AcquireData
 from qat.purr.compiler.instructions import AcquireMode
 from qat.runtime.connection import ConnectionMode
-from qat.runtime.executables import AcquireData
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
     InlineResultsProcessingTransform,

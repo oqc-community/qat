@@ -28,6 +28,7 @@ from qat.backend.waveform_v1.executable import (
 )
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
+from qat.executables import AcquireData
 from qat.ir.instructions import Assign
 from qat.ir.instructions import FrequencyShift as PydFrequencyShift
 from qat.ir.instructions import PhaseReset as PydPhaseReset
@@ -58,7 +59,6 @@ from qat.purr.compiler.instructions import (
     Waveform,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.runtime.executables import AcquireData
 from qat.utils.waveform import NumericFunction
 
 log = get_default_logger()

@@ -3,10 +3,10 @@
 import pytest
 
 from qat.core.result_base import ResultManager
+from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import AcquireMode
 from qat.model.loaders.converted import PydEchoModelLoader
-from qat.runtime.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 
 
