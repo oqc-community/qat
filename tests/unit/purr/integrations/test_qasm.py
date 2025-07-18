@@ -718,18 +718,20 @@ class TestQASM3:
 class TestParsing:
     echo = get_default_echo_hardware(6)
 
-    def test_compare_tket_parser(self):
-        for file in get_all_qasm2_paths():
-            qasm = get_qasm2(file)
-            circ = None
-            try:
-                circ = circuit_from_qasm_str(qasm)
-            except Exception:
-                pass
+    @pytest.mark.parametrize("file_name", get_all_qasm2_paths(), ids=lambda val: val.name)
+    def test_compare_tket_parser(self, file_name):
+        if file_name.name == "example_if.qasm":
+            pytest.skip(reason="If's not supported")
+        qasm = get_qasm2(file_name)
+        circ = None
+        try:
+            circ = circuit_from_qasm_str(qasm)
+        except Exception:
+            pass
 
-            tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm)
-            if circ is not None:
-                assert circ.n_gates <= tket_builder.circuit.n_gates
+        tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm)
+        if circ is not None:
+            assert circ.n_gates <= tket_builder.circuit.n_gates
 
     def test_invalid_gates(self):
         with pytest.raises(ValueError):
@@ -745,8 +747,12 @@ class TestParsing:
         builder = parse_and_apply_optimizations("parallel_test.qasm", qubit_count=8)
         assert 2116 == len(builder.instructions)
 
+    def test_mid_circuit_measurements(self):
+        with pytest.raises(ValueError, match="No mid-circuit measurements allowed."):
+            parse_and_apply_optimizations("mid_circuit_measure.qasm")
+
     def test_example_if(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="IfElseOp is not currently supported."):
             parse_and_apply_optimizations("example_if.qasm")
 
     def test_move_measurements(self):
@@ -767,7 +773,7 @@ class TestParsing:
         assert list(ret_node.variables) == ["a", "b", "c"]
 
     def test_restrict_if(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="If's are currently unable to be used."):
             RestrictedQasm2Parser(disable_if=True).parse(
                 get_builder(self.echo), get_qasm2("example_if.qasm")
             )

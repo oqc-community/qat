@@ -24,6 +24,7 @@ from qiskit.circuit import (
     ClassicalRegister,
     Delay,
     Gate,
+    IfElseOp,
     Measure,
     QuantumRegister,
     Reset,
@@ -384,6 +385,12 @@ class Qasm2Parser(AbstractParser):
 
         circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
         program = circuit_to_dag(circ)
+        # TODO: Drop conversion when we update to Qiskit 2.x - COMPILER-425
+        from qiskit.transpiler.passes.utils.convert_conditions_to_if_ops import (
+            ConvertConditionsToIfOps,
+        )
+
+        program = ConvertConditionsToIfOps().run(program)
 
         self._cached_parses[qasm_id] = program
         return program
@@ -539,7 +546,6 @@ class Qasm2Parser(AbstractParser):
                 elif isinstance(register, ClassicalRegister):
                     self.process_creg(register, context, builder)
         elif isinstance(node, DAGOpNode):
-            kwargs.update(self._get_conditions(node, context))
             match node.op:
                 case Delay():
                     self.process_delay(node, context, builder, **kwargs)
@@ -553,21 +559,14 @@ class Qasm2Parser(AbstractParser):
                     self.process_unitary(node, context, builder, **kwargs)
                 case CXGate():
                     self.process_cnot(node, context, builder, **kwargs)
+                case IfElseOp():
+                    raise ValueError("IfElseOp is not currently supported.")
                 case Gate():
                     self.process_gate(node, context, builder, **kwargs)
                 case _:
                     raise NotImplementedError(
                         "DAGNode action not implemented for '{type(node)}'."
                     )
-
-    def _get_conditions(self, node: DAGOpNode, context: QasmContext) -> dict:
-        conditions = None
-        if (op := node.op).condition is not None:
-            conditions = {
-                "condition_bits": self._get_clbits(op.condition_bits, context),
-                "condition_value": op.condition[1],
-            }
-        return {"conditions": conditions}
 
     def _get_parameters(self, node: DAGOpNode, context: QasmContext) -> list:
         """Get the params of a gate. These are the non-qubit values of a gate."""
@@ -643,7 +642,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
                 )
 
         if self.disable_if and any(
-            [node.op for node in circ.op_nodes() if node.op.condition is not None]
+            [node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)]
         ):
             raise ValueError("If's are currently unable to be used.")
 

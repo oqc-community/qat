@@ -71,9 +71,14 @@ class TestQasm2Parser:
         assert count_number_of_pulses(builder, "drive") == 100  # we have 100 'sx gates
         assert count_number_of_pulses(builder, "measure") == 2
 
+    def test_mid_circuit_measurements(self, n_qubits, seed):
+        hw = generate_hw_model(n_qubits, seed=seed)
+        with pytest.raises(ValueError, match="No mid-circuit measurements allowed."):
+            parse_qasm2_and_apply_optimisations("mid_circuit_measure.qasm", hw)
+
     def test_example_if(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="IfElseOp is not currently supported."):
             parse_qasm2_and_apply_optimisations("example_if.qasm", hw)
 
     def test_random_n5_d5(self, n_qubits, seed):
@@ -86,7 +91,7 @@ class TestQasm2Parser:
 
     def test_restrict_if(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="If's are currently unable to be used."):
             RestrictedQasm2Parser(disable_if=True).parse(
                 QuantumInstructionBuilder(hardware_model=hw), get_qasm2("example_if.qasm")
             )

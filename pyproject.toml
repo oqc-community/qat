@@ -188,21 +188,19 @@ filterwarnings = [
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
     # TODO: Watch Qiskit BasicSimulator file for update to the new run flow. COMPILER-298
     'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
-    # Qiskit Experiment using deprecated version of PulseBackendConfiguration
+    # TODO: Evaluate if this warning requires action from our point. COMPILER-425
+    ## Qiskit Experiment using deprecated version of PulseBackendConfiguration
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
-    # Qiskit internal usage of deprecated of DAG Circuit fields
+    ## Qiskit internal usage of deprecated of DAG Circuit fields
     'default:.*qiskit\.dagcircuit\.dagcircuit\.DAGCircuit\.:DeprecationWarning:qiskit:',
-    # Qiskit internal usage of deprecated of Instruction field
+    ## Qiskit internal usage of deprecated of Instruction field
     'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qiskit.*:',
-    # TODO: Evaluate if this warning requires action from our point. COMPILER-198
-    'default:.*Conditioned gates:FutureWarning:qiskit:',
-    'default:.*Conditioned gates:FutureWarning:qat.purr.integrations.qasm:',
-    'default:.*Conditioned gates:FutureWarning:qat.frontend.parsers.qasm:',
-    'default:.*qiskit\.circuit\.singleton\._SingletonInstructionOverrides\.c_if:DeprecationWarning:qiskit:',
-    'default:.*qiskit\.circuit\.instruction\.Instruction\.c_if:DeprecationWarning::',
-    # TODO: Resolve usage of deprecated Qiskit Instruction field. COMPILER-197
-    'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qat.purr.integrations.qasm:',
-    'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qat.frontend.parsers.qasm:',
+    'default:.*qiskit\.circuit\.singleton\._SingletonInstructionOverrides\.c_if:DeprecationWarning:qiskit.qasm2.parse:264',
+    'default:.*qiskit\.circuit\.instruction\.Instruction\.c_if:DeprecationWarning:qiskit.circuit.singleton:495',
+    # TODO: Resolve usage of deprecated Qiskit Transform Pass. COMPILER-425
+    'default:.*Conditioned gates:FutureWarning:qat.purr.integrations.qasm:386',
+    'default:.*Conditioned gates:FutureWarning:qat.frontend.parsers.qasm:59',
+    'default:.*qiskit\.transpiler\.passes\.utils\.convert_conditions_to_if_ops:DeprecationWarning:qiskit.transpiler.basepasses:51',
     # Lark using deprecated version on sre_parse and sre_constants
     'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
     # DOcplex using deprecated escape sequence

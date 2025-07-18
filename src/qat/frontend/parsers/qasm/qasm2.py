@@ -10,6 +10,7 @@ from qiskit.circuit import (
     ClassicalRegister,
     Delay,
     Gate,
+    IfElseOp,
     Measure,
     QuantumRegister,
     Reset,
@@ -57,6 +58,12 @@ class Qasm2Parser(AbstractParser):
 
         circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
         program = circuit_to_dag(circ)
+        # TODO: Drop conversion when we update to Qiskit 2.x - COMPILER-425
+        from qiskit.transpiler.passes.utils.convert_conditions_to_if_ops import (
+            ConvertConditionsToIfOps,
+        )
+
+        program = ConvertConditionsToIfOps().run(program)
 
         self._cached_parses[qasm_id] = program
         return program
@@ -259,6 +266,8 @@ class Qasm2Parser(AbstractParser):
                     self.process_unitary(node, context, builder, **kwargs)
                 case CXGate():
                     self.process_cnot(node, context, builder, **kwargs)
+                case IfElseOp():
+                    raise ValueError("IfElseOp is not currently supported.")
                 case Gate():
                     self.process_gate(node, context, builder, **kwargs)
                 case _:
@@ -340,7 +349,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
                 )
 
         if self.disable_if and any(
-            [node.op for node in circ.op_nodes() if node.op.condition is not None]
+            [node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)]
         ):
             raise ValueError("If's are currently unable to be used.")
 
