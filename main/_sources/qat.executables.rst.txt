@@ -1,0 +1,7 @@
+qat.executables module
+======================
+
+.. automodule:: qat.executables
+   :members:
+   :undoc-members:
+   :show-inheritance:

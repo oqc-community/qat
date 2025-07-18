@@ -352,7 +352,6 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -370,6 +369,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html">qat.executables module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
 </ul>
 </li>
@@ -898,13 +898,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html#qat.runtime.connection.ConnectionMode"><code class="docutils literal notranslate"><span class="pre">ConnectionMode</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.AcquireData"><code class="docutils literal notranslate"><span class="pre">AcquireData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.ChannelData"><code class="docutils literal notranslate"><span class="pre">ChannelData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable"><code class="docutils literal notranslate"><span class="pre">ChannelExecutable</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable"><code class="docutils literal notranslate"><span class="pre">Executable</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime"><code class="docutils literal notranslate"><span class="pre">LegacyRuntime</span></code></a></li>
 </ul>
@@ -1031,6 +1024,42 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.executables.html">qat.executables module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData"><code class="docutils literal notranslate"><span class="pre">AcquireData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData.length"><code class="docutils literal notranslate"><span class="pre">AcquireData.length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData.mode"><code class="docutils literal notranslate"><span class="pre">AcquireData.mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData.model_config"><code class="docutils literal notranslate"><span class="pre">AcquireData.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData.output_variable"><code class="docutils literal notranslate"><span class="pre">AcquireData.output_variable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData.position"><code class="docutils literal notranslate"><span class="pre">AcquireData.position</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelData"><code class="docutils literal notranslate"><span class="pre">ChannelData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelData.acquires"><code class="docutils literal notranslate"><span class="pre">ChannelData.acquires</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelData.model_config"><code class="docutils literal notranslate"><span class="pre">ChannelData.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelExecutable"><code class="docutils literal notranslate"><span class="pre">ChannelExecutable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelExecutable.acquires"><code class="docutils literal notranslate"><span class="pre">ChannelExecutable.acquires</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelExecutable.channel_data"><code class="docutils literal notranslate"><span class="pre">ChannelExecutable.channel_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.ChannelExecutable.model_config"><code class="docutils literal notranslate"><span class="pre">ChannelExecutable.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.executables.html#qat.executables.Executable"><code class="docutils literal notranslate"><span class="pre">Executable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.acquires"><code class="docutils literal notranslate"><span class="pre">Executable.acquires</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.assigns"><code class="docutils literal notranslate"><span class="pre">Executable.assigns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.calibration_id"><code class="docutils literal notranslate"><span class="pre">Executable.calibration_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.compiled_shots"><code class="docutils literal notranslate"><span class="pre">Executable.compiled_shots</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.deserialize"><code class="docutils literal notranslate"><span class="pre">Executable.deserialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.model_config"><code class="docutils literal notranslate"><span class="pre">Executable.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.post_processing"><code class="docutils literal notranslate"><span class="pre">Executable.post_processing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.results_processing"><code class="docutils literal notranslate"><span class="pre">Executable.results_processing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.returns"><code class="docutils literal notranslate"><span class="pre">Executable.returns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.serialize"><code class="docutils literal notranslate"><span class="pre">Executable.serialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html#qat.executables.Executable.shots"><code class="docutils literal notranslate"><span class="pre">Executable.shots</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.extensions.html#qat.extensions.QatExtension"><code class="docutils literal notranslate"><span class="pre">QatExtension</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html#qat.extensions.QatExtension.load"><code class="docutils literal notranslate"><span class="pre">QatExtension.load()</span></code></a></li>

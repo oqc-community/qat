@@ -351,7 +351,6 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.connection.html">qat.runtime.connection module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -369,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.executables.html">qat.executables module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../qat.extensions.html">qat.extensions module</a></li>
 </ul>
 </li>
@@ -649,7 +649,7 @@ method,</p>
 </pre></div>
 </div>
 <p>The package returned from a backend is referred to as an
-<a class="reference internal" href="../qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>. They are Pydantic data classes
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code>. They are Pydantic data classes
 that contain all the information needed to execute a program, including the instructions
 needed by the control hardware (or simulator), and the classical post-processing
 instructions required by the runtime needed to interpret and process the results (see the

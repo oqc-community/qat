@@ -351,7 +351,6 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -369,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html">qat.executables module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
 </ul>
 </li>
@@ -424,7 +424,7 @@ just filled with zeros.</p>
 <dd><p>Execute an <code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code>, returning zeros for all readouts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.engines.zero.ZeroEngine.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.engines.zero.ZeroEngine.execute.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.Executable" title="qat.runtime.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The compiled executable containing acquisitions.</p>
+<dd class="field-odd"><p><span class="target" id="qat.engines.zero.ZeroEngine.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.engines.zero.ZeroEngine.execute.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.executables.html#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The compiled executable containing acquisitions.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
@@ -444,7 +444,7 @@ just filled with zeros.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.engines.zero.readout_shape.params.acquire"></span><strong>acquire</strong><a class="paramlink headerlink reference internal" href="#qat.engines.zero.readout_shape.params.acquire">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.AcquireData" title="qat.runtime.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a></span>) – The acquisition information.</p></li>
+<li><p><span class="target" id="qat.engines.zero.readout_shape.params.acquire"></span><strong>acquire</strong><a class="paramlink headerlink reference internal" href="#qat.engines.zero.readout_shape.params.acquire">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData" title="qat.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a></span>) – The acquisition information.</p></li>
 <li><p><span class="target" id="qat.engines.zero.readout_shape.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.engines.zero.readout_shape.params.shots">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The number of shots being executed.</p></li>
 </ul>
 </dd>

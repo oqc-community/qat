@@ -31,4 +31,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.executables
    qat.extensions

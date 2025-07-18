@@ -348,7 +348,6 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -366,6 +365,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html">qat.executables module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
 </ul>
 </li>
@@ -540,18 +540,18 @@
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.acquire_weighed">acquire_weighed() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed">[1]</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData">AcquireData (class in qat.runtime.executables)</a>
+      <li><a href="qat.executables.html#qat.executables.AcquireData">AcquireData (class in qat.executables)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode">AcquireMode (class in qat.purr.compiler.instructions)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel">AcquirePulseChannel (class in qat.model.device)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData.acquires">acquires (ChannelData attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.ChannelData.acquires">acquires (ChannelData attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.acquires">(ChannelExecutable property)</a>
+        <li><a href="qat.executables.html#qat.executables.ChannelExecutable.acquires">(ChannelExecutable property)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.acquires">(Executable property)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.acquires">(Executable property)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires">(qat.backend.waveform_v1.executable.WaveformV1ChannelData parameter)</a>
 </li>
@@ -878,14 +878,14 @@
 </li>
       <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.AssignResultsTransform">AssignResultsTransform (class in qat.runtime.passes.transform)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.assigns">assigns (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.assigns">assigns (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.assigns">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.assigns">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.assigns">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TriageResult.assigns">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.assigns">[1]</a>
 </li>
@@ -1252,14 +1252,14 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.calibration_grammar_declaration">calibration_grammar_declaration() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.calibration_grammar_declaration">[1]</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.calibration_id">calibration_id (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.calibration_id">calibration_id (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.calibration_id">(InstructionBuilder property)</a>
 </li>
         <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.LogicalHardwareModel.calibration_id">(LogicalHardwareModel attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.calibration_id">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.calibration_id">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper.calibration_id">(QiskitBuilderWrapper property)</a>
 </li>
@@ -1328,19 +1328,19 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform.channel">(Waveform property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.channel_data">channel_data (ChannelExecutable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.ChannelExecutable.channel_data">channel_data (ChannelExecutable attribute)</a>
 
       <ul>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.channel_data">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.channel_data">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.channel_data">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.channel_data">(WaveformV1Executable attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData">ChannelData (class in qat.runtime.executables)</a>
+      <li><a href="qat.executables.html#qat.executables.ChannelData">ChannelData (class in qat.executables)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable">ChannelExecutable (class in qat.runtime.executables)</a>
+      <li><a href="qat.executables.html#qat.executables.ChannelExecutable">ChannelExecutable (class in qat.executables)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses.params.channels">channels (qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses parameter)</a>
 </li>
@@ -1478,14 +1478,14 @@
         <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.compile">(UpdateablePipeline method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.compiled_shots">compiled_shots (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.compiled_shots">compiled_shots (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.compiled_shots">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.compiled_shots">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.compiled_shots">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.compiled_shots">(qat.executables.Executable parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile.params.compiler_config">compiler_config (qat.core.qat.QAT.compile parameter)</a>
@@ -2164,7 +2164,7 @@
       </ul></li>
       <li><a href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.description">description (WaveformDef attribute)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.deserialize">deserialize() (Executable class method)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.deserialize">deserialize() (Executable class method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.deserialize">(InstructionBuilder static method)</a>
@@ -2632,7 +2632,7 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.CouplingType.Exchange">Exchange (CouplingType attribute)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable">Executable (class in qat.runtime.executables)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable">Executable (class in qat.executables)</a>
 </li>
       <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.execute.params.executable">executable (qat.pipelines.updateable.UpdateablePipeline.execute parameter)</a>
 </li>
@@ -4064,10 +4064,10 @@
 </li>
       <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime">LegacyRuntime (class in qat.runtime.legacy)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.length">length (AcquireData attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.AcquireData.length">length (AcquireData attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.length">(qat.runtime.executables.AcquireData parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.params.length">(qat.executables.AcquireData parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Sweep.length">(Sweep property)</a>
 </li>
@@ -4629,13 +4629,13 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.mode">mode (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.mode">(AcquireData attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.mode">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Measure.mode">(Measure attribute)</a>
 </li>
-        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure.params.mode">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.params.mode">(qat.executables.AcquireData parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.mode">(qat.runtime.executables.AcquireData parameter)</a>
+        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure.params.mode">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure parameter)</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.get_axis_map.params.mode">(qat.runtime.post_processing.get_axis_map parameter)</a>
 </li>
@@ -4789,7 +4789,7 @@
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.model_config">(Acquire attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.model_config">(AcquireData attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.model_config">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.AcquirePulseChannel.model_config">(AcquirePulseChannel attribute)</a>
 </li>
@@ -4817,9 +4817,9 @@
 </li>
         <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.model_config">(CalibratablePulse attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelData.model_config">(ChannelData attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.ChannelData.model_config">(ChannelData attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable.model_config">(ChannelExecutable attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.ChannelExecutable.model_config">(ChannelExecutable attribute)</a>
 </li>
         <li><a href="qat.core.config.descriptions.html#id2">(ClassDescription attribute)</a>, <a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ClassDescription.model_config">[1]</a>
 </li>
@@ -4869,7 +4869,7 @@
 </li>
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.model_config">(ErrorMitigation attribute)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.model_config">(Executable attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.model_config">(Executable attribute)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_config">(ExtraSoftSquareFunction attribute)</a>
 </li>
@@ -5338,6 +5338,8 @@
 </li>
         <li><a href="qat.engines.zero.html#module-qat.engines.zero">qat.engines.zero</a>
 </li>
+        <li><a href="qat.executables.html#module-qat.executables">qat.executables</a>
+</li>
         <li><a href="qat.extensions.html#module-qat.extensions">qat.extensions</a>
 </li>
         <li><a href="qat.frontend.html#module-qat.frontend">qat.frontend</a>
@@ -5649,8 +5651,6 @@
         <li><a href="qat.runtime.base.html#module-qat.runtime.base">qat.runtime.base</a>
 </li>
         <li><a href="qat.runtime.connection.html#module-qat.runtime.connection">qat.runtime.connection</a>
-</li>
-        <li><a href="qat.runtime.executables.html#module-qat.runtime.executables">qat.runtime.executables</a>
 </li>
         <li><a href="qat.runtime.legacy.html#module-qat.runtime.legacy">qat.runtime.legacy</a>
 </li>
@@ -6082,13 +6082,13 @@
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.output_variable">output_variable (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.output_variable">(AcquireData attribute)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.output_variable">(AcquireData attribute)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.output_variable">(PostProcessing attribute)</a>
 </li>
-        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.params.output_variable">(qat.executables.AcquireData parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.output_variable">(qat.runtime.executables.AcquireData parameter)</a>
+        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z parameter)</a>
 </li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.output_variable">(SimpleAcquire attribute)</a>
 </li>
@@ -6485,20 +6485,20 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.position">position (AcquireData attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.AcquireData.position">position (AcquireData attribute)</a>
 
       <ul>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.AcquireData.params.position">(qat.runtime.executables.AcquireData parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.AcquireData.params.position">(qat.executables.AcquireData parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData">PositionData (class in qat.purr.backends.utilities)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.post_processing">post_processing (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.post_processing">post_processing (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.post_processing">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.post_processing">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.post_processing">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_processing.params.post_processing">(qat.runtime.post_processing.apply_post_processing parameter)</a>
 </li>
@@ -7364,6 +7364,13 @@
 </li>
       </ul></li>
       <li>
+    qat.executables
+
+      <ul>
+        <li><a href="qat.executables.html#module-qat.executables">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.extensions
 
       <ul>
@@ -8000,6 +8007,8 @@
         <li><a href="qat.purr.backends.calibrations.html#module-qat.purr.backends.calibrations">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.calibrations.remote
 
@@ -8007,8 +8016,6 @@
         <li><a href="qat.purr.backends.calibrations.remote.html#module-qat.purr.backends.calibrations.remote">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.purr.backends.echo
 
@@ -8455,13 +8462,6 @@
 
       <ul>
         <li><a href="qat.runtime.connection.html#module-qat.runtime.connection">module</a>
-</li>
-      </ul></li>
-      <li>
-    qat.runtime.executables
-
-      <ul>
-        <li><a href="qat.runtime.executables.html#module-qat.runtime.executables">module</a>
 </li>
       </ul></li>
       <li>
@@ -9361,12 +9361,12 @@
         <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime.params.results_pipeline">(qat.runtime.simple.SimpleRuntime parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.results_processing">results_processing (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.results_processing">results_processing (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.results_processing">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.results_processing">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.results_processing">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.results_processing">(ResultsProcessing attribute)</a>
 </li>
@@ -9395,14 +9395,14 @@
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.return_statement">return_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.return_statement">[1]</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.returns">returns (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.returns">returns (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.returns">(PartitionedIR attribute)</a>
 </li>
         <li><a href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns">(qat.backend.waveform_v1.executable.WaveformV1Executable parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.returns">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.returns">(qat.executables.Executable parameter)</a>
 </li>
         <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TriageResult.returns">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.returns">[1]</a>
 </li>
@@ -9999,7 +9999,7 @@
 </li>
       <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.SequentialEndMeasurements">SequentialEndMeasurements (class in qat.middleend.passes.gates.transform)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.serialize">serialize() (Executable method)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.serialize">serialize() (Executable method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.serialize">(InstructionBuilder method)</a>
@@ -10111,7 +10111,7 @@
 </li>
       <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.DummyQbloxControlHardware.shot_pattern">shot_pattern (DummyQbloxControlHardware attribute)</a>
 </li>
-      <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.shots">shots (Executable attribute)</a>
+      <li><a href="qat.executables.html#qat.executables.Executable.shots">shots (Executable attribute)</a>
 
       <ul>
         <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.shots">(PartitionedIR attribute)</a>
@@ -10120,7 +10120,7 @@
 </li>
         <li><a href="qat.engines.zero.html#qat.engines.zero.readout_shape.params.shots">(qat.engines.zero.readout_shape parameter)</a>
 </li>
-        <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.shots">(qat.runtime.executables.Executable parameter)</a>
+        <li><a href="qat.executables.html#qat.executables.Executable.params.shots">(qat.executables.Executable parameter)</a>
 </li>
       </ul></li>
   </ul></td>
