@@ -234,6 +234,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.validators.html">qat.model.validators module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
@@ -1467,8 +1468,16 @@
       </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics">CompilationMetrics (class in qat.purr.compiler.metrics)</a>
 </li>
-      <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile">compile() (QAT method)</a>
+      <li><a href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline.compile">compile() (AbstractPipeline method)</a>
+
+      <ul>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.compile">(Pipeline method)</a>
 </li>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile">(QAT method)</a>
+</li>
+        <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.compile">(UpdateablePipeline method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.compiled_shots">compiled_shots (Executable attribute)</a>
 
       <ul>
@@ -1479,9 +1488,15 @@
         <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable.params.compiled_shots">(qat.runtime.executables.Executable parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.compiler_config">compiler_config (qat.frontend.auto.AutoFrontend.emit parameter)</a>
+      <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile.params.compiler_config">compiler_config (qat.core.qat.QAT.compile parameter)</a>
 
       <ul>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.execute.params.compiler_config">(qat.core.qat.QAT.execute parameter)</a>
+</li>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.run.params.compiler_config">(qat.core.qat.QAT.run parameter)</a>
+</li>
+        <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit.params.compiler_config">(qat.frontend.auto.AutoFrontend.emit parameter)</a>
+</li>
         <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.compiler_config">(qat.frontend.base.BaseFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.compiler_config">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
@@ -1503,6 +1518,14 @@
         <li><a href="qat.middleend.passes.purr.validation.html#qat.middleend.passes.purr.validation.HardwareConfigValidity.run.params.compiler_config">(qat.middleend.passes.purr.validation.HardwareConfigValidity.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.purr.validation.html#qat.middleend.passes.purr.validation.QiskitResultsFormatValidation.run.params.compiler_config">(qat.middleend.passes.purr.validation.QiskitResultsFormatValidation.run parameter)</a>
+</li>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.compile.params.compiler_config">(qat.pipelines.pipeline.Pipeline.compile parameter)</a>
+</li>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.execute.params.compiler_config">(qat.pipelines.pipeline.Pipeline.execute parameter)</a>
+</li>
+        <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.compile.params.compiler_config">(qat.pipelines.updateable.UpdateablePipeline.compile parameter)</a>
+</li>
+        <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.execute.params.compiler_config">(qat.pipelines.updateable.UpdateablePipeline.execute parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.purr.transform.html#qat.runtime.passes.purr.transform.QiskitErrorMitigation.run.params.compiler_config">(qat.runtime.passes.purr.transform.QiskitErrorMitigation.run parameter)</a>
 </li>
@@ -1591,6 +1614,8 @@
         <li><a href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxInstrument.configure">(QbloxInstrument method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmRfConfigHelper.configure_acq">configure_acq() (QrmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_acq">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmRfConfigHelper.configure_attenuation">configure_attenuation() (QcmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper.configure_attenuation">[1]</a>
@@ -1599,8 +1624,6 @@
         <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmRfConfigHelper.configure_attenuation">(QrmRfConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper.configure_attenuation">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.configure_awg">configure_awg() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_awg">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.configure_connection">configure_connection() (QbloxConfigHelper method)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.configure_connection">[1]</a>
@@ -2523,14 +2546,14 @@
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.NewQbloxContext.enter_sweep">enter_sweep() (NewQbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext.enter_sweep">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Equals">Equals (class in qat.ir.instructions)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.ERROR">ERROR (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.error">error() (CompositeLogger method)</a>
@@ -2611,9 +2634,13 @@
 </li>
       <li><a href="qat.runtime.executables.html#qat.runtime.executables.Executable">Executable (class in qat.runtime.executables)</a>
 </li>
-      <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.execute">execute() (BaseRuntime method)</a>
+      <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.execute.params.executable">executable (qat.pipelines.updateable.UpdateablePipeline.execute parameter)</a>
+</li>
+      <li><a href="qat.pipelines.base.html#qat.pipelines.base.AbstractPipeline.execute">execute() (AbstractPipeline method)</a>
 
       <ul>
+        <li><a href="qat.runtime.base.html#qat.runtime.base.BaseRuntime.execute">(BaseRuntime method)</a>
+</li>
         <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.execute">(EchoEngine method)</a>
 </li>
         <li><a href="qat.purr.qat.html#qat.purr.qat.execute">(in module qat.purr.qat)</a>
@@ -2625,6 +2652,8 @@
         <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime.execute">(LegacyRuntime method)</a>
 </li>
         <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine.execute">(NativeEngine method)</a>
+</li>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.execute">(Pipeline method)</a>
 </li>
         <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend.execute">(QASMFrontend method)</a>
 </li>
@@ -2643,6 +2672,8 @@
         <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.execute">(QuantumRuntime method)</a>
 </li>
         <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime.execute">(SimpleRuntime method)</a>
+</li>
+        <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.execute">(UpdateablePipeline method)</a>
 </li>
         <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.execute">(ZeroEngine method)</a>
 </li>
@@ -4583,7 +4614,7 @@
 </li>
       <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_QRM_RF_OFFSET_V">MIN_QRM_RF_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QRM_RF_OFFSET_V">[1]</a>
 </li>
-      <li><a href="qat.core.config.validators.html#qat.core.config.validators.MismatchingHardwareModelException">MismatchingHardwareModelException</a>
+      <li><a href="qat.model.validators.html#qat.model.validators.MismatchingHardwareModelException">MismatchingHardwareModelException</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.mixer">mixer (SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.mixer">[1]</a>
 </li>
@@ -5455,6 +5486,8 @@
 </li>
         <li><a href="qat.model.target_data.html#module-qat.model.target_data">qat.model.target_data</a>
 </li>
+        <li><a href="qat.model.validators.html#module-qat.model.validators">qat.model.validators</a>
+</li>
         <li><a href="qat.pipelines.html#module-qat.pipelines">qat.pipelines</a>
 </li>
         <li><a href="qat.pipelines.base.html#module-qat.pipelines.base">qat.pipelines.base</a>
@@ -6076,10 +6109,14 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.execute.params.package">package (qat.engines.waveform_v1.echo.EchoEngine.execute parameter)</a>
+      <li><a href="qat.core.qat.html#qat.core.qat.QAT.execute.params.package">package (qat.core.qat.QAT.execute parameter)</a>
 
       <ul>
+        <li><a href="qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine.execute.params.package">(qat.engines.waveform_v1.echo.EchoEngine.execute parameter)</a>
+</li>
         <li><a href="qat.engines.zero.html#qat.engines.zero.ZeroEngine.execute.params.package">(qat.engines.zero.ZeroEngine.execute parameter)</a>
+</li>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.execute.params.package">(qat.pipelines.pipeline.Pipeline.execute parameter)</a>
 </li>
         <li><a href="qat.runtime.legacy.html#qat.runtime.legacy.LegacyRuntime.execute.params.package">(qat.runtime.legacy.LegacyRuntime.execute parameter)</a>
 </li>
@@ -6371,6 +6408,12 @@
 </li>
         <li><a href="qat.core.pipeline.html#qat.core.pipeline.PipelineSet.remove.params.pipeline">(qat.core.pipeline.PipelineSet.remove parameter)</a>
 </li>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile.params.pipeline">(qat.core.qat.QAT.compile parameter)</a>
+</li>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.execute.params.pipeline">(qat.core.qat.QAT.execute parameter)</a>
+</li>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.run.params.pipeline">(qat.core.qat.QAT.run parameter)</a>
+</li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.params.pipeline">(qat.frontend.custom.CustomFrontend parameter)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.params.pipeline">(qat.frontend.qasm.BaseQasmFrontend parameter)</a>
@@ -6654,12 +6697,20 @@
       </ul></li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis">ProcessAxis (class in qat.purr.compiler.instructions)</a>
 </li>
-      <li><a href="qat.frontend.passes.analysis.html#qat.frontend.passes.analysis.InputAnalysis.run.params.program">program (qat.frontend.passes.analysis.InputAnalysis.run parameter)</a>
+      <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile.params.program">program (qat.core.qat.QAT.compile parameter)</a>
 
       <ul>
+        <li><a href="qat.core.qat.html#qat.core.qat.QAT.run.params.program">(qat.core.qat.QAT.run parameter)</a>
+</li>
+        <li><a href="qat.frontend.passes.analysis.html#qat.frontend.passes.analysis.InputAnalysis.run.params.program">(qat.frontend.passes.analysis.InputAnalysis.run parameter)</a>
+</li>
         <li><a href="qat.frontend.passes.purr.transform.html#qat.frontend.passes.purr.transform.InputOptimisation.run.params.program">(qat.frontend.passes.purr.transform.InputOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.frontend.passes.purr.transform.html#qat.frontend.passes.purr.transform.Parse.run.params.program">(qat.frontend.passes.purr.transform.Parse.run parameter)</a>
+</li>
+        <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline.compile.params.program">(qat.pipelines.pipeline.Pipeline.compile parameter)</a>
+</li>
+        <li><a href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline.compile.params.program">(qat.pipelines.updateable.UpdateablePipeline.compile parameter)</a>
 </li>
         <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Sequence.program">(Sequence attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.program">[1]</a>
 </li>
@@ -7828,6 +7879,13 @@
 
       <ul>
         <li><a href="qat.model.target_data.html#module-qat.model.target_data">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.model.validators
+
+      <ul>
+        <li><a href="qat.model.validators.html#module-qat.model.validators">module</a>
 </li>
       </ul></li>
       <li>
@@ -10646,6 +10704,8 @@
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQIRParser">TketQIRParser (class in qat.purr.integrations.tket)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter">TketToQatIRConverter (class in qat.purr.integrations.tket)</a>
+</li>
+      <li><a href="qat.core.qat.html#qat.core.qat.QAT.compile.params.to_json">to_json (qat.core.qat.QAT.compile parameter)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.FeatureMetadata.to_json_dict">to_json_dict() (FeatureMetadata method)</a>
 
