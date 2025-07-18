@@ -3,13 +3,33 @@
 import pytest
 
 from qat.backend import WaveformV1Backend
+from qat.backend.base import BaseBackend
+from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
-from qat.frontend import AutoFrontend
-from qat.middleend import DefaultMiddleend
+from qat.frontend import AutoFrontend, FallthroughFrontend
+from qat.middleend import DefaultMiddleend, FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import SimpleRuntime
+from qat.runtime.executables import AcquireData, AcquireMode, Executable
+
+
+class MockExecutable(Executable):
+    returns: list[str] = ["test"]
+
+    @property
+    def acquires(self):
+        return [
+            AcquireData(
+                output_variable="test", mode=AcquireMode.INTEGRATOR, length=254, position=0
+            )
+        ]
+
+
+class MockBackend(BaseBackend):
+    def emit(self, ir, res_mgr=None, met_mgr=None, compiler_config=None):
+        return MockExecutable()
 
 
 class TestPipeline:
@@ -89,3 +109,32 @@ class TestPipeline:
         assert copied_pipeline.backend is pipeline.backend
         assert copied_pipeline.runtime is pipeline.runtime
         assert copied_pipeline.target_data is pipeline.target_data
+
+    @pytest.fixture()
+    def mock_pipeline(self):
+        model = EchoModelLoader(qubit_count=4).load()
+        return Pipeline(
+            name="MockPipeline",
+            model=model,
+            frontend=FallthroughFrontend(model),
+            middleend=FallthroughMiddleend(model),
+            backend=MockBackend(model),
+            runtime=SimpleRuntime(engine=ZeroEngine()),
+            target_data=TargetData.default(),
+        )
+
+    def test_compile(self, mock_pipeline):
+        program = "test"
+        package, metrics = mock_pipeline.compile(program)
+        assert isinstance(package, MockExecutable)
+        assert isinstance(metrics, MetricsManager)
+
+    def test_execute(self, mock_pipeline):
+        mock_executable = MockExecutable()
+        results, metrics = mock_pipeline.execute(mock_executable)
+        assert len(mock_executable.acquires) == 1
+        assert "test" in mock_executable.returns
+        assert isinstance(results, dict)
+        assert "test" in results
+        assert len(results["test"]) == 1000
+        assert isinstance(metrics, MetricsManager)

@@ -146,6 +146,3 @@ def requires_target_data(value: type) -> bool:
     consistent enough with type hinting for this.
     """
     return "target_data" in inspect.signature(value).parameters
-
-
-class MismatchingHardwareModelException(Exception): ...

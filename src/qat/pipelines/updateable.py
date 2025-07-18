@@ -1,9 +1,11 @@
 from abc import abstractmethod
 from typing import get_type_hints
 
+from compiler_config.config import CompilerConfig
 from pydantic import BaseModel, TypeAdapter
 
 from qat.backend.base import BaseBackend
+from qat.core.metrics_base import MetricsManager
 from qat.engines.native import NativeEngine
 from qat.frontend.base import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
@@ -14,6 +16,7 @@ from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.base import BaseRuntime
+from qat.runtime.executables import Executable
 
 
 class PipelineConfig(BaseModel):
@@ -280,3 +283,33 @@ class UpdateablePipeline(AbstractPipeline):
             target_data=target_data if target_data is not None else self.target_data,
             engine=engine,
         )
+
+    def compile(
+        self, program, compiler_config: CompilerConfig | None = None
+    ) -> tuple[Executable, MetricsManager]:
+        """Calls the compile method of the construted pipeline to compile a program into
+        an executable.
+
+        :param program: The source program to compile.
+        :param compiler_config: Configuration options for the compiler, such as optimization
+            and results formatting.
+        :return: A tuple containing the executable of the compiled program for the target
+            device and the metrics manager containing metrics collected during compilation.
+        """
+
+        return self.pipeline.compile(program, compiler_config=compiler_config)
+
+    def execute(
+        self, executable: Executable, compiler_config: CompilerConfig | None = None
+    ) -> tuple[dict, MetricsManager]:
+        """Calls the execute method of the constructed pipeline to execute a compiled
+        program on the target device.
+
+        :param executable: The compiled program to execute.
+        :param compiler_config: Configuration options for the compiler, such as optimization
+            and results formatting.
+        :return: A tuple containing the results of the execution and the metrics manager
+            containing metrics collected during execution.
+        """
+
+        return self.pipeline.execute(executable, compiler_config=compiler_config)

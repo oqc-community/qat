@@ -7,10 +7,8 @@ from compiler_config.config import CompilerConfig
 
 from qat.core.config.configure import get_qatconfig, override_config
 from qat.core.config.session import QatSessionConfig
-from qat.core.config.validators import MismatchingHardwareModelException
 from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import HardwareLoaders, PipelineSet
-from qat.core.result_base import ResultManager
 from qat.pipelines import get_default_pipelines
 from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.builders import InstructionBuilder
@@ -44,39 +42,22 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
         to_json: bool = False,
-    ):
+    ) -> tuple[InstructionBuilder | Executable | str, MetricsManager]:
+        """Compiles a source program into an executable using the specified pipeline.
+
+        :param program: The source program to compile.
+        :param compiler_config: Configuration options for the compiler, such as optimization
+            and results formatting.
+        :param pipeline: The pipeline to use for compilation. Defaults to "default".
+        :param to_json: If True, the output package will be serialized to JSON format.
+        :return: A tuple containing the executable of the compiled program for the target
+            device and the metrics manager containing metrics collected during compilation.
+        """
+
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
-
-            # TODO: Improve metrics and config handling
-            compiler_config = compiler_config or CompilerConfig()
-            metrics_manager = MetricsManager(compiler_config.metrics)
-            compilation_results = ResultManager()
-
-            ir = P.frontend.emit(
-                program,
-                compilation_results,
-                metrics_manager,
-                compiler_config=compiler_config,
-            )
-
-            ir = P.middleend.emit(
-                ir,
-                compilation_results,
-                metrics_manager,
-                compiler_config=compiler_config,
-            )
-
-            package = P.backend.emit(
-                ir,
-                compilation_results,
-                metrics_manager,
-                compiler_config=compiler_config,
-            )
-
-            if to_json:
-                package = package.serialize()
-
+            package, metrics_manager = P.compile(program, compiler_config=compiler_config)
+            package = package.serialize() if to_json else package
             return package, metrics_manager
 
     def execute(
@@ -84,7 +65,17 @@ class QAT:
         package: InstructionBuilder | Executable | str,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
-    ):
+    ) -> tuple[dict, MetricsManager]:
+        """Executes a compiled package on the specified pipeline.
+
+        :param package: The compiled package to execute, which can be provided as a JSON
+            blob.
+        :param compiler_config: Configuration options for the compiler, such as optimization
+            and results formatting.
+        :param pipeline: The pipeline to use for execution. Defaults to "default".
+        :return: A tuple containing the results of the execution and the metrics manager
+        """
+
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
             if isinstance(package, str):
@@ -93,29 +84,24 @@ class QAT:
                     package = InstructionBuilder.deserialize(package)
                 else:
                     package = Executable.deserialize(package)
-            if P.model.calibration_id != package.calibration_id:
-                raise MismatchingHardwareModelException(
-                    f"Hardware id in the executable package '{P.model.calibration_id}'' does not match the hardware id '{package.calibration_id}' used during compilation."
-                )
-
-            compiler_config = compiler_config or CompilerConfig()
-            pp_results = ResultManager()
-            metrics_manager = MetricsManager(compiler_config.metrics)
-
-            results = P.runtime.execute(
-                package,
-                res_mgr=pp_results,
-                met_mgr=metrics_manager,
-                compiler_config=compiler_config,
-            )
-            return results, metrics_manager
+            return P.execute(package, compiler_config=compiler_config)
 
     def run(
         self,
         program,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
-    ):
+    ) -> tuple[dict, MetricsManager]:
+        """Compiles and executes a source program using the specified pipeline.
+
+        :param program: The source program to compile and execute.
+        :param compiler_config: Configuration options for the compiler, such as optimization
+            and results formatting.
+        :param pipeline: The pipeline to use for compilation and execution. Defaults to
+            "default".
+        :return: A tuple containing the results of the execution and the metrics manager
+        """
+
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
             pkg, compile_metrics = self.compile(
