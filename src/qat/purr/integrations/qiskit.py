@@ -5,7 +5,7 @@ import uuid
 from typing import List
 
 from compiler_config.config import CompilerConfig
-from qiskit import QuantumCircuit, assemble, qasm2, transpile
+from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit.providers.basic_provider import BasicProviderJob, BasicSimulator
 from qiskit.result import Result
 from qiskit.result.models import ExperimentResult, ExperimentResultData
@@ -66,44 +66,38 @@ class QatBackend(BasicSimulator):
         self.hardware = hardware
         self.comp_config = comp_config
 
-    def run(self, qobj, **backend_options):
-        if not isinstance(qobj, List):
-            qobj = [qobj]
+    def run(self, run_input, **run_options):
+        if not isinstance(run_input, List):
+            run_input = [run_input]
 
-        if not all(isinstance(val, QuantumCircuit) for val in qobj):
+        if not all(isinstance(val, QuantumCircuit) for val in run_input):
             raise ValueError(
                 "Experiment list contains non QuantumCircuit objects which we can't "
                 "process at this time."
             )
 
-        options_keys = set(dir(self.options))
-        assembled_data = assemble(
-            qobj,
-            self,
-            **{key: val for key, val in backend_options.items() if key in options_keys},
-        )
-
         if self.comp_config is None:
             self.comp_config = CompilerConfig()
-        self.comp_config.repeats = assembled_data.config.shots
+        qiskit_run_options = dict(self.options)
+        for key, value in run_options.items():
+            if key in qiskit_run_options:
+                qiskit_run_options[key] = value
+        self.comp_config.repeats = qiskit_run_options["shots"]
         self.comp_config.results_format.binary_count()
 
-        # Merge the Qiskit header/config info together with the experiment as
-        # represented as a QASM string
         experiment_info = [
             (
                 qasm2.dumps(val),
-                assembled_data.experiments[i].config,
-                assembled_data.experiments[i].header,
+                [creg.name for creg in val.cregs],
             )
-            for i, val in enumerate(qobj)
+            for val in run_input
         ]
 
         results = []
         full_start = time.time()
         status = "COMPLETED"
         try:
-            for circ, exp_config, header in experiment_info:
+            for circ, creg_names in experiment_info:
                 target_hardware = self.hardware or get_default_RTCS_hardware()
                 start = time.time()
                 results_data = execute_qasm(circ, target_hardware, self.comp_config)
@@ -115,9 +109,9 @@ class QatBackend(BasicSimulator):
 
                 # Below, solution for a single classical register. Not sure how qat
                 # deals with multiple cregs.
-                if len(header.creg_sizes) == 1:
-                    creg_label, _ = header.creg_sizes[0]
-                    counts_qat = results_data[creg_label]
+                if len(creg_names) == 1:
+                    creg_name = creg_names[0]
+                    counts_qat = results_data[creg_name]
                     counts_qiskit = dict(
                         (hex(int(key[::-1], 2)), value)
                         for (key, value) in counts_qat.items()
@@ -128,11 +122,10 @@ class QatBackend(BasicSimulator):
                             True,
                             ExperimentResultData(counts=counts_qiskit),
                             status="DONE",
-                            header=header,
-                            name=header.name,
                             time_taken=end - start,
                         )
                     )
+
                 else:
                     results.append(
                         ExperimentResult(
@@ -140,8 +133,6 @@ class QatBackend(BasicSimulator):
                             True,
                             ExperimentResultData(counts=results_data),
                             status="DONE",
-                            header=header,
-                            name=header.name,
                             time_taken=end - start,
                         )
                     )
@@ -157,13 +148,11 @@ class QatBackend(BasicSimulator):
             job_id,
             Result(
                 backend_name=self.name,
-                backend_version=self._configuration.backend_version,
-                qobj_id=assembled_data.qobj_id,
+                backend_version=self.backend_version,
                 job_id=job_id,
                 results=results,
                 status=status,
                 success=any(results) and all(val.success for val in results),
                 time_taken=full_end - full_start,
-                header=assembled_data.header,
             ),
         )

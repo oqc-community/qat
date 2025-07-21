@@ -186,10 +186,8 @@ filterwarnings = [
     # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
     #
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
-    # TODO: Watch Qiskit BasicSimulator file for update to the new run flow. COMPILER-298
-    'default:.*qiskit\.compiler\.assembler\.assemble:DeprecationWarning:qat.purr.integrations.qiskit',
     # TODO: Evaluate if this warning requires action from our point. COMPILER-425
-    ## Qiskit Experiment using deprecated version of PulseBackendConfiguration
+    ## Qiskit Experiment using deprecated version of PulseBackendConfiguration. COMPILER-656
     'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
     ## Qiskit internal usage of deprecated of DAG Circuit fields
     'default:.*qiskit\.dagcircuit\.dagcircuit\.DAGCircuit\.:DeprecationWarning:qiskit:',
