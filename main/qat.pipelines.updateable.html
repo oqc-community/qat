@@ -442,7 +442,9 @@ validated to form a valid model.</p>
 <p>Pipelines are designed to be immutable to maintain performance and prevent errors from
 moving parts. <a class="reference internal" href="#qat.pipelines.updateable.UpdateablePipeline" title="qat.pipelines.updateable.UpdateablePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipeline</span></code></a> provide a mechanism to update and refresh
 pipelines with updated components, such as an updated hardware model, without
-invalidating other components in the pipeline by reconstructing the entire pipeline.</p>
+invalidating other components in the pipeline by reconstructing the entire pipeline.
+It will also inherit the properties and methods of the pipeline it creates, allowing
+it to be used as a drop-in replacement for the original pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -462,35 +464,6 @@ model, defaults to None.</p></li>
 provided.</p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.backend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.backend.base.html#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><span class="pre">BaseBackend</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.backend" title="Link to this definition"></a></dt>
-<dd><p>Return the pipeline instance backend.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.compile">
-<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.compile" title="Link to this definition"></a></dt>
-<dd><p>Calls the compile method of the construted pipeline to compile a program into
-an executable.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.pipelines.updateable.UpdateablePipeline.compile.params.program"></span><strong>program</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.updateable.UpdateablePipeline.compile.params.program">¶</a> – The source program to compile.</p></li>
-<li><p><span class="target" id="qat.pipelines.updateable.UpdateablePipeline.compile.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.updateable.UpdateablePipeline.compile.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Configuration options for the compiler, such as optimization
-and results formatting.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.executables.html#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>, <a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A tuple containing the executable of the compiled program for the target
-device and the metrics manager containing metrics collected during compilation.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.config">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.pipelines.updateable.PipelineConfig" title="qat.pipelines.updateable.PipelineConfig"><span class="pre">PipelineConfig</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.config" title="Link to this definition"></a></dt>
@@ -535,37 +508,8 @@ hardware loader, the loader will not be copied.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.engine">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><span class="pre">NativeEngine</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.engine" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><span class="pre">NativeEngine</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.engine" title="Link to this definition"></a></dt>
 <dd><p>Return the engine of the pipeline.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">executable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.execute" title="Link to this definition"></a></dt>
-<dd><p>Calls the execute method of the constructed pipeline to execute a compiled
-program on the target device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.pipelines.updateable.UpdateablePipeline.execute.params.executable"></span><strong>executable</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.updateable.UpdateablePipeline.execute.params.executable">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.executables.html#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The compiled program to execute.</p></li>
-<li><p><span class="target" id="qat.pipelines.updateable.UpdateablePipeline.execute.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.pipelines.updateable.UpdateablePipeline.execute.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Configuration options for the compiler, such as optimization
-and results formatting.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A tuple containing the results of the execution and the metrics manager
-containing metrics collected during execution.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.frontend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frontend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.frontend.base.html#qat.frontend.base.BaseFrontend" title="qat.frontend.base.BaseFrontend"><span class="pre">BaseFrontend</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.frontend" title="Link to this definition"></a></dt>
-<dd><p>Return the pipeline instance frontend.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -574,10 +518,10 @@ containing metrics collected during execution.</p>
 <dd><p>Check if the pipeline has a loader.</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.middleend">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">middleend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.middleend.middleends.html#qat.middleend.middleends.BaseMiddleend" title="qat.middleend.middleends.BaseMiddleend"><span class="pre">BaseMiddleend</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.middleend" title="Link to this definition"></a></dt>
-<dd><p>Return the pipeline instance middleend.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.is_subtype_of">
+<span class="sig-name descname"><span class="pre">is_subtype_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.is_subtype_of" title="Link to this definition"></a></dt>
+<dd><p>Matches the type against the pipeline produced by the factory.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -594,14 +538,8 @@ containing metrics collected during execution.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.pipeline">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.Pipeline" title="qat.pipelines.pipeline.Pipeline"><span class="pre">Pipeline</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.pipeline" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pipeline</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.pipelines.base.html#qat.pipelines.base.BasePipeline" title="qat.pipelines.base.BasePipeline"><span class="pre">BasePipeline</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.pipeline" title="Link to this definition"></a></dt>
 <dd><p>Return the pipeline instance.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.pipelines.updateable.UpdateablePipeline.runtime">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">runtime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.runtime.base.html#qat.runtime.base.BaseRuntime" title="qat.runtime.base.BaseRuntime"><span class="pre">BaseRuntime</span></a></em><a class="headerlink" href="#qat.pipelines.updateable.UpdateablePipeline.runtime" title="Link to this definition"></a></dt>
-<dd><p>Return the runtime of the pipeline.</p>
 </dd></dl>
 
 <dl class="py property">
