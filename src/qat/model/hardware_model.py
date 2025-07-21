@@ -93,9 +93,11 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._pulse_channel_ids_to_physical_channel = {}
         self._pulse_channel_ids_to_device = {}
         self._qubits_to_qubit_ids = {}
+        self._resonators_to_qubits = {}
 
         for qubit_id, qubit in self.qubits.items():
             self._qubits_to_qubit_ids[qubit] = qubit_id
+            self._resonators_to_qubits[qubit.resonator] = qubit
 
             for device in [qubit, qubit.resonator]:
                 phys_channel = device.physical_channel

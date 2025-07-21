@@ -210,7 +210,7 @@ class Variable(Instruction):
         return Variable(name=str(uuid.uuid4()))
 
     def __repr__(self):
-        return self.name
+        return f"{self.__class__.__name__}(name={self.name}, type={self.var_type}, value={self.value})"
 
     @field_serializer("var_type", when_used="json")
     def _serialise_type(self, var_type: type) -> str:
@@ -246,6 +246,9 @@ class Label(Instruction):
     def with_random_name():
         return Label(name=f"label_{uuid.uuid4()}")
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name={self.name})"
+
 
 class Jump(Instruction):
     """
@@ -268,9 +271,9 @@ class Jump(Instruction):
 
     def __repr__(self):
         if self.condition is not None:
-            return f"jump if {str(self.condition)} -> {str(self.target)}"
+            return f"Jump if {str(self.condition)} -> {str(self.target)}"
         else:
-            return f"jump -> {str(self.target)}"
+            return f"Jump -> {str(self.target)}"
 
 
 class LoopCount(int): ...
@@ -374,7 +377,7 @@ class Assign(Instruction):
         return cls(name=legacy_assign.name, value=recursively_strip(legacy_assign.value))
 
     def __repr__(self):
-        return f"assign {self.name} = {str(self.value)}"
+        return f"Assign {self.name} = {str(self.value)}"
 
 
 ### Quantum Instructions

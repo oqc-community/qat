@@ -109,6 +109,9 @@ class PhysicalChannel(Component):
         sample_time: The rate at which the pulse is sampled.
         block_size: The number of samples within a single block.
         iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.
+
+        acquire_allowed: Whether the physical channel allows acquire operations.
+        swap_readout_iq: Whether to swap the I and Q components for readout operations.
     """
 
     baseband: PhysicalBaseband = Field(frozen=True)
@@ -124,6 +127,13 @@ class PhysicalChannel(Component):
     @property
     def Q_bias(self) -> float:
         return self.iq_voltage_bias.bias.imag
+
+
+class QubitPhysicalChannel(PhysicalChannel): ...
+
+
+class ResonatorPhysicalChannel(PhysicalChannel):
+    swap_readout_iq: bool = False
 
 
 pulse_channel_check = re.compile(r"PulseChannel$")
@@ -320,7 +330,7 @@ class Resonator(Component):
     :param acquire: Calibrated parameters for the acquire instruction.
     """
 
-    physical_channel: PhysicalChannel
+    physical_channel: ResonatorPhysicalChannel
     pulse_channels: ResonatorPulseChannels = Field(
         frozen=True, default=ResonatorPulseChannels()
     )
@@ -398,7 +408,7 @@ class Qubit(Component):
     :param pulse: Calibrated parameters for the X(pi/2) pulse.
     """
 
-    physical_channel: PhysicalChannel
+    physical_channel: QubitPhysicalChannel
     pulse_channels: QubitPulseChannels = Field(frozen=True, default=QubitPulseChannels())
     resonator: Resonator
 

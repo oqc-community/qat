@@ -13,10 +13,11 @@ from qat.model.device import (
     FreqShiftPulseChannel,
     MeasurePulseChannel,
     PhysicalBaseband,
-    PhysicalChannel,
     Qubit,
+    QubitPhysicalChannel,
     QubitPulseChannels,
     Resonator,
+    ResonatorPhysicalChannel,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
@@ -33,7 +34,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
     for qubit in legacy_hw.qubits:
         # Add topology of qubit. Since the topology is not always stored both in
         # the `qubit_direction_couplings`, look into `coupled_qubits` as well.
-        if couplings := legacy_hw.qubit_direction_couplings:
+        if couplings := getattr(legacy_hw, "qubit_direction_couplings", None):
             coupled_q_indices = [
                 c.direction[1] for c in couplings if c.direction[0] == qubit.index
             ]
@@ -54,17 +55,18 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
 
         # Physical channel
         phys_channel_q = qubit.physical_channel
-        new_phys_ch_q = PhysicalChannel(
+        new_phys_ch_q = QubitPhysicalChannel(
             baseband=new_phys_bb_q,
             sample_time=phys_channel_q.sample_time,
             block_size=phys_channel_q.block_size,
         )
 
         phys_channel_r = qubit.measure_device.physical_channel
-        new_phys_ch_r = PhysicalChannel(
+        new_phys_ch_r = ResonatorPhysicalChannel(
             baseband=new_phys_bb_r,
             sample_time=phys_channel_r.sample_time,
             block_size=phys_channel_r.block_size,
+            swap_readout_iq=getattr(phys_channel_r, "swap_readout_IQ", False),
         )
 
         # Resonator
@@ -76,7 +78,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             imbalance=measure_pulse_channel.imbalance,
             scale=measure_pulse_channel.scale,
             fixed_if=measure_pulse_channel.fixed_if,
-            phase_iq_offset=phys_channel_r.phase_offset,
+            phase_iq_offset=measure_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_measure),
         )
 
@@ -92,7 +94,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             imbalance=acquire_pulse_channel.imbalance,
             scale=acquire_pulse_channel.scale,
             fixed_if=acquire_pulse_channel.fixed_if,
-            phase_iq_offset=phys_channel_r.phase_offset,
+            phase_iq_offset=acquire_pulse_channel.phase_offset,
             acquire=CalibratableAcquire(**meas_acq),
         )
 
@@ -114,7 +116,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             imbalance=drive_pulse_channel.imbalance,
             scale=drive_pulse_channel.scale,
             fixed_if=drive_pulse_channel.fixed_if,
-            phase_iq_offset=phys_channel_q.phase_offset,
+            phase_iq_offset=drive_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_hw_x_pi_2),
         )
 
@@ -125,7 +127,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 imbalance=freqshift_pulse_channel.imbalance,
                 scale=freqshift_pulse_channel.scale,
                 fixed_if=freqshift_pulse_channel.fixed_if,
-                phase_iq_offset=phys_channel_q.phase_offset,
+                phase_iq_offset=freqshift_pulse_channel.phase_offset,
                 active=freqshift_pulse_channel.active,
                 amp=freqshift_pulse_channel.amp,
                 phase=getattr(freqshift_pulse_channel.pulse_channel, "phase", 0.0),
@@ -140,7 +142,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 imbalance=secondstate_pulse_channel.imbalance,
                 scale=secondstate_pulse_channel.scale,
                 fixed_if=secondstate_pulse_channel.fixed_if,
-                phase_iq_offset=phys_channel_q.phase_offset,
+                phase_iq_offset=secondstate_pulse_channel.phase_offset,
             )
         except KeyError:
             new_secondstate_pulse_channel = SecondStatePulseChannel()
@@ -162,7 +164,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         imbalance=pulse_channel.imbalance,
                         scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
-                        phase_iq_offset=phys_channel_q.phase_offset,
+                        phase_iq_offset=pulse_channel.phase_offset,
                     )
                     new_cross_resonance_pulse_channels[aux_qubit] = new_cr_pulse_channel
 
@@ -173,7 +175,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         imbalance=pulse_channel.imbalance,
                         scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
-                        phase_iq_offset=phys_channel_q.phase_offset,
+                        phase_iq_offset=pulse_channel.phase_offset,
                     )
                     new_cross_resonance_cancellation_pulse_channels[aux_qubit] = (
                         new_crc_pulse_channel

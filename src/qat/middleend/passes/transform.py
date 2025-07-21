@@ -37,7 +37,7 @@ from qat.ir.instructions import (
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, Waveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
-from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
+from qat.model.device import FreqShiftPulseChannel, MeasurePulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
@@ -177,16 +177,20 @@ class PhaseOptimisationHandler:
     @run.register(Acquire)
     def _(self, instruction: Pulse | Acquire):
         target = instruction.target
-        if not np.isclose(self.accum_phaseshifts[target] % (2 * np.pi), 0.0):
+        emit = True
+        if self.previous_phase_instruction_is_phase_set[target]:
+            op_class = PhaseSet
+        elif not np.isclose(self.accum_phaseshifts[target] % (2 * np.pi), 0.0):
+            op_class = PhaseShift
+        else:
+            emit = False
+
+        if emit:
             phase = self.accum_phaseshifts.pop(target)
-            if self.previous_phase_instruction_is_phase_set[target]:
-                phase_op = PhaseSet(target=target, phase=phase)
-            else:
-                phase_op = PhaseShift(target=target, phase=phase)
-            self.optimized_instructions.append(phase_op)
+            self.optimized_instructions.append(op_class(target=target, phase=phase))
+            self.previous_phase_instruction_is_phase_set[target] = False
 
         self.optimized_instructions.append(instruction)
-        self.previous_phase_instruction_is_phase_set[target] = False
 
     @run.register(Delay)
     @run.register(Synchronize)
@@ -293,6 +297,7 @@ class MeasurePhaseResetSanitisation(TransformPass):
         """
         :param hardware_model: The hardware model that holds calibrated information on the qubits on the QPU.
         """
+        self.model = hardware_model
         self.measure_pulse_channels = self._get_measure_pulse_channels(hardware_model)
 
     @staticmethod
@@ -313,6 +318,11 @@ class MeasurePhaseResetSanitisation(TransformPass):
                     new_instructions.append(
                         PhaseReset(target=self.measure_pulse_channels[qubit_target])
                     )
+            elif isinstance(instr, Pulse) and isinstance(
+                pulse_ch := self.model._ids_to_pulse_channels[instr.target],
+                MeasurePulseChannel,
+            ):
+                new_instructions.append(PhaseReset(target=pulse_ch.uuid))
             new_instructions.append(instr)
 
         ir.instructions = new_instructions

@@ -10,10 +10,11 @@ from qat.model.device import (
     FreqShiftPulseChannel,
     MeasurePulseChannel,
     PhysicalBaseband,
-    PhysicalChannel,
     Qubit,
+    QubitPhysicalChannel,
     QubitPulseChannels,
     Resonator,
+    ResonatorPhysicalChannel,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
@@ -69,8 +70,12 @@ class PhysicalHardwareModelBuilder:
             bb_q = self._build_uncalibrated_baseband()
             bb_r = self._build_uncalibrated_baseband()
 
-            physical_channel_q = self._build_uncalibrated_physical_channel(baseband=bb_q)
-            physical_channel_r = self._build_uncalibrated_physical_channel(baseband=bb_r)
+            physical_channel_q = self._build_uncalibrated_physical_channel(
+                baseband=bb_q, target_device=Qubit
+            )
+            physical_channel_r = self._build_uncalibrated_physical_channel(
+                baseband=bb_r, target_device=Resonator
+            )
 
             pulse_channels_q = self._build_uncalibrated_qubit_pulse_channels(
                 qubit_connectivity=qubit_connectivity
@@ -98,8 +103,15 @@ class PhysicalHardwareModelBuilder:
     def _build_uncalibrated_baseband(self):
         return PhysicalBaseband()
 
-    def _build_uncalibrated_physical_channel(self, baseband: PhysicalBaseband):
-        return PhysicalChannel(baseband=baseband)
+    def _build_uncalibrated_physical_channel(
+        self, baseband: PhysicalBaseband, target_device: type = Qubit | Resonator
+    ):
+        if target_device is Qubit:
+            return QubitPhysicalChannel(baseband=baseband)
+        elif target_device is Resonator:
+            return ResonatorPhysicalChannel(baseband=baseband)
+        else:
+            raise ValueError(f"Unsupported target device type: {target_device}")
 
     def _build_uncalibrated_qubit_pulse_channels(self, qubit_connectivity: list[QubitId]):
         cross_resonance_channels = FrozenDict(

@@ -17,8 +17,10 @@ from qat.model.device import (
     PhysicalChannel,
     PulseChannel,
     Qubit,
+    QubitPhysicalChannel,
     QubitPulseChannels,
     Resonator,
+    ResonatorPhysicalChannel,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
@@ -107,7 +109,7 @@ class TestDevicesValidation:
             frequency=random.Random(seed).uniform(1e05, 1e07),
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
-        physical_channel = PhysicalChannel(
+        physical_channel = ResonatorPhysicalChannel(
             baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
         )
 
@@ -129,11 +131,11 @@ class TestDevicesValidation:
             frequency=random.Random(seed).uniform(1e05, 1e07),
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
-        physical_channel = PhysicalChannel(
+        physical_channel_r = ResonatorPhysicalChannel(
             baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
         )
 
-        resonator = Resonator(physical_channel=physical_channel)
+        resonator = Resonator(physical_channel=physical_channel_r)
         for i, pulse_channel_name in enumerate(ResonatorPulseChannels.model_fields):
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
@@ -144,8 +146,11 @@ class TestDevicesValidation:
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
         assert qubit_pulse_channels.is_calibrated
 
+        physical_channel_q = QubitPhysicalChannel(
+            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+        )
         qubit = Qubit(
-            physical_channel=physical_channel,
+            physical_channel=physical_channel_q,
             pulse_channels=qubit_pulse_channels,
             resonator=resonator,
         )
@@ -233,6 +238,20 @@ class TestDevicesValidation:
 
             assert qubit.is_calibrated
 
+    @pytest.mark.parametrize(
+        "device_type, wrong_phys_ch_type",
+        [(Resonator, QubitPhysicalChannel), (Qubit, ResonatorPhysicalChannel)],
+    )
+    def test_device_wrong_physical_channel(self, seed, device_type, wrong_phys_ch_type):
+        bb = PhysicalBaseband(
+            frequency=random.Random(seed).uniform(1e05, 1e07),
+            if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
+        )
+        physical_channel = wrong_phys_ch_type(baseband=bb)
+
+        with pytest.raises(ValidationError):
+            device_type(physical_channel=physical_channel)
+
 
 @pytest.mark.parametrize("seed", [21, 22, 23, 24])
 class TestFrozenQubit:
@@ -242,11 +261,11 @@ class TestFrozenQubit:
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
 
-        physical_channel = PhysicalChannel(
+        physical_channel_r = ResonatorPhysicalChannel(
             baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
         )
 
-        resonator = Resonator(physical_channel=physical_channel)
+        resonator = Resonator(physical_channel=physical_channel_r)
         for i, pulse_channel_name in enumerate(ResonatorPulseChannels.model_fields):
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
@@ -256,8 +275,11 @@ class TestFrozenQubit:
             pulse_channel = getattr(qubit_pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
+        physical_channel_q = QubitPhysicalChannel(
+            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+        )
         qubit = Qubit(
-            physical_channel=physical_channel,
+            physical_channel=physical_channel_q,
             pulse_channels=qubit_pulse_channels,
             resonator=resonator,
         )

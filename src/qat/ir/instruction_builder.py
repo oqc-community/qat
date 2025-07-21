@@ -237,6 +237,29 @@ class InstructionBuilder(ABC):
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
+    def pretty_print(self):
+        output_str = ""
+        for instr in self:
+            targets = getattr(instr, "targets", None)
+            if targets:
+                format_target = ""
+                for target in targets:
+                    format_target = f"{instr.__class__.__name__} -> {self.hw._ids_to_pulse_channels[target]} "
+                    device = self.hw._pulse_channel_ids_to_device[target]
+                    if isinstance(device, Qubit):
+                        format_target += f" @Q{self.hw._qubits_to_qubit_ids[device]}"
+                    else:
+                        qubit = self.hw._resonators_to_qubits[device]
+                        format_target += f" @R{self.hw._qubits_to_qubit_ids[qubit]}"
+                output_str += format_target
+
+            else:
+                output_str += str(instr)
+
+            output_str += "\n"
+
+        return output_str.rstrip()
+
     @InstructionBuilder._check_identity_operation
     def X(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
         """
