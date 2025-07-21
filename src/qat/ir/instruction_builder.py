@@ -567,6 +567,48 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return self.add(measure_block)
 
+    def _apply_down_conversion_and_take_time_mean(
+        self,
+        acquire_mode: AcquireMode,
+        target: Qubit | set[Qubit],
+        output_variable: str,
+    ):
+        """
+        Applies down conversion and takes the mean of the acquired data.
+        If the acquire mode is INTEGRATOR, down conversion is not needed, so it returns the builder without any changes
+
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        if acquire_mode == AcquireMode.INTEGRATOR:
+            return self
+
+        return self.post_processing(
+            target, output_variable, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME
+        ).post_processing(target, output_variable, PostProcessType.MEAN, ProcessAxis.TIME)
+
+    def _take_sequence_mean(
+        self,
+        acquire_mode: AcquireMode,
+        target: Qubit | set[Qubit],
+        output_variable: str,
+    ):
+        """
+        Applies the mean post-processing to the acquired data along the sequence axis. If the acquire mode is SCOPE,
+        the mean post-processing is not needed, so it returns the builder without any changes.
+
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        if acquire_mode == AcquireMode.SCOPE:
+            return self
+
+        return self.post_processing(
+            target, output_variable, PostProcessType.MEAN, ProcessAxis.SEQUENCE
+        )
+
     def measure_single_shot_z(
         self,
         target: Qubit,
@@ -575,24 +617,23 @@ class QuantumInstructionBuilder(InstructionBuilder):
     ):
         """
         Measure a single qubit along the z-axis.
+        Execution results in an array of floats centred around 0, where anything above 0 shows a bias towards a
+        +Z measurement, and below 0 shows a bias towards a -Z measurement.
+        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
+        for each shot run.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
         :param output_variable: The variable where the output of the acquire should be saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
-
-        return (
-            self.measure(target, acq_mode_process_axis[axis], output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
-            )
+        acquire_mode = acq_mode_process_axis[axis]
+        self.measure(target, acquire_mode, output_variable)
+        self._apply_down_conversion_and_take_time_mean(
+            acquire_mode, target, output_variable
+        )
+        return self.post_processing(
+            target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         )
 
     def measure_single_shot_signal(
@@ -601,16 +642,21 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        output_variable = output_variable or self._generate_output_variable(target)
+        """
+        Measure the signal of a single qubit.
+        Execution results in an array of complex numbers that show the war signal output form the hardware.
+        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
+        for each shot run.
 
-        return (
-            self.measure(target, acq_mode_process_axis[axis], output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
-            )
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        output_variable = output_variable or self._generate_output_variable(target)
+        acquire_mode = acq_mode_process_axis[axis]
+        self.measure(target, acquire_mode, output_variable)
+        return self._apply_down_conversion_and_take_time_mean(
+            acquire_mode, target, output_variable
         )
 
     def measure_mean_z(
@@ -619,51 +665,52 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        output_variable = output_variable or self._generate_output_variable(target)
+        """
+        Measure a single qubit along the z-axis.
+        Execution results in an array of floats centred around 0, where anything above 0 shows a bias towards a
+        +Z measurement, and below 0 shows a bias towards a -Z measurement.
+        Each entry is for each qubit measured, and is the mean of the results from `measure_single_shot_z`.
 
-        return (
-            self.measure(target, acq_mode_process_axis[axis], output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
-            )
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        output_variable = output_variable or self._generate_output_variable(target)
+        acquire_mode = acq_mode_process_axis[axis]
+        self.measure(target, acquire_mode, output_variable)
+        self._apply_down_conversion_and_take_time_mean(
+            acquire_mode, target, output_variable
+        )
+        self._take_sequence_mean(acquire_mode, target, output_variable)
+        return self.post_processing(
+            target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         )
 
     def measure_mean_signal(self, target: Qubit, output_variable: str = None):
-        output_variable = output_variable or self._generate_output_variable(target)
+        """
+        Measure the signal of a single qubit.
+        Execution results in an array of complex numbers that show the war signal output form the hardware.
+        Each entry is for each qubit measured, and is the mean of the results from `measure_single_signal_shot`.
 
-        return (
-            self.measure(
-                target, acq_mode_process_axis[ProcessAxis.SEQUENCE], output_variable
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
-            )
+        :param target: The qubit to be measured.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        output_variable = output_variable or self._generate_output_variable(target)
+        acquire_mode = acq_mode_process_axis[ProcessAxis.SEQUENCE]
+        return self.measure(target, acquire_mode, output_variable)._take_sequence_mean(
+            acquire_mode, target, output_variable
         )
 
     def measure_scope_mode(self, target: Qubit, output_variable: str = None):
-        return (
-            self.measure(target, acq_mode_process_axis[ProcessAxis.TIME], output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]
-            )
+        """
+        Measure the scope mode
+
+        :param target: The qubit to be measured.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        acquire_mode = acq_mode_process_axis[ProcessAxis.TIME]
+        return self.measure(target, acquire_mode, output_variable).post_processing(
+            target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
         )
 
     def measure_single_shot_binned(
@@ -672,15 +719,23 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        output_variable = output_variable or self._generate_output_variable(target)
+        """
+        Measure a single qubit along the z-axis.
+        Execution results in an array of ±1s, where 1 indicates a +Z measurement, and -1 indicates a -Z measurement.
+        It takes the results from `measure_single_shot_z` and applies a binning operation to round the results to ±1.
+        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
+        for each shot run.
 
+        :param target: The qubit to be measured.
+        :param axis: The type of axis which the post-processing of readouts should occur on.
+        :param output_variable: The variable where the output of the acquire should be saved.
+        """
+        output_variable = output_variable or self._generate_output_variable(target)
+        acquire_mode = acq_mode_process_axis[axis]
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-            )
-            .post_processing(
-                target, output_variable, PostProcessType.MEAN, [ProcessAxis.TIME]
+            ._apply_down_conversion_and_take_time_mean(
+                acquire_mode, target, output_variable
             )
             .post_processing(
                 target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL

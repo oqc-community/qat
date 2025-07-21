@@ -419,6 +419,13 @@ class TestMeasure:
             measure.duration, acquire.duration + delay.duration
         )
 
+    def test_measures(self):
+        qubit = hw_model.qubit_with_index(0)
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.X(target=qubit)
+        builder.measure_single_shot_z(target=qubit)
+
     @pytest.mark.parametrize("axis", list(ProcessAxis))
     @pytest.mark.parametrize(
         ("measure_method", "pp_length"),
@@ -426,8 +433,8 @@ class TestMeasure:
             ["measure_single_shot_z", 3],
             ["measure_single_shot_signal", 2],
             ["measure_mean_z", 4],
-            ["measure_mean_signal", 3],
-            ["measure_scope_mode", 2],
+            ["measure_mean_signal", 1],
+            ["measure_scope_mode", 1],
             ["measure_single_shot_binned", 4],
         ),
     )
@@ -461,6 +468,20 @@ class TestMeasure:
 
             if isinstance(instruction, PostProcessing):
                 pps_per_qubit[int(instruction.output_variable)] += 1
+
+        if axis == ProcessAxis.SEQUENCE:
+            if measure_method in [
+                "measure_single_shot_z",
+                "measure_single_shot_signal",
+                "measure_mean_z",
+                "measure_single_shot_binned",
+            ]:
+                pp_length -= 2
+        elif axis == ProcessAxis.TIME:
+            if measure_method in [
+                "measure_mean_z",
+            ]:
+                pp_length -= 1
 
         assert measure_blocks_per_qubit == [1] * len(qubit_indices)
         assert pps_per_qubit == [pp_length] * len(qubit_indices)
