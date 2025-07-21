@@ -261,7 +261,11 @@ class QiskitEngine(InstructionExecutionEngine):
         )
         initial_layout = {qb: i for i, qb in enumerate(builder.circuit.qubits)}
         job = qasm_sim.run(
-            transpile(builder.circuit, qasm_sim, initial_layout=initial_layout),
+            transpile(
+                builder.circuit,
+                initial_layout=initial_layout,
+                target=qasm_sim.target,
+            ),
             shots=builder.shot_count,
         )
         return job.result()

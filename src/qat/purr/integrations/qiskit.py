@@ -19,7 +19,7 @@ logger = get_default_logger()
 
 def run_qasm_circuit(circuit):
     backend_sim = BasicSimulator()
-    transpiled_qc = transpile(circuit, backend_sim)
+    transpiled_qc = transpile(circuit, target=backend_sim.target)
     result = backend_sim.run(transpiled_qc).result()
 
     def _results_to_binary(results_dictionary):
