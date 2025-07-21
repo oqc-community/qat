@@ -24,10 +24,18 @@ from qat.executables import ChannelExecutable, Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
+from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
+
+from tests.unit.utils.pipelines import (
+    MockCompileUpdateablePipeline,
+    MockExecuteUpdateablePipeline,
+    MockPipelineConfig,
+    MockUpdateablePipeline,
+)
 
 
 class MockEngine(NativeEngine):
@@ -293,3 +301,125 @@ class TestQATHardwareModelReloading:
         assert pipelines.get("pipeline3").model == hardware.load("loader2")
         assert len(hardware["loader1"].qubits) == 3
         assert len(hardware["loader2"].qubits) == 7
+
+
+class TestQAT:
+    """Tests the methods of the QAT class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup method to create a QAT instance with the default pipelines."""
+        qat = QAT()
+        model = EchoModelLoader().load()
+        qat.pipelines.add(
+            Pipeline(
+                name="fallthrough",
+                frontend=FallthroughFrontend(),
+                middleend=FallthroughMiddleend(),
+                backend=FallthroughBackend(),
+                runtime=SimpleRuntime(engine=MockEngine()),
+                model=model,
+            )
+        )
+        qat.pipelines.add(
+            CompilePipeline(
+                name="fallthrough_compile",
+                frontend=FallthroughFrontend(),
+                middleend=FallthroughMiddleend(),
+                backend=FallthroughBackend(),
+                model=model,
+            )
+        )
+        qat.pipelines.add(
+            ExecutePipeline(
+                name="fallthrough_execute",
+                runtime=SimpleRuntime(engine=MockEngine()),
+                model=model,
+            )
+        )
+        qat.pipelines.add(
+            MockUpdateablePipeline(
+                config=MockPipelineConfig(name="mock_updateable"), model=model
+            )
+        )
+        qat.pipelines.add(
+            MockCompileUpdateablePipeline(
+                config=MockPipelineConfig(name="mock_compile_updateable"), model=model
+            )
+        )
+        qat.pipelines.add(
+            MockExecuteUpdateablePipeline(
+                config=MockPipelineConfig(name="mock_execute_updateable"), model=model
+            )
+        )
+        cls.qat = qat
+
+    @pytest.mark.parametrize(
+        "pipeline",
+        [
+            "fallthrough",
+            "fallthrough_compile",
+            "mock_compile_updateable",
+            "mock_updateable",
+        ],
+    )
+    def test_validate_pipeline_can_compile(self, pipeline):
+        """Tests that the method correctly identifies pipelines that can compile."""
+        pipeline = self.qat.pipelines.get(pipeline)
+        assert isinstance(pipeline, AbstractPipeline)
+        self.qat._validate_pipeline_can_compile(pipeline)
+
+    @pytest.mark.parametrize(
+        "pipeline",
+        [
+            "fallthrough_execute",
+            "mock_execute_updateable",
+        ],
+    )
+    def test_validate_pipeline_can_compile_fails(self, pipeline):
+        """Tests that the method raises an error for pipelines that cannot compile."""
+        pipeline = self.qat.pipelines.get(pipeline)
+        with pytest.raises(TypeError):
+            self.qat._validate_pipeline_can_compile(pipeline)
+
+    @pytest.mark.parametrize(
+        "pipeline",
+        [
+            "fallthrough_execute",
+            "fallthrough",
+            "mock_execute_updateable",
+            "mock_updateable",
+        ],
+    )
+    def test_validate_pipeline_can_execute(self, pipeline):
+        """Tests that the method correctly identifies pipelines that can execute."""
+        pipeline = self.qat.pipelines.get(pipeline)
+        assert isinstance(pipeline, AbstractPipeline)
+        self.qat._validate_pipeline_can_execute(pipeline)
+
+    @pytest.mark.parametrize(
+        "pipeline",
+        [
+            "fallthrough_compile",
+            "mock_compile_updateable",
+        ],
+    )
+    def test_validate_pipeline_can_execute_fails(self, pipeline):
+        """Tests that the method raises an error for pipelines that cannot execute."""
+        pipeline = self.qat.pipelines.get(pipeline)
+        with pytest.raises(TypeError):
+            self.qat._validate_pipeline_can_execute(pipeline)
+
+    @pytest.mark.parametrize("compile", [None, "fallthrough_compile"])
+    @pytest.mark.parametrize("execute", [None, "fallthrough_execute"])
+    def test_resolve_pipelines_uses_correct_pipelines(self, compile, execute):
+        """If specified, the compile and execute pipelines should be used,
+        otherwise the default pipeline should be used."""
+
+        compile_pipeline, execute_pipeline = self.qat._resolve_pipelines(
+            compile,
+            execute,
+            "fallthrough",
+        )
+        assert compile_pipeline.name == ("fallthrough" if compile is None else compile)
+        assert execute_pipeline.name == ("fallthrough" if execute is None else execute)

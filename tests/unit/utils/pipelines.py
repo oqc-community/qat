@@ -4,7 +4,7 @@ from qat.engines.zero import ZeroEngine
 from qat.frontend.auto import AutoFrontend
 from qat.middleend.middleends import DefaultMiddleend
 from qat.model.target_data import TargetData
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
 from qat.runtime.results_pipeline import get_default_results_pipeline
 from qat.runtime.simple import SimpleRuntime
@@ -64,6 +64,41 @@ class MockUpdateablePipeline(UpdateablePipeline):
             frontend=AutoFrontend(model=model),
             middleend=DefaultMiddleend(model=model),
             backend=WaveformV1Backend(model=model),
+            runtime=SimpleRuntime(engine=engine),
+            target_data=target_data,
+        )
+
+
+class MockCompileUpdateablePipeline(UpdateablePipeline):
+    """A mock updateable pipeline that only supports compilation, for testing purposes."""
+
+    @staticmethod
+    def _build_pipeline(
+        config: MockPipelineConfig, model, target_data=None, engine=None
+    ) -> CompilePipeline:
+        target_data = target_data if target_data is not None else TargetData.default()
+        return CompilePipeline(
+            name=config.name,
+            model=model,
+            frontend=AutoFrontend(model=model),
+            middleend=DefaultMiddleend(model=model),
+            backend=WaveformV1Backend(model=model),
+            target_data=target_data,
+        )
+
+
+class MockExecuteUpdateablePipeline(UpdateablePipeline):
+    """A mock updateable pipeline that only supports execution, for testing purposes."""
+
+    @staticmethod
+    def _build_pipeline(
+        config: MockPipelineConfig, model, target_data=None, engine=None
+    ) -> ExecutePipeline:
+        engine = engine if engine is not None else ZeroEngine()
+        target_data = target_data if target_data is not None else TargetData.default()
+        return ExecutePipeline(
+            name=config.name,
+            model=model,
             runtime=SimpleRuntime(engine=engine),
             target_data=target_data,
         )

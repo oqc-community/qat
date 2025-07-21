@@ -12,19 +12,25 @@ from qat.frontend import BaseFrontend
 from qat.middleend.middleends import BaseMiddleend
 from qat.model.target_data import TargetData
 from qat.model.validators import MismatchingHardwareModelException
-from qat.pipelines.base import AbstractPipeline
+from qat.pipelines.base import BasePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.base import BaseRuntime
 
 
-class Pipeline(AbstractPipeline):
-    """An immutable pipeline that can be constructed to compile and execute quantum
-    programs.
+class CompilePipeline(BasePipeline):
+    """Implements a pipeline that compiles quantum programs.
 
-    It is designed to be immutable to allow compilation passes to calculate important
-    quantities at instantiation using the given components, such as calibration information
-    and target data. Thus it assumes information about the device is non-changing and is
-    not suitable for calibrations.
+    In addition to the hardware model and target data, a compilation pipeline consists of
+    the following components:
+
+    #. Frontend: Compiles a high-level language-specific, but target-agnostic,
+       input (e.g., QASM, QIR, ...) to QAT's intermediate representation (IR), QatIR.
+    #. Middleend: Takes the QatIR and performs a sequences of  passes that validate and
+       optimise the IR, and prepare it for codegen.
+    #. Backend: Handles code generation to allow the program to be executed on the target.
+
+    In the future, this might be relaxed so compilation pipelines can be defined more
+    abstractly, only requiring the :meth:`compile` to be implemented.
     """
 
     def __init__(
@@ -34,104 +40,18 @@ class Pipeline(AbstractPipeline):
         frontend: BaseFrontend,
         middleend: BaseMiddleend,
         backend: BaseBackend,
-        runtime: BaseRuntime,
-        target_data: TargetData = TargetData.default(),
+        target_data: TargetData | None = None,
         disable_model_validation: bool = False,
     ):
+        if not disable_model_validation:
+            self._validate_consistent_model(model, frontend, middleend, backend)
         self._name = name
         self._model = model
-        self._target_data = target_data
+        self._target_data = target_data if target_data is not None else TargetData.default()
         self._frontend = frontend
         self._middleend = middleend
         self._backend = backend
-        self._runtime = runtime
-
-        if not disable_model_validation:
-            self._validate_consistent_model(
-                model,
-                frontend,
-                middleend,
-                backend,
-                runtime,
-                runtime.engine,
-            )
-
-    @property
-    def name(self) -> str:
-        """Returns the name of the pipeline."""
-        return self._name
-
-    @property
-    def model(self) -> QuantumHardwareModel:
-        """Returns the quantum hardware model used by the pipeline."""
-        return self._model
-
-    @property
-    def target_data(self) -> TargetData:
-        """Returns the target data used by the pipeline."""
-        return self._target_data
-
-    @property
-    def frontend(self) -> BaseFrontend:
-        """Returns the compilation frontend."""
-        return self._frontend
-
-    @property
-    def middleend(self) -> BaseMiddleend:
-        """Returns the middleend of the pipeline."""
-        return self._middleend
-
-    @property
-    def backend(self) -> BaseBackend:
-        """Returns the backend of the pipeline."""
-        return self._backend
-
-    @property
-    def runtime(self) -> BaseRuntime:
-        """Returns the runtime of the pipeline."""
-        return self._runtime
-
-    @property
-    def engine(self) -> NativeEngine:
-        """Returns the engine of the pipeline."""
-        return self._runtime.engine
-
-    @staticmethod
-    def _validate_consistent_model(
-        model: QuantumHardwareModel,
-        *args,
-    ):
-        """Validates that the hardware model supplied to the Pipeline matches the hardware
-        model embedded in other fields."""
-        for component in args:
-            if hasattr(component, "model") and component.model not in {model, None}:
-                raise ValueError(f"{model} hardware does not match supplied hardware")
-
-    def copy(self) -> "Pipeline":
-        """Returns a new instance of the pipeline with the same components."""
-
-        return Pipeline(
-            model=self._model,
-            target_data=self._target_data,
-            frontend=self._frontend,
-            middleend=self._middleend,
-            backend=self._backend,
-            runtime=self._runtime,
-            name=self._name,
-        )
-
-    def copy_with_name(self, name: str) -> "Pipeline":
-        """Returns a new instance of the pipeline with a different name."""
-
-        return Pipeline(
-            model=self._model,
-            target_data=self._target_data,
-            frontend=self._frontend,
-            middleend=self._middleend,
-            backend=self._backend,
-            runtime=self._runtime,
-            name=name,
-        )
+        self.disable_model_validation = disable_model_validation
 
     def compile(
         self, program, compiler_config: CompilerConfig | None = None
@@ -173,6 +93,50 @@ class Pipeline(AbstractPipeline):
 
         return package, metrics_manager
 
+    @property
+    def frontend(self) -> BaseFrontend:
+        return self._frontend
+
+    @property
+    def middleend(self) -> BaseMiddleend:
+        return self._middleend
+
+    @property
+    def backend(self) -> BaseBackend:
+        return self._backend
+
+
+class ExecutePipeline(BasePipeline):
+    """Implements a pipeline that can execute quantum programs.
+
+    In addition to the hardware model and target data, an execution pipeline consists of
+    the following components:
+
+    #. Runtime: Manages the execution of the program, including the engine and the post-
+       processing of the results.
+    #. Engine: Communicates the compiled program with the target devices, and returns the
+       results.
+
+    In the future, this might be relaxed so execution pipelines can be defined more
+    abstractly, only requiring the :meth:`execute` to be implemented.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        model: QuantumHardwareModel,
+        runtime: BaseRuntime,
+        target_data: TargetData | None = None,
+        disable_model_validation: bool = False,
+    ):
+        if not disable_model_validation:
+            self._validate_consistent_model(model, runtime, runtime.engine)
+        self._name = name
+        self._model = model
+        self._target_data = target_data if target_data is not None else TargetData.default()
+        self._runtime = runtime
+        self.disable_model_validation = disable_model_validation
+
     def execute(
         self, package: Executable, compiler_config: CompilerConfig | None = None
     ) -> tuple[dict, MetricsManager]:
@@ -207,3 +171,46 @@ class Pipeline(AbstractPipeline):
             compiler_config=compiler_config,
         )
         return results, metrics_manager
+
+    @property
+    def runtime(self) -> BaseRuntime:
+        return self._runtime
+
+    @property
+    def engine(self) -> NativeEngine:
+        """Returns the engine within the runtime."""
+        return self._runtime.engine
+
+
+class Pipeline(CompilePipeline, ExecutePipeline):
+    """A composite pipeline that can both compile and execute quantum programs.
+
+    This pipeline combines the functionality of both compilation and execution pipelines,
+    allowing for a complete workflow from source program to execution. See
+    :class:`CompilePipeline` and :class:`ExecutePipeline` for more details on the
+    components involved in compilation and execution.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        model: QuantumHardwareModel,
+        frontend: BaseFrontend,
+        middleend: BaseMiddleend,
+        backend: BaseBackend,
+        runtime: BaseRuntime,
+        target_data: TargetData | None = None,
+        disable_model_validation: bool = False,
+    ):
+        if not disable_model_validation:
+            self._validate_consistent_model(
+                model, frontend, middleend, backend, runtime, runtime.engine
+            )
+        self._name = name
+        self._model = model
+        self._target_data = target_data if target_data is not None else TargetData.default()
+        self._frontend = frontend
+        self._middleend = middleend
+        self._backend = backend
+        self._runtime = runtime
+        self.disable_model_validation = disable_model_validation

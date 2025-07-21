@@ -9,13 +9,19 @@ from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.updateable import PipelineConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.engines import MockEngineWithModel
 from tests.unit.utils.loaders import MockModelLoader
-from tests.unit.utils.pipelines import MockPipelineConfig, MockUpdateablePipeline
+from tests.unit.utils.pipelines import (
+    MockCompileUpdateablePipeline,
+    MockExecuteUpdateablePipeline,
+    MockPipelineConfig,
+    MockUpdateablePipeline,
+)
 
 
 class TestUpdateablePipeline:
@@ -414,3 +420,60 @@ class TestUpdateablePipeline:
             config=config, model=model_loader.load(), target_data=target_data, engine=engine
         )
         assert pipeline.has_loader is False
+
+    def test_full_pipeline_inherits_properties(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        assert pipeline.is_subtype_of(Pipeline)
+        assert pipeline.is_subtype_of(CompilePipeline)
+        assert pipeline.is_subtype_of(ExecutePipeline)
+        assert hasattr(pipeline, "compile")
+        assert hasattr(pipeline, "frontend")
+        assert hasattr(pipeline, "middleend")
+        assert hasattr(pipeline, "backend")
+        assert hasattr(pipeline, "execute")
+        assert hasattr(pipeline, "runtime")
+
+    def test_compile_pipeline_inherits_properties(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockCompileUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        assert pipeline.is_subtype_of(CompilePipeline)
+        assert not pipeline.is_subtype_of(Pipeline)
+        assert not pipeline.is_subtype_of(ExecutePipeline)
+        assert hasattr(pipeline, "compile")
+        assert hasattr(pipeline, "frontend")
+        assert hasattr(pipeline, "middleend")
+        assert hasattr(pipeline, "backend")
+        assert not hasattr(pipeline, "execute")
+        assert not hasattr(pipeline, "runtime")
+
+    def test_execute_pipeline_inherits_properties(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        engine = EchoEngine()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockExecuteUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data, engine=engine
+        )
+
+        assert pipeline.is_subtype_of(ExecutePipeline)
+        assert not pipeline.is_subtype_of(Pipeline)
+        assert not pipeline.is_subtype_of(CompilePipeline)
+        assert not hasattr(pipeline, "compile")
+        assert not hasattr(pipeline, "frontend")
+        assert not hasattr(pipeline, "middleend")
+        assert not hasattr(pipeline, "backend")
+        assert hasattr(pipeline, "execute")
+        assert hasattr(pipeline, "runtime")

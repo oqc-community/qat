@@ -11,7 +11,8 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import HardwareLoaders, PipelineSet
 from qat.executables import Executable
 from qat.pipelines import get_default_pipelines
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.base import AbstractPipeline
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.qatconfig import QatConfig
 
@@ -56,6 +57,7 @@ class QAT:
 
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
+            self._validate_pipeline_can_compile(P)
             package, metrics_manager = P.compile(program, compiler_config=compiler_config)
             package = package.serialize() if to_json else package
             return package, metrics_manager
@@ -78,6 +80,7 @@ class QAT:
 
         with override_config(self.config):
             P = self.pipelines.get(pipeline)
+            self._validate_pipeline_can_execute(P)
             if isinstance(package, str):
                 # If the package is a string, deserialize it
                 if "py/object" in package:
@@ -90,25 +93,41 @@ class QAT:
         self,
         program,
         compiler_config: CompilerConfig | None = None,
-        pipeline: Pipeline | str = "default",
+        pipeline: AbstractPipeline | str = "default",
+        compile_pipeline: AbstractPipeline | str | None = None,
+        execute_pipeline: AbstractPipeline | str | None = None,
     ) -> tuple[dict, MetricsManager]:
         """Compiles and executes a source program using the specified pipeline.
+
+        The compilation and execution pipeline can be specified separately using
+        `compile_pipeline` and `execute_pipeline` which take precedence . Alternatively,
+        a unified pipeline can be provided using the `pipeline` parameter. If neither are
+        provided, the default pipeline will be used for both compilation and execution.
 
         :param program: The source program to compile and execute.
         :param compiler_config: Configuration options for the compiler, such as optimization
             and results formatting.
         :param pipeline: The pipeline to use for compilation and execution. Defaults to
             "default".
+        :param compile_pipeline: The pipeline to use for compilation. If provided, it will
+            override the `pipeline` parameter for compilation.
+        :param execute_pipeline: The pipeline to use for execution. If provided, it will
+            override the `pipeline` parameter for execution.
         :return: A tuple containing the results of the execution and the metrics manager
         """
 
         with override_config(self.config):
-            P = self.pipelines.get(pipeline)
+            compile_pipeline, execute_pipeline = self._resolve_pipelines(
+                compile_pipeline, execute_pipeline, pipeline
+            )
+            self._validate_pipeline_can_compile(compile_pipeline)
+            self._validate_pipeline_can_execute(execute_pipeline)
+
             pkg, compile_metrics = self.compile(
-                program, compiler_config=compiler_config, pipeline=P
+                program, compiler_config=compiler_config, pipeline=compile_pipeline
             )
             result, execute_metrics = self.execute(
-                pkg, compiler_config=compiler_config, pipeline=P
+                pkg, compiler_config=compiler_config, pipeline=execute_pipeline
             )
             return result, execute_metrics.merge(compile_metrics)
 
@@ -116,3 +135,40 @@ class QAT:
         """Reloads all hardware models and updates the pipelines."""
         self._available_hardware.reload_all_models()
         self.pipelines.reload_all_models()
+
+    def _resolve_pipelines(
+        self,
+        compile_pipeline: AbstractPipeline | str | None,
+        execute_pipeline: AbstractPipeline | str | None,
+        pipeline: AbstractPipeline | str,
+    ) -> tuple[AbstractPipeline, AbstractPipeline]:
+        if compile_pipeline is None or execute_pipeline is None:
+            pipeline = self.pipelines.get(pipeline)
+
+        compile_pipeline = (
+            self.pipelines.get(compile_pipeline)
+            if compile_pipeline is not None
+            else pipeline
+        )
+        execute_pipeline = (
+            self.pipelines.get(execute_pipeline)
+            if execute_pipeline is not None
+            else pipeline
+        )
+        return compile_pipeline, execute_pipeline
+
+    @staticmethod
+    def _validate_pipeline_can_compile(pipeline: AbstractPipeline):
+        if not pipeline.is_subtype_of(CompilePipeline):
+            raise TypeError(
+                f"Pipeline {pipeline} is not a CompilePipeline, compilation is not "
+                "supported."
+            )
+
+    @staticmethod
+    def _validate_pipeline_can_execute(pipeline: AbstractPipeline):
+        if not pipeline.is_subtype_of(ExecutePipeline):
+            raise TypeError(
+                f"Pipeline {pipeline} is not an ExecutePipeline, execution is not "
+                "supported."
+            )

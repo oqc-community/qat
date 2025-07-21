@@ -160,7 +160,7 @@ class PipelineSet:
 
         del self._pipelines[name]
 
-    def get(self, pipeline: AbstractPipeline | str):
+    def get(self, pipeline: AbstractPipeline | str) -> AbstractPipeline:
         """Gets a stored pipeline by name (str) or passes through a pipeline instance
 
         :param pipeline: A pipeline instance or the string name of a stored pipeline

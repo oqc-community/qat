@@ -2,40 +2,20 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
+from inspect import signature
 
-from compiler_config.config import CompilerConfig
-
-from qat.backend.base import BaseBackend
-from qat.core.metrics_base import MetricsManager
-from qat.engines.native import NativeEngine
-from qat.executables import Executable
-from qat.frontend import BaseFrontend
-from qat.middleend.middleends import BaseMiddleend
 from qat.model.target_data import TargetData
+from qat.model.validators import MismatchingHardwareModelException
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.base import BaseRuntime
 
 
 class AbstractPipeline(ABC):
     """An abstraction of pipelines used in QAT to compile and execute quantum programs.
 
-    A pipeline is composed of many different components used to specify how a quantum
-    program is compiled and executed. On the compilation front, there is the:
-
-    #. Model: Contains calibration information surrounding the QPU.
-    #. TargetData: Contains information about the target device.
-    #. Frontend: Compiles a high-level language-specific, but target-agnostic,
-       input (e.g., QASM, QIR, ...) to QAT's intermediate representation (IR), QatIR.
-    #. Middleend: Takes the QatIR and performs a sequences of  passes that validate and
-       optimise the IR, and prepare it for codegen.
-    #. Backend: Handles code generation to allow the program to be executed on the target.
-
-    On the execution front, there is the:
-
-    #. Engine: Communicates the compiled program with the target devices, and returns the
-       results.
-    #. Runtime: Manages the execution of the program, including the engine and the post-
-       processing of the results.
+    Abstractly a pipeline needs to be given a hardware model and some target data that
+    contains the parameters of the target device needed to correctly compile and execute.
+    In the future, this might be relaxed so that the model and/or target data is not
+    concretely needed to define a pipeline.
     """
 
     @property
@@ -50,32 +30,61 @@ class AbstractPipeline(ABC):
     @abstractmethod
     def target_data(self) -> TargetData: ...
 
-    @property
-    @abstractmethod
-    def frontend(self) -> BaseFrontend: ...
+    def is_subtype_of(self, cls):
+        """Matches a given type against the pipeline."""
+        return isinstance(self, cls)
+
+
+class BasePipeline(AbstractPipeline, ABC):
+    """A base implementation of the abstract pipeline that provides access to the
+    components of the pipeline.
+
+    Subclasses should implement the `copy` and `copy_with_name` methods.
+    """
+
+    def __init__(self, name: str, model: QuantumHardwareModel, target_data: TargetData):
+        self._name = name
+        self._model = model
+        self._target_data = target_data
 
     @property
-    @abstractmethod
-    def middleend(self) -> BaseMiddleend: ...
+    def name(self) -> str:
+        return self._name
 
     @property
-    @abstractmethod
-    def backend(self) -> BaseBackend: ...
+    def model(self) -> QuantumHardwareModel:
+        return self._model
 
     @property
-    @abstractmethod
-    def runtime(self) -> BaseRuntime: ...
+    def target_data(self) -> TargetData:
+        return self._target_data
 
-    @property
-    @abstractmethod
-    def engine(self) -> NativeEngine: ...
+    def copy(self) -> "BasePipeline":
+        """Returns a new instance of the pipeline with the same components."""
 
-    @abstractmethod
-    def compile(
-        self, program, compiler_config: CompilerConfig | None = None
-    ) -> tuple[Executable, MetricsManager]: ...
+        cls = self.__class__
+        arg_names = signature(cls.__init__).parameters.keys()
+        args = {k: getattr(self, k) for k in arg_names if k != "self"}
+        return cls(**args)
 
-    @abstractmethod
-    def execute(
-        self, executable: Executable, compiler_config: CompilerConfig | None = None
-    ) -> tuple[dict, MetricsManager]: ...
+    def copy_with_name(self, name: str) -> "BasePipeline":
+        """Returns a new instance of the pipeline with the same components, but with a
+        different name."""
+
+        cls = self.__class__
+        arg_names = signature(cls.__init__).parameters.keys()
+        args = {k: getattr(self, k) for k in arg_names if k != "self"}
+        args["name"] = name
+        return cls(**args)
+
+    def _validate_consistent_model(self, model: QuantumHardwareModel, *args):
+        """Validates that the model is consistent across all components of the pipeline.
+
+        :param model: The hardware model to validate against.
+        :param args: The components of the pipeline to validate.
+        """
+        for component in args:
+            if hasattr(component, "model") and component.model not in {model, None}:
+                raise MismatchingHardwareModelException(
+                    f"{model} hardware does not match supplied hardware"
+                )

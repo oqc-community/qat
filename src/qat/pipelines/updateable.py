@@ -1,22 +1,15 @@
 from abc import abstractmethod
 from typing import get_type_hints
 
-from compiler_config.config import CompilerConfig
 from pydantic import BaseModel, TypeAdapter
 
-from qat.backend.base import BaseBackend
-from qat.core.metrics_base import MetricsManager
 from qat.engines.native import NativeEngine
-from qat.executables import Executable
-from qat.frontend.base import BaseFrontend
-from qat.middleend.middleends import BaseMiddleend
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.base import AbstractPipeline
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.pipeline import BasePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.base import BaseRuntime
 
 
 class PipelineConfig(BaseModel):
@@ -37,6 +30,8 @@ class UpdateablePipeline(AbstractPipeline):
     moving parts. :class:`UpdateablePipeline` provide a mechanism to update and refresh
     pipelines with updated components, such as an updated hardware model, without
     invalidating other components in the pipeline by reconstructing the entire pipeline.
+    It will also inherit the properties and methods of the pipeline it creates, allowing
+    it to be used as a drop-in replacement for the original pipeline.
     """
 
     def __init__(
@@ -85,7 +80,7 @@ class UpdateablePipeline(AbstractPipeline):
         model: Model,
         target_data: TargetData | None,
         engine: NativeEngine | None = None,
-    ) -> Pipeline:
+    ) -> BasePipeline:
         """Build the pipeline based on the configuration."""
 
         raise NotImplementedError(
@@ -93,6 +88,10 @@ class UpdateablePipeline(AbstractPipeline):
             "to implement their own `_build_pipeline` method that returns a `Pipeline` "
             "object."
         )
+
+    def is_subtype_of(self, cls):
+        """Matches the type against the pipeline produced by the factory."""
+        return isinstance(self, cls) or self._pipeline.is_subtype_of(cls)
 
     @classmethod
     def config_type(cls) -> type:
@@ -123,22 +122,7 @@ class UpdateablePipeline(AbstractPipeline):
         return self._pipeline.target_data
 
     @property
-    def frontend(self) -> BaseFrontend:
-        """Return the pipeline instance frontend."""
-        return self._pipeline.frontend
-
-    @property
-    def middleend(self) -> BaseMiddleend:
-        """Return the pipeline instance middleend."""
-        return self._pipeline.middleend
-
-    @property
-    def backend(self) -> BaseBackend:
-        """Return the pipeline instance backend."""
-        return self._pipeline.backend
-
-    @property
-    def pipeline(self) -> Pipeline:
+    def pipeline(self) -> BasePipeline:
         """Return the pipeline instance."""
         return self._pipeline
 
@@ -148,14 +132,11 @@ class UpdateablePipeline(AbstractPipeline):
         return self._pipeline_config
 
     @property
-    def runtime(self) -> BaseRuntime:
-        """Return the runtime of the pipeline."""
-        return self._pipeline.runtime
-
-    @property
-    def engine(self) -> NativeEngine:
+    def engine(self) -> NativeEngine | None:
         """Return the engine of the pipeline."""
-        return self._pipeline.engine
+        if hasattr(self._pipeline, "engine"):
+            return self._pipeline.engine
+        return None
 
     @property
     def has_loader(self) -> bool:
@@ -284,32 +265,11 @@ class UpdateablePipeline(AbstractPipeline):
             engine=engine,
         )
 
-    def compile(
-        self, program, compiler_config: CompilerConfig | None = None
-    ) -> tuple[Executable, MetricsManager]:
-        """Calls the compile method of the construted pipeline to compile a program into
-        an executable.
+    def __getattr__(self, name: str):
+        """Delegate attribute access to the underlying pipeline instance."""
 
-        :param program: The source program to compile.
-        :param compiler_config: Configuration options for the compiler, such as optimization
-            and results formatting.
-        :return: A tuple containing the executable of the compiled program for the target
-            device and the metrics manager containing metrics collected during compilation.
-        """
-
-        return self.pipeline.compile(program, compiler_config=compiler_config)
-
-    def execute(
-        self, executable: Executable, compiler_config: CompilerConfig | None = None
-    ) -> tuple[dict, MetricsManager]:
-        """Calls the execute method of the constructed pipeline to execute a compiled
-        program on the target device.
-
-        :param executable: The compiled program to execute.
-        :param compiler_config: Configuration options for the compiler, such as optimization
-            and results formatting.
-        :return: A tuple containing the results of the execution and the metrics manager
-            containing metrics collected during execution.
-        """
-
-        return self.pipeline.execute(executable, compiler_config=compiler_config)
+        if name in self.__dict__:
+            return self.__dict__[name]
+        if hasattr(self._pipeline, name):
+            return getattr(self._pipeline, name)
+        raise AttributeError(f"{self.__class__.__name__} has no attribute '{name}'")
