@@ -1,0 +1,7 @@
+qat.pipelines.legacy.rtcs.full module
+=====================================
+
+.. automodule:: qat.pipelines.legacy.rtcs.full
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+qat.pipelines.legacy.echo.execute module
+========================================
+
+.. automodule:: qat.pipelines.legacy.echo.execute
+   :members:
+   :undoc-members:
+   :show-inheritance:

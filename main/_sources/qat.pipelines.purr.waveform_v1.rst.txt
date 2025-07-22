@@ -1,0 +1,17 @@
+qat.pipelines.purr.waveform\_v1 package
+=======================================
+
+.. automodule:: qat.pipelines.purr.waveform_v1
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.pipelines.purr.waveform_v1.compile
+   qat.pipelines.purr.waveform_v1.execute
+   qat.pipelines.purr.waveform_v1.full

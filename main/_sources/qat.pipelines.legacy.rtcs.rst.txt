@@ -1,7 +1,16 @@
-qat.pipelines.legacy.rtcs module
-================================
+qat.pipelines.legacy.rtcs package
+=================================
 
 .. automodule:: qat.pipelines.legacy.rtcs
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.pipelines.legacy.rtcs.compile
+   qat.pipelines.legacy.rtcs.full

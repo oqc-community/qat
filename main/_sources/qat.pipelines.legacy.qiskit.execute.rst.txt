@@ -1,0 +1,7 @@
+qat.pipelines.legacy.qiskit.execute module
+==========================================
+
+.. automodule:: qat.pipelines.legacy.qiskit.execute
+   :members:
+   :undoc-members:
+   :show-inheritance:

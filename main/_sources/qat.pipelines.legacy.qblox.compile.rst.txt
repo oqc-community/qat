@@ -1,0 +1,7 @@
+qat.pipelines.legacy.qblox.compile module
+=========================================
+
+.. automodule:: qat.pipelines.legacy.qblox.compile
+   :members:
+   :undoc-members:
+   :show-inheritance:

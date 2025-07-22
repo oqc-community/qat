@@ -1,0 +1,7 @@
+qat.pipelines.legacy.qiskit.full module
+=======================================
+
+.. automodule:: qat.pipelines.legacy.qiskit.full
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+qat.pipelines.legacy.base.full module
+=====================================
+
+.. automodule:: qat.pipelines.legacy.base.full
+   :members:
+   :undoc-members:
+   :show-inheritance:

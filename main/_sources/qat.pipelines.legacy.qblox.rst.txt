@@ -1,7 +1,16 @@
-qat.pipelines.legacy.qblox module
-=================================
+qat.pipelines.legacy.qblox package
+==================================
 
 .. automodule:: qat.pipelines.legacy.qblox
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.pipelines.legacy.qblox.compile
+   qat.pipelines.legacy.qblox.full

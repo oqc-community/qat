@@ -1,0 +1,7 @@
+qat.pipelines.purr.waveform\_v1.full module
+===========================================
+
+.. automodule:: qat.pipelines.purr.waveform_v1.full
+   :members:
+   :undoc-members:
+   :show-inheritance:
