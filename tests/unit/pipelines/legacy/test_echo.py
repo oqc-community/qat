@@ -17,8 +17,13 @@ from qat.backend import FallthroughBackend
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr import EchoModelLoader
-from qat.pipelines.legacy.echo import LegacyEchoPipeline, LegacyEchoPipelineConfig
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.legacy.echo import (
+    LegacyEchoCompilePipeline,
+    LegacyEchoExecutePipeline,
+    LegacyEchoPipeline,
+    PipelineConfig,
+)
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
@@ -52,7 +57,7 @@ class TestEchoPipelines:
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = EchoModelLoader().load()
         pipeline = LegacyEchoPipeline._build_pipeline(
-            config=LegacyEchoPipelineConfig(),
+            config=PipelineConfig(name="legacy_echo"),
             model=model,
             target_data=None,
         )
@@ -62,6 +67,35 @@ class TestEchoPipelines:
         assert isinstance(pipeline.frontend, AutoFrontend)
         assert isinstance(pipeline.middleend, CustomMiddleend)
         assert isinstance(pipeline.backend, FallthroughBackend)
+        assert isinstance(pipeline.runtime, LegacyRuntime)
+        assert isinstance(pipeline.engine, EchoEngine)
+
+    def test_build_compile_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = EchoModelLoader().load()
+        pipeline = LegacyEchoCompilePipeline._build_pipeline(
+            config=PipelineConfig(name="legacy_echo_compile"),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, CompilePipeline)
+        assert pipeline.name == "legacy_echo_compile"
+        assert pipeline.model == model
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, CustomMiddleend)
+        assert isinstance(pipeline.backend, FallthroughBackend)
+
+    def test_build_execute_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = EchoModelLoader().load()
+        pipeline = LegacyEchoExecutePipeline._build_pipeline(
+            config=PipelineConfig(name="legacy_echo_execute"),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, ExecutePipeline)
+        assert pipeline.name == "legacy_echo_execute"
+        assert pipeline.model == model
         assert isinstance(pipeline.runtime, LegacyRuntime)
         assert isinstance(pipeline.engine, EchoEngine)
 
@@ -179,7 +213,7 @@ class TestLegacyEchoPipelineParity:
 
     model = EchoModelLoaderWithErrorMitigation(32).load()
     engine = EchoEngine(model)
-    pipeline = LegacyEchoPipeline(config=LegacyEchoPipelineConfig(), model=model)
+    pipeline = LegacyEchoPipeline(config=PipelineConfig(name="legacy_echo"), model=model)
 
     def compiler_config(self, config_settings):
         """The compiler config is instantiated in this way so that a new instance is

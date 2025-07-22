@@ -25,7 +25,7 @@ from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.base import AbstractPipeline
-from qat.pipelines.echo import EchoPipeline, EchoPipelineConfig
+from qat.pipelines.echo import EchoPipeline, PipelineConfig
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
@@ -49,7 +49,7 @@ class MockEngine(NativeEngine):
 @pytest.fixture
 def echo_pipeline(qubit_count=32):
     loader = EchoModelLoader(qubit_count=qubit_count)
-    yield EchoPipeline(config=EchoPipelineConfig(name="echo"), loader=loader)
+    yield EchoPipeline(config=PipelineConfig(name="echo"), loader=loader)
 
 
 @pytest.fixture

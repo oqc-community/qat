@@ -6,11 +6,13 @@ from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr import QiskitModelLoader
 from qat.pipelines.legacy.qiskit import (
+    LegacyQiskitCompilePipeline,
+    LegacyQiskitExecutePipeline,
     LegacyQiskitPipeline,
-    LegacyQiskitPipelineConfig,
+    PipelineConfig,
     legacy_qiskit8,
 )
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.backends.qiskit_simulator import QiskitEngine
 from qat.runtime import LegacyRuntime
 
@@ -31,7 +33,7 @@ class TestQiskitPipelines:
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = QiskitModelLoader(qubit_count=8).load()
         pipeline = LegacyQiskitPipeline._build_pipeline(
-            config=LegacyQiskitPipelineConfig(),
+            config=PipelineConfig(name="legacy_qiskit"),
             model=model,
             target_data=None,
         )
@@ -41,6 +43,35 @@ class TestQiskitPipelines:
         assert isinstance(pipeline.frontend, AutoFrontend)
         assert isinstance(pipeline.middleend, CustomMiddleend)
         assert isinstance(pipeline.backend, FallthroughBackend)
+        assert isinstance(pipeline.runtime, LegacyRuntime)
+        assert isinstance(pipeline.engine, QiskitEngine)
+
+    def test_build_compile_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = QiskitModelLoader(qubit_count=8).load()
+        pipeline = LegacyQiskitCompilePipeline._build_pipeline(
+            config=PipelineConfig(name="legacy_qiskit_compile"),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, CompilePipeline)
+        assert pipeline.name == "legacy_qiskit_compile"
+        assert pipeline.model == model
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, CustomMiddleend)
+        assert isinstance(pipeline.backend, FallthroughBackend)
+
+    def test_build_execute_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = QiskitModelLoader(qubit_count=8).load()
+        pipeline = LegacyQiskitExecutePipeline._build_pipeline(
+            config=PipelineConfig(name="legacy_qiskit_execute"),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, ExecutePipeline)
+        assert pipeline.name == "legacy_qiskit_execute"
+        assert pipeline.model == model
         assert isinstance(pipeline.runtime, LegacyRuntime)
         assert isinstance(pipeline.engine, QiskitEngine)
 

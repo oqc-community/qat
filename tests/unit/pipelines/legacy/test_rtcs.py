@@ -9,11 +9,12 @@ from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr import RTCSModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.legacy.rtcs import (
+    LegacyRTCSCompilePipeline,
     LegacyRTCSPipeline,
-    LegacyRTCSPipelineConfig,
+    PipelineConfig,
     legacy_rtcs2,
 )
-from qat.pipelines.pipeline import Pipeline
+from qat.pipelines.pipeline import CompilePipeline, Pipeline
 from qat.purr.backends.realtime_chip_simulator import RealtimeChipSimEngine
 from qat.runtime import LegacyRuntime
 
@@ -33,7 +34,7 @@ class TestRTCSPipelines:
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = RTCSModelLoader().load()
         pipeline = LegacyRTCSPipeline._build_pipeline(
-            config=LegacyRTCSPipelineConfig(),
+            config=PipelineConfig(name="legacy_rtcs"),
             model=model,
             target_data=None,
         )
@@ -45,6 +46,21 @@ class TestRTCSPipelines:
         assert isinstance(pipeline.backend, FallthroughBackend)
         assert isinstance(pipeline.runtime, LegacyRuntime)
         assert isinstance(pipeline.engine, RealtimeChipSimEngine)
+
+    def test_build_compile_pipeline(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = RTCSModelLoader().load()
+        pipeline = LegacyRTCSCompilePipeline._build_pipeline(
+            config=PipelineConfig(name="legacy_rtcs"),
+            model=model,
+            target_data=None,
+        )
+        assert isinstance(pipeline, CompilePipeline)
+        assert pipeline.name == "legacy_rtcs"
+        assert pipeline.model == model
+        assert isinstance(pipeline.frontend, AutoFrontend)
+        assert isinstance(pipeline.middleend, CustomMiddleend)
+        assert isinstance(pipeline.backend, FallthroughBackend)
 
     def execute_bell_state(self, config=None):
         qasm_str = get_qasm2("ghz_2.qasm")
