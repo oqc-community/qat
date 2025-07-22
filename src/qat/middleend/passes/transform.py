@@ -1315,6 +1315,29 @@ class EvaluateWaveforms(TransformPass):
         return waveform
 
 
+class SynchronizeTask(TransformPass):
+    """Synchronizes all active pulse channels in a task.
+
+    Adds a synchronize to the end of the instruction list for all active pulse channels,
+    which is extracted from the :class:`ActivePulseChannelAnalysis` pass. This is useful to
+    do before resetting the qubits, as it ensures no qubit is reset while the task is still
+    "active", reducing the effects of cross-talk.
+    """
+
+    def run(
+        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        """
+
+        active_channels = res_mgr.lookup_by_type(ActivePulseChannelResults).targets
+        if len(active_channels) > 1:
+            ir.add(Synchronize(targets=active_channels))
+        return ir
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
@@ -1332,3 +1355,4 @@ PydFreqShiftSanitisation = FreqShiftSanitisation
 PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation
 PydLowerSyncsToDelays = LowerSyncsToDelays
 PydEvaluateWaveforms = EvaluateWaveforms
+PydSynchronizeTask = SynchronizeTask

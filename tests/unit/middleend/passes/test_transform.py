@@ -61,6 +61,7 @@ from qat.middleend.passes.transform import (
     ReturnSanitisation,
     ScopeSanitisation,
     SquashDelaysOptimisation,
+    SynchronizeTask,
 )
 from qat.middleend.passes.validation import ReturnSanitisationValidation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
@@ -2113,3 +2114,50 @@ class TestEvaluateWaveforms:
         assert isinstance(new_builder.instructions[4], Acquire)
         assert isinstance(new_builder.instructions[4].filter, Pulse)
         assert isinstance(new_builder.instructions[4].filter.waveform, SampledWaveform)
+
+
+class TestSynchronizeTask:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader().load()
+
+    def test_synchronize_task_adds_sync(self, model):
+        qubit = model.qubit_with_index(0)
+        drive_chan = qubit.drive_pulse_channel
+        measure_chan = qubit.measure_pulse_channel
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActivePulseChannelResults(
+                target_map={drive_chan.uuid: qubit, measure_chan.uuid: qubit}
+            )
+        )
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.pulse(target=drive_chan.uuid, waveform=SquareWaveform(width=800e-9))
+        builder.pulse(target=measure_chan.uuid, waveform=SquareWaveform(width=400e-9))
+
+        ir = SynchronizeTask().run(builder, res_mgr)
+        assert isinstance(ir.instructions[-1], Synchronize)
+        assert ir.instructions[-1].targets == set([drive_chan.uuid, measure_chan.uuid])
+
+    def test_synchronize_task_not_adding_if_inactive(self, model):
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={}))
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        ir = SynchronizeTask().run(builder, res_mgr)
+        assert len(ir.instructions) == 0
+
+    def test_synchronize_task_not_adding_if_only_one_channel(self, model):
+        qubit = model.qubit_with_index(0)
+        drive_chan = qubit.drive_pulse_channel
+
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={drive_chan.uuid: qubit}))
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.pulse(target=drive_chan.uuid, waveform=SquareWaveform(width=800e-9))
+
+        ir = SynchronizeTask().run(builder, res_mgr)
+        assert len(ir.instructions) == 1
+        assert not isinstance(ir.instructions[-1], Synchronize)

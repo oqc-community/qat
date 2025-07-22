@@ -59,6 +59,7 @@ from qat.middleend.passes.transform import (
     PydReturnSanitisation,
     PydScopeSanitisation,
     PydSquashDelaysOptimisation,
+    PydSynchronizeTask,
 )
 from qat.middleend.passes.validation import (
     PydHardwareConfigValidity,
@@ -262,9 +263,9 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
                 legacy_model, target_data
             )  # TODO: COMPILER-553, COMPILER-347
             | ReturnSanitisation()
-            | SynchronizeTask()  # TODO: COMPILER-549
             # Corrections / optimisations to the IR
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydSynchronizeTask()
             | PydPostProcessingSanitisation()
             | PydReadoutValidation()
             | PydMeasurePhaseResetSanitisation(pyd_model)
