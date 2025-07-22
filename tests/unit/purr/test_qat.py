@@ -9,6 +9,8 @@ from qat.purr.qat import execute_with_metrics
 from tests.unit.utils.models import ListReturningEngine
 from tests.unit.utils.qasm_qir import ProgramFileType, get_test_file_path
 
+pytestmark = pytest.mark.legacy
+
 
 @pytest.mark.parametrize(
     ("input_string", "file_type", "instruction_length"),

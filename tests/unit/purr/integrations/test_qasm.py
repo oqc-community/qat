@@ -126,6 +126,7 @@ class TestQASM3:
     and focus on the OpenPulse side of the language definition.
     """
 
+    @pytest.mark.legacy
     def test_named_defcal_arg(self):
         hw = get_default_echo_hardware(8)
         comp = CompilerConfig()
@@ -138,6 +139,7 @@ class TestQASM3:
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
     )
+    @pytest.mark.legacy
     def test_basic(self):
         hw = get_default_RTCS_hardware()
         config = CompilerConfig()
@@ -149,11 +151,13 @@ class TestQASM3:
         # just that it's spread equally.
         assert not any([val for val in results["c"].values() if (val / 1000) < 0.15])
 
+    @pytest.mark.legacy
     def test_zmap(self):
         hw = get_default_echo_hardware(8)
         results = execute_qasm(get_qasm3("openpulse_tests/zmap.qasm"), hw)
         assert not isinstance(results, dict)
 
+    @pytest.mark.legacy
     def test_frequency(self):
         hw = get_default_echo_hardware(8)
         execute_qasm(get_qasm3("openpulse_tests/freq.qasm"), hw)
@@ -197,14 +201,17 @@ class TestQASM3:
 
         assert len(v3_instructions.instructions) == len(v2_instructions.instructions)
 
+    @pytest.mark.legacy
     def test_complex_gates(self):
         hw = get_default_echo_hardware(8)
         execute_qasm(get_qasm3("complex_gates_test.qasm"), hw)
 
+    @pytest.mark.legacy
     def test_execution(self):
         hw = get_default_echo_hardware(8)
         execute_qasm(get_qasm3("lark_parsing_test.qasm"), hw)
 
+    @pytest.mark.legacy
     def test_invalid_qasm_version(self):
         hw = get_default_echo_hardware(8)
         with pytest.raises(ValueError) as context:
@@ -389,6 +396,7 @@ class TestQASM3:
         assert pulses[0].shape is PulseShapeType.GAUSSIAN_ZERO_EDGE
         assert pulses[1].shape is PulseShapeType.SQUARE
 
+    @pytest.mark.legacy
     def test_excessive_pulse_width_fails(self):
         hw = get_default_echo_hardware(8)
         with pytest.raises(ValueError):
@@ -499,6 +507,7 @@ class TestQASM3:
             "waveform_numerical_types",
         ],
     )
+    @pytest.mark.legacy
     def test_op(self, qasm_name):
         qasm_string = get_qasm3(f"openpulse_tests/{qasm_name}.qasm")
         hardware = get_default_echo_hardware(8)
@@ -509,6 +518,7 @@ class TestQASM3:
         )
         assert execute_qasm(qasm_string, hardware=hardware, compiler_config=config)
 
+    @pytest.mark.legacy
     def test_internal_pulses(self):
         qasm_string = get_qasm3("waveform_tests/internal_waveform_tests.qasm")
         hardware = get_default_echo_hardware(8)
@@ -573,6 +583,7 @@ class TestQASM3:
         result = parser.parse(get_builder(hw), qasm_string)
         assert len(result.instructions) > 0
 
+    @pytest.mark.legacy
     def test_execute_different_qat_input_types(self):
         hw = get_default_echo_hardware(5)
         qubit = hw.get_qubit(0)

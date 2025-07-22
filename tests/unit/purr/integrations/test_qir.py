@@ -23,6 +23,7 @@ def _get_qir_path(file_name):
 
 
 class TestQIR:
+    @pytest.mark.legacy
     def test_invalid_paths(self):
         with pytest.raises(ValueError):
             execute(abspath("\\very\\wrong.ll"))
@@ -33,6 +34,7 @@ class TestQIR:
         with pytest.raises(ValueError):
             execute("/very/wrong.bc")
 
+    @pytest.mark.legacy
     def test_valid_ll_path(self):
         execute(
             _get_qir_path("generator-bell.ll"),
@@ -42,6 +44,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_qir_bell(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.squash_binary_result_arrays()
@@ -50,6 +53,7 @@ class TestQIR:
         )
         assert results == "00"
 
+    @pytest.mark.legacy
     def test_base_profile_ops(self):
         parser = QIRParser(get_default_echo_hardware(7))
         builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
@@ -63,6 +67,7 @@ class TestQIR:
         assert results.get("r00000") == [0]
 
     @pytest.mark.skip("Needs full runtime.")
+    @pytest.mark.legacy
     def test_bell_measure_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
@@ -71,18 +76,21 @@ class TestQIR:
         )
 
     @pytest.mark.skip("Needs full runtime.")
+    @pytest.mark.legacy
     def test_complicated(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
         execute_qir(_get_qir_path("complicated.ll"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
+    @pytest.mark.legacy
     def test_hello_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
         execute_qir(_get_qir_path("hello.bc"), get_default_echo_hardware(4), config)
 
     @pytest.mark.skip("Needs full runtime.")
+    @pytest.mark.legacy
     def test_select_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
@@ -92,6 +100,7 @@ class TestQIR:
         assert results == "00"
 
     @pytest.mark.skip("Needs full runtime.")
+    @pytest.mark.legacy
     def test_teleport_chain_bitcode(self):
         config = CompilerConfig()
         config.results_format.squash_binary_result_arrays()
@@ -105,6 +114,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_common_entrypoint_file(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
@@ -116,6 +126,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_common_entrypoint_string(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
@@ -127,6 +138,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_common_entrypoint_bitcode(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
@@ -138,6 +150,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_invalid_QIR(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
@@ -230,6 +243,7 @@ class TestQIR:
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
+    @pytest.mark.legacy
     def test_qir_bell_binary_count(self, optim_config):
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
@@ -243,6 +257,7 @@ class TestQIR:
     @pytest.mark.skipif(
         not qutip_available, reason="Qutip is not available on this platform"
     )
+    @pytest.mark.legacy
     @pytest.mark.parametrize(
         "optim_config", [Tket().disable(), Tket().minimum(), Tket().default()]
     )
@@ -276,6 +291,7 @@ class TestQIR:
         builder = parser.parse(_get_qir_path(qir_file))
         assert len(builder.instructions) > 0
 
+    @pytest.mark.legacy
     def test_execute_different_qat_input_types(self):
         hw = get_default_echo_hardware(5)
         qubit = hw.get_qubit(0)
@@ -293,6 +309,7 @@ class TestQIR:
         with pytest.raises(TypeError):
             execute_qir(qat_input=builder.instructions)
 
+    @pytest.mark.legacy
     def test_cudaq_ghz(self):
         """Tests routing via Tket qubit placement gives a program that executes."""
         model = get_default_echo_hardware(10)
@@ -308,6 +325,7 @@ class TestQIR:
         assert len(res) == 1
         assert "000" in res
 
+    @pytest.mark.legacy
     def test_tket_with_shifted_indices(self):
         """Tests routing via Tket qubit placement gives a program that executes."""
         model = get_jagged_echo_hardware(2)

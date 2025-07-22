@@ -25,6 +25,22 @@ def pytest_addoption(parser):
         dest="experimental",
         help="run only integration tests",
     )
+    parser.addoption(
+        "--legacy-enable",
+        action="store_const",
+        const=1,
+        dest="legacy",
+        default=1,
+        help="run legacy tests",
+    )
+    parser.addoption(
+        "--legacy-only",
+        action="store_const",
+        const=1,
+        dest="legacy",
+        default=-1,
+        help="run legacy tests",
+    )
 
 
 def pytest_configure(config):
@@ -35,7 +51,7 @@ def pytest_configure(config):
     if config.option.experimental is None:
         config.option.experimental = -1
     mark_list = [mark_string] if len(mark_string) > 0 else []
-    for marker in ["experimental"]:
+    for marker in ["experimental", "legacy"]:
         if marker in mark_string:
             continue
         val = getattr(config.option, marker)

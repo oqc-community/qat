@@ -393,6 +393,7 @@ class TestInstructionExecution:
         ],
         ids=lambda v: v.__code__.co_names[0],
     )
+    @pytest.mark.legacy
     def test_measure_instructions(self, measure_instruction):
         hw = get_default_echo_hardware(3)
         qubit = hw.get_qubit(0)
@@ -441,6 +442,7 @@ class TestInstructionExecution:
         ],
         ids=lambda val: f"{len(val)} sweep variables",
     )
+    @pytest.mark.legacy
     def test_batched_instruction_execution(self, sweeps, engine, form):
         hw = get_default_echo_hardware()
         hw.default_repeat_count = int(hw.repeat_limit * 1.5)
@@ -470,6 +472,7 @@ class TestInstructionExecution:
         self.check_size(results, shape)
 
     @pytest.mark.skip("Needs fixing for combining bathes of mean results.")
+    @pytest.mark.legacy
     def test_batched_instruction_execution_with_mean(self):
         hw = get_default_echo_hardware()
         hw.default_repeat_count = int(hw.repeat_limit * 1.5)
@@ -687,6 +690,7 @@ class TestInstructionBlocks:
         ]
 
 
+@pytest.mark.legacy
 class TestInstructionValidation:
     hw = get_default_echo_hardware()
 

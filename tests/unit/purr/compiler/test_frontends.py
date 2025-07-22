@@ -46,6 +46,7 @@ def _get_qasm_path(file_name):
         get_default_qiskit_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_execute_using_interruptable_QIRFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
@@ -64,6 +65,7 @@ def test_execute_using_interruptable_QIRFrontend(get_hardware):
         get_default_qiskit_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_execute_using_interruptable_QasmFrontend(get_hardware):
     config = CompilerConfig()
     config.results_format.binary_count()
@@ -82,6 +84,7 @@ def test_execute_using_interruptable_QasmFrontend(get_hardware):
         get_default_echo_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_interrupt_triggered_on_batch(get_hardware):
     config = CompilerConfig()
     path = _get_qasm_path("ghz_2.qasm")
@@ -119,6 +122,7 @@ def test_interrupt_triggered_on_batch(get_hardware):
         get_default_echo_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_interrupt_triggered_on_batch_n(
     kill_index, repeat_count, repeat_limit, get_hardware
 ):
@@ -165,6 +169,7 @@ def test_interrupt_triggered_on_batch_n(
         get_default_qiskit_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_interrupt_not_triggered_on_n_batches(get_hardware):
     hardware = get_hardware(2)
     # Force more than one batch in the batches
@@ -218,6 +223,7 @@ def _builder_1d_sweep_example(hw):
         get_default_echo_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_interrupt_triggered_on_sweep_m_1d(
     batch_n, repeat_count, repeat_limit, sweep_m, get_hardware
 ):
@@ -303,6 +309,7 @@ def _builder_2d_sweep_example(hw):
         get_default_echo_hardware,
     ],
 )
+@pytest.mark.legacy
 def test_interrupt_triggered_on_sweep_m_2d(
     batch_n, repeat_count, repeat_limit, sweep_m, get_hardware
 ):
@@ -351,6 +358,7 @@ def test_interrupt_triggered_on_sweep_m_2d(
     assert why_finished["metadata"]["sweep_iteration"] == sweep_m
 
 
+@pytest.mark.legacy
 class TestExecutionFrontend:
     def test_invalid_paths(self):
         with pytest.raises(ValueError):
@@ -600,7 +608,7 @@ class TestExecutionFrontend:
         metrics.record_metric(MetricsType.OptimizedCircuit, value)
         assert metrics.get_metric(MetricsType.OptimizedCircuit) == value
 
-    def test_parllel_execution(self):
+    def test_parallel_execution(self):
         qasm_string = get_qasm2("parallel_test.qasm")
 
         opts = Qasm2Optimizations()

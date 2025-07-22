@@ -163,6 +163,7 @@ class TestReadoutMitigation:
         ["linear_readout_mitigation"],
     ],
 )
+@pytest.mark.legacy
 class TestLinearReadoutMitigation(TestReadoutMitigation):
     @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
     @pytest.mark.parametrize("random_cal", [True, False])
@@ -238,6 +239,7 @@ class TestLinearReadoutMitigation(TestReadoutMitigation):
         ["matrix_readout_mitigation", "linear_readout_mitigation"],
     ],
 )
+@pytest.mark.legacy
 class TestMatrixReadoutMitigation(TestReadoutMitigation):
     @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
     @pytest.mark.parametrize("random_cal", [True, False])
@@ -313,6 +315,7 @@ class TestMatrixReadoutMitigation(TestReadoutMitigation):
     "error_mitigation",
     [None, ErrorMitigationConfig.Empty],
 )
+@pytest.mark.legacy
 class TestNoReadoutMitigation:
     def get_qasm(self, qubit_count):
         return f"""
@@ -337,6 +340,7 @@ class TestNoReadoutMitigation:
         assert len(results) == 1
 
 
+@pytest.mark.legacy
 class TestOnNoisySimulator:
     config = CompilerConfig(
         results_format=QuantumResultsFormat().binary_count(),

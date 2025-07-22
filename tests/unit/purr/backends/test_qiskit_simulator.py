@@ -29,6 +29,7 @@ qatconfig = get_config()
 qiskitconfig = qatconfig.SIMULATION.QISKIT
 
 
+@pytest.mark.legacy
 class TestQiskitSimulator:
     @pytest.mark.parametrize("strict_placement", [True, False])
     @pytest.mark.parametrize("qi0, qi1, valid", [(0, 1, True), (0, 2, False)])

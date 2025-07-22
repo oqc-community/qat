@@ -36,6 +36,7 @@ class TestFirmwareVerificationEngines:
             ("long_qasm.qasm", ProgramFileType.QASM2, False),
         ],
     )
+    @pytest.mark.legacy
     def test_circuit_length_validation(self, input_string, file_type, is_valid):
         program = str(get_test_file_path(file_type, input_string))
 

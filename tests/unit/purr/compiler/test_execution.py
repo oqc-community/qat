@@ -161,6 +161,7 @@ def get_test_runtime(model) -> QuantumRuntime:
 
 
 class TestBaseQuantum:
+    @pytest.mark.legacy
     def test_batched_execution(self):
         hw = get_default_echo_hardware()
         hw.shot_limit = 10
@@ -199,6 +200,7 @@ class TestBaseQuantum:
         for id_ in hw.basebands.keys():
             assert hw.get_physical_baseband(id_) is not None
 
+    @pytest.mark.legacy
     def test_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
         pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
@@ -230,6 +232,7 @@ class TestBaseQuantum:
         if_freq = np.argmax(x) / physical_channel.sample_time / len(pulses)
         assert if_freq == pytest.approx(baseband.if_frequency)
 
+    @pytest.mark.legacy
     def test_not_fixed_if_non_regular_pulse_generation(self):
         hw = get_test_model()
         pulse_channel = hw.get_pulse_channel_from_device(ChannelType.drive, "Q0")
@@ -258,6 +261,7 @@ class TestBaseQuantum:
         if_freq = np.argmax(x) / physical_channel.sample_time / len(pulses)
         assert if_freq == pytest.approx(pulse_channel.frequency - baseband.frequency)
 
+    @pytest.mark.legacy
     def test_fixed_if_pulse_channel_frequency_priority_with_multiple_pulse_channels(
         self,
     ):
@@ -331,6 +335,7 @@ class TestBaseQuantum:
         assert baseband_2.frequency == common_lo_frequency
         assert baseband_2.if_frequency == drive_channel_2.frequency - baseband_2.frequency
 
+    @pytest.mark.legacy
     def test_setup_hold_measure_pulse(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -370,6 +375,7 @@ class TestBaseQuantum:
             np.round(np.imag(result[setup_length:full_length]), 7),
         )
 
+    @pytest.mark.legacy
     def test_variable_acquire_pulse(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -441,6 +447,7 @@ class TestBaseQuantum:
         loaded_linear_rm = loaded_hw.error_mitigation.readout_mitigation.linear
         assert loaded_linear_rm == original_linear_rm
 
+    @pytest.mark.legacy
     def test_sweep_pulse_length_exceeds_max_throws_error(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -467,6 +474,7 @@ class TestBaseQuantum:
         )
         assert nb_points == execute_instructions(engine, builder)[0].shape[0]
 
+    @pytest.mark.legacy
     def test_phase_shift_optimisation_squashes_down_adjacent_phase_shifts(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -488,6 +496,7 @@ class TestBaseQuantum:
         assert len(phase_shift_list) == 1
         assert phase_shift_list[0].phase == phase_shift_1 + phase_shift_2
 
+    @pytest.mark.legacy
     def test_phase_shift_optimisation_does_not_squash_down_non_adjacent_phase_shifts(
         self,
     ):
@@ -505,7 +514,6 @@ class TestBaseQuantum:
         )
         engine = get_test_execution_engine(hw)
         optimized_instructions = engine.optimize(builder.instructions)
-        print(optimized_instructions)
         phase_shift_list = [
             instr for instr in optimized_instructions if isinstance(instr, PhaseShift)
         ]
@@ -513,6 +521,7 @@ class TestBaseQuantum:
         assert phase_shift_list[0].phase == phase_shift_1
         assert phase_shift_list[1].phase == phase_shift_2
 
+    @pytest.mark.legacy
     def test_phase_shift_optimisation_skips_sweep_variables(self):
         hw = get_test_model()
         qubit = hw.get_qubit(0)
@@ -561,6 +570,7 @@ class TestBaseQuantum:
             ids = [ids]
         return [engine.buffers[0][hw.get_qubit(_id).physical_channel.id] for _id in ids]
 
+    @pytest.mark.legacy
     def test_no_freq_shift(self):
         hardware = get_default_echo_hardware(2)
         engine = get_test_execution_engine(hardware)
@@ -574,6 +584,7 @@ class TestBaseQuantum:
         assert np.isclose(qubit1_buffer, 1 + 0j).all()
         assert np.isclose(qubit2_buffer, 1 + 0j).all()
 
+    @pytest.mark.legacy
     def test_freq_shift(self):
         hardware = get_default_echo_hardware(2)
         engine = get_test_execution_engine(hardware)
