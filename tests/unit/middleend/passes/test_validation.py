@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from copy import deepcopy
 
+import numpy as np
 import pytest
 from compiler_config.config import (
     CompilerConfig,
@@ -12,17 +13,20 @@ from compiler_config.config import (
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
+from qat.ir.measure import AcquireMode, ProcessAxis
 from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
 )
 from qat.middleend.passes.validation import (
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
+    PydReadoutValidation,
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
+from qat.purr.compiler.instructions import PostProcessType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 qatconfig = get_config()
@@ -207,3 +211,61 @@ class TestPydHardwareConfigValidity:
             results_format=QuantumResultsFormat().binary_count(),
         )
         PydHardwareConfigValidity(hw_model).run(ir, res_mgr, compiler_config=comp_config)
+
+
+class TestReadoutValidation:
+    hw = PydEchoModelLoader(qubit_count=4).load()
+
+    def test_valid_readout(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
+            builder.measure_single_shot_z(target=qubit)
+
+        PydReadoutValidation().run(builder)
+
+    @pytest.mark.parametrize(
+        "acquire_mode, process_axis",
+        [
+            (AcquireMode.SCOPE, ProcessAxis.SEQUENCE),
+            (AcquireMode.INTEGRATOR, ProcessAxis.TIME),
+            (AcquireMode.RAW, None),
+        ],
+    )
+    def test_acquire_with_invalid_pp(self, acquire_mode, process_axis):
+        qubit = self.hw.qubits[0]
+
+        output_variable = (
+            "out_" + qubit.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.acquire(qubit, mode=acquire_mode, output_variable=output_variable)
+        builder.post_processing(
+            target=qubit,
+            output_variable=output_variable,
+            process_type=PostProcessType.MEAN,
+            axes=process_axis,
+        )
+
+        with pytest.raises(ValueError, match="Invalid"):
+            PydReadoutValidation().run(builder)
+
+    def test_acquire_without_matching_output_variable(self):
+        qubit = self.hw.qubits[0]
+
+        output_variable_1 = (
+            "out_" + qubit.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
+        )
+        output_variable_2 = output_variable_1 + "_2"
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.acquire(
+            qubit, mode=AcquireMode.INTEGRATOR, output_variable=output_variable_1
+        )
+        builder.post_processing(
+            target=qubit,
+            output_variable=output_variable_2,
+            process_type=PostProcessType.MEAN,
+            axes=ProcessAxis.SEQUENCE,
+        )
+
+        with pytest.raises(ValueError, match="No AcquireMode found"):
+            PydReadoutValidation().run(builder)

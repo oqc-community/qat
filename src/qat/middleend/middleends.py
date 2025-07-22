@@ -53,6 +53,7 @@ from qat.middleend.passes.transform import (
     PydLowerSyncsToDelays,
     PydMeasurePhaseResetSanitisation,
     PydPhaseOptimisation,
+    PydPostProcessingSanitisation,
     PydRepeatTranslation,
     PydResetsToDelays,
     PydReturnSanitisation,
@@ -62,6 +63,7 @@ from qat.middleend.passes.transform import (
 from qat.middleend.passes.validation import (
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
+    PydReadoutValidation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.model.target_data import TargetData
@@ -262,10 +264,9 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | ReturnSanitisation()
             | SynchronizeTask()  # TODO: COMPILER-549
             # Corrections / optimisations to the IR
-            | PostProcessingSanitisation()  # TODO: COMPILER-540
-            | ReadoutValidation(legacy_model)  # TODO: COMPILER-556
-            | AcquireSanitisation()  # TODO: COMPILER-292
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydPostProcessingSanitisation()
+            | PydReadoutValidation()
             | PydMeasurePhaseResetSanitisation(pyd_model)
             | PydInstructionGranularitySanitisation(pyd_model, target_data)
             # Preparing for codegen

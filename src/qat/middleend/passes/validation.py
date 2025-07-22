@@ -7,7 +7,13 @@ from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.ir.instruction_builder import InstructionBuilder
 from qat.ir.instructions import Return
-from qat.ir.measure import Acquire, Pulse
+from qat.ir.measure import (
+    Acquire,
+    AcquireMode,
+    PostProcessing,
+    ProcessAxis,
+    Pulse,
+)
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
@@ -66,6 +72,51 @@ class NoMidCircuitMeasurementValidation(ValidationPass):
                         "Mid-circuit measurements currently unable to be used."
                     )
         return ir
+
+
+class ReadoutValidation(ValidationPass):
+    """Validates that the post-processing instructions do not have an invalid sequence.
+
+    Extracted from :meth:`qat.purr.backends.live.LiveDeviceEngine.validate`.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        acquire_modes = {}
+        for inst in ir:
+            if isinstance(inst, Acquire):
+                acquire_modes[inst.output_variable] = inst.mode
+            if isinstance(inst, PostProcessing):
+                acquire_mode = acquire_modes.get(inst.output_variable, None)
+                self._post_processing_options_handling(inst, acquire_mode)
+        return ir
+
+    @staticmethod
+    def _post_processing_options_handling(
+        inst: PostProcessing, acquire_mode: AcquireMode | None
+    ):
+        if acquire_mode == AcquireMode.SCOPE and ProcessAxis.SEQUENCE in inst.axes:
+            raise ValueError(
+                "Invalid post-processing! Post-processing over SEQUENCE is "
+                "not possible after the result is returned from hardware "
+                "in SCOPE mode!"
+            )
+        elif acquire_mode == AcquireMode.INTEGRATOR and ProcessAxis.TIME in inst.axes:
+            raise ValueError(
+                "Invalid post-processing! Post-processing over TIME is not "
+                "possible after the result is returned from hardware in "
+                "INTEGRATOR mode!"
+            )
+        elif acquire_mode == AcquireMode.RAW:
+            raise ValueError(
+                "Invalid acquire mode! The live hardware doesn't support RAW acquire mode!"
+            )
+        elif acquire_mode is None:
+            raise ValueError(
+                f"No AcquireMode found with output variable {inst.output_variable},"
+                f"ensure PostProcessing output_variable matches an Acquire output_variable with a"
+                f"valid AcquireMode selected."
+            )
 
 
 class HardwareConfigValidity(ValidationPass):
@@ -132,6 +183,7 @@ class ReturnSanitisationValidation(ValidationPass):
         return ir
 
 
+PydReadoutValidation = ReadoutValidation
 PydHardwareConfigValidity = HardwareConfigValidity
 PydNoMidCircuitMeasurementValidation = NoMidCircuitMeasurementValidation
 PydReturnSanitisationValidation = ReturnSanitisationValidation
