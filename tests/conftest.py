@@ -28,9 +28,9 @@ def pytest_addoption(parser):
     parser.addoption(
         "--legacy-enable",
         action="store_const",
-        const=1,
+        const=0,
         dest="legacy",
-        default=1,
+        default=None,
         help="run legacy tests",
     )
     parser.addoption(
@@ -50,6 +50,8 @@ def pytest_configure(config):
     mark_string = config.option.markexpr
     if config.option.experimental is None:
         config.option.experimental = -1
+    if config.option.legacy is None:
+        config.option.legacy = -1
     mark_list = [mark_string] if len(mark_string) > 0 else []
     for marker in ["experimental", "legacy"]:
         if marker in mark_string:
