@@ -47,7 +47,7 @@ qutip = ">=5.2.0"
 toml = "^0.10.2"
 openqasm3 = { version = "^1.0.0", extras = ["parser"] }
 pytket = "^1.41.0"
-qiskit = "^1.4.2"
+qiskit = ">=1.4.2,<3.0.0"
 qiskit-aer = "^0.17.1"
 qiskit-experiments = "^0.11.0"
 scipy = ">=1.15.2"
@@ -184,24 +184,8 @@ filterwarnings = [
     # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
     #
     # Temporary default for pre-existing issues. Tickets exist for addressing these:
-    # TODO: Evaluate if this warning requires action from our point. COMPILER-425
-    ## Qiskit Experiment using deprecated version of PulseBackendConfiguration. COMPILER-656
-    'default:.*qiskit\.providers\.models:DeprecationWarning:qiskit_experiments.framework.backend_data',
-    ## Qiskit internal usage of deprecated of Instruction field
-    'default:.*qiskit\.circuit\.instruction\.Instruction\.condition:DeprecationWarning:qiskit.*:',
-    'default:.*qiskit\.circuit\.singleton\._SingletonInstructionOverrides\.c_if:DeprecationWarning:qiskit.qasm2.parse:264',
-    'default:.*qiskit\.circuit\.instruction\.Instruction\.c_if:DeprecationWarning:qiskit.circuit.singleton:495',
-    # TODO: Resolve usage of deprecated Qiskit Transform Pass. COMPILER-425
-    'default:.*Conditioned gates:FutureWarning:qat.purr.integrations.qasm:386',
-    'default:.*Conditioned gates:FutureWarning:qat.frontend.parsers.qasm:59',
-    'default:.*qiskit\.transpiler\.passes\.utils\.convert_conditions_to_if_ops:DeprecationWarning:qiskit.transpiler.basepasses:51',
     # Lark using deprecated version on sre_parse and sre_constants
     'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
-    # DOcplex using deprecated escape sequence
-    'default:.*invalid escape sequence:SyntaxWarning::1092',
-    'default:.*invalid escape sequence:SyntaxWarning::1098',
-    'default:.*invalid escape sequence:DeprecationWarning::1092',
-    'default:.*invalid escape sequence:DeprecationWarning::1098',
     # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
     'default:.*GlobalisePhasedX:DeprecationWarning',
     # TODO: Change to passive_reset_time. 428, 455

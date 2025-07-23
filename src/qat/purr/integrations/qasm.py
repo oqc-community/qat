@@ -385,12 +385,15 @@ class Qasm2Parser(AbstractParser):
 
         circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
         program = circuit_to_dag(circ)
-        # TODO: Drop conversion when we update to Qiskit 2.x - COMPILER-425
-        from qiskit.transpiler.passes.utils.convert_conditions_to_if_ops import (
-            ConvertConditionsToIfOps,
-        )
+        from importlib.metadata import version
 
-        program = ConvertConditionsToIfOps().run(program)
+        if version("qiskit") < "2.0.0":
+            # TODO: Drop conversion when we enforce Qiskit 2.x - COMPILER-658
+            from qiskit.transpiler.passes.utils.convert_conditions_to_if_ops import (
+                ConvertConditionsToIfOps,
+            )
+
+            program = ConvertConditionsToIfOps().run(program)
 
         self._cached_parses[qasm_id] = program
         return program

@@ -15,7 +15,7 @@ def pytest_addoption(parser):
         action="store_const",
         const=0,
         dest="experimental",
-        default=None,
+        default=-1,
         help="run experimental tests",
     )
     parser.addoption(
@@ -30,7 +30,7 @@ def pytest_addoption(parser):
         action="store_const",
         const=0,
         dest="legacy",
-        default=None,
+        default=0,  # TODO: Potentially have this off by default. COMPILER-622
         help="run legacy tests",
     )
     parser.addoption(
@@ -38,7 +38,6 @@ def pytest_addoption(parser):
         action="store_const",
         const=1,
         dest="legacy",
-        default=-1,
         help="run legacy tests",
     )
 
@@ -48,10 +47,6 @@ def pytest_configure(config):
     global tests_dir
     tests_dir = config.rootpath / "tests"
     mark_string = config.option.markexpr
-    if config.option.experimental is None:
-        config.option.experimental = -1
-    if config.option.legacy is None:
-        config.option.legacy = -1
     mark_list = [mark_string] if len(mark_string) > 0 else []
     for marker in ["experimental", "legacy"]:
         if marker in mark_string:

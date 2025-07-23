@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+from importlib.metadata import version
+from warnings import warn
+
 from compiler_config.config import CompilerConfig as CompilerConfig
 
 from qat.core.config.configure import get_config
@@ -16,3 +19,12 @@ from qat.purr.qat import fetch_frontend as fetch_frontend
 from qat.purr.qatconfig import QatConfig
 
 qatconfig: QatConfig = get_config()
+
+# TODO: Remove version checking, COMPILER-658
+if version("qiskit") < "2.0.0":
+    warn(
+        "Support for Qiskit <2.0.0 is deprecated in QAT and Qiskit >=2.0.0 will soon "
+        "be required. Please update your local Qiskit dependency to >=2.0.0.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
