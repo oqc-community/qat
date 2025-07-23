@@ -48,15 +48,15 @@ toml = "^0.10.2"
 openqasm3 = { version = "^1.0.0", extras = ["parser"] }
 pytket = "^1.41.0"
 qiskit = "^1.4.2"
-qiskit-aer = "^0.16.1"
-qiskit-experiments = "^0.7.0"
+qiskit-aer = "^0.17.1"
+qiskit-experiments = "^0.11.0"
 scipy = ">=1.15.2"
 pyqir = ">=0.10.9"
 regex = ">=3.6.1"
 jsonpickle = ">=4.0.5"
-qblox-instruments = "0.16.0"
+qblox-instruments = "0.17.0"
 lark-parser = "^0.12.0"
-pydantic = "2.11.4"
+pydantic = "2.11.7"
 pydantic-settings = ">=2.5.2"
 compiler-config = { git = "https://github.com/oqc-community/compiler-config.git", branch = "main" }
 pydantic-extra-types = "^2.10.4"
@@ -73,24 +73,24 @@ pytest = "~8.3.5"
 pytest-cov = ">=6.2.1"
 pytest-mock = "^3.14.0"
 docplex = "^2.21.207"
-pre-commit = "^3.2.0"
+pre-commit = "^4.2.0"
 pytest-benchmark = "^4.0.0"
 jinja2 = "^3.1.5"
-jupytext = "1.17.1"
+jupytext = "1.17.2"
 nbstripout = "^0.8.1"
-ruff = "^0.11.7"
+ruff = "^0.12.4"
 
 [tool.poetry.group.licenses]
 optional = true
 
 [tool.poetry.group.licenses.dependencies]
-pip-licenses = "^3.5.3"
+pip-licenses = "^5.0.0"
 
 [tool.poetry.group.release]
 optional = true
 
 [tool.poetry.group.release.dependencies]
-twine = "^4.0.2"
+twine = "^6.1.0"
 
 [tool.poetry.group.docs]
 optional = true

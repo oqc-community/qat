@@ -6,21 +6,21 @@ repos:
     rev: v4.4.0
     hooks:
       - id: check-merge-conflict
-        stages: [commit, manual]
+        stages: [pre-commit, manual]
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.17.1  # CURRENT_TAG/COMMIT_HASH
+    rev: v1.17.2  # CURRENT_TAG/COMMIT_HASH
     hooks:
       - id: jupytext
         args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
         additional_dependencies:
-          - ruff==v0.11.7
+          - ruff==v0.12.4
   - repo: https://github.com/kynan/nbstripout
     rev: 0.5.0
     hooks:
     - id: nbstripout
       args: [--extra-keys=metadata.kernelspec]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.7
+    rev: v0.12.4
     hooks:
       # Run the linter.
       - id: ruff
