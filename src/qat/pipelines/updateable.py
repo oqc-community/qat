@@ -32,6 +32,12 @@ class UpdateablePipeline(AbstractPipeline):
     invalidating other components in the pipeline by reconstructing the entire pipeline.
     It will also inherit the properties and methods of the pipeline it creates, allowing
     it to be used as a drop-in replacement for the original pipeline.
+
+    :class:`UpdateablePipeline` can be instantiated with either a hardware model or a
+    loader, or both. If both are provided, the model will take precedence for the initial
+    pipeline constuction, but the loader can be used to refresh the model later on. If a
+    loader is provided but not a model, the loader will be used to load the model
+    during the initial pipeline construction.
     """
 
     def __init__(
@@ -45,15 +51,12 @@ class UpdateablePipeline(AbstractPipeline):
         """
         :param config: The pipeline configuration with the name of the pipeline, and any
             additional parameters that can be configured in the pipeline.
-        :param model: The hardware model to feed into the pipeline, cannot be used
-            simultaneously with loader, defaults to None.
+        :param model: The hardware model to feed into the pipeline. Defaults to None.
         :param loader: The hardware loader used to load the hardware model which can be used
-            to later refresh the hardware model. Cannot be used simultaneously with the
-            model, defaults to None.
+            to later refresh the hardware model. Defaults to None.
         :param target_data: The data concerning the target device, defaults to None
         :param engine: The engine to use for the pipeline, defaults to None.
-        :raises ValueError: If neither model nor loader is provided, or if both are
-            provided.
+        :raises ValueError: If neither model nor loader is provided.
         """
 
         config = TypeAdapter(self.config_type()).validate_python(config)
@@ -61,15 +64,14 @@ class UpdateablePipeline(AbstractPipeline):
         if model is None and loader is None:
             raise ValueError("Model or loader must be provided.")
 
-        if model is not None and loader is not None:
-            raise ValueError("Either model or loader must be provided, not both.")
+        if model is None:
+            model = loader.load()
 
         self._loader = loader
-        if self._loader is not None:
-            model = self._loader.load()
-            if engine is not None and hasattr(engine, "model"):
-                engine.model = model
+        if engine is not None and hasattr(engine, "model"):
+            engine.model = model
 
+        self._engine = engine
         self._pipeline_config = config
         self._pipeline = self.__class__._build_pipeline(config, model, target_data, engine)
 
@@ -132,13 +134,6 @@ class UpdateablePipeline(AbstractPipeline):
         return self._pipeline_config
 
     @property
-    def engine(self) -> NativeEngine | None:
-        """Return the engine of the pipeline."""
-        if hasattr(self._pipeline, "engine"):
-            return self._pipeline.engine
-        return None
-
-    @property
     def has_loader(self) -> bool:
         """Check if the pipeline has a loader."""
         return self._loader is not None
@@ -156,11 +151,7 @@ class UpdateablePipeline(AbstractPipeline):
         arguments. The whole pipeline is reinstantiated to avoid conflicts with changing
         components."""
 
-        if model is not None and loader is not None:
-            raise ValueError("Either model or loader must be provided, not both.")
-
-        if model is not None and reload_model:
-            raise ValueError("Model and reload_model cannot be used together.")
+        model, self._loader, reload_model = self._resolve_model(model, loader, reload_model)
 
         if config is not None:
             config = TypeAdapter(self.config_type()).validate_python(config)
@@ -175,25 +166,12 @@ class UpdateablePipeline(AbstractPipeline):
         if target_data is None:
             target_data = self.target_data
 
-        if loader is not None:
-            self._loader = loader
-            reload_model = True
-
-        if reload_model:
-            if self._loader is not None:
-                model = self._loader.load()
-            else:
-                raise ValueError("Factory has no Model loader, cannot reload model.")
-
-        if model is None:
-            # If no model is provided, use the existing model from the pipeline
-            model = self._pipeline.model
-
         # Update the engine if needed
         if engine is None:
-            engine = self.engine
+            engine = self._engine
         if hasattr(engine, "model"):
             engine.model = model
+        self._engine = engine
 
         self._pipeline = self.__class__._build_pipeline(
             config=self._pipeline_config,
@@ -203,16 +181,10 @@ class UpdateablePipeline(AbstractPipeline):
         )
 
     def copy(self) -> "UpdateablePipeline":
-        """Create a copy of the pipeline factory.
-
-        .. warning::
-
-            This creates a copy of the class which reinstantiates the builder. As such, if
-            the pipeline has a loader, this will force the model to be reloaded.
-        """
+        """Create a copy of the pipeline factory."""
         return self.__class__(
             config=self._pipeline_config,
-            model=self.model if self._loader is None else None,
+            model=self.model,
             loader=self._loader,
             target_data=self.target_data,
             engine=self.engine,
@@ -225,18 +197,11 @@ class UpdateablePipeline(AbstractPipeline):
         loader: BaseModelLoader | None = None,
         target_data: TargetData | None = None,
         engine: NativeEngine | None = None,
+        reload_model: bool = False,
     ) -> "UpdateablePipeline":
-        """Create a copy of the pipeline factory with updated parameters.
+        """Create a copy of the pipeline factory with updated parameters."""
 
-        .. warning::
-
-            If the pipeline has a loader, this will force the model to be reloaded.
-            Additionally, if a model is provided, but the pipeline was previously using a
-            hardware loader, the loader will not be copied.
-        """
-
-        if model is not None and loader is not None:
-            raise ValueError("Either model or loader must be provided, not both.")
+        model, loader, reload_model = self._resolve_model(model, loader, reload_model)
 
         if config is not None:
             # Update the pipeline configuration with the new config
@@ -245,17 +210,11 @@ class UpdateablePipeline(AbstractPipeline):
                 update=config.model_dump(exclude_unset=True, exclude_defaults=True)
             )
 
-        if loader is None and model is None:
-            loader = self._loader
-
-        if model is None and loader is None:
-            model = self.model
-
         # Update the engine if needed
         if engine is None:
-            engine = self.engine
+            engine = self._engine
         if hasattr(engine, "model"):
-            engine.model = model if model is not None else loader.load()
+            engine.model = model
 
         return self.__class__(
             config=config if config is not None else self._pipeline_config,
@@ -264,6 +223,34 @@ class UpdateablePipeline(AbstractPipeline):
             target_data=target_data if target_data is not None else self.target_data,
             engine=engine,
         )
+
+    def _resolve_model(
+        self, model: Model, loader: BaseModelLoader | None, reload_model: bool
+    ) -> tuple[Model, BaseModelLoader | None, bool]:
+        """Resolves the model from the model, loader and reload_model parameters.
+
+        The model is returned, along with the loader and a boolean indicating if the model
+        is updated.
+        """
+
+        if model is not None and reload_model:
+            raise ValueError("Both model and reload_model cannot be used together.")
+
+        if model is None and loader is None and not reload_model:
+            return self._pipeline.model, self._loader, False
+
+        if loader is not None and model is None:
+            reload_model = True
+
+        if loader is None:
+            loader = self._loader
+
+        if reload_model:
+            if loader is None:
+                raise ValueError("Factory has no Model loader, cannot reload model.")
+            model = loader.load()
+
+        return model, loader, True
 
     def __getattr__(self, name: str):
         """Delegate attribute access to the underlying pipeline instance."""

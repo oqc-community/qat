@@ -89,20 +89,26 @@ class TestUpdateablePipeline:
         with pytest.raises(ValueError):
             MockUpdateablePipeline(config=config, target_data=target_data, engine=engine)
 
-    def test_initialization_with_model_and_loader_raises_error(self):
-        model = EchoModelLoader(qubit_count=4).load()
+    def test_initialization_with_model_and_loader_takes_precedence(self):
         model_loader = MockModelLoader()
+        model = model_loader.load()
         target_data = TargetData.default()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
-        with pytest.raises(ValueError):
-            MockUpdateablePipeline(
-                config=config,
-                model=model,
-                loader=model_loader,
-                target_data=target_data,
-                engine=engine,
-            )
+
+        pipeline = MockUpdateablePipeline(
+            config=config,
+            model=model,
+            loader=model_loader,
+            target_data=target_data,
+            engine=engine,
+        )
+
+        assert pipeline._loader == model_loader
+        assert pipeline.model is model
+        assert len(pipeline.model.qubits) == 2  # it would be 3 if the loader was used again
+        pipeline.update(reload_model=True)
+        assert len(pipeline.model.qubits) == 3
 
     def test_initalization_with_loader_engine_that_requires_model(self):
         """Tests that the engine doesn't fail validation."""
@@ -237,20 +243,6 @@ class TestUpdateablePipeline:
         pipeline.update(model=new_model)
         assert pipeline.engine.model == new_model
 
-    def test_update_with_model_and_loader_raises_error(self):
-        model_loader = MockModelLoader()
-        target_data = TargetData.default()
-        engine = EchoEngine()
-        config = MockPipelineConfig(name="test")
-        pipeline = MockUpdateablePipeline(
-            config=config, loader=model_loader, target_data=target_data, engine=engine
-        )
-
-        new_loader = EchoModelLoader(qubit_count=5)
-        new_model = new_loader.load()
-        with pytest.raises(ValueError):
-            pipeline.update(model=new_model, loader=model_loader)
-
     def test_update_with_model_and_reload_model_raises_error(self):
         model_loader = MockModelLoader()
         target_data = TargetData.default()
@@ -315,7 +307,7 @@ class TestUpdateablePipeline:
 
         assert copied_pipeline is not pipeline
         assert copied_pipeline.name == pipeline.name
-        assert copied_pipeline._loader == None
+        assert copied_pipeline._loader is loader
         assert copied_pipeline.engine == pipeline.engine
         assert copied_pipeline.target_data == pipeline.target_data
         assert copied_pipeline.model is new_model
@@ -392,20 +384,6 @@ class TestUpdateablePipeline:
         copied_pipeline = pipeline.copy_with(model=new_model)
         assert copied_pipeline.engine.model == new_model
 
-    def test_copy_with_model_and_loader_raises_error(self):
-        loader = MockModelLoader()
-        target_data = TargetData.default()
-        engine = EchoEngine()
-        config = MockPipelineConfig(name="test")
-        pipeline = MockUpdateablePipeline(
-            config=config, loader=loader, target_data=target_data, engine=engine
-        )
-
-        new_loader = EchoModelLoader(qubit_count=5)
-        new_model = new_loader.load()
-        with pytest.raises(ValueError):
-            pipeline.copy_with(model=new_model, loader=new_loader)
-
     def test_has_loader(self):
         model_loader = MockModelLoader()
         target_data = TargetData.default()
@@ -477,3 +455,93 @@ class TestUpdateablePipeline:
         assert not hasattr(pipeline, "backend")
         assert hasattr(pipeline, "execute")
         assert hasattr(pipeline, "runtime")
+
+    @pytest.mark.parametrize(
+        "model, loader, reload_model",
+        [
+            (EchoModelLoader().load(), EchoModelLoader(), True),
+            (EchoModelLoader().load(), None, True),
+            (None, None, True),
+        ],
+    )
+    def test_resolve_model_raises_error(self, model, loader, reload_model):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, model=model_loader.load(), target_data=target_data
+        )
+
+        with pytest.raises(ValueError):
+            pipeline._resolve_model(model, loader, reload_model)
+
+    @pytest.mark.parametrize("has_loader", [True, False])
+    def test_resolve_model_with_new_model(self, has_loader):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        if has_loader:
+            pipeline = MockUpdateablePipeline(
+                config=config, loader=model_loader, target_data=target_data
+            )
+        else:
+            pipeline = MockUpdateablePipeline(
+                config=config, model=model_loader.load(), target_data=target_data
+            )
+
+        new_model = EchoModelLoader(qubit_count=5).load()
+        model, loader, refresh = pipeline._resolve_model(new_model, None, False)
+        assert model is new_model
+        assert refresh == True
+        assert loader is (model_loader if has_loader else None)
+
+    @pytest.mark.parametrize("has_loader", [True, False])
+    def test_resolve_with_new_loader(self, has_loader):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        if has_loader:
+            pipeline = MockUpdateablePipeline(
+                config=config, loader=model_loader, target_data=target_data
+            )
+        else:
+            pipeline = MockUpdateablePipeline(
+                config=config, model=model_loader.load(), target_data=target_data
+            )
+
+        new_loader = EchoModelLoader(qubit_count=5)
+        model, loader, refresh = pipeline._resolve_model(None, new_loader, False)
+        assert len(model.qubits) == 5
+        assert refresh == True
+        assert loader is new_loader
+
+    def test_resolve_with_model_and_loader(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data
+        )
+
+        new_loader = EchoModelLoader(qubit_count=5)
+        new_model = new_loader.load()
+        model, loader, refresh = pipeline._resolve_model(new_model, new_loader, False)
+        assert model is not pipeline.model
+        assert len(model.qubits) == 5
+        assert refresh == True
+        assert loader is new_loader
+
+    def test_resolve_with_reload(self):
+        model_loader = MockModelLoader()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        pipeline = MockUpdateablePipeline(
+            config=config, loader=model_loader, target_data=target_data
+        )
+
+        model, loader, refresh = pipeline._resolve_model(None, None, True)
+        assert model is not pipeline.model
+        assert len(pipeline.model.qubits) == 2
+        assert len(model.qubits) == 3
+        assert refresh == True
+        assert loader is model_loader
