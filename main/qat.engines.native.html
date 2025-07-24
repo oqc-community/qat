@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.engines.zero module" href="qat.engines.zero.html" />
-    <link rel="prev" title="qat.engines.waveform_v1.echo module" href="qat.engines.waveform_v1.echo.html" /> 
+    <link rel="prev" title="qat.engines.model module" href="qat.engines.model.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -130,6 +130,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.model.html">qat.engines.model module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.engines.native module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.zero.html">qat.engines.zero module</a></li>
 </ul>
@@ -477,8 +478,8 @@ to the target to be established. This class is used to mix in connection capabil
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NativeEngine</span></span><a class="headerlink" href="#qat.engines.native.NativeEngine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p><a class="reference internal" href="#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a> acts as an interface between some target machine and an
-executable. They are used to connect to the target machine (if applicable), and execute and
-return the results.</p>
+executable. They are used to connect to the target machine (if applicable), and execute
+and return the results.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.engines.native.NativeEngine.execute">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.execute" title="Link to this definition"></a></dt>
@@ -488,7 +489,7 @@ according to the acquires.</p>
 variables as keys. This may be changed in future iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -502,7 +503,7 @@ variables as keys. This may be changed in future iterations.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.engines.waveform_v1.echo.html" class="btn btn-neutral float-left" title="qat.engines.waveform_v1.echo module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.engines.model.html" class="btn btn-neutral float-left" title="qat.engines.model module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.engines.zero.html" class="btn btn-neutral float-right" title="qat.engines.zero module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
