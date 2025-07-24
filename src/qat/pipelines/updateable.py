@@ -3,10 +3,12 @@ from typing import get_type_hints
 
 from pydantic import BaseModel, TypeAdapter
 
+from qat.engines.model import requires_hardware_model
 from qat.engines.native import NativeEngine
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.target_data import TargetData
+from qat.model.validators import MismatchingHardwareModelException
 from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import BasePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -67,10 +69,16 @@ class UpdateablePipeline(AbstractPipeline):
         if model is None:
             model = loader.load()
 
-        self._loader = loader
-        if engine is not None and hasattr(engine, "model"):
-            engine.model = model
+        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
+        if requires_hardware_model(engine):
+            if engine.model != model:
+                raise MismatchingHardwareModelException(
+                    f"Engine model {engine.model} does not match the provided model "
+                    f"{model}. If the UpdateablePipeline is only provided a loader, and "
+                    "not a model, please consider also instantiating with a model."
+                )
 
+        self._loader = loader
         self._engine = engine
         self._pipeline_config = config
         self._pipeline = self.__class__._build_pipeline(config, model, target_data, engine)
@@ -166,12 +174,11 @@ class UpdateablePipeline(AbstractPipeline):
         if target_data is None:
             target_data = self.target_data
 
-        # Update the engine if needed
-        if engine is None:
-            engine = self._engine
-        if hasattr(engine, "model"):
+        engine = self._engine if engine is None else engine
+        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
+        if requires_hardware_model(engine) and reload_model:
             engine.model = model
-        self._engine = engine
+            self._engine = engine
 
         self._pipeline = self.__class__._build_pipeline(
             config=self._pipeline_config,
@@ -204,16 +211,14 @@ class UpdateablePipeline(AbstractPipeline):
         model, loader, reload_model = self._resolve_model(model, loader, reload_model)
 
         if config is not None:
-            # Update the pipeline configuration with the new config
             config = TypeAdapter(self.config_type()).validate_python(config)
             config = self._pipeline_config.model_copy(
                 update=config.model_dump(exclude_unset=True, exclude_defaults=True)
             )
 
-        # Update the engine if needed
-        if engine is None:
-            engine = self._engine
-        if hasattr(engine, "model"):
+        engine = self._engine if engine is None else engine
+        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
+        if requires_hardware_model(engine) and reload_model:
             engine.model = model
 
         return self.__class__(

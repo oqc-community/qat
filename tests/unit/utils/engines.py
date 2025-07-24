@@ -1,6 +1,7 @@
 import numpy as np
 from pydantic import BaseModel, validate_call
 
+from qat.engines.model import RequiresHardwareModelMixin
 from qat.engines.native import NativeEngine
 from qat.engines.zero import ZeroEngine
 from qat.executables import Executable
@@ -46,8 +47,13 @@ class BrokenEngine(NativeEngine):
         return {}
 
 
-class MockEngineWithModel(ZeroEngine):
+class MockEngineWithModel(ZeroEngine, RequiresHardwareModelMixin):
     """A mock engine that takes a model."""
 
     def __init__(self, model):
-        self.model = model
+        self._model = model
+        self.num_changes: int = 0
+
+    def _update_model(self, model):
+        self._model = model
+        self.num_changes += 1

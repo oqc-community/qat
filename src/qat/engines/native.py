@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
-from typing import Dict
 
 import numpy as np
 
@@ -10,11 +9,11 @@ from qat.executables import Executable
 
 class NativeEngine(ABC):
     """:class:`NativeEngine` acts as an interface between some target machine and an
-    executable. They are used to connect to the target machine (if applicable), and execute and
-    return the results."""
+    executable. They are used to connect to the target machine (if applicable), and execute
+    and return the results."""
 
     @abstractmethod
-    def execute(self, package: Executable) -> Dict[str, np.ndarray]:
+    def execute(self, package: Executable) -> dict[str, np.ndarray]:
         """Executes a compiled instruction executable and returns results that are processed
         according to the acquires.
 

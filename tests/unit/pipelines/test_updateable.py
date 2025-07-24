@@ -9,6 +9,7 @@ from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
+from qat.model.validators import MismatchingHardwareModelException
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.updateable import PipelineConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -110,17 +111,32 @@ class TestUpdateablePipeline:
         pipeline.update(reload_model=True)
         assert len(pipeline.model.qubits) == 3
 
-    def test_initalization_with_loader_engine_that_requires_model(self):
+    def test_initalization_with_engine_that_requires_model(self):
         """Tests that the engine doesn't fail validation."""
         loader = EchoModelLoader(qubit_count=4)
+        model = loader.load()
         target_data = TargetData.default()
         config = MockPipelineConfig(name="test")
-        engine = MockEngineWithModel(model=loader.load())
-        old_model = engine.model
+        engine = MockEngineWithModel(model=model)
         pipeline = MockUpdateablePipeline(
-            config=config, loader=loader, target_data=target_data, engine=engine
+            config=config,
+            loader=loader,
+            model=model,
+            target_data=target_data,
+            engine=engine,
         )
-        assert pipeline.engine.model is not old_model
+        assert pipeline.engine.model is model
+
+    def test_initalization_with_engine_that_requires_model_raises_error_with_loader(self):
+        loader = EchoModelLoader(qubit_count=4)
+        model = loader.load()
+        target_data = TargetData.default()
+        config = MockPipelineConfig(name="test")
+        engine = MockEngineWithModel(model=model)
+        with pytest.raises(MismatchingHardwareModelException):
+            MockUpdateablePipeline(
+                config=config, loader=loader, target_data=target_data, engine=engine
+            )
 
     def test_update_with_config(self):
         model_loader = MockModelLoader()
