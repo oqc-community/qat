@@ -11,8 +11,21 @@ on:
         type: boolean
         required: false
         default: true
+    outputs:
+      legacy-result:
+        description: "Legacy unit tests result"
+        value: ${{ jobs.legacy-unit-tests.outputs.result }}
+      stable-result:
+        description: "Stable unit tests result"
+        value: ${{ jobs.unit-tests.outputs.result }}
+      experimental-result:
+        description: "Experimental unit tests result"
+        value: ${{ jobs.experimental-unit-tests.outputs.result }}
   
 run-name: Units tests for QAT at ${{ github.ref }}
+
+env:
+  PYTHON_VERSION: '3.10'
 
 jobs:
 
@@ -35,7 +48,7 @@ jobs:
         uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: "3.10"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -106,35 +119,70 @@ jobs:
           path: static-report.md
           name: qat-formatting-markdown
 
-  unit-tests:
-    name: Unit Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ ubuntu-22.04 ]
-        python: ["3.10", "3.11", "3.12"]
-    defaults:
-      run:
-        shell: bash
-
+  legacy-unit-tests:
+    name: Legacy Unit Tests
+    runs-on: ubuntu-22.04
+    outputs:
+      result: ${{ steps.pytest.outputs.result }}
     steps:
       - uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
+        id: pytest
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          codebase: legacy
+          pytest-args: --legacy-only
+
+  unit-tests:
+    name: Stable Unit Tests
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    # Due to using a matrix, the outputs of the latest job will overwrite the outputs of all previous jobs.
+    # Dynamic outputs is currently not supported in GitHub Actions, so we cannot capture the results of each Python version separately.
+    # See: https://github.com/actions/runner/pull/2477
+    outputs:
+      result: ${{ steps.pytest.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+      - uses: ./.github/actions/testing-action
+        id: pytest
         with:
           python-version: ${{ matrix.python }}
+          codebase: stable
+          pytest-args: ""
+  
+  experimental-unit-tests:
+    name: Experimental Unit Tests
+    runs-on: ubuntu-22.04
+    outputs:
+      result: ${{ steps.pytest.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+      - uses: ./.github/actions/testing-action
+        id: pytest
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          codebase: experimental
+          pytest-args: "--experimental-only"
 
   generate-report:
     name: Generate report
     runs-on: ubuntu-22.04
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - unit-tests
+      - legacy-unit-tests
+      - experimental-unit-tests
       - formatting-tests
-    outputs:
-      report: ${{ steps.pytest.outputs.markdown-summary }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -170,7 +218,7 @@ jobs:
         run: poetry sync --with dev
 
       - name: Generate report for pytest
-        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} QAT -v
+        run: poetry run generate-report ./reports/ ./reports/output.md ${{ github.repository }} QAT
 
       - name: Output to step summary
         id: pytest

@@ -19,3 +19,5 @@ jobs:
     - uses: ./.github/actions/testing-action
       with:
         python-version: ${{ matrix.python }}
+        codebase: stable
+        pytest-args: ""

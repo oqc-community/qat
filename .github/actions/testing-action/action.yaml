@@ -4,15 +4,21 @@ inputs:
   python-version:
     required: true
     description: "Python version to run tests with"
+  codebase:
+    required: true
+    description: "Path to the codebase to test, relative to the repository root"
+    default: stable
+  pytest-args:
+    required: false
+    description: "Additional arguments to pass to pytest"
+outputs:
+  step_success:
+    description: "Whether the pytest step was successful or not"
+    value: ${{ steps.pytest.outcome }}
+
 runs:
   using: composite
   steps:
-
-    - name: Set up Python 3.x
-      id: setup-python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ inputs.python-version }}
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -20,25 +26,25 @@ runs:
         virtualenvs-create: true
         virtualenvs-in-project: true
 
-    - name: Load cached venv
-      id: cached-pip-wheels
-      uses: actions/cache@v4
+    - name: Set up Python 3.x
+      id: setup-python
+      uses: actions/setup-python@v5
       with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        python-version: ${{ inputs.python-version }}
+        cache: 'poetry'
 
     - name: Install dependancies
-      if: steps.cached-pip-wheels.outputs.cache-hit != 'true'
       shell: bash
       run: poetry sync --with dev
 
     - name: Unit tests
       shell: bash
-      run: poetry run pytest --benchmark-skip --junitxml=./reports/${{ runner.os }}_${{ steps.setup-python.outputs.python-version }}_unit_report.xml -v
+      id: pytest
+      run: poetry run pytest --benchmark-skip -v ${{ inputs.pytest-args }} --junitxml=./reports/${{ runner.os }}_${{ steps.setup-python.outputs.python-version }}_${{ inputs.codebase }}_unit_report.xml
 
     - name: Upload report
       uses: actions/upload-artifact@v4
-      if: always()
+      if: ${{ !cancelled() }}
       with:
-        name: qat_${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}_unit_report
+        name: qat_${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}_${{ inputs.codebase }}_unit_report
         path: reports/**

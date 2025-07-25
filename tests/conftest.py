@@ -23,14 +23,14 @@ def pytest_addoption(parser):
         action="store_const",
         const=1,
         dest="experimental",
-        help="run only integration tests",
+        help="run only experimental tests",
     )
     parser.addoption(
         "--legacy-enable",
         action="store_const",
         const=0,
         dest="legacy",
-        default=0,  # TODO: Potentially have this off by default. COMPILER-622
+        default=-1,
         help="run legacy tests",
     )
     parser.addoption(
@@ -38,7 +38,7 @@ def pytest_addoption(parser):
         action="store_const",
         const=1,
         dest="legacy",
-        help="run legacy tests",
+        help="run only legacy tests",
     )
 
 

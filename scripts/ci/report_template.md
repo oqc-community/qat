@@ -3,10 +3,10 @@ https://github.com/{{repo_name}}
 
 {% if summaries.unit -%}
 #### Unit Tests
-| Operating System | Python Version | Result | Passed ✅ | Failed ❌ | Errors ❗ | Skipped ↩️ | Notes |
-| ------| ------| ------ | ------ | ------ | ------ | ------- | ------ |
+| Operating System | Python Version | Codebase | Result | Passed ✅ | Failed ❌ | Errors ❗ | Skipped ↩️ | Notes |
+| ------| ------| ------ | ------ | ----- |------ | ------ | ------- | ------ |
 {% for summary in summaries.unit -%}
-| {{ summary.os }} | {{ summary.python }} | {% if summary.outcome == "success" -%} ✅ `Pass` {% else -%} ❌ `Fail` {% endif -%} | {{ summary.passed }} | {{ summary.failures }} | {{ summary.errors }} | {{ summary.skipped }} | {{ summary.notes }} |
+| {{ summary.os }} | {{ summary.python }} | {{ summary.codebase }} |{% if summary.outcome == "success" -%} ✅ `Pass` {% else -%} ❌ `Fail` {% endif -%} | {{ summary.passed }} | {{ summary.failures }} | {{ summary.errors }} | {{ summary.skipped }} | {{ summary.notes }} |
 {% endfor -%}
 {% endif -%}
 
@@ -27,9 +27,15 @@ No integration tests defined
 
 <Summary>Failure Report</Summary>
 
+{% set max_cases = 10 -%}
+
 #### Failures
 
-{% for case in details.failure -%}
+
+{% if details.failure|length > max_cases -%}
+> **⚠️ Warning:** Only the first {{ max_cases }} failures are shown. See the full report for more details.
+{% endif -%}
+{% for case in details.failure[:max_cases] %}
 
 **{{case.classname}}::{{case.name}} (os: {{case.os}} python: {{case.python}})**  
 ```python
@@ -53,7 +59,11 @@ No integration tests defined
 
 #### Errors
 
-{% for case in details.error -%}
+
+{% if details.error|length > max_cases -%}
+> **⚠️ Warning:** Only the first {{ max_cases }} errors are shown. See the full report for more details.
+{% endif -%}
+{% for case in details.error[:max_cases] %}
 
 **{{case.classname}}::{{case.name}} (os: {{case.os}} python: {{case.python}})**  
 ```python
@@ -77,7 +87,11 @@ No integration tests defined
 
 #### Skipped
 
-{% for case in details.skipped -%}
+
+{% if details.skipped|length > max_cases -%}
+> **⚠️ Warning:** Only the first {{ max_cases }} skipped tests are shown. See the full report for more details.
+{% endif -%}
+{% for case in details.skipped[:max_cases] %}
 
 **{{case.classname}}::{{case.name}} (os: {{case.os}} python: {{case.python}})**  
 ```python

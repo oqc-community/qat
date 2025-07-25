@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 NON_PASSED = ["failure", "skipped", "error"]
 
 
-def get_details(testsuite, os, python):
+def get_details(testsuite, os, python, codebase):
     details = {}
     for tag in NON_PASSED:
         details[tag] = []
@@ -19,6 +19,7 @@ def get_details(testsuite, os, python):
                 "verbose": node.find(tag).text,
                 "os": os,
                 "python": python,
+                "codebase": codebase,
             }
             details[tag].append(output)
     return details
@@ -32,15 +33,15 @@ def has_passed(testcase):
 
 
 def split_path(path):
-    (os, python, suite, _) = path.stem.split("_")
-    return (os, python, suite)
+    (os, python, suite, codebase, _) = path.stem.split("_")
+    return (os, python, suite, codebase)
 
 
 def parse_junit(path):
-    (os, python, _) = split_path(path)
+    (os, python, codebase, _) = split_path(path)
     root = ET.parse(path).getroot()
     testsuite = root[0]
-    details = get_details(testsuite, os, python)
+    details = get_details(testsuite, os, python, codebase)
     summary = {
         k: int(v)
         for (k, v) in testsuite.attrib.items()
@@ -54,6 +55,7 @@ def parse_junit(path):
     )
     summary["os"] = os
     summary["python"] = python
+    summary["codebase"] = codebase
     return summary, details
 
 
@@ -63,7 +65,7 @@ def get_reports(report_path):
     levels = ["unit", "integration"]
     summaries = {lvl: [] for lvl in levels}
     for suite in summaries.keys():
-        for path in sorted(Path(report_path).glob(f"*_*_{suite}_report.xml")):
+        for path in sorted(Path(report_path).glob(f"*_*_*_{suite}_report.xml")):
             print(path)
             summary, details = parse_junit(path)
             summaries[suite].append(summary)
