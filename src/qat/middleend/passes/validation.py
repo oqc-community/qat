@@ -6,7 +6,7 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.ir.instructions import Return
+from qat.ir.instructions import Repeat, Return
 from qat.ir.measure import (
     Acquire,
     AcquireMode,
@@ -183,7 +183,21 @@ class ReturnSanitisationValidation(ValidationPass):
         return ir
 
 
+class RepeatSanitisationValidation(ValidationPass):
+    """Checks if the builder has a :class:`Repeat` instruction and warns if none exists."""
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        for inst in ir.instructions:
+            if isinstance(inst, Repeat):
+                return ir
+
+        log.warning("Could not find any repeat instructions.")
+        return ir
+
+
 PydReadoutValidation = ReadoutValidation
 PydHardwareConfigValidity = HardwareConfigValidity
 PydNoMidCircuitMeasurementValidation = NoMidCircuitMeasurementValidation
 PydReturnSanitisationValidation = ReturnSanitisationValidation
+PydRepeatSanitisationValidation = RepeatSanitisationValidation

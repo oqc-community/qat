@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import logging
 from copy import deepcopy
 
 import numpy as np
@@ -21,6 +22,7 @@ from qat.middleend.passes.validation import (
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
     PydReadoutValidation,
+    PydRepeatSanitisationValidation,
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
@@ -269,3 +271,44 @@ class TestReadoutValidation:
 
         with pytest.raises(ValueError, match="No AcquireMode found"):
             PydReadoutValidation().run(builder)
+
+
+class TestRepeatSanitisationValidation:
+    hw = PydEchoModelLoader(qubit_count=4).load()
+    warning_msg = "Could not find any repeat instructions."
+
+    def test_repeat_sanitisation_validation_doesnt_edit_instructions(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
+            builder.measure_single_shot_z(target=qubit)
+
+        p = PydRepeatSanitisationValidation()
+        builder_before = deepcopy(builder)
+        p.run(builder)
+
+        assert builder_before.number_of_instructions == builder.number_of_instructions
+        for instr_before, instr_after in zip(builder_before, builder):
+            assert instr_before == instr_after
+
+    def test_repeat_sanitisation_validation_logs_warning_when_repeat_is_not_present(
+        self, caplog
+    ):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        caplog.set_level(logging.WARNING)
+        for qubit in self.hw.qubits.values():
+            builder.measure_single_shot_z(target=qubit)
+        PydRepeatSanitisationValidation().run(builder)
+
+        assert any(cl.message == self.warning_msg for cl in caplog.records)
+
+    def test_repeat_sanitisation_validation_doesnt_log_warning_when_repeat_is_present(
+        self, caplog
+    ):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        caplog.set_level(logging.WARNING)
+        builder.repeat(10)
+        for qubit in self.hw.qubits.values():
+            builder.measure_single_shot_z(target=qubit)
+        PydRepeatSanitisationValidation().run(builder)
+
+        assert all(cl.message != self.warning_msg for cl in caplog.records)
