@@ -8,7 +8,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.config.configure import get_qatconfig, override_config
 from qat.core.config.session import QatSessionConfig
 from qat.core.metrics_base import MetricsManager
-from qat.core.pipeline import HardwareLoaders, PipelineSet
+from qat.core.pipeline import EngineSet, HardwareLoaders, PipelineSet
 from qat.executables import Executable
 from qat.pipelines import get_default_pipelines
 from qat.pipelines.base import AbstractPipeline
@@ -32,9 +32,13 @@ class QAT:
         )
 
         self._available_hardware = HardwareLoaders.from_descriptions(self.config.HARDWARE)
+        self._engines = EngineSet.from_descriptions(
+            self.config.ENGINES, self._available_hardware
+        )
         self.pipelines = PipelineSet.from_descriptions(
             self.config.PIPELINES or get_default_pipelines(),
             available_hardware=self._available_hardware,
+            available_engines=self._engines,
         )
 
     def compile(
@@ -134,6 +138,7 @@ class QAT:
     def reload_all_models(self):
         """Reloads all hardware models and updates the pipelines."""
         self._available_hardware.reload_all_models()
+        self._engines.reload_all_models()
         self.pipelines.reload_all_models()
 
     def _resolve_pipelines(

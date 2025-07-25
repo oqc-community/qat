@@ -100,45 +100,39 @@ class TestPipelineFactory:
         with pytest.raises(TypeError):
             PipelineFactory(config, loader=EchoModelLoader())
 
-    def test_create_engine_returns_none_if_not_required(self):
-        """Tests that the factory does not create an engine if the factory function does not
-        require one."""
-
-        engine = PipelineFactory._create_engine(create_mock_pipeline, None, EchoEngine())
-        assert engine is None
-
-    def test_create_engine_returns_engine_if_required(self):
-        """Tests that the factory creates an engine if the factory function requires one."""
-
-        engine = PipelineFactory._create_engine(
-            create_mock_pipeline_with_engine, EchoEngine, None
-        )
-        assert isinstance(engine, EchoEngine)
-
     def test_build_pipeline_with_custom_engine(self):
         """Tests that the factory can build a pipeline with a custom engine."""
 
         config = PipelineFactoryDescription(
             name="test_factory",
             pipeline="tests.unit.core.pipelines.test_factory.create_mock_pipeline_with_engine",
-            engine={"type": "qat.engines.waveform_v1.EchoEngine"},
+            engine="echo",
         )
 
-        factory = PipelineFactory(config, loader=EchoModelLoader())
+        factory = PipelineFactory(config, loader=EchoModelLoader(), engine=EchoEngine())
         assert isinstance(factory.engine, EchoEngine)
 
-    def test_create_target_data_returns_false_if_not_required(self):
+    def test_has_argument_returns_false_if_target_data_not_required(self):
         """Tests the check to see if the factory requires target data."""
-        target_data = PipelineFactory._check_target_data(create_mock_pipeline)
-        assert target_data is False
 
-    def test_create_target_data_returns_target_data_if_required(self):
+        assert PipelineFactory._has_argument(create_mock_pipeline, "target_data") is False
+
+    def test_has_argument_returns_true_if_target_data_required(self):
         """Tests that the factory creates target data if the factory function requires it."""
 
-        target_data = PipelineFactory._check_target_data(
-            create_mock_pipeline_with_target_data
+        assert PipelineFactory._has_argument(
+            create_mock_pipeline_with_target_data, "target_data"
         )
-        assert target_data is True
+
+    def test_has_argument_returns_false_if_engine_not_required(self):
+        """Tests the check to see if the factory requires target data."""
+
+        assert PipelineFactory._has_argument(create_mock_pipeline, "engine") is False
+
+    def test_has_argument_returns_true_if_engine_required(self):
+        """Tests that the factory creates target data if the factory function requires it."""
+
+        assert PipelineFactory._has_argument(create_mock_pipeline_with_engine, "engine")
 
     def test_build_pipeline_with_custom_target_data(self):
         """Tests that the factory can build a pipeline with custom target data."""

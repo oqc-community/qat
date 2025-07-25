@@ -4,16 +4,19 @@ PIPELINES:
   pipeline: tests.unit.utils.pipelines.MockPipeline
   hardware_loader: echo6loader
   default: true
-  engine: 
-    type: tests.unit.utils.engines.BrokenEngine
-    config:
-      x : 10
-      cblam: 
-        host: someurl.com
-        timeout: 60
+  engine: brokenengine
 
 HARDWARE:
 - name: echo6loader
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
+
+ENGINES:
+- name: brokenengine
+  type: tests.unit.utils.engines.BrokenEngine
+  config:
+    x: 10
+    cblam:
+      host: someurl.com
+      timeout: 60

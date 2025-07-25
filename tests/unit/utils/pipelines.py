@@ -29,8 +29,9 @@ class MockPipeline(UpdateablePipeline):
         )
 
 
-def get_mock_pipeline(model, name="test") -> Pipeline:
+def get_mock_pipeline(model, name="test", engine=None) -> Pipeline:
     """A factory for creating a pipeline, mocked up for testing purposes."""
+    engine = engine if engine is not None else ZeroEngine()
     return Pipeline(
         name=name,
         model=model,
@@ -38,7 +39,7 @@ def get_mock_pipeline(model, name="test") -> Pipeline:
         middleend=DefaultMiddleend(model),
         backend=WaveformV1Backend(model),
         runtime=SimpleRuntime(
-            engine=ZeroEngine(),
+            engine=engine,
             results_pipeline=get_default_results_pipeline(model),
         ),
     )

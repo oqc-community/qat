@@ -1,12 +1,16 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
 from pydantic import ImportString, ValidationError
 
 import qat
+import qat.engines
 import qat.frontend
 import qat.pipelines
 from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.core.config.descriptions import (
     ClassDescription,
+    EngineDescription,
     HardwareLoaderDescription,
     ImportFrontend,
     PipelineClassDescription,
@@ -14,20 +18,62 @@ from qat.core.config.descriptions import (
     PipelineInstanceDescription,
     UpdateablePipelineDescription,
 )
-from qat.core.config.session import QatSessionConfig
 from qat.core.pipelines.configurable import ConfigurablePipeline
-from qat.engines import ZeroEngine
+from qat.engines import DefaultEngine, ZeroEngine
 from qat.frontend import FallthroughFrontend
 from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.loaders.purr import EchoModelLoader
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime import SimpleRuntime
 
+from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
 
-@pytest.fixture
-def qatconfig_testfiles(testpath):
-    return testpath / "files" / "qatconfig"
+
+class TestEngineDescription:
+    def test_valid_description(self):
+        desc = EngineDescription(name="zero", type="qat.engines.ZeroEngine")
+        assert desc.name == "zero"
+        assert desc.type is ZeroEngine
+
+    def test_invalid_type_raises(self):
+        with pytest.raises(ValidationError):
+            EngineDescription(
+                name="invalid", type="qat.backend.fallthrough.FallthroughBackend"
+            )
+
+    def test_extra_fields_raises_validation_error(self):
+        with pytest.raises(ValidationError):
+            EngineDescription(
+                name="invalid", type="qat.engines.ZeroEngine", extra_field="value"
+            )
+
+    def test_construct_engine_without_model(self):
+        desc = EngineDescription(name="zero", type="qat.engines.ZeroEngine")
+        engine = desc.construct()
+        assert isinstance(engine, ZeroEngine)
+
+    def test_construct_engine_with_model(self):
+        desc = EngineDescription(
+            name="zero", type="tests.unit.utils.engines.MockEngineWithModel"
+        )
+        model = EchoModelLoader().load()
+        engine = desc.construct(model=model)
+        assert isinstance(engine, MockEngineWithModel)
+        assert engine.model == model
+
+    def test_construct_engine_with_config(self):
+        desc = EngineDescription(
+            name="initable",
+            type="tests.unit.utils.engines.InitableEngine",
+            config={"x": 9, "cblam": {"host": "someurl.com", "timeout": 60}},
+        )
+        engine = desc.construct()
+        assert isinstance(engine, InitableEngine)
+        assert engine.x == 9
+        assert engine.y == "default_y"
+        assert engine.z == 3
+        assert engine.cblam.host == "someurl.com"
+        assert engine.cblam.timeout == 60
 
 
 class TestPipelineInstanceDescription:
@@ -116,6 +162,25 @@ class TestPipelineFactoryDescription:
         loader = EchoModelLoader()
         factory = desc.construct(loader=loader)
         assert isinstance(factory, PipelineFactory)
+        assert isinstance(factory.engine, ZeroEngine)
+
+    def test_construct_pipeline_with_engine(self):
+        from qat.core.pipelines.factory import PipelineFactory
+        from qat.engines.waveform_v1 import EchoEngine
+        from qat.model.loaders.purr import EchoModelLoader
+
+        desc = PipelineFactoryDescription(
+            name="mock_factory",
+            pipeline="tests.unit.utils.pipelines.get_mock_pipeline",
+            default=True,
+            hardware_loader="echo8a",
+            engine="qat.engines.waveform_v1.EchoEngine",
+        )
+
+        loader = EchoModelLoader()
+        factory = desc.construct(loader=loader, engine=EchoEngine())
+        assert isinstance(factory, PipelineFactory)
+        assert isinstance(factory.engine, EchoEngine)
 
 
 class TestUpdateablePipelineDescription:
@@ -154,15 +219,16 @@ class TestUpdateablePipelineDescription:
             pipeline="tests.unit.utils.pipelines.MockPipeline",
             default=True,
             hardware_loader="echo8a",
-            engine="qat.engines.ZeroEngine",
+            engine="qat.engines.waveform_v1.EchoEngine",
         )
 
+        from qat.engines.waveform_v1 import EchoEngine
         from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
-        pipeline = desc.construct(loader=loader)
+        pipeline = desc.construct(loader=loader, engine=EchoEngine())
         assert isinstance(pipeline, MockPipeline)
-        assert isinstance(pipeline.engine, ZeroEngine)
+        assert isinstance(pipeline.engine, EchoEngine)
 
 
 class TestHardwareLoaderDescription:
@@ -197,9 +263,11 @@ class TestPipelineClassDescription:
             middleend="qat.middleend.FallthroughMiddleend",
             backend="qat.backend.WaveformV1Backend",
             runtime="qat.runtime.SimpleRuntime",
-            engine="qat.engines.ZeroEngine",
+            engine=None,
         )
-        assert isinstance(desc.construct(loader=loader), ConfigurablePipeline)
+        pipeline = desc.construct(loader=loader)
+        assert isinstance(pipeline, ConfigurablePipeline)
+        assert isinstance(pipeline.engine, DefaultEngine)
 
     def test_end_from_dict(self):
         from qat.model.loaders.purr import EchoModelLoader
@@ -213,12 +281,13 @@ class TestPipelineClassDescription:
             middleend="qat.middleend.FallthroughMiddleend",
             backend="qat.backend.WaveformV1Backend",
             runtime="qat.runtime.SimpleRuntime",
-            engine="qat.engines.ZeroEngine",
+            engine=None,
         )
         assert isinstance(desc.construct(loader=loader), ConfigurablePipeline)
 
     def test_custom_config(self):
         from qat.model.loaders.purr import EchoModelLoader
+        from qat.runtime.connection import ConnectionMode
 
         loader = EchoModelLoader()
 
@@ -228,12 +297,15 @@ class TestPipelineClassDescription:
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
             backend="qat.backend.WaveformV1Backend",
-            runtime="qat.runtime.SimpleRuntime",
-            engine=dict(type="tests.unit.utils.engines.InitableEngine", config={"x": 9}),
+            runtime=dict(
+                type="qat.runtime.SimpleRuntime",
+                config={"connection_mode": ConnectionMode.ALWAYS_ON_EXECUTE},
+            ),
+            engine=None,
         )
         P = desc.construct(loader=loader)
         assert isinstance(P, ConfigurablePipeline)
-        assert P.runtime.engine.x == 9
+        assert P.runtime.connection_mode == ConnectionMode.ALWAYS_ON_EXECUTE
 
     def test_extra_field_raises_error(self):
         with pytest.raises(ValidationError):
@@ -256,7 +328,7 @@ class TestPipelineClassDescription:
             middleend="qat.middleend.FallthroughMiddleend",
             backend="qat.backend.WaveformV1Backend",
             runtime="qat.runtime.SimpleRuntime",
-            engine="qat.engines.ZeroEngine",
+            engine=None,
         )
 
         loader = EchoModelLoader()
@@ -267,7 +339,25 @@ class TestPipelineClassDescription:
         assert isinstance(P.middleend, FallthroughMiddleend)
         assert isinstance(P.backend, WaveformV1Backend)
         assert isinstance(P.runtime, SimpleRuntime)
-        assert isinstance(P.engine, ZeroEngine)
+        assert isinstance(P.engine, DefaultEngine)
+
+    def test_construct_pipeline_with_engine(self):
+        from qat.engines.waveform_v1 import EchoEngine
+
+        desc = PipelineClassDescription(
+            name="echo8a",
+            hardware_loader=None,
+            frontend="qat.frontend.FallthroughFrontend",
+            middleend="qat.middleend.FallthroughMiddleend",
+            backend="qat.backend.WaveformV1Backend",
+            runtime="qat.runtime.SimpleRuntime",
+            engine="qat.engines.waveform_v1.EchoEngine",
+        )
+
+        loader = EchoModelLoader()
+        P = desc.construct(loader=loader, engine=EchoEngine())
+        assert isinstance(P, ConfigurablePipeline)
+        assert isinstance(P.engine, EchoEngine)
 
 
 class TestClassConfig:
@@ -311,228 +401,3 @@ class TestClassConfig:
 
         frontend = frontend_partial(model=model)
         assert isinstance(frontend, qat.frontend.AutoFrontend)
-
-
-class TestQATConfig:
-    """These are tests of QAT config features only used by QAT.pipelines"""
-
-    def test_make_qatconfig_list(self):
-        pipelines = [
-            PipelineInstanceDescription(
-                name="echo8a", pipeline="qat.pipelines.echo.echo8", default=True
-            ),
-            PipelineInstanceDescription(
-                name="echo16a", pipeline="qat.pipelines.echo.echo16"
-            ),
-            PipelineInstanceDescription(
-                name="echo32a", pipeline="qat.pipelines.echo.echo32"
-            ),
-            UpdateablePipelineDescription(
-                name="echo6",
-                pipeline="qat.pipelines.echo.EchoPipeline",
-                hardware_loader="echo6loader",
-            ),
-        ]
-
-        hardware = [
-            HardwareLoaderDescription(
-                name="echo6loader",
-                type="qat.model.loaders.purr.EchoModelLoader",
-                config={"qubit_count": 6},
-            )
-        ]
-
-        qc = QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
-
-        pipes = {P.name: P.pipeline for P in qc.PIPELINES}
-        assert pipes == {
-            "echo8a": qat.pipelines.echo.echo8,
-            "echo16a": qat.pipelines.echo.echo16,
-            "echo32a": qat.pipelines.echo.echo32,
-            "echo6": qat.pipelines.echo.EchoPipeline,
-        }
-
-        assert len(qc.HARDWARE) == 1
-        assert qc.HARDWARE[0].name == qc.PIPELINES[-1].hardware_loader
-
-    def test_make_qatconfig_class_desc(self):
-        pipelines = [
-            PipelineClassDescription(
-                name="echocustom",
-                hardware_loader="echo6loader",
-                frontend="qat.frontend.FallthroughFrontend",
-                middleend="qat.middleend.FallthroughMiddleend",
-                backend="qat.backend.WaveformV1Backend",
-                runtime="qat.runtime.SimpleRuntime",
-                engine="qat.engines.ZeroEngine",
-                default=True,
-            ),
-        ]
-
-        hardware = [
-            HardwareLoaderDescription(
-                name="echo6loader",
-                type="qat.model.loaders.purr.EchoModelLoader",
-                config={"qubit_count": 6},
-            )
-        ]
-
-        assert pipelines[0].hardware_loader == "echo6loader"
-        qc = QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
-
-        pipe_names = {P.name for P in qc.PIPELINES}
-        assert pipe_names == {"echocustom"}
-        assert len(qc.HARDWARE) == 1
-        assert qc.HARDWARE[0].name == qc.PIPELINES[-1].hardware_loader
-
-    def test_mismatching_hardware_loader_raises(self):
-        pipelines = [
-            UpdateablePipelineDescription(
-                name="echo6",
-                pipeline="qat.pipelines.echo.EchoPipeline",
-                hardware_loader="echo6loader",
-                default=True,
-            ),
-        ]
-
-        hardware = [
-            HardwareLoaderDescription(
-                name="notwhatwearelookingfor",
-                type="qat.model.loaders.purr.EchoModelLoader",
-                config={"qubit_count": 6},
-            )
-        ]
-
-        with pytest.raises(ValidationError):
-            QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
-
-    def test_yaml_custom_config(self, qatconfig_testfiles):
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "customconfig.yaml")
-
-        from qat.model.loaders.purr import EchoModelLoader
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
-        assert isinstance(P, ConfigurablePipeline)
-        assert P.runtime.engine.x == 10
-        assert P.runtime.engine.cblam.host == "someurl.com"
-        assert P.runtime.engine.cblam.timeout == 60
-
-    def test_yaml_legacy_pipeline(self, qatconfig_testfiles):
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "legacyengine.yaml")
-
-        from qat.model.loaders.purr import EchoModelLoader
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
-        assert isinstance(P, ConfigurablePipeline)
-        assert isinstance(P.runtime.engine.model, QuantumHardwareModel)
-
-    def test_yaml_factory_with_engine(self, qatconfig_testfiles):
-        from qat.core.config.descriptions import UpdateablePipelineDescription
-        from qat.model.loaders.purr import EchoModelLoader
-
-        from tests.unit.utils.engines import InitableEngine
-        from tests.unit.utils.pipelines import MockPipeline
-
-        qatconfig = QatSessionConfig.from_yaml(
-            qatconfig_testfiles / "pipelinefactorywithengine.yaml"
-        )
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        assert isinstance(desc, UpdateablePipelineDescription)
-        P = desc.construct(loader=loader)
-        assert isinstance(P, MockPipeline)
-        assert isinstance(P.runtime.engine, InitableEngine)
-        assert P.runtime.engine.x == 10
-        assert P.runtime.engine.cblam.host == "someurl.com"
-        assert P.runtime.engine.cblam.timeout == 60
-
-    def test_yaml_custom_result_pipeline(self, qatconfig_testfiles):
-        qatconfig = QatSessionConfig.from_yaml(
-            qatconfig_testfiles / "customresultspipeline.yaml"
-        )
-
-        from qat.model.loaders.purr import EchoModelLoader
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
-        assert isinstance(P, ConfigurablePipeline)
-        results_pipeline = P.runtime.results_pipeline
-        assert len(results_pipeline.passes) == 1
-        dummypass = results_pipeline.passes[0]._pass
-        assert isinstance(dummypass.model, QuantumHardwareModel)
-        assert dummypass.some_int == 12
-
-    def test_yaml_custom_config_from_env(self, monkeypatch, qatconfig_testfiles):
-        from qat.model.loaders.purr import EchoModelLoader
-
-        monkeypatch.setenv("SOME_ENV_VAR", "A_VALUE")
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
-        assert isinstance(P, ConfigurablePipeline)
-        assert P.runtime.engine.x == "A_VALUE"
-
-    def test_yaml_defaults(self, qatconfig_testfiles):
-        from qat.backend import DefaultBackend
-        from qat.engines import DefaultEngine
-        from qat.frontend import DefaultFrontend
-        from qat.middleend import DefaultMiddleend
-        from qat.model.loaders.purr import EchoModelLoader
-        from qat.runtime import DefaultRuntime
-
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "defaults.yaml")
-
-        loader = EchoModelLoader()
-
-        desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
-        assert isinstance(P, ConfigurablePipeline)
-        assert type(P.frontend) is DefaultFrontend
-        assert type(P.middleend) is DefaultMiddleend
-        assert type(P.backend) is DefaultBackend
-        assert type(P.runtime) is DefaultRuntime
-        assert type(P.runtime.engine) is DefaultEngine
-
-    def test_yaml_custom_config_missing_from_env(self, monkeypatch, qatconfig_testfiles):
-        monkeypatch.delenv("SOME_ENV_VAR", raising=False)
-        with pytest.raises(ValueError):
-            QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
-
-    def test_yaml_custom_config_invalid_type(self, qatconfig_testfiles):
-        """Check that invalid config (types) raise exceptions
-
-        Config is only validated on pipeline construction"""
-        from qat.model.loaders.purr import EchoModelLoader
-
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidtype.yaml")
-        desc = qatconfig.PIPELINES[0]
-        loader = EchoModelLoader()
-
-        with pytest.raises(ValueError):
-            desc.construct(loader=loader)
-
-    def test_yaml_custom_config_invalid_arg(self, qatconfig_testfiles):
-        """Check that invalid config (types) raise exceptions
-
-        Config is only validated on pipeline construction"""
-        from qat.model.loaders.purr import EchoModelLoader
-
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidarg.yaml")
-        desc = qatconfig.PIPELINES[0]
-        loader = EchoModelLoader()
-
-        with pytest.raises(ValueError):
-            desc.construct(loader=loader)

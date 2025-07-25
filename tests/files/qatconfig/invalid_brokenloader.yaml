@@ -4,13 +4,7 @@ PIPELINES:
   pipeline: tests.unit.utils.pipelines.MockPipeline
   hardware_loader: echo6loader
   default: true
-  engine: 
-    type: tests.unit.utils.engines.InitableEngine
-    config:
-      x : 10
-      cblam: 
-        host: someurl.com
-        timeout: 60
+  engine: InitableEngine
   hardware_loader: broken
 
 HARDWARE:
@@ -20,3 +14,12 @@ HARDWARE:
     on_init: true
     on_load: false
     qubit_count: 6
+
+ENGINES:
+- name: InitableEngine
+  type: tests.unit.utils.engines.InitableEngine
+  config:
+    x : 10
+    cblam: 
+      host: someurl.com
+      timeout: 60

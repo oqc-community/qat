@@ -4,12 +4,10 @@ from typing import Callable
 
 from qat.core.config.descriptions import PipelineClassDescription
 from qat.core.config.validators import requires_model, requires_target_data
+from qat.engines import NativeEngine
 from qat.model.target_data import AbstractTargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import Model, UpdateablePipeline
-from qat.purr.utils.logger import get_default_logger
-
-log = get_default_logger()
 
 
 class ConfigurablePipeline(UpdateablePipeline):
@@ -25,16 +23,10 @@ class ConfigurablePipeline(UpdateablePipeline):
         config: PipelineClassDescription,
         model: Model,
         target_data: AbstractTargetData,
-        engine: None = None,
+        engine: NativeEngine,
     ) -> Pipeline:
         """Constructs a pipeline with each component defined in the config in a granular
         fashion."""
-
-        if engine is not None:
-            log.warning(
-                "The engine for the ConfigurablePipeline is expected to be provided using "
-                "the config, and the provided engine will be ignored."
-            )
 
         frontend = ConfigurablePipeline._inject_model_and_target_data(
             config.frontend, model, target_data
@@ -45,7 +37,6 @@ class ConfigurablePipeline(UpdateablePipeline):
         backend = ConfigurablePipeline._inject_model_and_target_data(
             config.backend, model, target_data
         )
-        engine = ConfigurablePipeline._create_engine(config.engine, model)
         results_pipeline = ConfigurablePipeline._create_results_pipeline(
             config.results_pipeline, model
         )
@@ -79,15 +70,6 @@ class ConfigurablePipeline(UpdateablePipeline):
         if requires_target_data(func):
             kwargs["target_data"] = target_data
         return func(**kwargs)
-
-    @staticmethod
-    def _create_engine(engine, model):
-        """Instantiates the engine if provided."""
-        if engine is None:
-            return None
-        if requires_model(engine):
-            return engine(model=model)
-        return engine()
 
     @staticmethod
     def _create_results_pipeline(results_pipeline, model):

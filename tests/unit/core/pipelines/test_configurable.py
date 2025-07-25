@@ -13,7 +13,6 @@ from qat.model.target_data import DefaultTargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import DefaultRuntime
 
-from tests.unit.utils.engines import MockEngineWithModel
 from tests.unit.utils.resultsprocessing import get_pipeline
 
 
@@ -65,17 +64,6 @@ class TestConfigurablePipeline:
         assert injectee.model == self.model
         assert injectee.target_data == self.target_data
 
-    def test_create_engine_without_model(self):
-        """Test the _create_engine method without a model."""
-        engine = ConfigurablePipeline._create_engine(ZeroEngine, None)
-        assert isinstance(engine, ZeroEngine)
-
-    def test_create_engine_with_model(self):
-        """Test the _create_engine method with a model."""
-        engine = ConfigurablePipeline._create_engine(MockEngineWithModel, self.model)
-        assert isinstance(engine, MockEngineWithModel)
-        assert engine.model == self.model
-
     def test_create_results_pipeline(self):
         """Test the _create_results_pipeline method."""
         results_pipeline = ConfigurablePipeline._create_results_pipeline(
@@ -103,13 +91,13 @@ class TestConfigurablePipeline:
             frontend="qat.frontend.DefaultFrontend",
             middleend="qat.middleend.DefaultMiddleend",
             backend="qat.backend.DefaultBackend",
-            engine="qat.engines.ZeroEngine",
+            engine="zero",
             runtime="qat.runtime.DefaultRuntime",
             results_pipeline="tests.unit.utils.resultsprocessing.get_pipeline",
             target_data="qat.model.target_data.DefaultTargetData",
         )
         pipeline = ConfigurablePipeline._build_pipeline(
-            config, self.model, self.target_data
+            config, self.model, self.target_data, engine=ZeroEngine()
         )
         assert isinstance(pipeline, Pipeline)
         assert pipeline.model == self.model

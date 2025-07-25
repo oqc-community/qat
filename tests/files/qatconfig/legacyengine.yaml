@@ -4,7 +4,7 @@ PIPELINES:
   middleend: qat.middleend.FallthroughMiddleend
   backend: qat.backend.WaveformV1Backend
   runtime: qat.runtime.LegacyRuntime
-  engine: qat.purr.backends.echo.EchoEngine
+  engine: echo
   hardware_loader: echo6loader
   default: true
 
@@ -13,3 +13,7 @@ HARDWARE:
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
+
+ENGINES:
+- name: echo
+  type: qat.purr.backends.echo.EchoEngine

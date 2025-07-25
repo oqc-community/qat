@@ -4,10 +4,7 @@ PIPELINES:
   middleend: qat.middleend.FallthroughMiddleend
   backend: qat.backend.WaveformV1Backend
   runtime: qat.runtime.SimpleRuntime
-  engine: 
-    type: tests.unit.utils.engines.InitableEngine
-    config:
-      z : frog # not valid
+  engine: InitableEngine
   hardware_loader: echo6loader
   default: true
 
@@ -16,3 +13,12 @@ HARDWARE:
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
+
+ENGINES:
+- name: InitableEngine
+  type: tests.unit.utils.engines.WrongInitableEngine
+  config:
+    x : 10
+    cblam: 
+      host: someurl.com
+      timeout: 60

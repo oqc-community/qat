@@ -2,11 +2,14 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.core.config.descriptions import (
+    EngineDescription,
     HardwareLoaderDescription,
     PipelineFactoryDescription,
     PipelineInstanceDescription,
     UpdateablePipelineDescription,
 )
+from qat.engines import NativeEngine
+from qat.engines.model import requires_hardware_model
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.loaders.cache import CacheAccessLoader
@@ -67,6 +70,71 @@ class HardwareLoaders:
         return cls({hld.name: hld.construct() for hld in hardware_loader_descriptions})
 
 
+class EngineSet:
+    """Stores a set of engines, allowing identification by name.
+
+    Also stores corresponding loaders which can be used to update the models within engines
+    for engines that have a :class:`RequiresHardwareModelMixin` mixin.
+    """
+
+    def __init__(
+        self,
+        engines: dict[str, NativeEngine] = {},
+        loaders: dict[str, BaseModelLoader] = {},
+    ):
+        self._engines: dict[str, NativeEngine] = dict(**engines)
+        self._loaders: dict[str, BaseModelLoader] = dict(**loaders)
+
+    def __getitem__(self, name: str) -> NativeEngine:
+        """Allows indexing to get an engine by name."""
+        return self.get(name)
+
+    def get(self, name: str, default=None) -> NativeEngine:
+        """Returns an engine by name, or a default if not found."""
+        return self._engines.get(name, default)
+
+    def reload_model(self, name: str):
+        """Reloads the model for an engine with the given identifier."""
+        if name not in self._engines:
+            raise ValueError(f"Engine {name} not found")
+
+        engine = self._engines[name]
+        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-XXX)
+        if not requires_hardware_model(engine):
+            return
+
+        loader = self._loaders.get(name, None)
+        if loader is None:
+            return
+
+        model = loader.load()
+        engine.model = model
+
+    def reload_all_models(self):
+        """Reloads all models for engines that require a hardware model."""
+        for name in self._engines:
+            self.reload_model(name)
+
+    @classmethod
+    def from_descriptions(
+        cls,
+        engine_descriptions: list[EngineDescription],
+        available_hardware: HardwareLoaders,
+    ) -> "EngineSet":
+        """Creates an :class:`EngineSet` from a list of engine descriptions."""
+
+        engines = {}
+        loaders = {}
+        for desc in engine_descriptions:
+            if desc.hardware_loader:
+                loader = CacheAccessLoader(available_hardware, desc.hardware_loader)
+                loaders[desc.name] = loader
+                engines[desc.name] = desc.construct(model=loader.load())
+            else:
+                engines[desc.name] = desc.construct(model=None)
+        return cls(engines, loaders)
+
+
 class PipelineSet:
     def __init__(self, pipelines: list[AbstractPipeline] = []):
         self._pipelines = {}
@@ -83,6 +151,7 @@ class PipelineSet:
             | UpdateablePipelineDescription
         ],
         available_hardware: HardwareLoaders,
+        available_engines: EngineSet,
     ):
         default = next(
             (Pdesc.name for Pdesc in pipeline_descriptions if Pdesc.default), None
@@ -90,17 +159,14 @@ class PipelineSet:
 
         pipes = []
         for Pdesc in pipeline_descriptions:
+            attrs = dict()
             if hasattr(Pdesc, "hardware_loader"):
-                loader = CacheAccessLoader(available_hardware, Pdesc.hardware_loader)
-                if loader is None:
-                    raise Exception(
-                        f"Hardware Model Loader {Pdesc.hardware_loader} not found"
-                    )
-
-                P = Pdesc.construct(loader)
-            else:
-                P = Pdesc.construct()
-
+                attrs["loader"] = CacheAccessLoader(
+                    available_hardware, Pdesc.hardware_loader
+                )
+            if hasattr(Pdesc, "engine"):
+                attrs["engine"] = available_engines[Pdesc.engine]
+            P = Pdesc.construct(**attrs)
             pipes.append(P)
 
         pipelinesset = cls(pipes)
@@ -126,13 +192,11 @@ class PipelineSet:
         """Returns the name of the current default pipeline"""
         return self._default_pipeline
 
-    def add(self, pipeline: AbstractPipeline, default=False):
+    def add(self, pipeline: AbstractPipeline, default: bool = False):
         """Adds a pipeline for subsequent use for compilation and execution
 
         :param pipeline: A pipeline instance to add, indexed by pipeline.name
-        :type pipeline: AbstractPipeline
         :param default: Set the added pipeline as the default, defaults to False
-        :type default: bool, optional
         """
         self._pipelines[pipeline.name] = pipeline
         if default:
@@ -142,7 +206,6 @@ class PipelineSet:
         """Remove a pipeline
 
         :param pipeline: The name of a pipeline or a pipeline instance to remove
-        :type pipeline: AbstractPipeline | str
         """
         name = pipeline.name if isinstance(pipeline, AbstractPipeline) else pipeline
 
@@ -164,7 +227,6 @@ class PipelineSet:
         """Gets a stored pipeline by name (str) or passes through a pipeline instance
 
         :param pipeline: A pipeline instance or the string name of a stored pipeline
-        :type pipeline: AbstractPipeline | str
         """
 
         if isinstance(pipeline, str):

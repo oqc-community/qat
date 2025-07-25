@@ -10,9 +10,12 @@ from qat.utils.pydantic import NoExtraFieldsModel
 if TYPE_CHECKING:
     from qat.core.pipelines.configurable import ConfigurablePipeline
     from qat.core.pipelines.factory import PipelineFactory
+    from qat.engines.native import NativeEngine
+    from qat.model.hardware_model import PhysicalHardwareModel
     from qat.model.loaders.base import BaseModelLoader
     from qat.pipelines.pipeline import Pipeline
     from qat.pipelines.updateable import UpdateablePipeline
+    from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 from .validators import (
     is_backend,
@@ -26,7 +29,6 @@ from .validators import (
     is_runtime,
     is_target_data,
     is_updateable_pipeline,
-    requires_model,
 )
 
 ImportPipeline = Annotated[ImportString, AfterValidator(is_pipeline_instance)]
@@ -64,6 +66,21 @@ class HardwareLoaderDescription(NoExtraFieldsModel):
         return self.type(**self.config)
 
 
+class EngineDescription(NoExtraFieldsModel):
+    name: str
+    hardware_loader: str | None = None
+    config: dict = {}
+    type: ImportEngine
+
+    def construct(
+        self, model: "None | QuantumHardwareModel | PhysicalHardwareModel" = None
+    ) -> "NativeEngine":
+        """Returns the described Engine instance, injecting the model if provided."""
+        if model is None:
+            return self.type(**self.config)
+        return self.type(model=model, **self.config)
+
+
 T = TypeVar("T")
 
 
@@ -97,9 +114,6 @@ RuntimeDescription = (
     ImportRuntime | Annotated[ClassDescription[ImportRuntime], ToPartialValidator]
 )
 
-EngineDescription = (
-    ImportEngine | Annotated[ClassDescription[ImportEngine], ToPartialValidator]
-)
 
 TargetDataDescription = (
     ImportTargetData | Annotated[ClassDescription[ImportTargetData], ToPartialValidator]
@@ -118,24 +132,28 @@ class PipelineFactoryDescription(NoExtraFieldsModel):
 
     name: str
     hardware_loader: str | None = None
+    engine: str | None = None
     target_data: ImportTargetData | None = None
     pipeline: ImportPipelineFactory
-    engine: EngineDescription | None = None
     config: dict = {}
     default: bool = False
 
-    def construct(self, loader: "BaseModelLoader") -> "PipelineFactory":
+    def construct(
+        self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
+    ) -> "PipelineFactory":
         """Constructs and returns a Pipeline from its description
 
-        :param model: The instantiated hardware model, this is required to be the model
-            provided by the associated hardware_loader
+        :param loader: The hardware model loader to fetch the hardware model.
+        :param engine: The engine to use for the pipeline, optional.
         :return: The constructed pipeline
         """
 
         from qat.core.pipelines.factory import PipelineFactory
 
         target_data = self.target_data() if self.target_data is not None else None
-        return PipelineFactory(config=self, loader=loader, target_data=target_data)
+        return PipelineFactory(
+            config=self, loader=loader, target_data=target_data, engine=engine
+        )
 
 
 class UpdateablePipelineDescription(NoExtraFieldsModel):
@@ -146,15 +164,18 @@ class UpdateablePipelineDescription(NoExtraFieldsModel):
     name: str
     pipeline: ImportUpdateablePipeline
     hardware_loader: str | None = None
+    engine: str | None = None
     target_data: ImportTargetData | None = None
-    engine: EngineDescription | None = None
     config: dict = {}
     default: bool = False
 
-    def construct(self, loader: "BaseModelLoader") -> "UpdateablePipeline":
+    def construct(
+        self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
+    ) -> "UpdateablePipeline":
         """Constructs and returns a Pipeline from its description
 
         :param loader: The hardware model loader to fetch the hardware model.
+        :param engine: The engine to use for the pipeline.
         :return: The updateable pipeline with a constructed pipeline instance.
         """
 
@@ -162,17 +183,9 @@ class UpdateablePipelineDescription(NoExtraFieldsModel):
         config["name"] = self.name
 
         target_data = self.target_data() if self.target_data is not None else None
-
-        if self.engine is not None:
-            if requires_model(self.engine):
-                engine = self.engine(model=loader.load())
-            else:
-                engine = self.engine()
-            return self.pipeline(
-                config=config, loader=loader, target_data=target_data, engine=engine
-            )
-        else:
-            return self.pipeline(config=config, loader=loader, target_data=target_data)
+        return self.pipeline(
+            config=config, loader=loader, target_data=target_data, engine=engine
+        )
 
 
 class PipelineClassDescription(NoExtraFieldsModel):
@@ -181,11 +194,11 @@ class PipelineClassDescription(NoExtraFieldsModel):
 
     name: str
     hardware_loader: str | None = None
+    engine: str | None = None
     frontend: FrontendDescription = "qat.frontend.DefaultFrontend"
     middleend: MiddleendDescription = "qat.middleend.DefaultMiddleend"
     backend: BackendDescription = "qat.backend.DefaultBackend"
     runtime: RuntimeDescription = "qat.runtime.DefaultRuntime"
-    engine: EngineDescription = "qat.engines.DefaultEngine"
     target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
     results_pipeline: PassManagerFactoryDescription = (
         "qat.runtime.results_pipeline.get_default_results_pipeline"
@@ -194,16 +207,22 @@ class PipelineClassDescription(NoExtraFieldsModel):
     default: bool = False
     model_config = ConfigDict(validate_default=True)
 
-    def construct(self, loader: "BaseModelLoader") -> "ConfigurablePipeline":
+    def construct(
+        self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
+    ) -> "ConfigurablePipeline":
         """Constructs and returns a Pipeline from its description
 
-        :param model: The instantiated hardware model, this is required to be the model
-            provided by the associated hardware_loader
+        :param loader: The hardware model loader to fetch the hardware model.
+        :param engine: The engine to use for the pipeline.
         :return: The pipeline as a :class:`ConfigurablePipeline` instance.
         """
 
         from qat.core.pipelines.configurable import ConfigurablePipeline
+        from qat.engines import DefaultEngine
+
+        if engine is None:
+            engine = DefaultEngine()
 
         return ConfigurablePipeline(
-            config=self, loader=loader, target_data=self.target_data()
+            config=self, loader=loader, target_data=self.target_data(), engine=engine
         )

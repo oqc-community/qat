@@ -30,6 +30,7 @@ from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
 
+from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
 from tests.unit.utils.pipelines import (
     MockCompileUpdateablePipeline,
     MockExecuteUpdateablePipeline,
@@ -278,16 +279,43 @@ class TestQATHardwareModelReloading:
         assert len(hardware["loader1"].qubits) == 2
         assert len(hardware["loader2"].qubits) == 6
 
+    def test_engines_are_instantiated_correctly(self, qat):
+        engines = qat._engines
+        assert len(engines._engines) == 3
+        assert ("InitableEngine", "model_engine1", "model_engine2") == tuple(
+            engines._engines.keys()
+        )
+        assert ("model_engine1", "model_engine2") == tuple(engines._loaders.keys())
+        assert isinstance(engines.get("InitableEngine"), InitableEngine)
+        assert isinstance(engines.get("model_engine1"), MockEngineWithModel)
+        assert isinstance(engines.get("model_engine2"), MockEngineWithModel)
+
     def test_pipelines_are_instantiated_correctly(self, qat):
         pipelines = qat.pipelines
         hardware = qat._available_hardware
+        engines = qat._engines
         assert isinstance(pipelines, PipelineSet)
-        assert len(pipelines._pipelines) == 3
-        assert ("pipeline1", "pipeline2", "pipeline3") == tuple(pipelines.list())
+        assert len(pipelines._pipelines) == 6
+        expected_pipelines = (
+            "standard_echo1",
+            "standard_echo2",
+            "standard_echo3",
+            "custom_pipeline1",
+            "custom_pipeline2",
+            "custom_pipeline3",
+        )
+        assert expected_pipelines == tuple(pipelines.list())
 
-        assert pipelines.get("pipeline1").model == hardware.load("loader1")
-        assert pipelines.get("pipeline2").model == hardware.load("loader1")
-        assert pipelines.get("pipeline3").model == hardware.load("loader2")
+        assert pipelines.get("standard_echo1").model == hardware.load("loader1")
+        assert pipelines.get("standard_echo2").model == hardware.load("loader1")
+        assert pipelines.get("standard_echo3").model == hardware.load("loader2")
+        assert pipelines.get("custom_pipeline1").model == hardware.load("loader1")
+        assert pipelines.get("custom_pipeline2").model == hardware.load("loader1")
+        assert pipelines.get("custom_pipeline3").model == hardware.load("loader2")
+
+        assert pipelines.get("custom_pipeline1").engine == engines.get("InitableEngine")
+        assert pipelines.get("custom_pipeline2").engine == engines.get("model_engine1")
+        assert pipelines.get("custom_pipeline3").engine == engines.get("model_engine2")
 
     def test_reload_models(self, qat):
         """This tests that hardware models in the pipeline are the expected instances,
@@ -296,9 +324,17 @@ class TestQATHardwareModelReloading:
         qat.reload_all_models()
         hardware = qat._available_hardware
         pipelines = qat.pipelines
-        assert pipelines.get("pipeline1").model == hardware.load("loader1")
-        assert pipelines.get("pipeline2").model == hardware.load("loader1")
-        assert pipelines.get("pipeline3").model == hardware.load("loader2")
+        engines = qat._engines
+        assert pipelines.get("standard_echo1").model == hardware.load("loader1")
+        assert pipelines.get("standard_echo2").model == hardware.load("loader1")
+        assert pipelines.get("standard_echo3").model == hardware.load("loader2")
+        assert pipelines.get("custom_pipeline1").model == hardware.load("loader1")
+        assert pipelines.get("custom_pipeline2").model == hardware.load("loader1")
+        assert pipelines.get("custom_pipeline3").model == hardware.load("loader2")
+
+        assert engines.get("model_engine1").model == hardware.load("loader1")
+        assert engines.get("model_engine2").model == hardware.load("loader2")
+
         assert len(hardware["loader1"].qubits) == 3
         assert len(hardware["loader2"].qubits) == 7
 

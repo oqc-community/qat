@@ -1,15 +1,37 @@
 MAX_REPEATS_LIMIT: 1000
 PIPELINES:
-- name: pipeline1
+- name: standard_echo1
   pipeline: qat.pipelines.echo.EchoPipeline
   hardware_loader: loader1
   default: true
-- name: pipeline2 
+- name: standard_echo2
   pipeline: qat.pipelines.echo.EchoPipeline
   hardware_loader: loader1
-- name: pipeline3
+- name: standard_echo3
   pipeline: qat.pipelines.echo.EchoPipeline
   hardware_loader: loader2
+- name: custom_pipeline1
+  frontend: qat.frontend.FallthroughFrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  runtime: qat.runtime.SimpleRuntime
+  engine: InitableEngine
+  hardware_loader: loader1
+- name: custom_pipeline2
+  frontend: qat.frontend.FallthroughFrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  runtime: qat.runtime.SimpleRuntime
+  engine: model_engine1
+  hardware_loader: loader1
+- name: custom_pipeline3
+  frontend: qat.frontend.FallthroughFrontend
+  middleend: qat.middleend.FallthroughMiddleend
+  backend: qat.backend.WaveformV1Backend
+  runtime: qat.runtime.SimpleRuntime
+  engine: model_engine2
+  hardware_loader: loader2
+
 HARDWARE:
 - name: loader1
   type: tests.unit.utils.loaders.MockModelLoader
@@ -19,3 +41,18 @@ HARDWARE:
   type: tests.unit.utils.loaders.MockModelLoader
   config:
     num_qubits: 5
+
+ENGINES:
+- name: InitableEngine
+  type: tests.unit.utils.engines.InitableEngine
+  config:
+    x: 10
+    cblam:
+      host: someurl.com
+      timeout: 60
+- name: model_engine1
+  type: tests.unit.utils.engines.MockEngineWithModel
+  hardware_loader: loader1
+- name: model_engine2
+  type: tests.unit.utils.engines.MockEngineWithModel
+  hardware_loader: loader2

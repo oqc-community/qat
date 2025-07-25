@@ -4,13 +4,7 @@ PIPELINES:
   pipeline: tests.unit.utils.pipelines.MockPipeline
   hardware_loader: echo6loader
   default: true
-  engine: 
-    type: tests.unit.utils.engines.InitableEngine
-    config:
-      x : 10
-      cblam: 
-        host: someurl.com
-        timeout: 60
+  engine: InitableEngine
   hardware_loader: echo6loader
 
 
@@ -19,3 +13,12 @@ HARDWARE:
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
+
+ENGINES:
+- name: InitableEngine
+  type: tests.unit.utils.engines.InitableEngine
+  config:
+    x : 10
+    cblam: 
+      host: someurl.com
+      timeout: 60

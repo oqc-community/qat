@@ -6,6 +6,7 @@ from pydantic import ImportString, ValidationInfo, field_validator
 from pydantic_settings import SettingsConfigDict
 
 from qat.core.config.descriptions import (
+    EngineDescription,
     HardwareLoaderDescription,
     PipelineClassDescription,
     PipelineFactoryDescription,
@@ -14,10 +15,7 @@ from qat.core.config.descriptions import (
 )
 from qat.extensions import QatExtension
 from qat.purr.qatconfig import QatConfig
-from qat.purr.utils.logger import get_default_logger
 from qat.utils.piny import VeryStrictMatcher
-
-log = get_default_logger()
 
 
 class QatSessionConfig(QatConfig):
@@ -57,6 +55,9 @@ class QatSessionConfig(QatConfig):
     HARDWARE: list[HardwareLoaderDescription] = []
     """ QAT Hardware Models to load on start-up """
 
+    ENGINES: list[EngineDescription] = []
+    """ QAT Engines to add on start-up """
+
     PIPELINES: (
         list[
             PipelineInstanceDescription
@@ -76,7 +77,8 @@ class QatSessionConfig(QatConfig):
             else:
                 name = inspect.getmodule(value).__name__
                 raise ValueError(
-                    f"extension '{name}' must be a valid QatExtension class, type is actually {type(value)}"
+                    f"extension '{name}' must be a valid QatExtension class, type is "
+                    f"actually {type(value)}"
                 )
         return values
 
@@ -97,7 +99,7 @@ class QatSessionConfig(QatConfig):
             )
         return v
 
-    @field_validator("PIPELINES")
+    @field_validator("PIPELINES", "ENGINES")
     @classmethod
     def matching_hardware_loaders(cls, pipelines, info: ValidationInfo):
         if pipelines is None:
@@ -108,8 +110,46 @@ class QatSessionConfig(QatConfig):
         hardware_loader_names = {hld.name for hld in info.data.get("HARDWARE", [])}
         for Pdesc in pipelines:
             expected_loader = getattr(Pdesc, "hardware_loader", None)
-            if expected_loader and expected_loader not in hardware_loader_names:
+            if expected_loader is not None and expected_loader not in hardware_loader_names:
                 raise ValueError(f"Hardware Loader {expected_loader} not defined")
+
+        return pipelines
+
+    @field_validator("PIPELINES")
+    @classmethod
+    def matching_engines(cls, pipelines, info: ValidationInfo):
+        if pipelines is None:
+            return pipelines
+        if len(pipelines) == 0:
+            return pipelines
+
+        engine_names = {desc.name for desc in info.data.get("ENGINES", [])}
+        engine_loaders = {
+            desc.name: desc.hardware_loader for desc in info.data.get("ENGINES", [])
+        }
+
+        for Pdesc in pipelines:
+            engine = getattr(Pdesc, "engine", None)
+            if engine is None:
+                continue
+
+            if engine not in engine_names:
+                raise ValueError(
+                    f"Pipeline {Pdesc.name} requires engine {engine}, but it is not "
+                    "defined in ENGINES"
+                )
+
+            expected_loader = getattr(Pdesc, "hardware_loader", None)
+            engine_loader = engine_loaders[engine]
+            if (
+                engine_loader is not None
+                and expected_loader is not None
+                and engine_loader != expected_loader
+            ):
+                raise ValueError(
+                    f"Pipeline {Pdesc.name} has hardware_loader {expected_loader}, but "
+                    f"the engine {engine} has a different hardware_loader {engine_loader}."
+                )
 
         return pipelines
 

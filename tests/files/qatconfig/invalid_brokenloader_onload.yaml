@@ -2,15 +2,8 @@ MAX_REPEATS_LIMIT: 10
 PIPELINES:
 - name: echo6b
   pipeline: tests.unit.utils.pipelines.MockPipeline
-  hardware_loader: echo6loader
   default: true
-  engine: 
-    type: tests.unit.utils.engines.InitableEngine
-    config:
-      x : 10
-      cblam: 
-        host: someurl.com
-        timeout: 60
+  engine: InitableEngine
   hardware_loader: broken
 
 HARDWARE:
@@ -20,3 +13,12 @@ HARDWARE:
     on_init: false
     on_load: true
     qubit_count: 6
+
+ENGINES:
+- name: InitableEngine
+  type: tests.unit.utils.engines.InitableEngine
+  config:
+    x : 10
+    cblam: 
+      host: someurl.com
+      timeout: 60
