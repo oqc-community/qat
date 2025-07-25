@@ -481,6 +481,12 @@
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.ENGINES">
+<span class="sig-name descname"><span class="pre">ENGINES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.EngineDescription" title="qat.core.config.descriptions.EngineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineDescription</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.ENGINES" title="Link to this definition"></a></dt>
+<dd><p>QAT Engines to add on start-up</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.EXTENSIONS">
 <span class="sig-name descname"><span class="pre">EXTENSIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportString</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.EXTENSIONS" title="Link to this definition"></a></dt>
 <dd><p>QAT Extensions to initialise on start-up</p>
@@ -506,6 +512,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.load_extensions">
 <span class="sig-name descname"><span class="pre">load_extensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.load_extensions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.matching_engines">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matching_engines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.matching_engines" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
