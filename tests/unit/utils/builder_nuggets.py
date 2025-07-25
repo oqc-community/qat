@@ -525,3 +525,51 @@ def zmap(model, qubit_indices=None, do_X=False):
         qubit = model.get_qubit(index)
         builder.synchronize([qubit.get_all_channels()])
     return builder
+
+
+def hidden_mode(model, qubit_indices=None, mode_indices=None, num_points=None):
+    num_points = num_points or 10
+    qubit_indices = qubit_indices or [0]
+    mode_indices = mode_indices or [q + 1 for q in qubit_indices]
+
+    detuning = 5e6
+    width = 8e-6
+    time = np.linspace(0, width, num_points)
+    phase = 2.0 * np.pi * detuning * time
+    dephasing_freqs = np.linspace(10.25e9 - 25e6, 10.25e9 + 25e6, 3)
+    dephase_amp = 0.5
+    rise = 1.0 / 3.0
+
+    all_indices = qubit_indices + mode_indices
+    for index in all_indices:
+        qubit = model.get_qubit(index)
+        qubit.get_drive_channel().scale = 1.0e-8 + 0.0j
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in all_indices])
+
+    builder.sweep([SweepValue("f", dephasing_freqs)])
+    builder.sweep([SweepValue("t", time), SweepValue("p", phase)])
+    for index, mode_index in zip(qubit_indices, mode_indices):
+        qubit = model.get_qubit(index)
+        mode_channel = model.get_qubit(mode_indices[index]).get_measure_channel()
+        builder.device_assign(mode_channel, "frequency", Variable("f"))
+        builder.X(qubit, np.pi / 2.0)
+        builder.synchronize([qubit, mode_channel])
+        builder.pulse(
+            mode_channel,
+            PulseShapeType.GAUSSIAN,
+            width=Variable("t"),
+            amp=dephase_amp,
+            rise=rise,
+        )
+        builder.synchronize([qubit, mode_channel])
+        builder.phase_shift(qubit, Variable("p"))
+        builder.Y(qubit, -np.pi / 2.0)
+
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_mean_z(qubit, output_variable=f"Q{index}")
+
+    return builder

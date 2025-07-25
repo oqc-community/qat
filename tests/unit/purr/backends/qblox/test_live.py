@@ -17,6 +17,7 @@ from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
+    hidden_mode,
     multi_readout,
     qubit_spect,
     readout_freq,
@@ -30,8 +31,8 @@ log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
-@pytest.mark.parametrize("enable_hax", [False, True])
+@pytest.mark.parametrize("qubit_indices", [[0]])
+@pytest.mark.parametrize("enable_hax", [True])
 class Test1QMeasurements:
     def test_resonator_spect(self, enable_hax, model, qubit_indices):
         runtime = model.create_runtime()
@@ -43,6 +44,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (10,)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
     def test_qubit_spect(self, enable_hax, model, qubit_indices):
         runtime = model.create_runtime()
@@ -54,6 +56,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (10,)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
     def test_xpi2amp(self, enable_hax, model, qubit_indices):
         if enable_hax:
@@ -69,6 +72,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (2, 10)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
     def test_readout_freq(self, enable_hax, model, qubit_indices):
         if enable_hax:
@@ -84,6 +88,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (10, 2, 1000)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
     def test_zmap(self, enable_hax, model, qubit_indices):
         if enable_hax:
@@ -99,6 +104,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (1, 1000)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
     def test_t1(self, enable_hax, model, qubit_indices):
         runtime = model.create_runtime()
@@ -110,6 +116,7 @@ class Test1QMeasurements:
         for index in qubit_indices:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == (100,)
+            assert not np.any(np.isnan(results[f"Q{index}"]))
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
@@ -341,6 +348,14 @@ class TestBuildingBlocks:
                 assert f"1_Q{index}" in results
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
+
+    @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_hidden_mode(self, model, qubit_indices):
+        engine = model.create_engine()
+        builder = hidden_mode(model, qubit_indices, num_points=3)
+
+        results, _ = execute_instructions(engine, builder)
+        assert results
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

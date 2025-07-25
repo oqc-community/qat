@@ -10,7 +10,11 @@ from typing import Dict, List
 
 import numpy as np
 import regex
-from qblox_instruments import Cluster, DummyBinnedAcquisitionData, DummyScopeAcquisitionData
+from qblox_instruments import (
+    Cluster,
+    DummyBinnedAcquisitionData,
+    DummyScopeAcquisitionData,
+)
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
@@ -299,9 +303,13 @@ class QbloxControlHardware(ControlHardware):
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
-                        sequencer.get_acquisition_status(timeout=60)
-                        acquisitions = sequencer.get_acquisitions()
+                        status_obj = sequencer.get_sequencer_status()
+                        log.debug(f"Sequencer status - {sequencer}: {status_obj}")
+                        if acquisitions := sequencer.get_acquisitions():
+                            # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
+                            # Only wait if you sequencer is expected to have acquisitions
+                            # TODO - Precise expectation of acquisitions should come from higher up
+                            sequencer.get_acquisition_status(timeout=60)
 
                         for name in acquisitions:
                             sequencer.store_scope_acquisition(name)
