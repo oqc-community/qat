@@ -12,7 +12,7 @@ inputs:
     required: false
     description: "Additional arguments to pass to pytest"
 outputs:
-  step_success:
+  result:
     description: "Whether the pytest step was successful or not"
     value: ${{ steps.pytest.outcome }}
 
