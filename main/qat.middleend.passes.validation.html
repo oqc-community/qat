@@ -518,6 +518,12 @@ If None, uses the default from the QatConfig.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.PydRepeatSanitisationValidation">
+<span class="sig-name descname"><span class="pre">PydRepeatSanitisationValidation</span></span><a class="headerlink" href="#qat.middleend.passes.validation.PydRepeatSanitisationValidation" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.validation.RepeatSanitisationValidation" title="qat.middleend.passes.validation.RepeatSanitisationValidation"><code class="xref py py-class docutils literal notranslate"><span class="pre">RepeatSanitisationValidation</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.middleend.passes.validation.PydReturnSanitisationValidation">
 <span class="sig-name descname"><span class="pre">PydReturnSanitisationValidation</span></span><a class="headerlink" href="#qat.middleend.passes.validation.PydReturnSanitisationValidation" title="Link to this definition"></a></dt>
 <dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.validation.ReturnSanitisationValidation" title="qat.middleend.passes.validation.ReturnSanitisationValidation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnSanitisationValidation</span></code></a></p>
@@ -535,6 +541,23 @@ If None, uses the default from the QatConfig.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.middleend.passes.validation.ReadoutValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.ReadoutValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.RepeatSanitisationValidation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisationValidation</span></span><a class="headerlink" href="#qat.middleend.passes.validation.RepeatSanitisationValidation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.ValidationPass" title="qat.core.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Checks if the builder has a <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code> instruction and warns if none exists.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.RepeatSanitisationValidation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.validation.RepeatSanitisationValidation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.validation.RepeatSanitisationValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.RepeatSanitisationValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
