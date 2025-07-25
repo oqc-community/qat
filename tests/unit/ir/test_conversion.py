@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
+from copy import deepcopy
 from enum import Enum
 from functools import singledispatchmethod
 from numbers import Number
@@ -12,9 +13,18 @@ from compiler_config.config import InlineResultsProcessing
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
-from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
+from qat.ir.instructions import (
+    Assign,
+    FrequencySet,
+    InstructionBlock,
+    Label,
+    PhaseReset,
+    QuantumInstructionBlock,
+)
 from qat.middleend.passes.purr.transform import LoopCount
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.converted import PydEchoModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, PipelineConfig
 from qat.purr.compiler import instructions
@@ -26,6 +36,88 @@ from qat.purr.compiler.devices import (
 from qat.utils.pydantic import FrozenSet, ValidatedList, ValidatedSet
 
 from tests.unit.utils.qasm_qir import get_qasm2
+
+
+class TestFlattenIRPass:
+    @pytest.fixture(scope="class")
+    def ir(self):
+        pass
+
+    @pytest.fixture(scope="class")
+    def model(self):
+        return PydEchoModelLoader(4).load()
+
+    def test_flat_ir_does_nothing(self, model):
+        ir = QuantumInstructionBuilder(hardware_model=model)
+        ir.add(Assign(name="a", value=1))
+        ir.add(Label(name="b"))
+        ir.add(PhaseReset(target="c"))
+        ir.add(FrequencySet(target="d", frequency=5.0))
+
+        ref_ir = deepcopy(ir.instructions)
+
+        ir.flatten()
+        assert ir.number_of_instructions == len(ref_ir)
+        for instr, ref_instr in zip(ir, ref_ir):
+            assert instr == ref_instr
+
+    def test_instruction_block_flattened(self, model):
+        ir = QuantumInstructionBuilder(hardware_model=model)
+        ir.add(Assign(name="a", value=1))
+        ir.add(
+            InstructionBlock(
+                instructions=[
+                    PhaseReset(target="b"),
+                    FrequencySet(target="c", frequency=5.0),
+                ]
+            )
+        )
+        ref_ir = deepcopy(ir.instructions)
+
+        ir.flatten()
+        assert len(ir.instructions) == 3
+        assert len(ir.instructions) > len(ref_ir)
+        assert isinstance(ir.instructions, ValidatedList)
+
+    def test_quantum_instruction_block_targets_flattened(self, model):
+        ir = QuantumInstructionBuilder(hardware_model=model)
+        ir.add(
+            QuantumInstructionBlock(
+                instructions=[
+                    PhaseReset(target="b"),
+                    FrequencySet(target="c", frequency=5.0),
+                ]
+            )
+        )
+
+        ir.flatten()
+        assert len(ir.instructions) == 2
+        for instr in ir:
+            assert len(instr.targets) == 1
+
+        assert ir._ir.head.target == "b"
+        assert ir._ir.tail.target == "c"
+
+    def test_nested_instruction_blocks(self, model):
+        ir = QuantumInstructionBuilder(hardware_model=model)
+        block = InstructionBlock(
+            instructions=[Assign(name="a", value=1), PhaseReset(target="b")]
+        )
+        nested_block = InstructionBlock(
+            instructions=[FrequencySet(target="c", frequency=5.0), block]
+        )
+        ir.add(block, nested_block)
+
+        another_nested_block = InstructionBlock(instructions=[block, nested_block])
+        ir.add(another_nested_block)
+
+        ref_ir = deepcopy(ir)
+        ref_nr_instructions = ref_ir.number_of_instructions
+
+        ir.flatten()
+        assert len(ir.instructions) == ref_nr_instructions
+        for instr, ref_instr in zip(ir.instructions, ref_ir):
+            assert instr == ref_instr
 
 
 class TestConvertToPydanticIRPass:

@@ -115,6 +115,13 @@ class InstructionBlock(Instruction, Iterable):
             f"Cannot access last element of an empty `{self.__class__.__name__}`."
         )
 
+    def flatten(self):
+        flattened_instructions = []
+        for instr in self:
+            flattened_instructions.append(instr)
+        self.instructions = flattened_instructions
+        return self
+
     @field_serializer("instructions")
     def _serialize_instructions(self, instructions: list[Instruction]):
         return [inst.model_dump() for inst in self]

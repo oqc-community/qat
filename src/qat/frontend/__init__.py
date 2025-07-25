@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.frontend.auto import AutoFrontend as AutoFrontend
+from qat.frontend.auto import AutoFrontendWithFlattenedIR as AutoFrontendWithFlattenedIR
 from qat.frontend.base import BaseFrontend as BaseFrontend
 from qat.frontend.custom import CustomFrontend as CustomFrontend
 from qat.frontend.fallthrough import FallthroughFrontend as FallthroughFrontend

@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
-from qat.frontend import AutoFrontend
+from qat.frontend import AutoFrontendWithFlattenedIR
 from qat.middleend.middleends import ExperimentalDefaultMiddleend
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.target_data import TargetData
@@ -51,7 +51,7 @@ class EchoPipeline(UpdateablePipeline):
         return Pipeline(
             model=model,
             target_data=target_data,
-            frontend=AutoFrontend(model),
+            frontend=AutoFrontendWithFlattenedIR(model),
             middleend=ExperimentalDefaultMiddleend(model, pyd_model, target_data),
             backend=PydWaveformV1Backend(pyd_model, model, target_data),
             runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),

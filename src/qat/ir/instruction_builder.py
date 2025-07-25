@@ -235,6 +235,12 @@ class InstructionBuilder(ABC):
     def __reversed__(self):
         return self._ir.__reversed__()
 
+    def flatten(self):
+        """
+        Flatten the instruction builder by removing nested structures like InstructionBlocks.
+        """
+        return self._ir.flatten()
+
 
 class QuantumInstructionBuilder(InstructionBuilder):
     def pretty_print(self):

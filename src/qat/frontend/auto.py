@@ -5,6 +5,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
+from qat.frontend.passes.purr.transform import FlattenIR
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend
 from qat.frontend.qir import QIRFrontend
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
@@ -99,3 +100,19 @@ class AutoFrontend(BaseFrontend):
             if frontend.check_and_return_source(src):
                 return frontend.emit(src, res_mgr, met_mgr, compiler_config)
         raise ValueError("No suitable frontend could be found for the source program.")
+
+
+class AutoFrontendWithFlattenedIR(AutoFrontend):
+    """
+    An :class:`AutoFrontend` that flattens the IR after parsing.
+    """
+
+    def emit(
+        self,
+        src,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
+    ):
+        ir = super().emit(src, res_mgr, met_mgr, compiler_config)
+        return FlattenIR().run(ir)

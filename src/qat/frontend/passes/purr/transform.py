@@ -20,9 +20,18 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.frontend.passes.analysis import InputAnalysisResult
+from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
 from qat.purr.integrations.tket import run_tket_optimizations_qasm
+
+
+class FlattenIR(TransformPass):
+    """Flatten the IR by removing nested structures like InstructionBlocks."""
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        ir._instructions = ir.instructions
+        return ir
 
 
 class InputOptimisation(TransformPass):

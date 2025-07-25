@@ -42,6 +42,7 @@ from qat.middleend.passes.purr.validation import (
     ReadoutValidation,
 )
 from qat.middleend.passes.transform import (
+    PydAcquireSanitisation,
     PydBatchedShots,
     PydEndOfTaskResetSanitisation,
     PydEvaluateWaveforms,
@@ -268,6 +269,7 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | PydSynchronizeTask()
             | PydPostProcessingSanitisation()
             | PydReadoutValidation()
+            | PydAcquireSanitisation()
             | PydMeasurePhaseResetSanitisation(pyd_model)
             | PydInstructionGranularitySanitisation(pyd_model, target_data)
             # Preparing for codegen

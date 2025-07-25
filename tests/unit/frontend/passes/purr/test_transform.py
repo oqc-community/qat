@@ -14,13 +14,61 @@ from compiler_config.config import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.frontend.passes.analysis import InputAnalysisResult
-from qat.frontend.passes.purr.transform import InputOptimisation, Parse
+from qat.frontend.passes.purr.transform import FlattenIR, InputOptimisation, Parse
 from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import QubitCoupling
-from qat.purr.compiler.instructions import ResultsProcessing
+from qat.purr.compiler.instructions import MeasureBlock, PulseShapeType, ResultsProcessing
 
 from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir
+
+
+class TestFlattenIR:
+    @pytest.fixture(scope="class")
+    def model(self):
+        return EchoModelLoader().load()
+
+    def test_flat_ir_does_nothing(self, model):
+        builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
+        builder.pulse(
+            quantum_target=model.get_qubit(0).get_measure_channel(),
+            amp=1.0,
+            shape=PulseShapeType.SQUARE,
+            width=100e-6,
+        )
+        builder.acquire(
+            model.get_qubit(0).get_acquire_channel(),
+            output_variable="test",
+            mode="raw",
+            delay=0,
+            time=100e-6,
+        )
+        builder = FlattenIR().run(builder)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) == 3
+
+    def test_flatten_ir_with_measure_blocks(self, model):
+        builder = model.create_builder()
+        builder.repeat(1000, 100e-6)
+        builder.pulse(
+            quantum_target=model.get_qubit(0).get_measure_channel(),
+            amp=1.0,
+            shape=PulseShapeType.SQUARE,
+            width=100e-6,
+        )
+        builder.measure(model.get_qubit(0))
+
+        assert len(builder._instructions) == 3
+
+        measure_blocks = [
+            instr for instr in builder._instructions if isinstance(instr, MeasureBlock)
+        ]
+        assert len(measure_blocks) == 1
+
+        builder = FlattenIR().run(builder)
+        assert isinstance(builder, InstructionBuilder)
+        assert len(builder.instructions) == 2 + len(measure_blocks[0].instructions)
 
 
 class TestInputOptimisation:

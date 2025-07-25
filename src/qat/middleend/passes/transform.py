@@ -1338,6 +1338,40 @@ class SynchronizeTask(TransformPass):
         return ir
 
 
+class AcquireSanitisation(TransformPass):
+    """Sanitises the :class:`Acquire` instruction: the first per pulse channel is split into
+    an :class:`Acquire` and a :class:`Delay`, and other acquisitions have their delay
+    removed.
+
+    :class:`Acquire` instructions are defined by a "duration" for which they instruct the
+    target to readout. They also contain a "delay" attribute, which instructions the
+    acquisition to start after some given time. This pass separates acqusitions with a
+    delay into two instructions for the first acquire that acts on the channel. For multiple
+    acquisitions on a single channel, the delay is not needed for the following
+    acquisitions, and is set to zero.
+    """
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        """
+
+        new_instructions: list[Instruction] = []
+
+        for inst in ir:
+            if isinstance(inst, Acquire):
+                if inst.delay:
+                    delay = Delay(target=inst.target, duration=inst.delay)
+                    inst.delay = 0.0
+                    new_instructions.extend([delay, inst])
+                else:
+                    new_instructions.append(inst)
+            else:
+                new_instructions.append(inst)
+        ir.instructions = new_instructions
+        return ir
+
+
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
@@ -1356,3 +1390,4 @@ PydInitialPhaseResetSanitisation = InitialPhaseResetSanitisation
 PydLowerSyncsToDelays = LowerSyncsToDelays
 PydEvaluateWaveforms = EvaluateWaveforms
 PydSynchronizeTask = SynchronizeTask
+PydAcquireSanitisation = AcquireSanitisation
