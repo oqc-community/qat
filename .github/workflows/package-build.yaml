@@ -90,6 +90,11 @@ jobs:
         run: |
           poetry run pip-audit
 
+      - name: Pip licensing check
+        id: pip-licenses
+        if: ${{ !cancelled() }}
+        run: poetry run pip-licenses --fail-on "GNU General Public License (GPL);GNU General Public License v2 (GPLv2);GNU General Public License v2 or later (GPLv2+);GNU General Public License v3 (GPLv3);GNU General Public License v3 or later (GPLv3+)" --from=mixed
+
       - name: Generate report for formatting scans
         id: formatting
         if: ${{ !cancelled() }}
@@ -101,7 +106,8 @@ jobs:
           | Jupytext Check | ${{ steps.jupytext.outcome }} |
           | Lint Check | ${{ steps.lint.outcome }} |
           | Format Check | ${{ steps.format.outcome}} |
-          | Pip Audit | ${{ steps.pip-audit.outcome }} |;
+          | Pip Audit | ${{ steps.pip-audit.outcome }} |
+          | Pip Licensing | ${{ steps.pip-licenses.outcome }} |
           EOF
           SUMMARY=$(cat static-report.md)
           echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
