@@ -2286,6 +2286,19 @@ class TestLowerSyncsToDelays:
         times = [inst.duration for inst in builder.instructions]
         assert times[0] + times[1] + times[4] == times[2] + times[3]
 
+    def test_with_sync_with_no_channels(self):
+        model = EchoModelLoader().load()
+        chan1 = model.qubits[0].get_drive_channel()
+
+        builder = model.create_builder()
+        builder.pulse(chan1, shape=PulseShapeType.SQUARE, width=120e-9)
+        builder.delay(chan1, 48e-9)
+        builder.synchronize([])
+
+        LowerSyncsToDelays().run(builder)
+        assert len(builder.instructions) == 2
+        assert [type(inst) for inst in builder.instructions] == [Pulse, Delay]
+
 
 class TestSquashDelaysOptimisation:
     @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])

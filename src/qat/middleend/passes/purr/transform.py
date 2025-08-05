@@ -1192,6 +1192,12 @@ class LowerSyncsToDelays(TransformPass):
             elif isinstance(inst, Synchronize):
                 # determine the durations for syncs
                 targets = inst.quantum_targets
+                if (num_targets := len(targets)) <= 1:
+                    log.info(
+                        f"Synchronize instructions with {num_targets} does not have enough "
+                        "targets to synchronise, it will be ignored."
+                    )
+                    continue
                 current_durations = np.asarray(
                     [durations[target.partial_id()] for target in targets]
                 )
