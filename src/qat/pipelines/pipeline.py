@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from compiler_config.config import CompilerConfig
+from compiler_config.config import CompilerConfig, MetricsType
 
 from qat.backend.base import BaseBackend
 from qat.core.metrics_base import MetricsManager
@@ -66,7 +66,9 @@ class CompilePipeline(BasePipeline):
         """
 
         # TODO: Improve metrics and config handling
-        compiler_config = compiler_config or CompilerConfig()
+        compiler_config = compiler_config or CompilerConfig(
+            metrics=MetricsType.Experimental
+        )
         metrics_manager = MetricsManager(compiler_config.metrics)
         compilation_results = ResultManager()
 
