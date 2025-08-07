@@ -271,6 +271,7 @@ class QbloxControlHardware(ControlHardware):
 
         try:
             self._resources.clear()
+            self._reset_connections()
             for pkg in packages:
                 module, sequencer = self.allocate_resources(pkg)
                 self.configure(pkg, module, sequencer)
