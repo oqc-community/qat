@@ -56,6 +56,7 @@ from qat.middleend.passes.transform import (
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PostProcessingSanitisation,
+    RepeatSanitisation,
     RepeatTranslation,
     ResetsToDelays,
     ReturnSanitisation,
@@ -63,7 +64,10 @@ from qat.middleend.passes.transform import (
     SquashDelaysOptimisation,
     SynchronizeTask,
 )
-from qat.middleend.passes.validation import ReturnSanitisationValidation
+from qat.middleend.passes.validation import (
+    RepeatSanitisationValidation,
+    ReturnSanitisationValidation,
+)
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.target_data import (
     AbstractTargetData,
@@ -201,6 +205,36 @@ class TestRepeatTranslation:
 
         self._check_loop_start(ir, start_indices)
         self._check_loop_close(ir, close_indices, [1000, 300])
+
+
+class TestRepeatSanitisation:
+    hw = PydEchoModelLoader(1).load()
+
+    @pytest.mark.parametrize("shots", [10, 100, 1000])
+    @pytest.mark.parametrize("passive_reset_time", [1e-03, 2])
+    @pytest.mark.parametrize("default", [True, False])
+    def test_default_repeat(self, shots, passive_reset_time, default):
+        # TODO: Change to `passive_reset_time`. 428, 455
+        qubit_data = QubitDescription.random().model_copy(
+            update={"passive_reset_time": passive_reset_time}
+        )
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=shots,
+            RESONATOR_DATA=ResonatorDescription.random(),
+            QUBIT_DATA=qubit_data,
+        )
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        builder.X(target=self.hw.qubit_with_index(0))
+        if not default:
+            # To make sure the parameters are different from the default params.
+            shots = shots - 1
+            builder.repeat(shots)
+
+        RepeatSanitisationValidation().run(builder)
+        ir = RepeatSanitisation(target_data).run(builder)
+        assert isinstance(repeat := ir.instructions[-1], Repeat)
+        assert repeat.repeat_count == shots
 
 
 class TestPydPhaseOptimisation:

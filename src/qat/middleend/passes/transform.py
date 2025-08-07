@@ -688,6 +688,30 @@ class ReturnSanitisation(TransformPass):
         return ir
 
 
+class RepeatSanitisation(TransformPass):
+    """Adds repeat counts and repetition periods to :class:`Repeat` instructions. If none
+    is found, a repeat instruction is added."""
+
+    def __init__(self, target_data: TargetData):
+        """
+        :param target_data: Target-related information.
+        """
+        self.target_data = target_data
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        for inst in ir.instructions:
+            if isinstance(inst, Repeat):
+                return ir
+
+        ir.repeat(self.target_data.default_shots)
+        log.warning(
+            "Could not find any repeat instructions. "
+            f"One has been added with {self.target_data.default_shots} shots."
+        )
+        return ir
+
+
 class BatchedShots(TransformPass):
     """Determines how shots should be grouped when the total number exceeds that maximum
     allowed.
@@ -1375,6 +1399,7 @@ class AcquireSanitisation(TransformPass):
 PydPhaseOptimisation = PhaseOptimisation
 PydPostProcessingSanitisation = PostProcessingSanitisation
 PydReturnSanitisation = ReturnSanitisation
+PydRepeatSanitisation = RepeatSanitisation
 PydBatchedShots = BatchedShots
 PydResetsToDelays = ResetsToDelays
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
