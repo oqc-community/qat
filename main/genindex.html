@@ -3893,14 +3893,14 @@
         <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.invoke_backend">(QbloxLiveEngineAdapter method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.InvokerMixin">InvokerMixin (class in qat.core.pass_base)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin">(class in qat.purr.backends.qblox.pass_base)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.iq_voltage_bias">iq_voltage_bias (PhysicalChannel attribute)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.IQBias">IQBias (class in qat.model.device)</a>
@@ -4043,6 +4043,8 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run.params.ir">(qat.middleend.passes.transform.RepeatSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslation.run.params.ir">(qat.middleend.passes.transform.RepeatTranslation.run parameter)</a>
 </li>
@@ -7416,6 +7418,8 @@
 </li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReadoutValidation">PydReadoutValidation (in module qat.middleend.passes.validation)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydRepeatSanitisation">PydRepeatSanitisation (in module qat.middleend.passes.transform)</a>
+</li>
       <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydRepeatSanitisationValidation">PydRepeatSanitisationValidation (in module qat.middleend.passes.validation)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydRepeatTranslation">PydRepeatTranslation (in module qat.middleend.passes.transform)</a>
@@ -9788,6 +9792,8 @@
       <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.RepeatSanitisation">RepeatSanitisation (class in qat.middleend.passes.purr.transform)</a>
 
       <ul>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation">(class in qat.middleend.passes.transform)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
@@ -10372,7 +10378,7 @@
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.RemoveRedundantSWAPs.run">(RemoveRedundantSWAPs method)</a>
 </li>
-        <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.RepeatSanitisation.run">(RepeatSanitisation method)</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">[1]</a>
+        <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.RepeatSanitisation.run">(RepeatSanitisation method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run">[1]</a>, <a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.RepeatSanitisation.run">[2]</a>
 </li>
         <li><a href="qat.middleend.passes.purr.validation.html#qat.middleend.passes.purr.validation.RepeatSanitisationValidation.run">(RepeatSanitisationValidation method)</a>, <a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.RepeatSanitisationValidation.run">[1]</a>
 </li>
@@ -11246,6 +11252,8 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.params.target_data">(qat.middleend.passes.transform.InstructionGranularitySanitisation parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.params.target_data">(qat.middleend.passes.transform.RepeatSanitisation parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.params.target_data">(qat.middleend.passes.transform.ResetsToDelays parameter)</a>
 </li>
         <li><a href="qat.pipelines.legacy.base.compile.html#qat.pipelines.legacy.base.compile.LegacyCompilePipeline.params.target_data">(qat.pipelines.legacy.base.compile.LegacyCompilePipeline parameter)</a>
@@ -11353,6 +11361,8 @@
       </ul></li>
       <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData">TargetData (class in qat.model.target_data)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.middleend.passes.purr.analysis.html#qat.middleend.passes.purr.analysis.ActiveChannelResults.targets">targets (ActiveChannelResults property)</a>
 
       <ul>
@@ -11371,8 +11381,6 @@
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.targets">(UntargetedPulse attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSCoupling.targets">targets() (RTCSCoupling method)</a>
 </li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Tdg">Tdg (class in qat.ir.gates.gates_1q)</a>
