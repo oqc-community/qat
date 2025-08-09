@@ -23,6 +23,7 @@ Submodules
    :maxdepth: 4
 
    qat.pipelines.base
+   qat.pipelines.cache
    qat.pipelines.echo
    qat.pipelines.pipeline
    qat.pipelines.qiskit

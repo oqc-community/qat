@@ -289,6 +289,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.cache.html">qat.pipelines.cache module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
@@ -481,9 +482,21 @@
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.COMPILE">
+<span class="sig-name descname"><span class="pre">COMPILE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineInstanceDescription" title="qat.core.config.descriptions.PipelineInstanceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.UpdateablePipelineDescription" title="qat.core.config.descriptions.UpdateablePipelineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipelineDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineFactoryDescription" title="qat.core.config.descriptions.PipelineFactoryDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineFactoryDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.CompilePipelineDescription" title="qat.core.config.descriptions.CompilePipelineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilePipelineDescription</span></code></a><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.COMPILE" title="Link to this definition"></a></dt>
+<dd><p>QAT Pipelines for compilation to add on start-up, None adds default pipelines</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.ENGINES">
 <span class="sig-name descname"><span class="pre">ENGINES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.EngineDescription" title="qat.core.config.descriptions.EngineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineDescription</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.ENGINES" title="Link to this definition"></a></dt>
 <dd><p>QAT Engines to add on start-up</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.EXECUTE">
+<span class="sig-name descname"><span class="pre">EXECUTE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineInstanceDescription" title="qat.core.config.descriptions.PipelineInstanceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.UpdateablePipelineDescription" title="qat.core.config.descriptions.UpdateablePipelineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipelineDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineFactoryDescription" title="qat.core.config.descriptions.PipelineFactoryDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineFactoryDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.ExecutePipelineDescription" title="qat.core.config.descriptions.ExecutePipelineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutePipelineDescription</span></code></a><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.EXECUTE" title="Link to this definition"></a></dt>
+<dd><p>QAT Pipelines for execution to add on start-up, None adds default pipelines</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -501,7 +514,8 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.PIPELINES">
 <span class="sig-name descname"><span class="pre">PIPELINES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineInstanceDescription" title="qat.core.config.descriptions.PipelineInstanceDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineInstanceDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.UpdateablePipelineDescription" title="qat.core.config.descriptions.UpdateablePipelineDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipelineDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineFactoryDescription" title="qat.core.config.descriptions.PipelineFactoryDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineFactoryDescription</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineClassDescription" title="qat.core.config.descriptions.PipelineClassDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineClassDescription</span></code></a><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.PIPELINES" title="Link to this definition"></a></dt>
-<dd><p>QAT Pipelines to add on start-up, None adds default pipelines</p>
+<dd><p>QAT Pipelines for compilation and execution to add on start-up, None adds default
+pipelines</p>
 </dd></dl>
 
 <dl class="py method">
@@ -531,9 +545,30 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.no_duplicate_names">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">no_duplicate_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.no_duplicate_names" title="Link to this definition"></a></dt>
+<dd><p>Checks that there are no duplicate names in the list of descriptions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.no_duplicate_pipeline_names">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">no_duplicate_pipeline_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.no_duplicate_pipeline_names" title="Link to this definition"></a></dt>
+<dd><p>For each of the PIPELINES, COMPILE, and EXECUTE fields, this checks that there
+are no duplicate names in the list of descriptions. Also checks there are no shared
+names between PIPELINES and COMPILE/EXECUTE.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.core.config.session.QatSessionConfig.one_default">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.one_default" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.config.session.QatSessionConfig.one_default" title="Link to this definition"></a></dt>
+<dd><p>Ensures that exactly one PIPELINE is marked as default, or alternatively, one of
+COMPILE and EXECUTE pipelines is marked as default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

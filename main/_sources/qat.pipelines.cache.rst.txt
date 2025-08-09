@@ -1,0 +1,7 @@
+qat.pipelines.cache module
+==========================
+
+.. automodule:: qat.pipelines.cache
+   :members:
+   :undoc-members:
+   :show-inheritance:
