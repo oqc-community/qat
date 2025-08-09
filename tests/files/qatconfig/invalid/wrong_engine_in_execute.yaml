@@ -1,0 +1,15 @@
+HARDWARE:
+- name: echo6loader
+  type: qat.model.loaders.purr.EchoModelLoader
+  config:
+    qubit_count: 6
+
+ENGINE:
+- name: mock
+  type: tests.unit.utils.engine.InitableEngine
+  
+EXECUTE:
+- name: mock 
+  engine: not_found 
+  runtime: qat.runtime.SimpleRuntime 
+  hardware_loader: echo6loader

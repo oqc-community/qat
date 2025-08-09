@@ -5,10 +5,10 @@ import inspect
 
 
 def is_pipeline_instance(value: type):
-    """A validator which raises when the input not a Pipeline instance."""
-    from qat.pipelines.pipeline import Pipeline
+    """A validator which raises when the input not a BasePipeline instance."""
+    from qat.pipelines.pipeline import BasePipeline
 
-    if not isinstance(value, Pipeline):
+    if not isinstance(value, BasePipeline):
         raise ValueError(f"{value} is not a valid Pipeline instance")
     return value
 
@@ -114,10 +114,13 @@ def is_hardwareloader(value: type):
 
 def is_pipeline_factory(value: type):
     """A validator which raises when the input not function which returns a Pipeline."""
-    from qat.pipelines.pipeline import Pipeline
+    from qat.pipelines.base import BasePipeline
 
-    if not (callable(value) and inspect.signature(value).return_annotation is Pipeline):
-        raise ValueError(f"{value} does not a return a Pipeline")
+    if not (
+        callable(value)
+        and issubclass(inspect.signature(value).return_annotation, BasePipeline)
+    ):
+        raise ValueError(f"{value} does not a return a BasePipeline")
     return value
 
 

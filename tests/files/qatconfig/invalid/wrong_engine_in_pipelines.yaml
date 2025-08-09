@@ -1,0 +1,14 @@
+HARDWARE:
+- name: echo6loader
+  type: qat.model.loaders.purr.EchoModelLoader
+  config:
+    qubit_count: 6
+
+ENGINE:
+- name: mock
+  type: tests.unit.utils.engine.InitableEngine
+  
+PIPELINES:
+- name: mock
+  pipeline: tests.unit.utils.pipelines.MockPipeline
+  engine: not_found

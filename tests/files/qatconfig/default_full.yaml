@@ -1,0 +1,5 @@
+MAX_REPEATS_LIMIT: 1000
+
+PIPELINES:
+- name: echo
+  pipeline: qat.pipelines.echo.echo8

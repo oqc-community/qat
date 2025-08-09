@@ -2,11 +2,13 @@ import inspect
 from pathlib import Path
 
 import piny
-from pydantic import ImportString, ValidationInfo, field_validator
+from pydantic import ImportString, ValidationInfo, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
 from qat.core.config.descriptions import (
+    CompilePipelineDescription,
     EngineDescription,
+    ExecutePipelineDescription,
     HardwareLoaderDescription,
     PipelineClassDescription,
     PipelineFactoryDescription,
@@ -67,7 +69,30 @@ class QatSessionConfig(QatConfig):
         ]
         | None
     ) = None
-    """ QAT Pipelines to add on start-up, None adds default pipelines"""
+    """ QAT Pipelines for compilation and execution to add on start-up, None adds default
+    pipelines"""
+
+    COMPILE: (
+        list[
+            PipelineInstanceDescription
+            | UpdateablePipelineDescription
+            | PipelineFactoryDescription
+            | CompilePipelineDescription
+        ]
+        | None
+    ) = None
+    """ QAT Pipelines for compilation to add on start-up, None adds default pipelines"""
+
+    EXECUTE: (
+        list[
+            PipelineInstanceDescription
+            | UpdateablePipelineDescription
+            | PipelineFactoryDescription
+            | ExecutePipelineDescription
+        ]
+        | None
+    ) = None
+    """ QAT Pipelines for execution to add on start-up, None adds default pipelines"""
 
     @field_validator("EXTENSIONS")
     def load_extensions(values):
@@ -82,24 +107,92 @@ class QatSessionConfig(QatConfig):
                 )
         return values
 
-    @field_validator("PIPELINES")
-    @classmethod
-    def one_default(cls, v):
-        if v is None:
-            return v
-        elif len(v) == 0:
-            return v
-        elif len(v) == 1:
-            v[0].default = True
-            return v
-        num_defaults = sum(pipe.default for pipe in v)
-        if not num_defaults == 1:
-            raise ValueError(
-                f"Exactly one pipeline must have default: true (found {num_defaults})"
-            )
-        return v
+    @model_validator(mode="after")
+    def one_default(cls, values: dict) -> dict:
+        """Ensures that exactly one PIPELINE is marked as default, or alternatively, one of
+        COMPILE and EXECUTE pipelines is marked as default."""
+        compile_pipelines = values.COMPILE
+        execute_pipelines = values.EXECUTE
+        full_pipelines = values.PIPELINES
 
-    @field_validator("PIPELINES", "ENGINES")
+        if not (compile_pipelines or execute_pipelines):
+            if full_pipelines and len(full_pipelines) == 1:
+                full_pipelines[0].default = True
+                return values
+
+        num_full_defaults = (
+            sum(desc.default for desc in full_pipelines)
+            if full_pipelines is not None
+            else 0
+        )
+        if num_full_defaults > 1:
+            raise ValueError(
+                "Expected at most one default pipeline in PIPELINES, found "
+                f"{num_full_defaults}."
+            )
+
+        for pipelines in [compile_pipelines, execute_pipelines]:
+            if not pipelines and not full_pipelines:
+                continue
+
+            num_pipelines = len(pipelines) if pipelines is not None else 0
+            num_pipeline_defaults = (
+                sum(desc.default for desc in pipelines) if num_pipelines != 0 else 0
+            )
+
+            if num_pipelines == 1 and not full_pipelines:
+                pipelines[0].default = True
+                continue
+
+            if (total_defaults := num_pipeline_defaults + num_full_defaults) != 1:
+                raise ValueError(
+                    f"Expected exactly one default COMPILE and EXECUTE pipelines, found "
+                    f"multiple (including PIPELINES): {total_defaults}."
+                )
+
+        return values
+
+    @field_validator("HARDWARE", "ENGINES")
+    @classmethod
+    def no_duplicate_names(cls, val, info: ValidationInfo):
+        """Checks that there are no duplicate names in the list of descriptions."""
+        if val is None or len(val) == 0:
+            return val
+
+        names = set()
+        for desc in val:
+            if desc.name in names:
+                raise ValueError(f"Duplicate name {desc.name} found in {info.field_name}")
+            names.add(desc.name)
+        return val
+
+    @field_validator("COMPILE", "EXECUTE")
+    @classmethod
+    def no_duplicate_pipeline_names(cls, val, info: ValidationInfo):
+        """For each of the PIPELINES, COMPILE, and EXECUTE fields, this checks that there
+        are no duplicate names in the list of descriptions. Also checks there are no shared
+        names between PIPELINES and COMPILE/EXECUTE."""
+        from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline
+
+        pipeline_ty = CompilePipeline if info.field_name == "COMPILE" else ExecutePipeline
+
+        pipelines = [] if val is None else val
+        full_pipelines = info.data.get("PIPELINES", [])
+        full_pipelines = [] if full_pipelines is None else full_pipelines
+        full_pipelines = [
+            desc for desc in full_pipelines if desc.is_subtype_of(pipeline_ty)
+        ]
+
+        names = set()
+        for desc in full_pipelines + pipelines:
+            if desc.name in names:
+                raise ValueError(
+                    f"Duplicate name {desc.name} found in {info.field_name} pipelines."
+                )
+            names.add(desc.name)
+        return val
+
+    @field_validator("PIPELINES", "ENGINES", "COMPILE", "EXECUTE")
     @classmethod
     def matching_hardware_loaders(cls, pipelines, info: ValidationInfo):
         if pipelines is None:
@@ -115,7 +208,7 @@ class QatSessionConfig(QatConfig):
 
         return pipelines
 
-    @field_validator("PIPELINES")
+    @field_validator("PIPELINES", "EXECUTE")
     @classmethod
     def matching_engines(cls, pipelines, info: ValidationInfo):
         if pipelines is None:

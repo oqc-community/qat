@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from functools import partial
+from inspect import signature
 from typing import TYPE_CHECKING, Annotated, Generic, TypeVar
 
 from pydantic import AfterValidator, ConfigDict, ImportString
@@ -8,7 +9,11 @@ from pydantic import AfterValidator, ConfigDict, ImportString
 from qat.utils.pydantic import NoExtraFieldsModel
 
 if TYPE_CHECKING:
-    from qat.core.pipelines.configurable import ConfigurablePipeline
+    from qat.core.pipelines.configurable import (
+        ConfigurableCompilePipeline,
+        ConfigurableExecutePipeline,
+        ConfigurablePipeline,
+    )
     from qat.core.pipelines.factory import PipelineFactory
     from qat.engines.native import NativeEngine
     from qat.model.hardware_model import PhysicalHardwareModel
@@ -54,6 +59,10 @@ class PipelineInstanceDescription(NoExtraFieldsModel):
     def construct(self) -> "Pipeline":
         """Returns the requested Pipeline instance"""
         return self.pipeline.copy_with_name(self.name)
+
+    def is_subtype_of(self, ty: type) -> bool:
+        """Matches the type of the pipeline against the given type."""
+        return isinstance(self.pipeline, ty)
 
 
 class HardwareLoaderDescription(NoExtraFieldsModel):
@@ -155,6 +164,11 @@ class PipelineFactoryDescription(NoExtraFieldsModel):
             config=self, loader=loader, target_data=target_data, engine=engine
         )
 
+    def is_subtype_of(self, ty: type) -> bool:
+        """Matches the type of the pipeline returned by the factory against the given
+        type."""
+        return issubclass(signature(self.pipeline).return_annotation, ty)
+
 
 class UpdateablePipelineDescription(NoExtraFieldsModel):
     """A description pointing to an updateable pipeline, which can be configured with
@@ -187,6 +201,90 @@ class UpdateablePipelineDescription(NoExtraFieldsModel):
             config=config, loader=loader, target_data=target_data, engine=engine
         )
 
+    def is_subtype_of(self, ty: type) -> bool:
+        """Matches the type of the pipeline returned by the factory against the given
+        type."""
+        return issubclass(signature(self.pipeline._build_pipeline).return_annotation, ty)
+
+
+class CompilePipelineDescription(NoExtraFieldsModel):
+    """A description of a compile pipeline, which is a pipeline that can be used to compile
+    a model into an executable."""
+
+    name: str
+    hardware_loader: str | None = None
+    frontend: FrontendDescription = "qat.frontend.DefaultFrontend"
+    middleend: MiddleendDescription = "qat.middleend.DefaultMiddleend"
+    backend: BackendDescription = "qat.backend.DefaultBackend"
+    target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
+    default: bool = False
+    model_config = ConfigDict(validate_default=True)
+
+    @staticmethod
+    def is_subtype_of(ty: type) -> bool:
+        """Matches the type of the pipeline returned by the factory against the given
+        type."""
+        from qat.pipelines.pipeline import CompilePipeline
+
+        return issubclass(CompilePipeline, ty)
+
+    def construct(
+        self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
+    ) -> "ConfigurableCompilePipeline":
+        """Constructs and returns a CompilePipeline from its description
+
+        :param loader: The hardware model loader to fetch the hardware model.
+        :return: The constructed pipeline
+        """
+
+        from qat.core.pipelines.configurable import ConfigurableCompilePipeline
+
+        target_data = self.target_data() if self.target_data is not None else None
+        return ConfigurableCompilePipeline(
+            config=self, loader=loader, target_data=target_data, engine=None
+        )
+
+
+class ExecutePipelineDescription(NoExtraFieldsModel):
+    """A description of an executable pipeline, which is a pipeline that can be used to
+    execute an executable."""
+
+    name: str
+    hardware_loader: str | None = None
+    engine: str | None = None
+    runtime: RuntimeDescription = "qat.runtime.DefaultRuntime"
+    target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
+    results_pipeline: PassManagerFactoryDescription = (
+        "qat.runtime.results_pipeline.get_default_results_pipeline"
+    )
+    default: bool = False
+    model_config = ConfigDict(validate_default=True)
+
+    @staticmethod
+    def is_subtype_of(ty: type) -> bool:
+        """Matches the type of the pipeline returned by the factory against the given
+        type."""
+        from qat.pipelines.pipeline import ExecutePipeline
+
+        return issubclass(ExecutePipeline, ty)
+
+    def construct(
+        self, loader: "BaseModelLoader", engine: "NativeEngine"
+    ) -> "ConfigurableExecutePipeline":
+        """Constructs and returns a Pipeline from its description
+
+        :param loader: The hardware model loader to fetch the hardware model.
+        :param engine: The engine to use for the pipeline.
+        :return: The constructed pipeline
+        """
+
+        from qat.core.pipelines.configurable import ConfigurableExecutePipeline
+
+        target_data = self.target_data() if self.target_data is not None else None
+        return ConfigurableExecutePipeline(
+            config=self, loader=loader, target_data=target_data, engine=engine
+        )
+
 
 class PipelineClassDescription(NoExtraFieldsModel):
     """Allows pipelines to be specified in a granular way and constructed as an updateable
@@ -203,7 +301,6 @@ class PipelineClassDescription(NoExtraFieldsModel):
     results_pipeline: PassManagerFactoryDescription = (
         "qat.runtime.results_pipeline.get_default_results_pipeline"
     )
-    config: dict = {}
     default: bool = False
     model_config = ConfigDict(validate_default=True)
 
@@ -226,3 +323,11 @@ class PipelineClassDescription(NoExtraFieldsModel):
         return ConfigurablePipeline(
             config=self, loader=loader, target_data=self.target_data(), engine=engine
         )
+
+    @staticmethod
+    def is_subtype_of(ty: type) -> bool:
+        """Matches the type of the pipeline returned by the factory against the given
+        type."""
+        from qat.pipelines.pipeline import Pipeline
+
+        return issubclass(Pipeline, ty)

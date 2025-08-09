@@ -157,7 +157,7 @@ class ExecutePipeline(BasePipeline):
 
         compiler_config = CompilerConfig() if compiler_config is None else compiler_config
 
-        if self.model.calibration_id != package.calibration_id:
+        if self.model is not None and self.model.calibration_id != package.calibration_id:
             raise MismatchingHardwareModelException(
                 f"Hardware id in the executable package '{self.model.calibration_id}'' "
                 f"does not match the hardware id '{package.calibration_id}' used "

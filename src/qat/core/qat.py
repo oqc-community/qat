@@ -8,11 +8,11 @@ from compiler_config.config import CompilerConfig
 from qat.core.config.configure import get_qatconfig, override_config
 from qat.core.config.session import QatSessionConfig
 from qat.core.metrics_base import MetricsManager
-from qat.core.pipeline import EngineSet, HardwareLoaders, PipelineSet
+from qat.core.pipeline import EngineSet, HardwareLoaders, PipelineManager
 from qat.executables import Executable
 from qat.pipelines import get_default_pipelines
 from qat.pipelines.base import AbstractPipeline
-from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
+from qat.pipelines.pipeline import Pipeline
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.qatconfig import QatConfig
 
@@ -35,8 +35,22 @@ class QAT:
         self._engines = EngineSet.from_descriptions(
             self.config.ENGINES, self._available_hardware
         )
-        self.pipelines = PipelineSet.from_descriptions(
-            self.config.PIPELINES or get_default_pipelines(),
+
+        if (
+            self.config.PIPELINES is None
+            and self.config.COMPILE is None
+            and self.config.EXECUTE is None
+        ):
+            full_pipelines, compile_pipelines, execute_pipelines = get_default_pipelines()
+        else:
+            full_pipelines = self.config.PIPELINES
+            compile_pipelines = self.config.COMPILE
+            execute_pipelines = self.config.EXECUTE
+
+        self.pipelines = PipelineManager.from_descriptions(
+            compile_pipelines=compile_pipelines,
+            execute_pipelines=execute_pipelines,
+            full_pipelines=full_pipelines,
             available_hardware=self._available_hardware,
             available_engines=self._engines,
         )
@@ -60,8 +74,7 @@ class QAT:
         """
 
         with override_config(self.config):
-            P = self.pipelines.get(pipeline)
-            self._validate_pipeline_can_compile(P)
+            P = self.pipelines.get_compile_pipeline(pipeline)
             package, metrics_manager = P.compile(program, compiler_config=compiler_config)
             package = package.serialize() if to_json else package
             return package, metrics_manager
@@ -83,8 +96,7 @@ class QAT:
         """
 
         with override_config(self.config):
-            P = self.pipelines.get(pipeline)
-            self._validate_pipeline_can_execute(P)
+            P = self.pipelines.get_execute_pipeline(pipeline)
             if isinstance(package, str):
                 # If the package is a string, deserialize it
                 if "py/object" in package:
@@ -120,60 +132,19 @@ class QAT:
         :return: A tuple containing the results of the execution and the metrics manager
         """
 
-        with override_config(self.config):
-            compile_pipeline, execute_pipeline = self._resolve_pipelines(
-                compile_pipeline, execute_pipeline, pipeline
-            )
-            self._validate_pipeline_can_compile(compile_pipeline)
-            self._validate_pipeline_can_execute(execute_pipeline)
+        compile_pipeline = compile_pipeline if compile_pipeline is not None else pipeline
+        execute_pipeline = execute_pipeline if execute_pipeline is not None else pipeline
 
-            pkg, compile_metrics = self.compile(
-                program, compiler_config=compiler_config, pipeline=compile_pipeline
-            )
-            result, execute_metrics = self.execute(
-                pkg, compiler_config=compiler_config, pipeline=execute_pipeline
-            )
-            return result, execute_metrics.merge(compile_metrics)
+        pkg, compile_metrics = self.compile(
+            program, compiler_config=compiler_config, pipeline=compile_pipeline
+        )
+        result, execute_metrics = self.execute(
+            pkg, compiler_config=compiler_config, pipeline=execute_pipeline
+        )
+        return result, execute_metrics.merge(compile_metrics)
 
     def reload_all_models(self):
         """Reloads all hardware models and updates the pipelines."""
         self._available_hardware.reload_all_models()
         self._engines.reload_all_models()
         self.pipelines.reload_all_models()
-
-    def _resolve_pipelines(
-        self,
-        compile_pipeline: AbstractPipeline | str | None,
-        execute_pipeline: AbstractPipeline | str | None,
-        pipeline: AbstractPipeline | str,
-    ) -> tuple[AbstractPipeline, AbstractPipeline]:
-        if compile_pipeline is None or execute_pipeline is None:
-            pipeline = self.pipelines.get(pipeline)
-
-        compile_pipeline = (
-            self.pipelines.get(compile_pipeline)
-            if compile_pipeline is not None
-            else pipeline
-        )
-        execute_pipeline = (
-            self.pipelines.get(execute_pipeline)
-            if execute_pipeline is not None
-            else pipeline
-        )
-        return compile_pipeline, execute_pipeline
-
-    @staticmethod
-    def _validate_pipeline_can_compile(pipeline: AbstractPipeline):
-        if not pipeline.is_subtype_of(CompilePipeline):
-            raise TypeError(
-                f"Pipeline {pipeline} is not a CompilePipeline, compilation is not "
-                "supported."
-            )
-
-    @staticmethod
-    def _validate_pipeline_can_execute(pipeline: AbstractPipeline):
-        if not pipeline.is_subtype_of(ExecutePipeline):
-            raise TypeError(
-                f"Pipeline {pipeline} is not an ExecutePipeline, execution is not "
-                "supported."
-            )

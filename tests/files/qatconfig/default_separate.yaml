@@ -1,0 +1,17 @@
+MAX_REPEATS_LIMIT: 1000
+
+HARDWARE:
+- name: echo6loader
+  type: qat.model.loaders.purr.EchoModelLoader
+  config:
+    qubit_count: 6
+
+COMPILE: 
+- name: waveform-compile 
+  pipeline: qat.pipelines.waveform_v1.WaveformV1CompilePipeline
+  hardware_loader: echo6loader
+
+EXECUTE: 
+- name: waveform-execute 
+  pipeline: qat.pipelines.waveform_v1.EchoExecutePipeline
+  hardware_loader: echo6loader

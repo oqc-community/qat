@@ -324,15 +324,114 @@ class TestQatSessionConfigForPipelines:
         Error is raised with config instantiation as import type is not found."""
 
         with pytest.raises(ValidationError, match="No module"):
-            QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidtype.yaml")
+            QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / "type.yaml")
 
     def test_yaml_custom_config_invalid_arg(self, qatconfig_testfiles):
         """Check that invalid config (types) raise exceptions
 
         Config is only validated on engine construction"""
 
-        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalidarg.yaml")
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / "arg.yaml")
         desc = qatconfig.ENGINES[0]
 
         with pytest.raises(ValueError):
             desc.construct()
+
+    def test_multiple_defaults_on_full_and_separate_pipelines_raises(
+        self, qatconfig_testfiles
+    ):
+        with pytest.raises(ValidationError, match="Expected exactly one default"):
+            QatSessionConfig.from_yaml(
+                qatconfig_testfiles / "invalid" / "duplicate_defaults.yaml"
+            )
+
+    def test_duplicate_names_raises(self, qatconfig_testfiles):
+        """Check that duplicate names in hardware, engines or pipelines raise exceptions."""
+        with pytest.raises(ValidationError, match="Duplicate name"):
+            QatSessionConfig.from_yaml(
+                qatconfig_testfiles / "invalid" / "duplicate_names.yaml"
+            )
+
+    def test_default_on_full(self, qatconfig_testfiles):
+        """Checks that only a single full pipeline is marked as default."""
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "default_full.yaml")
+        assert len(qatconfig.PIPELINES) == 1
+        assert qatconfig.COMPILE is None
+        assert qatconfig.EXECUTE is None
+        assert qatconfig.PIPELINES[0].default is True
+
+    def test_default_on_seperate(self, qatconfig_testfiles):
+        """Checks that only a single compile or execute pipeline is marked as default."""
+        qatconfig = QatSessionConfig.from_yaml(
+            qatconfig_testfiles / "default_separate.yaml"
+        )
+        assert len(qatconfig.COMPILE) == 1
+        assert len(qatconfig.EXECUTE) == 1
+        assert qatconfig.COMPILE[0].default is True
+        assert qatconfig.EXECUTE[0].default is True
+
+    def test_no_default_on_all(self, qatconfig_testfiles):
+        """Checks that no default is set when no full or separate pipelines are given."""
+        with pytest.raises(ValidationError, match="Expected exactly one default"):
+            QatSessionConfig.from_yaml(
+                qatconfig_testfiles / "invalid" / "no_default_on_all.yaml"
+            )
+
+    def test_multiple_defaults(self, qatconfig_testfiles):
+        """Checks that multiple defaults on compile and execute pipelines raise exceptions."""
+        with pytest.raises(ValidationError, match="Expected exactly one default"):
+            QatSessionConfig.from_yaml(
+                qatconfig_testfiles / "invalid" / "multiple_defaults.yaml"
+            )
+
+    def test_passes_with_exactly_one_default(self, qatconfig_testfiles):
+        """Checks that exactly one default compile and execute pipeline is set."""
+        qatconfig = QatSessionConfig.from_yaml(
+            qatconfig_testfiles / "choose_correct_default.yaml"
+        )
+
+        assert len(qatconfig.COMPILE) == 3
+        assert len(qatconfig.EXECUTE) == 3
+
+        assert qatconfig.COMPILE[1].default is True
+        assert qatconfig.EXECUTE[1].default is True
+
+    @pytest.mark.parametrize(
+        "qatconfig_file",
+        [
+            "wrong_hardware_model_on_compile.yaml",
+            "wrong_hardware_model_on_engine.yaml",
+            "wrong_hardware_model_on_execute.yaml",
+            "wrong_hardware_model_on_pipelines.yaml",
+        ],
+    )
+    def test_engine_with_incorrect_hardware(self, qatconfig_testfiles, qatconfig_file):
+        """Checks that an engine with incorrect hardware raises an error."""
+        with pytest.raises(ValidationError, match="Hardware Loader"):
+            QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / qatconfig_file)
+
+    @pytest.mark.parametrize(
+        "qatconfig_file",
+        [
+            "wrong_engine_in_pipelines.yaml",
+            "wrong_engine_in_execute.yaml",
+        ],
+    )
+    def test_wrong_engine_in_execute(self, qatconfig_testfiles, qatconfig_file):
+        """Checks that an engine not found in the config raises an error."""
+        with pytest.raises(ValidationError, match="requires engine"):
+            QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / qatconfig_file)
+
+    @pytest.mark.parametrize(
+        "qatconfig_file",
+        [
+            "duplicate_engine_names.yaml",
+            "duplicate_hardware_names.yaml",
+        ],
+    )
+    def test_duplicate_names_in_engines_or_hardware(
+        self, qatconfig_testfiles, qatconfig_file
+    ):
+        """Checks that duplicate names in engines or hardware raise an error."""
+        with pytest.raises(ValidationError, match="Duplicate name"):
+            QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / qatconfig_file)

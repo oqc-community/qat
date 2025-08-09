@@ -45,6 +45,30 @@ def get_mock_pipeline(model, name="test", engine=None) -> Pipeline:
     )
 
 
+def get_mock_compile_pipeline(model, name="test", engine=None) -> CompilePipeline:
+    """A factory for creating a compile pipeline, mocked up for testing purposes."""
+    engine = engine if engine is not None else ZeroEngine()
+    return CompilePipeline(
+        name=name,
+        model=model,
+        frontend=AutoFrontend(model),
+        middleend=DefaultMiddleend(model),
+        backend=WaveformV1Backend(model),
+        target_data=TargetData.default(),
+    )
+
+
+def get_mock_execute_pipeline(model, name="test", engine=None) -> ExecutePipeline:
+    """A factory for creating an execute pipeline, mocked up for testing purposes."""
+    engine = engine if engine is not None else ZeroEngine()
+    return ExecutePipeline(
+        name=name,
+        model=model,
+        runtime=SimpleRuntime(engine=engine),
+        target_data=TargetData.default(),
+    )
+
+
 class MockPipelineConfig(PipelineConfig):
     name: str = "test"
     test_attr: bool = False

@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 from inspect import signature
 
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.model.validators import MismatchingHardwareModelException
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -24,7 +25,7 @@ class AbstractPipeline(ABC):
 
     @property
     @abstractmethod
-    def model(self) -> QuantumHardwareModel: ...
+    def model(self) -> QuantumHardwareModel | PhysicalHardwareModel: ...
 
     @property
     @abstractmethod

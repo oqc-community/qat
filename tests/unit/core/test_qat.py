@@ -17,26 +17,19 @@ from qat.core.config.descriptions import (
     UpdateablePipelineDescription,
 )
 from qat.core.config.session import QatSessionConfig
-from qat.core.pipeline import HardwareLoaders, PipelineSet
+from qat.core.pipeline import HardwareLoaders, PipelineManager
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.executables import ChannelExecutable, Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend.middleends import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
-from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.echo import EchoPipeline, PipelineConfig
-from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
+from qat.pipelines.pipeline import Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
-from tests.unit.utils.pipelines import (
-    MockCompileUpdateablePipeline,
-    MockExecuteUpdateablePipeline,
-    MockPipelineConfig,
-    MockUpdateablePipeline,
-)
 
 
 class MockEngine(NativeEngine):
@@ -69,9 +62,12 @@ def fallthrough_pipeline(qubit_count=32):
 class TestQATPipelineSetup:
     def test_make_qat(self):
         q = QAT()
-        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
-        assert q.pipelines.default == "echo32"
-        assert q.pipelines.get("default").name == "echo32"
+        assert set(q.pipelines.list_compile_pipelines) == {"echo8", "echo16", "echo32"}
+        assert set(q.pipelines.list_execute_pipelines) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default_compile_pipeline == "echo32"
+        assert q.pipelines.default_execute_pipeline == "echo32"
+        assert q.pipelines.get_compile_pipeline("default").name == "echo32"
+        assert q.pipelines.get_execute_pipeline("default").name == "echo32"
 
     def test_qat_session_respects_globalqat_config(self):
         qatconfig = get_config()
@@ -81,9 +77,12 @@ class TestQATPipelineSetup:
         qatconfig.MAX_REPEATS_LIMIT = NEW_LIMIT
 
         q = QAT()
-        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
-        assert q.pipelines.default == "echo32"
-        assert q.pipelines.get("default").name == "echo32"
+        assert set(q.pipelines.list_compile_pipelines) == {"echo8", "echo16", "echo32"}
+        assert set(q.pipelines.list_execute_pipelines) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default_compile_pipeline == "echo32"
+        assert q.pipelines.default_execute_pipeline == "echo32"
+        assert q.pipelines.get_compile_pipeline("default").name == "echo32"
+        assert q.pipelines.get_execute_pipeline("default").name == "echo32"
         assert q.config.MAX_REPEATS_LIMIT == NEW_LIMIT
         qatconfig.MAX_REPEATS_LIMIT = OLD_LIMIT
 
@@ -93,9 +92,12 @@ class TestQATPipelineSetup:
         assert get_config().MAX_REPEATS_LIMIT != qatconfig.MAX_REPEATS_LIMIT
 
         q = QAT(qatconfig=qatconfig)
-        assert set(q.pipelines.list()) == {"echo8", "echo16", "echo32"}
-        assert q.pipelines.default == "echo32"
-        assert q.pipelines.get("default").name == "echo32"
+        assert set(q.pipelines.list_compile_pipelines) == {"echo8", "echo16", "echo32"}
+        assert set(q.pipelines.list_execute_pipelines) == {"echo8", "echo16", "echo32"}
+        assert q.pipelines.default_compile_pipeline == "echo32"
+        assert q.pipelines.default_execute_pipeline == "echo32"
+        assert q.pipelines.get_compile_pipeline("default").name == "echo32"
+        assert q.pipelines.get_execute_pipeline("default").name == "echo32"
         assert q.config.MAX_REPEATS_LIMIT == qatconfig.MAX_REPEATS_LIMIT
 
     def test_make_qatconfig_list(self):
@@ -125,27 +127,38 @@ class TestQATPipelineSetup:
         ]
 
         q = QAT(qatconfig=QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware))
-        assert set(q.pipelines.list()) == {"echo8i", "echo16i", "echo32i", "echo6b"}
+        assert set(q.pipelines.list_compile_pipelines) == {
+            "echo8i",
+            "echo16i",
+            "echo32i",
+            "echo6b",
+        }
+        assert set(q.pipelines.list_execute_pipelines) == {
+            "echo8i",
+            "echo16i",
+            "echo32i",
+            "echo6b",
+        }
 
     def test_make_invalid_qatconfig_brokenengine_yaml(self, testpath):
-        path = str(testpath / "files/qatconfig/invalid_brokenengine.yaml")
+        path = str(testpath / "files/qatconfig/invalid/brokenengine.yaml")
         with pytest.raises(ValueError, match="This engine is broken intentionally."):
             QAT(qatconfig=path)
 
     def test_make_invalid_qatconfig_brokenloader_yaml(self, testpath):
-        path = str(testpath / "files/qatconfig/invalid_brokenloader.yaml")
+        path = str(testpath / "files/qatconfig/invalid/brokenloader.yaml")
         with pytest.raises(
             ValueError, match="This loader is broken intentionally on init."
         ):
             QAT(qatconfig=path)
 
     def test_make_invalid_qatconfig_nohardware_yaml(self, testpath):
-        path = str(testpath / "files/qatconfig/invalid_nonexistenthardware.yaml")
+        path = str(testpath / "files/qatconfig/invalid/nonexistenthardware.yaml")
         with pytest.raises(ValidationError, match="No module named"):
             QAT(qatconfig=path)
 
     def test_make_invalid_qatconfig_brokenloader_onload_yaml(self, testpath):
-        path = str(testpath / "files/qatconfig/invalid_brokenloader_onload.yaml")
+        path = str(testpath / "files/qatconfig/invalid/brokenloader_onload.yaml")
         with pytest.raises(
             ValueError, match="This loader is broken intentionally on load."
         ):
@@ -154,7 +167,7 @@ class TestQATPipelineSetup:
     def test_make_qatconfig_yaml(self, testpath):
         path = str(testpath / "files/qatconfig/pipelines.yaml")
         q = QAT(qatconfig=path)
-        assert set(q.pipelines.list()) == {
+        expected_pipelines = {
             "echo8i",
             "echo16i",
             "echo6b",
@@ -162,8 +175,13 @@ class TestQATPipelineSetup:
             "echo-defaultfrontend",
             "echocustomconfig",
         }
-        assert type(q.pipelines.get("echo-defaultfrontend").frontend) is DefaultFrontend
-        assert q.pipelines.get("echocustomconfig").runtime.engine.x == 10
+        assert set(q.pipelines.list_compile_pipelines) == expected_pipelines
+        assert set(q.pipelines.list_execute_pipelines) == expected_pipelines
+        assert (
+            type(q.pipelines.get_compile_pipeline("echo-defaultfrontend").frontend)
+            is DefaultFrontend
+        )
+        assert q.pipelines.get_execute_pipeline("echocustomconfig").runtime.engine.x == 10
 
     def test_make_qatconfig_yaml_curdir(self, testpath, tmpdir, monkeypatch):
         config_file = testpath / "files/qatconfig/pipelines.yaml"
@@ -171,8 +189,10 @@ class TestQATPipelineSetup:
         monkeypatch.chdir(tmpdir)
         shutil.copy(config_file, tmpdir / "qatconfig.yaml")
         q2 = QAT()
-        assert set(q2.pipelines.list()) != set(q1.pipelines.list())
-        assert set(q2.pipelines.list()) == {
+        assert set(q2.pipelines.list_compile_pipelines) != set(
+            q1.pipelines.list_compile_pipelines
+        )
+        assert set(q2.pipelines.list_compile_pipelines) == {
             "echo8i",
             "echo16i",
             "echo6b",
@@ -181,8 +201,11 @@ class TestQATPipelineSetup:
             "echocustomconfig",
         }
 
-        assert type(q2.pipelines.get("echo-defaultfrontend").frontend) is DefaultFrontend
-        assert q2.pipelines.get("echocustomconfig").runtime.engine.x == 10
+        assert (
+            type(q2.pipelines.get_compile_pipeline("echo-defaultfrontend").frontend)
+            is DefaultFrontend
+        )
+        assert q2.pipelines.get_execute_pipeline("echocustomconfig").runtime.engine.x == 10
 
     def test_FallthroughFrontend(self):
         frontend = FallthroughFrontend()
@@ -217,23 +240,29 @@ class TestQATPipelineSetup:
     def test_add_pipeline(self, echo_pipeline):
         q = QAT()
         q.pipelines.add(echo_pipeline)
-        assert echo_pipeline.name in q.pipelines.list()
+        assert echo_pipeline.name in q.pipelines.list_compile_pipelines
+        assert echo_pipeline.name in q.pipelines.list_execute_pipelines
 
     def test_remove_pipeline(self, echo_pipeline):
         q = QAT()
         q.pipelines.add(echo_pipeline)
-        assert echo_pipeline.name in q.pipelines.list()
+        assert echo_pipeline.name in q.pipelines.list_compile_pipelines
+        assert echo_pipeline.name in q.pipelines.list_execute_pipelines
         q.pipelines.remove(echo_pipeline)
-        assert echo_pipeline.name not in q.pipelines.list()
+        assert echo_pipeline.name not in q.pipelines.list_compile_pipelines
+        assert echo_pipeline.name not in q.pipelines.list_execute_pipelines
 
     def test_add_pipeline_set_default(self, fallthrough_pipeline):
         pipe1 = fallthrough_pipeline.copy_with_name("pipe1")
         pipe2 = fallthrough_pipeline.copy_with_name("pipe2")
         q = QAT()
         q.pipelines.add(pipe1, default=True)
-        assert q.pipelines.default == pipe1.name
+        assert q.pipelines.default_compile_pipeline == pipe1.name
+        assert q.pipelines.default_execute_pipeline == pipe1.name
         q.pipelines.add(pipe2)
-        assert q.pipelines.default == pipe1.name
+
+        assert q.pipelines.default_compile_pipeline == pipe1.name
+        assert q.pipelines.default_execute_pipeline == pipe1.name
 
     def test_set_default(self, fallthrough_pipeline):
         pipe1 = fallthrough_pipeline.copy_with_name("pipe1")
@@ -244,11 +273,14 @@ class TestQATPipelineSetup:
         q.pipelines.add(pipe2)
         q.pipelines.add(pipe3)
         q.pipelines.set_default("pipe1")
-        assert q.pipelines.default == "pipe1"
+        assert q.pipelines.default_compile_pipeline == "pipe1"
+        assert q.pipelines.default_execute_pipeline == "pipe1"
         q.pipelines.set_default("pipe2")
-        assert q.pipelines.default == "pipe2"
+        assert q.pipelines.default_compile_pipeline == "pipe2"
+        assert q.pipelines.default_execute_pipeline == "pipe2"
         q.pipelines.set_default("pipe1")
-        assert q.pipelines.default == "pipe1"
+        assert q.pipelines.default_compile_pipeline == "pipe1"
+        assert q.pipelines.default_execute_pipeline == "pipe1"
 
     def test_compile(self, fallthrough_pipeline):
         src = "test"
@@ -271,6 +303,17 @@ class TestQATHardwareModelReloading:
         """Fixture to create a QAT instance with a specific configuration."""
         return QAT("tests/files/qatconfig/modelreloading.yaml")
 
+    @pytest.fixture(autouse=True)
+    def full_pipelines(self):
+        return {
+            "standard_echo1": "loader1",
+            "standard_echo2": "loader1",
+            "standard_echo3": "loader2",
+            "custom_pipeline1": "loader1",
+            "custom_pipeline2": "loader1",
+            "custom_pipeline3": "loader2",
+        }
+
     def test_models_are_instantiated_correctly(self, qat):
         hardware = qat._available_hardware
         assert isinstance(hardware, HardwareLoaders)
@@ -290,34 +333,42 @@ class TestQATHardwareModelReloading:
         assert isinstance(engines.get("model_engine1"), MockEngineWithModel)
         assert isinstance(engines.get("model_engine2"), MockEngineWithModel)
 
-    def test_pipelines_are_instantiated_correctly(self, qat):
+    def test_compile_pipelines_are_instantiated_correctly(self, qat, full_pipelines):
+        pipelines = qat.pipelines
+        hardware = qat._available_hardware
+
+        assert isinstance(pipelines, PipelineManager)
+        assert set(pipelines.list_compile_pipelines) == {
+            *list(full_pipelines.keys()),
+        }
+
+        for pipeline, model in full_pipelines.items():
+            assert pipelines.get_compile_pipeline(pipeline).model == hardware.load(model)
+
+    def test_execute_pipelines_are_instantiated_correctly(self, qat, full_pipelines):
         pipelines = qat.pipelines
         hardware = qat._available_hardware
         engines = qat._engines
-        assert isinstance(pipelines, PipelineSet)
-        assert len(pipelines._pipelines) == 6
-        expected_pipelines = (
-            "standard_echo1",
-            "standard_echo2",
-            "standard_echo3",
-            "custom_pipeline1",
-            "custom_pipeline2",
-            "custom_pipeline3",
+
+        assert isinstance(pipelines, PipelineManager)
+        assert set(pipelines.list_execute_pipelines) == {
+            *list(full_pipelines.keys()),
+        }
+
+        for pipeline, model in full_pipelines.items():
+            assert pipelines.get_execute_pipeline(pipeline).model == hardware.load(model)
+
+        assert pipelines.get_execute_pipeline("custom_pipeline1").engine == engines.get(
+            "InitableEngine"
         )
-        assert expected_pipelines == tuple(pipelines.list())
+        assert pipelines.get_execute_pipeline("custom_pipeline2").engine == engines.get(
+            "model_engine1"
+        )
+        assert pipelines.get_execute_pipeline("custom_pipeline3").engine == engines.get(
+            "model_engine2"
+        )
 
-        assert pipelines.get("standard_echo1").model == hardware.load("loader1")
-        assert pipelines.get("standard_echo2").model == hardware.load("loader1")
-        assert pipelines.get("standard_echo3").model == hardware.load("loader2")
-        assert pipelines.get("custom_pipeline1").model == hardware.load("loader1")
-        assert pipelines.get("custom_pipeline2").model == hardware.load("loader1")
-        assert pipelines.get("custom_pipeline3").model == hardware.load("loader2")
-
-        assert pipelines.get("custom_pipeline1").engine == engines.get("InitableEngine")
-        assert pipelines.get("custom_pipeline2").engine == engines.get("model_engine1")
-        assert pipelines.get("custom_pipeline3").engine == engines.get("model_engine2")
-
-    def test_reload_models(self, qat):
+    def test_reload_models(self, qat, full_pipelines):
         """This tests that hardware models in the pipeline are the expected instances,
         and the number of qubits is only incremented by, the number of loads is the number
         of hardware loaders, and not the number of pipelines."""
@@ -325,137 +376,12 @@ class TestQATHardwareModelReloading:
         hardware = qat._available_hardware
         pipelines = qat.pipelines
         engines = qat._engines
-        assert pipelines.get("standard_echo1").model == hardware.load("loader1")
-        assert pipelines.get("standard_echo2").model == hardware.load("loader1")
-        assert pipelines.get("standard_echo3").model == hardware.load("loader2")
-        assert pipelines.get("custom_pipeline1").model == hardware.load("loader1")
-        assert pipelines.get("custom_pipeline2").model == hardware.load("loader1")
-        assert pipelines.get("custom_pipeline3").model == hardware.load("loader2")
+        for pipeline, model in full_pipelines.items():
+            assert pipelines.get_compile_pipeline(pipeline).model == hardware.load(model)
+            assert pipelines.get_execute_pipeline(pipeline).model == hardware.load(model)
 
         assert engines.get("model_engine1").model == hardware.load("loader1")
         assert engines.get("model_engine2").model == hardware.load("loader2")
 
         assert len(hardware["loader1"].qubits) == 3
         assert len(hardware["loader2"].qubits) == 7
-
-
-class TestQAT:
-    """Tests the methods of the QAT class."""
-
-    @classmethod
-    def setup_class(cls):
-        """Setup method to create a QAT instance with the default pipelines."""
-        qat = QAT()
-        model = EchoModelLoader().load()
-        qat.pipelines.add(
-            Pipeline(
-                name="fallthrough",
-                frontend=FallthroughFrontend(),
-                middleend=FallthroughMiddleend(),
-                backend=FallthroughBackend(),
-                runtime=SimpleRuntime(engine=MockEngine()),
-                model=model,
-            )
-        )
-        qat.pipelines.add(
-            CompilePipeline(
-                name="fallthrough_compile",
-                frontend=FallthroughFrontend(),
-                middleend=FallthroughMiddleend(),
-                backend=FallthroughBackend(),
-                model=model,
-            )
-        )
-        qat.pipelines.add(
-            ExecutePipeline(
-                name="fallthrough_execute",
-                runtime=SimpleRuntime(engine=MockEngine()),
-                model=model,
-            )
-        )
-        qat.pipelines.add(
-            MockUpdateablePipeline(
-                config=MockPipelineConfig(name="mock_updateable"), model=model
-            )
-        )
-        qat.pipelines.add(
-            MockCompileUpdateablePipeline(
-                config=MockPipelineConfig(name="mock_compile_updateable"), model=model
-            )
-        )
-        qat.pipelines.add(
-            MockExecuteUpdateablePipeline(
-                config=MockPipelineConfig(name="mock_execute_updateable"), model=model
-            )
-        )
-        cls.qat = qat
-
-    @pytest.mark.parametrize(
-        "pipeline",
-        [
-            "fallthrough",
-            "fallthrough_compile",
-            "mock_compile_updateable",
-            "mock_updateable",
-        ],
-    )
-    def test_validate_pipeline_can_compile(self, pipeline):
-        """Tests that the method correctly identifies pipelines that can compile."""
-        pipeline = self.qat.pipelines.get(pipeline)
-        assert isinstance(pipeline, AbstractPipeline)
-        self.qat._validate_pipeline_can_compile(pipeline)
-
-    @pytest.mark.parametrize(
-        "pipeline",
-        [
-            "fallthrough_execute",
-            "mock_execute_updateable",
-        ],
-    )
-    def test_validate_pipeline_can_compile_fails(self, pipeline):
-        """Tests that the method raises an error for pipelines that cannot compile."""
-        pipeline = self.qat.pipelines.get(pipeline)
-        with pytest.raises(TypeError):
-            self.qat._validate_pipeline_can_compile(pipeline)
-
-    @pytest.mark.parametrize(
-        "pipeline",
-        [
-            "fallthrough_execute",
-            "fallthrough",
-            "mock_execute_updateable",
-            "mock_updateable",
-        ],
-    )
-    def test_validate_pipeline_can_execute(self, pipeline):
-        """Tests that the method correctly identifies pipelines that can execute."""
-        pipeline = self.qat.pipelines.get(pipeline)
-        assert isinstance(pipeline, AbstractPipeline)
-        self.qat._validate_pipeline_can_execute(pipeline)
-
-    @pytest.mark.parametrize(
-        "pipeline",
-        [
-            "fallthrough_compile",
-            "mock_compile_updateable",
-        ],
-    )
-    def test_validate_pipeline_can_execute_fails(self, pipeline):
-        """Tests that the method raises an error for pipelines that cannot execute."""
-        pipeline = self.qat.pipelines.get(pipeline)
-        with pytest.raises(TypeError):
-            self.qat._validate_pipeline_can_execute(pipeline)
-
-    @pytest.mark.parametrize("compile", [None, "fallthrough_compile"])
-    @pytest.mark.parametrize("execute", [None, "fallthrough_execute"])
-    def test_resolve_pipelines_uses_correct_pipelines(self, compile, execute):
-        """If specified, the compile and execute pipelines should be used,
-        otherwise the default pipeline should be used."""
-
-        compile_pipeline, execute_pipeline = self.qat._resolve_pipelines(
-            compile,
-            execute,
-            "fallthrough",
-        )
-        assert compile_pipeline.name == ("fallthrough" if compile is None else compile)
-        assert execute_pipeline.name == ("fallthrough" if execute is None else execute)
