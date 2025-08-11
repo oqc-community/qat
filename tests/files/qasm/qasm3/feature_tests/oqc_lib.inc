@@ -1,0 +1,2 @@
+bit c;
+qubit q;

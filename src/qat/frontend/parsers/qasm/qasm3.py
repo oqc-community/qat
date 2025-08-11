@@ -1581,7 +1581,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         elif name == "capture_v0":
             # Not sure what this method should return.
-            pass
+            raise NotImplementedError(
+                "capture_v0 is not yet implemented. Please use capture_v1, capture_v2 or "
+                "capture_v3 instead."
+            )
 
         elif name == "capture_v1":
             # A capture command that returns an iq value
@@ -1685,9 +1688,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
             return variable
 
         elif name == "capture_v4":
-            # Not relevant to us
-            pass
-
+            raise NotImplementedError(
+                "capture_v4 is not implemented. Please use capture_v1, capture_v2 or "
+                "capture_v3 instead."
+            )
         else:
             raise ValueError(f"Extern {name} not implemented.")
 

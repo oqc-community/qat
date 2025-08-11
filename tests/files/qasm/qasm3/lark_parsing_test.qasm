@@ -82,11 +82,11 @@ defcal cz $1, $0 {
     barrier q0_q1_cz_frame, q0_rf_frame;
     shift_phase(q0_q1_cz_frame, 2.183093190874712);
     reset q0_rf_frame;
-    capture_v0(r0_acquire);
+    // capture_v0(r0_acquire); // feature unsupported 
     capture_v1(r0_acquire, 1e-6);
     capture_v2(r0_acquire, 1e-6);
     capture_v3(r0_acquire, 1e-6);
-    capture_v4(r0_acquire);
+    // capture_v4(r0_acquire); // feature unsupported
 }
 
 bit[2] ro;
