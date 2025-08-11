@@ -1,0 +1,1092 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.purr.compiler package &mdash; qat-compiler 2.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.purr.compiler.error_mitigation package" href="qat.purr.compiler.error_mitigation.html" />
+    <link rel="prev" title="qat.purr.backends.verification module" href="qat.purr.backends.verification.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            qat-compiler
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.transform.html">qat.backend.passes.transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.base.html">qat.backend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.fallthrough.html">qat.backend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.graph.html">qat.backend.graph module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html">qat.core.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html">qat.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.native.html">qat.engines.native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.zero.html">qat.engines.zero module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html">qat.frontend.parsers.qasm.qasm2 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html">qat.frontend.parsers.qasm.qasm3 module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.html">qat.frontend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.analysis.html">qat.frontend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.decompositions.html">qat.middleend.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.base.html">qat.middleend.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.gates.html">qat.middleend.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.pulses.html">qat.middleend.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.passes.html">qat.middleend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.gates.html">qat.middleend.passes.gates package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.transform.html">qat.middleend.passes.gates.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.validation.html">qat.middleend.passes.gates.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.legacy.html">qat.middleend.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.transform.html">qat.middleend.passes.legacy.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.legacy.validation.html">qat.middleend.passes.legacy.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.analysis.html">qat.middleend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.legacy.html">qat.model.loaders.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.base.html">qat.model.loaders.legacy.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.echo.html">qat.model.loaders.legacy.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.file.html">qat.model.loaders.legacy.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.lucy.html">qat.model.loaders.legacy.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.qiskit.html">qat.model.loaders.legacy.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.legacy.rtcs.html">qat.model.loaders.legacy.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.convert_legacy.html">qat.model.convert_legacy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.passes.html">qat.runtime.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.legacy.html">qat.runtime.passes.legacy package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.legacy.transform.html">qat.runtime.passes.legacy.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.analysis.html">qat.runtime.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.executables.html">qat.runtime.executables module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.algorithm.html">qat.utils.algorithm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.qat.html">qat.qat module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qat-compiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.purr.html">qat.purr package</a></li>
+      <li class="breadcrumb-item active">qat.purr.compiler package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.purr.compiler.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.purr.compiler">
+<span id="qat-purr-compiler-package"></span><h1>qat.purr.compiler package<a class="headerlink" href="#module-qat.purr.compiler" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyHybridReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyHybridReadoutMitigation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyLinearReadoutMitigation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyMatrixReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyMatrixReadoutMitigation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyPostProcReadoutMitigation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ApplyReadoutMitigation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.get_readout_mitigation"><code class="docutils literal notranslate"><span class="pre">get_readout_mitigation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.experimental.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.InterruptableExecutingMixin"><code class="docutils literal notranslate"><span class="pre">InterruptableExecutingMixin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.QASMFrontend"><code class="docutils literal notranslate"><span class="pre">QASMFrontend</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html#qat.purr.compiler.experimental.frontends.QIRFrontend"><code class="docutils literal notranslate"><span class="pre">QIRFrontend</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.Axis"><code class="docutils literal notranslate"><span class="pre">Axis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.Axis.X"><code class="docutils literal notranslate"><span class="pre">Axis.X</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.Axis.Y"><code class="docutils literal notranslate"><span class="pre">Axis.Y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.Axis.Z"><code class="docutils literal notranslate"><span class="pre">Axis.Z</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.FluidBuilderWrapper"><code class="docutils literal notranslate"><span class="pre">FluidBuilderWrapper</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.ECR"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.ECR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.S"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.S()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.SX"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.SX()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.SXdg"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.SXdg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Sdg"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.Sdg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.T"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.T()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Tdg"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.Tdg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.U"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.X"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.X()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Y"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.Y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.Z"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.Z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.acquire"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.acquire()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.add"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.assign"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.assign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cX"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cX()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cY"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cY()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cZ"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cZ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.ccnot"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.ccnot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.clear"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cnot"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cnot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.controlled"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.controlled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.create_label"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.create_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cswap"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cswap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.delay"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.delay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.deserialize"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.deserialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.device_assign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.get_child_builder"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.get_child_builder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.had"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.had()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.insert"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.insert()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.jump"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.jump()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure_mean_signal"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure_mean_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure_mean_z"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure_mean_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure_single_shot_signal"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure_single_shot_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.measure_single_shot_z"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure_single_shot_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.merge_builder"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.merge_builder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.phase_shift"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.phase_shift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.post_processing"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.post_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.pulse"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.repeat"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.repeat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.reset"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.results_processing"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.results_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.returns"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.returns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.serialize"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.serialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.splice"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.splice()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.swap"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.swap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.sweep"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.sweep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.synchronize"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.synchronize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.ECR"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.ECR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.U"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.X"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.X()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.Y"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.Y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.Z"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.Z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.acquire"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.acquire()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.cnot"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.cnot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.delay"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.delay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.frequency_shift"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.frequency_shift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.get_child_builder"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.get_child_builder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_mean_signal"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_mean_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_mean_z"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_mean_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_scope_mode"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_scope_mode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_binned"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_single_shot_binned()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_signal"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_single_shot_signal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.measure_single_shot_z"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_single_shot_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.phase_shift"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.phase_shift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.post_processing"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.post_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.pulse"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.sweep"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.sweep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.synchronize"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.synchronize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache"><code class="docutils literal notranslate"><span class="pre">QatCache</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache.create_cache_folders"><code class="docutils literal notranslate"><span class="pre">QatCache.create_cache_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache.delete_cache_folders"><code class="docutils literal notranslate"><span class="pre">QatCache.delete_cache_folders()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.config.html">qat.purr.compiler.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable"><code class="docutils literal notranslate"><span class="pre">Calibratable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable.get_calibration"><code class="docutils literal notranslate"><span class="pre">Calibratable.get_calibration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable.load_calibration"><code class="docutils literal notranslate"><span class="pre">Calibratable.load_calibration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable.load_calibration_from_file"><code class="docutils literal notranslate"><span class="pre">Calibratable.load_calibration_from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable.save_calibration_to_file"><code class="docutils literal notranslate"><span class="pre">Calibratable.save_calibration_to_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType"><code class="docutils literal notranslate"><span class="pre">ChannelType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.acquire"><code class="docutils literal notranslate"><span class="pre">ChannelType.acquire</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.cross_resonance"><code class="docutils literal notranslate"><span class="pre">ChannelType.cross_resonance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.cross_resonance_cancellation"><code class="docutils literal notranslate"><span class="pre">ChannelType.cross_resonance_cancellation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.drive"><code class="docutils literal notranslate"><span class="pre">ChannelType.drive</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift"><code class="docutils literal notranslate"><span class="pre">ChannelType.freq_shift</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.macq"><code class="docutils literal notranslate"><span class="pre">ChannelType.macq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.measure"><code class="docutils literal notranslate"><span class="pre">ChannelType.measure</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.second_state"><code class="docutils literal notranslate"><span class="pre">ChannelType.second_state</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.CyclicRefPickler"><code class="docutils literal notranslate"><span class="pre">CyclicRefPickler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.CyclicRefPickler.ref_field"><code class="docutils literal notranslate"><span class="pre">CyclicRefPickler.ref_field</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.CyclicRefUnpickler"><code class="docutils literal notranslate"><span class="pre">CyclicRefUnpickler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.CyclicRefUnpickler.reset"><code class="docutils literal notranslate"><span class="pre">CyclicRefUnpickler.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FakeList"><code class="docutils literal notranslate"><span class="pre">FakeList</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FakeList.append"><code class="docutils literal notranslate"><span class="pre">FakeList.append()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.FreqShiftPulseChannel"><code class="docutils literal notranslate"><span class="pre">FreqShiftPulseChannel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalBaseband"><code class="docutils literal notranslate"><span class="pre">PhysicalBaseband</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.baseband_frequency"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel.baseband_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.baseband_if_frequency"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel.baseband_if_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.block_time"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel.block_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.create_freq_shift_pulse_channel"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel.create_freq_shift_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.create_pulse_channel"><code class="docutils literal notranslate"><span class="pre">PhysicalChannel.create_pulse_channel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel"><code class="docutils literal notranslate"><span class="pre">PulseChannel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.acquire_allowed"><code class="docutils literal notranslate"><span class="pre">PulseChannel.acquire_allowed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.baseband_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.baseband_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.baseband_if_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.baseband_if_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size"><code class="docutils literal notranslate"><span class="pre">PulseChannel.block_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_time"><code class="docutils literal notranslate"><span class="pre">PulseChannel.block_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.full_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.full_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.max_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.max_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.min_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.min_frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.partial_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.partial_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.physical_channel_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.physical_channel_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.sample_time"><code class="docutils literal notranslate"><span class="pre">PulseChannel.sample_time</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannelView"><code class="docutils literal notranslate"><span class="pre">PulseChannelView</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType"><code class="docutils literal notranslate"><span class="pre">PulseShapeType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.BLACKMAN"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.BLACKMAN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.COS"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.COS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.EXTRA_SOFT_SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.EXTRA_SOFT_SQUARE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.GAUSSIAN"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.GAUSSIAN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.GAUSSIAN_DRAG"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.GAUSSIAN_DRAG</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.GAUSSIAN_SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.GAUSSIAN_SQUARE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.GAUSSIAN_ZERO_EDGE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.GAUSSIAN_ZERO_EDGE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.ROUNDED_SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.ROUNDED_SQUARE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SECH"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SECH</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SETUP_HOLD"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SETUP_HOLD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SIN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SOFTER_GAUSSIAN"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SOFTER_GAUSSIAN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SOFTER_SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SOFTER_SQUARE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SOFT_SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SOFT_SQUARE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SQUARE"><code class="docutils literal notranslate"><span class="pre">PulseShapeType.SQUARE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumComponent"><code class="docutils literal notranslate"><span class="pre">QuantumComponent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumComponent.full_id"><code class="docutils literal notranslate"><span class="pre">QuantumComponent.full_id()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice"><code class="docutils literal notranslate"><span class="pre">QuantumDevice</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.PTType"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.PTType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.add_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.add_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.create_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.create_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_auxiliary_devices"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.get_auxiliary_devices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_default_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.get_default_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.get_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.get_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QuantumDevice.multi_device_pulse_channel_types"><code class="docutils literal notranslate"><span class="pre">QuantumDevice.multi_device_pulse_channel_types</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit"><code class="docutils literal notranslate"><span class="pre">Qubit</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.add_coupled_qubit"><code class="docutils literal notranslate"><span class="pre">Qubit.add_coupled_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_acquire_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_acquire_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_all_channels"><code class="docutils literal notranslate"><span class="pre">Qubit.get_all_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_cross_resonance_cancellation_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_cross_resonance_cancellation_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_cross_resonance_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_cross_resonance_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_drive_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_drive_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_freq_shift_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_freq_shift_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_measure_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_measure_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_second_state_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.get_second_state_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.measure_device"><code class="docutils literal notranslate"><span class="pre">Qubit.measure_device</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.QubitCoupling"><code class="docutils literal notranslate"><span class="pre">QubitCoupling</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator"><code class="docutils literal notranslate"><span class="pre">Resonator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator.get_acquire_channel"><code class="docutils literal notranslate"><span class="pre">Resonator.get_acquire_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Resonator.get_measure_channel"><code class="docutils literal notranslate"><span class="pre">Resonator.get_measure_channel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.add_cross_resonance"><code class="docutils literal notranslate"><span class="pre">add_cross_resonance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.build_qubit"><code class="docutils literal notranslate"><span class="pre">build_qubit()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.build_resonator"><code class="docutils literal notranslate"><span class="pre">build_resonator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.InstructionEmitter"><code class="docutils literal notranslate"><span class="pre">InstructionEmitter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.InstructionEmitter.emit"><code class="docutils literal notranslate"><span class="pre">InstructionEmitter.emit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile"><code class="docutils literal notranslate"><span class="pre">QatFile</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.add"><code class="docutils literal notranslate"><span class="pre">QatFile.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.add_meta"><code class="docutils literal notranslate"><span class="pre">QatFile.add_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.get_pp_for_variable"><code class="docutils literal notranslate"><span class="pre">QatFile.get_pp_for_variable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.instructions"><code class="docutils literal notranslate"><span class="pre">QatFile.instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.repeat"><code class="docutils literal notranslate"><span class="pre">QatFile.repeat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.return_"><code class="docutils literal notranslate"><span class="pre">QatFile.return_</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.sweeps"><code class="docutils literal notranslate"><span class="pre">QatFile.sweeps</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.TimelineSegment"><code class="docutils literal notranslate"><span class="pre">TimelineSegment</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector"><code class="docutils literal notranslate"><span class="pre">DeviceInjector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector.inject"><code class="docutils literal notranslate"><span class="pre">DeviceInjector.inject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjector.revert"><code class="docutils literal notranslate"><span class="pre">DeviceInjector.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors"><code class="docutils literal notranslate"><span class="pre">DeviceInjectors</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors.inject"><code class="docutils literal notranslate"><span class="pre">DeviceInjectors.inject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.DeviceInjectors.revert"><code class="docutils literal notranslate"><span class="pre">DeviceInjectors.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata"><code class="docutils literal notranslate"><span class="pre">InjectionMetadata</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata.field"><code class="docutils literal notranslate"><span class="pre">InjectionMetadata.field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata.inject"><code class="docutils literal notranslate"><span class="pre">InjectionMetadata.inject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata.is_empty"><code class="docutils literal notranslate"><span class="pre">InjectionMetadata.is_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InjectionMetadata.revert"><code class="docutils literal notranslate"><span class="pre">InjectionMetadata.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.execute"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.load_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.optimize"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.optimize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.run_calibrations"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.run_calibrations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.shutdown"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.shutdown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.startup"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.startup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.validate"><code class="docutils literal notranslate"><span class="pre">InstructionExecutionEngine.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.IteratorInjector"><code class="docutils literal notranslate"><span class="pre">IteratorInjector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.IteratorInjector.replace"><code class="docutils literal notranslate"><span class="pre">IteratorInjector.replace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.IteratorInjector.revert"><code class="docutils literal notranslate"><span class="pre">IteratorInjector.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_acquire_list"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.build_acquire_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_physical_channel_buffers"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.build_physical_channel_buffers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.build_pulse_channel_buffers"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.build_pulse_channel_buffers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.create_duration_timeline"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.create_duration_timeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.do_upconvert"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.do_upconvert()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.error_mitigation"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.error_mitigation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.execute"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.optimize"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.optimize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_frequencyshift"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.process_frequencyshift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_phasereset"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.process_phasereset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_phaseshift"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.process_phaseshift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_pulse"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.process_pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.process_reset"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.process_reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.run_post_processing"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.run_post_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.QuantumExecutionEngine.validate"><code class="docutils literal notranslate"><span class="pre">QuantumExecutionEngine.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator"><code class="docutils literal notranslate"><span class="pre">SweepIterator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.accumulated_sweep_iteration"><code class="docutils literal notranslate"><span class="pre">SweepIterator.accumulated_sweep_iteration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.add_sweep"><code class="docutils literal notranslate"><span class="pre">SweepIterator.add_sweep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.do_sweep"><code class="docutils literal notranslate"><span class="pre">SweepIterator.do_sweep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_qfile"><code class="docutils literal notranslate"><span class="pre">SweepIterator.from_qfile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration"><code class="docutils literal notranslate"><span class="pre">SweepIterator.get_current_sweep_iteration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_results_shape"><code class="docutils literal notranslate"><span class="pre">SweepIterator.get_results_shape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.insert_result_at_sweep_position"><code class="docutils literal notranslate"><span class="pre">SweepIterator.insert_result_at_sweep_position()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.is_finished"><code class="docutils literal notranslate"><span class="pre">SweepIterator.is_finished()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.length"><code class="docutils literal notranslate"><span class="pre">SweepIterator.length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.reset_iteration"><code class="docutils literal notranslate"><span class="pre">SweepIterator.reset_iteration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.revert"><code class="docutils literal notranslate"><span class="pre">SweepIterator.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement"><code class="docutils literal notranslate"><span class="pre">ValueReplacement</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement.replace"><code class="docutils literal notranslate"><span class="pre">ValueReplacement.replace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement.revert"><code class="docutils literal notranslate"><span class="pre">ValueReplacement.revert()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector"><code class="docutils literal notranslate"><span class="pre">VariableInjector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector.replace"><code class="docutils literal notranslate"><span class="pre">VariableInjector.replace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector.revert"><code class="docutils literal notranslate"><span class="pre">VariableInjector.revert()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.LanguageFrontend"><code class="docutils literal notranslate"><span class="pre">LanguageFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.LanguageFrontend.execute"><code class="docutils literal notranslate"><span class="pre">LanguageFrontend.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.LanguageFrontend.parse"><code class="docutils literal notranslate"><span class="pre">LanguageFrontend.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend"><code class="docutils literal notranslate"><span class="pre">QASMFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend.execute"><code class="docutils literal notranslate"><span class="pre">QASMFrontend.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend.parse"><code class="docutils literal notranslate"><span class="pre">QASMFrontend.parse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QASMFrontend.parse_and_execute"><code class="docutils literal notranslate"><span class="pre">QASMFrontend.parse_and_execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend"><code class="docutils literal notranslate"><span class="pre">QIRFrontend</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend.execute"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend.parse"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.parse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend.parse_and_execute"><code class="docutils literal notranslate"><span class="pre">QIRFrontend.parse_and_execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ErrorMitigation"><code class="docutils literal notranslate"><span class="pre">ErrorMitigation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel"><code class="docutils literal notranslate"><span class="pre">HardwareModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_builder"><code class="docutils literal notranslate"><span class="pre">HardwareModel.create_builder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_engine"><code class="docutils literal notranslate"><span class="pre">HardwareModel.create_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_runtime"><code class="docutils literal notranslate"><span class="pre">HardwareModel.create_runtime()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.LegacyHardwareModel"><code class="docutils literal notranslate"><span class="pre">LegacyHardwareModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_physical_baseband"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_physical_baseband()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_physical_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_physical_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_quantum_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_quantum_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.constrain"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.constrain()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.create_builder"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.create_builder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.create_engine"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.create_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_devices_from_physical_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_devices_from_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_U"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_gate_U()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_X"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_gate_X()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_Y"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_gate_Y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_Z"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_gate_Z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_gate_ZX"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_gate_ZX()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_hw_x_pi_2"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_hw_x_pi_2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_hw_z"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_hw_z()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_hw_zx_pi_4"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_hw_zx_pi_4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_physical_baseband"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_physical_baseband()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_physical_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_physical_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_pulse_channel_from_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_pulse_channel_from_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_pulse_channel_from_id"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_pulse_channel_from_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_pulse_channels_from_physical_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_pulse_channels_from_physical_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_quantum_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_quantum_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_qubit"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.has_qubit"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.has_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.is_calibrated</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.qubits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resolve_qb_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.resolve_qb_pulse_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resonators"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.resonators</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ReadoutMitigation"><code class="docutils literal notranslate"><span class="pre">ReadoutMitigation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.get_cl2qu_index_mapping"><code class="docutils literal notranslate"><span class="pre">get_cl2qu_index_mapping()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire"><code class="docutils literal notranslate"><span class="pre">Acquire</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.channel"><code class="docutils literal notranslate"><span class="pre">Acquire.channel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.duration"><code class="docutils literal notranslate"><span class="pre">Acquire.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.generate_name"><code class="docutils literal notranslate"><span class="pre">Acquire.generate_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.suffix_incrementor"><code class="docutils literal notranslate"><span class="pre">Acquire.suffix_incrementor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode"><code class="docutils literal notranslate"><span class="pre">AcquireMode</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.INTEGRATOR"><code class="docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.RAW"><code class="docutils literal notranslate"><span class="pre">AcquireMode.RAW</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode.SCOPE"><code class="docutils literal notranslate"><span class="pre">AcquireMode.SCOPE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Assign"><code class="docutils literal notranslate"><span class="pre">Assign</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.BinaryOperator"><code class="docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CrossResonanceCancelPulse"><code class="docutils literal notranslate"><span class="pre">CrossResonanceCancelPulse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CrossResonancePulse"><code class="docutils literal notranslate"><span class="pre">CrossResonancePulse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse"><code class="docutils literal notranslate"><span class="pre">CustomPulse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse.duration"><code class="docutils literal notranslate"><span class="pre">CustomPulse.duration</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay"><code class="docutils literal notranslate"><span class="pre">Delay</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay.duration"><code class="docutils literal notranslate"><span class="pre">Delay.duration</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DeviceUpdate"><code class="docutils literal notranslate"><span class="pre">DeviceUpdate</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DrivePulse"><code class="docutils literal notranslate"><span class="pre">DrivePulse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndRepeat"><code class="docutils literal notranslate"><span class="pre">EndRepeat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndSweep"><code class="docutils literal notranslate"><span class="pre">EndSweep</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals"><code class="docutils literal notranslate"><span class="pre">Equals</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift"><code class="docutils literal notranslate"><span class="pre">FrequencyShift</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift.channel"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.channel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterOrEqualThan"><code class="docutils literal notranslate"><span class="pre">GreaterOrEqualThan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterThan"><code class="docutils literal notranslate"><span class="pre">GreaterThan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Id"><code class="docutils literal notranslate"><span class="pre">Id</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.IndexAccessor"><code class="docutils literal notranslate"><span class="pre">IndexAccessor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction"><code class="docutils literal notranslate"><span class="pre">Instruction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock"><code class="docutils literal notranslate"><span class="pre">InstructionBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.InstructionBlock.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.instructions</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Jump"><code class="docutils literal notranslate"><span class="pre">Jump</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label"><code class="docutils literal notranslate"><span class="pre">Label</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label.generate_name"><code class="docutils literal notranslate"><span class="pre">Label.generate_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label.with_random_name"><code class="docutils literal notranslate"><span class="pre">Label.with_random_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessOrEqualThan"><code class="docutils literal notranslate"><span class="pre">LessOrEqualThan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.LessThan"><code class="docutils literal notranslate"><span class="pre">LessThan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock"><code class="docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.add_measurements"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.add_measurements()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.duration"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.get_acquires"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.get_acquires()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.instructions"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.quantum_targets"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.quantum_targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasurePulse"><code class="docutils literal notranslate"><span class="pre">MeasurePulse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.NotEquals"><code class="docutils literal notranslate"><span class="pre">NotEquals</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset"><code class="docutils literal notranslate"><span class="pre">PhaseReset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.add_channels"><code class="docutils literal notranslate"><span class="pre">PhaseReset.add_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.quantum_targets"><code class="docutils literal notranslate"><span class="pre">PhaseReset.quantum_targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift"><code class="docutils literal notranslate"><span class="pre">PhaseShift</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift.channel"><code class="docutils literal notranslate"><span class="pre">PhaseShift.channel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType"><code class="docutils literal notranslate"><span class="pre">PostProcessType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE"><code class="docutils literal notranslate"><span class="pre">PostProcessType.DISCRIMINATE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DOWN_CONVERT"><code class="docutils literal notranslate"><span class="pre">PostProcessType.DOWN_CONVERT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL"><code class="docutils literal notranslate"><span class="pre">PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.MEAN"><code class="docutils literal notranslate"><span class="pre">PostProcessType.MEAN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.MUL"><code class="docutils literal notranslate"><span class="pre">PostProcessType.MUL</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing"><code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing.acquire"><code class="docutils literal notranslate"><span class="pre">PostProcessing.acquire</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis"><code class="docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis.SEQUENCE"><code class="docutils literal notranslate"><span class="pre">ProcessAxis.SEQUENCE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ProcessAxis.TIME"><code class="docutils literal notranslate"><span class="pre">ProcessAxis.TIME</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse"><code class="docutils literal notranslate"><span class="pre">Pulse</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse.duration"><code class="docutils literal notranslate"><span class="pre">Pulse.duration</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction.duration"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.duration</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.duration"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.instructions"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.quantum_targets"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.quantum_targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumMetadata"><code class="docutils literal notranslate"><span class="pre">QuantumMetadata</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Repeat"><code class="docutils literal notranslate"><span class="pre">Repeat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Reset"><code class="docutils literal notranslate"><span class="pre">Reset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.ResultsProcessing"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Return"><code class="docutils literal notranslate"><span class="pre">Return</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.SecondStatePulse"><code class="docutils literal notranslate"><span class="pre">SecondStatePulse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Sweep"><code class="docutils literal notranslate"><span class="pre">Sweep</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Sweep.length"><code class="docutils literal notranslate"><span class="pre">Sweep.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.SweepOperation"><code class="docutils literal notranslate"><span class="pre">SweepOperation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.SweepValue"><code class="docutils literal notranslate"><span class="pre">SweepValue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Synchronize"><code class="docutils literal notranslate"><span class="pre">Synchronize</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Synchronize.add_channels"><code class="docutils literal notranslate"><span class="pre">Synchronize.add_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Synchronize.quantum_targets"><code class="docutils literal notranslate"><span class="pre">Synchronize.quantum_targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Variable.generate_name"><code class="docutils literal notranslate"><span class="pre">Variable.generate_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Variable.with_random_name"><code class="docutils literal notranslate"><span class="pre">Variable.with_random_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform"><code class="docutils literal notranslate"><span class="pre">Waveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Waveform.channel"><code class="docutils literal notranslate"><span class="pre">Waveform.channel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.build_generated_name"><code class="docutils literal notranslate"><span class="pre">build_generated_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.calculate_duration"><code class="docutils literal notranslate"><span class="pre">calculate_duration()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.is_generated_name"><code class="docutils literal notranslate"><span class="pre">is_generated_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.remove_floating_point"><code class="docutils literal notranslate"><span class="pre">remove_floating_point()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt"><code class="docutils literal notranslate"><span class="pre">BasicInterrupt</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.event"><code class="docutils literal notranslate"><span class="pre">BasicInterrupt.event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.if_triggered"><code class="docutils literal notranslate"><span class="pre">BasicInterrupt.if_triggered()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.queue"><code class="docutils literal notranslate"><span class="pre">BasicInterrupt.queue</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.trigger"><code class="docutils literal notranslate"><span class="pre">BasicInterrupt.trigger()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt"><code class="docutils literal notranslate"><span class="pre">Interrupt</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt.if_triggered"><code class="docutils literal notranslate"><span class="pre">Interrupt.if_triggered()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.Interrupt.trigger"><code class="docutils literal notranslate"><span class="pre">Interrupt.trigger()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.InterruptError"><code class="docutils literal notranslate"><span class="pre">InterruptError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt"><code class="docutils literal notranslate"><span class="pre">NullInterrupt</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt.if_triggered"><code class="docutils literal notranslate"><span class="pre">NullInterrupt.if_triggered()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.NullInterrupt.trigger"><code class="docutils literal notranslate"><span class="pre">NullInterrupt.trigger()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.are_enabled"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.are_enabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.as_dict"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.as_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.enable"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.enable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.get_metric"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.get_metric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.merge"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.merge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_circuit"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.optimized_circuit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_instruction_count"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.optimized_instruction_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.record_metric"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.record_metric()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin"><code class="docutils literal notranslate"><span class="pre">MetricsMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.are_metrics_enabled"><code class="docutils literal notranslate"><span class="pre">MetricsMixin.are_metrics_enabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.enable_metrics"><code class="docutils literal notranslate"><span class="pre">MetricsMixin.enable_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.MetricsMixin.record_metric"><code class="docutils literal notranslate"><span class="pre">MetricsMixin.record_metric()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.optimisers.html#qat.purr.compiler.optimisers.DefaultOptimizers"><code class="docutils literal notranslate"><span class="pre">DefaultOptimizers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.optimisers.html#qat.purr.compiler.optimisers.DefaultOptimizers.optimize_qasm"><code class="docutils literal notranslate"><span class="pre">DefaultOptimizers.optimize_qasm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.optimisers.html#qat.purr.compiler.optimisers.DefaultOptimizers.optimize_qir"><code class="docutils literal notranslate"><span class="pre">DefaultOptimizers.optimize_qir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.optimisers.html#qat.purr.compiler.optimisers.DefaultOptimizers.run_qiskit_optimization"><code class="docutils literal notranslate"><span class="pre">DefaultOptimizers.run_qiskit_optimization()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs"><code class="docutils literal notranslate"><span class="pre">CalibrationWithArgs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.CalibrationWithArgs.run"><code class="docutils literal notranslate"><span class="pre">CalibrationWithArgs.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime"><code class="docutils literal notranslate"><span class="pre">NewQuantumRuntime</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">NewQuantumRuntime.build_pass_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock"><code class="docutils literal notranslate"><span class="pre">QuantumExecutableBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumExecutableBlock.run"><code class="docutils literal notranslate"><span class="pre">QuantumExecutableBlock.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime"><code class="docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.execute"><code class="docutils literal notranslate"><span class="pre">QuantumRuntime.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.model"><code class="docutils literal notranslate"><span class="pre">QuantumRuntime.model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.run_calibration"><code class="docutils literal notranslate"><span class="pre">QuantumRuntime.run_calibration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.QuantumRuntime.run_quantum_executable"><code class="docutils literal notranslate"><span class="pre">QuantumRuntime.run_quantum_executable()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration"><code class="docutils literal notranslate"><span class="pre">RemoteCalibration</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.arguments_type"><code class="docutils literal notranslate"><span class="pre">RemoteCalibration.arguments_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.run"><code class="docutils literal notranslate"><span class="pre">RemoteCalibration.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.execute_instructions"><code class="docutils literal notranslate"><span class="pre">execute_instructions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_builder"><code class="docutils literal notranslate"><span class="pre">get_builder()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_model"><code class="docutils literal notranslate"><span class="pre">get_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.get_runtime"><code class="docutils literal notranslate"><span class="pre">get_runtime()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.DeviceUpdateSanitisation"><code class="docutils literal notranslate"><span class="pre">DeviceUpdateSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.DeviceUpdateSanitisation.run"><code class="docutils literal notranslate"><span class="pre">DeviceUpdateSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PhaseOptimisation.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingSanitisation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run"><code class="docutils literal notranslate"><span class="pre">PostProcessingSanitisation.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.ReadoutValidation"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.validation_passes.html#qat.purr.compiler.validation_passes.ReadoutValidation.run"><code class="docutils literal notranslate"><span class="pre">ReadoutValidation.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.AbstractWaveform"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.AbstractWaveform.actual_waveforms"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform.actual_waveforms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.AbstractWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.BlackmanWaveform"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.BlackmanWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.ExtraSoftSquareWaveform"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.ExtraSoftSquareWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.GaussianWaveform"><code class="docutils literal notranslate"><span class="pre">GaussianWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.GaussianWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">GaussianWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SetupHoldWaveform"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SetupHoldWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SoftSquareWaveform"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SoftSquareWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SofterGaussianWaveform"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SofterGaussianWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SofterSquareWaveform"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SofterSquareWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SquareWaveform"><code class="docutils literal notranslate"><span class="pre">SquareWaveform</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.SquareWaveform.waveform_definition"><code class="docutils literal notranslate"><span class="pre">SquareWaveform.waveform_definition</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef"><code class="docutils literal notranslate"><span class="pre">WaveformDef</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.description"><code class="docutils literal notranslate"><span class="pre">WaveformDef.description</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.name"><code class="docutils literal notranslate"><span class="pre">WaveformDef.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.WaveformDef.type"><code class="docutils literal notranslate"><span class="pre">WaveformDef.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.build_waveform"><code class="docutils literal notranslate"><span class="pre">build_waveform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.waveforms.html#qat.purr.compiler.waveforms.get_waveform_type"><code class="docutils literal notranslate"><span class="pre">get_waveform_type()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.purr.backends.verification.html" class="btn btn-neutral float-left" title="qat.purr.backends.verification module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.purr.compiler.error_mitigation.html" class="btn btn-neutral float-right" title="qat.purr.compiler.error_mitigation package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: 2.7.0
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="qat.purr.compiler.html">2.7.0</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
