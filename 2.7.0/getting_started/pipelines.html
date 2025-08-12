@@ -420,7 +420,7 @@ case, the echo simulator).</p>
 <li><p><a class="reference internal" href="../qat.pipelines.echo.html#module-qat.pipelines.echo" title="qat.pipelines.echo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.pipelines.echo</span></code></a>: Pipelines that execute using the
 <a class="reference internal" href="../qat.engines.waveform_v1.echo.html#qat.engines.waveform_v1.echo.EchoEngine" title="qat.engines.waveform_v1.echo.EchoEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></a>. The pipelines available
 by default are <code class="xref py py-attr docutils literal notranslate"><span class="pre">echo8</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">echo16</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">echo32</span></code>. For a custom amount of
-qubits, the method <a class="reference internal" href="../qat.pipelines.echo.html#qat.pipelines.echo.get_pipeline" title="qat.pipelines.echo.get_pipeline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code></a> can be used.</p></li>
+qubits, the method <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code> can be used.</p></li>
 </ul>
 <p>There are also pipelines that use legacy hardware and engines, but wrapped in the new
 pipeline API:</p>
@@ -429,7 +429,7 @@ pipeline API:</p>
 <a class="reference internal" href="../qat.purr.backends.echo.html#qat.purr.backends.echo.EchoEngine" title="qat.purr.backends.echo.EchoEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></a>. The pipelines available
 by default are <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_echo8</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_echo16</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">lgeacy_echo32</span></code>. For a
 custom amount of qubits, the method
-<a class="reference internal" href="../qat.pipelines.legacy.echo.html#qat.pipelines.legacy.echo.get_pipeline" title="qat.pipelines.legacy.echo.get_pipeline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code></a> can be used.</p></li>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code> can be used.</p></li>
 <li><p><a class="reference internal" href="../qat.pipelines.legacy.rtcs.html#module-qat.pipelines.legacy.rtcs" title="qat.pipelines.legacy.rtcs"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.pipelines.legacy.rtcs</span></code></a>: Pipelines that execute using the legacy
 <a class="reference internal" href="../qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine" title="qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">RealtimeChipSimEngine</span></code></a>.
 The only available pipeline is for two qubits, <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_rtcs2</span></code>.</p></li>
@@ -437,7 +437,7 @@ The only available pipeline is for two qubits, <code class="xref py py-attr docu
 <a class="reference internal" href="../qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitEngine" title="qat.purr.backends.qiskit_simulator.QiskitEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitEngine</span></code></a>. The available
 pipelines are <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_qiskit8</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_qiskit16</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">legacy_qiskit32</span></code>.
 For a custom amount of qubits, the method
-<a class="reference internal" href="../qat.pipelines.legacy.qiskit.html#qat.pipelines.legacy.qiskit.get_pipeline" title="qat.pipelines.legacy.qiskit.get_pipeline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code></a> can be used.</p></li>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_pipeline</span></code> can be used.</p></li>
 </ul>
 </section>
 <section id="defining-custom-pipelines">
@@ -584,7 +584,29 @@ hardware model, which is specified under <code class="code docutils literal notr
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../../2.6.0/index.html">2.6.0</a></dd>
       <dd><a href="pipelines.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../../main/getting_started/pipelines.html">main</a></dd>
     </dl>
   </div>
 </div><script>

@@ -9,6 +9,7 @@
   <title>qat.runtime.executables module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -331,181 +332,8 @@
              
 
 
-  <section id="module-qat.runtime.executables">
-<span id="qat-runtime-executables-module"></span><h1>qat.runtime.executables module<a class="headerlink" href="#module-qat.runtime.executables" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireDataStruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Contains all the information needed for to record a measurement / readout.</p>
-<p>Depending on the target machine, not all information might be needed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.executables.AcquireDataStruct.params.length"></span><strong>length</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.AcquireDataStruct.params.length">¶</a> (<em>int</em>) – A readout is performed for some given time which translates to a
-number of discrete samples.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.AcquireDataStruct.params.position"></span><strong>position</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.AcquireDataStruct.params.position">¶</a> (<em>int</em>) – The sample which a readout starts.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.AcquireDataStruct.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.AcquireDataStruct.params.mode">¶</a> (<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><em>AcquireMode</em></a>) – The acqusition mode used by the hardware to carry out the readout.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.AcquireDataStruct.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.AcquireDataStruct.params.output_variable">¶</a> (<em>str</em>) – The name of the variable to save the result to.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct.length" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct.mode">
-<span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireMode</span></code></a></em><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct.mode" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct.output_variable">
-<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct.output_variable" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.AcquireDataStruct.position">
-<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.executables.AcquireDataStruct.position" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.executables.ChannelData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChannelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.executables.ChannelData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Contains the instructions required by a particular channel in the control stack to execute
-a program.</p>
-<p>For a given target, this should be expanded on to include any instructions / data
-required for execution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.executables.ChannelData.params.acquires"></span><strong>acquires</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.ChannelData.params.acquires">¶</a> – Specifies the acquire (or a list of acquires) for a channel.</p>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.ChannelData.acquires">
-<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="#qat.runtime.executables.AcquireDataStruct" title="qat.runtime.executables.AcquireDataStruct"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireDataStruct</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.runtime.executables.AcquireDataStruct" title="qat.runtime.executables.AcquireDataStruct"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireDataStruct</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.runtime.executables.ChannelData.acquires" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.ChannelData.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.runtime.executables.ChannelData.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.executables.Executable" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Executables</span></code> are instruction packages that will be sent to a target (either
-physical control hardware or a simulator).</p>
-<p>This class serves as a base model that can be inherited to define a complete instruction
-package tailored to a particular target.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.channel_data"></span><strong>channel_data</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.channel_data">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#qat.runtime.executables.ChannelData" title="qat.runtime.executables.ChannelData"><em>ChannelData</em></a><em>]</em>) – Stores the data required by the control hardware for each pulse
-channel.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.shots">¶</a> (<em>int</em>) – The number of times the program is executed.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.compiled_shots"></span><strong>compiled_shots</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.compiled_shots">¶</a> (<em>int</em>) – When the required number of shots exceeds the allowed amount by
-the target machine, shots can be batched into groups. This states how many shots to do
-in each batch.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.post_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><em>PostProcessing</em></a><em>]</em><em>]</em>) – Contains the post-processing information for each acquisition.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.results_processing"></span><strong>results_processing</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.results_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>InlineResultsProcessing</em><em>]</em>) – Contains the information for how results should be formatted.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.assigns"></span><strong>assigns</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.assigns">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign" title="qat.ir.instructions.Assign"><em>Assign</em></a><em>]</em>) – Assigns results to given variables.</p></li>
-<li><p><span class="target" id="qat.runtime.executables.Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.executables.Executable.params.returns">¶</a> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Which acqusitions/variables should be returned.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.acquires">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.runtime.executables.AcquireDataStruct" title="qat.runtime.executables.AcquireDataStruct"><span class="pre">AcquireDataStruct</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.runtime.executables.Executable.acquires" title="Link to this definition"></a></dt>
-<dd><p>Retrieves all assigns from each channel.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.assigns">
-<span class="sig-name descname"><span class="pre">assigns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign" title="qat.ir.instructions.Assign"><code class="xref py py-class docutils literal notranslate"><span class="pre">Assign</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.assigns" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.channel_data">
-<span class="sig-name descname"><span class="pre">channel_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.runtime.executables.ChannelData" title="qat.runtime.executables.ChannelData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.channel_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.compiled_shots">
-<span class="sig-name descname"><span class="pre">compiled_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.executables.Executable.compiled_shots" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.deserialize">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.executables.Executable.deserialize" title="Link to this definition"></a></dt>
-<dd><p>Instantiates a executable from a JSON blob.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.post_processing">
-<span class="sig-name descname"><span class="pre">post_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.post_processing" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.results_processing">
-<span class="sig-name descname"><span class="pre">results_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.results_processing" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.returns">
-<span class="sig-name descname"><span class="pre">returns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.executables.Executable.returns" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.executables.Executable.serialize" title="Link to this definition"></a></dt>
-<dd><p>Serializes the executable as a JSON blob.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.executables.Executable.shots">
-<span class="sig-name descname"><span class="pre">shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.executables.Executable.shots" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <section id="qat-runtime-executables-module">
+<h1>qat.runtime.executables module<a class="headerlink" href="#qat-runtime-executables-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -543,7 +371,29 @@ validated to form a valid model.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.runtime.executables.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.runtime.executables.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.runtime.executables.html">main</a></dd>
     </dl>
   </div>
 </div><script>

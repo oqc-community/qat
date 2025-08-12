@@ -9,6 +9,7 @@
   <title>qat.purr.compiler package &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -397,6 +398,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cX"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cX()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cY"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cY()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cZ"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cZ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.calibration_id"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.calibration_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.ccnot"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.ccnot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.clear"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.clear()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cnot"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cnot()</span></code></a></li>
@@ -408,6 +410,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.device_assign()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.get_child_builder"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.get_child_builder()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.had"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.had()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.id"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.id()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.insert"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.insert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.jump"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.jump()</span></code></a></li>
@@ -515,11 +518,9 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size"><code class="docutils literal notranslate"><span class="pre">PulseChannel.block_size</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_time"><code class="docutils literal notranslate"><span class="pre">PulseChannel.block_time</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.full_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.full_id()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.imbalance"><code class="docutils literal notranslate"><span class="pre">PulseChannel.imbalance</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.max_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.max_frequency</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.min_frequency"><code class="docutils literal notranslate"><span class="pre">PulseChannel.min_frequency</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.partial_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.partial_id()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.phase_offset"><code class="docutils literal notranslate"><span class="pre">PulseChannel.phase_offset</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.physical_channel_id"><code class="docutils literal notranslate"><span class="pre">PulseChannel.physical_channel_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.sample_time"><code class="docutils literal notranslate"><span class="pre">PulseChannel.sample_time</span></code></a></li>
 </ul>
@@ -655,6 +656,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.add_sweep"><code class="docutils literal notranslate"><span class="pre">SweepIterator.add_sweep()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.do_sweep"><code class="docutils literal notranslate"><span class="pre">SweepIterator.do_sweep()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_qfile"><code class="docutils literal notranslate"><span class="pre">SweepIterator.from_qfile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.from_sweeps"><code class="docutils literal notranslate"><span class="pre">SweepIterator.from_sweeps()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration"><code class="docutils literal notranslate"><span class="pre">SweepIterator.get_current_sweep_iteration()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_results_shape"><code class="docutils literal notranslate"><span class="pre">SweepIterator.get_results_shape()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.insert_result_at_sweep_position"><code class="docutils literal notranslate"><span class="pre">SweepIterator.insert_result_at_sweep_position()</span></code></a></li>
@@ -704,6 +706,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel.create_runtime"><code class="docutils literal notranslate"><span class="pre">HardwareModel.create_runtime()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.LegacyHardwareModel"><code class="docutils literal notranslate"><span class="pre">LegacyHardwareModel</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_device"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_device()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_physical_baseband"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.add_physical_baseband()</span></code></a></li>
@@ -733,6 +736,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_qubit"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.get_qubit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.has_qubit"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.has_qubit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.is_calibrated</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubit_quality"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.qubit_quality()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.qubits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resolve_qb_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.resolve_qb_pulse_channel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resonators"><code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel.resonators</span></code></a></li>
@@ -762,6 +766,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CrossResonancePulse"><code class="docutils literal notranslate"><span class="pre">CrossResonancePulse</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse"><code class="docutils literal notranslate"><span class="pre">CustomPulse</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse.duration"><code class="docutils literal notranslate"><span class="pre">CustomPulse.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.CustomPulse.samples"><code class="docutils literal notranslate"><span class="pre">CustomPulse.samples</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay"><code class="docutils literal notranslate"><span class="pre">Delay</span></code></a><ul>
@@ -773,6 +778,10 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndRepeat"><code class="docutils literal notranslate"><span class="pre">EndRepeat</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.EndSweep"><code class="docutils literal notranslate"><span class="pre">EndSweep</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Equals"><code class="docutils literal notranslate"><span class="pre">Equals</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencySet"><code class="docutils literal notranslate"><span class="pre">FrequencySet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencySet.channel"><code class="docutils literal notranslate"><span class="pre">FrequencySet.channel</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift"><code class="docutils literal notranslate"><span class="pre">FrequencyShift</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.FrequencyShift.channel"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.channel</span></code></a></li>
 </ul>
@@ -809,10 +818,15 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.quantum_targets"><code class="docutils literal notranslate"><span class="pre">PhaseReset.quantum_targets</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet"><code class="docutils literal notranslate"><span class="pre">PhaseSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseSet.channel"><code class="docutils literal notranslate"><span class="pre">PhaseSet.channel</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift"><code class="docutils literal notranslate"><span class="pre">PhaseShift</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseShift.channel"><code class="docutils literal notranslate"><span class="pre">PhaseShift.channel</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Plus"><code class="docutils literal notranslate"><span class="pre">Plus</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType"><code class="docutils literal notranslate"><span class="pre">PostProcessType</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DISCRIMINATE"><code class="docutils literal notranslate"><span class="pre">PostProcessType.DISCRIMINATE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessType.DOWN_CONVERT"><code class="docutils literal notranslate"><span class="pre">PostProcessType.DOWN_CONVERT</span></code></a></li>
@@ -906,6 +920,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.merge"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.merge()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_circuit"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.optimized_circuit</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.optimized_instruction_count"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.optimized_instruction_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.physical_qubit_indices"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.physical_qubit_indices</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.record_metric"><code class="docutils literal notranslate"><span class="pre">CompilationMetrics.record_metric()</span></code></a></li>
 </ul>
 </li>
@@ -1071,7 +1086,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.compiler.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.purr.compiler.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.compiler.html">main</a></dd>
     </dl>
   </div>
 </div><script>

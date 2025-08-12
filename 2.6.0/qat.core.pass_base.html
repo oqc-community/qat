@@ -9,6 +9,7 @@
   <title>qat.core.pass_base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -376,6 +377,21 @@ validates its analyses results, and uses those results for its purpose.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.core.pass_base.LoweringPass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoweringPass</span></span><a class="headerlink" href="#qat.core.pass_base.LoweringPass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.core.pass_base.PassInfoMixin" title="qat.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
+<p>Base case for all passes that modify the IR, instrinsically changing its type and
+structure.</p>
+<p>Acts as insulation between passes that that expect to see the IR in some
+given format.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.pass_base.LoweringPass.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pass_base.LoweringPass.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pass_base.PassConcept">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassConcept</span></span><a class="headerlink" href="#qat.core.pass_base.PassConcept" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
@@ -509,6 +525,8 @@ method that accepts an argument as well as a <code class="xref py py-class docut
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TransformPass</span></span><a class="headerlink" href="#qat.core.pass_base.TransformPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.core.pass_base.PassInfoMixin" title="qat.core.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
 <p>Base class for all passes that mutates the IR.</p>
+<p>It is expected that child classes do not alter the type of the IR, but only alter its
+contents.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pass_base.TransformPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pass_base.TransformPass.run" title="Link to this definition"></a></dt>
@@ -529,12 +547,6 @@ an error raised. It can change according to circumstances.</p>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pass_base.ValidationPass.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.core.pass_base.get_hardware_model">
-<span class="sig-name descname"><span class="pre">get_hardware_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pass_base.get_hardware_model" title="Link to this definition"></a></dt>
-<dd><p>To be replaced with a constructor argument on the relevant passes</p>
 </dd></dl>
 
 </section>
@@ -574,7 +586,29 @@ an error raised. It can change according to circumstances.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.core.pass_base.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.core.pass_base.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.core.pass_base.html">main</a></dd>
     </dl>
   </div>
 </div><script>

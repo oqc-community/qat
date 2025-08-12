@@ -346,7 +346,7 @@
 <span id="qat-purr-backends-qblox-metrics-base-module"></span><h1>qat.purr.backends.qblox.metrics_base module<a class="headerlink" href="#module-qat.purr.backends.qblox.metrics_base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Default:</span> <span class="pre">6&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Experimental:</span> <span class="pre">14&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Pydantic version based on qat.purr.compiler.metrics.py elements.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -411,6 +411,11 @@ collection.</p>
 <span class="sig-name descname"><span class="pre">optimized_instruction_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices">
+<span class="sig-name descname"><span class="pre">physical_qubit_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.record_metric">
 <span class="sig-name descname"><span class="pre">record_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.record_metric" title="Link to this definition"></a></dt>
@@ -461,7 +466,29 @@ collection.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.purr.backends.qblox.metrics_base.html">2.6.0</a></dd>
       <dd><a href="qat.purr.backends.qblox.metrics_base.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.backends.qblox.metrics_base.html">main</a></dd>
     </dl>
   </div>
 </div><script>

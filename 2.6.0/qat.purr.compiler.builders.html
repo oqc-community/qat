@@ -9,6 +9,7 @@
   <title>qat.purr.compiler.builders module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -473,6 +474,11 @@ merging.</p>
 <span class="sig-name descname"><span class="pre">cZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.cZ" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.calibration_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calibration_id</span></span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.calibration_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.ccnot">
 <span class="sig-name descname"><span class="pre">ccnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.ccnot" title="Link to this definition"></a></dt>
@@ -534,6 +540,11 @@ merging.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.had">
 <span class="sig-name descname"><span class="pre">had</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.had" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -619,7 +630,7 @@ resolves them if any are found.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.InstructionBuilder.repeat">
-<span class="sig-name descname"><span class="pre">repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.repeat" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.InstructionBuilder.repeat" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -704,7 +715,7 @@ This could be supported pretty easily, but not required right now.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.builders.QuantumInstructionBuilder.cnot">
-<span class="sig-name descname"><span class="pre">cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controlled_qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder.cnot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.builders.QuantumInstructionBuilder.cnot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -830,7 +841,29 @@ additional information.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.compiler.builders.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.purr.compiler.builders.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.compiler.builders.html">main</a></dd>
     </dl>
   </div>
 </div><script>

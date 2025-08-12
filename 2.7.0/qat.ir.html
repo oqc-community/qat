@@ -433,8 +433,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.constrain"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.constrain()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.controlled"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.controlled()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.cswap"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cswap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.flatten"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.flatten()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.had"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.had()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.jump"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.jump()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.number_of_instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.number_of_instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.repeat"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.repeat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.reset"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.reset()</span></code></a></li>
@@ -443,6 +445,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.swap"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.swap()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.PydQuantumInstructionBuilder"><code class="docutils literal notranslate"><span class="pre">PydQuantumInstructionBuilder</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.ECR"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.ECR()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.U"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.U()</span></code></a></li>
@@ -465,6 +468,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_single_shot_z()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.phase_shift"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.phase_shift()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.post_processing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.pretty_print"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.pretty_print()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.pulse"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.pulse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.swap"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.swap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.synchronize"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.synchronize()</span></code></a></li>
@@ -474,28 +478,50 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign"><code class="docutils literal notranslate"><span class="pre">Assign</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign.inst"><code class="docutils literal notranslate"><span class="pre">Assign.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign.model_config"><code class="docutils literal notranslate"><span class="pre">Assign.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign.name"><code class="docutils literal notranslate"><span class="pre">Assign.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign.value"><code class="docutils literal notranslate"><span class="pre">Assign.value</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator"><code class="docutils literal notranslate"><span class="pre">BinaryOperator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.left"><code class="docutils literal notranslate"><span class="pre">BinaryOperator.left</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.model_config"><code class="docutils literal notranslate"><span class="pre">BinaryOperator.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.BinaryOperator.right"><code class="docutils literal notranslate"><span class="pre">BinaryOperator.right</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay"><code class="docutils literal notranslate"><span class="pre">Delay</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay.inst"><code class="docutils literal notranslate"><span class="pre">Delay.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay.model_config"><code class="docutils literal notranslate"><span class="pre">Delay.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.EndRepeat"><code class="docutils literal notranslate"><span class="pre">EndRepeat</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.EndRepeat.model_config"><code class="docutils literal notranslate"><span class="pre">EndRepeat.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Equals"><code class="docutils literal notranslate"><span class="pre">Equals</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Equals.model_config"><code class="docutils literal notranslate"><span class="pre">Equals.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet"><code class="docutils literal notranslate"><span class="pre">FrequencySet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet.frequency"><code class="docutils literal notranslate"><span class="pre">FrequencySet.frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencySet.model_config"><code class="docutils literal notranslate"><span class="pre">FrequencySet.model_config</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift"><code class="docutils literal notranslate"><span class="pre">FrequencyShift</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.frequency"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.frequency</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.inst"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.model_config"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.target"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.target</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.FrequencyShift.targets"><code class="docutils literal notranslate"><span class="pre">FrequencyShift.targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.GreaterOrEqualThan"><code class="docutils literal notranslate"><span class="pre">GreaterOrEqualThan</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.GreaterOrEqualThan.model_config"><code class="docutils literal notranslate"><span class="pre">GreaterOrEqualThan.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.GreaterThan"><code class="docutils literal notranslate"><span class="pre">GreaterThan</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.GreaterThan.model_config"><code class="docutils literal notranslate"><span class="pre">GreaterThan.model_config</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction"><code class="docutils literal notranslate"><span class="pre">Instruction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.head"><code class="docutils literal notranslate"><span class="pre">Instruction.head</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.inst"><code class="docutils literal notranslate"><span class="pre">Instruction.inst</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.instr_type"><code class="docutils literal notranslate"><span class="pre">Instruction.instr_type</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.model_config"><code class="docutils literal notranslate"><span class="pre">Instruction.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.number_of_instructions"><code class="docutils literal notranslate"><span class="pre">Instruction.number_of_instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction.tail"><code class="docutils literal notranslate"><span class="pre">Instruction.tail</span></code></a></li>
@@ -503,38 +529,68 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock"><code class="docutils literal notranslate"><span class="pre">InstructionBlock</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.add"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.flatten"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.flatten()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.head"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.head</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.inst"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.model_config"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.number_of_instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.number_of_instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.InstructionBlock.tail"><code class="docutils literal notranslate"><span class="pre">InstructionBlock.tail</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Jump"><code class="docutils literal notranslate"><span class="pre">Jump</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Jump.condition"><code class="docutils literal notranslate"><span class="pre">Jump.condition</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Jump.label"><code class="docutils literal notranslate"><span class="pre">Jump.label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Jump.model_config"><code class="docutils literal notranslate"><span class="pre">Jump.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Jump.target"><code class="docutils literal notranslate"><span class="pre">Jump.target</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Label"><code class="docutils literal notranslate"><span class="pre">Label</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Label.model_config"><code class="docutils literal notranslate"><span class="pre">Label.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Label.name"><code class="docutils literal notranslate"><span class="pre">Label.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Label.with_random_name"><code class="docutils literal notranslate"><span class="pre">Label.with_random_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.LessOrEqualThan"><code class="docutils literal notranslate"><span class="pre">LessOrEqualThan</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.LessOrEqualThan.model_config"><code class="docutils literal notranslate"><span class="pre">LessOrEqualThan.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.LessThan"><code class="docutils literal notranslate"><span class="pre">LessThan</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.LessThan.model_config"><code class="docutils literal notranslate"><span class="pre">LessThan.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.LoopCount"><code class="docutils literal notranslate"><span class="pre">LoopCount</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.NotEquals"><code class="docutils literal notranslate"><span class="pre">NotEquals</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.NotEquals.model_config"><code class="docutils literal notranslate"><span class="pre">NotEquals.model_config</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset"><code class="docutils literal notranslate"><span class="pre">PhaseReset</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset.inst"><code class="docutils literal notranslate"><span class="pre">PhaseReset.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset.model_config"><code class="docutils literal notranslate"><span class="pre">PhaseReset.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseReset.phase"><code class="docutils literal notranslate"><span class="pre">PhaseReset.phase</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet"><code class="docutils literal notranslate"><span class="pre">PhaseSet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.model_config"><code class="docutils literal notranslate"><span class="pre">PhaseSet.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseSet.phase"><code class="docutils literal notranslate"><span class="pre">PhaseSet.phase</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift"><code class="docutils literal notranslate"><span class="pre">PhaseShift</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.inst"><code class="docutils literal notranslate"><span class="pre">PhaseShift.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.model_config"><code class="docutils literal notranslate"><span class="pre">PhaseShift.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.phase"><code class="docutils literal notranslate"><span class="pre">PhaseShift.phase</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.target"><code class="docutils literal notranslate"><span class="pre">PhaseShift.target</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.PhaseShift.targets"><code class="docutils literal notranslate"><span class="pre">PhaseShift.targets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Plus"><code class="docutils literal notranslate"><span class="pre">Plus</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Plus.model_config"><code class="docutils literal notranslate"><span class="pre">Plus.model_config</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.duration"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.duration</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.inst"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.model_config"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.target"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.target</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.targets"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.targets</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction.validate_targets"><code class="docutils literal notranslate"><span class="pre">QuantumInstruction.validate_targets()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.add"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.add()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.inst"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.instructions"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.model_config"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstructionBlock.model_post_init"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBlock.model_post_init()</span></code></a></li>
@@ -542,36 +598,33 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Repeat"><code class="docutils literal notranslate"><span class="pre">Repeat</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Repeat.inst"><code class="docutils literal notranslate"><span class="pre">Repeat.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Repeat.model_config"><code class="docutils literal notranslate"><span class="pre">Repeat.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Repeat.repeat_count"><code class="docutils literal notranslate"><span class="pre">Repeat.repeat_count</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Repeat.repetition_period"><code class="docutils literal notranslate"><span class="pre">Repeat.repetition_period</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset"><code class="docutils literal notranslate"><span class="pre">Reset</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.inst"><code class="docutils literal notranslate"><span class="pre">Reset.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.model_config"><code class="docutils literal notranslate"><span class="pre">Reset.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.qubit_target"><code class="docutils literal notranslate"><span class="pre">Reset.qubit_target</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.qubit_targets"><code class="docutils literal notranslate"><span class="pre">Reset.qubit_targets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.target"><code class="docutils literal notranslate"><span class="pre">Reset.target</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.targets"><code class="docutils literal notranslate"><span class="pre">Reset.targets</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Reset.validate_targets"><code class="docutils literal notranslate"><span class="pre">Reset.validate_targets()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.inst"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.model_config"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.results_processing"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing.results_processing</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.variable"><code class="docutils literal notranslate"><span class="pre">ResultsProcessing.variable</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Return"><code class="docutils literal notranslate"><span class="pre">Return</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Return.inst"><code class="docutils literal notranslate"><span class="pre">Return.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Return.model_config"><code class="docutils literal notranslate"><span class="pre">Return.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Return.variables"><code class="docutils literal notranslate"><span class="pre">Return.variables</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize"><code class="docutils literal notranslate"><span class="pre">Synchronize</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.inst"><code class="docutils literal notranslate"><span class="pre">Synchronize.inst</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.duration"><code class="docutils literal notranslate"><span class="pre">Synchronize.duration</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.model_config"><code class="docutils literal notranslate"><span class="pre">Synchronize.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize.targets"><code class="docutils literal notranslate"><span class="pre">Synchronize.targets</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a><ul>
@@ -589,30 +642,28 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.delay"><code class="docutils literal notranslate"><span class="pre">Acquire.delay</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.duration"><code class="docutils literal notranslate"><span class="pre">Acquire.duration</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.filter"><code class="docutils literal notranslate"><span class="pre">Acquire.filter</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.inst"><code class="docutils literal notranslate"><span class="pre">Acquire.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.mode"><code class="docutils literal notranslate"><span class="pre">Acquire.mode</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.model_config"><code class="docutils literal notranslate"><span class="pre">Acquire.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.output_variable"><code class="docutils literal notranslate"><span class="pre">Acquire.output_variable</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.pulse_channel"><code class="docutils literal notranslate"><span class="pre">Acquire.pulse_channel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.rotation"><code class="docutils literal notranslate"><span class="pre">Acquire.rotation</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.suffix_incrementor"><code class="docutils literal notranslate"><span class="pre">Acquire.suffix_incrementor</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.target"><code class="docutils literal notranslate"><span class="pre">Acquire.target</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.targets"><code class="docutils literal notranslate"><span class="pre">Acquire.targets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire.threshold"><code class="docutils literal notranslate"><span class="pre">Acquire.threshold</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock"><code class="docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.add"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.add()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.inst"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.inst</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.instructions"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.model_config"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.model_post_init"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.output_variables"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.output_variables</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.qubit_targets"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.qubit_targets</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock.validate_targets"><code class="docutils literal notranslate"><span class="pre">MeasureBlock.validate_targets()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing"><code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.args"><code class="docutils literal notranslate"><span class="pre">PostProcessing.args</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.axes"><code class="docutils literal notranslate"><span class="pre">PostProcessing.axes</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.inst"><code class="docutils literal notranslate"><span class="pre">PostProcessing.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.model_config"><code class="docutils literal notranslate"><span class="pre">PostProcessing.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.output_variable"><code class="docutils literal notranslate"><span class="pre">PostProcessing.output_variable</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing.process_type"><code class="docutils literal notranslate"><span class="pre">PostProcessing.process_type</span></code></a></li>
@@ -672,11 +723,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse"><code class="docutils literal notranslate"><span class="pre">Pulse</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.ignore_channel_scale"><code class="docutils literal notranslate"><span class="pre">Pulse.ignore_channel_scale</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.inst"><code class="docutils literal notranslate"><span class="pre">Pulse.inst</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.model_config"><code class="docutils literal notranslate"><span class="pre">Pulse.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.pulse_channel"><code class="docutils literal notranslate"><span class="pre">Pulse.pulse_channel</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.target"><code class="docutils literal notranslate"><span class="pre">Pulse.target</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.targets"><code class="docutils literal notranslate"><span class="pre">Pulse.targets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.update_duration"><code class="docutils literal notranslate"><span class="pre">Pulse.update_duration()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.validate_duration"><code class="docutils literal notranslate"><span class="pre">Pulse.validate_duration()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.waveform"><code class="docutils literal notranslate"><span class="pre">Pulse.waveform</span></code></a></li>
 </ul>
@@ -789,7 +839,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.ir.html">2.6.0</a></dd>
       <dd><a href="qat.ir.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.ir.html">main</a></dd>
     </dl>
   </div>
 </div><script>

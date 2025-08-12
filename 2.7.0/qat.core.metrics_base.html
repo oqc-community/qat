@@ -344,7 +344,7 @@
 <span id="qat-core-metrics-base-module"></span><h1>qat.core.metrics_base module<a class="headerlink" href="#module-qat.core.metrics_base" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.metrics_base.MetricsManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Default:</span> <span class="pre">6&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Experimental:</span> <span class="pre">14&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Stores useful intermediary metrics that are generated during compilation, such as an
 optimised circuit or the instruction count.</p>
@@ -352,7 +352,7 @@ optimised circuit or the instruction count.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.core.metrics_base.MetricsManager.params.enabled_metrics"></span><strong>enabled_metrics</strong><a class="paramlink headerlink reference internal" href="#qat.core.metrics_base.MetricsManager.params.enabled_metrics">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsType</span></code></span>) – Which metrics to enable? Default,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Default.</span></code></p>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Experimental.</span></code></p>
 </dd>
 </dl>
 <dl class="py method">
@@ -374,7 +374,7 @@ optimised circuit or the instruction count.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.core.metrics_base.MetricsManager.enable.params.enabled_metrics"></span><strong>enabled_metrics</strong><a class="paramlink headerlink reference internal" href="#qat.core.metrics_base.MetricsManager.enable.params.enabled_metrics">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsType</span></code></span>) – Which metrics to enable? Default,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Default</span></code>.</p></li>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Experimental</span></code>.</p></li>
 <li><p><span class="target" id="qat.core.metrics_base.MetricsManager.enable.params.overwrite"></span><strong>overwrite</strong><a class="paramlink headerlink reference internal" href="#qat.core.metrics_base.MetricsManager.enable.params.overwrite">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If true, overwrite these metrics with a new collection.
 If false, just enable them in the current collection. Default, true.</p></li>
 </ul>
@@ -384,13 +384,13 @@ If false, just enable them in the current collection. Default, true.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.metrics_base.MetricsManager.enable_metrics">
-<span class="sig-name descname"><span class="pre">enable_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Default:</span> <span class="pre">6&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.metrics_base.MetricsManager.enable_metrics" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">enable_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Experimental:</span> <span class="pre">14&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.metrics_base.MetricsManager.enable_metrics" title="Link to this definition"></a></dt>
 <dd><p>Enables the set of metrics in the current collection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.core.metrics_base.MetricsManager.enable_metrics.params.enabled_metrics"></span><strong>enabled_metrics</strong><a class="paramlink headerlink reference internal" href="#qat.core.metrics_base.MetricsManager.enable_metrics.params.enabled_metrics">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsType</span></code></span>) – Which metrics to enable? Default,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Default</span></code>.</p></li>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">MetricsType.Experimental</span></code>.</p></li>
 <li><p><span class="target" id="qat.core.metrics_base.MetricsManager.enable_metrics.params.overwrite"></span><strong>overwrite</strong><a class="paramlink headerlink reference internal" href="#qat.core.metrics_base.MetricsManager.enable_metrics.params.overwrite">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If true, overwrite these metrics with a new collection.
 If false, just enable them in the current collection. Default, true.</p></li>
 </ul>
@@ -427,6 +427,11 @@ If false, just enable them in the current collection. Default, true.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.core.metrics_base.MetricsManager.optimized_instruction_count">
 <span class="sig-name descname"><span class="pre">optimized_instruction_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.core.metrics_base.MetricsManager.optimized_instruction_count" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.core.metrics_base.MetricsManager.physical_qubit_indices">
+<span class="sig-name descname"><span class="pre">physical_qubit_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.core.metrics_base.MetricsManager.physical_qubit_indices" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -479,7 +484,29 @@ If false, just enable them in the current collection. Default, true.</p></li>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.core.metrics_base.html">2.6.0</a></dd>
       <dd><a href="qat.core.metrics_base.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.core.metrics_base.html">main</a></dd>
     </dl>
   </div>
 </div><script>

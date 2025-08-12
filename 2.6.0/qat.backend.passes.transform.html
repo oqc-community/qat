@@ -9,6 +9,7 @@
   <title>qat.backend.passes.transform module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -332,85 +333,8 @@
              
 
 
-  <section id="module-qat.backend.passes.transform">
-<span id="qat-backend-passes-transform-module"></span><h1>qat.backend.passes.transform module<a class="headerlink" href="#module-qat.backend.passes.transform" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.DesugaringPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DesugaringPass</span></span><a class="headerlink" href="#qat.backend.passes.transform.DesugaringPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Transforms syntactic sugars and implicit effects. Not that it applies here, but a
-classical example of a sugar syntax is the ternary expression
-<code class="code docutils literal notranslate"><span class="pre">&quot;cond</span> <span class="pre">?</span> <span class="pre">val1</span> <span class="pre">:</span> <span class="pre">val2&quot;</span></code> which is nothing more than an if else in disguise.</p>
-<p>The goal of this pass is to desugar any syntactic and semantic sugars. One of these
-sugars is iteration constructs such as <code class="xref py py-class docutils literal notranslate"><span class="pre">Sweep</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.DesugaringPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.transform.DesugaringPass.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.passes.transform.DesugaringPass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.transform.DesugaringPass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.RepeatSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RepeatSanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.transform.RepeatSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Fixes repeat instructions if any with default values from the HW model.
-Adds a repeat instructions if none is found.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.RepeatSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.transform.RepeatSanitisation.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.passes.transform.RepeatSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.transform.RepeatSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.ReturnSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReturnSanitisation</span></span><a class="headerlink" href="#qat.backend.passes.transform.ReturnSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Squashes all <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code> instructions into a single one. Adds a <code class="xref py py-class docutils literal notranslate"><span class="pre">Return</span></code>
-with all acquisitions if none is found.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.ReturnSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.transform.ReturnSanitisation.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.passes.transform.ReturnSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.transform.ReturnSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.ScopeSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeSanitisation</span></span><a class="headerlink" href="#qat.backend.passes.transform.ScopeSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Bubbles up all sweeps and repeats to the beginning of the list.
-Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.</p>
-<p>Intended for legacy existing builders and the relative order of instructions guarantees
-backwards compatibility.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.backend.passes.transform.ScopeSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.transform.ScopeSanitisation.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.passes.transform.ScopeSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.backend.passes.transform.ScopeSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="qat-backend-passes-transform-module">
+<h1>qat.backend.passes.transform module<a class="headerlink" href="#qat-backend-passes-transform-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -448,7 +372,29 @@ backwards compatibility.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.backend.passes.transform.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.backend.passes.transform.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.backend.passes.transform.html">main</a></dd>
     </dl>
   </div>
 </div><script>

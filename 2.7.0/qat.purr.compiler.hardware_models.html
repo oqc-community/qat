@@ -390,7 +390,7 @@ should be used to build circuits/pulses for its particular back-end.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.hardware_models.QuantumHardwareModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shot_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_mitigation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shot_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_mitigation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.hardware_models.HardwareModel" title="qat.purr.compiler.hardware_models.HardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">HardwareModel</span></code></a>, <a class="reference internal" href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Calibratable" title="qat.purr.compiler.devices.Calibratable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibratable</span></code></a></p>
 <p>Object modelling our superconducting hardware. Holds up-to-date information about a
 current piece of hardware, whether simulated or physical machine.</p>
@@ -566,6 +566,13 @@ object just returns that.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_calibrated</span></span><a class="headerlink" href="#qat.purr.compiler.hardware_models.QuantumHardwareModel.is_calibrated" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.compiler.hardware_models.QuantumHardwareModel.qubit_quality">
+<span class="sig-name descname"><span class="pre">qubit_quality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubit_quality" title="Link to this definition"></a></dt>
+<dd><p>Readout quality for a qubit with index <cite>qubit_index</cite>.
+Note that this does not take gate fidelity into account.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><a class="headerlink" href="#qat.purr.compiler.hardware_models.QuantumHardwareModel.qubits" title="Link to this definition"></a></dt>
@@ -656,7 +663,29 @@ Classical register indices are extracted following the pattern &lt;clreg_name&gt
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.purr.compiler.hardware_models.html">2.6.0</a></dd>
       <dd><a href="qat.purr.compiler.hardware_models.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.compiler.hardware_models.html">main</a></dd>
     </dl>
   </div>
 </div><script>

@@ -9,6 +9,7 @@
   <title>qat.purr.backends.qblox.analysis_passes module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -339,25 +340,35 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.BindingPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BindingPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.BindingPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass" title="qat.purr.backends.qblox.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>Builds binding of variables, instructions, and a view of variables from/to scopes.</p>
+<p>Variables are implicitly declared in sweep instructions and are ultimately read from
+quantum instructions. Thus, every iteration variable is associated to all the scopes it
+is declared in.</p>
+<p>Values of the iteration variable are abstract and don’t mean anything. In this pass, we
+only extract  the bound and associate it to the name variable. Further analysis is
+required on read sites to make sure their usage is consistent and meaningful.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
-<dd><p>Given a sequence of numbers (typically having been generated from np.linspace()), figure out
-if the numbers are linearly/evenly spaced, in which case returns an IterBound instance holding
-the start, step, end, and count of the numbers in the array, or else fail.</p>
-<p>In the future, we might be interested in relaxing this condition and return “interpolated”
-evenly spaced approximation of the input sequence.</p>
+<dd><p>Given a sequence of numbers (typically having been generated from
+<code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced,
+in which case returns an IterBound instance holding the start, step, end, and count
+of the numbers in the array, or else fail.</p>
+<p>In the future, we might be interested in relaxing this condition and return
+“interpolated” evenly spaced approximation of the input sequence.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.BindingPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.BindingPass.run" title="Link to this definition"></a></dt>
-<dd><p>Builds binding of variables, instructions, and a view of variables from/to scopes.</p>
-<p>Variables are implicitly declared in sweep instructions and are ultimately read from quantum
-instructions. Thus, every iteration variable is associated to all the scopes it is declared in.</p>
-<p>Values of the iteration variable are abstract and don’t mean anything. In this pass, we only extract
-the bound and associate it to the name variable. Further analysis is required on read sites to make
-sure their usage is consistent and meaningful.</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.BindingPass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.BindingPass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR" title="qat.purr.backends.qblox.pass_base.QatIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.BindingPass.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.BindingPass.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager" title="qat.purr.backends.qblox.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to save the analysis results.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -390,7 +401,15 @@ sure their usage is consistent and meaningful.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.CFGPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.CFGPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.CFGPass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.CFGPass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR" title="qat.purr.backends.qblox.pass_base.QatIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.CFGPass.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.CFGPass.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager" title="qat.purr.backends.qblox.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to save the analysis results.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -407,26 +426,31 @@ sure their usage is consistent and meaningful.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IterBound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.astype">
+<span class="sig-name descname"><span class="pre">astype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.astype" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.count">
-<span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.count" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.end">
-<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.end" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.end" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.start">
-<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.start" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.IterBound.step">
-<span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.IterBound.step" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -436,9 +460,21 @@ sure their usage is consistent and meaningful.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLegalisationPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass" title="qat.purr.backends.qblox.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps">
+<span class="sig-name descname"><span class="pre">amp_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps" title="Link to this definition"></a></dt>
+<dd><p>The instruction <cite>set_awg_offs</cite> expects DAC ratio as a (potentially signed) integer operand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">freq_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>The instruction <cite>set_freq</cite> expects the frequency as a (potentially signed) integer operand.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
@@ -448,7 +484,8 @@ sure their usage is consistent and meaningful.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>The instruction <cite>set_ph_delta</cite> expects the phase shift as a (potentially signed) integer operand.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
@@ -525,7 +562,7 @@ will follow in future iterations.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.ReadWriteResult.reads">
-<span class="sig-name descname"><span class="pre">reads</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.ReadWriteResult.reads" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reads</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.ReadWriteResult.reads" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -555,6 +592,26 @@ will follow in future iterations.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TILegalisationPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass" title="qat.purr.backends.qblox.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>An instruction is legal if it has a direct equivalent in the programming model
+implemented by the control stack. The notion of “legal” is highly determined by the
+hardware features of the control stack as well as its programming model. Control stacks
+such as Qblox have a direct ISA-level representation for basic RF instructions such as
+frequency and phase manipulation, arithmetic instructions such as add,  and branching
+instructions such as jump.</p>
+<p>This pass performs target-independent legalisation. The goal here is to understand how
+variables are used and legalise their bounds. Furthermore, analysis in this pass is
+fundamentally based on QAT semantics and must be kept target-agnostic so that it can be
+reused among backends.</p>
+<p>Particularly in QAT:
+#. A sweep instruction is illegal because it specifies unclear iteration semantics.
+#. Device updates/assigns in general are illegal because they are bound to a sweep</p>
+<blockquote>
+<div><p>instruction via a variable. In fact, a variable (implicitly defined by a Sweep
+instruction) remains obscure until a “read” (usually on the instruction builder or on
+the hardware model) (typically from a DeviceUpdate instruction) is encountered where
+its intent becomes clear. We say that a DeviceUpdate carries meaning for the variable
+and materialises its intention.</p>
+</div></blockquote>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass.decompose_freq">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompose_freq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.decompose_freq" title="Link to this definition"></a></dt>
@@ -563,26 +620,20 @@ will follow in future iterations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run" title="Link to this definition"></a></dt>
-<dd><p>An instruction is legal if it has a direct equivalent in the programming model implemented by the control
-stack. The notion of “legal” is highly determined by the hardware features of the control stack as well
-as its programming model. Control stacks such as Qblox have a direct ISA-level representation for basic
-RF instructions such as frequency and phase manipulation, arithmetic instructions such as add,
-and branching instructions such as jump.</p>
-<p>This pass performs target-independent legalisation. The goal here is to understand how variables
-are used and legalise their bounds. Furthermore, analysis in this pass is fundamentally based on QAT
-semantics and must be kept target-agnostic so that it can be reused among targets.</p>
-<dl class="simple">
-<dt>Particularly in QAT:</dt><dd><ol class="arabic simple">
-<li><p>A sweep instruction is illegal because it specifies unclear iteration semantics.</p></li>
-<li><p>Device updates/assigns in general are illegal because they are bound to a sweep instruction</p></li>
-</ol>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR" title="qat.purr.backends.qblox.pass_base.QatIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager" title="qat.purr.backends.qblox.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to save the analysis results.</p></li>
+</ul>
 </dd>
 </dl>
-<p>via a variable. In fact, a variable (implicitly defined by a Sweep instruction) remains obscure
-until a “read” (usually on the instruction builder or on the hardware model) (typically from
-a DeviceUpdate instruction) is encountered where its intent becomes clear. We say that a DeviceUpdate
-carries meaning for the variable and materialises its intention.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TILegalisationPass.transform_amp">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transform_amp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TILegalisationPass.transform_amp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -590,21 +641,29 @@ carries meaning for the variable and materialises its intention.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriagePass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriagePass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriagePass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.AnalysisPass" title="qat.purr.backends.qblox.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
+<p>Builds a view of instructions per quantum target AOT.</p>
+<p>Builds selections of instructions useful for subsequent analysis/transform passes, for
+code generation, and post-playback steps.</p>
+<p>This is equivalent to the <code class="xref py py-class docutils literal notranslate"><span class="pre">QatFile</span></code> and simplifies the duration timeline creation
+in the legacy code.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriagePass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriagePass.run" title="Link to this definition"></a></dt>
-<dd><p>Builds a view of instructions per quantum target AOT.
-Builds selections of instructions useful for subsequent analysis/transform passes,
-for code generation, and post-playback steps.</p>
-<p>This is equivalent to the QatFile and simplifies the duration timeline creation in
-legacy code.</p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.TriagePass.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.TriagePass.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR" title="qat.purr.backends.qblox.pass_base.QatIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.purr.backends.qblox.analysis_passes.TriagePass.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.purr.backends.qblox.analysis_passes.TriagePass.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultManager" title="qat.purr.backends.qblox.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to save the analysis results.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TriageResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeats=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_updates=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantum_instructions=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pp_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rp_map=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.purr.backends.qblox.result_base.html#qat.purr.backends.qblox.result_base.ResultInfoMixin" title="qat.purr.backends.qblox.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult.acquire_map">
@@ -617,8 +676,23 @@ legacy code.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult.device_updates">
+<span class="sig-name descname"><span class="pre">device_updates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.DeviceUpdate" title="qat.purr.compiler.instructions.DeviceUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeviceUpdate</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult.device_updates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map">
 <span class="sig-name descname"><span class="pre">pp_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing" title="qat.purr.compiler.instructions.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult.quantum_instructions">
+<span class="sig-name descname"><span class="pre">quantum_instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult.quantum_instructions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.TriageResult.repeats">
+<span class="sig-name descname"><span class="pre">repeats</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Repeat" title="qat.purr.compiler.instructions.Repeat"><code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.TriageResult.repeats" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -680,7 +754,29 @@ legacy code.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.backends.qblox.analysis_passes.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.purr.backends.qblox.analysis_passes.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.backends.qblox.analysis_passes.html">main</a></dd>
     </dl>
   </div>
 </div><script>

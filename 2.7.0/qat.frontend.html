@@ -371,8 +371,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.InputOptimisation"><code class="docutils literal notranslate"><span class="pre">InputOptimisation</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.Parse"><code class="docutils literal notranslate"><span class="pre">Parse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.FlattenIR"><code class="docutils literal notranslate"><span class="pre">FlattenIR</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydInputOptimisation"><code class="docutils literal notranslate"><span class="pre">PydInputOptimisation</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PydParse"><code class="docutils literal notranslate"><span class="pre">PydParse</span></code></a></li>
 </ul>
@@ -394,6 +393,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.check_and_return_source()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.default_frontends"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.default_frontends()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit"><code class="docutils literal notranslate"><span class="pre">AutoFrontend.emit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontendWithFlattenedIR"><code class="docutils literal notranslate"><span class="pre">AutoFrontendWithFlattenedIR</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontendWithFlattenedIR.emit"><code class="docutils literal notranslate"><span class="pre">AutoFrontendWithFlattenedIR.emit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -459,6 +462,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.build_pass_pipeline"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.build_pass_pipeline()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.check_and_return_source"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.check_and_return_source()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.emit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.parser"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.parser</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.version"><code class="docutils literal notranslate"><span class="pre">BaseQasmFrontend.version</span></code></a></li>
 </ul>
 </li>
@@ -557,7 +561,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.frontend.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.frontend.html">main</a></dd>
     </dl>
   </div>
 </div><script>

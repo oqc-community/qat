@@ -342,56 +342,8 @@
              
 
 
-  <section id="module-qat.middleend.passes.legacy.transform">
-<span id="qat-middleend-passes-legacy-transform-module"></span><h1>qat.middleend.passes.legacy.transform module<a class="headerlink" href="#module-qat.middleend.passes.legacy.transform" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntegratorAcquireSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Changes <cite>AcquireMode.INTEGRATOR</cite> acquisitions to <cite>AcquireMode.RAW</cite>.</p>
-<p>The legacy echo/RTCS engines expect the acquisition mode to be either <cite>RAW</cite> or <cite>SCOPE</cite>.
-While the actual execution can process <cite>INTEGRATOR</cite> by treating it as <cite>RAW</cite>, they are
-typically santitised the runtime using <code class="xref py py-meth docutils literal notranslate"><span class="pre">EchoEngine.optimize()</span></code>. If not done in the
-new pipelines, it will conflict with <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessingSantisiation</span></code>, and return the
-wrong results. The new echo engine supports all acquisition modes, so this is not a
-problem here.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.legacy.transform.IntegratorAcquireSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitInstructionsWrapper</span></span><a class="headerlink" href="#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Wraps the Qiskit builder in a wrapper to match the pipelines API.</p>
-<p>A really silly pass needed to wrap the <code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitBuilder</span></code> in an object that allows
-<cite>QiskitBuilderWrapper.instructions</cite> to be called, allowing the builder to be used in the
-the <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyRuntime</span></code>. This is needed because the qiskit engine has a different API
-to other <cite>purr</cite> engines, requiring the whole builder to be passed (as opposed to
-<cite>builder.instructions</cite>).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.legacy.transform.QiskitInstructionsWrapper.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder" title="qat.purr.backends.qiskit_simulator.QiskitBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitBuilder</span></code></a></span>) – The Qiskit instructions</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper" title="qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitBuilderWrapper</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="qat-middleend-passes-legacy-transform-module">
+<h1>qat.middleend.passes.legacy.transform module<a class="headerlink" href="#qat-middleend-passes-legacy-transform-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -429,7 +381,29 @@ to other <cite>purr</cite> engines, requiring the whole builder to be passed (as
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.middleend.passes.legacy.transform.html">2.6.0</a></dd>
       <dd><a href="qat.middleend.passes.legacy.transform.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.middleend.passes.legacy.transform.html">main</a></dd>
     </dl>
   </div>
 </div><script>

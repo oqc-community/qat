@@ -9,6 +9,7 @@
   <title>qat.core.result_base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -383,7 +384,8 @@ sophisticated <code class="xref py py-class docutils literal notranslate"><span 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultManager.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.add" title="Link to this definition"></a></dt>
-<dd><p>Add a results object to the manager.</p>
+<dd><p>Add a results object to the manager, overwriting any previous results of the same
+type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.add.params.res_obj"></span><strong>res_obj</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.add.params.res_obj">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></span>) – Results from a pass, typically an analysis pass.</p>
@@ -392,9 +394,23 @@ sophisticated <code class="xref py py-class docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultManager.check_for_type">
+<span class="sig-name descname"><span class="pre">check_for_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.check_for_type" title="Link to this definition"></a></dt>
+<dd><p>Checks the result manager contains a result with a given type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.check_for_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.check_for_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The results type.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultManager.lookup_by_type">
 <span class="sig-name descname"><span class="pre">lookup_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.lookup_by_type" title="Link to this definition"></a></dt>
-<dd><p>Find a result by its type.</p>
+<dd><p>Find a result by its type. Throws an error if none or multiple are found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.lookup_by_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.lookup_by_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The results type.</p>
@@ -470,7 +486,29 @@ sophisticated <code class="xref py py-class docutils literal notranslate"><span 
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.core.result_base.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.core.result_base.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.core.result_base.html">main</a></dd>
     </dl>
   </div>
 </div><script>

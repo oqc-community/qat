@@ -387,23 +387,23 @@ where the <a class="reference internal" href="../qat.model.loaders.converted.htm
 legacy Echo model and converts it to a Pydantic model.</p>
 <p>To load the models as a
 <a class="reference internal" href="../qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a>,
-<a class="reference internal" href="../qat.model.loaders.html#module-qat.model.loaders" title="qat.model.loaders"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.model.loaders</span></code></a> has a <a class="reference internal" href="../qat.model.loaders.legacy.html#module-qat.model.loaders.legacy" title="qat.model.loaders.legacy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">legacy</span></code></a> package, which
+<a class="reference internal" href="../qat.model.loaders.html#module-qat.model.loaders" title="qat.model.loaders"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.model.loaders</span></code></a> has a <code class="xref py py-mod docutils literal notranslate"><span class="pre">legacy</span></code> package, which
 includes the following loaders:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="../qat.model.loaders.legacy.html#qat.model.loaders.legacy.EchoModelLoader" title="qat.model.loaders.legacy.EchoModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoModelLoader</span></code></a>: a model
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoModelLoader</span></code>: a model
 traditionally used with “echo engines”.</p></li>
-<li><p><a class="reference internal" href="../qat.model.loaders.legacy.html#qat.model.loaders.legacy.LucyModelLoader" title="qat.model.loaders.legacy.LucyModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">LucyModelLoader</span></code></a>: a mock-up hardware
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LucyModelLoader</span></code>: a mock-up hardware
 model of the legacy OQC Lucy hardware.</p></li>
-<li><p><a class="reference internal" href="../qat.model.loaders.legacy.html#qat.model.loaders.legacy.QiskitModelLoader" title="qat.model.loaders.legacy.QiskitModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitModelLoader</span></code></a>: a model
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitModelLoader</span></code>: a model
 with specific support for Qiskit’s AerSimulator as a target.</p></li>
-<li><p><a class="reference internal" href="../qat.model.loaders.legacy.html#qat.model.loaders.legacy.RTCSModelLoader" title="qat.model.loaders.legacy.RTCSModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTCSModelLoader</span></code></a>: a model
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RTCSModelLoader</span></code>: a model
 with specific support for OQC’s real time chip simulator (RTCS).</p></li>
-<li><p><a class="reference internal" href="../qat.model.loaders.legacy.html#qat.model.loaders.legacy.FileModelLoader" title="qat.model.loaders.legacy.FileModelLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileModelLoader</span></code></a>: used to load
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FileModelLoader</span></code>: used to load
 legacy hardware models from file.</p></li>
 </ul>
 <p>For legacy models that do not have a designated loader method, we can manually convert from
 a legacy to Pydantic hardware model by using the
-<a class="reference internal" href="../qat.model.convert_legacy.html#qat.model.convert_legacy.convert_legacy_echo_hw_to_pydantic" title="qat.model.convert_legacy.convert_legacy_echo_hw_to_pydantic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">convert_legacy_echo_hw_to_pydantic</span></code></a>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">convert_legacy_echo_hw_to_pydantic</span></code>
 method.</p>
 </section>
 <section id="loading-models-from-external-files">
@@ -496,7 +496,29 @@ properties, such as pulses can be modified, are validated to ensure they are sen
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../../2.6.0/index.html">2.6.0</a></dd>
       <dd><a href="hardware_models.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../../main/getting_started/hardware_models.html">main</a></dd>
     </dl>
   </div>
 </div><script>

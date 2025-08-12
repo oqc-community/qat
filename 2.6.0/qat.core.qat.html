@@ -9,6 +9,7 @@
   <title>qat.core.qat module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -339,18 +340,87 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.qat.QAT.compile">
-<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.compile" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.compile" title="Link to this definition"></a></dt>
+<dd><p>Compiles a source program into an executable using the specified pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.core.qat.QAT.compile.params.program"></span><strong>program</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.compile.params.program">¶</a> – The source program to compile.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.compile.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.compile.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Configuration options for the compiler, such as optimization
+and results formatting.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.compile.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.compile.params.pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The pipeline to use for compilation. Defaults to “default”.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.compile.params.to_json"></span><strong>to_json</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.compile.params.to_json">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the output package will be serialized to JSON format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing the executable of the compiled program for the target
+device and the metrics manager containing metrics collected during compilation.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.qat.QAT.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.execute" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Executes a compiled package on the specified pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.core.qat.QAT.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.execute.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The compiled package to execute, which can be provided as a JSON
+blob.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.execute.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.execute.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Configuration options for the compiler, such as optimization
+and results formatting.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.execute.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.execute.params.pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The pipeline to use for execution. Defaults to “default”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing the results of the execution and the metrics manager</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.qat.QAT.reload_all_models">
+<span class="sig-name descname"><span class="pre">reload_all_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.reload_all_models" title="Link to this definition"></a></dt>
+<dd><p>Reloads all hardware models and updates the pipelines.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.qat.QAT.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compile_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execute_pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.qat.QAT.run" title="Link to this definition"></a></dt>
+<dd><p>Compiles and executes a source program using the specified pipeline.</p>
+<p>The compilation and execution pipeline can be specified separately using
+<cite>compile_pipeline</cite> and <cite>execute_pipeline</cite> which take precedence . Alternatively,
+a unified pipeline can be provided using the <cite>pipeline</cite> parameter. If neither are
+provided, the default pipeline will be used for both compilation and execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.core.qat.QAT.run.params.program"></span><strong>program</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.run.params.program">¶</a> – The source program to compile and execute.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Configuration options for the compiler, such as optimization
+and results formatting.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.run.params.pipeline"></span><strong>pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.run.params.pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPipeline</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The pipeline to use for compilation and execution. Defaults to
+“default”.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.run.params.compile_pipeline"></span><strong>compile_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.run.params.compile_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPipeline</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – The pipeline to use for compilation. If provided, it will
+override the <cite>pipeline</cite> parameter for compilation.</p></li>
+<li><p><span class="target" id="qat.core.qat.QAT.run.params.execute_pipeline"></span><strong>execute_pipeline</strong><a class="paramlink headerlink reference internal" href="#qat.core.qat.QAT.run.params.execute_pipeline">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPipeline</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – The pipeline to use for execution. If provided, it will
+override the <cite>pipeline</cite> parameter for execution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing the results of the execution and the metrics manager</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -391,7 +461,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.core.qat.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.core.qat.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.core.qat.html">main</a></dd>
     </dl>
   </div>
 </div><script>

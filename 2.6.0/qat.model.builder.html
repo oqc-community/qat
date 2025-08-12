@@ -9,6 +9,7 @@
   <title>qat.model.builder module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -341,8 +342,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.builder.PhysicalHardwareModelBuilder.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.builder.PhysicalHardwareModelBuilder.params.physical_connectivity">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[int]</span></code>]</span>) – The connectivities of the physical qubits on the QPU (undirected graph).</p></li>
-<li><p><span class="target" id="qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[int]</span></code>]]</span>) – The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of <cite>physical_connectivity</cite>.</p></li>
+<li><p><span class="target" id="qat.model.builder.PhysicalHardwareModelBuilder.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.builder.PhysicalHardwareModelBuilder.params.physical_connectivity">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[int]</span></code>]</span>) – The connectivities of the physical qubits on the QPU
+(undirected graph).</p></li>
+<li><p><span class="target" id="qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[int]</span></code>]]</span>) – The connectivities (directed graph) of the qubits used for
+compilation, which can be a subgraph of <cite>physical_connectivity</cite>.</p></li>
 <li><p><span class="target" id="qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity_quality"></span><strong>logical_connectivity_quality</strong><a class="paramlink headerlink reference internal" href="#qat.model.builder.PhysicalHardwareModelBuilder.params.logical_connectivity_quality">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenDict[tuple[Annotated[int,</span> <span class="pre">AfterValidator],</span> <span class="pre">Annotated[int,</span> <span class="pre">AfterValidator]],</span> <span class="pre">Annotated[float,</span> <span class="pre">AfterValidator]]</span></code>]</span>) – Quality of the connections between the qubits.</p></li>
 </ul>
 </dd>
@@ -396,7 +399,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.model.builder.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.model.builder.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.model.builder.html">main</a></dd>
     </dl>
   </div>
 </div><script>

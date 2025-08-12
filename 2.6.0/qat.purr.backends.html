@@ -9,6 +9,7 @@
   <title>qat.purr.backends package &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -359,10 +360,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qblox.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html#qat.purr.backends.qblox.algorithm.stable_partition"><code class="docutils literal notranslate"><span class="pre">stable_partition()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.algorithm.html">qat.purr.backends.qblox.algorithm module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass"><code class="docutils literal notranslate"><span class="pre">BindingPass</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult"><code class="docutils literal notranslate"><span class="pre">BindingResult</span></code></a></li>
@@ -378,8 +376,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AbstractContext"><code class="docutils literal notranslate"><span class="pre">AbstractContext</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager"><code class="docutils literal notranslate"><span class="pre">AllocationManager</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.ContextMixin"><code class="docutils literal notranslate"><span class="pre">ContextMixin</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxContext"><code class="docutils literal notranslate"><span class="pre">NewQbloxContext</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter"><code class="docutils literal notranslate"><span class="pre">NewQbloxEmitter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass"><code class="docutils literal notranslate"><span class="pre">PreCodegenPass</span></code></a></li>
@@ -388,8 +386,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext"><code class="docutils literal notranslate"><span class="pre">QbloxContext</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxEmitter"><code class="docutils literal notranslate"><span class="pre">QbloxEmitter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage"><code class="docutils literal notranslate"><span class="pre">QbloxPackage</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_phase_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_phase_arguments()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.get_nco_set_frequency_arguments"><code class="docutils literal notranslate"><span class="pre">get_nco_set_frequency_arguments()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a><ul>
@@ -445,8 +441,9 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.NewQbloxLiveEngine"><code class="docutils literal notranslate"><span class="pre">NewQbloxLiveEngine</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine"><code class="docutils literal notranslate"><span class="pre">QbloxLiveEngine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine"><code class="docutils literal notranslate"><span class="pre">AbstractQbloxLiveEngine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine1"><code class="docutils literal notranslate"><span class="pre">QbloxLiveEngine1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngine2"><code class="docutils literal notranslate"><span class="pre">QbloxLiveEngine2</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter"><code class="docutils literal notranslate"><span class="pre">QbloxLiveEngineAdapter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.QbloxLiveHardwareModel"><code class="docutils literal notranslate"><span class="pre">QbloxLiveHardwareModel</span></code></a></li>
 </ul>
@@ -473,7 +470,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.QatIR"><code class="docutils literal notranslate"><span class="pre">QatIR</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.TransformPass"><code class="docutils literal notranslate"><span class="pre">TransformPass</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.ValidationPass"><code class="docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.get_hardware_model"><code class="docutils literal notranslate"><span class="pre">get_hardware_model()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a><ul>
@@ -491,8 +487,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_acquisitions"><code class="docutils literal notranslate"><span class="pre">plot_acquisitions()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_packages"><code class="docutils literal notranslate"><span class="pre">plot_packages()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html#qat.purr.backends.qblox.visualisation.plot_playback"><code class="docutils literal notranslate"><span class="pre">plot_playback()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -599,6 +595,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper"><code class="docutils literal notranslate"><span class="pre">QiskitBuilderWrapper</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper.calibration_id"><code class="docutils literal notranslate"><span class="pre">QiskitBuilderWrapper.calibration_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilderWrapper.instructions"><code class="docutils literal notranslate"><span class="pre">QiskitBuilderWrapper.instructions</span></code></a></li>
 </ul>
 </li>
@@ -871,7 +868,29 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.backends.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.purr.backends.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.backends.html">main</a></dd>
     </dl>
   </div>
 </div><script>

@@ -9,6 +9,7 @@
   <title>qat.runtime.passes.legacy.transform module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -333,114 +334,8 @@
              
 
 
-  <section id="module-qat.runtime.passes.legacy.transform">
-<span id="qat-runtime-passes-legacy-transform-module"></span><h1>qat.runtime.passes.legacy.transform module<a class="headerlink" href="#module-qat.runtime.passes.legacy.transform" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitErrorMitigation</span></span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Implements readout error mitigation for legacy Qiskit engines.</p>
-<p>Because the legacy Qiskit engine returns results in a format that is not consistent with
-other legacy engines (or refactored ones), it requires its own implementation. The
-refactored engine will be written so that the output of the results are formatted
-in a way that the runtime will expect to receive them. This is just a work around to
-support legacy engines in the new pipelines API.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping">
-<span class="sig-name descname"><span class="pre">classical_to_quantum_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping" title="Link to this definition"></a></dt>
-<dd><p>Generates a mapping between classical register indices and qubit indices.</p>
-<p>This would probably be an analysis pass for refactored code, but since its only used
-here, its just included within this transformation pass.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.classical_to_quantum_mapping.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder" title="qat.purr.backends.qiskit_simulator.QiskitBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitBuilder</span></code></a></span>) – The Qiskit instruction builder.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the assign variables is not in the expected format, an error
-is thrown.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Returns the mapping as a dictionary.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.index_pattern">
-<span class="sig-name descname"><span class="pre">index_pattern</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile('(.*)\\[(?P&lt;clbit_index&gt;[0-9]+)\\]_(?P&lt;qubit_index&gt;[0-9]+)')</span></em><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.index_pattern" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – Acquisition data returned from the Qiskit simulator.</p></li>
-<li><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler config contains the error mitigation
-configuration.</p></li>
-<li><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitErrorMitigation.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html#qat.purr.backends.qiskit_simulator.QiskitBuilder" title="qat.purr.backends.qiskit_simulator.QiskitBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QiskitBuilder</span></code></a></span>) – The Qiskit instruction builder.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – Multiple registers are not allowed with error mitigation.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The transformed result acquisitions.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitSimplifyResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitSimplifyResults</span></span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitSimplifyResults" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Strips away randomly generated names.</p>
-<p>This is the same as the <cite>simplify_results</cite> function in <code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsTransform</span></code>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitSimplifyResults.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – Acquisition data returned from the Qiskit simulator.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The acquisition data simplified.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitStripMetadata">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QiskitStripMetadata</span></span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitStripMetadata" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Detects if Qiskit is returning meta data associated with the simulation, and trims
-it away if so.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.passes.legacy.transform.QiskitStripMetadata.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.legacy.transform.QiskitStripMetadata.run" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.legacy.transform.QiskitStripMetadata.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.legacy.transform.QiskitStripMetadata.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – Acquisition data returned from the Qiskit simulator.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The acquisition data with metadata stripped away (if found).</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="qat-runtime-passes-legacy-transform-module">
+<h1>qat.runtime.passes.legacy.transform module<a class="headerlink" href="#qat-runtime-passes-legacy-transform-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -478,7 +373,29 @@ it away if so.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.runtime.passes.legacy.transform.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.runtime.passes.legacy.transform.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.runtime.passes.legacy.transform.html">main</a></dd>
     </dl>
   </div>
 </div><script>

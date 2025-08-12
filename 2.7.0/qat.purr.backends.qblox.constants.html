@@ -374,6 +374,18 @@ three to a maximum number of 589824 bins.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH">
+<span class="sig-name descname"><span class="pre">MAX_ACQ_INTEGRATION_LENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777212</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH" title="Link to this definition"></a></dt>
+<dd><p>Minimum and maximum integration lengths</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD">
+<span class="sig-name descname"><span class="pre">MAX_ACQ_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777212</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD" title="Link to this definition"></a></dt>
+<dd><p>Minimum and maximum thresholds for the thresholded acquisition</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_GAIN">
 <span class="sig-name descname"><span class="pre">MAX_GAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32767</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_GAIN" title="Link to this definition"></a></dt>
 <dd><p>Maximum gain in Q1ASM programs.</p>
@@ -446,6 +458,16 @@ assembler is 2**16-1, but this is the largest that is a multiple of 4 ns.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MIN_ACQ_INTEGRATION_LENGTH">
+<span class="sig-name descname"><span class="pre">MIN_ACQ_INTEGRATION_LENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_INTEGRATION_LENGTH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MIN_ACQ_THRESHOLD">
+<span class="sig-name descname"><span class="pre">MIN_ACQ_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-16777212</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_THRESHOLD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MIN_GAIN">
 <span class="sig-name descname"><span class="pre">MIN_GAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-32768</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MIN_GAIN" title="Link to this definition"></a></dt>
 <dd><p>Minimum gain in Q1ASM programs.</p>
@@ -498,6 +520,12 @@ For the minimum we multiply by -1.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">
 <span class="sig-name descname"><span class="pre">NCO_MAX_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500000000.0</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ" title="Link to this definition"></a></dt>
 <dd><p>Maximum NCO frequency</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.NCO_MAX_PHASE_STEPS">
+<span class="sig-name descname"><span class="pre">NCO_MAX_PHASE_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000000</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.NCO_MAX_PHASE_STEPS" title="Link to this definition"></a></dt>
+<dd><p>Maximum NCO phase steps</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -575,7 +603,29 @@ For the minimum we multiply by -1.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.purr.backends.qblox.constants.html">2.6.0</a></dd>
       <dd><a href="qat.purr.backends.qblox.constants.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.purr.backends.qblox.constants.html">main</a></dd>
     </dl>
   </div>
 </div><script>

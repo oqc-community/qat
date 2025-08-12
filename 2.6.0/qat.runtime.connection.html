@@ -9,6 +9,7 @@
   <title>qat.runtime.connection module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -343,12 +344,13 @@ used. For example, if a user only requires to send jobs sporadically, then a con
 that is created before execution and ended after execution might be desired. On the
 contrary, if there is a stream of frequent jobs, the connection likely wants to be held
 indefinitely.</p>
-<p>There are different flags that can be specified:
-#. <cite>ConnectionMode.CONNECT_BEFORE_EXECUTE</cite>: Specifies that the Runtime should attempt</p>
-<blockquote>
-<div><p>to connect the engine each time execute is called.</p>
-</div></blockquote>
+<p>There are different flags that can be specified:</p>
 <ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.CONNECT_BEFORE_EXECUTE</cite>: Specifies that the Runtime should attempt</dt><dd><p>to connect the engine each time execute is called.</p>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><cite>ConnectionMode.DISCONNECT_AFTER_EXECUTE</cite>: Specifies that the Runtime should attempt</dt><dd><p>to disconnect the engine after each execute.</p>
 </dd>
@@ -366,12 +368,13 @@ manager).</p>
 </dl>
 </li>
 </ol>
-<p>Some predefined composite modes:
-#. <cite>ConnectionMode.MANUAL</cite>: Connection handling is done externally: the Runtime will</p>
-<blockquote>
-<div><p>make no attempt to manage it.</p>
-</div></blockquote>
+<p>Some predefined composite modes:</p>
 <ol class="arabic simple">
+<li><dl class="simple">
+<dt><cite>ConnectionMode.MANUAL</cite>: Connection handling is done externally: the Runtime will</dt><dd><p>make no attempt to manage it.</p>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><cite>ConnectionMode.DEFAULT</cite>: The connection will be created before each execution and</dt><dd><p>disconnected immediately after the execution is complete.</p>
 </dd>
@@ -477,7 +480,29 @@ depending on which Runtime is used (which should be well documented).</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.runtime.connection.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.runtime.connection.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.runtime.connection.html">main</a></dd>
     </dl>
   </div>
 </div><script>

@@ -9,6 +9,7 @@
   <title>qat.model.hardware_model module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -351,6 +352,11 @@
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.calibration_id">
+<span class="sig-name descname"><span class="pre">calibration_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.calibration_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.hardware_model.LogicalHardwareModel.logical_connectivity">
 <span class="sig-name descname"><span class="pre">logical_connectivity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FrozenDict[QubitId,</span> <span class="pre">FrozenSet[QubitId]]</span></em><a class="headerlink" href="#qat.model.hardware_model.LogicalHardwareModel.logical_connectivity" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -375,7 +381,7 @@ validated to form a valid model.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalHardwareModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*,</span> <span class="pre">version:</span> <span class="pre">~pydantic_extra_types.semantic_version.SemanticVersion</span> <span class="pre">=</span> <span class="pre">Version(major=0,</span> <span class="pre">minor=0,</span> <span class="pre">patch=1,</span> <span class="pre">prerelease=None,</span> <span class="pre">build=None),</span> <span class="pre">logical_connectivity:</span> <span class="pre">~qat.utils.pydantic.FrozenDict[Annotated[int,</span> <span class="pre">AfterValidator],</span> <span class="pre">FrozenSet[Annotated[int,</span> <span class="pre">AfterValidator]]]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">calibration_id:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">qubits:</span> <span class="pre">~qat.utils.pydantic.FrozenDict[Annotated[int,</span> <span class="pre">AfterValidator],</span> <span class="pre">Qubit],</span> <span class="pre">physical_connectivity:</span> <span class="pre">~qat.utils.pydantic.FrozenDict[Annotated[int,</span> <span class="pre">AfterValidator],</span> <span class="pre">FrozenSet[Annotated[int,</span> <span class="pre">AfterValidator]]],</span> <span class="pre">logical_connectivity_quality:</span> <span class="pre">~qat.utils.pydantic.FrozenDict[Annotated[tuple[Annotated[int,</span> <span class="pre">AfterValidator],</span> <span class="pre">Annotated[int,</span> <span class="pre">AfterValidator]],</span> <span class="pre">BeforeValidator],</span> <span class="pre">Annotated[float,</span> <span class="pre">AfterValidator]],</span> <span class="pre">error_mitigation:</span> <span class="pre">~qat.model.error_mitigation.ErrorMitigation</span> <span class="pre">=</span> <span class="pre">ErrorMitigation(readout_mitigation=None)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.hardware_model.LogicalHardwareModel" title="qat.model.hardware_model.LogicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicalHardwareModel</span></code></a></p>
 <p>Class for calibrating our QPU hardware.</p>
 <dl class="field-list simple">
@@ -398,10 +404,26 @@ validated to form a valid model.</p>
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_logical_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.default_logical_connectivity" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.device_for_pulse_channel_id">
+<span class="sig-name descname"><span class="pre">device_for_pulse_channel_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.device_for_pulse_channel_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.error_mitigation">
 <span class="sig-name descname"><span class="pre">error_mitigation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ErrorMitigation</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.error_mitigation" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.index_of_qubit">
+<span class="sig-name descname"><span class="pre">index_of_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.index_of_qubit" title="Link to this definition"></a></dt>
+<dd><p>Returns the index of the given qubit in the hardware model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.is_calibrated">
@@ -427,6 +449,16 @@ validated to form a valid model.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.physical_channel_for_pulse_channel_id">
+<span class="sig-name descname"><span class="pre">physical_channel_for_pulse_channel_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_for_pulse_channel_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.physical_channel_with_id">
+<span class="sig-name descname"><span class="pre">physical_channel_with_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_with_id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -483,6 +515,18 @@ in this hardware model as a list.</p>
 
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PydLogicalHardwareModel">
+<span class="sig-name descname"><span class="pre">PydLogicalHardwareModel</span></span><a class="headerlink" href="#qat.model.hardware_model.PydLogicalHardwareModel" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.model.hardware_model.LogicalHardwareModel" title="qat.model.hardware_model.LogicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicalHardwareModel</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PydPhysicalHardwareModel">
+<span class="sig-name descname"><span class="pre">PydPhysicalHardwareModel</span></span><a class="headerlink" href="#qat.model.hardware_model.PydPhysicalHardwareModel" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></p>
+</dd></dl>
+
 </section>
 
 
@@ -520,7 +564,29 @@ in this hardware model as a list.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.model.hardware_model.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/qat.model.hardware_model.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.model.hardware_model.html">main</a></dd>
     </dl>
   </div>
 </div><script>

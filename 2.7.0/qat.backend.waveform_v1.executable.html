@@ -346,7 +346,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1ChannelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.ChannelData" title="qat.runtime.executables.ChannelData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelData</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelData</span></code></p>
 <p>Contains the channel data for a <a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code></a>.</p>
 <p>Stores the waveforms and acqusitions needed for execution. No control flow is possible.</p>
 <dl class="field-list simple">
@@ -354,7 +354,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.buffer"></span><strong>buffer</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.buffer">¶</a> (<em>list</em><em>[</em><em>complex</em><em>]</em>) – The waveform to be sent at each sample.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.baseband_frequency"></span><strong>baseband_frequency</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.baseband_frequency">¶</a> (<em>float</em><em> | </em><em>None</em>) – The frequency to be set for the baseband.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires"></span><strong>acquires</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.AcquireData" title="qat.runtime.executables.AcquireData"><em>AcquireData</em></a><em>]</em>) – Acquire information needed for readouts.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires"></span><strong>acquires</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires">¶</a> (<em>list</em><em>[</em><em>AcquireData</em><em>]</em>) – Acquire information needed for readouts.</p></li>
 </ul>
 </dd>
 </dl>
@@ -364,7 +364,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires">
-<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.AcquireData" title="qat.runtime.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -388,7 +388,7 @@ validated to form a valid model.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1Executable">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.runtime.executables.html#qat.runtime.executables.ChannelExecutable" title="qat.runtime.executables.ChannelExecutable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelExecutable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelExecutable</span></code></p>
 <p>A <a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code></a> is an executable used in early iterations of QAT.</p>
 <p>This type of executable is composed of explicit waveforms that are compiled for each
 pulse channel, and summed to provide the waveform “buffer” for each physical channel.
@@ -403,10 +403,13 @@ channel.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots">¶</a> (<em>int</em>) – The number of times the program is executed.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.repetition_time"></span><strong>repetition_time</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.repetition_time">¶</a> (<em>float</em>) – The amount of time to wait between shots for the QPU to
 reset.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.compiled_shots"></span><strong>compiled_shots</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.compiled_shots">¶</a> (<em>PositiveInt</em>) – When the required number of shots exceeds the
+allowed amount by the target machine, shots can be batched into groups. This states
+how many shots to do in each batch.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.post_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>list</em><em>[</em><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><em>PostProcessing</em></a><em>]</em><em>]</em>) – Contains the post-processing information for each acquisition.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.results_processing"></span><strong>results_processing</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.results_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>InlineResultsProcessing</em><em>]</em>) – Contains the information for how results should be formatted.</p></li>
 <li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns"></span><strong>assigns</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign" title="qat.ir.instructions.Assign"><em>Assign</em></a><em>]</em>) – Assigns results to given variables.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns">¶</a> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Which acqusitions/variables should be returned.</p></li>
+<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns">¶</a> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Which acquisitions/variables should be returned.</p></li>
 </ul>
 </dd>
 </dl>
@@ -469,7 +472,29 @@ validated to form a valid model.</p>
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/qat.backend.waveform_v1.executable.html">2.6.0</a></dd>
       <dd><a href="qat.backend.waveform_v1.executable.html">2.7.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../main/qat.backend.waveform_v1.executable.html">main</a></dd>
     </dl>
   </div>
 </div><script>
