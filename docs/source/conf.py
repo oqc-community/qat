@@ -30,6 +30,12 @@ author = config.author
 
 smv_remote_whitelist = None
 
+# Only allow tags for release versions, e.g., v1.0.0, 2.3.4, etc.
+smv_tag_whitelist = r"^v?\d+\.\d+\.\d+$"
+
+# Only allow branches named 'main'
+smv_branch_whitelist = r"^main$"
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
