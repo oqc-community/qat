@@ -65,6 +65,7 @@ from qat.middleend.passes.transform import (
 )
 from qat.middleend.passes.validation import (
     PydDynamicFrequencyValidation,
+    PydFrequencySetupValidation,
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
     PydReadoutValidation,
@@ -259,8 +260,8 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             PassManager()
             | HardwareConfigValidity(legacy_model)
             | ActivePulseChannelAnalysis(legacy_model)  # TODO: COMPILER-393
-            | FrequencySetupValidation(legacy_model, target_data)  # TODO: COMPILER-648
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydFrequencySetupValidation(pyd_model, target_data)
             | PydDynamicFrequencyValidation(pyd_model, target_data)
             # Sanitising input IR to make it complete
             | PydRepeatSanitisation(target_data)  # TODO: COMPILER-347

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-
 from collections import defaultdict
 from functools import singledispatchmethod
 
@@ -9,6 +8,7 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
+from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import InstructionBuilder
 from qat.ir.instructions import FrequencySet, FrequencyShift, Instruction, Repeat, Return
 from qat.ir.measure import (
@@ -18,6 +18,8 @@ from qat.ir.measure import (
     ProcessAxis,
     Pulse,
 )
+from qat.middleend.passes.analysis import ActivePulseChannelResults
+from qat.model.device import PhysicalChannel
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.utils.logger import get_default_logger
@@ -302,6 +304,189 @@ class HardwareConfigValidity(ValidationPass):
                 )
 
 
+class FrequencySetupValidation(ValidationPass):
+    """Validates the baseband frequencies and intermediate frequencies of pulse channels
+    against the target data.
+    """
+
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model.
+        :param target_data: Target-related information.
+        """
+
+        # Extract limits from the target data.
+        self.qubit_lo_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_lo_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_lo_freq_max,
+        )
+        self.resonator_lo_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_lo_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_lo_freq_max,
+        )
+        self.qubit_if_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_if_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_if_freq_max,
+        )
+        self.resonator_if_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
+        )
+
+        self._pulse_channel_data = self._get_pulse_channel_data(model)
+        self._physical_channel_data = self._get_physical_channel_data(model)
+
+    def _get_pulse_channel_data(self, model: PhysicalHardwareModel) -> dict[str, dict]:
+        """Extracts pulse channel data from the model."""
+        pulse_channel_data = {}
+
+        for qubit in model.qubits.values():
+            pulse_channel_data = self._populate_pulse_channel_dict(
+                pulse_channel_data, qubit.all_pulse_channels, qubit.physical_channel, False
+            )
+            pulse_channel_data = self._populate_pulse_channel_dict(
+                pulse_channel_data,
+                qubit.resonator.all_pulse_channels,
+                qubit.resonator.physical_channel,
+                True,
+            )
+        return pulse_channel_data
+
+    def _populate_pulse_channel_dict(
+        self,
+        pulse_channel_data: dict,
+        pulse_channels: list[Pulse],
+        physical_channel: PhysicalChannel,
+        is_resonator: bool,
+    ) -> dict:
+        for pulse_channel in pulse_channels:
+            if_freq = pulse_channel.frequency - physical_channel.baseband.frequency
+            pulse_channel_data[pulse_channel.uuid] = {
+                "physical_channel": physical_channel.uuid,
+                "is_valid": self._validate_pulse_channel_if(if_freq, is_resonator),
+                "is_resonator": is_resonator,
+                "if_frequency": if_freq,
+                "pulse_type": pulse_channel.pulse_type,
+            }
+        return pulse_channel_data
+
+    def _get_physical_channel_data(self, model: PhysicalHardwareModel) -> dict[str, dict]:
+        """Extracts physical channel data from the model."""
+        physical_channel_data = {}
+        for q_index, qubit in model.qubits.items():
+            physical_channel = qubit.physical_channel
+            physical_channel_data[physical_channel.uuid] = (
+                self._populate_physical_channel_data(physical_channel, False, q_index)
+            )
+
+            physical_channel = qubit.resonator.physical_channel
+            physical_channel_data[physical_channel.uuid] = (
+                self._populate_physical_channel_data(physical_channel, True, q_index)
+            )
+
+        return physical_channel_data
+
+    def _populate_physical_channel_data(
+        self, physical_channel: PhysicalChannel, is_resonator: bool, qubit_index: int
+    ) -> dict:
+        physical_channel_data = {
+            "baseband_frequency": physical_channel.baseband.frequency,
+            "is_resonator": is_resonator,
+            "is_valid": self._validate_baseband_frequency(
+                physical_channel.baseband.frequency, is_resonator
+            ),
+            "index": qubit_index,
+        }
+        return physical_channel_data
+
+    def _validate_baseband_frequency(self, frequency, is_resonator: bool) -> bool:
+        """Validates that the frequencies in the dictionary are within the specified range."""
+        lower, upper = self._get_lo_freq_range(is_resonator)
+        return bool(lower <= frequency <= upper)
+
+    def _validate_pulse_channel_if(self, frequency: float, is_resonator: bool) -> bool:
+        """Validates that the pulse channel frequencies are within the specified range."""
+        lower, upper = self._get_if_freq_range(is_resonator)
+        return bool(lower <= np.abs(frequency) <= upper)
+
+    def _get_lo_freq_range(self, is_resonator: bool) -> tuple[float, float]:
+        """Returns the frequency range for the given type of channel."""
+        return (
+            self.qubit_lo_freq_limits if not is_resonator else self.resonator_lo_freq_limits
+        )
+
+    def _get_if_freq_range(self, is_resonator: bool) -> tuple[float, float]:
+        """Returns the IF frequency range for the given type of channel."""
+        return (
+            self.qubit_if_freq_limits if not is_resonator else self.resonator_if_freq_limits
+        )
+
+    def _find_physical_channel_violations(self, physical_channels) -> list[str] | None:
+        """Finds violations in the physical channels based on their baseband frequencies."""
+        violations = []
+        for physical_channel in physical_channels:
+            data = self._physical_channel_data.get(physical_channel, None)
+            if not data["is_valid"]:
+                freq_range = self._get_lo_freq_range(data["is_resonator"])
+                baseband_freq = data["baseband_frequency"]
+                name = "Resonator" if data["is_resonator"] else "Qubit"
+                name += f" {data['index']}"
+                violations.append(
+                    f"Physical channel for {name} with baseband frequency "
+                    f"{baseband_freq} is out of the valid "
+                    f"range {freq_range}."
+                )
+        return violations
+
+    def _find_pulse_channel_violations(self, pulse_channels) -> list[str] | None:
+        """Finds violations in the pulse channels based on their IF frequencies."""
+        violations = []
+        for pulse_channel in pulse_channels:
+            data = self._pulse_channel_data[pulse_channel]
+
+            # TODO: Add support for custom pulse channels COMPILER-698
+            valid = data["is_valid"]
+
+            if not valid:
+                freq_range = self._get_if_freq_range(data["is_resonator"])
+                if_freq = data["if_frequency"]
+                index = self._physical_channel_data[data["physical_channel"]]["index"]
+                name = "Resonator" if data["is_resonator"] else "Qubit"
+                name += f" {index} {data['pulse_type']}"
+                violations.append(
+                    f"The IF of {name} pulse channel has a value {if_freq}, "
+                    f"which is outside of the the valid range {freq_range}."
+                )
+
+        return violations
+
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager containing the results of the analysis.
+        """
+
+        active_channel_res = res_mgr.lookup_by_type(ActivePulseChannelResults)
+        pulse_channels = active_channel_res.targets
+        physical_channels = set(
+            [
+                self._pulse_channel_data[pulse_channel]["physical_channel"]
+                for pulse_channel in pulse_channels
+            ]
+        )
+
+        violations = self._find_physical_channel_violations(physical_channels)
+        violations.extend(self._find_pulse_channel_violations(pulse_channels))
+
+        if len(violations) > 0:
+            raise ValueError(
+                "Frequency validation of the hardware model against the target data failed "
+                "with the following violations: \n" + "\n".join(violations)
+            )
+        return ir
+
+
 class ReturnSanitisationValidation(ValidationPass):
     """Validates that the IR has a :class:`Return` instruction."""
 
@@ -333,6 +518,7 @@ class RepeatSanitisationValidation(ValidationPass):
 PydReadoutValidation = ReadoutValidation
 PydDynamicFrequencyValidation = DynamicFrequencyValidation
 PydHardwareConfigValidity = HardwareConfigValidity
+PydFrequencySetupValidation = FrequencySetupValidation
 PydNoMidCircuitMeasurementValidation = NoMidCircuitMeasurementValidation
 PydReturnSanitisationValidation = ReturnSanitisationValidation
 PydRepeatSanitisationValidation = RepeatSanitisationValidation
