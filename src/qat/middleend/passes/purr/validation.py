@@ -604,9 +604,7 @@ class DynamicFrequencyValidation(ValidationPass):
 
         violations = []
         for pulse_channel, if_values in ifs.items():
-            if any(
-                if_violations := self._validate_frequency_shifts(pulse_channel, if_values)
-            ):
+            if if_violations := self._validate_frequency_shifts(pulse_channel, if_values):
                 violations.append(
                     f"The IF of pulse channel {pulse_channel.full_id()} is frequency "
                     f"shifted to values {if_violations} that exceed the allowed limits."

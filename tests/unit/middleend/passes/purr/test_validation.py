@@ -663,11 +663,26 @@ class TestDynamicFrequencyValidation:
 
     def test_create_resonator_map(self):
         model = EchoModelLoader().load()
-        is_resonator = FrequencySetupValidation._create_resonator_map(model)
+        is_resonator = DynamicFrequencyValidation._create_resonator_map(model)
         assert len([val for val in is_resonator.values() if val]) == len(
             [val for val in is_resonator.values() if not val]
         )
         assert len(is_resonator) == len(model.physical_channels)
+
+    def test_violating_if_is_zero(self):
+        model = EchoModelLoader().load()
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel(model)
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        delta_freq = 1.1 * qubit_data.pulse_channel_if_freq_min
+        builder = model.create_builder()
+        builder.frequency_shift(channel, delta_freq)
+        builder.frequency_shift(channel, -delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            DynamicFrequencyValidation(model, target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
     def test_raises_no_error_when_freq_shift_in_range(self, scale):
@@ -677,8 +692,8 @@ class TestDynamicFrequencyValidation:
         qubit_data = self.target_data.QUBIT_DATA
         target_freq = (
             channel.physical_channel.baseband_frequency
-            + scale * qubit_data.pulse_channel_lo_freq_max
-            - (1 - scale) * qubit_data.pulse_channel_lo_freq_min
+            + scale * qubit_data.pulse_channel_if_freq_max
+            - (1 - scale) * qubit_data.pulse_channel_if_freq_min
         )
         delta_freq = target_freq - channel.frequency
         builder = model.create_builder()
@@ -696,7 +711,7 @@ class TestDynamicFrequencyValidation:
         assert qubit_data.pulse_channel_if_freq_min > 0.0
         target_freq = (
             channel.physical_channel.baseband_frequency
-            + sign * 0.5 * qubit_data.pulse_channel_lo_freq_min
+            + sign * 0.5 * qubit_data.pulse_channel_if_freq_min
         )
         delta_freq = target_freq - channel.frequency
         builder = model.create_builder()
@@ -713,7 +728,7 @@ class TestDynamicFrequencyValidation:
         qubit_data = self.target_data.QUBIT_DATA
         target_freq = (
             channel.physical_channel.baseband_frequency
-            + sign * 1.1 * qubit_data.pulse_channel_lo_freq_max
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
         )
         delta_freq = target_freq - channel.frequency
         builder = model.create_builder()
@@ -730,7 +745,7 @@ class TestDynamicFrequencyValidation:
         qubit_data = self.target_data.QUBIT_DATA
         target_freq = (
             channel.physical_channel.baseband_frequency
-            + sign * 1.1 * qubit_data.pulse_channel_lo_freq_max
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
         )
         delta_freq = target_freq - channel.frequency
         builder = model.create_builder()
@@ -749,7 +764,7 @@ class TestDynamicFrequencyValidation:
 
         qubit_data = self.target_data.QUBIT_DATA
         delta_freq = 0.05 * (
-            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
         )
 
         # interweave with random instructions
@@ -777,7 +792,7 @@ class TestDynamicFrequencyValidation:
 
         qubit_data = self.target_data.QUBIT_DATA
         delta_freq = 0.05 * (
-            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
         )
 
         # interweave with random instructions
@@ -804,7 +819,7 @@ class TestDynamicFrequencyValidation:
         channels = self.get_two_pulse_channels_from_different_physical_channels(model)
         qubit_data = self.target_data.QUBIT_DATA
         delta_freq = 0.05 * (
-            qubit_data.pulse_channel_lo_freq_max - qubit_data.pulse_channel_lo_freq_min
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
         )
 
         builder = model.create_builder()

@@ -1,12 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
+from collections import defaultdict
+from functools import singledispatchmethod
+
+import numpy as np
 from compiler_config.config import CompilerConfig, ErrorMitigationConfig, ResultsFormatting
 
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.ir.instruction_builder import InstructionBuilder
-from qat.ir.instructions import Repeat, Return
+from qat.ir.instructions import FrequencySet, FrequencyShift, Instruction, Repeat, Return
 from qat.ir.measure import (
     Acquire,
     AcquireMode,
@@ -15,9 +19,139 @@ from qat.ir.measure import (
     Pulse,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
+from qat.model.target_data import TargetData
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+class DynamicFrequencyValidation(ValidationPass):
+    """Validates the setting or shifting frequencies does not move the intermediate
+    frequency of a pulse channel outside the allowed limits."""
+
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+        """Instantiate the pass with a hardware model.
+
+        :param model: The hardware model.
+        :param target_data: Target-related information.
+        """
+        self.model = model
+        self._is_resonator = self._create_resonator_map(model)
+
+        # Extract limits from the target data.
+        self.qubit_if_freq_limits = (
+            target_data.QUBIT_DATA.pulse_channel_if_freq_min,
+            target_data.QUBIT_DATA.pulse_channel_if_freq_max,
+        )
+        self.resonator_if_freq_limits = (
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
+            target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
+        )
+
+    @staticmethod
+    def _create_resonator_map(model: PhysicalHardwareModel) -> dict[str, bool]:
+        """Creates a map to lookup if physical channels belong to resonators.."""
+        res_map = {}
+        for qubit in model.qubits.values():
+            res_map[qubit.physical_channel.uuid] = False
+            res_map[qubit.resonator.physical_channel.uuid] = True
+        return res_map
+
+    def _validate_frequency_shifts(self, physical_channel_id: str, ifs: list[float]):
+        """Validates that the frequency shifts do not exceed the allowed limits."""
+
+        if_limits = (
+            self.qubit_if_freq_limits
+            if not self._is_resonator[physical_channel_id]
+            else self.resonator_if_freq_limits
+        )
+
+        return [
+            if_value
+            for if_value in ifs
+            if not (if_limits[0] <= np.abs(if_value) <= if_limits[1])
+        ]
+
+    @singledispatchmethod
+    def _calculate_frequency(
+        self,
+        instruction: Instruction,
+        ifs: dict[str, list[float]],
+        physical_channel_ids: dict[str, str],
+    ):
+        pass
+
+    @_calculate_frequency.register(FrequencyShift)
+    def _(
+        self,
+        instruction: FrequencyShift,
+        ifs: dict[str, list[float]],
+        physical_channel_ids: dict[str, str],
+    ):
+        frequencies = ifs[instruction.target]
+        physical_channel = self.model.physical_channel_for_pulse_channel_id(
+            instruction.target
+        )
+        freq = (
+            frequencies[-1]
+            if len(frequencies) > 0
+            else (
+                self.model.pulse_channel_with_id(instruction.target).frequency
+                - physical_channel.baseband.frequency
+            )
+        )
+        frequencies.append(freq + instruction.frequency)
+        physical_channel_ids[instruction.target] = physical_channel.uuid
+
+    @_calculate_frequency.register(FrequencySet)
+    def _(
+        self,
+        instruction: FrequencySet,
+        ifs: dict[str, list[float]],
+        physical_channel_ids: dict[str, str],
+    ):
+        physical_channel = self.model.physical_channel_for_pulse_channel_id(
+            instruction.target
+        )
+        ifs[instruction.target].append(
+            instruction.frequency - physical_channel.baseband.frequency
+        )
+        physical_channel_ids[instruction.target] = physical_channel.uuid
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        ifs = defaultdict(list)
+        physical_channel_ids = defaultdict(str)
+        for instruction in ir.instructions:
+            self._calculate_frequency(instruction, ifs, physical_channel_ids)
+
+        violations = []
+        for pulse_channel_id, if_values in ifs.items():
+            physical_channel_id = physical_channel_ids[pulse_channel_id]
+            if if_violations := self._validate_frequency_shifts(
+                physical_channel_id, if_values
+            ):
+                pulse_channel = self.model.pulse_channel_with_id(pulse_channel_id)
+                device = self.model.device_for_pulse_channel_id(pulse_channel_id)
+                device_name = "Qubit "
+                if self._is_resonator[physical_channel_id]:
+                    device_name = "Resonator "
+                    device = next(
+                        filter(lambda qubit: qubit.resonator is device, self.model.qubits)
+                    )
+                device_name += str(self.model.index_of_qubit(device))
+                violations.append(
+                    f"The IF of {device_name} {pulse_channel.pulse_type} pulse channel is set or "
+                    f"shifted to values {if_violations} that exceed the allowed limits."
+                )
+
+        if len(violations) > 0:
+            raise ValueError(
+                "Dynamic frequency validation failed with the following violations:\n"
+                + "\n".join(violations)
+            )
+        return ir
 
 
 class NoMidCircuitMeasurementValidation(ValidationPass):
@@ -197,6 +331,7 @@ class RepeatSanitisationValidation(ValidationPass):
 
 
 PydReadoutValidation = ReadoutValidation
+PydDynamicFrequencyValidation = DynamicFrequencyValidation
 PydHardwareConfigValidity = HardwareConfigValidity
 PydNoMidCircuitMeasurementValidation = NoMidCircuitMeasurementValidation
 PydReturnSanitisationValidation = ReturnSanitisationValidation

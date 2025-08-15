@@ -14,11 +14,15 @@ from compiler_config.config import (
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
+from qat.ir.instructions import FrequencySet
 from qat.ir.measure import AcquireMode, ProcessAxis
+from qat.ir.waveforms import SquareWaveform
+from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
 )
 from qat.middleend.passes.validation import (
+    PydDynamicFrequencyValidation,
     PydHardwareConfigValidity,
     PydNoMidCircuitMeasurementValidation,
     PydReadoutValidation,
@@ -27,11 +31,317 @@ from qat.middleend.passes.validation import (
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
 from qat.model.loaders.purr import EchoModelLoader
+from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import PostProcessType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 qatconfig = get_config()
+
+
+class TestPydDynamicFrequencyValidation:
+    target_data = TargetData.default()
+    hw = PydEchoModelLoader(qubit_count=4).load()
+
+    def get_single_pulse_channel(self):
+        return next(iter(self.hw._ids_to_pulse_channels.values()))
+
+    def get_two_pulse_channels_from_single_physical_channel(self):
+        device = next(iter(self.hw.quantum_devices))
+        pulse_channels = filter(
+            lambda ch: ch.frequency is not np.nan, device.all_pulse_channels
+        )
+        return next(pulse_channels), next(pulse_channels)
+
+    def get_two_pulse_channels_from_different_physical_channels(self):
+        devices = iter(self.hw.quantum_devices)
+        pulse_channel_1 = next(
+            filter(lambda ch: ch.frequency is not np.nan, next(devices).all_pulse_channels)
+        )
+        pulse_channel_2 = next(
+            filter(lambda ch: ch.frequency is not np.nan, next(devices).all_pulse_channels)
+        )
+        return pulse_channel_1, pulse_channel_2
+
+    def get_baseband_frequency_of_pulse_channel(self, channel_id):
+        return self.hw.physical_channel_for_pulse_channel_id(channel_id).baseband.frequency
+
+    @staticmethod
+    def target_data_with_non_zero_if_min():
+        target_data = TargetData.default()
+        return target_data.model_copy(
+            update={
+                "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(
+                    update={"pulse_channel_if_freq_min": 1e6}
+                ),
+                "RESONATOR_DATA": target_data.RESONATOR_DATA.model_copy(
+                    update={"pulse_channel_if_freq_min": 1e6}
+                ),
+            }
+        )
+
+    def test_create_resonator_map(self):
+        is_resonator = PydDynamicFrequencyValidation._create_resonator_map(self.hw)
+        assert len([val for val in is_resonator.values() if val]) == len(
+            [val for val in is_resonator.values() if not val]
+        )
+        assert len(is_resonator) == len(self.hw._ids_to_physical_channels.keys())
+
+    @pytest.mark.parametrize("method", ["frequency_shift", "frequency_set"])
+    def test_violating_if_is_zero(self, method):
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel()
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        if method == "frequency_shift":
+            delta_freq = 1.1 * qubit_data.pulse_channel_if_freq_min
+            builder.frequency_shift(channel, delta_freq)
+            builder.frequency_shift(channel, -delta_freq)
+        else:
+            builder.add(
+                FrequencySet(
+                    target=channel.uuid,
+                    frequency=self.get_baseband_frequency_of_pulse_channel(channel.uuid),
+                )
+            )
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
+    def test_raises_no_error_when_freq_shift_in_range(self, scale):
+        """Shifts the frequency in the range [min_if, max_if] to check it does not fail."""
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + scale * qubit_data.pulse_channel_if_freq_max
+            - (1 - scale) * qubit_data.pulse_channel_if_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
+    def test_raises_no_error_when_freq_set_in_range(self, scale):
+        """Sets the frequency in the range [min_if, max_if] to check it does not fail."""
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + scale * qubit_data.pulse_channel_if_freq_max
+            - (1 - scale) * qubit_data.pulse_channel_if_freq_min
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_shifted_lower_than_min(self, sign):
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel()
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 0.5 * qubit_data.pulse_channel_if_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_set_lower_than_min(self, sign):
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel()
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 0.5 * qubit_data.pulse_channel_if_freq_min
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_shifted_higher_than_max(self, sign):
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.frequency_shift(channel, delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_set_higher_than_max(self, sign):
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_shifting_out_of_and_back_in_to_range(self, sign):
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.frequency_shift(channel, delta_freq)
+        builder.frequency_shift(channel, -delta_freq)
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_raises_error_when_set_out_of_and_back_in_range(self, sign):
+        channel = self.get_single_pulse_channel()
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 1.1 * qubit_data.pulse_channel_if_freq_max
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
+        builder.add(FrequencySet(target=channel.uuid, frequency=0.5 * target_freq))
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [+1, -1])
+    def test_no_value_error_for_two_channels_same_physical_channel(self, sign):
+        channels = self.get_two_pulse_channels_from_single_physical_channel()
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
+        )
+
+        # interweave with random instructions
+        builder.phase_shift(channels[0], np.pi)
+        builder.frequency_shift(channels[0], sign * delta_freq)
+        builder.phase_shift(channels[1], -np.pi)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 3 * delta_freq)
+        builder.phase_shift(channels[1], -2.54)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActivePulseChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [+1, -1])
+    def test_value_error_for_two_channels_same_physical_channel(self, sign):
+        channels = self.get_two_pulse_channels_from_single_physical_channel()
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
+        )
+
+        # interweave with random instructions
+        builder.phase_shift(channels[0], np.pi)
+        builder.frequency_shift(channels[0], sign * 10 * delta_freq)
+        builder.phase_shift(channels[1], -np.pi)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 16 * delta_freq)
+        builder.phase_shift(channels[1], -2.54)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActivePulseChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    @pytest.mark.parametrize("sign", [+1, -1])
+    def test_value_error_for_two_channels_different_physical_channel(self, sign):
+        channels = self.get_two_pulse_channels_from_different_physical_channels()
+        qubit_data = self.target_data.QUBIT_DATA
+        delta_freq = 0.05 * (
+            qubit_data.pulse_channel_if_freq_max - qubit_data.pulse_channel_if_freq_min
+        )
+
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+
+        # interweave with random instructions
+        builder.phase_shift(channels[0], np.pi)
+        builder.frequency_shift(channels[0], sign * 10 * delta_freq)
+        builder.phase_shift(channels[1], -np.pi)
+        builder.frequency_shift(channels[1], sign * 2 * delta_freq)
+        builder.frequency_shift(channels[0], sign * 16 * delta_freq)
+        builder.phase_shift(channels[1], -2.54)
+        builder.frequency_shift(channels[1], sign * 4 * delta_freq)
+
+        res_mgr = ResultManager()
+        res_mgr.add(
+            ActivePulseChannelResults(
+                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
+            )
+        )
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+
+    def test_small_change_to_if_is_valid(self):
+        """Lil' regression test to test a bug fix for a bug found in pipeline tests.
+
+        Does a little change to the IF frequency - ensures the current IF value is added.
+        """
+
+        target_data = self.target_data_with_non_zero_if_min()
+        pulse_channel = self.hw.qubits[0].drive_pulse_channel
+        pulse_channel.frequency = (
+            self.get_baseband_frequency_of_pulse_channel(pulse_channel.uuid) + 1e7
+        )
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        builder.frequency_shift(pulse_channel, 1e3)
+        builder.pulse(target=pulse_channel.uuid, duration=80e-9, waveform=SquareWaveform())
+        res_mgr = ResultManager()
+        res_mgr.add(ActivePulseChannelResults(target_map={pulse_channel: "doesn't matter"}))
+        PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
 
 
 class TestPydNoMidCircuitMeasurementValidation:

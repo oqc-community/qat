@@ -907,7 +907,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 "Please provide a target that is either a `Qubit` or a `PulseChannel`."
             )
 
-    @InstructionBuilder._check_identity_operation
     def frequency_shift(self, target: Qubit, frequency):
         if isinstance(target, Qubit):
             return self.add(
