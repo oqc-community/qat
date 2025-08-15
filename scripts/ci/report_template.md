@@ -22,12 +22,12 @@ No integration tests defined
 {% endfor -%}
 {% endif -%}
 
+{% set max_cases = 10 -%}
+
 {% if details.failure -%}
 <details>
 
 <Summary>Failure Report</Summary>
-
-{% set max_cases = 10 -%}
 
 #### Failures
 
