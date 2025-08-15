@@ -31,7 +31,7 @@ class TestRequiresHardwareModelMixin:
 
 
 class TestRequiresHardwareModel:
-    # TODO: delete with function (COMPILER-XXX)
+    # TODO: delete with function (COMPILER-662)
 
     def test_requires_hardware_model_with_legacy(self):
         model = EchoModelLoader().load()

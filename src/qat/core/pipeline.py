@@ -104,7 +104,7 @@ class EngineSet:
             raise ValueError(f"Engine {name} not found")
 
         engine = self._engines[name]
-        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-XXX)
+        # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
         if not requires_hardware_model(engine):
             return
 

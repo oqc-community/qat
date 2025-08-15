@@ -699,6 +699,17 @@ class TestFrequencySetupValidation:
 
 
 class TestPydHardwareConfigValidity:
+    @pytest.mark.parametrize("shots", [0, 100, None])
+    def test_shots_does_not_exceed_limit(self, shots):
+        hw_model = generate_hw_model(n_qubits=8)
+        comp_config = CompilerConfig(repeats=shots)
+        ir = "test"
+
+        validation_pass = PydHardwareConfigValidity(hw_model, max_shots=1000)
+        ir_out = validation_pass.run(ir, compiler_config=comp_config)
+
+        assert ir_out == ir
+
     @pytest.mark.parametrize("max_shots", [qatconfig.MAX_REPEATS_LIMIT, None])
     def test_max_shot_limit_exceeded(self, max_shots):
         hw_model = generate_hw_model(n_qubits=8)

@@ -282,7 +282,8 @@ class HardwareConfigValidity(ValidationPass):
         return ir
 
     def _validate_shots(self, compiler_config: CompilerConfig):
-        if compiler_config.repeats > self.max_shots:
+        shots = compiler_config.repeats
+        if shots is not None and shots > self.max_shots:
             raise ValueError(
                 f"Number of shots in compiler config {compiler_config.repeats} exceeds max "
                 f"number of shots {self.max_shots}."

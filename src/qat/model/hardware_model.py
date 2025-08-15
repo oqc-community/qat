@@ -258,6 +258,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def device_for_pulse_channel_id(self, id_: str):
         return self._pulse_channel_ids_to_device.get(id_, None)
 
+    def qubit_for_resonator(self, resonator: Resonator) -> Qubit:
+        """Returns the qubit associated with the given resonator."""
+        return self._resonators_to_qubits.get(resonator, None)
+
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:
         """

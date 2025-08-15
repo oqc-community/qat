@@ -10,6 +10,7 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
+from qat.middleend.passes.analysis import PydActivePulseChannelAnalysis
 from qat.middleend.passes.purr.analysis import (
     ActivePulseChannelAnalysis,
 )
@@ -67,13 +68,11 @@ from qat.middleend.passes.validation import (
     PydDynamicFrequencyValidation,
     PydFrequencySetupValidation,
     PydHardwareConfigValidity,
-    PydNoMidCircuitMeasurementValidation,
     PydReadoutValidation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.runtime.passes.purr.analysis import CalibrationAnalysis
 
 
 class BaseMiddleend(abc.ABC):
@@ -258,9 +257,9 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
         """
         return (
             PassManager()
-            | HardwareConfigValidity(legacy_model)
-            | ActivePulseChannelAnalysis(legacy_model)  # TODO: COMPILER-393
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PydHardwareConfigValidity(pyd_model)
+            | PydActivePulseChannelAnalysis(pyd_model)
             | PydFrequencySetupValidation(pyd_model, target_data)
             | PydDynamicFrequencyValidation(pyd_model, target_data)
             # Sanitising input IR to make it complete
@@ -286,21 +285,4 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | PydBatchedShots(target_data)
             | PydScopeSanitisation()
             | PydRepeatTranslation(target_data)
-        )
-
-
-class PydDefaultMiddleend(CustomMiddleend):
-    def __init__(self, model: PydHardwareModel):
-        pipeline = self.build_pass_pipeline(model)
-        super().__init__(model=model, pipeline=pipeline)
-
-    @staticmethod
-    def build_pass_pipeline(model) -> PassManager:
-        return (
-            PassManager()
-            | PydHardwareConfigValidity(model)
-            | CalibrationAnalysis()
-            | PydPhaseOptimisation()
-            | PydReturnSanitisation()
-            | PydNoMidCircuitMeasurementValidation(model)
         )
