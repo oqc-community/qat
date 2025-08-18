@@ -806,3 +806,61 @@ class TestInstructionValidation:
         )
         with pytest.raises(ValueError, match=r"Mid-circuit"):
             qie.validate(builder.instructions)
+
+
+@pytest.mark.parametrize("nparray", [True, False])
+@pytest.mark.parametrize("serialization_type", ["pickle", "json"])
+class TestSerializationOfCustomPulses:
+    """Regression tests that tests the serialization of custom pulses.
+
+    We have had problems across the two serialization modes regarding the type of samples
+    in a custom pulse. These tests ensure that we are able to serialize lists and numpy
+    arrays for both serialization modes.
+    """
+
+    def test_custom_pulse_serialization(self, nparray, serialization_type):
+        hw = get_default_echo_hardware()
+        qubit = hw.get_qubit(0)
+        channel = qubit.get_drive_channel()
+        samples = np.random.rand(80) + 1j * np.random.rand(80)
+        if not nparray:
+            samples = samples.tolist()
+        custom_pulse = CustomPulse(channel, samples)
+        builder = hw.create_builder()
+        builder.add(custom_pulse)
+
+        if serialization_type == "pickle":
+            blob = builder.serialize()
+            new_builder = InstructionBuilder.deserialize(blob)
+            instructions = new_builder.instructions
+        elif serialization_type == "json":
+            blob = json_dumps(builder.instructions)
+            instructions = json_loads(blob, model=hw)
+
+        assert len(instructions) == 1
+        assert isinstance(instructions[0], CustomPulse)
+        assert np.allclose(instructions[0].samples, samples)
+
+    def test_acquire_with_samples_serialization(self, nparray, serialization_type):
+        hw = get_default_echo_hardware()
+        qubit = hw.get_qubit(0)
+        channel = qubit.get_acquire_channel()
+        samples = np.random.rand(80) + 1j * np.random.rand(80)
+        if not nparray:
+            samples = samples.tolist()
+        time = channel.physical_channel.sample_time * len(samples)
+        acquire = Acquire(channel, time=time, filter=CustomPulse(channel, samples))
+        builder = hw.create_builder()
+        builder.add(acquire)
+
+        if serialization_type == "pickle":
+            blob = builder.serialize()
+            new_builder = InstructionBuilder.deserialize(blob)
+            instructions = new_builder.instructions
+        elif serialization_type == "json":
+            blob = json_dumps(builder.instructions)
+            instructions = json_loads(blob, model=hw)
+
+        assert len(instructions) == 1
+        assert isinstance(instructions[0], Acquire)
+        assert np.allclose(instructions[0].filter.samples, samples)

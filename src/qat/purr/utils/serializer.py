@@ -4,6 +4,7 @@ import json
 from typing import TYPE_CHECKING
 
 import compiler_config.serialiser as legacy_serialiser
+import numpy as np
 
 from qat.purr.compiler.devices import QuantumComponent
 from qat.purr.compiler.instructions import Acquire
@@ -46,6 +47,13 @@ class CustomQatJsonDecoder(legacy_serialiser.CustomJsonDecoder):
     def default(self, obj):
         if not isinstance(obj, dict):
             return obj
+        elif obj.get("type", False) == "numpyarray":
+            if "value" in obj:
+                array = np.frombuffer(
+                    bytearray.fromhex(obj["value"]), dtype=np.dtype(obj["dtype"])
+                )
+                return array.reshape(obj["shape"])
+            return np.array(obj["list"])
 
         # Components are objects directly related to hardware and you never want to serialize them, so we re-link
         # upon deserialization.
@@ -86,4 +94,11 @@ class CustomQatJsonEncoder(legacy_serialiser.CustomJSONEncoder):
         #   for it now, think about reverting its special status.
         if isinstance(obj, QuantumComponent) and not isinstance(obj, Acquire):
             return {"$component_id": obj.full_id()}
+        elif isinstance(obj, np.ndarray):
+            return {
+                "type": "numpyarray",
+                "dtype": obj.dtype.name,
+                "shape": obj.shape,
+                "value": obj.tobytes().hex(),
+            }
         return super().default(obj)
