@@ -1,12 +1,6 @@
 name: Publish documentation
 on:
-  push:
-      tags:
-        - "*"
-      branches:
-        - main
-  
-  workflow_dispatch:
+  workflow_call:
   
 jobs:
   deploy:
@@ -44,6 +38,7 @@ jobs:
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4
+      if: ${{ github.event_name != 'pull_request' }}
       with:
         folder: docs/build
         clean: false
