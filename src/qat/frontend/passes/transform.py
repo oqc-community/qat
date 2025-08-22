@@ -11,23 +11,65 @@ from compiler_config.config import (
     QiskitOptimizations,
     Tket,
     TketOptimizations,
+    get_optimizer_config,
 )
+from qiskit import QuantumCircuit, qasm2, transpile
+from qiskit.transpiler import TranspilerError
 
+from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.frontend.parsers import CloudQasmParser as PydCloudQasmParser
 from qat.frontend.parsers import Qasm3Parser as PydQasm3Parser
 from qat.frontend.passes.analysis import InputAnalysisResult
-from qat.frontend.passes.purr.transform import InputOptimisation
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import (
     PydQuantumInstructionBuilder,
     QuantumInstructionBuilder,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
+from qat.purr.utils.logger import get_default_logger
+
+log = get_default_logger()
 
 
-class PydInputOptimisation(InputOptimisation):
+class InputOptimisation:
+    def __init__(self, hardware: PydHardwareModel, *args, **kwargs):
+        """Instantiate the pass with a hardware model.
+
+        :param hardware: The hardware model is used in TKET optimisations.
+        """
+        self.hardware = hardware
+
+    def run(
+        self,
+        program: str,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        compiler_config: CompilerConfig,
+        **kwargs,
+    ):
+        """
+        :param program: The program as a string (e.g. QASM or QIR), or filepath to the
+            program.
+        :param res_mgr: The results manager to look-up the :class:`InputAnalysisResults`.
+        :param met_mgr: The metrics manager to save the optimised circuit.
+        :param compiler_config: The compiler config should be provided by a keyword
+            argument.
+        """
+
+        input_results = res_mgr.lookup_by_type(InputAnalysisResult)
+        language = input_results.language
+        program = input_results.raw_input
+        if compiler_config.optimizations is None:
+            compiler_config.optimizations = get_optimizer_config(language)
+        if language in (Languages.Qasm2, Languages.Qasm3):
+            program = self.run_qasm_optimisation(
+                program, compiler_config.optimizations, met_mgr
+            )
+        return program
+
     def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
         """Extracted from DefaultOptimizers.optimize_qasm"""
 
@@ -48,6 +90,20 @@ class PydInputOptimisation(InputOptimisation):
             )
 
         met_mgr.record_metric(MetricsType.OptimizedCircuit, qasm_string)
+        return qasm_string
+
+    def run_qiskit_optimization(self, qasm_string, level):
+        if level is not None:
+            try:
+                optimized_circuits = transpile(
+                    QuantumCircuit.from_qasm_str(qasm_string),
+                    basis_gates=["u1", "u2", "u3", "cx"],
+                    optimization_level=level,
+                )
+                qasm_string = qasm2.dumps(optimized_circuits)
+            except TranspilerError as e:
+                log.warning(f"Qiskit transpile pass failed. {str(e)}")
+
         return qasm_string
 
 
@@ -112,3 +168,6 @@ class FlattenIR(TransformPass):
 
     def run(self, ir: PydQuantumInstructionBuilder, *args, **kwargs):
         return ir.flatten()
+
+
+PydInputOptimisation = InputOptimisation

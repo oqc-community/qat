@@ -30,6 +30,8 @@ class ReadoutMitigation(NoExtraFieldsModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+    # TODO: COMPILER-706 linear readout mitigation currently a 2x2 matrix,
+    #  we may want to change this to be a dictionary like in the old hardware model.
     linear: FrozenDict[QubitId, CalibratableUnitInterval2x2Array]
     matrix: NDArray | None = None
     m3_available: bool = False
