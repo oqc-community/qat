@@ -25,7 +25,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
 
@@ -55,7 +55,7 @@ jobs:
       - name: Benchmarking on main
         run: poetry run pytest benchmarks/run.py --benchmark-only --benchmark-save="benchmark"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           clean: false
 
