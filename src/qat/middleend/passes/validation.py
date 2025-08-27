@@ -16,8 +16,8 @@ from qat.ir.measure import (
     AcquireMode,
     PostProcessing,
     ProcessAxis,
-    Pulse,
 )
+from qat.ir.waveforms import Pulse
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import PhysicalChannel
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -25,6 +25,94 @@ from qat.model.target_data import TargetData
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+class InstructionValidation(ValidationPass):
+    """
+    Validates instructions against the hardware, including whether:
+    - they fit in memory,
+    - pulse durations are within the allowed limits and
+    - acquire instructions are only performed on acquire channels..
+    """
+
+    def __init__(
+        self,
+        target_data: TargetData,
+        model: PhysicalHardwareModel,
+        pulse_duration_limits: bool | None = None,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param target_data: Target-related information.
+        :param pulse_duration_limits: Whether to check the pulse duration limits.
+            If None, uses the default from the QatConfig.
+        :param instruction_memory_size: The maximum number of instructions that can
+            be run in a single shot. If None, uses the default from QatConfig.
+        """
+        self.instruction_memory_size = target_data.instruction_memory_size
+        self.pulse_duration_max = max(
+            target_data.QUBIT_DATA.pulse_duration_max,
+            target_data.RESONATOR_DATA.pulse_duration_max,
+        )
+        self.pulse_duration_min = min(
+            target_data.QUBIT_DATA.pulse_duration_min,
+            target_data.RESONATOR_DATA.pulse_duration_min,
+        )
+        self.pulse_duration_limits = (
+            pulse_duration_limits
+            if pulse_duration_limits is not None
+            else get_config().INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
+        )
+        self._channel_data = self._get_channel_data(model)
+
+    @staticmethod
+    def _get_channel_data(model):
+        data = {"acquire": [], "non-acquire": {}}
+        for q_id, qubit in model.qubits.items():
+            data["acquire"].append(qubit.acquire_pulse_channel.uuid)
+            for pulse_channel in qubit.all_pulse_channels + [qubit.measure_pulse_channel]:
+                data["non-acquire"][pulse_channel.uuid] = [pulse_channel.pulse_type, q_id]
+        return data
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs):
+        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+
+        instruction_length = ir.number_of_instructions
+        if instruction_length > self.instruction_memory_size:
+            raise ValueError(
+                f"Program with {instruction_length} instructions too large to be run "
+                f"in a single block on current hardware."
+            )
+
+        for inst in ir.instructions:
+            self._validate_instruction(inst)
+
+        return ir
+
+    @singledispatchmethod
+    def _validate_instruction(self, instruction: Instruction):
+        pass
+
+    @_validate_instruction.register(Pulse)
+    def _(self, instruction: Pulse):
+        duration = instruction.duration
+        if duration > self.pulse_duration_max or duration < self.pulse_duration_min:
+            if self.pulse_duration_limits:
+                # Do not throw error if we specifically disabled the limit checks.
+                raise ValueError(
+                    f"Waveform width must be between {self.pulse_duration_min} s "
+                    f"and {self.pulse_duration_max} s. "
+                    f"Given has a width: {instruction.duration} s"
+                )
+
+    @_validate_instruction.register(Acquire)
+    def _(self, instruction: Acquire):
+        if instruction.target not in self._channel_data["acquire"]:
+            channel = self._channel_data["non-acquire"][instruction.target]
+            raise ValueError(
+                f"Cannot perform an acquire on the {channel[0]} pulse channel for qubit {channel[1]}"
+            )
 
 
 class DynamicFrequencyValidation(ValidationPass):
@@ -516,6 +604,7 @@ class RepeatSanitisationValidation(ValidationPass):
         return ir
 
 
+PydInstructionValidation = InstructionValidation
 PydReadoutValidation = ReadoutValidation
 PydDynamicFrequencyValidation = DynamicFrequencyValidation
 PydHardwareConfigValidity = HardwareConfigValidity

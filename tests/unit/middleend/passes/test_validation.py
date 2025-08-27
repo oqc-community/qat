@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import logging
+from contextlib import nullcontext
 from copy import deepcopy
 
 import numpy as np
@@ -15,8 +16,8 @@ from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.instructions import FrequencySet
-from qat.ir.measure import AcquireMode, ProcessAxis
-from qat.ir.waveforms import SquareWaveform
+from qat.ir.measure import Acquire, AcquireMode, ProcessAxis
+from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
@@ -25,6 +26,7 @@ from qat.middleend.passes.validation import (
     PydDynamicFrequencyValidation,
     PydFrequencySetupValidation,
     PydHardwareConfigValidity,
+    PydInstructionValidation,
     PydNoMidCircuitMeasurementValidation,
     PydReadoutValidation,
     PydRepeatSanitisationValidation,
@@ -38,6 +40,81 @@ from qat.purr.compiler.instructions import PostProcessType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 qatconfig = get_config()
+
+
+class TestInstructionValidation:
+    hw = PydEchoModelLoader(qubit_count=4).load()
+    target_data = TargetData.default()
+
+    @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
+    def test_valid_instructions(self, pulse_duration_limits):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
+            builder.X(target=qubit)
+
+        PydInstructionValidation(
+            self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+        ).run(builder)
+
+    @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
+    def test_pulse_too_short(self, pulse_duration_limits):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
+            builder.pulse(
+                target=qubit.drive_pulse_channel.uuid,
+                duration=0,
+                waveform=GaussianWaveform(width=0),
+            )
+
+        with (
+            pytest.raises(ValueError, match="Waveform width must be between")
+            if (pulse_duration_limits or pulse_duration_limits is None)
+            else nullcontext()
+        ):
+            PydInstructionValidation(
+                self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+            ).run(builder)
+
+    @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
+    def test_pulse_too_long(self, pulse_duration_limits):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        for qubit in self.hw.qubits.values():
+            builder.pulse(
+                target=qubit.drive_pulse_channel.uuid,
+                duration=0.1,
+                waveform=GaussianWaveform(width=0.1),
+            )
+
+        with (
+            pytest.raises(ValueError, match="Waveform width must be between")
+            if (pulse_duration_limits or pulse_duration_limits is None)
+            else nullcontext()
+        ):
+            PydInstructionValidation(
+                self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+            ).run(builder)
+
+    def test_too_many_instructions(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        drive_pulse_ch = self.hw.qubits[0].drive_pulse_channel.uuid
+
+        for _ in range(self.target_data.QUBIT_DATA.instruction_memory_size + 1):
+            builder.pulse(
+                target=drive_pulse_ch, duration=1e-8, waveform=GaussianWaveform(width=1e-8)
+            )
+
+        with pytest.raises(
+            ValueError, match="too large to be run in a single block on current hardware."
+        ):
+            PydInstructionValidation(self.target_data, self.hw).run(builder)
+
+    def test_acquire_on_drive_channel(self):
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        drive_pulse_ch = self.hw.qubits[0].drive_pulse_channel.uuid
+        builder.add(Acquire(target=drive_pulse_ch, duration=1e-8))
+
+        with pytest.raises(ValueError, match="Cannot perform an acquire on the"):
+            PydInstructionValidation(self.target_data, self.hw).run(builder)
 
 
 class TestPydDynamicFrequencyValidation:
