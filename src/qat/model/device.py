@@ -152,8 +152,8 @@ class PulseChannel(Component):
     """
 
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
-    imbalance: float | complex = 0.0 + 0.0j
-    phase_iq_offset: float | complex = 0.0 + 0.0j
+    imbalance: float = 1.0
+    phase_iq_offset: float = 0.0
     scale: float | complex = 1.0 + 0.0j
     fixed_if: bool = False
 
