@@ -55,7 +55,8 @@ class Acquire(QuantumInstruction):
                 filter_duration = (
                     filter.duration if isinstance(filter, Pulse) else filter["duration"]
                 )
-
+                # TODO: COMPILER-722 -- with this in place, it required to add a duration to both the pulse
+                #  and the Acquire instruction, would be better to figure out how to share information in some cases.
                 if filter_duration == 0:  # < 0 condition already tested in `Waveform`
                     raise ValueError("Filter duration cannot be equal to zero.")
 

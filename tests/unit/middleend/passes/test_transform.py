@@ -55,6 +55,7 @@ from qat.middleend.passes.transform import (
     LowerSyncsToDelays,
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
+    PopulateWaveformSampleTime,
     PostProcessingSanitisation,
     RepeatSanitisation,
     RepeatTranslation,
@@ -77,6 +78,118 @@ from qat.model.target_data import (
 )
 
 from tests.unit.utils.pulses import test_waveforms
+
+
+class TestPopulateWaveformSampleTime:
+    hw = LucyModelLoader(1).load()
+    taget_data = TargetData.default()
+
+    def test_sampled_pulse_gains_sample_time(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+        samples = np.random.rand(100)
+        wf = SampledWaveform(samples=samples)
+        builder.pulse(target=qubit.drive_pulse_channel.uuid, waveform=wf)
+
+        assert builder.instructions[0].duration == 0
+        assert builder.instructions[0].waveform.sample_time is None
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+        duration = 100 * self.taget_data.QUBIT_DATA.sample_time
+        assert ir.instructions[0].waveform.duration == duration
+        assert ir.instructions[0].duration == duration
+        assert (
+            builder.instructions[0].waveform.sample_time
+            == self.taget_data.QUBIT_DATA.sample_time
+        )
+
+    def test_sampled_waveform_on_acquire_filter_sample_time(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+        samples = np.random.rand(100)
+        wf = SampledWaveform(samples=samples)
+        acq_duration = self.taget_data.RESONATOR_DATA.sample_time * 50
+        builder.acquire(
+            qubit,
+            duration=acq_duration,
+            filter=Pulse(
+                duration=acq_duration,
+                target=qubit.resonator.acquire_pulse_channel.uuid,
+                waveform=wf,
+            ),
+        )
+        assert builder.instructions[0].filter.duration == acq_duration
+        assert builder.instructions[0].filter.waveform.sample_time is None
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+
+        duration = 100 * self.taget_data.RESONATOR_DATA.sample_time
+        assert ir.instructions[0].filter.waveform.duration == duration
+        assert ir.instructions[0].filter.duration == duration
+        assert (
+            ir.instructions[0].filter.waveform.sample_time
+            == self.taget_data.RESONATOR_DATA.sample_time
+        )
+
+    def test_acquire_without_filter_remains_unchanged(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+        acq_duration = self.taget_data.RESONATOR_DATA.sample_time * 50
+        builder.acquire(qubit, duration=acq_duration)
+        assert builder.instructions[0].duration == acq_duration
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+
+        assert ir.instructions[0].duration == acq_duration
+
+    def test_aqcuire_with_waveform_remains_unchanged(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+        acq_duration = 2e-6
+        wf = GaussianWaveform(width=acq_duration)
+        builder.acquire(
+            qubit,
+            duration=acq_duration,
+            filter=Pulse(
+                duration=acq_duration,
+                target=qubit.resonator.acquire_pulse_channel.uuid,
+                waveform=wf,
+            ),
+        )
+        assert builder.instructions[0].duration == acq_duration
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+
+        assert ir.instructions[0].duration == acq_duration
+        assert not hasattr(builder.instructions[0].filter.waveform, "sample_time")
+
+    def test_pulse_with_waveform_remains_unchanged(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+        wf = GaussianWaveform(width=1e-6)
+        builder.pulse(target=qubit.drive_pulse_channel.uuid, waveform=wf)
+        assert builder.instructions[0].duration == 1e-6
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+
+        assert ir.instructions[0].duration == 1e-6
+        assert not hasattr(builder.instructions[0].waveform, "sample_time")
+
+    def test_does_noting_to_non_pulse_instruction(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubits[0]
+
+        builder.delay(target=qubit, duration=1e-6)
+        builder.repeat(repeat_count=1)
+        builder.phase_shift(target=qubit, theta=1)
+        builder.reset(targets=qubit)
+        builder.measure(targets=qubit)
+
+        ir = PopulateWaveformSampleTime(self.hw, self.taget_data).run(builder)
+
+        assert ir.instructions[0].duration == 1e-6
+        assert ir.instructions[1].repeat_count == 1
+        assert ir.instructions[2].phase == 1
 
 
 @pytest.mark.parametrize("explicit_close", [False, True])
@@ -737,7 +850,7 @@ class TestPydInstructionGranularitySanitisation:
         acquire_time = np.random.randint(1, 100) * clock_cycle
         builder.acquire(self.qubit, duration=acquire_time, delay=0.0)
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(builder)
 
         # compare in units of ns to ensure np.isclose works fine
         assert np.isclose(ir.instructions[0].duration * 1e9, delay_time * 1e9)
@@ -766,7 +879,7 @@ class TestPydInstructionGranularitySanitisation:
             delay=0.0,
         )
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(builder)
 
         # compare in units of ns to ensure np.isclose works fine
         assert np.isclose(ir.instructions[0].duration * 1e9, delay_time * 1e9)
@@ -774,11 +887,12 @@ class TestPydInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
     # TODO: Review for COMPILER-488 changes.
-    def test_acquire_with_filter_samples_get_cut_off(self):
+    @pytest.mark.parametrize("time_adder", list(range(1, 10)))
+    def test_acquire_with_filter_samples_get_cut_off(self, time_adder):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
 
         clock_cycle = self.target_data.clock_cycle
-        acquire_time = np.random.randint(1, 10) * clock_cycle + 0.5 * clock_cycle
+        acquire_time = (time_adder + 0.5) * clock_cycle
 
         n_samples_weights = int(
             np.ceil(acquire_time / self.target_data.RESONATOR_DATA.sample_time)
@@ -794,15 +908,16 @@ class TestPydInstructionGranularitySanitisation:
                 ),
             )
         )
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = PopulateWaveformSampleTime(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(ir)
         assert ir.number_of_instructions == 1
 
-        granular_duration = int(np.floor(acquire_time / clock_cycle)) * clock_cycle
-        n_cut_off_samples = int(
-            np.floor(granular_duration / self.target_data.RESONATOR_DATA.sample_time)
+        samples_multiplier = int(
+            np.round(clock_cycle / self.target_data.RESONATOR_DATA.sample_time, 1)
         )
+
         assert len(ir._ir.head.filter.waveform.samples) < n_samples_weights
-        assert len(ir._ir.head.filter.waveform.samples) == n_cut_off_samples
+        assert len(ir._ir.head.filter.waveform.samples) == time_adder * samples_multiplier
 
     def test_custom_pulses_with_correct_length_are_unchanged(self):
         sample_time = self.qubit.physical_channel.sample_time
@@ -817,7 +932,7 @@ class TestPydInstructionGranularitySanitisation:
             Pulse(target=self.drive_chan.uuid, waveform=SampledWaveform(samples=samples))
         )
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(builder)
         assert ir.instructions[0].waveform.samples.tolist() == samples
 
     @pytest.mark.parametrize("seed", [1, 2, 3, 4])
@@ -835,16 +950,16 @@ class TestPydInstructionGranularitySanitisation:
         builder.add(
             Pulse(target=self.drive_chan.uuid, waveform=SampledWaveform(samples=samples))
         )
+
         assert len(builder.instructions[0].waveform.samples) == len(samples)
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = PopulateWaveformSampleTime(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(ir)
         n = num_samples + supersampling
 
         assert len(ir.instructions[0].waveform.samples) == n
 
-    @pytest.mark.skip("Skipped untile SampledWaveform duration is resolved")
     def test_acquires_with_too_large_custom_pulse_filters_are_sanitised(self):
-        # TODO: Review for COMPILER-642 changes
         # Mock up some channels and a builder
         sample_time = self.target_data.RESONATOR_DATA.sample_time
 
@@ -860,15 +975,19 @@ class TestPydInstructionGranularitySanitisation:
         # Create the builder
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         filter = Pulse(
+            duration=acquire_time,
             target=self.acquire_chan.uuid,
             waveform=SampledWaveform(samples=np.random.rand(num_samples)),
         )
+
         acquire = Acquire(
-            target=self.acquire_chan, time=acquire_time, delay=0.0, filter=filter
+            target=self.acquire_chan.uuid, duration=acquire_time, delay=0.0, filter=filter
         )
+
         builder.add(acquire)
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = PopulateWaveformSampleTime(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(ir)
         assert isinstance(ir.instructions[0], Acquire)
         assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
         assert isinstance(ir.instructions[0].filter, Pulse)
@@ -882,9 +1001,7 @@ class TestPydInstructionGranularitySanitisation:
             filter.waveform.samples[0 : len(ir.instructions[0].filter.waveform.samples)],
         )
 
-    @pytest.mark.skip("Skipped untile SampledWaveform duration is resolved")
     def test_acquires_with_too_small_custom_pulse_filters_are_sanitised(self):
-        # TODO: Review for COMPILER-642 changes
         # Mock up some channels and a builder
         sample_time = self.target_data.RESONATOR_DATA.sample_time
 
@@ -901,16 +1018,18 @@ class TestPydInstructionGranularitySanitisation:
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         filter = Pulse(
             target=self.acquire_chan.uuid,
+            duration=acquire_time,
             waveform=SampledWaveform(samples=np.random.rand(num_samples)),
         )
         acquire = Acquire(
-            target=self.acquire_chan, time=acquire_time, delay=0.0, filter=filter
+            target=self.acquire_chan.uuid, duration=acquire_time, delay=0.0, filter=filter
         )
         builder.add(acquire)
         filter.waveform.samples = filter.waveform.samples[: num_samples - 5]
         samples = deepcopy(filter.waveform.samples)
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = PopulateWaveformSampleTime(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(ir)
         assert isinstance(ir.instructions[0], Acquire)
         assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
         assert isinstance(ir.instructions[0].filter, Pulse)
@@ -922,7 +1041,7 @@ class TestPydInstructionGranularitySanitisation:
         assert np.allclose(ir.instructions[0].filter.waveform.samples[-2:], [0.0, 0.0])
         assert np.allclose(ir.instructions[0].filter.waveform.samples[:-2], samples)
 
-    def test_acuqires_with_square_filters_are_sanitised(self):
+    def test_acquires_with_square_filters_are_sanitised(self):
         # Mock up some channels and a builder
         sample_time = self.target_data.RESONATOR_DATA.sample_time
 
@@ -945,7 +1064,7 @@ class TestPydInstructionGranularitySanitisation:
         )
         builder.add(acquire)
 
-        ir = InstructionGranularitySanitisation(self.hw, self.target_data).run(builder)
+        ir = InstructionGranularitySanitisation(self.target_data).run(builder)
         assert isinstance(ir.instructions[0], Acquire)
         assert np.isclose(ir.instructions[0].duration, num_clock_cycles * clock_cycle)
         assert isinstance(ir.instructions[0].filter, Pulse)

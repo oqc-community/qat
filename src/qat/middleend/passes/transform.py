@@ -50,6 +50,54 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
+class PopulateWaveformSampleTime(TransformPass):
+    def __init__(self, hardware_model: PhysicalHardwareModel, target_data: TargetData):
+        """
+        :param hardware_model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param target_data: Target-related information.
+        """
+        self._channel_data = self._create_channel_data(hardware_model, target_data)
+
+    @staticmethod
+    def _create_channel_data(
+        hardware_model: PhysicalHardwareModel, target_data
+    ) -> dict[str, float]:
+        """
+        Creates a mapping between physical channel and pulse channel to specify if the
+        channel is a resonator or not.
+        """
+        channel_data = {}
+        for qubit in hardware_model.qubits.values():
+            for pulse_channel in qubit.all_pulse_channels:
+                channel_data[pulse_channel.uuid] = target_data.QUBIT_DATA.sample_time
+            for pulse_channel in qubit.resonator.all_pulse_channels:
+                channel_data[pulse_channel.uuid] = target_data.RESONATOR_DATA.sample_time
+        return channel_data
+
+    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+        for inst in ir.instructions:
+            self._add_sample_time(inst, getattr(inst, "target", None))
+        return ir
+
+    @singledispatchmethod
+    def _add_sample_time(self, inst: Instruction, target: str):
+        pass
+
+    @_add_sample_time.register(Pulse)
+    def _(self, inst: Pulse, target: str):
+        self._add_sample_time(inst.waveform, target)
+        inst.duration = inst.waveform.duration
+
+    @_add_sample_time.register(Acquire)
+    def _(self, inst: Acquire, target: str):
+        if inst.filter is not None:
+            self._add_sample_time(inst.filter, target)
+
+    @_add_sample_time.register(SampledWaveform)
+    def _(self, inst: SampledWaveform, target: str):
+        inst.sample_time = self._channel_data[target]
+
+
 class RepeatTranslation(TransformPass):
     """Transform :class:`Repeat` instructions so that they are replaced with:
     :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
@@ -397,55 +445,47 @@ class InstructionGranularitySanitisation(TransformPass):
         :class:`AcquireSanitisation` pass.
     """
 
-    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+    def __init__(self, target_data: TargetData):
         """:param target_data: Target-related information."""
 
         self.clock_cycle = target_data.clock_cycle
-        qubit_sample_time = target_data.QUBIT_DATA.sample_time
-        res_sample_time = target_data.RESONATOR_DATA.sample_time
-        self.sample_times = {
-            pulse_channel.uuid: (
-                qubit_sample_time if isinstance(device, Qubit) else res_sample_time
-            )
-            for device in model.quantum_devices
-            for pulse_channel in device.all_pulse_channels
-        }
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         """
 
-        self.sanitise_quantum_instructions(
-            [
-                inst
-                for inst in ir.instructions
-                if (
-                    isinstance(inst, (Acquire, Delay))
-                    or (
-                        isinstance(inst, Pulse)
-                        and not isinstance(inst.waveform, SampledWaveform)
-                    )
-                )
-            ]
-        )
-        self.sanitise_custom_pulses(
-            [
-                inst
-                for inst in ir.instructions
-                if (isinstance(inst, Pulse) and isinstance(inst.waveform, SampledWaveform))
-            ]
-        )
+        quantum_instructions = []
+        custom_pulses = []
+        for inst in ir.instructions:
+            if isinstance(inst, (Acquire, Delay)) or (
+                isinstance(inst, Pulse) and not isinstance(inst.waveform, SampledWaveform)
+            ):
+                quantum_instructions.append(inst)
+            elif isinstance(inst, Pulse) and isinstance(inst.waveform, SampledWaveform):
+                custom_pulses.append(inst)
+
+        self._sanitise_quantum_instructions(quantum_instructions)
+        self._sanitise_custom_pulses(custom_pulses)
+
         return ir
 
-    def sanitise_quantum_instructions(self, instructions: list[Pulse | Acquire | Delay]):
+    def _clock_cycle_multiples(
+        self, instructions: list[Pulse | Acquire | Delay]
+    ) -> NDArray[float]:
+        """
+        Extracts the number of clock cycles for each instruction
+        """
+        durations = np.asarray([inst.duration for inst in instructions])
+        return durations / self.clock_cycle
+
+    def _sanitise_quantum_instructions(self, instructions: list[Pulse | Acquire | Delay]):
         """Sanitises the durations quantum instructions with non-zero duration by rounding
         down to the nearest clock cycle."""
 
-        durations = np.asarray([inst.duration for inst in instructions])
-        multiples = durations / self.clock_cycle
-        rounded_multiples = np.floor(multiples + 1e-10).astype(int)
+        multiples = self._clock_cycle_multiples(instructions)
         # 1e-10 for floating point errors
+        rounded_multiples = np.floor(multiples + 1e-10).astype(int)
         durations_equal = np.isclose(multiples, rounded_multiples)
 
         invalid_instructions: set[str] = set()
@@ -456,29 +496,8 @@ class InstructionGranularitySanitisation(TransformPass):
             if isinstance(inst, Pulse):
                 inst.update_duration(new_duration)
             else:
-                # TODO: Review for COMPILER-642 changes
                 if isinstance(inst, Acquire) and inst.filter is not None:
-                    # Acquire instructions with filters have a duration equal to the filter
-                    # duration, so we need to update the filter as well.
-                    if (
-                        isinstance(inst.filter.waveform, SampledWaveform)
-                        and new_duration < inst.duration
-                    ):
-                        # This is a temporary workaround due to the fact that the acquire duration gets rounded
-                        # down to the nearest clock cycle, which results in cutting off the sample.
-                        # TODO: Review for COMPILER-488 changes.
-                        n_samples = int(
-                            np.floor(new_duration / self.sample_times[inst.target])
-                        )
-                        inst.filter.waveform.samples = inst.filter.waveform.samples[
-                            :n_samples
-                        ]
-                        inst.filter.duration = new_duration
-
-                    else:
-                        inst.filter.update_duration(
-                            new_duration, sample_time=self.sample_times[inst.target]
-                        )
+                    self._sanitise_acquire_pulse(inst, new_duration)
                 inst.duration = new_duration
 
         if len(invalid_instructions) >= 1:
@@ -488,18 +507,33 @@ class InstructionGranularitySanitisation(TransformPass):
                 "down: " + ", ".join(set(invalid_instructions))
             )
 
-    def sanitise_custom_pulses(self, instructions: list[Pulse]):
+    @staticmethod
+    def _sanitise_acquire_pulse(instruction: Acquire, new_duration: float):
+        """
+        Acquire instructions with filters have a duration equal to the filter duration,
+        so we need to update the filter as well.
+        """
+        if (
+            isinstance(instruction.filter.waveform, SampledWaveform)
+            and new_duration < instruction.duration
+        ):
+            # This is a temporary workaround due to the fact that the acquire duration gets rounded
+            # down to the nearest clock cycle, which results in cutting off the sample.
+            # TODO: Review for COMPILER-488 changes.
+            n_samples = int(
+                np.floor(new_duration / instruction.filter.waveform.sample_time)
+            )
+            instruction.filter.waveform.samples = instruction.filter.waveform.samples[
+                :n_samples
+            ]
+            instruction.filter.duration = new_duration
+        instruction.filter.update_duration(new_duration)
+
+    def _sanitise_custom_pulses(self, instructions: list[Pulse]):
         """Sanitises the durations of :class:`SampledWaveform`s by padding the
         waveforms with zero amplitudes."""
 
-        # TODO: Review for COMPILER-642 changes
-        durations = np.asarray(
-            [
-                self.sample_times[inst.target] * len(inst.waveform.samples)
-                for inst in instructions
-            ]
-        )
-        multiples = durations / self.clock_cycle
+        multiples = self._clock_cycle_multiples(instructions)
         # 1e-10 for floating point errors
         rounded_multiples = np.ceil(multiples - 1e-10).astype(int)
         durations_equal = np.isclose(multiples, rounded_multiples)
@@ -509,9 +543,7 @@ class InstructionGranularitySanitisation(TransformPass):
             inst = instructions[idx]
             invalid_instructions.add(str(inst))
             new_duration = rounded_multiples[idx] * self.clock_cycle
-
-            # TODO: Review for COMPILER-642 changes
-            inst.update_duration(new_duration, self.sample_times[inst.target])
+            inst.update_duration(new_duration)
 
         if len(invalid_instructions) > 1:
             log.info(

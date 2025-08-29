@@ -43,6 +43,7 @@ from qat.middleend.passes.purr.validation import (
     ReadoutValidation,
 )
 from qat.middleend.passes.transform import (
+    PopulateWaveformSampleTime,
     PydAcquireSanitisation,
     PydBatchedShots,
     PydEndOfTaskResetSanitisation,
@@ -258,6 +259,7 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
         return (
             PassManager()
             | ConvertToPydanticIR(legacy_model, pyd_model)
+            | PopulateWaveformSampleTime(pyd_model, target_data)
             | PydHardwareConfigValidity(pyd_model)
             | PydActivePulseChannelAnalysis(pyd_model)
             | PydFrequencySetupValidation(pyd_model, target_data)
@@ -270,7 +272,7 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | PydReadoutValidation()
             | PydAcquireSanitisation()
             | PydMeasurePhaseResetSanitisation(pyd_model)
-            | PydInstructionGranularitySanitisation(pyd_model, target_data)
+            | PydInstructionGranularitySanitisation(target_data)
             # Preparing for codegen
             | PydEvaluateWaveforms(pyd_model, target_data)
             | PydLowerSyncsToDelays()

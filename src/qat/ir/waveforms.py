@@ -127,14 +127,16 @@ class SampledWaveform(AbstractWaveform):
 
     # TODO: Investigate linting issue with typehint Shape["* x"]
     samples: NDArray[Shape["* x"], int | float | complex]  # noqa: F722
+    sample_time: Optional[float] = None  # Time between samples, in seconds
 
     @property
     def duration(self):
-        # TODO: Calculating this duration requires knowledge of the pulse channel, which
-        # is not stored here. I think what we should actually be doing is calculating
-        # the duration of a Pulse instruction when we calculate the position map.
-        # TODO: Review for COMPILER-642 changes
-        return 0.0
+        if self.sample_time is None:
+            # TODO: COMPILER-723 -- Do we want to raise an error here, or return NAN or None or 0?
+            raise ValueError(
+                "Cannot determine duration of SampledWaveform without sample_time being set."
+            )
+        return self.sample_time * len(self.samples)
 
     def __repr__(self):
         return "sampled waveform"
@@ -217,10 +219,7 @@ class Pulse(QuantumInstruction):
 
     @model_validator(mode="before")
     def validate_duration(cls, data):
-        # The duration of a pulse is equal to the width of the underlying waveform of the pulse.
-        # Since `SampledWaveform`s do not have a width, only a set of samples, we cannot derive a
-        # duration from such custom waveform and the duration must be supplied to the pulse.
-        # TODO: Review for COMPILER-642 changes
+        # TODO: Review with COMPILER-723
         if isinstance(data, dict) and isinstance(data.get("waveform"), Waveform):
             data["duration"] = data["waveform"].duration
         return data
@@ -233,16 +232,16 @@ class Pulse(QuantumInstruction):
             self.duration = duration
             self.waveform.width = duration
         elif isinstance(self.waveform, SampledWaveform):
-            # TODO: Review for COMPILER-642 changes
             if sample_time is None:
-                raise ValueError(
-                    "Updating the duration of a pulse with 'SampledWaveform' waveform "
-                    "requires 'sample_time' but None was provided."
-                )
-            current_duration = sample_time * self.waveform.samples.size
-            if current_duration > duration:
+                sample_time = self.waveform.sample_time
+            else:
+                self.waveform.sample_time = sample_time
+
+            current_duration = self.waveform.duration
+            if current_duration > duration and not np.isclose(current_duration, duration):
                 raise NotImplementedError(
                     "Cannot update the duration of a SampledWaveform to a smaller value. "
+                    f"{current_duration} > {duration}\n"
                     "This would require removing samples, which is not supported."
                 )
             # If the new duration is larger, we can pad the samples with zeros.
