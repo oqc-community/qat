@@ -2,18 +2,38 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 
+from pathlib import Path
+
 import numpy as np
 import pytest
+from jinja2 import Environment, FileSystemLoader, meta
 
 from qat.frontend.parsers.qasm import Qasm3Parser
+from qat.frontend.parsers.qasm.qasm3 import UntargetedPulse
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.instructions import Return
+from qat.ir.instructions import (
+    Delay,
+    FrequencyShift,
+    PhaseShift,
+    QuantumInstruction,
+    Reset,
+    Return,
+    Synchronize,
+)
+from qat.ir.measure import Acquire, PostProcessing, PostProcessType
 from qat.ir.waveforms import (
+    DragGaussianWaveform,
+    GaussianSquareWaveform,
+    GaussianWaveform,
     Pulse,
+    SampledWaveform,
+    SechWaveform,
+    SinWaveform,
     SoftSquareWaveform,
     SquareWaveform,
 )
 from qat.model.builder import PhysicalHardwareModelBuilder
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.graphs import generate_cyclic_connectivity
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.qasm import get_qasm_parser
@@ -264,3 +284,894 @@ class TestQasm3Parser:
         assert isinstance(builder, QuantumInstructionBuilder)
         assert len(builder.instructions) > 0
         assert isinstance(builder.instructions[-1], Return)
+
+
+class TestQASM3Features:
+    """Tests isolated features of QASM3 and OpenPulse, even those that aren't supported to
+    ensure they throw errors."""
+
+    @pytest.fixture
+    def feature_testpath(self, testpath):
+        """Fixture to provide the path to the test files."""
+        return testpath / "files" / "qasm" / "qasm3" / "feature_tests"
+
+    @pytest.fixture
+    def model(self):
+        return LucyModelLoader(qubit_count=4).load()
+
+    @staticmethod
+    def load_source(model, feature_testpath, filename, **kwargs):
+        """Opens the source program using Jinja2 to template it."""
+
+        env = Environment(loader=FileSystemLoader(feature_testpath))
+
+        # Extract the parameters we need to provide
+        template_source = env.loader.get_source(env, str(filename))[0]
+        parsed_content = env.parse(template_source)
+        parameters = meta.find_undeclared_variables(parsed_content)
+
+        # Pick the parameters
+        qubits = iter(model.qubits)
+        for param in parameters:
+            if param in kwargs:
+                continue
+            if param.startswith("angle"):
+                kwargs[param] = np.random.uniform(-4 * np.pi, 4 * np.pi)
+            elif param.startswith("physical_index"):
+                kwargs[param] = next(qubits)
+            elif param.startswith("lib"):
+                kwargs[param] = str(feature_testpath / "oqc_lib.inc")
+            elif param.startswith("frame"):
+                kwargs[param] = f"q{next(qubits).index}_drive"
+            else:
+                raise ValueError(f"Unknown parameter {param} in template {filename}")
+
+        template = env.get_template(str(filename))
+        return template.render(**kwargs)
+
+    @staticmethod
+    def get_devices_from_builder(builder, model):
+        """Extracts the devices from the builder."""
+        devices = set()
+        for inst in builder.instructions:
+            if isinstance(inst, QuantumInstruction):
+                targets = inst.targets
+                for target in targets:
+                    devices.add(model.device_for_pulse_channel_id(target))
+        return devices
+
+    def return_builder_and_devices(self, model, feature_testpath, filename, **kwargs):
+        """Returns the builder and source code for a given QASM file."""
+        qasm = self.load_source(model, feature_testpath, filename, **kwargs)
+        parser = Qasm3Parser()
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder = parser.parse(builder, qasm)
+        devices = self.get_devices_from_builder(builder, model)
+        return builder, devices
+
+    def test_barrier(self, model, feature_testpath):
+        qubits = list(model.qubits.keys())[:2]
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("gates", "barrier.qasm"),
+            physical_index_1=qubits[0],
+            physical_index_2=qubits[1],
+        )
+
+        syncs = [inst for inst in builder.instructions if isinstance(inst, Synchronize)]
+        assert len(syncs) == 1
+
+        expected_targets = []
+        for device in devices:
+            for channel in device.all_pulse_channels:
+                expected_targets.append(channel.uuid)
+        assert syncs[0].targets == set(expected_targets)
+
+    @pytest.mark.parametrize("gate", ["cx", "ecr"])
+    def test_2q_gate(self, model, feature_testpath, gate):
+        qubits = list(model.qubits.keys())[:2]
+        _, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("gates", f"{gate}.qasm"),
+            physical_index_1=qubits[0],
+            physical_index_2=qubits[1],
+        )
+
+        # picks up extra qubits via syncs on connected qubits
+        for qubit in qubits:
+            assert model.qubits[qubit] in devices
+
+    def test_gate_def(self, model, feature_testpath):
+        """Overloads X gate onto identity, so we check that there are no pulses."""
+        builder, _ = self.return_builder_and_devices(
+            model, feature_testpath, Path("gates", "gate_def.qasm")
+        )
+        for inst in builder.instructions:
+            assert not isinstance(inst, Pulse)
+
+    def test_measure(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        _, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("gates", "measure.qasm"),
+            physical_index_1=index,
+        )
+        assert qubit in devices
+        assert qubit.resonator in devices
+
+    def test_reset(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("gates", "reset.qasm"),
+            physical_index_1=index,
+        )
+        assert qubit in devices
+        assert len([inst for inst in builder.instructions if isinstance(inst, Reset)]) == 3
+
+    def test_U(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        _, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("gates", "u.qasm"),
+            physical_index_1=index,
+        )
+        assert qubit in devices
+
+    def test_defcal(self, model, feature_testpath):
+        """Used here to override the X gate for a qubit with a zero-delay.
+
+        This also tests the keywords `defcalgrammar` and `extern`.
+        """
+        qubits = list(model.qubits.items())[0:2]
+        frame = f"q{qubits[0][0]}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("keywords", "defcal.qasm"),
+            physical_index_1=qubits[0][0],
+            physical_index_2=qubits[1][0],
+            frame=frame,
+        )
+
+        assert qubits[0][1] in devices
+        assert qubits[1][1] in devices
+        delays = [inst for inst in builder.instructions if isinstance(inst, Delay)]
+        assert len(delays) == 1
+        assert np.isclose(delays[0].duration, 0.0)
+        assert delays[0].target == qubits[0][1].drive_pulse_channel.uuid
+
+    def test_get_frequency(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "get_frequency.qasm"),
+            frame=frame,
+        )
+
+        assert qubit in devices
+        frequencies = [
+            inst for inst in builder.instructions if isinstance(inst, FrequencyShift)
+        ]
+        assert len(frequencies) == 1
+        channel = qubit.drive_pulse_channel
+        assert frequencies[0].target == channel.uuid
+        assert np.isclose(frequencies[0].frequency, 0.05 * channel.frequency)
+
+    def test_shift_frequency(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "shift_frequency.qasm"),
+            frame=frame,
+            physical_index=index,
+            frequency=channel.frequency * 0.05,
+        )
+
+        assert qubit in devices
+        frequencies = [
+            inst for inst in builder.instructions if isinstance(inst, FrequencyShift)
+        ]
+        assert len(frequencies) == 1
+        assert frequencies[0].target == channel.uuid
+        assert np.isclose(frequencies[0].frequency, 0.05 * channel.frequency)
+
+    def test_set_frequency(self, model, feature_testpath):
+        """`set_frequency` actually adds a shift, so test for that."""
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "set_frequency.qasm"),
+            frame=frame,
+            physical_index=index,
+            frequency=channel.frequency * 1.05,
+        )
+
+        assert qubit in devices
+        frequencies = [
+            inst for inst in builder.instructions if isinstance(inst, FrequencyShift)
+        ]
+        assert len(frequencies) == 1
+        assert frequencies[0].target == channel.uuid
+        assert np.isclose(frequencies[0].frequency, 0.05 * channel.frequency)
+
+    def test_getphase(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "get_phase.qasm"),
+            frame=frame,
+        )
+
+        assert qubit in devices
+        phases = [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        assert len(phases) == 2
+        for phase in phases:
+            assert np.isclose(phase.phase, np.pi)
+            assert phase.target == channel.uuid
+
+    def test_shift_phase(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "shift_phase.qasm"),
+            frame=frame,
+            physical_index=index,
+            phase=2.0,
+        )
+
+        assert qubit in devices
+        phases = [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        assert len(phases) == 1
+        assert phases[0].target == channel.uuid
+        assert np.isclose(phases[0].phase, 0.254)
+
+    def test_set_phase(self, model, feature_testpath):
+        """`set_phase` actually adds a shift, so test for that."""
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "set_phase.qasm"),
+            frame=frame,
+            physical_index=index,
+            phase=0.254,
+        )
+
+        assert qubit in devices
+        phases = [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        assert len(phases) == 2
+        assert phases[0].target == channel.uuid
+        assert phases[1].target == channel.uuid
+        assert np.isclose(phases[0].phase, 0.5)
+        assert np.isclose(phases[1].phase, 0.254 - 0.5)
+
+    @pytest.mark.xfail(
+        reason="Shouldn't return untargeted pulse (COMPILER-716).", raises=AssertionError
+    )
+    def test_newframe(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "newframe.qasm"),
+            frame=frame,
+            physical_index=index,
+            frequency=channel.frequency * 1.05,
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        for pulse in pulses:
+            assert not isinstance(pulse, UntargetedPulse)
+        assert len(pulses) == 2
+        assert pulses[0].target == qubit.drive_pulse_channel.uuid
+        assert pulses[1].target != qubit.drive_pulse_channel.uuid
+
+        # TODO (COMPILER-721): when resolving this test, we should be able to retrieve the
+        # new channel and inspect its properties. e.g.
+        # code that retrieves channel
+        # assert new_channel.uuid != channel.uuid
+        # assert new_channel.physical_channel == channel.physical_channel
+        # assert np.isclose(new_channel.frequency, channel.frequency * 1.05)
+
+    @pytest.mark.parametrize(
+        "version",
+        [
+            pytest.param(
+                "0",
+                marks=pytest.mark.xfail(
+                    reason="Version 0 is not supported.", raises=NotImplementedError
+                ),
+            ),
+            pytest.param(
+                "1",
+                marks=pytest.mark.xfail(
+                    reason="Failing for unknown reason, needs looking into (COMPILER-719).",
+                    raises=UnboundLocalError,
+                ),
+            ),
+            pytest.param(
+                "2",
+                marks=pytest.mark.xfail(
+                    reason="Failing for unknown reason, needs looking into (COMPILER-719).",
+                    raises=UnboundLocalError,
+                ),
+            ),
+            "3",
+            pytest.param(
+                "4",
+                marks=pytest.mark.xfail(
+                    reason="Version 4 is not supported.", raises=NotImplementedError
+                ),
+            ),
+        ],
+    )
+    def test_capture(self, model, feature_testpath, version):
+        index, qubit = next(iter(model.qubits.items()))
+        # TODO: this usage is inconsistent with extern frames in purr. We should probably
+        # align them (COMPILER-716)
+        frame = f"r{index}_measure"
+        channel = qubit.measure_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "instructions", "capture.qasm"),
+            frame=frame,
+            physical_index=index,
+            capture_version=version,
+        )
+
+        assert qubit.resonator in devices
+        acquires = [inst for inst in builder.instructions if isinstance(inst, Acquire)]
+        assert len(acquires) == 1
+        assert acquires[0].target == channel.uuid
+
+        acquire_name = acquires[0].output_variable
+        pps = [inst for inst in builder.instructions if isinstance(inst, PostProcessing)]
+
+        if version == 1:
+            # Just returns IQ values: requires no PP
+            assert len(pps) == 0
+        elif version == 2:
+            # returns discriminated bit
+            assert len(pps) == 1
+            assert pps[0].output_variable == acquire_name
+            assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+        elif version == 3:
+            # SCOPE mode
+            assert len(pps) == 2
+            assert pps[0].output_variable == acquire_name
+            assert pps[1].output_variable == acquire_name
+            assert pps[0].process_type == PostProcessType.MEAN
+            assert pps[1].process_type == PostProcessType.DOWN_CONVERT
+
+    def test_delay(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "instructions", "delay.qasm"),
+            frame=frame,
+            physical_index=index,
+            time="80ns",
+        )
+
+        assert qubit in devices
+        delays = [inst for inst in builder.instructions if isinstance(inst, Delay)]
+        assert len(delays) == 1
+        assert delays[0].target == channel.uuid
+        assert np.isclose(delays[0].duration, 80e-9)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_play(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "instructions", "play.qasm"),
+            frame=frame,
+            physical_index=index,
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_arb_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        samples = np.random.rand(160) + 1j * np.random.rand(160)
+        samples_as_str = ", ".join(
+            [f"{sample.real} + {sample.imag}im" for sample in samples]
+        )
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "arb.qasm"),
+            frame=frame,
+            samples=samples_as_str,
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert not isinstance(pulses[0], UntargetedPulse)
+        assert isinstance(pulses[0].waveform, SampledWaveform)
+        assert np.allclose(pulses[0].waveform.samples, samples)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_constant_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "constant.qasm"),
+            frame=frame,
+            amp=1e-4,
+            width="80ns",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert isinstance(pulses[0].waveform, SquareWaveform)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_drag_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "drag.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-7",
+            sigma="20ns",
+            beta="0.05",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, DragGaussianWaveform)
+        assert np.isclose(waveform.std_dev, 20e-9)
+        assert np.isclose(waveform.beta, 0.05)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_gaussian_square_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "gaussian_square.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-4",
+            square_width="40ns",
+            sigma="20ns",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, GaussianSquareWaveform)
+        assert np.isclose(waveform.std_dev, 20e-9)
+        assert np.isclose(waveform.square_width, 40e-9)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_gaussian_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "gaussian.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-4",
+            sigma="20ns",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, GaussianWaveform)
+        assert np.isclose(waveform.std_dev, 20e-9)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_sech_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "sech.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-4",
+            sigma="20ns",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, SechWaveform)
+        assert np.isclose(waveform.std_dev, 20e-9)
+
+    @pytest.mark.xfail(
+        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
+    )
+    def test_sine_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        channel = qubit.drive_pulse_channel
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "sine.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-4",
+            frequency="1e9",
+            phase="0.254",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert pulses[0].target == channel.uuid
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert not isinstance(pulses[0], UntargetedPulse)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, SinWaveform)
+        assert np.isclose(waveform.frequency, 1e9)
+        assert np.isclose(waveform.phase, 0.254)
+
+    @pytest.mark.xfail(
+        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
+    )
+    def test_mix_waveform(self, model, feature_testpath):
+        # Also expecting this to fail because of the hard-coded sample time, so the reason
+        # and raises might just need changing after fixing...
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "mix.qasm"),
+            frame=frame,
+            width="80ns",
+            amp1="2.5e-4",
+            amp2="0.5",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+
+        waveform = pulses[0].waveform
+        assert np.isclose(pulses[0].duration, 80e-9)
+        assert isinstance(waveform, SampledWaveform)
+        assert np.allclose(waveform.samples, [2.5e-4 * 0.5])
+
+    @pytest.mark.xfail(
+        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
+    )
+    def test_phase_shift_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "phase_shift.qasm"),
+            frame=frame,
+            width="80ns",
+            amp="1e-4",
+            phase="0.254",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert np.isclose(pulses[0].duration, 80e-9)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, SquareWaveform)
+        assert np.isclose(waveform, 0.254)
+
+    @pytest.mark.xfail(
+        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
+    )
+    def test_scale_waveform(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "scale.qasm"),
+            frame=frame,
+            width="80ns",
+            amp1="2.5e-4",
+            amp2="0.5",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert np.isclose(pulses[0].duration, 80e-9)
+
+        waveform = pulses[0].waveform
+        assert isinstance(waveform, SquareWaveform)
+        assert np.isclose(pulses[0].amp, 2.5e-4)
+        assert np.isclose(pulses[0].scale_factor, 0.5)
+
+    @pytest.mark.xfail(
+        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
+    )
+    def test_sum_waveform(self, model, feature_testpath):
+        # Also expecting this to fail because of the hard-coded sample time, so the reason
+        # and raises might just need changing after fixing...
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "waveforms", "sum.qasm"),
+            frame=frame,
+            width="80ns",
+            amp1="2.5e-4",
+            amp2="5e-4",
+        )
+
+        assert qubit in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 1
+        assert np.allclose(pulses[0].samples, [2.5e-4 + 5e-4])
+        assert np.isclose(pulses[0].duration, 80e-9)
+
+    def test_type_physical_index(self, model, feature_testpath):
+        index, qubit = next(iter(model.qubits.items()))
+        _, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("types", "physical_index.qasm"),
+            physical_index=index,
+        )
+        assert qubit in devices
+        assert qubit.resonator in devices
+
+    def test_type_port(self, model, feature_testpath):
+        """Just a basic smoke test as there's nothing to really inspect."""
+        index = next(iter(model.qubits))
+        _ = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("types", "port.qasm"),
+            port=f"channel_{index}",
+        )
+
+    @pytest.mark.parametrize(
+        "width", ["80ns", "0.08us", "0.08µs", "80e-9s", "160dt", "80e-6ms"]
+    )
+    def test_units(self, model, feature_testpath, width):
+        """Test that different units are parsed correctly."""
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "instructions", "delay.qasm"),
+            frame=frame,
+            time=width,
+        )
+
+        assert qubit in devices
+        delays = [inst for inst in builder.instructions if isinstance(inst, Delay)]
+        assert len(delays) == 1
+        assert np.isclose(delays[0].duration, 80e-9)
+
+    @pytest.mark.parametrize(
+        "constant, value",
+        [
+            ("pi", np.pi),
+            ("euler", np.e),
+            ("tau", 2 * np.pi),
+            # unicode symbols for constants
+            ("\u03c0", np.pi),
+            ("\u2107", np.e),
+            ("\U0001d70f", 2 * np.pi),
+        ],
+    )
+    def test_constants(self, model, feature_testpath, constant, value):
+        """Test that constants are parsed correctly."""
+        index, qubit = next(iter(model.qubits.items()))
+        frame = f"q{index}_drive"
+        builder, devices = self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("constants.qasm"),
+            frame=frame,
+            value=constant,
+        )
+
+        assert qubit in devices
+        phases = [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
+        assert len(phases) == 1
+        assert np.isclose(phases[0].phase, value)
+
+    @pytest.mark.xfail(raises=ValueError, reason="Control flow is not supported yet.")
+    @pytest.mark.parametrize(
+        "file",
+        [
+            "break.qasm",
+            "continue.qasm",
+            "for.qasm",
+            "functions.qasm",
+            "if_else.qasm",
+            "while.qasm",
+        ],
+    )
+    def test_control_flow(self, model, feature_testpath, file):
+        """More precise testing of control flow to come when control flow is supported."""
+        file = Path("classical", file)
+        self.return_builder_and_devices(model, feature_testpath, file)
+
+    @pytest.mark.xfail(raises=ValueError, reason="Gate modifiers are not supported yet.")
+    @pytest.mark.parametrize(
+        "file",
+        [
+            "ctrl.qasm",
+            "inv.qasm",
+            "negctrl.qasm",
+            "pow.qasm",
+        ],
+    )
+    def test_gate_modifiers(self, model, feature_testpath, file):
+        """More precise testing of gate modifiers to come when they are supported."""
+        file = Path("gates", "modifiers", file)
+        self.return_builder_and_devices(model, feature_testpath, file)
+
+    @pytest.mark.xfail(
+        raises=ValueError, reason="Constant declarations are not supported yet."
+    )
+    def test_constant(self, model, feature_testpath):
+        """More precise testing of constant declarations to come when they are supported."""
+        self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("keywords", "constant.qasm"),
+        )
+
+    @pytest.mark.xfail(
+        raises=ValueError, reason="Function definitions are not supported yet."
+    )
+    def test_def(self, model, feature_testpath):
+        """More precise testing of function definitions to come when they are supported."""
+        self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("keywords", "def.qasm"),
+        )
+
+    @pytest.mark.xfail(raises=ValueError, reason="Durationof is not supported yet.")
+    def test_durationof(self, model, feature_testpath):
+        """More precise testing of durationof to come when supported."""
+        index = next(iter(model.qubits))
+        frame = f"q{index}_drive"
+        self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            Path("pulse", "functions", "durationof.qasm"),
+            frame=frame,
+            physical_index=index,
+        )
+
+    @pytest.mark.xfail(raises=ValueError, reason="This types is not fully supported yet.")
+    @pytest.mark.parametrize(
+        "file",
+        [
+            "angle.qasm",
+            "array.qasm",
+            "complex.qasm",
+            "duration.qasm",
+            "float.qasm",
+            "int.qasm",
+            "stretch.qasm",
+        ],
+    )
+    def test_types(self, model, feature_testpath, file):
+        """More precise testing of types to come when they are supported."""
+        file = Path("types", file)
+        self.return_builder_and_devices(
+            model,
+            feature_testpath,
+            file,
+        )
+
+    @pytest.mark.xfail(
+        raises=AttributeError, reason="Some unknown bug is causing failure (COMPILER-720)."
+    )
+    def test_include(self, model, feature_testpath):
+        """Will likely fail even after the bug is resolved, but I was expected a different
+        error to do with the fact we can't load in custom includes."""
+        lib = str(feature_testpath / "oqc_lib.inc")
+        self.return_builder_and_devices(
+            model, feature_testpath, Path("include.qasm"), lib=lib
+        )

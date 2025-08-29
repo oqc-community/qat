@@ -1331,7 +1331,6 @@ class TestQASM3Features:
     @pytest.mark.skip(reason="Fails because of hard-coded sample time in qasm3 parser.")
     def test_mix_waveform(self, model, feature_testpath):
         qubit = model.qubits[0]
-        print(qubit.physical_channel.sample_time)
         frame = f"q{qubit.index}_drive"
         builder, devices = self.return_builder_and_devices(
             model,
@@ -1348,8 +1347,6 @@ class TestQASM3Features:
             inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
         ]
         assert len(pulses) == 1
-        print(len(pulses[0].samples))
-        print(pulses[0].quantum_targets[0].physical_channel.sample_time)
         assert np.allclose(pulses[0].samples, [2.5e-4 * 0.5])
         assert np.isclose(pulses[0].duration, 80e-9)
 
