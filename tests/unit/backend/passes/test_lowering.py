@@ -18,13 +18,13 @@ from qat.ir.measure import (
     ProcessAxis,
 )
 from qat.ir.waveforms import Pulse, SquareWaveform
-from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader as LegEchoModelLoader
 from qat.purr.compiler.instructions import PulseShapeType
 
 
 class TestPydPartitionByPulseChannel:
-    hw = PydEchoModelLoader().load()
+    hw = LucyModelLoader().load()
 
     @pytest.fixture(scope="class")
     def builder(self):

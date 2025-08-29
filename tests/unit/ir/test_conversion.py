@@ -24,7 +24,7 @@ from qat.ir.instructions import (
 )
 from qat.middleend.passes.purr.transform import LoopCount
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
-from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, PipelineConfig
 from qat.purr.compiler import instructions
@@ -45,7 +45,7 @@ class TestFlattenIRPass:
 
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader(4).load()
+        return LucyModelLoader(4).load()
 
     def test_flat_ir_does_nothing(self, model):
         ir = QuantumInstructionBuilder(hardware_model=model)

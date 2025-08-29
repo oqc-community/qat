@@ -12,12 +12,12 @@ from qat.middleend.passes.analysis import (
     ActivePulseChannelResults,
 )
 from qat.model.device import Resonator
-from qat.model.loaders.converted import EchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.purr.utils.logger import LoggerLevel
 
 
 class TestActivePulseChannelAnalysis:
-    model = EchoModelLoader().load()
+    model = LucyModelLoader().load()
 
     def test_create_channel_to_qubit_mapping(self):
         map = ActivePulseChannelAnalysis._create_channel_to_qubit_mapping(self.model)

@@ -657,9 +657,9 @@ class TestClassConfig:
         assert ob.y == config.get("y", "default_y")
 
     def test_frontend_description(self):
-        from qat.model.loaders.converted import EchoModelLoader as ConvertedEchoModelLoader
+        from qat.model.loaders.lucy import LucyModelLoader
 
-        model = ConvertedEchoModelLoader().load()
+        model = LucyModelLoader().load()
 
         FrontendDescription = ClassDescription[ImportFrontend]
         frontend_desc = FrontendDescription(type="qat.frontend.AutoFrontend")

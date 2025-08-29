@@ -68,7 +68,7 @@ from qat.middleend.passes.validation import (
     RepeatSanitisationValidation,
     ReturnSanitisationValidation,
 )
-from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.target_data import (
     AbstractTargetData,
     QubitDescription,
@@ -81,7 +81,7 @@ from tests.unit.utils.pulses import test_waveforms
 
 @pytest.mark.parametrize("explicit_close", [False, True])
 class TestRepeatTranslation:
-    hw = PydEchoModelLoader(1).load()
+    hw = LucyModelLoader(1).load()
 
     @staticmethod
     def _check_loop_start(ir: QuantumInstructionBuilder, indices: list[int]):
@@ -208,7 +208,7 @@ class TestRepeatTranslation:
 
 
 class TestRepeatSanitisation:
-    hw = PydEchoModelLoader(1).load()
+    hw = LucyModelLoader(1).load()
 
     @pytest.mark.parametrize("shots", [10, 100, 1000])
     @pytest.mark.parametrize("passive_reset_time", [1e-03, 2])
@@ -238,7 +238,7 @@ class TestRepeatSanitisation:
 
 
 class TestPydPhaseOptimisation:
-    hw = PydEchoModelLoader(8).load()
+    hw = LucyModelLoader(8).load()
 
     def test_merged_identical_phase_resets(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -439,7 +439,7 @@ class TestPydPhaseOptimisation:
 
 
 class TestPydPostProcessingSanitisation:
-    hw = PydEchoModelLoader(32).load()
+    hw = LucyModelLoader(32).load()
 
     def test_meas_acq_with_pp(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -521,7 +521,7 @@ class TestPydPostProcessingSanitisation:
 
 
 class TestMeasurePhaseResetSanitisation:
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
 
     def test_measure_phase_reset(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -576,7 +576,7 @@ class TestMeasurePhaseResetSanitisation:
 
 
 class TestInactivePulseChannelSanitisation:
-    hw = PydEchoModelLoader(10).load()
+    hw = LucyModelLoader(10).load()
 
     def test_sync_on_one_qubit_with_one_pulse_channel_is_removed(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -712,7 +712,7 @@ class TestInactivePulseChannelSanitisation:
 
 
 class TestPydInstructionGranularitySanitisation:
-    hw = PydEchoModelLoader(10).load()
+    hw = LucyModelLoader(10).load()
     target_data = TargetData(
         max_shots=1000,
         default_shots=10,
@@ -954,7 +954,7 @@ class TestPydInstructionGranularitySanitisation:
 
 @pytest.mark.parametrize("seed", [1, 2, 3, 4])
 class TestInstructionLengthSanitisation:
-    hw = PydEchoModelLoader(8).load()
+    hw = LucyModelLoader(8).load()
 
     @staticmethod
     def get_target_data(seed):
@@ -1108,7 +1108,7 @@ class TestInstructionLengthSanitisation:
 
 
 class TestPydReturnSanitisation:
-    hw = PydEchoModelLoader(8).load()
+    hw = LucyModelLoader(8).load()
 
     def test_empty_builder(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -1169,7 +1169,7 @@ class TestPydReturnSanitisation:
 class TestPydBatchedShots:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     def test_with_no_repeat(self, model):
         builder = QuantumInstructionBuilder(hardware_model=model)
@@ -1212,7 +1212,7 @@ class TestPydBatchedShots:
 class TestResetsToDelays:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize("add_reset", [True, False])
     def test_qubit_reset(self, passive_reset_time: float, add_reset: bool, model):
@@ -1338,7 +1338,7 @@ class TestResetsToDelays:
 class TestSquashDelaysOptimisation:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
     @pytest.mark.parametrize("with_phase", [True, False])
@@ -1428,7 +1428,7 @@ class TestSquashDelaysOptimisation:
 class TestScopeSanitisation:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize("num_repeats", [1, 2, 3])
     def test_repeats_are_shifted_to_the_beginning(self, num_repeats, model):
@@ -1446,7 +1446,7 @@ class TestScopeSanitisation:
 class TestEndOfTaskResetSanitisation:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize("reset_q1", [False, True])
     @pytest.mark.parametrize("reset_q2", [False, True])
@@ -1556,14 +1556,14 @@ class TestEndOfTaskResetSanitisation:
 class TestFreqShiftSanitisation:
     @pytest.fixture(scope="class")
     def model(self):
-        hw = PydEchoModelLoader().load()
+        hw = LucyModelLoader().load()
         for q_idx in range(2):
             hw.qubit_with_index(q_idx).freq_shift_pulse_channel.active = True
         return hw
 
     @pytest.fixture(scope="class")
     def model_no_freq_shift(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.fixture(scope="class")
     def freq_shift_pulse_channels(self, model):
@@ -1737,7 +1737,7 @@ class TestFreqShiftSanitisation:
 class TestPhaseResetSanitisation:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize("reset_qubits", [False, True])
     def test_phase_reset_shot(self, model, reset_qubits):
@@ -1868,7 +1868,7 @@ class TestLowerSyncsToDelays:
                 assert np.isclose(inst.duration, 120e-9)
 
     def test_sync_with_two_channels(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         chan1 = model.qubits[0].drive_pulse_channel
         chan2 = model.qubits[1].drive_pulse_channel
 
@@ -1895,7 +1895,7 @@ class TestLowerSyncsToDelays:
 class TestEvaluateWaveforms:
     @pytest.fixture(scope="class")
     def model(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         model.qubit_with_index(0).drive_pulse_channel.scale = 2.0
         return model
 
@@ -2153,7 +2153,7 @@ class TestEvaluateWaveforms:
 class TestSynchronizeTask:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader().load()
+        return LucyModelLoader().load()
 
     def test_synchronize_task_adds_sync(self, model):
         qubit = model.qubit_with_index(0)

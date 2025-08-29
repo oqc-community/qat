@@ -32,7 +32,7 @@ from qat.middleend.passes.validation import (
     PydRepeatSanitisationValidation,
 )
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
-from qat.model.loaders.converted import EchoModelLoader as PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
@@ -43,7 +43,7 @@ qatconfig = get_config()
 
 
 class TestInstructionValidation:
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
     target_data = TargetData.default()
 
     @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
@@ -119,7 +119,7 @@ class TestInstructionValidation:
 
 class TestPydDynamicFrequencyValidation:
     target_data = TargetData.default()
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
 
     def get_single_pulse_channel(self):
         return next(iter(self.hw._ids_to_pulse_channels.values()))
@@ -423,7 +423,7 @@ class TestPydDynamicFrequencyValidation:
 
 
 class TestPydNoMidCircuitMeasurementValidation:
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
 
     def test_no_mid_circuit_meas_found(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -455,7 +455,7 @@ class TestHardwareConfigValidity:
     def get_hw(legacy=True):
         if legacy:
             return EchoModelLoader(qubit_count=4).load()
-        return PydEchoModelLoader(qubit_count=4).load()
+        return LucyModelLoader(qubit_count=4).load()
 
     @pytest.mark.parametrize(
         "mitigation_config",
@@ -545,7 +545,7 @@ class TestHardwareConfigValidity:
 
 class TestFrequencySetupValidation:
     target_data = TargetData.default()
-    model = PydEchoModelLoader().load()
+    model = LucyModelLoader().load()
 
     @staticmethod
     def target_data_with_non_zero_if_min():
@@ -847,7 +847,7 @@ class TestPydHardwareConfigValidity:
 
 
 class TestReadoutValidation:
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
 
     def test_valid_readout(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -905,7 +905,7 @@ class TestReadoutValidation:
 
 
 class TestRepeatSanitisationValidation:
-    hw = PydEchoModelLoader(qubit_count=4).load()
+    hw = LucyModelLoader(qubit_count=4).load()
     warning_msg = "Could not find any repeat instructions."
 
     def test_repeat_sanitisation_validation_doesnt_edit_instructions(self):

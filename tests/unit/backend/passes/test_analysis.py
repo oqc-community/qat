@@ -26,6 +26,7 @@ from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays as LegLowerSyncsToDelays,
 )
 from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import Delay as LegDelay
@@ -33,7 +34,7 @@ from qat.purr.compiler.instructions import Delay as LegDelay
 
 class TestIntermediateFrequencyAnalysis:
     def test_different_frequencies_with_fixed_if_yields_error(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         pulse_channels = iter(model.qubits[0].all_pulse_channels)
 
         pulse_channel_1 = next(pulse_channels)
@@ -67,7 +68,7 @@ class TestIntermediateFrequencyAnalysis:
             PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
     def test_same_frequencies_with_fixed_if_passes(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         pulse_channels = iter(model.qubits[0].all_pulse_channels)
 
         pulse_channel_1 = next(pulse_channels)
@@ -90,7 +91,7 @@ class TestIntermediateFrequencyAnalysis:
 
     #
     def test_fixed_if_returns_frequencies(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
 
         # Find two pulse channels with different physical channels
 
@@ -121,7 +122,7 @@ class TestIntermediateFrequencyAnalysis:
 class TestIntermediateFrequencyAnalysisParity:
     def test_different_frequencies_with_fixed_if_yields_error(self):
         leg_model = EchoModelLoader().load()
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         physical_channel = next(iter(leg_model.physical_channels.values()))
         pulse_channels = iter(
             leg_model.get_pulse_channels_from_physical_channel(physical_channel)
@@ -166,7 +167,7 @@ class TestIntermediateFrequencyAnalysisParity:
 
     def test_same_frequencies_with_fixed_if_passes(self):
         leg_model = EchoModelLoader().load()
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         physical_channel = next(iter(leg_model.physical_channels.values()))
         pulse_channels = iter(
             leg_model.get_pulse_channels_from_physical_channel(physical_channel)

@@ -6,14 +6,14 @@ from qat.core.result_base import ResultManager
 from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import AcquireMode
-from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 
 
 class TestIndexMappingAnalysis:
     @pytest.fixture(scope="class")
     def model(self):
-        return PydEchoModelLoader(2).load()
+        return LucyModelLoader(2).load()
 
     @pytest.fixture(scope="class")
     def ir(self, model):

@@ -7,12 +7,12 @@ from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import Acquire
 from qat.ir.waveforms import Pulse, SquareWaveform
-from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 
 
 class TestNoAcquireWeightsValidation:
     def test_acquire_with_filter_raises_error(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         res_mgr = ResultManager()
         qubit = model.qubits[0]
         builder = QuantumInstructionBuilder(model)
@@ -28,7 +28,7 @@ class TestNoAcquireWeightsValidation:
             NoAcquireWeightsValidation().run(builder, res_mgr)
 
     def test_acquire_without_filter_returns_instructions(self):
-        model = PydEchoModelLoader().load()
+        model = LucyModelLoader().load()
         res_mgr = ResultManager()
         qubit = model.qubits[0]
         builder = QuantumInstructionBuilder(model)

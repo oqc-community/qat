@@ -17,7 +17,7 @@ from qat.frontend.passes.analysis import InputAnalysisResult
 from qat.frontend.passes.transform import PydInputOptimisation, PydParse
 from qat.ir.instruction_builder import InstructionBuilder
 from qat.ir.instructions import ResultsProcessing
-from qat.model.loaders.converted import EchoModelLoader
+from qat.model.loaders.lucy import LucyModelLoader
 
 from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir
 
@@ -25,7 +25,7 @@ from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir
 class TestPydInputOptimisation:
     @pytest.fixture(scope="class")
     def model(self):
-        model = EchoModelLoader().load()
+        model = LucyModelLoader().load()
         logical_connectivity = {0: {1}, 1: {2}, 2: {3}, 3: {0}}
         physical_connectivity = {0: {1, 3}, 1: {0, 2}, 2: {1, 3}, 3: {0, 2}}
         logical_connectivity_quality = {
@@ -118,7 +118,7 @@ class TestPydInputOptimisation:
 class TestPydParse:
     @pytest.fixture(scope="class")
     def model(self):
-        return EchoModelLoader().load()
+        return LucyModelLoader().load()
 
     @pytest.mark.parametrize(
         "program,language",
