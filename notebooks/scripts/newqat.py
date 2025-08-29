@@ -20,6 +20,15 @@
 # %load_ext autoreload
 # %autoreload 2
 
+# %%
+# This is required to support both the script and notebook versions of this file
+from pathlib import Path
+
+if nb_dir := globals().get("_dh"):
+    notebooks_dir = Path(nb_dir[0]).parents[0].resolve()
+else:
+    notebooks_dir = Path(__file__).parents[1].resolve()
+
 # %% [markdown]
 # Import QAT and instantiate a qat instance
 
@@ -57,7 +66,7 @@ pkg, metrics = qat.compile(src)
 
 # %%
 res, metrics = qat.execute(pkg)
-res
+print(res)
 
 # %% [markdown]
 # Comile and execute a program with a different pipeline...
@@ -70,7 +79,7 @@ res, metrics = qat.execute(pkg, pipeline="echo16")
 # QAT pipelines can also be configured with YAML...
 
 # %%
-qat = QAT(qatconfig="../qatconfig.eg.yaml")
+qat = QAT(qatconfig=str(notebooks_dir) + "/qatconfig.yaml")
 qat.pipelines
 
 # %% [markdown]
@@ -81,23 +90,38 @@ import pathlib
 
 import yaml
 
-print(yaml.dump(yaml.safe_load(pathlib.Path("../qatconfig.eg.yaml").read_text())))
+print(yaml.dump(yaml.safe_load(pathlib.Path(notebooks_dir, "qatconfig.yaml").read_text())))
 
 # %% [markdown]
 # Change the default pipeline
 
 # %%
 qat.pipelines.set_default("echo8-alt")
-inst, metrics = qat.compile(src)
-res, metrics = qat.execute(inst)
-res
+
+# Default shot number is now highet than pipeline max limit
+try:
+    inst, metrics = qat.compile(src)
+except ValueError as ex:
+    print(ex)
+
+
+# %% [markdown]
+# Create a custom config and set a lower shot count
+
+# %%
+from compiler_config.config import CompilerConfig
+
+config = CompilerConfig(repeats=8)
+inst, metrics = qat.compile(src, compiler_config=config)
+res, metrics = qat.execute(inst, compiler_config=config)
+print(res)
 
 # %% [markdown]
 # Run a program as a one liner...
 
 # %%
-res, metrics = qat.run(src)
-res
+res, metrics = qat.run(src, compiler_config=config)
+print(res)
 
 # %% [markdown]
 # Make a custom pipeline
@@ -128,9 +152,9 @@ P = Pipeline(
 # Compile and execute against the new pipeline
 
 # %%
-pkg, metrics = qat.compile(src, pipeline=P)
-res, metrics = qat.execute(pkg, pipeline=P)
-res
+pkg, metrics = qat.compile(src, compiler_config=config, pipeline=P)
+res, metrics = qat.execute(pkg, compiler_config=config, pipeline=P)
+print(res)
 
 # %% [markdown]
 # Keep it around for later...
@@ -143,6 +167,8 @@ P.name
 # Now it's available by name
 
 # %%
-pkg, metrics = qat.compile(src, pipeline="mycoolnewpipeline")
-res, metrics = qat.execute(pkg, pipeline="mycoolnewpipeline")
-res
+pkg, metrics = qat.compile(src, compiler_config=config, pipeline="mycoolnewpipeline")
+res, metrics = qat.execute(pkg, compiler_config=config, pipeline="mycoolnewpipeline")
+print(res)
+
+# %%

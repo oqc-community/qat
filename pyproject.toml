@@ -105,6 +105,12 @@ sphinx-multiversion = "^0.2.4"
 sphinx-pyproject = "^0.3.0"
 dunamai = "^1.24.1"
 
+[tool.poetry.group.notebook]
+optional = true
+
+[tool.poetry.group.notebook.dependencies]
+notebook = "^7.4.1"
+
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 
