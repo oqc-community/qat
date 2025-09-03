@@ -45,7 +45,7 @@ class EchoPipeline(UpdateablePipeline):
         return Pipeline(
             model=model,
             target_data=target_data,
-            frontend=AutoFrontend(model),
+            frontend=AutoFrontend.default_for_purr(model),
             middleend=DefaultMiddleend(model, target_data),
             backend=WaveformV1Backend(model),
             runtime=SimpleRuntime(engine=EchoEngine(), results_pipeline=results_pipeline),

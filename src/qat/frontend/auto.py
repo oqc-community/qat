@@ -5,8 +5,11 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
+from qat.frontend.fallthrough import FallthroughFrontend
 from qat.frontend.passes.purr.transform import FlattenIR
+from qat.frontend.purr.purr import PurrFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend
+from qat.frontend.qat_ir import QatFrontend
 from qat.frontend.qir import QIRFrontend
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -51,6 +54,40 @@ class AutoFrontend(BaseFrontend):
         :param model: The hardware model is needed to instantiate the default frontends.
         """
         return [Qasm2Frontend(model), Qasm3Frontend(model), QIRFrontend(model)]
+
+    @classmethod
+    def default_for_purr(cls, model: QuantumHardwareModel) -> "AutoFrontend":
+        """Temporary factory for creating an AutoFrontend that allows a PurrFrontend.
+
+        :param model: The purr hardware model is needed to instantiate the default
+            frontends.
+        """
+
+        # TODO: remove when purr is fully deprecated (COMPILER-724)
+        frontends = cls.default_frontends(model) + [PurrFrontend(model)]
+        return cls(model, *frontends)
+
+    @classmethod
+    def default_for_pydantic(cls, model: PydHardwareModel) -> "AutoFrontend":
+        """Temporary factory for creating an AutoFrontend that allows a QatFrontend.
+
+        :param model: The hardware model is needed to instantiate the default
+            frontends.
+        """
+
+        # TODO: The default_frontends methods should eventually be replaced with this.
+        # (COMPILER-724)
+        frontends = cls.default_frontends(model) + [QatFrontend(model)]
+        return cls(model, *frontends)
+
+    @classmethod
+    def default_for_legacy(cls, model: QuantumHardwareModel) -> "AutoFrontend":
+        """Temporary factory for creating an AutoFrontend that has a fallthrough frontend
+        to allow any legacy source."""
+
+        # TODO: remove when legacy is fully deprecated (COMPILER-724)
+        frontends = cls.default_frontends(model) + [FallthroughFrontend(model)]
+        return cls(model, *frontends)
 
     def check_and_return_source(self, src):
         """Checks the source file sequentially against the different frontends. If a

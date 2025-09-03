@@ -38,7 +38,7 @@ class WaveformV1CompilePipeline(UpdateablePipeline):
         return CompilePipeline(
             model=model,
             target_data=target_data,
-            frontend=AutoFrontend(model),
+            frontend=AutoFrontend.default_for_purr(model),
             middleend=DefaultMiddleend(model, target_data),
             backend=WaveformV1Backend(model),
             name=config.name,

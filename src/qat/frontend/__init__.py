@@ -8,6 +8,7 @@ from qat.frontend.custom import CustomFrontend as CustomFrontend
 from qat.frontend.fallthrough import FallthroughFrontend as FallthroughFrontend
 from qat.frontend.qasm import Qasm2Frontend as Qasm2Frontend
 from qat.frontend.qasm import Qasm3Frontend as Qasm3Frontend
+from qat.frontend.qat_ir import QatFrontend as QatFrontend
 from qat.frontend.qir import QIRFrontend as QIRFrontend
 
 DefaultFrontend = AutoFrontend

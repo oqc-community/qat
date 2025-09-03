@@ -45,7 +45,8 @@ class WaveformV1CompilePipeline(UpdateablePipeline):
         return CompilePipeline(
             model=model,
             target_data=target_data,
-            frontend=AutoFrontend(model),
+            # TODO: Replace with default_for_pydantic when available (COMPILER-725)
+            frontend=AutoFrontend.default_for_purr(model),
             middleend=ExperimentalDefaultMiddleend(model, pyd_model, target_data),
             backend=PydWaveformV1Backend(pyd_model, model, target_data),
             name=config.name,

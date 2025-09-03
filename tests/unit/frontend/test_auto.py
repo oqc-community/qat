@@ -8,12 +8,16 @@ from compiler_config.config import CompilerConfig, Languages, Tket
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager, ResultModel
 from qat.frontend.auto import AutoFrontend
+from qat.frontend.fallthrough import FallthroughFrontend
+from qat.frontend.purr import PurrFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend, load_qasm_file
+from qat.frontend.qat_ir import QatFrontend
 from qat.frontend.qir import QIRFrontend, load_qir_file
 from qat.ir.instruction_builder import (
     QuantumInstructionBuilder as PydQuantumInstructionBuilder,
 )
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
@@ -226,3 +230,21 @@ class TestAutoFrontend:
         assert isinstance(result, ResultModel)
         assert result.value.language == lang_type
         assert result.value.raw_input == ir_str
+
+    def test_default_for_purr(self):
+        model = EchoModelLoader(32).load()
+        frontend = AutoFrontend.default_for_purr(model)
+        assert isinstance(frontend, AutoFrontend)
+        assert any(isinstance(f, PurrFrontend) for f in frontend.frontends)
+
+    def test_default_for_pydantic(self):
+        model = LucyModelLoader().load()
+        frontend = AutoFrontend.default_for_pydantic(model)
+        assert isinstance(frontend, AutoFrontend)
+        assert any(isinstance(f, QatFrontend) for f in frontend.frontends)
+
+    def test_default_for_legacy(self):
+        model = EchoModelLoader(32).load()
+        frontend = AutoFrontend.default_for_legacy(model)
+        assert isinstance(frontend, AutoFrontend)
+        assert any(isinstance(f, FallthroughFrontend) for f in frontend.frontends)

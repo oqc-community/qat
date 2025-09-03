@@ -44,7 +44,7 @@ class LegacyRTCSPipeline(UpdateablePipeline):
             name=config.name,
             model=model,
             target_data=target_data,
-            frontend=AutoFrontend(model),
+            frontend=AutoFrontend.default_for_legacy(model),
             middleend=CustomMiddleend(
                 model,
                 pipeline=middleend_pipeline(model=model, target_data=target_data),
