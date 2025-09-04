@@ -17,5 +17,5 @@ def test_load_executor(testpath):
     composite = load_executor(filepath)
     assert composite
     assert isinstance(composite, CompositeExecutor)
-    assert len(composite.components) == 4
+    assert len(composite.components) == 8
     assert all([isinstance(comp, LeafExecutor) for comp in composite.components.values()])

@@ -35,7 +35,7 @@ from qat.backend.qblox.passes.analysis import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import InvokerMixin, PassManager
 from qat.core.result_base import ResultManager
-from qat.executables import Executable
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -639,12 +639,12 @@ class AbstractContext(ABC):
             raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")
 
 
-class QbloxContext(AbstractContext):
+class QbloxContext1(AbstractContext):
     def __init__(self, repeat: Repeat):
         super().__init__()
 
         self._repeat_count = repeat.repeat_count
-        self._repeat_period = repeat.repetition_period
+        self._repeat_period = repeat.passive_reset_time
         self._repeat_reg = None
         self._repeat_label = None
 
@@ -746,7 +746,7 @@ class QbloxContext(AbstractContext):
         self.ledger(pulse_width, pulse)
 
 
-class NewQbloxContext(AbstractContext):
+class QbloxContext2(AbstractContext):
     def __init__(
         self,
         alloc_mgr: AllocationManager,
@@ -869,7 +869,7 @@ class NewQbloxContext(AbstractContext):
             label = context.alloc_mgr.labels[iter_name]
             bound = context.iter_bounds[iter_name]
 
-            context.wait_imm(int(inst.repetition_period * 1e9))
+            context.wait_imm(int(inst.passive_reset_time * 1e9))
             context.sequence_builder.add(
                 register, bound.step, register, "Increment Shot / Repeat iterator"
             )
@@ -915,60 +915,11 @@ class NewQbloxContext(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxCFGWalker(DfsTraversal):
-    def __init__(self, contexts: Dict[PulseChannel, NewQbloxContext]):
-        super().__init__()
-        self.contexts = contexts
-
-    def enter(self, block):
-        iterator = block.iterator()
-        while (inst := next(iterator, None)) is not None:
-            if isinstance(inst, Sweep):
-                NewQbloxContext.enter_sweep(inst, self.contexts)
-            elif isinstance(inst, Repeat):
-                NewQbloxContext.enter_repeat(inst, self.contexts)
-            elif isinstance(inst, QuantumInstruction):
-                if isinstance(inst, PostProcessing):
-                    continue
-                elif isinstance(inst, Synchronize):
-                    NewQbloxContext.synchronize(inst, self.contexts)
-                    continue
-
-                for target in inst.quantum_targets:
-                    context = self.contexts[target]
-                    if isinstance(inst, DeviceUpdate):
-                        context.device_update(inst)
-                    elif isinstance(inst, PhaseReset):
-                        context.reset_phase()
-                    elif isinstance(inst, MeasurePulse):
-                        next_inst = next(iterator, None)
-                        if next_inst is None or not isinstance(next_inst, Acquire):
-                            raise ValueError(
-                                "Found a MeasurePulse but no Acquire instruction followed"
-                            )
-
-                        context.measure_acquire(inst, next_inst, target)
-                    elif isinstance(inst, Waveform):
-                        context.waveform(inst, target)
-                    elif isinstance(inst, Delay):
-                        context.delay(inst)
-                    elif isinstance(inst, PhaseShift):
-                        context.shift_phase(inst)
-                    elif isinstance(inst, FrequencyShift):
-                        context.shift_frequency(inst, target)
-                    elif isinstance(inst, Id):
-                        context.id()
-
-    def exit(self, block):
-        iterator = block.iterator()
-        while (inst := next(iterator, None)) is not None:
-            if isinstance(inst, Repeat):
-                NewQbloxContext.exit_repeat(inst, self.contexts)
-            elif isinstance(inst, Sweep):
-                NewQbloxContext.exit_sweep(inst, self.contexts)
-
-
 class QbloxBackend1(BaseBackend, InvokerMixin):
+    def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
+        super().__init__(model)
+        self.ignore_empty = ignore_empty
+
     def build_pass_pipeline(self, *args, **kwargs):
         pass
 
@@ -1001,7 +952,7 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
 
     def _do_emit(self, triage_result: TriageResult) -> QbloxExecutable:
         repeat = next(iter(triage_result.repeats))
-        contexts: Dict[PulseChannel, QbloxContext] = {}
+        contexts: Dict[PulseChannel, QbloxContext1] = {}
 
         with ExitStack() as stack:
             inst_iter = iter(triage_result.quantum_instructions)
@@ -1014,9 +965,9 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
                         if not isinstance(target, PulseChannel):
                             raise ValueError(f"{target} is not a PulseChannel")
                         contexts.setdefault(
-                            target, stack.enter_context(QbloxContext(repeat))
+                            target, stack.enter_context(QbloxContext1(repeat))
                         )
-                    QbloxContext.synchronize(inst, contexts)
+                    QbloxContext1.synchronize(inst, contexts)
                     continue
 
                 for target in inst.quantum_targets:
@@ -1024,7 +975,7 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
                         raise ValueError(f"{target} is not a PulseChannel")
 
                     context = contexts.setdefault(
-                        target, stack.enter_context(QbloxContext(repeat))
+                        target, stack.enter_context(QbloxContext1(repeat))
                     )
 
                     if isinstance(inst, DeviceUpdate):
@@ -1051,15 +1002,19 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
                         context.id()
 
         packages = {
-            target: context.create_package()
+            target.full_id(): context.create_package()
             for target, context in contexts.items()
-            if not context.is_empty()
+            if not (self.ignore_empty and context.is_empty())
         }
 
         return QbloxExecutable(packages=packages, triage_result=triage_result)
 
 
 class QbloxBackend2(BaseBackend, InvokerMixin):
+    def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
+        super().__init__(model)
+        self.ignore_empty = ignore_empty
+
     def build_pass_pipeline(self, *args, **kwargs):
         return PassManager() | PreCodegenPass() | CFGPass()
 
@@ -1069,7 +1024,7 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         compiler_config: Optional[CompilerConfig] = None,
-    ) -> Executable:
+    ) -> QbloxExecutable:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
@@ -1087,7 +1042,7 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
         with ExitStack() as stack:
             contexts = {
                 t: stack.enter_context(
-                    NewQbloxContext(
+                    QbloxContext2(
                         alloc_mgr=alloc_mgrs[t],
                         scoping_result=scoping_results[t],
                         rw_result=rw_results[t],
@@ -1099,9 +1054,62 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
             QbloxCFGWalker(contexts).run(cfg_result.cfg)
 
         packages = {
-            target: context.create_package()
+            target.full_id(): context.create_package()
             for target, context in contexts.items()
-            if not context.is_empty()
+            if not (self.ignore_empty and context.is_empty())
         }
 
         return QbloxExecutable(packages=packages, triage_result=triage_result)
+
+
+class QbloxCFGWalker(DfsTraversal):
+    def __init__(self, contexts: Dict[PulseChannel, QbloxContext2]):
+        super().__init__()
+        self.contexts = contexts
+
+    def enter(self, block):
+        iterator = block.iterator()
+        while (inst := next(iterator, None)) is not None:
+            if isinstance(inst, Sweep):
+                QbloxContext2.enter_sweep(inst, self.contexts)
+            elif isinstance(inst, Repeat):
+                QbloxContext2.enter_repeat(inst, self.contexts)
+            elif isinstance(inst, QuantumInstruction):
+                if isinstance(inst, PostProcessing):
+                    continue
+                elif isinstance(inst, Synchronize):
+                    QbloxContext2.synchronize(inst, self.contexts)
+                    continue
+
+                for target in inst.quantum_targets:
+                    context = self.contexts[target]
+                    if isinstance(inst, DeviceUpdate):
+                        context.device_update(inst)
+                    elif isinstance(inst, PhaseReset):
+                        context.reset_phase()
+                    elif isinstance(inst, MeasurePulse):
+                        next_inst = next(iterator, None)
+                        if next_inst is None or not isinstance(next_inst, Acquire):
+                            raise ValueError(
+                                "Found a MeasurePulse but no Acquire instruction followed"
+                            )
+
+                        context.measure_acquire(inst, next_inst, target)
+                    elif isinstance(inst, Waveform):
+                        context.waveform(inst, target)
+                    elif isinstance(inst, Delay):
+                        context.delay(inst)
+                    elif isinstance(inst, PhaseShift):
+                        context.shift_phase(inst)
+                    elif isinstance(inst, FrequencyShift):
+                        context.shift_frequency(inst, target)
+                    elif isinstance(inst, Id):
+                        context.id()
+
+    def exit(self, block):
+        iterator = block.iterator()
+        while (inst := next(iterator, None)) is not None:
+            if isinstance(inst, Repeat):
+                QbloxContext2.exit_repeat(inst, self.contexts)
+            elif isinstance(inst, Sweep):
+                QbloxContext2.exit_sweep(inst, self.contexts)

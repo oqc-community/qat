@@ -88,7 +88,7 @@ def resonator_spect(model, qubit_indices=None, num_points=None):
         builder.device_assign(acquire_channel, "frequency", Variable(f"freq{qubit.index}"))
         builder.measure_mean_signal(qubit, f"Q{qubit.index}")
 
-    builder.repeat(1000, 500e-6)
+    builder.repeat(1000, passive_reset_time=500e-6)
     return builder
 
 
@@ -133,7 +133,7 @@ def qubit_spect(model, qubit_indices=None, num_points=None):
         )
         builder.measure_mean_signal(qubit, output_variable=f"Q{index}")
 
-    builder.repeat(1000, 500e-6)
+    builder.repeat(1000, passive_reset_time=500e-6)
     return builder
 
 

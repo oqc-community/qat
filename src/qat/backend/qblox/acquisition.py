@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
+from typing import Optional
+
 import numpy as np
 from pydantic import BaseModel, Field
 
@@ -13,14 +15,14 @@ class PathData(BaseModel):
     of averages performed by the hardware (if any), and whether the hw observed any out-of-range samples.
     """
 
-    avg_count: int = Field(alias="avg_cnt", default=None)
-    oor: bool = Field(alias="out-of-range", default=None)
-    data: FloatNDArray = Field(alias="data", default=np.empty(0, dtype=float))
+    avg_cnt: int = None
+    oor: bool = Field(alias="out-of-range", default=False)
+    data: FloatNDArray = np.empty(0, dtype=float)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        if self.avg_count != other.avg_count:
+        if self.avg_cnt != other.avg_cnt:
             return False
         if self.oor != other.oor:
             return False
@@ -34,15 +36,15 @@ class IntegData(BaseModel):
     Path 0 refers to I while Path 1 refers to Q
     """
 
-    i: FloatNDArray = Field(alias="path0", default=np.empty(0, dtype=float))
-    q: FloatNDArray = Field(alias="path1", default=np.empty(0, dtype=float))
+    path0: FloatNDArray = np.empty(0, dtype=float)
+    path1: FloatNDArray = np.empty(0, dtype=float)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        if self.i.size != other.i.size or np.any(self.i != other.i):
+        if self.path0.size != other.path0.size or np.any(self.path0 != other.path0):
             return False
-        if self.q.size != other.q.size or np.any(self.q != other.q):
+        if self.path1.size != other.path1.size or np.any(self.path1 != other.path1):
             return False
         return True
 
@@ -53,8 +55,8 @@ class ScopeAcqData(BaseModel):
     to :class:`Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS`
     """
 
-    i: PathData = Field(alias="path0", default=PathData())
-    q: PathData = Field(alias="path1", default=PathData())
+    path0: PathData = PathData()
+    path1: PathData = PathData()
 
 
 class BinnedAcqData(BaseModel):
@@ -64,16 +66,14 @@ class BinnedAcqData(BaseModel):
     which are executed by the hardware.
     """
 
-    avg_count: IntNDArray = Field(alias="avg_cnt", default=np.empty(0, dtype=int))
-    integration: IntegData = Field(alias="integration", default=IntegData())
-    threshold: FloatNDArray = Field(alias="threshold", default=np.empty(0, dtype=float))
+    avg_cnt: IntNDArray = np.empty(0, dtype=int)
+    integration: IntegData = IntegData()
+    threshold: FloatNDArray = np.empty(0, dtype=float)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        if self.avg_count.size != other.avg_count.size or np.any(
-            self.avg_count != other.avg_count
-        ):
+        if self.avg_cnt.size != other.avg_cnt.size or np.any(self.avg_cnt != other.avg_cnt):
             return False
         if self.integration != other.integration:
             return False
@@ -84,14 +84,14 @@ class BinnedAcqData(BaseModel):
         return True
 
 
-class AcqData(BaseModel):
+class BinnedAndScopeAcqData(BaseModel):
     """
     The actual acquisition data, it represents the value associated with the key "acquisition"
     in the acquisition blob returned by Qblox. This object contains scope data and binned data.
     """
 
-    bins: BinnedAcqData = Field(alias="bins", default=BinnedAcqData())
-    scope: ScopeAcqData = Field(alias="scope", default=ScopeAcqData())
+    bins: BinnedAcqData = BinnedAcqData()
+    scope: ScopeAcqData = ScopeAcqData()
 
 
 class Acquisition(BaseModel):
@@ -102,9 +102,9 @@ class Acquisition(BaseModel):
     An acquisition contains is described by a name, index, and blob data represented by :class:`AcqData`
     """
 
-    name: str = None
-    index: int = Field(alias="index", default=None)
-    acq_data: AcqData = Field(alias="acquisition", default=AcqData())
+    name: Optional[str] = None
+    index: int = None
+    acquisition: BinnedAndScopeAcqData = BinnedAndScopeAcqData()
 
     @staticmethod
     def accumulate(acq1: "Acquisition", acq2: "Acquisition"):
@@ -129,28 +129,32 @@ class Acquisition(BaseModel):
             raise ValueError(f"Expected the same name but got {acq1.name} != {acq2.name}")
         result.name = acq1.name
 
-        scope_data1 = acq1.acq_data.scope
-        scope_data2 = acq2.acq_data.scope
-        scope_data = result.acq_data.scope
+        scope_data1 = acq1.acquisition.scope
+        scope_data2 = acq2.acquisition.scope
+        scope_data = result.acquisition.scope
 
-        scope_data.i.avg_count = min(
-            scope_data1.i.avg_count or 0, scope_data2.i.avg_count or 0
+        scope_data.path0.avg_cnt = min(
+            scope_data1.path0.avg_cnt or 0, scope_data2.path0.avg_cnt or 0
         )
-        scope_data.i.oor = scope_data1.i.oor and scope_data2.i.oor
-        scope_data.i.data = np.append(scope_data1.i.data, scope_data2.i.data)
-        scope_data.q.avg_count = min(
-            scope_data1.q.avg_count or 0, scope_data2.q.avg_count or 0
+        scope_data.path0.oor = scope_data1.path0.oor and scope_data2.path0.oor
+        scope_data.path0.data = np.append(scope_data1.path0.data, scope_data2.path0.data)
+        scope_data.path1.avg_cnt = min(
+            scope_data1.path1.avg_cnt or 0, scope_data2.path1.avg_cnt or 0
         )
-        scope_data.q.oor = scope_data1.q.oor and scope_data2.q.oor
-        scope_data.q.data = np.append(scope_data1.q.data, scope_data2.q.data)
+        scope_data.path1.oor = scope_data1.path1.oor and scope_data2.path1.oor
+        scope_data.path1.data = np.append(scope_data1.path1.data, scope_data2.path1.data)
 
-        bin_data1 = acq1.acq_data.bins
-        bin_data2 = acq2.acq_data.bins
-        bin_data = result.acq_data.bins
+        bin_data1 = acq1.acquisition.bins
+        bin_data2 = acq2.acquisition.bins
+        bin_data = result.acquisition.bins
 
-        bin_data.avg_count = np.append(bin_data1.avg_count, bin_data2.avg_count)
-        bin_data.integration.i = np.append(bin_data1.integration.i, bin_data2.integration.i)
-        bin_data.integration.q = np.append(bin_data1.integration.q, bin_data2.integration.q)
+        bin_data.avg_cnt = np.append(bin_data1.avg_cnt, bin_data2.avg_cnt)
+        bin_data.integration.path0 = np.append(
+            bin_data1.integration.path0, bin_data2.integration.path0
+        )
+        bin_data.integration.path1 = np.append(
+            bin_data1.integration.path1, bin_data2.integration.path1
+        )
         bin_data.threshold = np.append(bin_data1.threshold, bin_data2.threshold)
 
         return result

@@ -11,7 +11,6 @@ from qat.backend.passes.purr.analysis import TriageResult
 from qat.backend.qblox.config.specification import SequencerConfig
 from qat.backend.qblox.ir import Sequence
 from qat.executables import AcquireData, ChannelExecutable
-from qat.model.device import PulseChannel
 
 
 @dataclass
@@ -24,7 +23,7 @@ class QbloxPackage:
 class QbloxExecutable(ChannelExecutable):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    packages: Dict[PulseChannel, QbloxPackage]
+    packages: Dict[str, QbloxPackage]
     triage_result: TriageResult
 
     @property

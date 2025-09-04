@@ -1,14 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-import json
-import os
 from collections import defaultdict
 from dataclasses import asdict
-from datetime import datetime
-from functools import reduce
-from itertools import groupby
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -29,10 +24,8 @@ from qat.backend.qblox.config.specification import (
     SequencerConfig,
 )
 from qat.backend.qblox.execution import QbloxExecutable
-from qat.backend.qblox.visualisation import plot_executable
-from qat.engines import NativeEngine
-from qat.engines.qblox.instrument_base import CompositeInstrument, LeafInstrument
-from qat.purr.backends.qblox.visualisation import plot_playback
+from qat.engines.qblox.instrument import CompositeInstrument, LeafInstrument
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.devices import (
     PulseChannel,
 )
@@ -41,25 +34,31 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class QbloxInstrument(LeafInstrument):
-    _driver: Cluster
-
+class QbloxLeafInstrument(LeafInstrument):
     def __init__(
         self,
-        dev_id: str,
+        id: str,
         name: str,
         address: str = None,
-        dummy_cfg: Dict = None,
     ):
-        super().__init__(id=dev_id, name=name, address=address)
-        self.dummy_cfg = dummy_cfg
-
+        super().__init__(id=id, name=name, address=address)
         self.managed_mode = False
-        self.dump_sequence = False
-        self.plot_packages = False
-        self.plot_acquisitions = False
 
+        self._driver: Cluster = None
+        self._connected_modules: Dict[int, Module] = {}
         self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
+
+    @property
+    def driver(self):
+        return self._driver
+
+    @property
+    def connected_modules(self):
+        return self._connected_modules
+
+    @property
+    def resources(self):
+        return self._resources
 
     def allocate_resources(self, target: PulseChannel):
         module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
@@ -145,7 +144,7 @@ class QbloxInstrument(LeafInstrument):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
-        modules = self._resources.keys() or self._driver.get_connected_modules().values()
+        modules = self._resources.keys() or self._connected_modules.values()
 
         for m in modules:
             log.debug(f"Resetting sequencer connections for module {m.slot_idx}")
@@ -155,41 +154,30 @@ class QbloxInstrument(LeafInstrument):
 
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
-            self._driver: Cluster = Cluster(
-                name=self.name,
-                identifier=self.address,
-                dummy_cfg=self.dummy_cfg if self.address is None else None,
-            )
+            self._driver: Cluster = Cluster(name=self.name, identifier=self.address)
             self._driver.reset()
-            self._reset_connections()
+            self._connected_modules = self.driver.get_connected_modules()
 
         log.info(self._driver.get_system_status())
+        self.is_connected = True
 
     def disconnect(self):
         if self._driver is not None:
             try:
                 self._driver.close()
+                self._driver = None
+                self.is_connected = False
             except BaseException as e:
                 log.warning(
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
 
-    def setup(self, executable: QbloxExecutable):
-        if self.plot_packages:
-            plot_executable(executable)
-
-        packages: Dict[PulseChannel, QbloxPackage] = executable.packages
-
-        if self.dump_sequence:
-            for target, pkg in packages.items():
-                filename = f"schedules/target_{target.id}_@_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
-                os.makedirs(os.path.dirname(filename), exist_ok=True)
-                with open(filename, "w") as f:
-                    f.write(json.dumps(asdict(pkg.sequence)))
-
+    def setup(self, executable: QbloxExecutable, model: QbloxLiveHardwareModel):
         try:
             self._resources.clear()
-            for target, pkg in packages.items():
+            self._reset_connections()
+            for channel_id, pkg in executable.packages.items():
+                target: PulseChannel = model.get_pulse_channel_from_id(channel_id)
                 module, sequencer = self.allocate_resources(target)
                 self.configure(target, pkg, module, sequencer)
                 sequence = asdict(pkg.sequence)
@@ -204,7 +192,6 @@ class QbloxInstrument(LeafInstrument):
         if not any(self._resources):
             raise ValueError("No resources allocated. Install packages first")
 
-        results: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
         try:
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
@@ -217,13 +204,29 @@ class QbloxInstrument(LeafInstrument):
             for module, allocations in self._resources.items():
                 for target, sequencer in allocations.items():
                     sequencer.start_sequencer()
+        finally:
+            for module, allocations in self._resources.items():
+                for target, sequencer in allocations.items():
+                    sequencer.sync_en(False)
 
+    def collect(self):
+        if not any(self._resources):
+            raise ValueError(
+                "No resources allocated. Install packages first, and then run playback"
+            )
+
+        results: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
+        try:
             for module, allocations in self._resources.items():
                 if module.is_qrm_type:
                     for target, sequencer in allocations.items():
-                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
-                        sequencer.get_acquisition_status(timeout=60)
-                        acquisitions = sequencer.get_acquisitions()
+                        status_obj = sequencer.get_sequencer_status()
+                        log.debug(f"Sequencer status - {sequencer}: {status_obj}")
+                        if acquisitions := sequencer.get_acquisitions():
+                            # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
+                            # Only wait if you sequencer is expected to have acquisitions
+                            # TODO - Precise expectation of acquisitions should come from higher up
+                            sequencer.get_acquisition_status(timeout=60)
 
                         for name in acquisitions:
                             sequencer.store_scope_acquisition(name)
@@ -243,32 +246,25 @@ class QbloxInstrument(LeafInstrument):
                             acquisition = Acquisition.model_validate(acquisition)
                             acquisition.name = name
 
-                            scope_data = acquisition.acq_data.scope
-                            scope_data.i.data = scope_data.i.data[start:end]
-                            scope_data.q.data = scope_data.q.data[start:end]
+                            scope_data = acquisition.acquisition.scope
+                            scope_data.path0.data = scope_data.path0.data[start:end]
+                            scope_data.path1.data = scope_data.path1.data[start:end]
 
-                            integ_data = acquisition.acq_data.bins.integration
-                            integ_data.i /= integ_length
-                            integ_data.q /= integ_length
+                            integ_data = acquisition.acquisition.bins.integration
+                            integ_data.path0 /= integ_length
+                            integ_data.path1 /= integ_length
 
                             results[target].append(acquisition)
 
                         sequencer.delete_acquisition_data(all=True)
 
-            if self.plot_acquisitions:
-                plot_playback(results)
-
             return results
         finally:
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.sync_en(False)
-
-            self._reset_connections()
             self._resources.clear()
+            self._reset_connections()
 
 
-class CompositeQbloxInstrument(CompositeInstrument):
+class QbloxCompositeInstrument(CompositeInstrument):
     """
     For daisy-chained Qblox chassis.
     """
@@ -276,46 +272,4 @@ class CompositeQbloxInstrument(CompositeInstrument):
     pass
 
 
-class QbloxEngine(NativeEngine):
-    def __init__(self, instrument: QbloxInstrument | CompositeQbloxInstrument):
-        self.instrument: QbloxInstrument | CompositeQbloxInstrument = instrument
-
-    @staticmethod
-    def combine_playbacks(playbacks: Dict[PulseChannel, List[Acquisition]]):
-        """
-        Combines acquisition objects from multiple acquire instructions in multiple readout targets.
-        Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
-        the (sequential) lexicographical order of the loop nest:
-
-        playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in the same
-        order as the order in which the packages were sent to the FPGA.
-
-        Although acquisition names are enough for unicity in practice, the playback's structure
-        distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
-        """
-
-        playback: Dict[PulseChannel, Dict[str, Acquisition]] = {}
-        for target, acquisitions in playbacks.items():
-            groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
-            playback[target] = {
-                name: reduce(
-                    lambda acq1, acq2: Acquisition.accumulate(acq1, acq2),
-                    acqs,
-                    Acquisition(),
-                )
-                for name, acqs in groups_by_name
-            }
-
-        return playback
-
-    def execute(
-        self, executable: QbloxExecutable
-    ) -> Dict[PulseChannel, Dict[str, Acquisition]]:
-        packages = executable.packages
-
-        self.instrument.setup(packages)
-        playbacks: Dict[PulseChannel, List[Acquisition]] = self.instrument.playback()
-        playback: Dict[PulseChannel, Dict[str, Acquisition]] = self.combine_playbacks(
-            playbacks
-        )
-        return playback
+LiveQbloxInstrument = Union[QbloxLeafInstrument, QbloxCompositeInstrument]

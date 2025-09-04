@@ -4,6 +4,6 @@ from importlib.metadata import version
 
 
 # TODO: Write tests to verify driver <-> fw compatibility. COMPILER-661
-class TestQbloxExecutable:
-    def test_qiskit_instruments_compatibility(self):
+class TestDriverFwCompatibility:
+    def test_qblox_instruments_version(self):
         assert version("qblox_instruments") == "0.17.1"

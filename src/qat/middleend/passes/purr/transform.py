@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 import itertools
 from collections import OrderedDict, defaultdict
 from copy import copy, deepcopy
@@ -1055,10 +1056,9 @@ class RepeatSanitisation(TransformPass):
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-        repeats = [i for i, inst in enumerate(ir._instructions) if isinstance(inst, Repeat)]
+        repeats = [inst for inst in ir._instructions if isinstance(inst, Repeat)]
         if repeats:
-            for i in repeats:
-                rep = ir._instructions[i]
+            for rep in repeats:
                 if rep.repeat_count is None:
                     rep.repeat_count = self.target_data.default_shots
                 if rep.passive_reset_time is None and rep.repetition_period is None:
