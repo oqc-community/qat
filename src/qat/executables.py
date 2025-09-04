@@ -2,15 +2,36 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from abc import abstractmethod
+from typing import Generic, TypeVar
 
 from compiler_config.config import InlineResultsProcessing
-from pydantic import BaseModel, NonNegativeInt, PositiveInt
+from pydantic import (
+    BaseModel,
+    NonNegativeInt,
+    PositiveInt,
+    model_validator,
+)
 from pydantic_core import from_json
 
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
 from qat.purr.compiler.instructions import AcquireMode
 from qat.utils.pydantic import RehydratableModel
+
+
+class BaseExecutable(RehydratableModel):
+    """Base object for executables."""
+
+    calibration_id: str = ""
+
+    def serialize(self, indent: int = 4) -> str:
+        """Serializes the executable as a JSON blob."""
+        return self.model_dump_json(indent=indent, exclude_none=True)
+
+    @classmethod
+    def deserialize(cls, blob: str):
+        """Instantiates a executable from a JSON blob."""
+        return cls._rehydrate_object(from_json(blob))
 
 
 class AcquireData(BaseModel):
@@ -31,7 +52,7 @@ class AcquireData(BaseModel):
     output_variable: str
 
 
-class Executable(RehydratableModel):
+class Executable(BaseExecutable):
     """
     :class:`Executables` are instruction packages that will be sent to a target (either
     physical control hardware or a simulator).
@@ -64,17 +85,6 @@ class Executable(RehydratableModel):
     results_processing: dict[str, InlineResultsProcessing] = dict()
     assigns: list[Assign] = []
     returns: set[str] = set()
-
-    calibration_id: str = ""
-
-    def serialize(self, indent: int = 4) -> str:
-        """Serializes the executable as a JSON blob."""
-        return self.model_dump_json(indent=indent, exclude_none=True)
-
-    @classmethod
-    def deserialize(cls, blob: str):
-        """Instantiates a executable from a JSON blob."""
-        return cls._rehydrate_object(from_json(blob))
 
     @property
     @abstractmethod
@@ -116,3 +126,42 @@ class ChannelExecutable(Executable):
             else:
                 acquires.append(channel.acquires)
         return acquires
+
+
+T = TypeVar("T", bound=BaseExecutable)
+
+
+class ParameterizedExecutable(BaseModel, Generic[T]):
+    """Contains an executable and the metadata surrounding its paramerization when used in
+    an iterator.
+
+    :param params: The parameters used to instantiate the executable.
+    :param executable: The executable instantiated with the given parameters.
+    """
+
+    def __init__(self, **data):
+        executable = data.pop("executable")
+        if isinstance(executable, dict):
+            executable = BaseExecutable._rehydrate_object(executable)
+        super().__init__(executable=executable, **data)
+
+    params: dict[str, complex | float] = {}
+    executable: T
+
+
+class BatchedExecutable(BaseExecutable):
+    """Contains a batch of executables to be run sequentially.
+
+    :param executables: The list of executables to be run in sequence.
+    """
+
+    executables: list[ParameterizedExecutable] = []
+
+    @model_validator(mode="after")
+    def _check_executable_types(self):
+        types_ = {type(pkg.executable) for pkg in self.executables}
+        if len(types_) > 1:
+            raise ValueError(
+                "All executables in a BatchedExecutable must be of the same type."
+            )
+        return self

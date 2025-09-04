@@ -8,7 +8,7 @@ from qat import QAT
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
 from qat.engines.waveform_v1 import EchoEngine
-from qat.executables import Executable
+from qat.executables import BaseExecutable, Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
@@ -317,10 +317,11 @@ class TestExperimentalEchoPipelineWithCircuits:
         # register is used.
         assert total_length >= len(returned_acquires)
 
-    def test_serialization(self, executable: WaveformV1Executable):
+    @pytest.mark.parametrize("cls", [BaseExecutable, Executable])
+    def test_serialization(self, executable: WaveformV1Executable, cls):
         """Check that the executable can be serialized and deserialized correctly."""
         json_blob = executable.serialize()
-        new_package = Executable.deserialize(json_blob)
+        new_package = cls.deserialize(json_blob)
         assert isinstance(new_package, WaveformV1Executable)
         assert new_package == executable
 
@@ -482,7 +483,8 @@ class TestExperimentalEchoPipelineParity:
     def test_results_formatting(self, stable_results, experimental_results):
         assert stable_results == experimental_results
 
-    def test_serialization(self, experimental_executable):
+    @pytest.mark.parametrize("cls", [BaseExecutable, Executable])
+    def test_serialization(self, experimental_executable, cls):
         json_blob = experimental_executable.serialize()
-        new_package = Executable.deserialize(json_blob)
+        new_package = cls.deserialize(json_blob)
         assert experimental_executable == new_package

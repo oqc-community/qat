@@ -44,8 +44,8 @@ class PurrFrontend(BaseFrontend):
             if isinstance(instr, (Sweep, DeviceUpdate)):
                 logger.info(
                     "InstructionBuilder contains sweeps or device updates, which are not "
-                    "which are not supported by the PurrFrontend. Please use the "
-                    "SweepPipeline to handle programs with sweeping."
+                    "supported by the PurrFrontend. Please use sweep pipelines to handle "
+                    "programs with sweeping."
                 )
                 return False
         return src
