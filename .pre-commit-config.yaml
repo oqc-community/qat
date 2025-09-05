@@ -13,14 +13,14 @@ repos:
       - id: jupytext
         args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
         additional_dependencies:
-          - ruff==v0.12.11
+          - ruff==v0.12.12
   - repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
     hooks:
     - id: nbstripout
       args: [--extra-keys=metadata.kernelspec]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.12.12
     hooks:
       # Run the linter.
       - id: ruff
