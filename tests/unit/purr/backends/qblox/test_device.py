@@ -88,6 +88,6 @@ class TestQbloxControlHardware(InvokerMixin):
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
             model.control_hardware.set_data(packages)
-            assert any(model.control_hardware._resources)
+            assert any(model.control_hardware.allocations)
             model.control_hardware.start_playback(None, None)
-            assert not any(model.control_hardware._resources)
+            assert not any(model.control_hardware.allocations)

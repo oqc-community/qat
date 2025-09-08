@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from qblox_instruments import (
@@ -111,17 +110,13 @@ class TestInstrument:
         ordered_executables = self._do_emit(model, backend, builder)
 
         for executable in ordered_executables.values():
-            assert len(instrument.resources) == 0
+            assert len(instrument.allocations) == 0
             instrument.setup(executable, model)
-            assert len(instrument.resources) == 1
-
-            # One sequencer allocated in the module in question
-            allocations: Dict = next((val for val in instrument.resources.values()))
-            assert len(allocations) == 1
+            assert len(instrument.allocations) == 1
 
             # Unexpecting wf mem as the square pulse in res spec is done via Q1ASM
             # Expecting acquisition specification
-            channel, sequencer = next(((k, v) for k, v in allocations.items()))
+            channel, sequencer = next(((k, v) for k, v in instrument.allocations.items()))
             assert not sequencer.get_waveforms()
             assert sequencer.get_acquisitions()
 
@@ -137,7 +132,7 @@ class TestInstrument:
                 sequencer.integration_length_acq()
                 == acq_pkg.sequencer_config.square_weight_acq.integration_length
             )
-            instrument.resources.clear()
+            instrument.allocations.clear()
 
     @pytest.mark.parametrize("model", [None], indirect=True)
     @pytest.mark.parametrize("instrument", [None], indirect=True)
@@ -151,8 +146,7 @@ class TestInstrument:
                 instrument.playback()
 
             instrument.setup(executable, model)
-            allocations: Dict = next((val for val in instrument.resources.values()))
-            channel, sequencer = next(((k, v) for k, v in allocations.items()))
+            channel, sequencer = next(((k, v) for k, v in instrument.allocations.items()))
 
             instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
 
@@ -163,7 +157,7 @@ class TestInstrument:
             assert SequencerStatusFlags.ACQ_BINNING_DONE in sequencer_status.info_flags
             assert not sequencer.sync_en()
 
-            instrument.resources.clear()
+            instrument.allocations.clear()
 
     @pytest.mark.parametrize("model", [None], indirect=True)
     @pytest.mark.parametrize("instrument", [None], indirect=True)
@@ -178,4 +172,4 @@ class TestInstrument:
             assert results
 
             # Expect resource cleanup after playback
-            assert not instrument.resources
+            assert not instrument.allocations

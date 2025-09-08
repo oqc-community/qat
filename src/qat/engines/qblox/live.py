@@ -19,16 +19,11 @@ from qat.backend.qblox.config.helpers import (
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
-from qat.backend.qblox.config.specification import (
-    ModuleConfig,
-    SequencerConfig,
-)
+from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import QbloxExecutable
 from qat.engines.qblox.instrument import CompositeInstrument, LeafInstrument
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
-from qat.purr.compiler.devices import (
-    PulseChannel,
-)
+from qat.purr.compiler.devices import ChannelType, PulseChannel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -42,38 +37,31 @@ class QbloxLeafInstrument(LeafInstrument):
         address: str = None,
     ):
         super().__init__(id=id, name=name, address=address)
-        self.managed_mode = False
 
         self._driver: Cluster = None
-        self._connected_modules: Dict[int, Module] = {}
-        self._resources: Dict[Module, Dict[PulseChannel, Sequencer]] = {}
+        self._modules: Dict[Module, bool] = {}
+        self._allocations: Dict[PulseChannel, Sequencer] = {}
 
     @property
     def driver(self):
         return self._driver
 
     @property
-    def connected_modules(self):
-        return self._connected_modules
+    def allocations(self):
+        return self._allocations
 
-    @property
-    def resources(self):
-        return self._resources
-
-    def allocate_resources(self, target: PulseChannel):
-        module_id = target.physical_channel.slot_idx - 1  # slot_idx is in range [1..20]
-        module: Module = self._driver.modules[module_id]
-        allocations = self._resources.setdefault(module, {})
-        sequencer = allocations.get(target, None)
-        if not sequencer:
+    def allocate(self, target: PulseChannel):
+        slot_idx = target.physical_channel.slot_idx  # slot_idx is in range [1..20]
+        module: Module = getattr(self._driver, f"module{slot_idx}")
+        if (sequencer := self._allocations.get(target, None)) is None:
             total = set(target.physical_channel.config.sequencers.keys())
-            allocated = set([seq.seq_idx for seq in allocations.values()])
+            allocated = set([seq.seq_idx for seq in self._allocations.values()])
 
             available = total - allocated
             if not available:
                 raise ValueError(f"No more available sequencers on module {module}")
             sequencer: Sequencer = module.sequencers[next(iter(available))]
-            allocations[target] = sequencer
+            self._allocations[target] = sequencer
 
         log.debug(
             f"Sequencer {sequencer.seq_idx} in Module {module.slot_idx} will be running {target}"
@@ -135,37 +123,36 @@ class QbloxLeafInstrument(LeafInstrument):
             raise ValueError(f"Unknown module type {module.module_type}")
 
         config_helper.configure(module, sequencer)
+        self._modules[module] = True  # Mark as dirty
 
-        if self.managed_mode:
-            log.info("Managed mode enabled")
-            config_helper.calibrate_mixer(module, sequencer)
-
-    def _reset_connections(self):
+    def _reset_modules(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
-        modules = self._resources.keys() or self._connected_modules.values()
+        modules = [mod for mod, is_dirty in self._modules.items() if is_dirty]
 
-        for m in modules:
-            log.debug(f"Resetting sequencer connections for module {m.slot_idx}")
-            m.disconnect_outputs()
-            if m.is_qrm_type:
-                m.disconnect_inputs()
+        for mod in modules:
+            log.debug(f"Resetting sequencer connections for module {mod}")
+            mod.disconnect_outputs()
+            if mod.is_qrm_type:
+                mod.disconnect_inputs()
+            self._modules[mod] = False  # Mark as clean
 
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(name=self.name, identifier=self.address)
             self._driver.reset()
-            self._connected_modules = self.driver.get_connected_modules()
+            self._modules = {m: True for m in self._driver.get_connected_modules().values()}
+            self.is_connected = True
 
         log.info(self._driver.get_system_status())
-        self.is_connected = True
 
     def disconnect(self):
         if self._driver is not None:
             try:
                 self._driver.close()
                 self._driver = None
+                self._modules.clear()
                 self.is_connected = False
             except BaseException as e:
                 log.warning(
@@ -174,94 +161,91 @@ class QbloxLeafInstrument(LeafInstrument):
 
     def setup(self, executable: QbloxExecutable, model: QbloxLiveHardwareModel):
         try:
-            self._resources.clear()
-            self._reset_connections()
+            self._allocations.clear()
+            self._reset_modules()
             for channel_id, pkg in executable.packages.items():
                 target: PulseChannel = model.get_pulse_channel_from_id(channel_id)
-                module, sequencer = self.allocate_resources(target)
+                module, sequencer = self.allocate(target)
                 self.configure(target, pkg, module, sequencer)
                 sequence = asdict(pkg.sequence)
                 log.debug(f"Uploading sequence to {module}, sequencer {sequencer}")
                 sequencer.sequence(sequence)
         except BaseException as e:
-            self._reset_connections()
-            self._resources.clear()
+            self._allocations.clear()
+            self._reset_modules()
             raise e
 
     def playback(self):
-        if not any(self._resources):
-            raise ValueError("No resources allocated. Install packages first")
+        if not any(self._allocations):
+            raise ValueError("No allocations found. Install packages and configure first")
 
         try:
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.sync_en(True)
+            for target, sequencer in self._allocations.items():
+                sequencer.sync_en(True)
 
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.arm_sequencer()
+            for target, sequencer in self._allocations.items():
+                sequencer.arm_sequencer()
 
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.start_sequencer()
+            for target, sequencer in self._allocations.items():
+                sequencer.start_sequencer()
         finally:
-            for module, allocations in self._resources.items():
-                for target, sequencer in allocations.items():
-                    sequencer.sync_en(False)
+            for target, sequencer in self._allocations.items():
+                sequencer.sync_en(False)
 
     def collect(self):
-        if not any(self._resources):
+        if not any(self._allocations):
             raise ValueError(
-                "No resources allocated. Install packages first, and then run playback"
+                "No allocations found. Install packages, configure, and playback first"
             )
 
-        results: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
         try:
-            for module, allocations in self._resources.items():
-                if module.is_qrm_type:
-                    for target, sequencer in allocations.items():
-                        status_obj = sequencer.get_sequencer_status()
-                        log.debug(f"Sequencer status - {sequencer}: {status_obj}")
-                        if acquisitions := sequencer.get_acquisitions():
-                            # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
-                            # Only wait if you sequencer is expected to have acquisitions
-                            # TODO - Precise expectation of acquisitions should come from higher up
-                            sequencer.get_acquisition_status(timeout=60)
+            results: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
 
-                        for name in acquisitions:
-                            sequencer.store_scope_acquisition(name)
+            for target, sequencer in self._allocations.items():
+                if ChannelType.macq.name in target.full_id():
+                    status_obj = sequencer.get_sequencer_status()
+                    log.debug(f"Sequencer status - {sequencer}: {status_obj}")
+                    if acquisitions := sequencer.get_acquisitions():
+                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
+                        # Only wait if you sequencer is expected to have acquisitions
+                        # TODO - Precise expectation of acquisitions should come from higher up
+                        sequencer.get_acquisition_status(timeout=60)
 
-                        # (re)fetch the lot after having stored scope acquisition
-                        acquisitions = sequencer.get_acquisitions()
+                    for name in acquisitions:
+                        sequencer.store_scope_acquisition(name)
 
-                        integ_length = sequencer.integration_length_acq()
-                        start, end = (
-                            0,
-                            min(
-                                integ_length,
-                                Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
-                            ),
-                        )
-                        for name, acquisition in acquisitions.items():
-                            acquisition = Acquisition.model_validate(acquisition)
-                            acquisition.name = name
+                    # (re)fetch the lot after having stored scope acquisition
+                    acquisitions = sequencer.get_acquisitions()
 
-                            scope_data = acquisition.acquisition.scope
-                            scope_data.path0.data = scope_data.path0.data[start:end]
-                            scope_data.path1.data = scope_data.path1.data[start:end]
+                    integ_length = sequencer.integration_length_acq()
+                    start, end = (
+                        0,
+                        min(
+                            integ_length,
+                            Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                        ),
+                    )
+                    for name, acquisition in acquisitions.items():
+                        acquisition = Acquisition.model_validate(acquisition)
+                        acquisition.name = name
 
-                            integ_data = acquisition.acquisition.bins.integration
-                            integ_data.path0 /= integ_length
-                            integ_data.path1 /= integ_length
+                        scope_data = acquisition.acquisition.scope
+                        scope_data.path0.data = scope_data.path0.data[start:end]
+                        scope_data.path1.data = scope_data.path1.data[start:end]
 
-                            results[target].append(acquisition)
+                        integ_data = acquisition.acquisition.bins.integration
+                        integ_data.path0 /= integ_length
+                        integ_data.path1 /= integ_length
 
-                        sequencer.delete_acquisition_data(all=True)
+                        results[target].append(acquisition)
 
             return results
         finally:
-            self._resources.clear()
-            self._reset_connections()
+            for target, sequencer in self._allocations.items():
+                if ChannelType.macq.name in target.full_id():
+                    sequencer.delete_acquisition_data(all=True)
+
+            self._allocations.clear()
 
 
 class QbloxCompositeInstrument(CompositeInstrument):
