@@ -403,6 +403,7 @@ class AbstractContext(ABC):
         return wgt_index
 
     def _do_acquire(self, wgt_name, acq_filter, acq_index, acq_bin, acq_width):
+        legal_acq_width = min(acq_width, Constants.MAX_WAIT_TIME)
         if acq_filter:
             weight = acq_filter.samples
             wgt_i_index = self._register_weight(f"{wgt_name}_weight_I", weight.real)
@@ -418,10 +419,12 @@ class AbstractContext(ABC):
                 self.sequence_builder.move(wgt_q_index, wgt_q_reg)
 
                 self.sequence_builder.acquire_weighed(
-                    acq_index, acq_bin, wgt_i_reg, wgt_q_reg, acq_width
+                    acq_index, acq_bin, wgt_i_reg, wgt_q_reg, legal_acq_width
                 )
         else:
-            self.sequence_builder.acquire(acq_index, acq_bin, acq_width)
+            self.sequence_builder.acquire(acq_index, acq_bin, legal_acq_width)
+
+        self.wait_imm(acq_width - legal_acq_width)
 
     @contextmanager
     def _wrapper_pulse(
@@ -440,7 +443,18 @@ class AbstractContext(ABC):
             self.sequence_builder.upd_param(effective_width)
         else:
             self.sequence_builder.play(i_index, q_index, effective_width)
-        yield pulse_width - effective_width
+        remaining_width = pulse_width - effective_width
+        if remaining_width < Constants.GRID_TIME:
+            raise ValueError(
+                f"""
+                Remaining width after delay must be at least {Constants.GRID_TIME} ns.
+                Got pulse width = {pulse_width} ns, delay width = {delay_width} ns. This leaves {remaining_width} ns,
+                which isn't enough to trigger acquisition afterwards. Adjust the pulse width or delay width values so
+                that the following holds:
+                pulse_width - max(min(pulse_width, delay_width), Constants.GRID_TIME) >= Constants.GRID_TIME
+                """
+            )
+        yield remaining_width
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
@@ -734,7 +748,6 @@ class QbloxContext1(AbstractContext):
         with self._wrapper_pulse(
             delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,
@@ -835,7 +848,6 @@ class QbloxContext2(AbstractContext):
         with self._wrapper_pulse(
             delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,

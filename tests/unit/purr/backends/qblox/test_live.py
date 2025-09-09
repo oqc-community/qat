@@ -18,11 +18,11 @@ from qat.purr.utils.logger import get_default_logger
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     hidden_mode,
+    measure_acquire,
     multi_readout,
     qubit_spect,
     readout_freq,
     resonator_spect,
-    scope_acq,
     xpi2amp,
     zmap,
 )
@@ -307,7 +307,7 @@ class TestBuildingBlocks:
         ).tolist(),
     )
     @pytest.mark.parametrize("sync", [True, False])
-    def test_scope_acq(self, model, acq_width, sync):
+    def test_scope_acquisition(self, model, acq_width, sync):
         qubit_indices = [0]
         engine = model.create_engine()
 
@@ -316,7 +316,7 @@ class TestBuildingBlocks:
             qubit.measure_acquire["width"] = acq_width
             qubit.measure_acquire["sync"] = sync
 
-        builder = scope_acq(model, qubit_indices)
+        builder = measure_acquire(model, qubit_indices)
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 

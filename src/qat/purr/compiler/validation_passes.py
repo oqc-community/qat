@@ -62,7 +62,7 @@ class InstructionValidation(ValidationPass):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
                     if (
-                        not qatconfig.DISABLE_PULSE_DURATION_LIMITS
+                        qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
                     ):  # Do not throw error if we specifically disabled the limit checks.
                         # TODO: Add a lower bound for the pulse duration limits as well in a later PR,
                         # which is specific to each hardware model and can be stored as a member variables there.
@@ -82,7 +82,7 @@ class InstructionValidation(ValidationPass):
                         )
                     )
                     if np.max(values) > MaxPulseLength:
-                        if not qatconfig.DISABLE_PULSE_DURATION_LIMITS:
+                        if qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS:
                             raise ValueError(
                                 f"Max Waveform width is {MaxPulseLength} s "
                                 f"given: {values} s"

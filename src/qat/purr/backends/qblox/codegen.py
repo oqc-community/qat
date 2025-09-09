@@ -493,7 +493,18 @@ class AbstractContext(ABC):
             self.sequence_builder.upd_param(effective_width)
         else:
             self.sequence_builder.play(i_index, q_index, effective_width)
-        yield pulse_width - effective_width
+        remaining_width = pulse_width - effective_width
+        if remaining_width < Constants.GRID_TIME:
+            raise ValueError(
+                f"""
+                Remaining width after delay must be at least {Constants.GRID_TIME} ns.
+                Got pulse width = {pulse_width} ns, delay width = {delay_width} ns. This leaves {remaining_width} ns,
+                which isn't enough to trigger acquisition afterwards. Adjust the pulse width or delay width values so
+                that the following holds:
+                pulse_width - max(min(pulse_width, delay_width), Constants.GRID_TIME) >= Constants.GRID_TIME
+                """
+            )
+        yield remaining_width
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
@@ -787,7 +798,6 @@ class QbloxContext(AbstractContext):
         with self._wrapper_pulse(
             delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,
@@ -888,7 +898,6 @@ class NewQbloxContext(AbstractContext):
         with self._wrapper_pulse(
             delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
         ) as remaining_width:
-            assert remaining_width >= Constants.GRID_TIME
             self._do_acquire(
                 acquire.output_variable,
                 acquire.filter,

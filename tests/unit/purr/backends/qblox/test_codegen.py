@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from more_itertools import partition
 
-from qat import qatconfig
+from qat import get_config, qatconfig
 from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
     QbloxLegalisationPass,
@@ -43,12 +43,12 @@ from qat.purr.utils.logger import get_default_logger
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     empty,
+    measure_acquire,
     multi_readout,
     pulse_amplitude_iteration,
     pulse_width_iteration,
     qubit_spect,
     resonator_spect,
-    scope_acq,
     time_and_phase_iteration,
 )
 
@@ -66,17 +66,23 @@ class TestQbloxEmitter(InvokerMixin):
         )
 
     def _do_emit(self, builder, model, skip_runtime=False):
-        ir = QatIR(builder)
-        res_mgr = ResultManager()
-        met_mgr = MetricsManager()
+        qatconfig = get_config()
+        old_value = qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
+        try:
+            qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = False
+            ir = QatIR(builder)
+            res_mgr = ResultManager()
+            met_mgr = MetricsManager()
 
-        if not skip_runtime:
-            runtime = model.create_runtime()
-            runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+            if not skip_runtime:
+                runtime = model.create_runtime()
+                runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
 
-        self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+            self.model = model
+            self.run_pass_pipeline(ir, res_mgr, met_mgr)
+            return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+        finally:
+            qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = old_value
 
     def test_play_guassian(self, model):
         width = 100e-9
@@ -383,7 +389,7 @@ class TestQbloxEmitter(InvokerMixin):
 
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_scope_acquisition(self, model, qubit_indices):
-        builder = scope_acq(model, qubit_indices)
+        builder = measure_acquire(model, qubit_indices)
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
             assert len(packages) == len(qubit_indices)
@@ -391,13 +397,13 @@ class TestQbloxEmitter(InvokerMixin):
             acquire_pkg = next((pkg for pkg in packages))
             assert "weighed_acquire" not in acquire_pkg.sequence.program
 
-        builder = scope_acq(model, qubit_indices, do_X=True)
+        builder = measure_acquire(model, qubit_indices, do_X=True)
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
             assert len(packages) == 2 * len(qubit_indices)
 
             # Enable weights
-            builder = scope_acq(model, qubit_indices)
+            builder = measure_acquire(model, qubit_indices)
 
             for index in qubit_indices:
                 qubit = model.get_qubit(index)
@@ -455,6 +461,38 @@ class TestQbloxEmitter(InvokerMixin):
                     assert measure_pkg.sequence.program.count("acquire") == 2
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
+
+    @pytest.mark.parametrize("pulse_width", [0, Constants.GRID_TIME, 1e3, 1e6])
+    @pytest.mark.parametrize(
+        "delay_width", [0, Constants.GRID_TIME, 100, 1e3 - Constants.GRID_TIME, 1e3]
+    )
+    def test_measure_acquire_operands(self, model, pulse_width, delay_width):
+        qubit_indices = [0]
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit.pulse_measure["width"] = pulse_width * 1e-9
+            qubit.measure_acquire["delay"] = delay_width * 1e-9
+
+        builder = measure_acquire(model, qubit_indices)
+
+        effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
+        if 0 < pulse_width < effective_width + Constants.GRID_TIME:
+            with pytest.raises(ValueError):
+                self._do_emit(builder, model)
+
+        else:
+            iter2packages = self._do_emit(builder, model)
+            for packages in iter2packages.values():
+                if pulse_width < Constants.GRID_TIME:
+                    assert len(packages) == 0
+                else:
+                    assert len(packages) == len(qubit_indices)
+                    for pkg in packages:
+                        program = pkg.sequence.program
+                        quotient = effective_width // Constants.MAX_WAIT_TIME
+                        remainder = effective_width % Constants.MAX_WAIT_TIME
+                        if quotient > 1:
+                            assert f"wait {remainder}" in program
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

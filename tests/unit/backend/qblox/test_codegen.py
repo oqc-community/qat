@@ -47,12 +47,12 @@ from qat.purr.utils.logger import get_default_logger
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     empty,
+    measure_acquire,
     multi_readout,
     pulse_amplitude_iteration,
     pulse_width_iteration,
     qubit_spect,
     resonator_spect,
-    scope_acq,
     time_and_phase_iteration,
 )
 
@@ -323,7 +323,7 @@ class TestQbloxBackend1:
 
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_scope_acquisition(self, model, qubit_indices):
-        builder = scope_acq(model, qubit_indices)
+        builder = measure_acquire(model, qubit_indices)
         ordered_executables = self._do_emit(builder, model)
         for executable in ordered_executables.values():
             assert len(executable.packages) == len(qubit_indices)
@@ -331,13 +331,13 @@ class TestQbloxBackend1:
             acquire_pkg = next((pkg for pkg in executable.packages.values()))
             assert "weighed_acquire" not in acquire_pkg.sequence.program
 
-        builder = scope_acq(model, qubit_indices, do_X=True)
+        builder = measure_acquire(model, qubit_indices, do_X=True)
         ordered_executables = self._do_emit(builder, model)
         for executable in ordered_executables.values():
             assert len(executable.packages) == 2 * len(qubit_indices)
 
             # Enable weights
-            builder = scope_acq(model, qubit_indices)
+            builder = measure_acquire(model, qubit_indices)
 
             for index in qubit_indices:
                 qubit = model.get_qubit(index)
@@ -404,6 +404,39 @@ class TestQbloxBackend1:
                     assert measure_pkg.sequence.program.count("acquire") == 2
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
+
+    @pytest.mark.parametrize("pulse_width", [0, Constants.GRID_TIME, 1e3, 1e6])
+    @pytest.mark.parametrize(
+        "delay_width", [0, Constants.GRID_TIME, 100, 1e3 - Constants.GRID_TIME, 1e3]
+    )
+    def test_measure_acquire_operands(self, model, pulse_width, delay_width):
+        qubit_indices = [0]
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit.pulse_measure["width"] = pulse_width * 1e-9
+            qubit.measure_acquire["delay"] = delay_width * 1e-9
+
+        builder = measure_acquire(model, qubit_indices)
+
+        effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
+        if 0 < pulse_width < effective_width + Constants.GRID_TIME:
+            with pytest.raises(ValueError):
+                self._do_emit(builder, model)
+
+        else:
+            ordered_executables = self._do_emit(builder, model)
+            for executable in ordered_executables.values():
+                packages = executable.packages
+                if pulse_width < Constants.GRID_TIME:
+                    assert len(packages) == 0
+                else:
+                    assert len(packages) == len(qubit_indices)
+                    for pkg in packages.values():
+                        program = pkg.sequence.program
+                        quotient = effective_width // Constants.MAX_WAIT_TIME
+                        remainder = effective_width % Constants.MAX_WAIT_TIME
+                        if quotient > 1:
+                            assert f"wait {remainder}" in program
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

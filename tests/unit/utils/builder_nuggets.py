@@ -171,7 +171,7 @@ def delay_iteration(model, qubit_indices=None, num_points=None, width=None):
     return builder
 
 
-def scope_acq(model, qubit_indices=None, do_X=False):
+def measure_acquire(model, qubit_indices=None, do_X=False, acq_mode=AcquireMode.SCOPE):
     qubit_indices = qubit_indices or [0]
 
     builder = get_builder(model)
@@ -200,7 +200,7 @@ def scope_acq(model, qubit_indices=None, do_X=False):
             Acquire(
                 qubit.get_acquire_channel(),
                 output_variable=f"Q{index}",
-                mode=AcquireMode.SCOPE,
+                mode=acq_mode,
                 filter=None,
                 delay=measure_acquire["delay"],
                 time=width,
