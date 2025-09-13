@@ -12,7 +12,7 @@ from qat.core.config.configure import get_config
 from qat.purr.backends.echo import EchoEngine, get_default_echo_hardware
 from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 from qat.purr.backends.realtime_chip_simulator import get_default_RTCS_hardware
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.devices import (
     MaxPulseLength,
     PhysicalBaseband,
@@ -35,6 +35,7 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 from qat.purr.compiler.runtime import execute_instructions, get_builder
+from qat.purr.utils.logger import LoggerLevel
 from qat.purr.utils.serializer import json_dumps, json_loads
 
 from tests.unit.purr.compiler.test_execution import get_test_execution_engine
@@ -864,3 +865,18 @@ class TestSerializationOfCustomPulses:
         assert len(instructions) == 1
         assert isinstance(instructions[0], Acquire)
         assert np.allclose(instructions[0].filter.samples, samples)
+
+
+def test_logging_of_instructions_serialization_duration(caplog):
+    hw = get_default_echo_hardware(4)
+    builder = get_builder(hw)
+    for qubit in hw.qubits:
+        builder.had(qubit)
+        builder.measure_mean_z(qubit)
+
+    with caplog.at_level(LoggerLevel.INFO.value):
+        blob = builder.serialize()
+        assert "Serialization of the instruction builder completed" in caplog.text
+
+        QuantumInstructionBuilder.deserialize(blob)
+        assert "Deserialization of the instruction builder completed" in caplog.text

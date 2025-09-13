@@ -24,12 +24,14 @@ from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.hardware_models import (
     ErrorMitigation,
+    QuantumHardwareModel,
     ReadoutMitigation,
     get_cl2qu_index_mapping,
 )
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.integrations.qasm import Qasm2Parser
 from qat.purr.qat import execute_qasm
+from qat.purr.utils.logger import LoggerLevel
 
 from tests.unit.utils.models import get_jagged_echo_hardware
 
@@ -465,3 +467,13 @@ def test_cl2qu_index_mapping(qasm_string, expected_mapping):
     result2 = InstructionBuilder.deserialize(blob)
     mapping = get_cl2qu_index_mapping(result2.instructions, hw)
     assert mapping == expected_mapping
+
+
+def test_save_and_load_calibration_logs(caplog):
+    model = get_default_echo_hardware(4)
+    with caplog.at_level(LoggerLevel.INFO.value):
+        cal = model.get_calibration()
+        assert "Saved hardware model to calibration" in caplog.text
+
+        QuantumHardwareModel.load_calibration(cal)
+        assert "Loaded hardware model from calibration" in caplog.text

@@ -47,6 +47,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -95,7 +96,8 @@ class InstructionBuilder:
 
     @staticmethod
     def deserialize(blob) -> "InstructionBuilder":
-        builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
+        with log_duration("Deserialization of the instruction builder completed in {}s."):
+            builder = jsonpickle.decode(blob, context=CyclicRefUnpickler())
         if not isinstance(builder, InstructionBuilder):
             raise ValueError("Attempt to deserialize has failed.")
 
@@ -106,7 +108,8 @@ class InstructionBuilder:
         Currently only serializes the instructions, not the supporting objects of the builder itself.
         This could be supported pretty easily, but not required right now.
         """
-        return jsonpickle.encode(self, indent=4, context=CyclicRefPickler())
+        with log_duration("Serialization of the instruction builder completed in {}s."):
+            return jsonpickle.encode(self, indent=4, context=CyclicRefPickler())
 
     def splice(self):
         """Clears the builder and returns its current instructions."""

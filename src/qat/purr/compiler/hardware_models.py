@@ -30,6 +30,7 @@ from qat.purr.compiler.instructions import (
     Synchronize,
 )
 from qat.purr.utils.logger import get_default_logger
+from qat.purr.utils.logging_utils import log_duration
 
 log = get_default_logger()
 
@@ -577,6 +578,15 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             ]
         else:
             raise ValueError("Generic ZX gate not implemented yet!")
+
+    def get_calibration(self):
+        with log_duration("Saved hardware model to calibration in {}s."):
+            return super().get_calibration()
+
+    @classmethod
+    def load_calibration(cls, calibration_string: str):
+        with log_duration("Loaded hardware model from calibration in {}s."):
+            return super().load_calibration(calibration_string)
 
     def __setstate__(self, state):
         error_mitigation = state.pop("error_mitigation", None)
