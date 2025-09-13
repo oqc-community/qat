@@ -16,6 +16,7 @@ from qat.engines.model import requires_hardware_model
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.loaders.cache import CacheAccessLoader
+from qat.model.loaders.update import ModelUpdateChecker
 from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.cache import CompilePipelineCache, ExecutePipelineCache
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
@@ -66,6 +67,19 @@ class HardwareLoaders:
         """Reloads all hardware models from their respective loaders, updating the cache."""
         for loader_name in self._loaders:
             self.reload_model(loader_name)
+
+    @property
+    def models_up_to_date(self) -> bool:
+        """Checks if all models are up-to-date, for loaders that implement
+        :class:`ModelUpdateChecker`.
+        """
+        for key, loader in self._loaders.items():
+            model = self._loaded_models.get(key, None)
+            if model is None:
+                return False
+            if isinstance(loader, ModelUpdateChecker) and not loader.is_up_to_date(model):
+                return False
+        return True
 
     @classmethod
     def from_descriptions(

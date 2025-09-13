@@ -148,3 +148,11 @@ class QAT:
         self._available_hardware.reload_all_models()
         self._engines.reload_all_models()
         self.pipelines.reload_all_models()
+
+    @property
+    def models_up_to_date(self) -> bool:
+        """Checks if all hardware models are up-to-date.
+
+        :return: True if all models are up-to-date, False otherwise.
+        """
+        return self._available_hardware.models_up_to_date

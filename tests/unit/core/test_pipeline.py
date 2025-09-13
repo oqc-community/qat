@@ -51,6 +51,31 @@ class TestHardwareLoaders:
         assert len(loaders.load("a").qubits) == 3
         assert len(loaders.load("b").qubits) == 3
 
+    def test_models_up_to_date_single_loader(self):
+        loader = MockModelLoader()
+        loaders = HardwareLoaders({"a": loader})
+        assert not loaders.models_up_to_date  # model is not yet loaded
+        loaders.load("a")
+        assert loaders.models_up_to_date
+        loader.num_qubits += 1  # Simulate the model being out of date
+        assert not loaders.models_up_to_date
+        loaders.reload_model("a")
+        assert loaders.models_up_to_date
+
+    def test_models_up_to_date_multiple_loaders(self):
+        loader1 = MockModelLoader()
+        loader2 = MockModelLoader()
+        loaders = HardwareLoaders({"a": loader1, "b": loader2})
+        assert not loaders.models_up_to_date  # models are not yet loaded
+        loaders.load("a")
+        assert not loaders.models_up_to_date  # only one model is loaded
+        loaders.load("b")
+        assert loaders.models_up_to_date
+        loader1.num_qubits += 1  # Simulate one model being out of date
+        assert not loaders.models_up_to_date
+        loaders.reload_model("a")
+        assert loaders.models_up_to_date
+
 
 class TestEngineSet:
     def test_instantiation(self):

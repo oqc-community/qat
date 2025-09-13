@@ -385,3 +385,8 @@ class TestQATHardwareModelReloading:
 
         assert len(hardware["loader1"].qubits) == 3
         assert len(hardware["loader2"].qubits) == 7
+
+    def test_models_up_to_date(self, qat):
+        """Just delegates a call to the HardwareLoaders, so just test that this works.
+        Extensive testing of the feature is done in the HardwareLoaders tests."""
+        assert qat.models_up_to_date
