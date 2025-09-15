@@ -20,11 +20,11 @@ from qat.purr.backends.qblox.config import (
     SequencerConfig,
 )
 from qat.purr.backends.qblox.device import (
-    DummyQbloxControlHardware,
     QbloxControlHardware,
     QbloxPhysicalBaseband,
     QbloxPhysicalChannel,
 )
+from qat.purr.backends.qblox.dummy import DummyQbloxControlHardware
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.utils.logger import get_default_logger
 

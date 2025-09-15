@@ -1028,6 +1028,7 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
         self.ignore_empty = ignore_empty
 
     def build_pass_pipeline(self, *args, **kwargs):
+        # TODO: Make compatible with `DefaultMiddleend`: COMPILER-729
         return PassManager() | PreCodegenPass() | CFGPass()
 
     def emit(

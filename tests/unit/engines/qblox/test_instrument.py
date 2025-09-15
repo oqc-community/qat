@@ -46,7 +46,7 @@ log = get_default_logger()
 
 
 class TestInstrument:
-    def middleend_pipeline(self, model):
+    def middleend_pipeline(self, qblox_model):
         target_data = QbloxTargetData.default()
         return (
             PassManager()
@@ -54,8 +54,8 @@ class TestInstrument:
             | PostProcessingSanitisation()
             | DeviceUpdateSanitisation()
             | InstructionValidation(target_data)
-            | ReadoutValidation(model)
-            | RepeatSanitisation(model, target_data)
+            | ReadoutValidation(qblox_model)
+            | RepeatSanitisation(qblox_model, target_data)
             | ScopeSanitisation()
             | ReturnSanitisation()
             | DesugaringPass()
@@ -65,10 +65,10 @@ class TestInstrument:
             | QbloxLegalisationPass()
         )
 
-    def _do_emit(self, model, backend: BaseBackend, builder):
+    def _do_emit(self, qblox_model, backend: BaseBackend, builder):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        self.middleend_pipeline(model).run(builder, res_mgr, met_mgr)
+        self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
         return backend.emit(builder, res_mgr, met_mgr)
 
     def test_load_instrument(self, testpath):
@@ -87,36 +87,40 @@ class TestInstrument:
             [isinstance(comp, LeafInstrument) for comp in composite.components.values()]
         )
 
-    @pytest.mark.parametrize("instrument", [None], indirect=True)
-    def test_instrument_lifecycle(self, instrument):
-        assert instrument.is_connected  # connected already after resolution of the fixture
-        assert instrument.driver is not None
-        assert isinstance(instrument.driver, Cluster)
+    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
+    def test_instrument_lifecycle(self, qblox_instrument):
+        assert (
+            qblox_instrument.is_connected
+        )  # connected already after resolution of the fixture
+        assert qblox_instrument.driver is not None
+        assert isinstance(qblox_instrument.driver, Cluster)
 
-        instrument.disconnect()
-        assert not instrument.is_connected
-        assert instrument.driver is None
+        qblox_instrument.disconnect()
+        assert not qblox_instrument.is_connected
+        assert qblox_instrument.driver is None
 
-        instrument.connect()
-        assert instrument.is_connected
-        assert instrument.driver is not None
-        assert isinstance(instrument.driver, Cluster)
+        qblox_instrument.connect()
+        assert qblox_instrument.is_connected
+        assert qblox_instrument.driver is not None
+        assert isinstance(qblox_instrument.driver, Cluster)
 
-    @pytest.mark.parametrize("model", [None], indirect=True)
-    @pytest.mark.parametrize("instrument", [None], indirect=True)
-    def test_setup(self, model, instrument):
-        backend = QbloxBackend1(model)
-        builder = resonator_spect(model)
-        ordered_executables = self._do_emit(model, backend, builder)
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
+    def test_setup(self, qblox_model, qblox_instrument):
+        backend = QbloxBackend1(qblox_model)
+        builder = resonator_spect(qblox_model)
+        ordered_executables = self._do_emit(qblox_model, backend, builder)
 
         for executable in ordered_executables.values():
-            assert len(instrument.allocations) == 0
-            instrument.setup(executable, model)
-            assert len(instrument.allocations) == 1
+            assert len(qblox_instrument.allocations) == 0
+            qblox_instrument.setup(executable, qblox_model)
+            assert len(qblox_instrument.allocations) == 1
 
             # Unexpecting wf mem as the square pulse in res spec is done via Q1ASM
             # Expecting acquisition specification
-            channel, sequencer = next(((k, v) for k, v in instrument.allocations.items()))
+            channel, sequencer = next(
+                ((k, v) for k, v in qblox_instrument.allocations.items())
+            )
             assert not sequencer.get_waveforms()
             assert sequencer.get_acquisitions()
 
@@ -132,23 +136,25 @@ class TestInstrument:
                 sequencer.integration_length_acq()
                 == acq_pkg.sequencer_config.square_weight_acq.integration_length
             )
-            instrument.allocations.clear()
+            qblox_instrument.allocations.clear()
 
-    @pytest.mark.parametrize("model", [None], indirect=True)
-    @pytest.mark.parametrize("instrument", [None], indirect=True)
-    def test_playback(self, model, instrument):
-        backend = QbloxBackend1(model)
-        builder = resonator_spect(model)
-        ordered_executables = self._do_emit(model, backend, builder)
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
+    def test_playback(self, qblox_model, qblox_instrument):
+        backend = QbloxBackend1(qblox_model)
+        builder = resonator_spect(qblox_model)
+        ordered_executables = self._do_emit(qblox_model, backend, builder)
         for executable in ordered_executables.values():
             # Fail if no resource had been allocated leading up to playback
             with pytest.raises(ValueError):
-                instrument.playback()
+                qblox_instrument.playback()
 
-            instrument.setup(executable, model)
-            channel, sequencer = next(((k, v) for k, v in instrument.allocations.items()))
+            qblox_instrument.setup(executable, qblox_model)
+            channel, sequencer = next(
+                ((k, v) for k, v in qblox_instrument.allocations.items())
+            )
 
-            instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
+            qblox_instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
 
             # Expecting STOPPED after "arm" and "start" steps
             sequencer_status = sequencer.get_sequencer_status()
@@ -157,19 +163,19 @@ class TestInstrument:
             assert SequencerStatusFlags.ACQ_BINNING_DONE in sequencer_status.info_flags
             assert not sequencer.sync_en()
 
-            instrument.allocations.clear()
+            qblox_instrument.allocations.clear()
 
-    @pytest.mark.parametrize("model", [None], indirect=True)
-    @pytest.mark.parametrize("instrument", [None], indirect=True)
-    def test_collect(self, model, instrument):
-        backend = QbloxBackend1(model)
-        builder = resonator_spect(model)
-        ordered_executables = self._do_emit(model, backend, builder)
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
+    def test_collect(self, qblox_model, qblox_instrument):
+        backend = QbloxBackend1(qblox_model)
+        builder = resonator_spect(qblox_model)
+        ordered_executables = self._do_emit(qblox_model, backend, builder)
         for executable in ordered_executables.values():
-            instrument.setup(executable, model)
-            instrument.playback()
-            results = instrument.collect()
+            qblox_instrument.setup(executable, qblox_model)
+            qblox_instrument.playback()
+            results = qblox_instrument.collect()
             assert results
 
             # Expect resource cleanup after playback
-            assert not instrument.allocations
+            assert not qblox_instrument.allocations

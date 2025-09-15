@@ -8,13 +8,7 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Dict, List
 
-import numpy as np
-import regex
-from qblox_instruments import (
-    Cluster,
-    DummyBinnedAcquisitionData,
-    DummyScopeAcquisitionData,
-)
+from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
 from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
@@ -32,7 +26,6 @@ from qat.purr.backends.qblox.config import (
     SequencerConfig,
 )
 from qat.purr.backends.qblox.constants import Constants
-from qat.purr.backends.qblox.ir import Sequence
 from qat.purr.backends.qblox.visualisation import plot_packages, plot_playback
 from qat.purr.compiler.devices import (
     ChannelType,
@@ -363,51 +356,3 @@ class QbloxControlHardware(ControlHardware):
         self._modules = {}
         self._allocations = {}
         self.is_connected = False
-
-
-class DummyQbloxControlHardware(QbloxControlHardware):
-    shot_pattern = regex.compile("jlt( +)R([0-9]+),([0-9]+),@(.*)\n")
-
-    def _setup_dummy_scope_acq_data(self, sequencer: Sequencer, sequence: Sequence):
-        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
-        avg_count = int(shot_match.group(3)) if shot_match else 1
-
-        dummy_data = np.random.random(
-            size=(Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS, 2)
-        )
-        dummy_data = [(iq[0], iq[1]) for iq in dummy_data]
-        dummy_scope_acquisition_data = DummyScopeAcquisitionData(
-            data=dummy_data, out_of_range=(False, False), avg_cnt=(avg_count, avg_count)
-        )
-        sequencer.set_dummy_scope_acquisition_data(data=dummy_scope_acquisition_data)
-
-    def _setup_dummy_binned_acq_data(self, sequencer: Sequencer, sequence: Sequence):
-        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
-        avg_count = int(shot_match.group(3)) if shot_match else 1
-
-        for name, acquisition in sequence.acquisitions.items():
-            dummy_binned_acquisition_data = [
-                DummyBinnedAcquisitionData(
-                    data=(np.random.random(), np.random.random()),
-                    thres=np.random.choice(2),
-                    avg_cnt=avg_count,
-                )
-            ] * acquisition["num_bins"]
-            sequencer.set_dummy_binned_acquisition_data(
-                acq_index_name=name,
-                data=dummy_binned_acquisition_data,
-            )
-
-    def _delete_acquisitions(self, sequencer):
-        sequencer.delete_dummy_scope_acquisition_data()
-        sequencer.delete_dummy_binned_acquisition_data()
-
-    def set_data(self, packages: List[QbloxPackage]):
-        super().set_data(packages)
-
-        # Stage Scope and Acquisition data
-        for target, sequencer in self._allocations.items():
-            if ChannelType.macq.name in target.full_id():
-                package = next((pkg for pkg in packages if pkg.target == target))
-                self._setup_dummy_scope_acq_data(sequencer, package.sequence)
-                self._setup_dummy_binned_acq_data(sequencer, package.sequence)

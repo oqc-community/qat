@@ -29,17 +29,17 @@ from qat.purr.compiler.instructions import DeviceUpdate
 from tests.unit.utils.builder_nuggets import resonator_spect
 
 
-@pytest.mark.parametrize("model", [None], indirect=True)
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
 class TestAnalysisPasses:
-    def test_precodegen_pass(self, model):
+    def test_precodegen_pass(self, qblox_model):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        builder = resonator_spect(model)
+        builder = resonator_spect(qblox_model)
 
         target_data = QbloxTargetData.default()
         pipeline = (
             PassManager()
-            | RepeatSanitisation(model, target_data)
+            | RepeatSanitisation(qblox_model, target_data)
             | ScopeSanitisation()
             | TriagePass()
             | BindingPass()
@@ -59,8 +59,8 @@ class TestAnalysisPasses:
             assert len(alloc_mgr.registers) >= 2
             assert len(alloc_mgr.labels) >= 2
 
-    def test_qblox_legalisation_pass(self, model):
-        builder = resonator_spect(model)
+    def test_qblox_legalisation_pass(self, qblox_model):
+        builder = resonator_spect(qblox_model)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
 
