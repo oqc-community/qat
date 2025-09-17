@@ -9,7 +9,6 @@ import pytest
 from jinja2 import Environment, FileSystemLoader, meta
 
 from qat.frontend.parsers.qasm import Qasm3Parser
-from qat.frontend.parsers.qasm.qasm3 import UntargetedPulse
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     Delay,
@@ -567,9 +566,6 @@ class TestQASM3Features:
         assert np.isclose(phases[0].phase, 0.5)
         assert np.isclose(phases[1].phase, 0.254 - 0.5)
 
-    @pytest.mark.xfail(
-        reason="Shouldn't return untargeted pulse (COMPILER-716).", raises=AssertionError
-    )
     def test_newframe(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -585,8 +581,6 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
-        for pulse in pulses:
-            assert not isinstance(pulse, UntargetedPulse)
         assert len(pulses) == 2
         assert pulses[0].target == qubit.drive_pulse_channel.uuid
         assert pulses[1].target != qubit.drive_pulse_channel.uuid
@@ -688,9 +682,6 @@ class TestQASM3Features:
         assert delays[0].target == channel.uuid
         assert np.isclose(delays[0].duration, 80e-9)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_play(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -707,11 +698,7 @@ class TestQASM3Features:
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
-        assert not isinstance(pulses[0], UntargetedPulse)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_arb_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -730,13 +717,9 @@ class TestQASM3Features:
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 1
-        assert not isinstance(pulses[0], UntargetedPulse)
         assert isinstance(pulses[0].waveform, SampledWaveform)
         assert np.allclose(pulses[0].waveform.samples, samples)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_constant_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -756,11 +739,7 @@ class TestQASM3Features:
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
         assert isinstance(pulses[0].waveform, SquareWaveform)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_drag_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -781,16 +760,12 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, DragGaussianWaveform)
         assert np.isclose(waveform.std_dev, 20e-9)
         assert np.isclose(waveform.beta, 0.05)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_gaussian_square_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -811,16 +786,12 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, GaussianSquareWaveform)
         assert np.isclose(waveform.std_dev, 20e-9)
         assert np.isclose(waveform.square_width, 40e-9)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_gaussian_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -840,15 +811,11 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, GaussianWaveform)
         assert np.isclose(waveform.std_dev, 20e-9)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_sech_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -868,15 +835,11 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SechWaveform)
         assert np.isclose(waveform.std_dev, 20e-9)
 
-    @pytest.mark.xfail(
-        raises=AssertionError, reason="Shouldn't give untargeted pulses (COMPILER-717)."
-    )
     def test_sine_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -897,7 +860,6 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert not isinstance(pulses[0], UntargetedPulse)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SinWaveform)

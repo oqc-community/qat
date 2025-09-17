@@ -9,7 +9,7 @@ from numbers import Number
 from os.path import join
 from pathlib import Path
 from pydoc import locate
-from typing import Any, Literal, Optional, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing, Languages
@@ -18,7 +18,6 @@ from lark.visitors import Interpreter
 from openqasm3 import ast
 from openqasm3.parser import parse as oq3_parse
 from openqasm3.visitor import QASMVisitor
-from pydantic import Field
 
 from qat.frontend.parsers.qasm.base import AbstractParser, ParseResults, QasmContext
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
@@ -32,6 +31,7 @@ from qat.ir.instructions import (
 )
 from qat.ir.measure import Acquire, AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.waveforms import (
+    AbstractWaveform,
     DragGaussianWaveform,
     GaussianSquareWaveform,
     GaussianWaveform,
@@ -43,6 +43,7 @@ from qat.ir.waveforms import (
     SinWaveform,
     SoftSquareWaveform,
     SquareWaveform,
+    Waveform,
 )
 from qat.model.device import (
     AcquirePulseChannel,
@@ -54,7 +55,7 @@ from qat.model.device import (
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
-from qat.utils.pydantic import FrozenSet, ValidatedList
+from qat.utils.pydantic import ValidatedList
 
 log = get_default_logger()
 
@@ -104,17 +105,6 @@ def get_port_mappings(hw: PhysicalHardwareModel):
         ports[name] = qubit.physical_channel
 
     return ports
-
-
-class UntargetedPulse(Pulse):
-    """Pulse that currently has no device to send it down."""
-
-    targets: FrozenSet[str] = Field(max_length=1, default=FrozenSet[str](set()))
-    ignore_channel_scale: Literal[True] = True
-
-    @property
-    def built(self):
-        return True if len(self.targets) else False
 
 
 class Qasm3ParserBase(AbstractParser, QASMVisitor):
@@ -574,11 +564,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._frame_mappings = get_frame_mappings(builder.hw)
         self._port_mappings = get_port_mappings(builder.hw)
 
-    def get_waveform_samples(self, pulse: UntargetedPulse):
-        if isinstance(pulse.waveform, SampledWaveform):
-            return pulse.waveform.samples
+    def get_waveform_samples(self, waveform: Waveform | SampledWaveform) -> np.ndarray:
+        if isinstance(waveform, SampledWaveform):
+            return waveform.samples
         else:
-            waveform = pulse.waveform
             # TODO: how do we do this arbitarily?
             dt = 0.5e-9
             samples = int(waveform.width / dt)
@@ -587,7 +576,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
             t = np.linspace(-midway_time, midway_time, samples)
             return waveform.sample(t).samples
 
-    def _perform_signal_processing(self, name: str, args):
+    def _perform_signal_processing(
+        self, name: str, args
+    ) -> Waveform | SampledWaveform | None:
         if name == "mix":
             wf1, wf2 = args
             # TODO: just make getwfsamp take args
@@ -604,7 +595,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 for i, val in enumerate(wave):
                     output[i] *= val
 
-            return UntargetedPulse(waveform=SampledWaveform(samples=output))
+            return SampledWaveform(samples=output)
 
         elif name == "sum":
             wf1, wf2 = args
@@ -615,24 +606,24 @@ class Qasm3Parser(Interpreter, AbstractParser):
             for wave in (samples1, samples2):
                 for i, val in enumerate(wave):
                     output[i] += val
-            return UntargetedPulse(waveform=SampledWaveform(samples=output))
+            return SampledWaveform(samples=output)
 
         elif name == "phase_shift":
-            wf1: UntargetedPulse
+            wf1: Waveform | SampledWaveform
             wf1, shift = args
             exp_shift = np.exp(1j * shift)
-            if isinstance(wf1.waveform, SampledWaveform):
-                wf1.waveform.samples = [exp_shift * val for val in wf1.waveform.samples]
+            if isinstance(wf1, SampledWaveform):
+                wf1.samples = [exp_shift * val for val in wf1.samples]
             else:
-                wf1.waveform.phase += shift
+                wf1.phase += shift
             return wf1
 
         elif name == "scale":
             wf1, scale = args
-            if isinstance(wf1.waveform, SampledWaveform):
-                wf1.waveform.samples = [scale * val for val in wf1.waveform.samples]
+            if isinstance(wf1, SampledWaveform):
+                wf1.samples = [scale * val for val in wf1.samples]
             else:
-                wf1.waveform.scale_factor *= scale
+                wf1.scale_factor *= scale
             return wf1
 
         return None
@@ -939,26 +930,24 @@ class Qasm3Parser(Interpreter, AbstractParser):
             case None:
                 # This is a flat array of pulse values.
                 array_contents = self.transform_to_value(tree.children[3])
-                pulse = UntargetedPulse(waveform=SampledWaveform(samples=array_contents))
+                waveform = SampledWaveform(samples=array_contents)
 
             # TODO: implement non intrinsic waveforms.
             case "constant":
                 width, amp = _validate_arg_length(tree.children[4], 2)
                 _validate_waveform_args(width=width, amp=amp)
-                pulse = UntargetedPulse(waveform=SquareWaveform(width=width, amp=amp))
+                waveform = SquareWaveform(width=width, amp=amp)
 
             case "rounded_square":
                 width, std_dev, rise_time, amp = _validate_arg_length(tree.children[4], 4)
                 _validate_waveform_args(
                     width=width, std_dev=std_dev, amp=amp, rise=rise_time
                 )
-                pulse = UntargetedPulse(
-                    waveform=RoundedSquareWaveform(
-                        width=width,
-                        std_dev=std_dev,
-                        amp=amp,
-                        rise=rise_time,
-                    )
+                waveform = RoundedSquareWaveform(
+                    width=width,
+                    std_dev=std_dev,
+                    amp=amp,
+                    rise=rise_time,
                 )
 
             case "drag":
@@ -973,26 +962,22 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     zero_at_edges=zero_at_edges,
                     std_dev=std_dev,
                 )
-                pulse = UntargetedPulse(
-                    waveform=DragGaussianWaveform(
-                        width=width,
-                        amp=amp,
-                        zero_at_edges=zero_at_edges,
-                        beta=beta,
-                        std_dev=std_dev,
-                    )
+                waveform = DragGaussianWaveform(
+                    width=width,
+                    amp=amp,
+                    zero_at_edges=zero_at_edges,
+                    beta=beta,
+                    std_dev=std_dev,
                 )
 
             case "gaussian":
                 amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
                 _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
-                pulse = UntargetedPulse(
-                    waveform=GaussianWaveform(
-                        width=width,
-                        amp=amp,
-                        std_dev=std_dev,
-                        zero_at_edges=0,
-                    )
+                waveform = GaussianWaveform(
+                    width=width,
+                    amp=amp,
+                    std_dev=std_dev,
+                    zero_at_edges=0,
                 )
 
             case "gaussian_zero_edge":
@@ -1003,20 +988,16 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 _validate_waveform_args(
                     width=width, amp=amp, zero_at_edges=zero_at_edges, std_dev=std_dev
                 )
-                pulse = UntargetedPulse(
-                    waveform=GaussianZeroEdgeWaveform(
-                        width=width,
-                        amp=amp,
-                        zero_at_edges=zero_at_edges,
-                        std_dev=std_dev,
-                    )
+                waveform = GaussianZeroEdgeWaveform(
+                    width=width,
+                    amp=amp,
+                    zero_at_edges=zero_at_edges,
+                    std_dev=std_dev,
                 )
 
             case "sech":
                 amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
-                pulse = UntargetedPulse(
-                    waveform=SechWaveform(width=width, amp=amp, std_dev=std_dev)
-                )
+                waveform = SechWaveform(width=width, amp=amp, std_dev=std_dev)
 
             case "gaussian_square":
                 amp, width, square_width, std_dev, zero_at_edges = _validate_arg_length(
@@ -1030,14 +1011,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     std_dev=std_dev,
                     zero_at_edges=zero_at_edges,
                 )
-                pulse = UntargetedPulse(
-                    waveform=GaussianSquareWaveform(
-                        width=width,
-                        std_dev=std_dev,
-                        amp=amp,
-                        zero_at_edges=zero_at_edges,
-                        square_width=square_width,
-                    ),
+                waveform = GaussianSquareWaveform(
+                    width=width,
+                    std_dev=std_dev,
+                    amp=amp,
+                    zero_at_edges=zero_at_edges,
+                    square_width=square_width,
                 )
 
             case "sine":
@@ -1045,13 +1024,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 _validate_waveform_args(
                     width=width, amp=amp, frequency=frequency, phase=phase
                 )
-                pulse = UntargetedPulse(
-                    waveform=SinWaveform(
-                        amp=amp,
-                        width=width,
-                        frequency=frequency,
-                        phase=phase,
-                    )
+                waveform = SinWaveform(
+                    amp=amp,
+                    width=width,
+                    frequency=frequency,
+                    phase=phase,
                 )
 
             case "gaussian_rise":
@@ -1059,14 +1036,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 _validate_waveform_args(
                     width=width, rise=rise, amp=amp, drag=drag, phase=phase
                 )
-                pulse = UntargetedPulse(
-                    waveform=GaussianWaveform(
-                        amp=amp,
-                        width=width,
-                        rise=rise,
-                        drag=drag,
-                        phase=phase,
-                    )
+                waveform = GaussianWaveform(
+                    amp=amp,
+                    width=width,
+                    rise=rise,
+                    drag=drag,
+                    phase=phase,
                 )
 
             case "soft_square_rise":
@@ -1074,14 +1049,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 _validate_waveform_args(
                     width=width, rise=rise, amp=amp, drag=drag, phase=phase
                 )
-                pulse = UntargetedPulse(
-                    waveform=SoftSquareWaveform(
-                        amp=amp,
-                        width=width,
-                        rise=rise,
-                        drag=drag,
-                        phase=phase,
-                    )
+                waveform = SoftSquareWaveform(
+                    amp=amp,
+                    width=width,
+                    rise=rise,
+                    drag=drag,
+                    phase=phase,
                 )
 
             case _:
@@ -1099,10 +1072,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
                 width, amp = _validate_arg_length(tree.children[4], 2)
                 _validate_waveform_args(width=width, amp=amp)
-                pulse = UntargetedPulse(waveform=waveform_type(width=width, amp=amp))
+                waveform = waveform_type(width=width, amp=amp)
 
         self._attempt_declaration(
-            Variable(name=assigned_variable, var_type=UntargetedPulse, value=pulse)
+            Variable(name=assigned_variable, var_type=AbstractWaveform, value=waveform)
         )
 
     def timing_instruction(self, tree: Tree):
@@ -1526,8 +1499,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
             return self._perform_signal_processing(name, args)
 
         elif name == "play":
-            ut_pulse: UntargetedPulse = args[1]
-            if not isinstance(ut_pulse, UntargetedPulse):
+            waveform: Waveform | SampledWaveform = args[1]
+            if not isinstance(waveform, Waveform | SampledWaveform):
                 variable_name = self.transform_to_value(
                     tree.children[1].children[1], walk_variable=False
                 )
@@ -1542,12 +1515,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     f"Play waveform argument {variable_name} does not point to a waveform."
                 )
 
-            ut_pulse_blob = deepcopy(ut_pulse.model_dump())
-            ut_pulse_blob["targets"] |= {pulse_target.uuid}
-            # TODO: Review for COMPILER-642 changes
-            ut_pulse = UntargetedPulse(**ut_pulse_blob)
+            waveform_blob = deepcopy(waveform)
+            pulse = Pulse(targets=pulse_target.uuid, waveform=waveform_blob)
 
-            self.builder.add(ut_pulse)
+            self.builder.add(pulse)
 
         elif name == "shift_phase":
             pulse_channel, phase = self._validate_phase_args(args[0], args[1])
