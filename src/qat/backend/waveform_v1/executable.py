@@ -3,6 +3,7 @@
 
 
 import numpy as np
+from pydantic import Field
 
 from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.utils.pydantic import ComplexNDArray
@@ -22,7 +23,7 @@ class WaveformV1ChannelData(ChannelData):
     :type acquires: list[AcquireData]
     """
 
-    buffer: ComplexNDArray = np.ndarray([])
+    buffer: ComplexNDArray = Field(default_factory=lambda: ComplexNDArray([]))
     baseband_frequency: float | None = None
     acquires: list[AcquireData] = []
 

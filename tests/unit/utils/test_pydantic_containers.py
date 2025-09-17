@@ -6,13 +6,17 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from numpydantic import NDArray, Shape
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     CalibratableUnitInterval,
+    ComplexNDArray,
+    FloatNDArray,
     FrozenDict,
     FrozenSet,
+    IntNDArray,
+    PydArray,
     PydDictBase,
     PydListBase,
     PydSetBase,
@@ -205,3 +209,106 @@ class TestNDArray:
 
         with pytest.raises(ValidationError):
             PydListBase[str].model_validate(blob)
+
+
+class TestPydArray:
+    def test_empty_array(self):
+        arr = PydArray(value=np.array([]))
+        assert arr.value.size == 0
+        assert arr.value.shape == (0,)
+
+    def test_1d_value(self):
+        a = np.random.rand(3)
+        b = np.random.rand(5)
+
+        arr = PydArray(value=a)
+        assert np.allclose(arr.value, a)
+
+        arr.value = b
+        assert np.allclose(arr.value, b)
+
+    def test_nd_value(self):
+        a = np.random.rand(2, 3, 4)
+
+        arr = PydArray(value=a)
+        assert np.allclose(arr.value, a)
+
+    def nameless_constructor(self):
+        a = np.random.rand(2, 3, 4)
+
+        arr = PydArray(a)
+        assert np.allclose(arr.value, a)
+
+    def test_equals(self):
+        a = np.random.rand(4, 5, 6, 7)
+
+        arr1 = PydArray(value=a)
+        arr2 = PydArray(value=deepcopy(a))
+
+        assert arr1 == arr2
+        assert arr1 == a
+
+        arr2 += 1e-03
+        assert arr1 != arr2
+        assert arr1 != a + 1e-03
+
+    def test_empty_array_serialisation(self):
+        arr = PydArray(value=np.array([]))
+
+        blob = arr.model_dump()
+        arr_deserialised = PydArray.model_validate(blob)
+        assert arr_deserialised.value.size == 0
+        assert arr_deserialised.value.shape == (0,)
+        assert arr_deserialised == arr
+
+    def test_serialisation(self):
+        arr = PydArray(np.random.rand(2, 3, 4))
+
+        blob = arr.model_dump()
+        arr_deserialised = PydArray.model_validate(blob)
+        assert np.allclose(arr_deserialised.value, arr.value)
+        assert arr_deserialised == arr
+
+    def test_list_input(self):
+        arr = PydArray([1.0, 2.0, 3.0])
+        assert isinstance(arr.value, np.ndarray)
+        assert arr.value.shape == (3,)
+
+    @pytest.mark.parametrize(
+        "arr_type,lst",
+        [
+            (ComplexNDArray, [1.0 + 3.2j, 2.0 + 4.2j, 3.0 + 5.2j]),
+            (FloatNDArray, [1.0, 2.0, 3.0]),
+            (IntNDArray, [1, 2, 3]),
+        ],
+    )
+    def test_typed_arrays(self, arr_type, lst):
+        arr = arr_type(lst)
+        assert isinstance(arr.value, np.ndarray)
+        assert arr.value.shape == (len(lst),)
+
+        arr2 = arr_type(value=deepcopy(lst))
+        assert arr == arr2
+
+        arr2[0] += 1
+        assert arr != arr2
+
+    def test_wrong_type(self):
+        with pytest.raises(ValidationError):
+            IntNDArray(["a", "b", "c"])
+
+        # Downconversion is fine.
+        class MockContainer(BaseModel):
+            a: IntNDArray
+
+        m = MockContainer(a=[1.0, 2.0, 3.0])
+        assert m.a.value.dtype == np.dtype(int)
+        assert m.a.dtype == np.dtype(int)
+
+        # Upconversion too!
+        class MockContainer(BaseModel):
+            a: ComplexNDArray
+
+        m = MockContainer(a=[1.0, 2.0, 3.0])
+        assert m.a.value.dtype == np.dtype(complex)
+        assert m.a.dtype == np.dtype(complex)

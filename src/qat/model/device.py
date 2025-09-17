@@ -12,6 +12,8 @@ from pydantic import Field, field_validator, model_validator
 from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
+    ComplexNDArray,
+    FloatNDArray,
     FrozenDict,
     NoExtraFieldsModel,
     QubitId,
@@ -154,7 +156,7 @@ class PulseChannel(Component):
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
     imbalance: float = 1.0
     phase_iq_offset: float = 0.0
-    scale: float | complex = 1.0 + 0.0j
+    scale: complex = 1.0 + 0.0j
     fixed_if: bool = False
 
     def __init_subclass__(cls, **kwargs):
@@ -190,7 +192,9 @@ class CalibratableAcquire(NoExtraFieldsModel):
     delay: CalibratablePositiveFloat = Field(default=180e-08, ge=0)
     width: CalibratablePositiveFloat = Field(default=1e-06, ge=0)
     sync: bool = True
-    weights: list[float | complex] = Field(default_factory=list)
+    weights: ComplexNDArray | FloatNDArray = Field(
+        default_factory=lambda: ComplexNDArray([])
+    )
     use_weights: bool = False
 
 

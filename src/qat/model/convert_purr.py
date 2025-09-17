@@ -76,7 +76,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         new_measure_pulse_channel = MeasurePulseChannel(
             frequency=measure_pulse_channel.frequency,
             imbalance=measure_pulse_channel.imbalance,
-            scale=measure_pulse_channel.scale,
+            scale=_process_real_or_complex(measure_pulse_channel.scale),
             fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=measure_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_measure),
@@ -92,7 +92,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         new_acquire_pulse_channel = AcquirePulseChannel(
             frequency=acquire_pulse_channel.frequency,
             imbalance=acquire_pulse_channel.imbalance,
-            scale=acquire_pulse_channel.scale,
+            scale=_process_real_or_complex(acquire_pulse_channel.scale),
             fixed_if=acquire_pulse_channel.fixed_if,
             phase_iq_offset=acquire_pulse_channel.phase_offset,
             acquire=CalibratableAcquire(**meas_acq),
@@ -114,7 +114,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         new_drive_pulse_channel = DrivePulseChannel(
             frequency=drive_pulse_channel.frequency,
             imbalance=drive_pulse_channel.imbalance,
-            scale=drive_pulse_channel.scale,
+            scale=_process_real_or_complex(drive_pulse_channel.scale),
             fixed_if=drive_pulse_channel.fixed_if,
             phase_iq_offset=drive_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_hw_x_pi_2),
@@ -125,7 +125,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             new_freqshift_pulse_channel = FreqShiftPulseChannel(
                 frequency=freqshift_pulse_channel.frequency,
                 imbalance=freqshift_pulse_channel.imbalance,
-                scale=freqshift_pulse_channel.scale,
+                scale=_process_real_or_complex(freqshift_pulse_channel.scale),
                 fixed_if=freqshift_pulse_channel.fixed_if,
                 phase_iq_offset=freqshift_pulse_channel.phase_offset,
                 active=freqshift_pulse_channel.active,
@@ -140,7 +140,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             new_secondstate_pulse_channel = SecondStatePulseChannel(
                 frequency=secondstate_pulse_channel.frequency,
                 imbalance=secondstate_pulse_channel.imbalance,
-                scale=secondstate_pulse_channel.scale,
+                scale=_process_real_or_complex(secondstate_pulse_channel.scale),
                 fixed_if=secondstate_pulse_channel.fixed_if,
                 phase_iq_offset=secondstate_pulse_channel.phase_offset,
             )
@@ -162,7 +162,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=pulse_channel.scale,
+                        scale=_process_real_or_complex(pulse_channel.scale),
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                     )
@@ -173,7 +173,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=pulse_channel.scale,
+                        scale=_process_real_or_complex(pulse_channel.scale),
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                     )
@@ -226,3 +226,10 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
     )
 
     return new_hw
+
+
+def _process_real_or_complex(value: float | complex) -> float | complex:
+    if isinstance(value, complex) and value.imag == 0.0:
+        return value.real
+
+    return value

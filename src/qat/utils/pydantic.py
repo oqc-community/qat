@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
+import numbers
 import re
 from collections.abc import Iterable
 from copy import deepcopy
@@ -546,17 +547,34 @@ def find_all_subclasses(cls: Type) -> list[Type]:
 def _list_serializer(lst):
     """Lists of complex numbers can be expensive to serialise: by serializing type
     information and its value as a hex, we can have more performant serialization."""
-    lst = np.asarray(lst)
-    return {"dtype": lst.dtype.name, "shape": lst.shape, "value": lst.tobytes().hex()}
+    if isinstance(lst, PydArray):
+        return {
+            "dtype": lst.value.dtype.name,
+            "shape": lst.value.shape,
+            "value": lst.value.tobytes().hex(),
+        }
+    else:
+        return {"dtype": lst.dtype.name, "shape": lst.shape, "value": lst.tobytes().hex()}
 
 
 def _list_validator(lst, ty: type):
     """Reverts the hex value and type information into a numpy array."""
     if isinstance(lst, dict):
-        arr = np.frombuffer(bytearray.fromhex(lst["value"]), dtype=np.dtype(lst["dtype"]))
-        return arr.reshape(lst["shape"])
-    if isinstance(lst, list):
-        return np.asarray(lst, dtype=ty)
+        dtype = lst.get("dtype", None)
+        dtype = np.dtype(dtype) if dtype is not None else None
+        if dtype is not None and not np.issubdtype(dtype, ty):
+            return lst
+
+        arr = PydArray(value=np.frombuffer(bytearray.fromhex(lst["value"]), dtype=dtype))
+        arr.value = arr.value.reshape(lst["shape"])
+        return arr
+
+    if isinstance(lst, list | np.ndarray):
+        # catches wrong types to allow e.g. FloatNDArray | ComplexNDArray
+        try:
+            return PydArray(value=np.asarray(lst, dtype=ty))
+        except TypeError:
+            return lst
     return lst
 
 
@@ -564,11 +582,147 @@ def get_annotated_array(ty: type):
     """Creates an annotated type for numeric lists with Pydantic serializers and validators
     for efficient serialization."""
     return Annotated[
-        # TODO: Investigate linting issue with Shape["* x"]
-        NDArray[Shape["* x"], ty],  # noqa: F722
+        PydArray,
         BeforeValidator(lambda x: _list_validator(x, ty)),
         PlainSerializer(_list_serializer),
     ]
+
+
+class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
+    """
+    Subclass a NumPy mixin that auto-adds Python operator methods
+    (like +, -, *, etc.) in terms of NumPy ufuncs. This class
+    still controls behavior via `__array_ufunc__` below.
+    """
+
+    value: NDArray[Shape["*, ..."], int | float | complex | bool]  # noqa: F722
+    _HANDLED_TYPES = (np.ndarray, numbers.Number)
+
+    def __init__(self, *args, **kwargs):
+        if args:
+            if len(args) != 1:
+                raise TypeError(
+                    f"{type(self).__name__} accepts at most 1 positional argument ('value'), got {len(args)}."
+                )
+
+            if "value" in kwargs:
+                raise TypeError("Pass either a positional value or 'value=', not both")
+
+            kwargs["value"] = args[0]
+
+        kwargs["value"] = (
+            np.asarray(kwargs["value"])
+            if (isinstance(lst := kwargs.get("value", []), list))
+            else lst
+        )
+        super().__init__(**kwargs)
+
+    def __array__(self, dtype=None):
+        arr = self.value
+        return arr.astype(dtype, copy=False) if dtype is not None else arr
+
+    # One might also consider adding the built-in list type to this
+    # list, to support operations like np.add(array_like, list)
+
+    @staticmethod
+    def _wrap(x):
+        """Wrap ndarrays as PydArray; leave scalars/others as-is."""
+        return PydArray(x) if isinstance(x, np.ndarray) else x
+
+    def __array_function__(self, func, types, args, kwargs):
+        # Only handle if any argument is of PydArray type
+        if not any(issubclass(t, PydArray) for t in types):
+            return NotImplemented
+
+        # Unwrap all PydArray to ndarrays
+        def unwrap(a):
+            return a.value if isinstance(a, PydArray) else a
+
+        uargs = tuple(unwrap(a) for a in args)
+        ukwargs = {k: unwrap(v) for k, v in (kwargs or {}).items()}
+
+        out = func(*uargs, **ukwargs)
+        if isinstance(out, tuple):
+            return tuple(self._wrap(x) for x in out)
+        return self._wrap(out)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Implements special methods for almost all of Python's built-in operators.
+
+        Implementation inspired by
+        https://numpy.org/doc/2.2/reference/generated/numpy.lib.mixins.NDArrayOperatorsMixin.html
+        """
+        out = kwargs.get("out", ())
+        for x in inputs + out:
+            # Use PydArray instead of type(self)
+            # for isinstance to allow subclasses that don't
+            # override __array_ufunc__ to handle `PydArray` objects.
+            if not isinstance(x, (np.ndarray, numbers.Number, PydArray)):
+                return NotImplemented
+        # Defer to the implementation of the ufunc
+        # on unwrapped values.
+        inputs = tuple(x.value if isinstance(x, PydArray) else x for x in inputs)
+        if out:
+            kwargs["out"] = tuple(x.value if isinstance(x, PydArray) else x for x in out)
+
+        result = getattr(ufunc, method)(*inputs, **kwargs)
+
+        if type(result) is tuple:
+            # multiple return values
+            return tuple(type(self)(x) for x in result)
+        elif method == "at":
+            # ufunc.at performs in-place updates and returns None by design
+            return None
+        else:
+            # one return value (default)
+            return self._wrap(result)
+
+    # Custom equality and inequality operators to improve compatibility of
+    # Pydantic with empty arrays.
+    def __eq__(self, other):
+        if isinstance(other, PydArray):
+            return np.array_equal(self.value, other.value)
+        elif isinstance(other, np.ndarray):
+            return np.array_equal(self.value, other)
+
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    # Other niceties from the ndarray interface we'd like to support for PydArrays.
+    def __getattr__(self, name):
+        """
+        Delegate attribute access to the underlying ndarray.
+        This will handle .shape, .size, .reshape, etc. automatically.
+        """
+        attr = getattr(self.value, name)
+        # If the attribute is callable (e.g. reshape), wrap its return value
+        if callable(attr):
+
+            def wrapper(*args, **kwargs):
+                result = attr(*args, **kwargs)
+                return self._wrap(result)
+
+            return wrapper
+        return attr
+
+    def __getitem__(self, index):
+        return self._wrap(self.value[index])
+
+    def __setitem__(self, index, value):
+        self.value[index] = value.value if isinstance(value, PydArray) else value
+
+    def __len__(self):
+        return len(self.value)
+
+    def __iter__(self):
+        for x in self.value:
+            yield self._wrap(x)
+
+    def __repr__(self):
+        return "%s(%r, dtype=%r)" % (type(self).__name__, self.value, self.dtype)
 
 
 IntNDArray = get_annotated_array(int)

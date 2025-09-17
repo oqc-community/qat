@@ -5,11 +5,15 @@ from __future__ import annotations
 from typing import Optional, Type, Union
 
 import numpy as np
-from numpydantic import NDArray, Shape
 from pydantic import Field, model_validator
 
 from qat.ir.instructions import QuantumInstruction
-from qat.utils.pydantic import AllowExtraFieldsModel, find_all_subclasses
+from qat.utils.pydantic import (
+    AllowExtraFieldsModel,
+    ComplexNDArray,
+    FloatNDArray,
+    find_all_subclasses,
+)
 from qat.utils.waveform import (
     BlackmanFunction,
     ComplexFunction,
@@ -125,8 +129,7 @@ class SampledWaveform(AbstractWaveform):
     Provide a list of amplitudes to define a sampled waveform.
     """
 
-    # TODO: Investigate linting issue with typehint Shape["* x"]
-    samples: NDArray[Shape["* x"], int | float | complex]  # noqa: F722
+    samples: ComplexNDArray | FloatNDArray
     sample_time: Optional[float] = None  # Time between samples, in seconds
 
     @property
