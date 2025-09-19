@@ -15,7 +15,7 @@ from qat.ir.measure import (
     ProcessAxis,
     acq_mode_process_axis,
 )
-from qat.ir.waveforms import Pulse
+from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import (
     CrossResonanceCancellationPulseChannel,
     CrossResonancePulseChannel,
@@ -58,6 +58,65 @@ class TestInstructionBuilder:
         builder1 += builder2
         assert builder1.number_of_instructions == before1 + before2
         assert builder2.number_of_instructions == before2
+
+    def test_flatten(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit = hw_model.qubit_with_index(0)
+        builder.X(target=qubit)
+        builder.measure_single_shot_z(target=qubit)
+        before = builder.number_of_instructions
+
+        measure_block_exists = False
+        measure_pulse_exists = False
+        acquire_exists = False
+        for instruction in builder.instructions:
+            if isinstance(instruction, MeasureBlock):
+                measure_block_exists = True
+            elif (
+                isinstance(instruction, Pulse)
+                and instruction.target == qubit.measure_pulse_channel.uuid
+            ):
+                measure_pulse_exists = True
+            elif (
+                isinstance(instruction, Acquire)
+                and instruction.target == qubit.acquire_pulse_channel.uuid
+            ):
+                acquire_exists = True
+        assert measure_block_exists
+        assert not measure_pulse_exists
+        assert not acquire_exists
+
+        builder.flatten()
+        assert builder.number_of_instructions == before
+        measure_pulse_exists = False
+        acquire_exists = False
+        for instruction in builder.instructions:
+            assert not isinstance(instruction, MeasureBlock)
+            if (
+                isinstance(instruction, Pulse)
+                and instruction.target == qubit.measure_pulse_channel.uuid
+            ):
+                measure_pulse_exists = True
+            if (
+                isinstance(instruction, Acquire)
+                and instruction.target == qubit.acquire_pulse_channel.uuid
+            ):
+                acquire_exists = True
+        assert measure_pulse_exists
+        assert acquire_exists
+
+    def test_synchronize(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit = hw_model.qubit_with_index(0)
+        builder.synchronize(qubit)
+        assert builder.number_of_instructions == 1
+        sync = builder._ir.instructions[0]
+        assert isinstance(sync, Synchronize)
+
+        # check for channels in both qubit and resonator
+        assert qubit.drive_pulse_channel.uuid in sync.targets
+        assert qubit.acquire_pulse_channel.uuid in sync.targets
+        assert qubit.measure_pulse_channel.uuid in sync.targets
 
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
@@ -547,3 +606,38 @@ class TestMeasure:
                 max_duration = max(max_duration, instruction.duration)
 
         assert measure_block.duration == max_duration
+
+    def test_measure_with_weights(self):
+        model = generate_hw_model(n_qubits=1)
+        acquire = model.qubit_with_index(0).acquire_pulse_channel.acquire
+        acquire.width = 800e-9
+        acquire.weights = np.random.rand(800)
+        acquire.use_weights = True
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.measure_single_shot_z(target=model.qubit_with_index(0))
+        for instruction in builder._ir.instructions:
+            if isinstance(instruction, MeasureBlock):
+                for sub_instruction in instruction.instructions:
+                    if isinstance(sub_instruction, Acquire):
+                        filter = sub_instruction.filter
+                        assert filter is not None
+                        assert isinstance(filter, Pulse)
+                        assert isinstance(filter.waveform, SampledWaveform)
+
+                        acquire_channel = model.qubit_with_index(0).acquire_pulse_channel
+                        assert filter.target == acquire_channel.uuid
+
+    def test_measure_syncs_channels_on_both_resonator_and_qubit(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit = hw_model.qubit_with_index(0)
+
+        builder.measure(qubit)
+
+        syncs = [instr for instr in builder._ir if isinstance(instr, Synchronize)]
+        assert len(syncs) == 2  # One before and one after the measure block
+
+        for sync in syncs:
+            assert qubit.drive_pulse_channel.uuid in sync.targets
+            assert qubit.acquire_pulse_channel.uuid in sync.targets
+            assert qubit.measure_pulse_channel.uuid in sync.targets

@@ -4,11 +4,17 @@ import pytest
 
 from qat.backend import WaveformV1Backend
 from qat.backend.base import BaseBackend
+from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
 from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
 from qat.executables import AcquireData, AcquireMode, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
-from qat.middleend import DefaultMiddleend, FallthroughMiddleend
+from qat.middleend import (
+    DefaultMiddleend,
+    ExperimentalDefaultMiddleend,
+    FallthroughMiddleend,
+)
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.model.validators import MismatchingHardwareModelException
@@ -100,6 +106,31 @@ class TestCompilePipeline:
         with pytest.raises(AttributeError):
             mock_pipeline.execute(MockExecutable())
 
+    def test_validate_model(self):
+        model = LucyModelLoader(qubit_count=4).load()
+
+        # Should not raise
+        CompilePipeline(
+            name="TestCompilePipeline",
+            model=model,
+            frontend=AutoFrontend(model=model),
+            middleend=ExperimentalDefaultMiddleend(model=model),
+            backend=PydWaveformV1Backend(model=model),
+            target_data=TargetData.default(),
+        )
+
+        # will raise
+        new_model = LucyModelLoader(qubit_count=6).load()
+        with pytest.raises(MismatchingHardwareModelException):
+            CompilePipeline(
+                name="TestCompilePipeline",
+                model=model,
+                frontend=AutoFrontend(model=model),
+                middleend=ExperimentalDefaultMiddleend(model=model),
+                backend=PydWaveformV1Backend(model=new_model),
+                target_data=TargetData.default(),
+            )
+
 
 class TestExecutePipeline:
     @pytest.fixture()
@@ -162,6 +193,27 @@ class TestExecutePipeline:
         assert "test" in results
         assert len(results["test"]) == 1000
         assert isinstance(metrics, MetricsManager)
+
+    def test_validate_model(self):
+        model = LucyModelLoader(qubit_count=4).load()
+
+        # Should not raise
+        ExecutePipeline(
+            name="TestExecutePipeline",
+            model=model,
+            runtime=SimpleRuntime(engine=MockEngineWithModel(model)),
+            target_data=TargetData.default(),
+        )
+
+        # will raise
+        new_model = LucyModelLoader(qubit_count=6).load()
+        with pytest.raises(MismatchingHardwareModelException):
+            ExecutePipeline(
+                name="TestExecutePipeline",
+                model=model,
+                runtime=SimpleRuntime(engine=MockEngineWithModel(new_model)),
+                target_data=TargetData.default(),
+            )
 
 
 class TestPipeline:

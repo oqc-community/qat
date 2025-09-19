@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.engines.waveform_v1 import EchoEngine
-from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import ExecutePipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime import SimpleRuntime
 from qat.runtime.results_pipeline import (
@@ -33,7 +32,7 @@ class EchoExecutePipeline(UpdateablePipeline):
     @staticmethod
     def _build_pipeline(
         config: PipelineConfig,
-        model: QuantumHardwareModel,
+        model: PhysicalHardwareModel,
         target_data: TargetData | None,
         engine: None = None,
     ) -> ExecutePipeline:
@@ -47,8 +46,7 @@ class EchoExecutePipeline(UpdateablePipeline):
             )
 
         target_data = target_data if target_data is not None else TargetData.default()
-        pyd_model = convert_purr_echo_hw_to_pydantic(model)
-        results_pipeline = get_experimental_results_pipeline(model, pyd_model)
+        results_pipeline = get_experimental_results_pipeline(model)
         return ExecutePipeline(
             model=model,
             target_data=target_data,

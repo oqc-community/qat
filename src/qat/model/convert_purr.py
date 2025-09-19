@@ -3,6 +3,7 @@
 from collections import defaultdict
 from copy import deepcopy
 
+from qat.ir.waveforms import SquareWaveform
 from qat.model.device import (
     AcquirePulseChannel,
     CalibratableAcquire,
@@ -79,7 +80,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             scale=_process_real_or_complex(measure_pulse_channel.scale),
             fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=measure_pulse_channel.phase_offset,
-            pulse=CalibratablePulse(**pulse_measure),
+            pulse=CalibratablePulse(waveform_type=SquareWaveform, **pulse_measure),
         )
 
         meas_acq = deepcopy(qubit.measure_acquire)
@@ -218,11 +219,13 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
     else:
         logical_connectivity_quality = None
 
+    calibration_id = getattr(legacy_hw, "calibration_id", "")
     new_hw = PhysicalHardwareModel(
         logical_connectivity=logical_connectivity,
         logical_connectivity_quality=logical_connectivity_quality,
         physical_connectivity=physical_connectivity,
         qubits=new_qubits,
+        calibration_id=calibration_id,
     )
 
     return new_hw

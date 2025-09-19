@@ -18,7 +18,6 @@ from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import is_generated_name
 from qat.runtime.passes.purr.analysis import IndexMappingResult
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
 from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list
@@ -174,7 +173,7 @@ class ResultTransform(TransformPass):
             If we only have one result after this, just return that list directly
             instead, as it's probably just a single experiment.
             """
-            if all([is_generated_name(k) for k in simplify_target.keys()]):
+            if all([self._is_generated_name(k) for k in simplify_target.keys()]):
                 if len(simplify_target) == 1:
                     return list(simplify_target.values())[0]
                 else:
@@ -204,6 +203,11 @@ class ResultTransform(TransformPass):
         if ResultsFormatting.DynamicStructureReturn in format_flags:
             acquisitions = simplify_results(acquisitions)
         return acquisitions
+
+    @staticmethod
+    def _is_generated_name(name: str) -> bool:
+        """Check if a name is a generated name."""
+        return name.startswith("generated_name_")
 
 
 class ErrorMitigation(TransformPass):

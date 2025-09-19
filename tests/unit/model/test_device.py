@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
+from qat.ir.waveforms import GaussianWaveform
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import (
     CalibratableAcquire,
@@ -41,6 +42,25 @@ class TestCalibratable:
     def test_invalid_delay(self, invalid_delay):
         with pytest.raises(ValidationError):
             CalibratableAcquire(width=invalid_delay)
+
+
+class TestCalibratablePulse:
+    def test_defaults_give_valid_pulse(self):
+        """Regression test to ensure default values give a sensible waveform that is free
+        of errors and warnings."""
+        pulse = CalibratablePulse()
+        assert pulse.waveform_type == GaussianWaveform
+        assert pulse.amp > 0.0
+        assert pulse.width > 0.0
+        assert pulse.rise > 0.0
+
+        params = pulse.model_dump()
+        params.pop("waveform_type")
+        wf = pulse.waveform_type(**params)
+
+        # evaluate the samples to check no divide by zeros
+        samples = wf.sample(np.linspace(-pulse.width / 2, pulse.width / 2, 40))
+        assert np.all(np.abs(samples.samples) > 0.0)
 
 
 @pytest.mark.parametrize("seed", [21, 22, 23, 24])

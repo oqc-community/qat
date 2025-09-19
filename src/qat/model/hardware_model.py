@@ -215,7 +215,8 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         return self
 
     def __eq__(self, other: PhysicalHardwareModel) -> bool:
-        base_eq = super().__eq__(other)
+        if not super().__eq__(other):
+            return False
 
         s_qubits = list(self.qubits.values())
         o_qubits = list(other.qubits.values())
@@ -226,7 +227,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             if s != o:
                 return False
 
-        return base_eq
+        return True
 
     @property
     def is_calibrated(self) -> bool:

@@ -7,6 +7,7 @@ from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.frontend.passes.purr.transform import FlattenIR
+from qat.frontend.passes.transform import PydFlattenIR
 from qat.frontend.purr.purr import PurrFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend
 from qat.frontend.qat_ir import QatFrontend
@@ -152,4 +153,7 @@ class AutoFrontendWithFlattenedIR(AutoFrontend):
         compiler_config: CompilerConfig | None = None,
     ):
         ir = super().emit(src, res_mgr, met_mgr, compiler_config)
+
+        if self.model and isinstance(self.model, PydHardwareModel):
+            return PydFlattenIR().run(ir)
         return FlattenIR().run(ir)

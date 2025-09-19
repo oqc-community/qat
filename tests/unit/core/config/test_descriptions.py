@@ -28,6 +28,7 @@ from qat.frontend import FallthroughFrontend
 from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.loaders.cache import CacheAccessLoader
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.waveform_v1 import (
@@ -88,13 +89,13 @@ class TestEngineDescription:
 
 
 mock_compile_pipeline = WaveformV1CompilePipeline(
-    config=dict(name="mock_compile"), loader=EchoModelLoader()
+    config=dict(name="mock_compile"), loader=LucyModelLoader()
 ).pipeline
 mock_execute_pipeline = EchoExecutePipeline(
-    config=dict(name="mock_execute"), loader=EchoModelLoader()
+    config=dict(name="mock_execute"), loader=LucyModelLoader()
 ).pipeline
 mock_full_pipeline = EchoPipeline(
-    config=dict(name="mock_full"), loader=EchoModelLoader()
+    config=dict(name="mock_full"), loader=LucyModelLoader()
 ).pipeline
 
 

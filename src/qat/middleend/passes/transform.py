@@ -728,18 +728,20 @@ class RepeatSanitisation(TransformPass):
         """
         :param target_data: Target-related information.
         """
-        self.target_data = target_data
+        self.default_shots = target_data.default_shots
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
         for inst in ir.instructions:
             if isinstance(inst, Repeat):
+                if inst.repeat_count is None:
+                    inst.repeat_count = self.default_shots
                 return ir
 
-        ir.repeat(self.target_data.default_shots)
+        ir.repeat(self.default_shots)
         log.warning(
             "Could not find any repeat instructions. "
-            f"One has been added with {self.target_data.default_shots} shots."
+            f"One has been added with {self.default_shots} shots."
         )
         return ir
 
@@ -1395,16 +1397,13 @@ class SynchronizeTask(TransformPass):
 
 
 class AcquireSanitisation(TransformPass):
-    """Sanitises the :class:`Acquire` instruction: the first per pulse channel is split into
-    an :class:`Acquire` and a :class:`Delay`, and other acquisitions have their delay
-    removed.
+    """Sanitises the :class:`Acquire` instruction to separate the :class:`Delay` from
+    :class:`Acquire` instructions.
 
     :class:`Acquire` instructions are defined by a "duration" for which they instruct the
     target to readout. They also contain a "delay" attribute, which instructions the
     acquisition to start after some given time. This pass separates acqusitions with a
-    delay into two instructions for the first acquire that acts on the channel. For multiple
-    acquisitions on a single channel, the delay is not needed for the following
-    acquisitions, and is set to zero.
+    delay into two instructions for the first acquire that acts on the channel.
     """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:

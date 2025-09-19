@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from abc import ABC
 from pathlib import Path
 
 from compiler_config.config import CompilerConfig, Tket, TketOptimizations
@@ -57,7 +56,7 @@ def load_qir_file(path: str) -> str | bytes:
     return src
 
 
-class QIRFrontend(BaseFrontend, ABC):
+class QIRFrontend(BaseFrontend):
     """A frontend for handling QIR programs.
 
     Handles the parsing of QIR programs, and optionally implements a pipeline for validation

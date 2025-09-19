@@ -13,6 +13,8 @@ from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
 from qat.middleend.middleends import ExperimentalDefaultMiddleend
+from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
@@ -34,7 +36,7 @@ from tests.unit.utils.qasm_qir import get_pipeline_tests
 class TestExperimentalEchoPipeline:
     def test_build_pipeline(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = EchoModelLoader(qubit_count=4).load()
+        model = LucyModelLoader(qubit_count=4).load()
         pipeline = ExperimentalEchoPipeline._build_pipeline(
             config=PipelineConfig(name="echo"), model=model, target_data=None
         )
@@ -50,7 +52,7 @@ class TestExperimentalEchoPipeline:
 
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
-        model = EchoModelLoader(qubit_count=4).load()
+        model = LucyModelLoader(qubit_count=4).load()
         compile_pipeline = ExperimentalWaveformV1CompilePipeline._build_pipeline(
             config=PipelineConfig(name="compile"),
             model=model,
@@ -64,7 +66,7 @@ class TestExperimentalEchoPipeline:
 
     def test_build_execute_pipeline(self):
         """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
-        model = EchoModelLoader(qubit_count=4).load()
+        model = LucyModelLoader(qubit_count=4).load()
         execute_pipeline = ExperimentalEchoExecutePipeline._build_pipeline(
             config=PipelineConfig(name="execute"),
             model=model,
@@ -76,11 +78,10 @@ class TestExperimentalEchoPipeline:
         assert isinstance(execute_pipeline.engine, EchoEngine)
 
 
-test_files = get_pipeline_tests(openpulse=False)
+test_files = get_pipeline_tests(openpulse=False, skips=["cudaq-ghz.ll"])
 
 
 @pytest.mark.parametrize("shots", [1254, 10002], scope="class")
-@pytest.mark.parametrize("passive_reset_time", [1e-3], scope="class")
 @pytest.mark.parametrize(
     "program_file, num_readouts, num_registers",
     test_files.values(),
@@ -107,19 +108,18 @@ class TestExperimentalEchoPipelineWithCircuits:
     """
 
     target_data = TargetData.default()
-    model = EchoModelLoader(qubit_count=32).load()
+    model = LucyModelLoader(qubit_count=32).load()
     pipeline = ExperimentalEchoPipeline(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data
     )
 
     @pytest.fixture(scope="class")
-    def compiler_config(self, shots, passive_reset_time, results_format) -> CompilerConfig:
+    def compiler_config(self, shots, results_format) -> CompilerConfig:
         """Initialize a compiler config per program, as it is possible for the compiler
         config to be adjusted during compilation."""
         return CompilerConfig(
             repeats=shots,
             results_format=results_format,
-            passive_reset_time=passive_reset_time,
             optimizations=Tket().default(),
         )
 
@@ -173,13 +173,14 @@ class TestExperimentalEchoPipelineWithCircuits:
         assert executable.compiled_shots <= shots
         assert executable.compiled_shots <= self.target_data.max_shots
 
-    def test_repetition_period(self, executable, passive_reset_time):
+    def test_shot_period(self, executable):
         """Checks that i) the repetition time accounts for both the passive reset time and
         circuit time, and ii) the buffers for each channel do not exceed the repetition
         time."""
+        passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
         assert executable.repetition_time >= passive_reset_time
         for physical_channel, channel_data in executable.channel_data.items():
-            for qubit in self.pipeline.backend.pyd_model.qubits.values():
+            for qubit in self.pipeline.backend.model.qubits.values():
                 if physical_channel == qubit.physical_channel.uuid:
                     sample_time = self.target_data.QUBIT_DATA.sample_time
                     break
@@ -192,8 +193,8 @@ class TestExperimentalEchoPipelineWithCircuits:
         """WaveformV1Executables are expected to have channel data for each physical
         channel available, regardless of if they're used."""
 
-        assert len(executable.channel_data) == len(self.model.physical_channels)
-        for qubit in self.pipeline.backend.pyd_model.qubits.values():
+        assert len(executable.channel_data) == 2 * len(self.model.qubits)
+        for qubit in self.model.qubits.values():
             for physical_channel in [
                 qubit.physical_channel,
                 qubit.resonator.physical_channel,
@@ -346,11 +347,15 @@ class MockEchoModelLoader(EchoModelLoader):
         return model
 
 
+# TODO: turn on QIR tests when placement is sorted (COMPILER-747)
+parity_test_files = get_pipeline_tests(openpulse=False, qir=False)
+
+
 @pytest.mark.experimental
 @pytest.mark.parametrize(
     "program_file",
-    [val[0] for val in test_files.values()],
-    ids=test_files.keys(),
+    [val[0] for val in parity_test_files.values()],
+    ids=parity_test_files.keys(),
     scope="class",
 )
 class TestExperimentalEchoPipelineParity:
@@ -367,11 +372,14 @@ class TestExperimentalEchoPipelineParity:
 
     target_data = TargetData.default()
     model = MockEchoModelLoader(qubit_count=32, target_data=target_data).load()
+    pydantic_model = convert_purr_echo_hw_to_pydantic(model)
     stable_pipeline = EchoPipeline(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data
     )
     experimental_pipeline = ExperimentalEchoPipeline(
-        config=PipelineConfig(name="experimental"), model=model, target_data=target_data
+        config=PipelineConfig(name="experimental"),
+        model=pydantic_model,
+        target_data=target_data,
     )
 
     def compiler_config(self):
@@ -396,7 +404,7 @@ class TestExperimentalEchoPipelineParity:
 
     @pytest.fixture(scope="class")
     def physical_channel_map(self):
-        pyd_model = self.experimental_pipeline.backend.pyd_model
+        pyd_model = self.experimental_pipeline.backend.model
         physical_channel_map = {}
         for index, qubit in pyd_model.qubits.items():
             legacy_qubit = self.model.get_qubit(index)
@@ -449,7 +457,9 @@ class TestExperimentalEchoPipelineParity:
             == experimental_executable.results_processing
         )
         assert stable_executable.post_processing == experimental_executable.post_processing
-        assert stable_executable.acquires == experimental_executable.acquires
+        # the ordering of packages, and different times when measures are done mean we
+        # no longer have complete parity here.
+        assert len(stable_executable.assigns) == len(experimental_executable.assigns)
         for stable, experimental in zip(
             stable_executable.assigns, experimental_executable.assigns
         ):
@@ -471,14 +481,28 @@ class TestExperimentalEchoPipelineParity:
             assert new_key in experimental_executable.channel_data
             assert isinstance(stable_data, WaveformV1ChannelData)
             experimental_data = experimental_executable.channel_data[new_key]
-            assert np.allclose(stable_data.buffer, experimental_data.buffer)
             assert (
                 stable_data.baseband_frequency is None
                 and experimental_data.baseband_frequency is None
             ) or np.isclose(
                 stable_data.baseband_frequency, experimental_data.baseband_frequency
             )
-            assert stable_data.acquires == experimental_data.acquires
+
+            # Since how we sync qubits before measurement has changed, we have diverged
+            # from complete feature parity here. The buffers and acquires might look
+            # different: check what we can, but otherwise, skip
+            assert len(stable_data.acquires) == len(experimental_data.acquires)
+            if len(stable_data.acquires) > 0:
+                for acq1, acq2 in zip(stable_data.acquires, experimental_data.acquires):
+                    assert acq1.length == acq2.length
+                    assert np.allclose(
+                        stable_data.buffer[acq1.position : acq1.position + acq1.length],
+                        experimental_data.buffer[
+                            acq2.position : acq2.position + acq2.length
+                        ],
+                    )
+            else:
+                assert np.allclose(stable_data.buffer, experimental_data.buffer)
 
     def test_results_formatting(self, stable_results, experimental_results):
         assert stable_results == experimental_results

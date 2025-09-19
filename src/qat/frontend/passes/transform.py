@@ -171,3 +171,4 @@ class FlattenIR(TransformPass):
 
 
 PydInputOptimisation = InputOptimisation
+PydFlattenIR = FlattenIR

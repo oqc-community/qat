@@ -85,7 +85,7 @@ class BasePipeline(AbstractPipeline, ABC):
         :param args: The components of the pipeline to validate.
         """
         for component in args:
-            if hasattr(component, "model") and component.model not in {model, None}:
+            if hasattr(component, "model") and component.model not in (model, None):
                 raise MismatchingHardwareModelException(
                     f"{model} hardware does not match supplied hardware"
                 )

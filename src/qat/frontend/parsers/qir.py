@@ -186,7 +186,7 @@ class QIRParser:
                     ):
                         label = byte_string.decode("utf-8").rstrip("\x00")
                     else:
-                        label = "generated-name_" + str(uuid.uuid4())
+                        label = "generated_name_" + str(uuid.uuid4())
                     self.result_variables.append((str(res), label))
 
     def parse(self, qir_file: str):

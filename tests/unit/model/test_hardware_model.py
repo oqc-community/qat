@@ -13,6 +13,7 @@ from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.device import PulseChannel
 from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
 from qat.model.hardware_model import VERSION, PhysicalHardwareModel
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import (
     generate_connectivity_data,
     generate_random_linear,
@@ -21,6 +22,19 @@ from qat.utils.hardware_model import (
 )
 
 from tests.unit.utils.models import get_toshiko_connectivity
+
+
+class TestPhysicalHardwareModel:
+    def test_models_are_equal(self):
+        model = LucyModelLoader(qubit_count=8).load()
+        new_model = deepcopy(model)
+        assert new_model is not model
+        assert model == new_model
+
+    def test_models_not_equal(self):
+        model1 = LucyModelLoader(qubit_count=8).load()
+        model2 = LucyModelLoader(qubit_count=16).load()
+        assert model1 != model2
 
 
 @pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])

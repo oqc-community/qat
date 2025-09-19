@@ -183,7 +183,7 @@ class CalibratablePulse(NoExtraFieldsModel):
     amp: float = 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5)
     phase: float = 0.0
     drag: float = 0.0
-    rise: float = 0.0
+    rise: float = 1.0 / 3.0
     amp_setup: float = 0.0
     std_dev: float = 0.0
 
@@ -422,6 +422,10 @@ class Qubit(Component):
     @property
     def all_pulse_channels(self):
         return self.pulse_channels.all_pulse_channels
+
+    @property
+    def all_qubit_and_resonator_pulse_channels(self):
+        return self.all_pulse_channels + self.resonator.all_pulse_channels
 
     @property
     def drive_pulse_channel(self):

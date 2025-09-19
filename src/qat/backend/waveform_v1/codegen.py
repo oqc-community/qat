@@ -381,17 +381,14 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
     def __init__(
         self,
         model: PhysicalHardwareModel,
-        legacy_model: QuantumHardwareModel,
         target_data: TargetData = TargetData.default(),
     ):
-        # TODO: PhysicalHardwareModel should be used instead of QuantumHardwareModel but is "unhashable"
-        self.legacy_model = legacy_model
-        self.pyd_model = model
+        self.model = model
         self.target_data = target_data
 
     def emit(
         self,
-        ir: InstructionBuilder,  # TODO: Update to pydantic builder COMPILER-381
+        ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         upconvert: bool = True,
@@ -443,7 +440,7 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
             },
             assigns=ir.assigns,
             returns=returns,
-            calibration_id=self.legacy_model.calibration_id,
+            calibration_id=self.model.calibration_id,
         )
 
     def build_pass_pipeline(self, *args, **kwargs):
@@ -451,8 +448,8 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
             PassManager()
             | PydNoAcquireWeightsValidation()
             | PydPartitionByPulseChannel()
-            | PydTimelineAnalysis(self.pyd_model, self.target_data)
-            | PydIntermediateFrequencyAnalysis(self.pyd_model)
+            | PydTimelineAnalysis(self.model, self.target_data)
+            | PydIntermediateFrequencyAnalysis(self.model)
         )
 
     @staticmethod
@@ -514,8 +511,8 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
             ):
                 continue
 
-            pulse_channel = self.pyd_model.pulse_channel_with_id(pulse_channel_id)
-            device = self.pyd_model.device_for_pulse_channel_id(pulse_channel_id)
+            pulse_channel = self.model.pulse_channel_with_id(pulse_channel_id)
+            device = self.model.device_for_pulse_channel_id(pulse_channel_id)
             pulse_channel_buffers[pulse_channel_id] = self.create_pulse_channel_buffer(
                 pulse_channel,
                 ir.target_map[pulse_channel_id],
@@ -523,7 +520,7 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
                 self.target_data.QUBIT_DATA
                 if isinstance(device, Qubit)
                 else self.target_data.RESONATOR_DATA,
-                self.pyd_model.physical_channel_for_pulse_channel_id(pulse_channel.uuid),
+                self.model.physical_channel_for_pulse_channel_id(pulse_channel.uuid),
                 upconvert,
             )
 
@@ -531,12 +528,12 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
         phys_to_pulse_map = {}
         for pulse_channel_id, buffer in pulse_channel_buffers.items():
             phys_to_pulse_map.setdefault(
-                self.pyd_model.physical_channel_for_pulse_channel_id(pulse_channel_id), []
+                self.model.physical_channel_for_pulse_channel_id(pulse_channel_id), []
             ).append(buffer)
 
         # Compute sum of pulse channels
         physical_channel_buffers = {}
-        for device in self.pyd_model.quantum_devices:
+        for device in self.model.quantum_devices:
             physical_channel = device.physical_channel
             buffer_list = phys_to_pulse_map.get(physical_channel, [])
             if len(buffer_list) == 0:
@@ -560,7 +557,7 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
         """
         acquire_dict = {}
         for pulse_channel_id, acquire_list in ir.acquire_map.items():
-            phys_channel = self.pyd_model.physical_channel_for_pulse_channel_id(
+            phys_channel = self.model.physical_channel_for_pulse_channel_id(
                 pulse_channel_id
             )
             acq_list = acquire_dict.setdefault(phys_channel, [])

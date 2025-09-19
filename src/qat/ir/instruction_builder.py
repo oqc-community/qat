@@ -160,7 +160,9 @@ class InstructionBuilder(ABC):
         for target in targets:
             if isinstance(target, Qubit):
                 self.add(Reset(qubit_target=self._qubit_index_by_uuid[target.uuid]))
-                pulse_channel_ids.extend([pc.uuid for pc in target.all_pulse_channels])
+                pulse_channel_ids.extend(
+                    [pc.uuid for pc in target.all_qubit_and_resonator_pulse_channels]
+                )
             else:
                 pulse_channel_ids.append(target.uuid)
 
@@ -239,7 +241,8 @@ class InstructionBuilder(ABC):
         """
         Flatten the instruction builder by removing nested structures like InstructionBlocks.
         """
-        return self._ir.flatten()
+        self._ir.flatten()
+        return self
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
@@ -462,10 +465,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         sync = Synchronize(
             targets=[
                 pulse_ch.uuid
-                for pulse_ch in target1.all_pulse_channels
-                + target1.resonator.all_pulse_channels
-                + target2.all_pulse_channels
-                + target2.resonator.all_pulse_channels
+                for pulse_ch in target1.all_qubit_and_resonator_pulse_channels
+                + target2.all_qubit_and_resonator_pulse_channels
             ]
         )
 
@@ -496,11 +497,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
             else acquire_channel.acquire.width
         )
 
-        if acquire_channel.acquire.use_weights is False:
+        if acquire_channel.acquire.use_weights:
             filter = Pulse(
                 waveform=SampledWaveform(samples=acquire_channel.acquire.weights),
                 duration=acquire_duration,
-                target=None,
+                target=acquire_channel.uuid,
             )
         else:
             filter = None
@@ -541,7 +542,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
         measure_block = MeasureBlock(qubit_targets=target_ids)
 
         all_pulse_channels = [
-            pc.uuid for qubit in targets for pc in qubit.all_pulse_channels
+            pc.uuid
+            for qubit in targets
+            for pc in qubit.all_qubit_and_resonator_pulse_channels
         ]
 
         if sync_qubits:
@@ -550,7 +553,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         for qubit in targets:
             if not sync_qubits:
-                qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
+                qubit_pulse_channels = [
+                    pc.uuid for pc in qubit.all_qubit_and_resonator_pulse_channels
+                ]
                 measure_block.add(Synchronize(targets=qubit_pulse_channels))
 
             output_var = output_variable or self._generate_output_variable(qubit)
@@ -564,7 +569,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             measure_block.duration = max(measure_block.duration, duration)
 
             if not sync_qubits:
-                qubit_pulse_channels = [pc.uuid for pc in qubit.all_pulse_channels]
+                qubit_pulse_channels = [
+                    pc.uuid for pc in qubit.all_qubit_and_resonator_pulse_channels
+                ]
                 measure_block.add(Synchronize(targets=qubit_pulse_channels))
 
         # Sync pulse channels of all pulse channels after measurement.
@@ -871,7 +878,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 pulse_channel_ids.add(target.acquire_pulse_channel.uuid)
                 pulse_channel_ids.add(target.measure_pulse_channel.uuid)
                 qubit_pulse_channel_ids = [
-                    pulse_channel.uuid for pulse_channel in target.all_pulse_channels
+                    pulse_channel.uuid
+                    for pulse_channel in target.all_qubit_and_resonator_pulse_channels
                 ]
                 pulse_channel_ids.update(qubit_pulse_channel_ids)
             else:

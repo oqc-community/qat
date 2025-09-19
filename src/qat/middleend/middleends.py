@@ -9,7 +9,6 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.ir.conversion import ConvertToPydanticIR
 from qat.middleend.passes.analysis import PydActivePulseChannelAnalysis
 from qat.middleend.passes.purr.analysis import (
     ActivePulseChannelAnalysis,
@@ -230,8 +229,7 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
 
     def __init__(
         self,
-        model: QuantumHardwareModel,
-        pyd_model: PydHardwareModel,
+        model: PydHardwareModel,
         target_data: TargetData = TargetData.default(),
     ):
         """
@@ -239,15 +237,13 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             the QPU.
         :param clock_cycle: The period for a single sequencer clock cycle.
         """
-        pipeline = self.build_pass_pipeline(model, pyd_model, target_data)
+        pipeline = self.build_pass_pipeline(model, target_data)
         self.target_data = target_data
-        self.pyd_model = pyd_model
         super().__init__(model=model, pipeline=pipeline)
 
     @staticmethod
     def build_pass_pipeline(
-        legacy_model: QuantumHardwareModel,
-        pyd_model: PydHardwareModel,
+        model: PydHardwareModel,
         target_data: TargetData = TargetData.default(),
     ) -> PassManager:
         """
@@ -258,12 +254,11 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
         """
         return (
             PassManager()
-            | ConvertToPydanticIR(legacy_model, pyd_model)
-            | PopulateWaveformSampleTime(pyd_model, target_data)
-            | PydHardwareConfigValidity(pyd_model)
-            | PydActivePulseChannelAnalysis(pyd_model)
-            | PydFrequencySetupValidation(pyd_model, target_data)
-            | PydDynamicFrequencyValidation(pyd_model, target_data)
+            | PopulateWaveformSampleTime(model, target_data)
+            | PydHardwareConfigValidity(model)
+            | PydActivePulseChannelAnalysis(model)
+            | PydFrequencySetupValidation(model, target_data)
+            | PydDynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
             | PydRepeatSanitisation(target_data)  # TODO: COMPILER-347
             | PydReturnSanitisation()
@@ -271,19 +266,19 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | PydPostProcessingSanitisation()
             | PydReadoutValidation()
             | PydAcquireSanitisation()
-            | PydMeasurePhaseResetSanitisation(pyd_model)
+            | PydMeasurePhaseResetSanitisation(model)
             | PydInstructionGranularitySanitisation(target_data)
             # Preparing for codegen
-            | PydEvaluateWaveforms(pyd_model, target_data)
+            | PydEvaluateWaveforms(model, target_data)
             | PydLowerSyncsToDelays()
             | PydInactivePulseChannelSanitisation()
-            | PydFreqShiftSanitisation(pyd_model)
+            | PydFreqShiftSanitisation(model)
             | PydInitialPhaseResetSanitisation()
             | PydPhaseOptimisation()
-            | PydEndOfTaskResetSanitisation(pyd_model)
-            | PydResetsToDelays(pyd_model, target_data)
+            | PydEndOfTaskResetSanitisation(model)
+            | PydResetsToDelays(model, target_data)
             | PydSquashDelaysOptimisation()
-            | PydInstructionLengthSanitisation(pyd_model, target_data)
+            | PydInstructionLengthSanitisation(model, target_data)
             | PydBatchedShots(target_data)
             | PydScopeSanitisation()
             | PydRepeatTranslation(target_data)
