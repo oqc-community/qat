@@ -94,8 +94,8 @@ class TestBatchedExecutable:
     ):
         batched = BatchedExecutable(
             executables=[
-                ParameterizedExecutable(executable=executable, params={"param1": 1}),
-                ParameterizedExecutable(executable=executable, params={"param2": 2}),
+                ParameterizedExecutable(executable=executable, parameters={"param1": 1}),
+                ParameterizedExecutable(executable=executable, parameters={"param2": 2}),
             ]
         )
         serialized = batched.serialize()
@@ -104,7 +104,7 @@ class TestBatchedExecutable:
         assert isinstance(deserialized, BatchedExecutable)
         for i in range(2):
             assert isinstance(deserialized.executables[i].executable, type(executable))
-            assert deserialized.executables[i].params == {f"param{i + 1}": i + 1}
+            assert deserialized.executables[i].parameters == {f"param{i + 1}": i + 1}
             assert deserialized.executables[i].executable.super_cool_instruction == 42
 
     def test_batched_executable_raises_value_error_on_mixed_types(self):
@@ -116,11 +116,34 @@ class TestBatchedExecutable:
                 executables=[
                     ParameterizedExecutable(
                         executable=MockExecutableA(super_cool_instruction=42),
-                        params={"param1": 1},
+                        parameters={"param1": 1},
                     ),
                     ParameterizedExecutable(
                         executable=MockExecutableC(super_cool_instruction=42),
-                        params={"param2": 2},
+                        parameters={"param2": 2},
                     ),
                 ]
             )
+
+    def test_serialization_of_parameters(self):
+        parameters = {
+            "param1": [1.0, 2.0, 3.0],
+            "param2": [1 + 1j, 2 + 2j, 3 + 3j],
+        }
+
+        executables = [
+            ParameterizedExecutable(
+                executable=MockExecutableA(super_cool_instruction=42),
+                parameters={"param1": val1, "param2": val2},
+            )
+            for val1 in parameters["param1"]
+            for val2 in parameters["param2"]
+        ]
+
+        batched = BatchedExecutable(shape=(3, 3), executables=executables)
+        serialized = batched.serialize()
+        deserialized = BatchedExecutable.deserialize(serialized)
+        assert isinstance(deserialized, BatchedExecutable)
+        assert deserialized.shape == (3, 3)
+        for i, exe in enumerate(deserialized.executables):
+            assert executables[i] == exe

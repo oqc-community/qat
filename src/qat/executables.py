@@ -135,7 +135,7 @@ class ParameterizedExecutable(BaseModel, Generic[T]):
     """Contains an executable and the metadata surrounding its paramerization when used in
     an iterator.
 
-    :param params: The parameters used to instantiate the executable.
+    :param parameters: The parameters used to instantiate the executable.
     :param executable: The executable instantiated with the given parameters.
     """
 
@@ -145,16 +145,22 @@ class ParameterizedExecutable(BaseModel, Generic[T]):
             executable = BaseExecutable._rehydrate_object(executable)
         super().__init__(executable=executable, **data)
 
-    params: dict[str, complex | float] = {}
+    parameters: dict[str, complex | float] = {}
     executable: T
 
 
 class BatchedExecutable(BaseExecutable):
     """Contains a batch of executables to be run sequentially.
 
+    Currently used as a means to do a nested loop on the same program over many variables
+    (e.g. to support legacy sweeps.) However, this might be eventually superseded to support
+    more arbitrary batching of paramaterized executables.
+
+    :param shape: The shape of the batch of parameters, used when grouping results.
     :param executables: The list of executables to be run in sequence.
     """
 
+    shape: tuple[int, ...] = tuple()
     executables: list[ParameterizedExecutable] = []
 
     @model_validator(mode="after")
