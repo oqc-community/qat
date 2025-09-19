@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import random
 
+import numpy as np
 import pytest
 from pydantic import ValidationError
 
@@ -294,3 +295,20 @@ class TestFrozenQubit:
             qubit.cross_resonance_cancellation_pulse_channels[1] = (
                 CrossResonanceCancellationPulseChannel(auxiliary_qubit=2)
             )
+
+
+class TestPulseChannel:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            1.0,
+            1 + 0j,
+            0.5 + 0.5j,
+            np.float64(1.0),
+            np.complex128(1 + 0j),
+            np.complex128(0.5 + 0.5j),
+        ],
+    )
+    def test_pulse_channel_scale_validator(self, value):
+        """Regression test to test robustness against non-standard float types."""
+        PulseChannel(uuid="test", scale=value, frequency=5e9)

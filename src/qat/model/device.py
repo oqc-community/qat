@@ -156,7 +156,7 @@ class PulseChannel(Component):
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
     imbalance: float = 1.0
     phase_iq_offset: float = 0.0
-    scale: complex = 1.0 + 0.0j
+    scale: float | complex = 1.0 + 0.0j
     fixed_if: bool = False
 
     def __init_subclass__(cls, **kwargs):
