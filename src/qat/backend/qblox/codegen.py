@@ -927,7 +927,7 @@ class QbloxContext2(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxBackend1(BaseBackend, InvokerMixin):
+class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
     def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
         super().__init__(model)
         self.ignore_empty = ignore_empty
@@ -1022,7 +1022,7 @@ class QbloxBackend1(BaseBackend, InvokerMixin):
         return QbloxExecutable(packages=packages, triage_result=triage_result)
 
 
-class QbloxBackend2(BaseBackend, InvokerMixin):
+class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
     def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
         super().__init__(model)
         self.ignore_empty = ignore_empty
@@ -1037,7 +1037,7 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         compiler_config: Optional[CompilerConfig] = None,
-    ) -> QbloxExecutable:
+    ) -> Dict[int, QbloxExecutable]:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
@@ -1072,7 +1072,8 @@ class QbloxBackend2(BaseBackend, InvokerMixin):
             if not (self.ignore_empty and context.is_empty())
         }
 
-        return QbloxExecutable(packages=packages, triage_result=triage_result)
+        # Makes it similar to vanilla QbloxBackend1.
+        return {1: QbloxExecutable(packages=packages, triage_result=triage_result)}
 
 
 class QbloxCFGWalker(DfsTraversal):

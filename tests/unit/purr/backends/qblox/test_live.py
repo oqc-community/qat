@@ -34,6 +34,10 @@ log = get_default_logger()
 @pytest.mark.parametrize("qubit_indices", [[0]])
 @pytest.mark.parametrize("enable_hax", [True])
 class Test1QMeasurements:
+    """
+    Tests execution of a standard 1Q measurements.
+    """
+
     def test_resonator_spect(self, enable_hax, model, qubit_indices):
         runtime = model.create_runtime()
         engine = runtime.engine
@@ -121,6 +125,11 @@ class Test1QMeasurements:
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestBuildingBlocks:
+    """
+    Tests execution of a plethora of IRs and combinations. These are specific programs
+    to trigger certain aspects that have acquired attention over the
+    """
+
     @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
     def test_measure_amp_sweep(self, model, amp):
         engine = model.create_engine()

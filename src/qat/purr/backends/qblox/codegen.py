@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+
 from abc import ABC
 from bisect import insort
 from collections import OrderedDict, defaultdict
@@ -456,6 +457,7 @@ class AbstractContext(ABC):
         return wgt_index
 
     def _do_acquire(self, wgt_name, acq_filter, acq_index, acq_bin, acq_width):
+        legal_acq_width = min(acq_width, Constants.MAX_WAIT_TIME)
         if acq_filter:
             weight = acq_filter.samples
             wgt_i_index = self._register_weight(f"{wgt_name}_weight_I", weight.real)
@@ -471,10 +473,12 @@ class AbstractContext(ABC):
                 self.sequence_builder.move(wgt_q_index, wgt_q_reg)
 
                 self.sequence_builder.acquire_weighed(
-                    acq_index, acq_bin, wgt_i_reg, wgt_q_reg, acq_width
+                    acq_index, acq_bin, wgt_i_reg, wgt_q_reg, legal_acq_width
                 )
         else:
-            self.sequence_builder.acquire(acq_index, acq_bin, acq_width)
+            self.sequence_builder.acquire(acq_index, acq_bin, legal_acq_width)
+
+        self.wait_imm(acq_width - legal_acq_width)
 
     @contextmanager
     def _wrapper_pulse(

@@ -29,6 +29,7 @@ from qat.engines.qblox.instrument import (
     LeafInstrument,
     load_instrument,
 )
+from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
 from qat.middleend.passes.purr.transform import (
     DeviceUpdateSanitisation,
     PhaseOptimisation,
@@ -71,7 +72,15 @@ class TestInstrument:
         self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
         return backend.emit(builder, res_mgr, met_mgr)
 
-    def test_load_instrument(self, testpath):
+    @pytest.mark.parametrize(
+        "cinstr_type, linstr_type",
+        [
+            (None, None),
+            (CompositeInstrument, LeafInstrument),
+            (QbloxCompositeInstrument, QbloxLeafInstrument),
+        ],
+    )
+    def test_load_instrument(self, testpath, cinstr_type, linstr_type):
         filepath = Path(
             testpath,
             "files",
@@ -79,13 +88,22 @@ class TestInstrument:
             "instrument_info.csv",
         )
 
-        composite = load_instrument(filepath)
-        assert composite
-        assert isinstance(composite, CompositeInstrument)
+        composite = load_instrument(filepath, cinstr_type, linstr_type)
+        if cinstr_type in [None, CompositeInstrument]:
+            assert isinstance(composite, CompositeInstrument)
+            assert all(
+                isinstance(comp, LeafInstrument) for comp in composite.components.values()
+            )
+        else:
+            assert isinstance(composite, QbloxCompositeInstrument)
+            assert all(
+                isinstance(comp, QbloxLeafInstrument)
+                for comp in composite.components.values()
+            )
+            assert all(
+                comp.ref_source == "internal" for comp in composite.components.values()
+            )
         assert len(composite.components) == 8
-        assert all(
-            [isinstance(comp, LeafInstrument) for comp in composite.components.values()]
-        )
 
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
     def test_instrument_lifecycle(self, qblox_instrument):

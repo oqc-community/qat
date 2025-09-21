@@ -55,7 +55,7 @@ def plot_executable(executable: QbloxExecutable):
     plt.show()
 
 
-def plot_acquisitions(playback: Dict[PulseChannel, List[Acquisition]]):
+def plot_playback(playback: Dict[PulseChannel, List[Acquisition]]):
     if not playback:
         return
 
@@ -71,13 +71,13 @@ def plot_acquisitions(playback: Dict[PulseChannel, List[Acquisition]]):
             )
             fig.suptitle(f"Playback plots for {acquisition.name} on {target}")
 
-            scope_data = acquisition.acq_data.scope
-            integ_data = acquisition.acq_data.bins.integration
-            thrld_data = acquisition.acq_data.bins.threshold
+            scope_data = acquisition.acquisition.scope
+            integ_data = acquisition.acquisition.bins.integration
+            thrld_data = acquisition.acquisition.bins.threshold
 
             # Scope data
-            axes[0, 0].plot(scope_data.i.data, label="I")
-            axes[0, 0].plot(scope_data.q.data, label="Q")
+            axes[0, 0].plot(scope_data.path0.data, label="I")
+            axes[0, 0].plot(scope_data.path1.data, label="Q")
             axes[0, 0].set_xlabel("Sample (ns)")
             axes[0, 0].set_ylabel("Value")
             axes[0, 0].autoscale()
@@ -85,8 +85,8 @@ def plot_acquisitions(playback: Dict[PulseChannel, List[Acquisition]]):
             axes[0, 0].title.set_text("Scope acquisition")
 
             # Integration data
-            axes[1, 0].plot(integ_data.i, label="I")
-            axes[1, 0].plot(integ_data.q, label="Q")
+            axes[1, 0].plot(integ_data.path0, label="I")
+            axes[1, 0].plot(integ_data.path1, label="Q")
             axes[1, 0].set_xlabel("Iteration")
             axes[1, 0].set_ylabel("Value")
             axes[1, 0].autoscale()

@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import abc
-from typing import Optional
+from typing import Generic, Optional, TypeVar
 
 from compiler_config.config import CompilerConfig
 
@@ -12,8 +12,10 @@ from qat.executables import Executable
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
+EXE = TypeVar("EXE", bound=Executable)
 
-class BaseBackend(abc.ABC):
+
+class BaseBackend(Generic[EXE], abc.ABC):
     """
     Converts an intermediate representation (IR) to code for a given target
     by selecting target-machine operations to implement for each instruction
@@ -33,4 +35,4 @@ class BaseBackend(abc.ABC):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         compiler_config: Optional[CompilerConfig] = None,
-    ) -> Executable: ...
+    ) -> EXE: ...

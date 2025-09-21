@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 from dataclasses import asdict
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -21,7 +21,10 @@ from qat.backend.qblox.config.helpers import (
 )
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import QbloxExecutable
-from qat.engines.qblox.instrument import CompositeInstrument, LeafInstrument
+from qat.engines.qblox.instrument import (
+    CompositeInstrument,
+    LeafInstrument,
+)
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannel
 from qat.purr.utils.logger import get_default_logger
@@ -35,8 +38,10 @@ class QbloxLeafInstrument(LeafInstrument):
         id: str,
         name: str,
         address: str = None,
+        ref_source: str = None,
     ):
         super().__init__(id=id, name=name, address=address)
+        self.ref_source = ref_source or "internal"
 
         self._driver: Cluster = None
         self._modules: Dict[Module, bool] = {}
@@ -142,6 +147,7 @@ class QbloxLeafInstrument(LeafInstrument):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(name=self.name, identifier=self.address)
             self._driver.reset()
+            self._driver.reference_source(self.ref_source)
             self._modules = {m: True for m in self._driver.get_connected_modules().values()}
             self.is_connected = True
 
@@ -192,7 +198,7 @@ class QbloxLeafInstrument(LeafInstrument):
             for target, sequencer in self._allocations.items():
                 sequencer.sync_en(False)
 
-    def collect(self):
+    def collect(self) -> Dict:
         if not any(self._allocations):
             raise ValueError(
                 "No allocations found. Install packages, configure, and playback first"
@@ -248,12 +254,22 @@ class QbloxLeafInstrument(LeafInstrument):
             self._allocations.clear()
 
 
-class QbloxCompositeInstrument(CompositeInstrument):
+class QbloxCompositeInstrument(CompositeInstrument[QbloxLeafInstrument]):
     """
-    For daisy-chained Qblox chassis.
+    Composing Qblox instruments can be achieved by 2 methods:
+    1- Daisy-chaining the REF_out of one cluster's CMM to REF_in of the next cluster's CMM.
+       This is like a linked list pattern where the first cluster is **allowed** to have both "external"
+       or "internal" reference source config, but subsequent clusters **must** have their reference
+       source set as "external".
+    2- Distribute the clock from a common source to all the REF_in of all clusters' CMM modules.
+       This is like a star pattern where an external reference clock is distributed to all the clusters
+       in the fleet
+
+    Historically, both methods have been supported, but recent FW versions ditched the first method and only
+    support the second method. Regardless of the method followed, this abstraction remains oblivious.
     """
 
     pass
 
 
-LiveQbloxInstrument = Union[QbloxLeafInstrument, QbloxCompositeInstrument]
+LiveQbloxInstrument = QbloxLeafInstrument | QbloxCompositeInstrument

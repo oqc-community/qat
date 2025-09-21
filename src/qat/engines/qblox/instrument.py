@@ -3,7 +3,8 @@
 
 import csv
 import os
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Generic, Type, TypeVar
 
 from pydantic import BaseModel, Field, IPvAnyAddress
 
@@ -41,7 +42,7 @@ class InstrumentConcept(ConnectionMixin):
     def playback(self, *args, **kwargs):
         pass
 
-    def collect(self, *args, **kwargs):
+    def collect(self, *args, **kwargs) -> Dict:
         pass
 
 
@@ -68,12 +69,15 @@ class LeafInstrument(InstrumentConcept):
         return self.__repr__()
 
 
-class CompositeInstrument(InstrumentConcept):
+LInstr = TypeVar("LInstr", bound=LeafInstrument)
+
+
+class CompositeInstrument(Generic[LInstr], InstrumentConcept):
     def __init__(self):
-        self._components: Dict[str, InstrumentConcept] = {}
+        self._components: Dict[str, LInstr] = {}
 
     @property
-    def components(self) -> Dict[str, InstrumentConcept]:
+    def components(self) -> Dict[str, LInstr]:
         return self._components
 
     @property
@@ -88,7 +92,7 @@ class CompositeInstrument(InstrumentConcept):
         for comp in self._components.values():
             comp.disconnect()
 
-    def add(self, component: LeafInstrument):
+    def add(self, component: LInstr):
         if next(
             (comp for id, comp in self._components.items() if id == component.id),
             None,
@@ -97,26 +101,64 @@ class CompositeInstrument(InstrumentConcept):
         else:
             self._components[component.id] = component
 
+    def setup(self, *args, **kwargs):
+        for comp in self._components.values():
+            comp.setup(*args, **kwargs)
+
     def playback(self, *args, **kwargs):
         for comp in self._components.values():
             comp.playback(*args, **kwargs)
 
+    def collect(self, *args, **kwargs):
+        component_results = [
+            comp.collect(*args, **kwargs) for comp in self._components.values()
+        ]
 
-def load_instrument(instrument_info_csv: str):
+        results = {}
+        for comp_res in component_results:
+            if comp_res.keys() & results.keys():
+                raise ValueError("Component results have conflicting keys")
+            results.update(comp_res)
+
+        return results
+
+    def __repr__(self):
+        return "\n".join(repr(comp) for comp in self._components.values())
+
+    def __str__(self):
+        return "\n".join(str(comp) for comp in self._components.values())
+
+
+CInstr = TypeVar("CInstr", bound=CompositeInstrument)
+
+
+def load_instrument(
+    instrument_info_csv: str | Path,
+    cinstr_type: Type[CInstr] = None,
+    linstr_type: Type[LInstr] = None,
+) -> CInstr:
     """
-    Builds an InstrumentConcept object representing an arbitrary fleet of leaf instruments defined as CSV.
+    A generic function that builds an InstrumentConcept object representing
+    an arbitrary fleet of leaf instruments defined as CSV.
+
+    :param instrument_info_csv: path to CSV containing instrument information
+    :param cinstr_type: type of Composite Instrument to build
+    :param linstr_type: type of Leaf Instrument to build
     """
+
+    cinstr_type = cinstr_type or CompositeInstrument
+    linstr_type = linstr_type or LeafInstrument
 
     if not os.path.exists(instrument_info_csv):
         raise ValueError(f"File '{instrument_info_csv}' not found!")
 
-    composite = CompositeInstrument()
+    composite = cinstr_type()
     with open(instrument_info_csv) as f:
         reader = csv.DictReader(f)
         for row in reader:
             instr_model = InstrumentModel.model_validate(row)
             composite.add(
-                LeafInstrument(
+                linstr_type(
                     id=instr_model.id,
                     name=instr_model.name,
                     address=str(instr_model.address),

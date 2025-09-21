@@ -42,6 +42,7 @@ from qat.purr.compiler.instructions import (
     Sweep,
     Variable,
 )
+from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
@@ -81,6 +82,16 @@ class TestQbloxBackend1:
         met_mgr = MetricsManager()
         self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
         return QbloxBackend1(qblox_model, ignore_empty).emit(builder, res_mgr, met_mgr)
+
+    def test_very_long_pulse(self, qblox_model):
+        q0 = qblox_model.get_qubit(0)
+        drive_channel = q0.get_drive_channel()
+        builder = get_builder(qblox_model).pulse(
+            drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
+        )
+
+        with pytest.raises(ValueError):
+            self._do_emit(builder, qblox_model)
 
     def test_play_guassian(self, qblox_model):
         width = 100e-9
@@ -470,62 +481,66 @@ class TestQbloxBackend2:
         builder = empty(qblox_model)
         assert len(builder.instructions) == 3
 
-        executable = self._do_emit(builder, qblox_model, ignore_empty=False)
-        assert len(executable.packages) == 2
+        ordered_executables = self._do_emit(builder, qblox_model, ignore_empty=False)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == 2
 
-        for pkg in executable.packages.values():
-            assert pkg.sequencer_config == SequencerConfig()
-            assert pkg.timeline.size == 4
-            assert not pkg.sequence.waveforms
-            assert not pkg.sequence.acquisitions
-            assert not pkg.sequence.weights
+            for pkg in executable.packages.values():
+                assert pkg.sequencer_config == SequencerConfig()
+                assert pkg.timeline.size == 4
+                assert not pkg.sequence.waveforms
+                assert not pkg.sequence.acquisitions
+                assert not pkg.sequence.weights
 
-            assert "set_mrk 3\nset_latch_en 1,4\nupd_param 4" in pkg.sequence.program
-            assert "stop" in pkg.sequence.program
+                assert "set_mrk 3\nset_latch_en 1,4\nupd_param 4" in pkg.sequence.program
+                assert "stop" in pkg.sequence.program
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_resonator_spect(self, qblox_model, num_points, qubit_indices):
         builder = resonator_spect(qblox_model, qubit_indices, num_points)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
-        executable = self._do_emit(builder, qblox_model)
-        assert len(executable.packages) == len(qubit_indices)
+        ordered_executables = self._do_emit(builder, qblox_model)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == len(qubit_indices)
 
-        for index in qubit_indices:
-            qubit = qblox_model.get_qubit(index)
-            acquire_channel = qubit.get_acquire_channel()
-            acquire_pkg = next(
-                (
-                    pkg
-                    for channel_id, pkg in executable.packages.items()
-                    if channel_id == acquire_channel.full_id()
+            for index in qubit_indices:
+                qubit = qblox_model.get_qubit(index)
+                acquire_channel = qubit.get_acquire_channel()
+                acquire_pkg = next(
+                    (
+                        pkg
+                        for channel_id, pkg in executable.packages.items()
+                        if channel_id == acquire_channel.full_id()
+                    )
                 )
-            )
-            measure_pulse = next(
-                (
-                    inst
-                    for inst in builder.instructions
-                    if isinstance(inst, MeasurePulse)
-                    and acquire_channel in inst.quantum_targets
+                measure_pulse = next(
+                    (
+                        inst
+                        for inst in builder.instructions
+                        if isinstance(inst, MeasurePulse)
+                        and acquire_channel in inst.quantum_targets
+                    )
                 )
-            )
 
-            assert acquire_pkg.sequence.acquisitions
-            for sweep in sweeps:
-                assert f"sweep_{hash(sweep)}_0" in acquire_pkg.sequence.program
+                assert acquire_pkg.sequence.acquisitions
+                for sweep in sweeps:
+                    assert f"sweep_{hash(sweep)}_0" in acquire_pkg.sequence.program
 
-            assert "wait_sync" in acquire_pkg.sequence.program
+                assert "wait_sync" in acquire_pkg.sequence.program
 
-            if measure_pulse.shape == PulseShapeType.SQUARE:
-                assert not acquire_pkg.sequence.waveforms
-                assert "play" not in acquire_pkg.sequence.program
-                assert "set_awg_offs" in acquire_pkg.sequence.program
-                assert "upd_param" in acquire_pkg.sequence.program
-            else:
-                assert acquire_pkg.sequence.waveforms
-                assert "play" in acquire_pkg.sequence.program
-                assert "set_awg_offs" not in acquire_pkg.sequence.program
-                assert "upd_param" not in acquire_pkg.sequence.program
+                if measure_pulse.shape == PulseShapeType.SQUARE:
+                    assert not acquire_pkg.sequence.waveforms
+                    assert "play" not in acquire_pkg.sequence.program
+                    assert "set_awg_offs" in acquire_pkg.sequence.program
+                    assert "upd_param" in acquire_pkg.sequence.program
+                else:
+                    assert acquire_pkg.sequence.waveforms
+                    assert "play" in acquire_pkg.sequence.program
+                    assert "set_awg_offs" not in acquire_pkg.sequence.program
+                    assert "upd_param" not in acquire_pkg.sequence.program
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
@@ -545,76 +560,79 @@ class TestQbloxBackend2:
 
         injectors = DeviceInjectors(static_dus)
         try:
-            executable = self._do_emit(builder, qblox_model)
-            assert len(executable.packages) == 2 * len(qubit_indices)
+            ordered_executables = self._do_emit(builder, qblox_model)
+            assert len(ordered_executables) == 1
+            for executable in ordered_executables.values():
+                assert len(executable.packages) == 2 * len(qubit_indices)
 
-            for index in qubit_indices:
-                qubit = qblox_model.get_qubit(index)
-                drive_channel = qubit.get_drive_channel()
-                acquire_channel = qubit.get_acquire_channel()
+                for index in qubit_indices:
+                    qubit = qblox_model.get_qubit(index)
+                    drive_channel = qubit.get_drive_channel()
+                    acquire_channel = qubit.get_acquire_channel()
 
-                # Drive
-                drive_pkg = next(
-                    (
-                        pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == drive_channel.full_id()
+                    # Drive
+                    drive_pkg = next(
+                        (
+                            pkg
+                            for channel_id, pkg in executable.packages.items()
+                            if channel_id == drive_channel.full_id()
+                        )
                     )
-                )
-                drive_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
+                    drive_pulse = next(
+                        (
+                            inst
+                            for inst in builder.instructions
+                            if isinstance(inst, Pulse)
+                            and drive_channel in inst.quantum_targets
+                        )
                     )
-                )
 
-                assert not drive_pkg.sequence.acquisitions
+                    assert not drive_pkg.sequence.acquisitions
 
-                assert "wait_sync" in drive_pkg.sequence.program
+                    assert "wait_sync" in drive_pkg.sequence.program
 
-                if drive_pulse.shape == PulseShapeType.SQUARE:
-                    assert not drive_pkg.sequence.waveforms
-                    assert "play" not in drive_pkg.sequence.program
-                    assert "set_awg_offs" in drive_pkg.sequence.program
-                    assert "upd_param" in drive_pkg.sequence.program
-                else:
-                    assert drive_pkg.sequence.waveforms
-                    assert "play" in drive_pkg.sequence.program
-                    assert "set_awg_offs" not in drive_pkg.sequence.program
-                    assert "upd_param" not in drive_pkg.sequence.program
+                    if drive_pulse.shape == PulseShapeType.SQUARE:
+                        assert not drive_pkg.sequence.waveforms
+                        assert "play" not in drive_pkg.sequence.program
+                        assert "set_awg_offs" in drive_pkg.sequence.program
+                        assert "upd_param" in drive_pkg.sequence.program
+                    else:
+                        assert drive_pkg.sequence.waveforms
+                        assert "play" in drive_pkg.sequence.program
+                        assert "set_awg_offs" not in drive_pkg.sequence.program
+                        assert "upd_param" not in drive_pkg.sequence.program
 
-                # Readout
-                acquire_pkg = next(
-                    (
-                        pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == acquire_channel.full_id()
+                    # Readout
+                    acquire_pkg = next(
+                        (
+                            pkg
+                            for channel_id, pkg in executable.packages.items()
+                            if channel_id == acquire_channel.full_id()
+                        )
                     )
-                )
-                measure_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, MeasurePulse)
-                        and acquire_channel in inst.quantum_targets
+                    measure_pulse = next(
+                        (
+                            inst
+                            for inst in builder.instructions
+                            if isinstance(inst, MeasurePulse)
+                            and acquire_channel in inst.quantum_targets
+                        )
                     )
-                )
 
-                assert acquire_pkg.sequence.acquisitions
+                    assert acquire_pkg.sequence.acquisitions
 
-                assert "wait_sync" in acquire_pkg.sequence.program
+                    assert "wait_sync" in acquire_pkg.sequence.program
 
-                if measure_pulse.shape == PulseShapeType.SQUARE:
-                    assert not acquire_pkg.sequence.waveforms
-                    assert "play" not in acquire_pkg.sequence.program
-                    assert "set_awg_offs" in acquire_pkg.sequence.program
-                    assert "upd_param" in acquire_pkg.sequence.program
-                else:
-                    assert acquire_pkg.sequence.waveforms
-                    assert "play" in acquire_pkg.sequence.program
-                    assert "set_awg_offs" not in acquire_pkg.sequence.program
-                    assert "upd_param" not in acquire_pkg.sequence.program
+                    if measure_pulse.shape == PulseShapeType.SQUARE:
+                        assert not acquire_pkg.sequence.waveforms
+                        assert "play" not in acquire_pkg.sequence.program
+                        assert "set_awg_offs" in acquire_pkg.sequence.program
+                        assert "upd_param" in acquire_pkg.sequence.program
+                    else:
+                        assert acquire_pkg.sequence.waveforms
+                        assert "play" in acquire_pkg.sequence.program
+                        assert "set_awg_offs" not in acquire_pkg.sequence.program
+                        assert "upd_param" not in acquire_pkg.sequence.program
         finally:
             injectors.revert()
 
@@ -622,26 +640,34 @@ class TestQbloxBackend2:
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_delay_iteration(self, qblox_model, num_points, qubit_indices):
         builder = delay_iteration(qblox_model, qubit_indices, num_points)
-        executable = self._do_emit(builder, qblox_model)
-        assert len(executable.packages) == 2 * len(qubit_indices)
+        ordered_executables = self._do_emit(builder, qblox_model)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_width_iteration(self, qblox_model, num_points, qubit_indices):
         builder = pulse_width_iteration(qblox_model, qubit_indices, num_points)
-        executable = self._do_emit(builder, qblox_model)
-        assert len(executable.packages) == 2 * len(qubit_indices)
+        ordered_executables = self._do_emit(builder, qblox_model)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_amplitude_iteration(self, qblox_model, num_points, qubit_indices):
         builder = pulse_amplitude_iteration(qblox_model, qubit_indices, num_points)
-        executable = self._do_emit(builder, qblox_model)
-        assert len(executable.packages) == 2 * len(qubit_indices)
+        ordered_executables = self._do_emit(builder, qblox_model)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_time_and_phase_iteration(self, qblox_model, num_points, qubit_indices):
         builder = time_and_phase_iteration(qblox_model, qubit_indices, num_points)
-        executable = self._do_emit(builder, qblox_model)
-        assert len(executable.packages) == 2 * len(qubit_indices)
+        ordered_executables = self._do_emit(builder, qblox_model)
+        assert len(ordered_executables) == 1
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == 2 * len(qubit_indices)
