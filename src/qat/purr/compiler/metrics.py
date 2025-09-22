@@ -98,6 +98,8 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
             if self.get_metric(metric) is None:
                 self.record_metric(metric, other.get_metric(metric))
 
+        return self
+
 
 class MetricsMixin:
     def __init__(self):

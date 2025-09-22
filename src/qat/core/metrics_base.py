@@ -103,3 +103,5 @@ class MetricsManager(BaseModel):
         for metric in MetricsType:
             if not metric.is_composite() and self.get_metric(metric) is None:
                 self.record_metric(metric, other.get_metric(metric))
+
+        return self

@@ -47,7 +47,10 @@ class TestMetricsManager:
         for metric, value in records.items():
             met_mgr_2.record_metric(metric, value)
 
-        met_mgr_2.merge(met_mgr_1)
+        met_mgr_ret = met_mgr_2.merge(met_mgr_1)
+
+        # Assert mgr.merge(other) returns mgr
+        assert met_mgr_2 is met_mgr_ret
 
         for metric in [MetricsType.OptimizedCircuit, MetricsType.OptimizedInstructionCount]:
             if metric in records:
