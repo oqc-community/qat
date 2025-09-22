@@ -600,4 +600,4 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.__dict__.update(state)
 
 
-LegacyHardwareModel = HardwareModel
+LegacyHardwareModel = QuantumHardwareModel

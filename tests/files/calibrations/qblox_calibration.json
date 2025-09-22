@@ -1,0 +1,2075 @@
+{
+    "py/object": "qat.purr.backends.qblox.live.QbloxLiveHardwareModel",
+    "py/state": {
+        "default_acquire_mode": {
+            "py/reduce": [
+                {
+                    "py/type": "qat.purr.compiler.instructions.AcquireMode"
+                },
+                {
+                    "py/tuple": [
+                        "integrator"
+                    ]
+                }
+            ],
+            "py/obj_ref_id": 131388727872016
+        },
+        "default_repeat_count": 1000,
+        "default_repetition_period": 0.0001,
+        "quantum_devices": {
+            "R0": {
+                "py/object": "qat.purr.backends.qblox.device.QbloxResonator",
+                "py/state": {
+                    "is_calibrated": false,
+                    "id": "R0",
+                    "measure_device": null,
+                    "pulse_channels": {
+                        "macq": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "R0.macq",
+                                        "physical_channel": {
+                                            "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalChannel",
+                                            "py/state": {
+                                                "is_calibrated": false,
+                                                "id": "A-CH-QRM-RF-14",
+                                                "sample_time": 1e-09,
+                                                "baseband": {
+                                                    "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalBaseband",
+                                                    "py/state": {
+                                                        "instrument": {
+                                                            "py/object": "qat.purr.backends.qblox.dummy.DummyQbloxControlHardware",
+                                                            "py/state": {
+                                                                "is_calibrated": false,
+                                                                "id": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                                "address": null,
+                                                                "_driver": null,
+                                                                "is_connected": true,
+                                                                "channels": {
+                                                                    "B-CH-QCM-RF-2": {
+                                                                        "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalChannel",
+                                                                        "py/state": {
+                                                                            "is_calibrated": false,
+                                                                            "id": "B-CH-QCM-RF-2",
+                                                                            "sample_time": 1e-09,
+                                                                            "baseband": {
+                                                                                "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalBaseband",
+                                                                                "py/state": {
+                                                                                    "instrument": {
+                                                                                        "py/id": 131388584270928
+                                                                                    },
+                                                                                    "instrument_id": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                                                    "channel_idx": null,
+                                                                                    "is_calibrated": false,
+                                                                                    "id": "B-LO-0-QCM-RF-2",
+                                                                                    "frequency": 4024000000.0,
+                                                                                    "if_frequency": 250000000.0,
+                                                                                    "slot_idx": 2,
+                                                                                    "config": {
+                                                                                        "py/object": "qat.purr.backends.qblox.config.QbloxConfig",
+                                                                                        "slot_idx": null,
+                                                                                        "module": {
+                                                                                            "py/object": "qat.purr.backends.qblox.config.ModuleConfig",
+                                                                                            "marker_inverts": {},
+                                                                                            "offset": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.OffsetConfig",
+                                                                                                "out0": null,
+                                                                                                "out1": null,
+                                                                                                "out2": null,
+                                                                                                "out3": null,
+                                                                                                "in1": null,
+                                                                                                "in0": null,
+                                                                                                "out0_path0": 0,
+                                                                                                "out0_path1": 0,
+                                                                                                "out1_path0": 0,
+                                                                                                "out1_path1": 0,
+                                                                                                "in0_path0": null,
+                                                                                                "in0_path1": null,
+                                                                                                "py/obj_ref_id": 131388571459984
+                                                                                            },
+                                                                                            "lo": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.LoConfig",
+                                                                                                "out0_en": true,
+                                                                                                "out0_freq": null,
+                                                                                                "out1_en": true,
+                                                                                                "out1_freq": null,
+                                                                                                "out0_in0_en": null,
+                                                                                                "out0_in0_freq": null,
+                                                                                                "py/obj_ref_id": 131388565717968
+                                                                                            },
+                                                                                            "attenuation": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.AttConfig",
+                                                                                                "out0": 0,
+                                                                                                "out1": 0,
+                                                                                                "in0": null,
+                                                                                                "py/obj_ref_id": 131388565721488
+                                                                                            },
+                                                                                            "gain": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.GainConfig",
+                                                                                                "in0": null,
+                                                                                                "in1": null,
+                                                                                                "py/obj_ref_id": 131388565717712
+                                                                                            },
+                                                                                            "scope_acq": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.ScopeAcqConfig",
+                                                                                                "sequencer_select": null,
+                                                                                                "trigger_mode_path0": null,
+                                                                                                "trigger_mode_path1": null,
+                                                                                                "trigger_level_path0": null,
+                                                                                                "trigger_level_path1": null,
+                                                                                                "avg_mode_en_path0": null,
+                                                                                                "avg_mode_en_path1": null,
+                                                                                                "py/obj_ref_id": 131388574044176
+                                                                                            },
+                                                                                            "py/obj_ref_id": 131388610054480
+                                                                                        },
+                                                                                        "sequencers": {
+                                                                                            "0": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388590191376
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565729808
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565722000
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388568423056
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388567271376
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388574670928
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388568872592
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565720528
+                                                                                            },
+                                                                                            "1": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out1"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388570970000
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565762960
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565754128
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565751568
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565750992
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565753744
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565763024
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565719824
+                                                                                            },
+                                                                                            "2": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565759248
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565807632
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565809040
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565802000
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565813392
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565811152
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565810192
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565764432
+                                                                                            },
+                                                                                            "3": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out1"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565811600
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565855888
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565852944
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565849808
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565856592
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565857360
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565856144
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565801872
+                                                                                            },
+                                                                                            "4": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565855952
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565849168
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565848592
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565853968
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565888464
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565883024
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565882960
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565849744
+                                                                                            },
+                                                                                            "5": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out1"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565888144
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565882640
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565887952
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565887888
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565887824
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565887760
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565887696
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565888080
+                                                                                            }
+                                                                                        },
+                                                                                        "py/obj_ref_id": 131388565887632
+                                                                                    }
+                                                                                },
+                                                                                "py/obj_ref_id": 131388565750544
+                                                                            },
+                                                                            "block_size": 1,
+                                                                            "phase_offset": 0.0,
+                                                                            "imbalance": 1.0,
+                                                                            "acquire_allowed": false,
+                                                                            "pulse_channel_min_frequency": 0.0,
+                                                                            "pulse_channel_max_frequency": Infinity
+                                                                        },
+                                                                        "py/obj_ref_id": 131388565889168
+                                                                    },
+                                                                    "B-CH-QRM-RF-14": {
+                                                                        "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalChannel",
+                                                                        "py/state": {
+                                                                            "is_calibrated": false,
+                                                                            "id": "B-CH-QRM-RF-14",
+                                                                            "sample_time": 1e-09,
+                                                                            "baseband": {
+                                                                                "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalBaseband",
+                                                                                "py/state": {
+                                                                                    "instrument": {
+                                                                                        "py/id": 131388584270928
+                                                                                    },
+                                                                                    "instrument_id": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                                                    "channel_idx": null,
+                                                                                    "is_calibrated": false,
+                                                                                    "id": "B-LO-0-QRM-RF-14",
+                                                                                    "frequency": 9777200000.0,
+                                                                                    "if_frequency": 250000000.0,
+                                                                                    "slot_idx": 14,
+                                                                                    "config": {
+                                                                                        "py/object": "qat.purr.backends.qblox.config.QbloxConfig",
+                                                                                        "slot_idx": null,
+                                                                                        "module": {
+                                                                                            "py/object": "qat.purr.backends.qblox.config.ModuleConfig",
+                                                                                            "marker_inverts": {},
+                                                                                            "offset": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.OffsetConfig",
+                                                                                                "out0": null,
+                                                                                                "out1": null,
+                                                                                                "out2": null,
+                                                                                                "out3": null,
+                                                                                                "in1": null,
+                                                                                                "in0": null,
+                                                                                                "out0_path0": null,
+                                                                                                "out0_path1": null,
+                                                                                                "out1_path0": null,
+                                                                                                "out1_path1": null,
+                                                                                                "in0_path0": null,
+                                                                                                "in0_path1": null,
+                                                                                                "py/obj_ref_id": 131388565887440
+                                                                                            },
+                                                                                            "lo": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.LoConfig",
+                                                                                                "out0_en": null,
+                                                                                                "out0_freq": null,
+                                                                                                "out1_en": null,
+                                                                                                "out1_freq": null,
+                                                                                                "out0_in0_en": true,
+                                                                                                "out0_in0_freq": null,
+                                                                                                "py/obj_ref_id": 131388566802256
+                                                                                            },
+                                                                                            "attenuation": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.AttConfig",
+                                                                                                "out0": null,
+                                                                                                "out1": null,
+                                                                                                "in0": null,
+                                                                                                "py/obj_ref_id": 131388565887376
+                                                                                            },
+                                                                                            "gain": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.GainConfig",
+                                                                                                "in0": null,
+                                                                                                "in1": null,
+                                                                                                "py/obj_ref_id": 131388565887312
+                                                                                            },
+                                                                                            "scope_acq": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.ScopeAcqConfig",
+                                                                                                "sequencer_select": null,
+                                                                                                "trigger_mode_path0": null,
+                                                                                                "trigger_mode_path1": null,
+                                                                                                "trigger_level_path0": null,
+                                                                                                "trigger_level_path1": null,
+                                                                                                "avg_mode_en_path0": null,
+                                                                                                "avg_mode_en_path1": null,
+                                                                                                "py/obj_ref_id": 131388565887248
+                                                                                            },
+                                                                                            "py/obj_ref_id": 131388565887568
+                                                                                        },
+                                                                                        "sequencers": {
+                                                                                            "0": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565887184
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565886928
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565886864
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565886800
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565886736
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565886672
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565886608
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565887120
+                                                                                            },
+                                                                                            "1": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565886544
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565886288
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565886224
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565886160
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565886096
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565886032
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565885712
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565886480
+                                                                                            },
+                                                                                            "2": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565885008
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565884432
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565884368
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565884304
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565884240
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565884176
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565884112
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565884624
+                                                                                            },
+                                                                                            "3": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565884048
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565883792
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565883728
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565883664
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565883600
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565883536
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565883472
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565883984
+                                                                                            },
+                                                                                            "4": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565883408
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565883152
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565883088
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565882896
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565882768
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565882704
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565882512
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565883344
+                                                                                            },
+                                                                                            "5": {
+                                                                                                "py/object": "qat.purr.backends.qblox.config.SequencerConfig",
+                                                                                                "sync_en": null,
+                                                                                                "marker_ovr_en": null,
+                                                                                                "marker_ovr_value": null,
+                                                                                                "trigger_count_thresholds": {},
+                                                                                                "trigger_threshold_inverts": {},
+                                                                                                "connection": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ConnectionConfig",
+                                                                                                    "bulk_value": [
+                                                                                                        "out0",
+                                                                                                        "in0"
+                                                                                                    ],
+                                                                                                    "out0": null,
+                                                                                                    "out1": null,
+                                                                                                    "out2": null,
+                                                                                                    "out3": null,
+                                                                                                    "acq": null,
+                                                                                                    "acq_I": null,
+                                                                                                    "acq_Q": null,
+                                                                                                    "py/obj_ref_id": 131388565882192
+                                                                                                },
+                                                                                                "nco": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.NcoConfig",
+                                                                                                    "freq": null,
+                                                                                                    "phase_offs": null,
+                                                                                                    "prop_delay_comp": null,
+                                                                                                    "prop_delay_comp_en": null,
+                                                                                                    "py/obj_ref_id": 131388565881744
+                                                                                                },
+                                                                                                "awg": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.AwgConfig",
+                                                                                                    "cont_mode_en_path0": null,
+                                                                                                    "cont_mode_en_path1": null,
+                                                                                                    "cont_mode_waveform_idx_path0": null,
+                                                                                                    "cont_mode_waveform_idx_path1": null,
+                                                                                                    "upsample_rate_path0": null,
+                                                                                                    "upsample_rate_path1": null,
+                                                                                                    "gain_path0": null,
+                                                                                                    "gain_path1": null,
+                                                                                                    "offset_path0": null,
+                                                                                                    "offset_path1": null,
+                                                                                                    "mod_en": null,
+                                                                                                    "py/obj_ref_id": 131388565888208
+                                                                                                },
+                                                                                                "mixer": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.MixerConfig",
+                                                                                                    "phase_offset": null,
+                                                                                                    "gain_ratio": null,
+                                                                                                    "py/obj_ref_id": 131388565888272
+                                                                                                },
+                                                                                                "demod_en_acq": null,
+                                                                                                "square_weight_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.SquareWeightAcq",
+                                                                                                    "integration_length": null,
+                                                                                                    "py/obj_ref_id": 131388565888336
+                                                                                                },
+                                                                                                "thresholded_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.ThresholdedAcqConfig",
+                                                                                                    "rotation": null,
+                                                                                                    "threshold": null,
+                                                                                                    "marker_en": null,
+                                                                                                    "marker_address": null,
+                                                                                                    "marker_invert": null,
+                                                                                                    "trigger_en": null,
+                                                                                                    "trigger_address": null,
+                                                                                                    "trigger_invert": null,
+                                                                                                    "py/obj_ref_id": 131388565888400
+                                                                                                },
+                                                                                                "ttl_acq": {
+                                                                                                    "py/object": "qat.purr.backends.qblox.config.TtlAcqConfig",
+                                                                                                    "auto_bin_incr_en": null,
+                                                                                                    "threshold": null,
+                                                                                                    "input_select": null,
+                                                                                                    "py/obj_ref_id": 131388565888528
+                                                                                                },
+                                                                                                "py/obj_ref_id": 131388565881232
+                                                                                            }
+                                                                                        },
+                                                                                        "py/obj_ref_id": 131388565888592
+                                                                                    }
+                                                                                },
+                                                                                "py/obj_ref_id": 131388565889360
+                                                                            },
+                                                                            "block_size": 1,
+                                                                            "phase_offset": 0.0,
+                                                                            "imbalance": 1.0,
+                                                                            "acquire_allowed": true,
+                                                                            "pulse_channel_min_frequency": 0.0,
+                                                                            "pulse_channel_max_frequency": Infinity
+                                                                        },
+                                                                        "py/obj_ref_id": 131388565889488
+                                                                    }
+                                                                },
+                                                                "name": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                                "dummy_cfg": {
+                                                                    "1": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QCM"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975379728
+                                                                    },
+                                                                    "2": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QCM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975445776
+                                                                    },
+                                                                    "4": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QCM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975445776
+                                                                    },
+                                                                    "12": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QCM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975445776
+                                                                    },
+                                                                    "13": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QRM"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975447568
+                                                                    },
+                                                                    "14": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QRM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975447632
+                                                                    },
+                                                                    "16": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QRM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975447632
+                                                                    },
+                                                                    "18": {
+                                                                        "py/reduce": [
+                                                                            {
+                                                                                "py/type": "qblox_instruments.types.ClusterType"
+                                                                            },
+                                                                            {
+                                                                                "py/tuple": [
+                                                                                    "Cluster QRM-RF"
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "py/obj_ref_id": 131389975447632
+                                                                    }
+                                                                },
+                                                                "dump_sequence": false,
+                                                                "plot_packages": false,
+                                                                "plot_acquisitions": false,
+                                                                "_modules": {},
+                                                                "_allocations": {}
+                                                            },
+                                                            "py/obj_ref_id": 131388584270928
+                                                        },
+                                                        "instrument_id": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                        "channel_idx": null,
+                                                        "is_calibrated": false,
+                                                        "id": "A-LO-0-QRM-RF-14",
+                                                        "frequency": 9777200000.0,
+                                                        "if_frequency": 250000000.0,
+                                                        "slot_idx": 14,
+                                                        "config": {
+                                                            "py/id": 131388565888592
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131388565727952
+                                                },
+                                                "block_size": 1,
+                                                "phase_offset": 0.0,
+                                                "imbalance": 1.0,
+                                                "acquire_allowed": true,
+                                                "pulse_channel_min_frequency": 0.0,
+                                                "pulse_channel_max_frequency": Infinity
+                                            },
+                                            "py/obj_ref_id": 131388565853328
+                                        },
+                                        "frequency": 10203300000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    1.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767376
+                                        },
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388565888848
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                8
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388778683216
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388584229776
+                        }
+                    },
+                    "default_pulse_channel_type": {
+                        "py/reduce": [
+                            {
+                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                            },
+                            {
+                                "py/tuple": [
+                                    8
+                                ]
+                            }
+                        ],
+                        "py/obj_ref_id": 131388778683216
+                    },
+                    "physical_channel": {
+                        "py/id": 131388565853328
+                    }
+                },
+                "py/obj_ref_id": 131388565703760
+            },
+            "Q0": {
+                "py/object": "qat.purr.compiler.devices.Qubit",
+                "py/state": {
+                    "is_calibrated": false,
+                    "id": "Q0",
+                    "measure_device": {
+                        "py/id": 131388565703760
+                    },
+                    "pulse_channels": {
+                        "drive": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.drive",
+                                        "physical_channel": {
+                                            "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalChannel",
+                                            "py/state": {
+                                                "is_calibrated": false,
+                                                "id": "A-CH-QCM-RF-2",
+                                                "sample_time": 1e-09,
+                                                "baseband": {
+                                                    "py/object": "qat.purr.backends.qblox.device.QbloxPhysicalBaseband",
+                                                    "py/state": {
+                                                        "instrument": {
+                                                            "py/id": 131388584270928
+                                                        },
+                                                        "instrument_id": "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d",
+                                                        "channel_idx": null,
+                                                        "is_calibrated": false,
+                                                        "id": "A-LO-0-QCM-RF-2",
+                                                        "frequency": 4024000000.0,
+                                                        "if_frequency": 250000000.0,
+                                                        "slot_idx": 2,
+                                                        "config": {
+                                                            "py/id": 131388565887632
+                                                        }
+                                                    },
+                                                    "py/obj_ref_id": 131388565888656
+                                                },
+                                                "block_size": 1,
+                                                "phase_offset": 0.0,
+                                                "imbalance": 1.0,
+                                                "acquire_allowed": false,
+                                                "pulse_channel_min_frequency": 0.0,
+                                                "pulse_channel_max_frequency": Infinity
+                                            },
+                                            "py/obj_ref_id": 131388567546704
+                                        },
+                                        "frequency": 3872000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": 1,
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388584228624
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                1
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388727754448
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388568200592
+                        },
+                        "second_state": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q0.second_state",
+                                        "physical_channel": {
+                                            "py/id": 131388567546704
+                                        },
+                                        "frequency": 4085000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": 1,
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388565888976
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                3
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388727754704
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388565889232
+                        }
+                    },
+                    "default_pulse_channel_type": {
+                        "py/reduce": [
+                            {
+                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                            },
+                            {
+                                "py/tuple": [
+                                    1
+                                ]
+                            }
+                        ],
+                        "py/obj_ref_id": 131388727754448
+                    },
+                    "physical_channel": {
+                        "py/id": 131388567546704
+                    },
+                    "index": 0,
+                    "coupled_qubits": [],
+                    "mean_z_map_args": [
+                        1.0,
+                        0.0
+                    ],
+                    "discriminator": [
+                        0.0
+                    ],
+                    "pulse_hw_zx_pi_4": {},
+                    "pulse_hw_x_pi_2": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "gaussian"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131388775562384
+                        },
+                        "width": 1e-07,
+                        "rise": 0.3333333333333333,
+                        "amp": 4231421.876608172,
+                        "drag": 0.0,
+                        "phase": 0.0
+                    },
+                    "pulse_measure": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "square"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131388727873168
+                        },
+                        "width": 1e-06,
+                        "amp": 0.5,
+                        "amp_setup": 0.0,
+                        "rise": 0.0
+                    },
+                    "measure_acquire": {
+                        "delay": 1.51e-07,
+                        "sync": true,
+                        "width": 1e-06,
+                        "weights": null,
+                        "use_weights": false
+                    }
+                },
+                "py/obj_ref_id": 131388565712464
+            },
+            "R1": {
+                "py/object": "qat.purr.backends.qblox.device.QbloxResonator",
+                "py/state": {
+                    "is_calibrated": false,
+                    "id": "R1",
+                    "measure_device": null,
+                    "pulse_channels": {
+                        "macq": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "R1.macq",
+                                        "physical_channel": {
+                                            "py/id": 131388565889488
+                                        },
+                                        "frequency": 10203300000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    1.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767376
+                                        },
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388565889872
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                8
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388778683216
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388565890000
+                        }
+                    },
+                    "default_pulse_channel_type": {
+                        "py/reduce": [
+                            {
+                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                            },
+                            {
+                                "py/tuple": [
+                                    8
+                                ]
+                            }
+                        ],
+                        "py/obj_ref_id": 131388778683216
+                    },
+                    "physical_channel": {
+                        "py/id": 131388565889488
+                    }
+                },
+                "py/obj_ref_id": 131388565889616
+            },
+            "Q1": {
+                "py/object": "qat.purr.compiler.devices.Qubit",
+                "py/state": {
+                    "is_calibrated": false,
+                    "id": "Q1",
+                    "measure_device": {
+                        "py/id": 131388565889616
+                    },
+                    "pulse_channels": {
+                        "drive": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q1.drive",
+                                        "physical_channel": {
+                                            "py/id": 131388565889168
+                                        },
+                                        "frequency": 3872000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": 1,
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388565890128
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                1
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388727754448
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388565890384
+                        },
+                        "second_state": {
+                            "py/object": "qat.purr.compiler.devices.PulseChannelView",
+                            "py/state": {
+                                "pulse_channel": {
+                                    "py/object": "qat.purr.compiler.devices.PulseChannel",
+                                    "py/state": {
+                                        "is_calibrated": false,
+                                        "id": "Q1.second_state",
+                                        "physical_channel": {
+                                            "py/id": 131388565889168
+                                        },
+                                        "frequency": 4085000000.0,
+                                        "bias": {
+                                            "py/object": "builtins.complex",
+                                            "py/newargs": {
+                                                "py/tuple": [
+                                                    0.0,
+                                                    0.0
+                                                ]
+                                            },
+                                            "py/obj_ref_id": 131388775767920
+                                        },
+                                        "scale": 1,
+                                        "imbalance": 1.0,
+                                        "phase_offset": 0.0,
+                                        "fixed_if": false
+                                    },
+                                    "py/obj_ref_id": 131388565890512
+                                },
+                                "channel_type": {
+                                    "py/reduce": [
+                                        {
+                                            "py/type": "qat.purr.compiler.devices.ChannelType"
+                                        },
+                                        {
+                                            "py/tuple": [
+                                                3
+                                            ]
+                                        }
+                                    ],
+                                    "py/obj_ref_id": 131388727754704
+                                },
+                                "auxiliary_devices": [],
+                                "_pulse_channel_attributes": {
+                                    "py/set": [
+                                        "_is_serializable",
+                                        "baseband_if_frequency",
+                                        "fixed_if",
+                                        "baseband_frequency",
+                                        "scale",
+                                        "load_calibration_from_file",
+                                        "physical_channel_id",
+                                        "sample_time",
+                                        "save_calibration_to_file",
+                                        "bias",
+                                        "full_id",
+                                        "is_calibrated",
+                                        "get_calibration",
+                                        "block_time",
+                                        "partial_id",
+                                        "imbalance",
+                                        "load_calibration",
+                                        "physical_channel",
+                                        "min_frequency",
+                                        "frequency",
+                                        "max_frequency",
+                                        "id",
+                                        "acquire_allowed",
+                                        "block_size",
+                                        "phase_offset"
+                                    ]
+                                }
+                            },
+                            "py/obj_ref_id": 131388565890640
+                        }
+                    },
+                    "default_pulse_channel_type": {
+                        "py/reduce": [
+                            {
+                                "py/type": "qat.purr.compiler.devices.ChannelType"
+                            },
+                            {
+                                "py/tuple": [
+                                    1
+                                ]
+                            }
+                        ],
+                        "py/obj_ref_id": 131388727754448
+                    },
+                    "physical_channel": {
+                        "py/id": 131388565889168
+                    },
+                    "index": 1,
+                    "coupled_qubits": [],
+                    "mean_z_map_args": [
+                        1.0,
+                        0.0
+                    ],
+                    "discriminator": [
+                        0.0
+                    ],
+                    "pulse_hw_zx_pi_4": {},
+                    "pulse_hw_x_pi_2": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "gaussian"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131388775562384
+                        },
+                        "width": 1e-07,
+                        "rise": 0.3333333333333333,
+                        "amp": 4231421.876608172,
+                        "drag": 0.0,
+                        "phase": 0.0
+                    },
+                    "pulse_measure": {
+                        "shape": {
+                            "py/reduce": [
+                                {
+                                    "py/type": "qat.purr.compiler.devices.PulseShapeType"
+                                },
+                                {
+                                    "py/tuple": [
+                                        "square"
+                                    ]
+                                }
+                            ],
+                            "py/obj_ref_id": 131388727873168
+                        },
+                        "width": 1e-06,
+                        "amp": 0.5,
+                        "amp_setup": 0.0,
+                        "rise": 0.0
+                    },
+                    "measure_acquire": {
+                        "delay": 1.51e-07,
+                        "sync": true,
+                        "width": 1e-06,
+                        "weights": null,
+                        "use_weights": false
+                    }
+                },
+                "py/obj_ref_id": 131388565889744
+            }
+        },
+        "pulse_channels": {
+            "A-CH-QRM-RF-14.R0.macq": {
+                "py/id": 131388584229776
+            },
+            "A-CH-QCM-RF-2.Q0.drive": {
+                "py/id": 131388568200592
+            },
+            "A-CH-QCM-RF-2.Q0.second_state": {
+                "py/id": 131388565889232
+            },
+            "B-CH-QRM-RF-14.R1.macq": {
+                "py/id": 131388565890000
+            },
+            "B-CH-QCM-RF-2.Q1.drive": {
+                "py/id": 131388565890384
+            },
+            "B-CH-QCM-RF-2.Q1.second_state": {
+                "py/id": 131388565890640
+            }
+        },
+        "physical_channels": {
+            "A-CH-QCM-RF-2": {
+                "py/id": 131388567546704
+            },
+            "A-CH-QRM-RF-14": {
+                "py/id": 131388565853328
+            },
+            "B-CH-QCM-RF-2": {
+                "py/id": 131388565889168
+            },
+            "B-CH-QRM-RF-14": {
+                "py/id": 131388565889488
+            }
+        },
+        "basebands": {
+            "A-LO-0-QCM-RF-2": {
+                "py/id": 131388565888656
+            },
+            "A-LO-0-QRM-RF-14": {
+                "py/id": 131388565727952
+            },
+            "B-LO-0-QCM-RF-2": {
+                "py/id": 131388565750544
+            },
+            "B-LO-0-QRM-RF-14": {
+                "py/id": 131388565889360
+            }
+        },
+        "qubit_direction_couplings": [],
+        "error_mitigation": null,
+        "calibration_id": "",
+        "repeat_limit": 10000,
+        "control_hardware": {
+            "py/id": 131388584270928
+        },
+        "instruments": {
+            "test_save_model_c06e9a47_c653_46c1_8050_c456a8edaa0d": {
+                "py/id": 131388584270928
+            }
+        }
+    },
+    "py/obj_ref_id": 131388590448848
+}

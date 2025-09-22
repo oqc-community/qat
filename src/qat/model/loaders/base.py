@@ -1,18 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import abc
+
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 from qat.model.hardware_model import PydLogicalHardwareModel, PydPhysicalHardwareModel
 from qat.purr.compiler.hardware_models import LegacyHardwareModel
 
+LegHwModel = TypeVar("LegHwModel", bound=LegacyHardwareModel)
 
-class BaseModelLoader(abc.ABC):
+PydHwModel = TypeVar("PydHwModel", PydPhysicalHardwareModel, PydLogicalHardwareModel)
+
+HwModel = TypeVar(
+    "HwModel", LegacyHardwareModel, PydLogicalHardwareModel, PydPhysicalHardwareModel
+)
+
+
+class BaseModelLoader(Generic[HwModel], ABC):
     """ModelLoaders load HardwareModels from a source configured on initialisation."""
 
     def __init__(self): ...
 
-    @abc.abstractmethod
-    def load(self) -> LegacyHardwareModel | PydLogicalHardwareModel:
+    @abstractmethod
+    def load(self) -> HwModel:
         """Load and return the Hardware Model.
 
         :return: A loaded Hardware Model
@@ -21,13 +31,7 @@ class BaseModelLoader(abc.ABC):
         pass
 
 
-class BaseLogicalModelLoader(BaseModelLoader):
-    @abc.abstractmethod
-    def load(self) -> PydPhysicalHardwareModel:
-        pass
+class BaseLogicalModelLoader(BaseModelLoader[PydLogicalHardwareModel], ABC): ...
 
 
-class BasePhysicalModelLoader(BaseModelLoader):
-    @abc.abstractmethod
-    def load(self) -> PydPhysicalHardwareModel:
-        pass
+class BasePhysicalModelLoader(BaseModelLoader[PydPhysicalHardwareModel], ABC): ...
