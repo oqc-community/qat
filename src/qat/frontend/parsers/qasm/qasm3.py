@@ -568,7 +568,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if isinstance(waveform, SampledWaveform):
             return waveform.samples
         else:
-            # TODO: how do we do this arbitarily?
+            # TODO: how do we do this arbitarily? (COMPILER-752)
             dt = 0.5e-9
             samples = int(waveform.width / dt)
             midway_time = waveform.width / 2
@@ -1723,16 +1723,17 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if op != "=":
             raise ValueError(f"Assignment operator {op} is unsupported.")
 
-        existing = self._current_context.variables.get(register.register_name, None)
+        if isinstance(register, CregIndexValue):
+            register = register.register_name
+
+        existing = self._current_context.variables.get(register, None)
         if existing is not None:
             existing.value = value
         else:
             self._attempt_declaration(
                 value
                 if isinstance(value, Variable)
-                else Variable(
-                    name=register.register_name, var_type=type(value), value=value
-                )
+                else Variable(name=register, var_type=type(value), value=value)
             )
 
     def cal_block(self, tree: Tree):

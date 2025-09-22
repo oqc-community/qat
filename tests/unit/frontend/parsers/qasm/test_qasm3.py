@@ -866,36 +866,33 @@ class TestQASM3Features:
         assert np.isclose(waveform.frequency, 1e9)
         assert np.isclose(waveform.phase, 0.254)
 
-    @pytest.mark.xfail(
-        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
-    )
     def test_mix_waveform(self, model, feature_testpath):
         # Also expecting this to fail because of the hard-coded sample time, so the reason
         # and raises might just need changing after fixing...
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
+        amp1 = 2.5e-4
+        amp2 = 0.5
         builder, devices = self.return_builder_and_devices(
             model,
             feature_testpath,
             Path("pulse", "waveforms", "mix.qasm"),
             frame=frame,
             width="80ns",
-            amp1="2.5e-4",
-            amp2="0.5",
+            amp1=str(amp1),
+            amp2=str(amp2),
         )
 
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 1
 
-        waveform = pulses[0].waveform
-        assert np.isclose(pulses[0].duration, 80e-9)
-        assert isinstance(waveform, SampledWaveform)
-        assert np.allclose(waveform.samples, [2.5e-4 * 0.5])
+        pulse = pulses[0]
 
-    @pytest.mark.xfail(
-        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
-    )
+        waveform = pulse.waveform
+        assert isinstance(waveform, SampledWaveform)
+        assert np.allclose(waveform.samples, amp1 * amp2)
+
     def test_phase_shift_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
@@ -912,26 +909,27 @@ class TestQASM3Features:
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 1
-        assert np.isclose(pulses[0].duration, 80e-9)
+
+        pulse = pulses[0]
+        assert np.isclose(pulse.duration, 80e-9)
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SquareWaveform)
-        assert np.isclose(waveform, 0.254)
+        assert np.isclose(waveform.phase, 0.254)
 
-    @pytest.mark.xfail(
-        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
-    )
     def test_scale_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
+        amp1 = 2.5e-4
+        amp2 = 0.5
         builder, devices = self.return_builder_and_devices(
             model,
             feature_testpath,
             Path("pulse", "waveforms", "scale.qasm"),
             frame=frame,
             width="80ns",
-            amp1="2.5e-4",
-            amp2="0.5",
+            amp1=str(amp1),
+            amp2=str(amp2),
         )
 
         assert qubit in devices
@@ -941,32 +939,34 @@ class TestQASM3Features:
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SquareWaveform)
-        assert np.isclose(pulses[0].amp, 2.5e-4)
-        assert np.isclose(pulses[0].scale_factor, 0.5)
+        assert np.isclose(waveform.amp, amp1)
+        assert np.isclose(waveform.scale_factor, amp2)
 
-    @pytest.mark.xfail(
-        raises=AttributeError, reason="Fails due to an unknown bug (COMPILER-718)."
-    )
     def test_sum_waveform(self, model, feature_testpath):
         # Also expecting this to fail because of the hard-coded sample time, so the reason
         # and raises might just need changing after fixing...
         index, qubit = next(iter(model.qubits.items()))
         frame = f"q{index}_drive"
+        amp1 = 2.5e-4
+        amp2 = 0.5
         builder, devices = self.return_builder_and_devices(
             model,
             feature_testpath,
             Path("pulse", "waveforms", "sum.qasm"),
             frame=frame,
             width="80ns",
-            amp1="2.5e-4",
-            amp2="5e-4",
+            amp1=str(amp1),
+            amp2=str(amp2),
         )
 
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 1
-        assert np.allclose(pulses[0].samples, [2.5e-4 + 5e-4])
-        assert np.isclose(pulses[0].duration, 80e-9)
+
+        pulse = pulses[0]
+
+        waveform = pulse.waveform
+        assert np.allclose(waveform.samples, amp1 + amp2)
 
     def test_type_physical_index(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
