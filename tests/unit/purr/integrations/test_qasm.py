@@ -821,7 +821,6 @@ class TestQASM3Features:
             (Path("types", "float.qasm"), dict()),
             (Path("types", "int.qasm"), dict()),
             (Path("types", "stretch.qasm"), dict()),
-            (Path("include.qasm"), dict()),
         ],
         ids=lambda file: str(file),
     )
@@ -1486,6 +1485,12 @@ class TestQASM3Features:
         phases = [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
         assert len(phases) == 1
         assert np.isclose(phases[0].phase, value)
+
+    def test_include(self, model, feature_testpath):
+        lib = str(feature_testpath / "oqc_lib.inc")
+        self.return_builder_and_devices(
+            model, feature_testpath, Path("include.qasm"), lib=lib
+        )
 
 
 class TestParsing:

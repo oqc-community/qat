@@ -19,7 +19,7 @@ from qat.ir.instructions import (
     Return,
     Synchronize,
 )
-from qat.ir.measure import Acquire, PostProcessing, PostProcessType
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, PostProcessType
 from qat.ir.waveforms import (
     DragGaussianWaveform,
     GaussianSquareWaveform,
@@ -1121,13 +1121,19 @@ class TestQASM3Features:
             file,
         )
 
-    @pytest.mark.xfail(
-        raises=AttributeError, reason="Some unknown bug is causing failure (COMPILER-720)."
-    )
     def test_include(self, model, feature_testpath):
-        """Will likely fail even after the bug is resolved, but I was expected a different
-        error to do with the fact we can't load in custom includes."""
         lib = str(feature_testpath / "oqc_lib.inc")
-        self.return_builder_and_devices(
-            model, feature_testpath, Path("include.qasm"), lib=lib
+        builder, devices = self.return_builder_and_devices(
+            model, feature_testpath, Path("include.qasm"), lib=lib, physical_index=0
         )
+
+        assert model.qubit_with_index(0) in devices
+        assert model.qubit_with_index(0).resonator in devices
+        pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
+        assert len(pulses) == 2
+        for pulse in pulses:
+            assert pulse.target == model.qubit_with_index(0).drive_pulse_channel.uuid
+        measure_blocks = [
+            inst for inst in builder.instructions if isinstance(inst, MeasureBlock)
+        ]
+        assert len(measure_blocks) == 1
