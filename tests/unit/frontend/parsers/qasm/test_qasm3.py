@@ -601,20 +601,8 @@ class TestQASM3Features:
                     reason="Version 0 is not supported.", raises=NotImplementedError
                 ),
             ),
-            pytest.param(
-                "1",
-                marks=pytest.mark.xfail(
-                    reason="Failing for unknown reason, needs looking into (COMPILER-719).",
-                    raises=UnboundLocalError,
-                ),
-            ),
-            pytest.param(
-                "2",
-                marks=pytest.mark.xfail(
-                    reason="Failing for unknown reason, needs looking into (COMPILER-719).",
-                    raises=UnboundLocalError,
-                ),
-            ),
+            "1",
+            "2",
             "3",
             pytest.param(
                 "4",
@@ -624,12 +612,18 @@ class TestQASM3Features:
             ),
         ],
     )
-    def test_capture(self, model, feature_testpath, version):
+    @pytest.mark.parametrize("channel", ["acquire", "measure"])
+    def test_capture(self, model, feature_testpath, version, channel):
         index, qubit = next(iter(model.qubits.items()))
         # TODO: this usage is inconsistent with extern frames in purr. We should probably
         # align them (COMPILER-716)
-        frame = f"r{index}_measure"
-        channel = qubit.measure_pulse_channel
+        if channel == "measure":
+            frame = f"r{index}_measure"
+            channel = qubit.measure_pulse_channel
+        else:
+            frame = f"r{index}_acquire"
+            channel = qubit.acquire_pulse_channel
+
         builder, devices = self.return_builder_and_devices(
             model,
             feature_testpath,

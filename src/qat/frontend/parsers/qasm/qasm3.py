@@ -51,6 +51,7 @@ from qat.model.device import (
     PulseChannel,
     Qubit,
     QubitPulseChannels,
+    Resonator,
     ResonatorPulseChannels,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -1431,24 +1432,21 @@ class Qasm3Parser(Interpreter, AbstractParser):
         #
         # The returned value for each shot after postprocessing is a complex iq value.
 
-        # Determine the delay for the channel
-        delay = 0.0
+        device = self.builder.hw.device_for_pulse_channel_id(pulse_channel.uuid)
+        if device is None:
+            # TODO: add robustness to custom pulse channels (COMPILER-756)
+            raise TypeError(f"Pulse channel {pulse_channel} is not assigned to any device.")
+        if isinstance(device, Resonator):
+            qubit = self.builder.hw.qubit_for_resonator(device)
+
         if isinstance(pulse_channel, AcquirePulseChannel):
-            qubits = [
-                qubit
-                for qubit in self.builder.hw.qubits.values()
-                if qubit.acquire_pulse_channel.uuid == pulse_channel.uuid
-            ]
-
-            if len(qubits) == 1:
-                delay = pulse_channel.acquire.delay
-            else:
-                log.warning(
-                    f"The acquire channel {pulse_channel.uuid} is not assigned to a single resonator: "
-                    "setting the delay to 0.0."
-                )
-
-        qubit = qubits[0]
+            delay = pulse_channel.acquire.delay
+        else:
+            log.warning(
+                f"The acquire channel {pulse_channel.uuid} is not assigned to a single "
+                "resonator: setting the delay to 0.0."
+            )
+            delay = 0.0
 
         acquire = Acquire(
             targets=pulse_channel.uuid,
