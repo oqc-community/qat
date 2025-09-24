@@ -292,6 +292,7 @@ class WaveformContext:
         self,
         instruction: PydPulse,
         samples: int,
+        sample_time: float,
         do_upconvert: bool = True,
     ):
         """Converts a waveform instruction into a discrete number of samples, handling
@@ -300,11 +301,12 @@ class WaveformContext:
         # TODO: the evaluate shape is handled in the EvaluatePulses pass, so this needs
         # adjusting to only accept square waveforms and custom pulses. (COMPILER-413)
 
-        dt = self.pulse_channel.sample_time
-        length = samples * dt
+        length = samples * sample_time
         centre = length / 2.0
         t = np.linspace(
-            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=samples
+            start=-centre + 0.5 * sample_time,
+            stop=length - centre - 0.5 * sample_time,
+            num=samples,
         )
         pulse = evaluate_shape(instruction, t, self._phase)
 
@@ -318,7 +320,7 @@ class WaveformContext:
         pulse += self.pulse_channel.bias
 
         if do_upconvert:
-            t += centre - 0.5 * dt + self._duration * dt
+            t += centre - 0.5 * sample_time + self._duration * sample_time
             pulse = self._do_upconvert(pulse, t)
 
         self._buffer[self._duration : self._duration + samples] = pulse

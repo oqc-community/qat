@@ -429,7 +429,8 @@ class TestWaveformContext:
     @pytest.mark.parametrize("do_upconvert", [True, False])
     @pytest.mark.parametrize("scale", [0.95, 1.0])
     @pytest.mark.parametrize("ignore_scale", [True, False])
-    def test_square_pulse(self, delay, do_upconvert, scale, ignore_scale):
+    @pytest.mark.parametrize("sample_time", [1e-09, 0.5e-09])
+    def test_square_pulse(self, delay, do_upconvert, scale, ignore_scale, sample_time):
         """Tests that a square pulse is processed correctly."""
         model = EchoModelLoader(2).load()
         channel = model.qubits[0].get_drive_channel()
@@ -446,7 +447,7 @@ class TestWaveformContext:
             shape=PulseShapeType.SQUARE,
             ignore_channel_scale=ignore_scale,
         )
-        context.process_pulse(pulse, 10, do_upconvert=do_upconvert)
+        context.process_pulse(pulse, 10, sample_time=sample_time, do_upconvert=do_upconvert)
         assert np.allclose(context.buffer[0:delay], 0.0)
         assert np.allclose(context.buffer[delay + 10 :], 0.0)
 
@@ -471,7 +472,7 @@ class TestWaveformContext:
         context = WaveformContext(self.channel, 20)
         context._duration = delay
         pulse = Pulse(self.channel, width=80e-9, **attributes)
-        context.process_pulse(pulse, 10)
+        context.process_pulse(pulse, 10, 10e-09)
         assert np.allclose(context.buffer[0:delay], 0.0)
         assert not np.allclose(context.buffer[delay : delay + 10], 0.0)
         assert np.allclose(context.buffer[delay + 10 :], 0.0)

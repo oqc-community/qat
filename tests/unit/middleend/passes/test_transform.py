@@ -553,6 +553,7 @@ class TestPydPhaseOptimisation:
 
 class TestPydPostProcessingSanitisation:
     hw = LucyModelLoader(32).load()
+    target_data = TargetData.default()
 
     def test_meas_acq_with_pp(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -920,7 +921,7 @@ class TestPydInstructionGranularitySanitisation:
         assert len(ir._ir.head.filter.waveform.samples) == time_adder * samples_multiplier
 
     def test_custom_pulses_with_correct_length_are_unchanged(self):
-        sample_time = self.qubit.physical_channel.sample_time
+        sample_time = self.target_data.QUBIT_DATA.sample_time
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
 
         # Make some instructions to test

@@ -799,12 +799,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 measure_pulse_ch = resonator.measure_pulse_channel
 
                 if measure_pulse_ch.fixed_if:
-                    args = [bb.if_frequency, phys_channel.sample_time]
+                    args = [bb.if_frequency]
                 else:
-                    args = [
-                        measure_pulse_ch.frequency - bb.frequency,
-                        phys_channel.sample_time,
-                    ]
+                    args = [measure_pulse_ch.frequency - bb.frequency]
 
         axes = axes if isinstance(axes, list) else [axes]
 

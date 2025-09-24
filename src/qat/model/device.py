@@ -108,7 +108,6 @@ class PhysicalChannel(Component):
     Attributes:
         baseband: The physical baseband.
 
-        sample_time: The rate at which the pulse is sampled.
         block_size: The number of samples within a single block.
         iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.
 
@@ -119,7 +118,6 @@ class PhysicalChannel(Component):
 
     baseband: PhysicalBaseband = Field(frozen=True)
 
-    sample_time: CalibratablePositiveFloat = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
     iq_voltage_bias: IQBias = Field(default=IQBias())
     name_index: int = Field(ge=0, frozen=True)

@@ -46,7 +46,7 @@ class EchoExecutePipeline(UpdateablePipeline):
             )
 
         target_data = target_data if target_data is not None else TargetData.default()
-        results_pipeline = get_experimental_results_pipeline(model)
+        results_pipeline = get_experimental_results_pipeline(model, target_data)
         return ExecutePipeline(
             model=model,
             target_data=target_data,

@@ -68,7 +68,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         phys_channel_q = qubit.physical_channel
         new_phys_ch_q = QubitPhysicalChannel(
             baseband=new_phys_bb_q,
-            sample_time=phys_channel_q.sample_time,
             block_size=phys_channel_q.block_size,
             name_index=get_number_from_string(phys_channel_q.id),
         )
@@ -76,7 +75,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         phys_channel_r = qubit.measure_device.physical_channel
         new_phys_ch_r = ResonatorPhysicalChannel(
             baseband=new_phys_bb_r,
-            sample_time=phys_channel_r.sample_time,
             block_size=phys_channel_r.block_size,
             swap_readout_iq=getattr(phys_channel_r, "swap_readout_IQ", False),
             name_index=get_number_from_string(phys_channel_r.id),

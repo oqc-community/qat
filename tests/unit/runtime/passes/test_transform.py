@@ -7,6 +7,7 @@ from qat.executables import AcquireData, ChannelData, ChannelExecutable
 from qat.ir.instructions import Assign as PydAssign
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import PostProcessing
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
     AcquireMode,
     PostProcessType,
@@ -20,6 +21,8 @@ from qat.runtime.passes.transform import (
 
 
 class TestPostProcessingTransform:
+    target_data = TargetData.default()
+
     def test_raw_to_bits(self):
         mock_readout = {"test": np.ones((1000, 254))}
         pp_instructions = [
@@ -54,7 +57,9 @@ class TestPostProcessingTransform:
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )
-        result = PostProcessingTransform().run(mock_readout, package=package)
+        result = PostProcessingTransform(self.target_data).run(
+            mock_readout, package=package
+        )
         assert len(result) == 1
         assert "test" in result
         assert np.shape((result["test"])) == (1000,)
@@ -83,7 +88,9 @@ class TestPostProcessingTransform:
             channel_data={"CH1": ChannelData(acquires=acquire)},
             post_processing={"test": pp_instructions},
         )
-        result = PostProcessingTransform().run(mock_readout, package=package)
+        result = PostProcessingTransform(self.target_data).run(
+            mock_readout, package=package
+        )
         assert len(result) == 1
         assert "test" in result
         assert np.shape((result["test"])) == (1000,)

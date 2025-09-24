@@ -200,15 +200,11 @@ class LucyModelLoader(BasePhysicalModelLoader):
         """Populates the model with baseband frequencies for qubits and resonators."""
 
         for qubit in model.qubits.values():
-            # TODO: remove sample time? (COMPILER-714)
-            qubit.physical_channel.sample_time = 0.5e-9
             baseband = qubit.physical_channel.baseband
             baseband.frequency = self.qubit_baseband_frequency
             # TODO: remove if frequency? (COMPILER-714)
             baseband.if_frequency = self.qubit_baseband_if_frequency
 
-            # TODO: remove sample time? (COMPILER-714)
-            qubit.resonator.physical_channel.sample_time = 1e-9
             baseband = qubit.resonator.physical_channel.baseband
             baseband.frequency = self.resonator_baseband_frequency
             # TODO: remove if frequency? (COMPILER-714)

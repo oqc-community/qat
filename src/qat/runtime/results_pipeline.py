@@ -3,6 +3,7 @@
 
 from qat.core.pass_base import PassManager
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
+from qat.model.target_data import TargetData
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.passes.analysis import IndexMappingAnalysis as PydIndexMappingAnalysis
 from qat.runtime.passes.purr.analysis import IndexMappingAnalysis
@@ -32,7 +33,9 @@ def get_default_results_pipeline(model: QuantumHardwareModel) -> PassManager:
     )
 
 
-def get_experimental_results_pipeline(pyd_model: PydHardwareModel) -> PassManager:
+def get_experimental_results_pipeline(
+    pyd_model: PydHardwareModel, target_data: TargetData
+) -> PassManager:
     """Factory for creating the experimental results pipeline.
 
     This pipeline includes additional experimental features.
@@ -42,7 +45,7 @@ def get_experimental_results_pipeline(pyd_model: PydHardwareModel) -> PassManage
 
     return (
         PassManager()
-        | PostProcessingTransform()
+        | PostProcessingTransform(target_data)
         | InlineResultsProcessingTransform()
         | AssignResultsTransform()
         | ResultTransform()

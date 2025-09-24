@@ -255,8 +255,6 @@ class PhaseOptimisationHandler:
 class PostProcessingSanitisation(TransformPass):
     """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
     suitable for the acquisition mode, and removes them if not.
-
-    Extracted from :meth:`qat.purr.backends.live.LiveDeviceEngine.optimize`.
     """
 
     def run(

@@ -93,7 +93,6 @@ class TestEchoHardwareModelConversion:
             for pyd_phys_ch, leg_phys_ch in zip(
                 pyd_physical_channels, leg_physical_channels
             ):
-                assert pyd_phys_ch.sample_time == leg_phys_ch.sample_time
                 assert pyd_phys_ch.block_size == leg_phys_ch.block_size
                 assert f"CH{pyd_phys_ch.name_index}" == leg_phys_ch.id
 

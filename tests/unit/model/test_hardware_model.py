@@ -227,7 +227,6 @@ def randomly_calibrate(hardware_model: PhysicalHardwareModel, seed=42):
     for qubit in hardware_model.qubits.values():
         # Calibrate physical channel.
         for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:
-            physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
             physical_channel.baseband.frequency = random.Random(seed).uniform(1e05, 1e07)
             physical_channel.baseband.if_frequency = random.Random(seed).uniform(1e05, 1e07)
 

@@ -75,7 +75,9 @@ class TestSimpleRuntime:
 
         # Test with custom pipeline
         pipeline = (
-            PassManager() | PostProcessingTransform() | InlineResultsProcessingTransform()
+            PassManager()
+            | PostProcessingTransform(TargetData.default())
+            | InlineResultsProcessingTransform()
         )
         with SimpleRuntime(EchoEngine(), pipeline) as runtime:
             results = runtime.execute(package)

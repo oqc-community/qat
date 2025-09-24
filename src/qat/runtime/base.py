@@ -10,6 +10,7 @@ from qat.core.config.configure import get_config
 from qat.core.pass_base import PassManager
 from qat.engines import ConnectionMixin, NativeEngine
 from qat.executables import AcquireData
+from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import AcquireMode
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.passes.transform import (
@@ -53,10 +54,10 @@ class BaseRuntime(abc.ABC):
     @abc.abstractmethod
     def execute(package, *args): ...
 
-    def default_pipeline(self):
+    def default_pipeline(self, target_data: TargetData | None = None):
         return (
             PassManager()
-            | PostProcessingTransform()
+            | PostProcessingTransform(target_data)
             | InlineResultsProcessingTransform()
             | AssignResultsTransform()
         )
