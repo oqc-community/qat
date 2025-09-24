@@ -101,9 +101,9 @@ def get_port_mappings(hw: PhysicalHardwareModel):
     Returns a dictionary mapping name->physical channel.
     """
     ports = {}
-    for qubit_id, qubit in hw.qubits.items():
-        name = f"channel_{qubit_id}"
-        ports[name] = qubit.physical_channel
+    for index, channel in hw.physical_channel_map.items():
+        name = f"channel_{index}"
+        ports[name] = channel
 
     return ports
 

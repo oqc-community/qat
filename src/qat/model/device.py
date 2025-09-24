@@ -114,6 +114,7 @@ class PhysicalChannel(Component):
 
         acquire_allowed: Whether the physical channel allows acquire operations.
         swap_readout_iq: Whether to swap the I and Q components for readout operations.
+        name_index: integer used in human readable name, `channel_<index>`.
     """
 
     baseband: PhysicalBaseband = Field(frozen=True)
@@ -121,6 +122,7 @@ class PhysicalChannel(Component):
     sample_time: CalibratablePositiveFloat = Field(default=np.nan)
     block_size: Optional[int] = Field(ge=1, default=1)
     iq_voltage_bias: IQBias = Field(default=IQBias())
+    name_index: int = Field(ge=0, frozen=True)
 
     @property
     def I_bias(self) -> float:

@@ -973,9 +973,13 @@ class TestQASM3Features:
         assert qubit in devices
         assert qubit.resonator in devices
 
-    def test_type_port(self, model, feature_testpath):
+    @pytest.mark.parametrize("device_type", ["qubit", "resonator"])
+    def test_type_port(self, model, feature_testpath, device_type):
         """Just a basic smoke test as there's nothing to really inspect."""
-        index = next(iter(model.qubits))
+        device = next(iter(model.qubits.values()))
+        if device_type == "resonator":
+            device = device.resonator
+        index = device.physical_channel.name_index
         _ = self.return_builder_and_devices(
             model,
             feature_testpath,

@@ -36,6 +36,15 @@ class TestPhysicalHardwareModel:
         model2 = LucyModelLoader(qubit_count=16).load()
         assert model1 != model2
 
+    def test_unique_phys_chan_indices(self):
+        model = LucyModelLoader(qubit_count=8).load()
+        model_data = model.model_dump()
+        model_data["qubits"][0]["resonator"]["physical_channel"]["name_index"] = model_data[
+            "qubits"
+        ][0]["physical_channel"]["name_index"]
+        with pytest.raises(ValidationError):
+            PhysicalHardwareModel(**model_data)
+
 
 @pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])
 @pytest.mark.parametrize("n_logical_qubits", [0, 2, 4])

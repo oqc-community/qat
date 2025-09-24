@@ -95,6 +95,7 @@ class TestEchoHardwareModelConversion:
             ):
                 assert pyd_phys_ch.sample_time == leg_phys_ch.sample_time
                 assert pyd_phys_ch.block_size == leg_phys_ch.block_size
+                assert f"CH{pyd_phys_ch.name_index}" == leg_phys_ch.id
 
     def test_1q_pulse_channels(self, n_qubits, seed):
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)

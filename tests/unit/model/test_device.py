@@ -85,7 +85,7 @@ class TestDevicesValidation:
             if_frequency=random.Random(seed).uniform(1e05, 1e07),
         )
 
-        physical_channel = PhysicalChannel(baseband=bb)
+        physical_channel = PhysicalChannel(baseband=bb, name_index=0)
         assert not physical_channel.is_calibrated
 
         physical_channel.sample_time = random.Random(seed).uniform(1e-08, 1e-10)
@@ -131,7 +131,9 @@ class TestDevicesValidation:
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
         physical_channel = ResonatorPhysicalChannel(
-            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+            baseband=bb,
+            sample_time=random.Random(seed).uniform(1e-08, 1e-10),
+            name_index=1,
         )
 
         resonator = Resonator(physical_channel=physical_channel)
@@ -153,7 +155,7 @@ class TestDevicesValidation:
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
         physical_channel_r = ResonatorPhysicalChannel(
-            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10), name_index=1
         )
 
         resonator = Resonator(physical_channel=physical_channel_r)
@@ -168,7 +170,7 @@ class TestDevicesValidation:
         assert qubit_pulse_channels.is_calibrated
 
         physical_channel_q = QubitPhysicalChannel(
-            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10), name_index=0
         )
         qubit = Qubit(
             physical_channel=physical_channel_q,
@@ -268,7 +270,7 @@ class TestDevicesValidation:
             frequency=random.Random(seed).uniform(1e05, 1e07),
             if_frequency=random.Random(seed + 1).uniform(1e05, 1e07),
         )
-        physical_channel = wrong_phys_ch_type(baseband=bb)
+        physical_channel = wrong_phys_ch_type(baseband=bb, name_index=0)
 
         with pytest.raises(ValidationError):
             device_type(physical_channel=physical_channel)
@@ -283,7 +285,9 @@ class TestFrozenQubit:
         )
 
         physical_channel_r = ResonatorPhysicalChannel(
-            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+            baseband=bb,
+            sample_time=random.Random(seed).uniform(1e-08, 1e-10),
+            name_index=1,
         )
 
         resonator = Resonator(physical_channel=physical_channel_r)
@@ -297,7 +301,7 @@ class TestFrozenQubit:
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
         physical_channel_q = QubitPhysicalChannel(
-            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10)
+            baseband=bb, sample_time=random.Random(seed).uniform(1e-08, 1e-10), name_index=0
         )
         qubit = Qubit(
             physical_channel=physical_channel_q,

@@ -94,6 +94,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._pulse_channel_ids_to_device = {}
         self._qubits_to_qubit_ids = {}
         self._resonators_to_qubits = {}
+        self._physical_channel_map = {}
 
         for qubit_id, qubit in self.qubits.items():
             self._qubits_to_qubit_ids[qubit] = qubit_id
@@ -102,6 +103,12 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             for device in [qubit, qubit.resonator]:
                 phys_channel = device.physical_channel
                 self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
+
+                if phys_channel.name_index is None:
+                    raise ValueError(
+                        f"Physical channel '{phys_channel}' has no assigned index."
+                    )
+                self._physical_channel_map[phys_channel.name_index] = phys_channel
 
                 for pulse_channel in device.all_pulse_channels:
                     self._ids_to_pulse_channels[pulse_channel.uuid] = pulse_channel
@@ -184,6 +191,14 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             "Cross resonance cancellation channels mismatch physical connectivity."
         )
 
+        # Check unique physical channel indices.
+        physical_channel_indices = [
+            qubit.physical_channel.name_index for qubit in self.quantum_devices
+        ]
+        assert len(physical_channel_indices) == len(set(physical_channel_indices)), (
+            f"Physical channel indices must be unique, found {physical_channel_indices}."
+        )
+
         return self
 
     @model_validator(mode="after")
@@ -239,6 +254,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     @property
     def number_of_qubits(self) -> int:
         return len(self.qubits)
+
+    @property
+    def physical_channel_map(self) -> dict:
+        return self._physical_channel_map
 
     def qubit_with_index(self, index: int | QubitId) -> Qubit:
         return self.qubits[index]

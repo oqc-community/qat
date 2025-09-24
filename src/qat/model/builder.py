@@ -63,6 +63,8 @@ class PhysicalHardwareModelBuilder:
             *physical_connectivity.values()
         )
 
+        unused_chan_indices = set(range(len(unique_qubit_indices) * 2))
+
         qubits = {}
         for qubit_id in unique_qubit_indices:
             qubit_connectivity = physical_connectivity.get(qubit_id, set())
@@ -71,10 +73,10 @@ class PhysicalHardwareModelBuilder:
             bb_r = self._build_uncalibrated_baseband()
 
             physical_channel_q = self._build_uncalibrated_physical_channel(
-                baseband=bb_q, target_device=Qubit
+                baseband=bb_q, target_device=Qubit, name_index=unused_chan_indices.pop()
             )
             physical_channel_r = self._build_uncalibrated_physical_channel(
-                baseband=bb_r, target_device=Resonator
+                baseband=bb_r, target_device=Resonator, name_index=unused_chan_indices.pop()
             )
 
             pulse_channels_q = self._build_uncalibrated_qubit_pulse_channels(
@@ -104,12 +106,15 @@ class PhysicalHardwareModelBuilder:
         return PhysicalBaseband()
 
     def _build_uncalibrated_physical_channel(
-        self, baseband: PhysicalBaseband, target_device: type = Qubit | Resonator
+        self,
+        baseband: PhysicalBaseband,
+        target_device: type[Qubit | Resonator],
+        name_index: int,
     ):
         if target_device is Qubit:
-            return QubitPhysicalChannel(baseband=baseband)
+            return QubitPhysicalChannel(baseband=baseband, name_index=name_index)
         elif target_device is Resonator:
-            return ResonatorPhysicalChannel(baseband=baseband)
+            return ResonatorPhysicalChannel(baseband=baseband, name_index=name_index)
         else:
             raise ValueError(f"Unsupported target device type: {target_device}")
 

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import re
 from collections import defaultdict
 from copy import deepcopy
 
@@ -26,6 +27,15 @@ from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView
 from qat.purr.compiler.instructions import CustomPulse
 from qat.utils.pydantic import FrozenDict
+
+number_mask = re.compile("[0-9]+")
+
+
+def get_number_from_string(s: str) -> int | None:
+    number_match = number_mask.search(s)
+    if number_match is not None:
+        return int(number_match.group())
+    return None
 
 
 def convert_purr_echo_hw_to_pydantic(legacy_hw):
@@ -60,6 +70,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             baseband=new_phys_bb_q,
             sample_time=phys_channel_q.sample_time,
             block_size=phys_channel_q.block_size,
+            name_index=get_number_from_string(phys_channel_q.id),
         )
 
         phys_channel_r = qubit.measure_device.physical_channel
@@ -68,6 +79,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             sample_time=phys_channel_r.sample_time,
             block_size=phys_channel_r.block_size,
             swap_readout_iq=getattr(phys_channel_r, "swap_readout_IQ", False),
+            name_index=get_number_from_string(phys_channel_r.id),
         )
 
         # Resonator
