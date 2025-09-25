@@ -118,6 +118,39 @@ class TestInstructionBuilder:
         assert qubit.acquire_pulse_channel.uuid in sync.targets
         assert qubit.measure_pulse_channel.uuid in sync.targets
 
+    def test_get_pulse_channel_from_hardware_model(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit = hw_model.qubit_with_index(0)
+        pulse_channel = builder.get_pulse_channel(qubit.drive_pulse_channel.uuid)
+        assert pulse_channel is qubit.drive_pulse_channel
+
+    def test_create_pulse_channel_from_physical_channel(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        frequency = 5.254e9
+        scale = 0.954
+        physical_channel = hw_model.qubit_with_index(0).physical_channel
+        pulse_channel = builder.create_pulse_channel(
+            frequency=frequency, channel=physical_channel, scale=scale
+        )
+        assert pulse_channel.frequency == frequency
+        assert pulse_channel.scale == scale
+        assert pulse_channel.physical_channel_id == physical_channel.uuid
+        assert pulse_channel is builder.get_pulse_channel(pulse_channel.uuid)
+
+    def test_create_pulse_channel_from_pulse_channel(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        frequency = 5.254e9
+        scale = 0.954
+        qubit = hw_model.qubit_with_index(0)
+        drive_channel = qubit.drive_pulse_channel
+        pulse_channel = builder.create_pulse_channel(
+            channel=drive_channel, frequency=frequency, scale=scale
+        )
+        assert pulse_channel.frequency == frequency
+        assert pulse_channel.scale == scale
+        assert pulse_channel.physical_channel_id == qubit.physical_channel.uuid
+        assert pulse_channel is builder.get_pulse_channel(pulse_channel.uuid)
+
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))
 class TestPauliGates:

@@ -824,18 +824,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
         )
         phase = 0.0 if len(args) <= 2 else args[2]
 
-        if isinstance(port, PulseChannel):
-            for device in self.builder.hw.quantum_devices:
-                if device.pulse_channels.pulse_channel_with_id(port.uuid):
-                    port = device.physical_channel
-
-        if not isinstance(port, PhysicalChannel):
+        if not isinstance(port, (PulseChannel, PhysicalChannel)):
             raise TypeError(
                 f"Cannot create new frame from variable '{name}'. "
                 "Must be either type Port or Frame."
             )
 
-        pulse_channel = PulseChannel(frequency=frequency)
+        pulse_channel = self.builder.create_pulse_channel(frequency=frequency, channel=port)
         self.builder.phase_shift(target=pulse_channel, theta=phase)
 
         self._attempt_declaration(

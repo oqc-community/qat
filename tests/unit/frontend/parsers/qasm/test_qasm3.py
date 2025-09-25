@@ -20,6 +20,7 @@ from qat.ir.instructions import (
     Synchronize,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, PostProcessType
+from qat.ir.pulse_channel import CustomPulseChannel
 from qat.ir.waveforms import (
     DragGaussianWaveform,
     GaussianSquareWaveform,
@@ -283,6 +284,37 @@ class TestQasm3Parser:
         assert isinstance(builder, QuantumInstructionBuilder)
         assert len(builder.instructions) > 0
         assert isinstance(builder.instructions[-1], Return)
+
+    def test_frame_creation(self, n_qubits):
+        """Tests that frames can be created and used in a simple circuit."""
+        hw = generate_hw_model(n_qubits)
+        qasm = get_qasm3("openpulse_tests/frames.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        assert isinstance(builder, QuantumInstructionBuilder)
+        channel_1 = hw.physical_channel_map[1]
+
+        pulse_instructions = [
+            inst for inst in builder.instructions if isinstance(inst, Pulse)
+        ]
+        assert len(pulse_instructions) == 3
+
+        uuids = set()
+        channels = []
+        for pulse in pulse_instructions:
+            uuids.add(pulse.target)
+            channel = builder.get_pulse_channel(pulse.target)
+            channels.append(channel)
+            assert isinstance(channel, CustomPulseChannel)
+
+        assert len(uuids) == 3
+        assert channels[0].physical_channel_id == channel_1.uuid
+        assert (
+            channels[1].physical_channel_id == hw.qubit_with_index(1).physical_channel.uuid
+        )
+        assert (
+            channels[2].physical_channel_id == hw.qubit_with_index(1).physical_channel.uuid
+        )
 
 
 class TestQASM3Features:
@@ -582,15 +614,13 @@ class TestQASM3Features:
         assert qubit in devices
         pulses = [inst for inst in builder.instructions if isinstance(inst, Pulse)]
         assert len(pulses) == 2
-        assert pulses[0].target == qubit.drive_pulse_channel.uuid
-        assert pulses[1].target != qubit.drive_pulse_channel.uuid
+        assert pulses[0].target == channel.uuid
+        assert pulses[1].target != channel.uuid
 
-        # TODO (COMPILER-721): when resolving this test, we should be able to retrieve the
-        # new channel and inspect its properties. e.g.
-        # code that retrieves channel
-        # assert new_channel.uuid != channel.uuid
-        # assert new_channel.physical_channel == channel.physical_channel
-        # assert np.isclose(new_channel.frequency, channel.frequency * 1.05)
+        pulse_channel_1 = builder.get_pulse_channel(pulses[1].target)
+        assert isinstance(pulse_channel_1, CustomPulseChannel)
+        assert pulse_channel_1.physical_channel_id == qubit.physical_channel.uuid
+        assert np.isclose(pulse_channel_1.frequency, channel.frequency * 1.05)
 
     @pytest.mark.parametrize(
         "version",

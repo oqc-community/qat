@@ -36,8 +36,15 @@ from qat.ir.measure import (
     ProcessAxis,
     acq_mode_process_axis,
 )
+from qat.ir.pulse_channel import CustomPulseChannel
 from qat.ir.waveforms import Pulse, SampledWaveform
-from qat.model.device import Component, DrivePulseChannel, PulseChannel, Qubit
+from qat.model.device import (
+    Component,
+    DrivePulseChannel,
+    PhysicalChannel,
+    PulseChannel,
+    Qubit,
+)
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import QubitId, ValidatedList
@@ -246,6 +253,10 @@ class InstructionBuilder(ABC):
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._pulse_channels: dict[str, CustomPulseChannel] = {}
+
     def pretty_print(self):
         output_str = ""
         for instr in self:
@@ -923,6 +934,59 @@ class QuantumInstructionBuilder(InstructionBuilder):
             raise TypeError(
                 "Please provide a target that is either a `Qubit` or a `PulseChannel`."
             )
+
+    def get_pulse_channel(
+        self,
+        id: str,
+    ) -> CustomPulseChannel:
+        """Given an id, return the corresponding pulse channel."""
+
+        pulse_channel = self.hw.pulse_channel_with_id(id)
+        if pulse_channel is not None:
+            return pulse_channel
+
+        pulse_channel = self._pulse_channels.get(id, None)
+        if pulse_channel is None:
+            raise ValueError(f"Pulse channel with id '{id}' not found.")
+
+        return pulse_channel
+
+    def create_pulse_channel(
+        self,
+        frequency: float,
+        channel: CustomPulseChannel | PhysicalChannel | PulseChannel,
+        imbalance: float = 1.0,
+        phase_iq_offset: float = 0.0,
+        scale: float | complex = 1.0 + 0.0j,
+        fixed_if: bool = False,
+    ) -> CustomPulseChannel:
+        """Creates a pulse channel and adds stores it within the builder.
+
+        The channel can be provided as a physical channel which the logical channel is
+        linked too, or use the physical channel of a provided pulse channel.
+        """
+
+        if isinstance(channel, PulseChannel):
+            physical_channel = self._get_physical_channel_id_from_pulse_channel(channel)
+        else:
+            physical_channel = channel.uuid
+
+        pulse_channel = CustomPulseChannel(
+            physical_channel_id=physical_channel,
+            frequency=frequency,
+            imbalance=imbalance,
+            phase_iq_offset=phase_iq_offset,
+            scale=scale,
+            fixed_if=fixed_if,
+        )
+
+        self._pulse_channels[pulse_channel.uuid] = pulse_channel
+        return pulse_channel
+
+    def _get_physical_channel_id_from_pulse_channel(self, pulse_channel: PulseChannel):
+        if isinstance(pulse_channel, CustomPulseChannel):
+            return pulse_channel.physical_channel_id
+        return self.hw.physical_channel_for_pulse_channel_id(pulse_channel.uuid).uuid
 
 
 PydQuantumInstructionBuilder = QuantumInstructionBuilder
