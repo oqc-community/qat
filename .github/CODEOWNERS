@@ -1,3 +1,4 @@
 # For now everyone gets added to all PRs by default. Fine while the PR velocity is small, we'll change if
 # necessary as time goes on.
-* @keriksson-rosenqvist-oqc @oarnold-oqc @helmaazouz-oqc @bsach-oqc @dvanhende-oqc @lcauser-oqc @rrundle-oqc
+* @oqc-tech/qat-maintainers
+.github/** @oqc-tech/devops
