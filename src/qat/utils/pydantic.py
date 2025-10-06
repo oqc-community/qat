@@ -544,47 +544,100 @@ def find_all_subclasses(cls: Type) -> list[Type]:
 
 
 # Efficient serializing of numeric numpy arrays
-def _list_serializer(lst):
+def _validate_value(
+    value: str | list | np.ndarray,
+    implied_type: np.dtype,
+    required_type: np.dtype,
+):
+    """
+    If value is a string: Reverts the hex value and type information into a numpy array.
+    If value is a list or a numpy array: Make a numpy array and validate its type against ty
+    """
+
+    if isinstance(value, str):
+        value = np.frombuffer(bytearray.fromhex(value), dtype=implied_type)
+    elif isinstance(value, (list, np.ndarray)):
+        value = np.asarray(value, dtype=implied_type)
+    else:
+        raise ValueError(
+            f"Expected value to be {str | list | np.ndarray}, got {type(value)}"
+        )
+
+    if np.can_cast(value.dtype, required_type):
+        return value.astype(required_type)
+
+    try:
+        if np.all((cast_value := value.astype(required_type)) == value):
+            return cast_value
+    except Exception as e:
+        raise ValueError(f"""Cannot cast {value.dtype} to {required_type}\n{str(e)}""")
+
+
+def _serializer(obj, ty: type):
     """Lists of complex numbers can be expensive to serialise: by serializing type
     information and its value as a hex, we can have more performant serialization."""
-    if isinstance(lst, PydArray):
+
+    dtype = np.dtype(ty)
+    if isinstance(obj, PydArray):
+        obj.value = obj.value.astype(dtype)
         return {
-            "dtype": lst.value.dtype.name,
-            "shape": lst.value.shape,
-            "value": lst.value.tobytes().hex(),
+            "dtype": obj.value.dtype.name,
+            "shape": obj.value.shape,
+            "value": obj.value.tobytes().hex(),
         }
+    elif isinstance(obj, np.ndarray):
+        obj = obj.astype(dtype)
+        return {"dtype": obj.dtype.name, "shape": obj.shape, "value": obj.tobytes().hex()}
     else:
-        return {"dtype": lst.dtype.name, "shape": lst.shape, "value": lst.tobytes().hex()}
+        raise ValueError(f"Expected obj to be {PydArray | np.ndarray}, got {type(obj)}")
 
 
-def _list_validator(lst, ty: type):
-    """Reverts the hex value and type information into a numpy array."""
-    if isinstance(lst, dict):
-        dtype = lst.get("dtype", None)
+def _validator(payload, ty: type):
+    """
+    Plain validator function for annotated numpy array types.
+    The payload is assumed to be consumed as a string, a numpy array, or a dictionary
+    and a PydArray is created from it.
+    """
+
+    if isinstance(payload, PydArray):
+        return payload
+    elif isinstance(payload, np.ndarray):
+        payload = _validate_value(
+            payload, implied_type=payload.dtype, required_type=np.dtype(ty)
+        )
+        payload = {"dtype": payload.dtype, "shape": payload.shape, "value": payload}
+    elif isinstance(payload, (str, list)):
+        payload = _validate_value(
+            payload, implied_type=np.dtype(ty), required_type=np.dtype(ty)
+        )
+        payload = {"dtype": payload.dtype, "shape": payload.shape, "value": payload}
+    elif isinstance(payload, dict):
+        dtype = payload.get("dtype", None)
         dtype = np.dtype(dtype) if dtype is not None else None
-        if dtype is not None and not np.issubdtype(dtype, ty):
-            return lst
+        shape = payload.get("shape", (0,))
+        shape = tuple(shape)
+        value = payload.get("value", [])
+        value = _validate_value(value, implied_type=dtype, required_type=np.dtype(ty))
+        payload = {"dtype": dtype, "shape": shape, "value": value}
+    else:
+        raise ValueError(
+            f"Expected payload to be {str | list | np.ndarray | dict} got {type(payload)}"
+        )
 
-        arr = PydArray(value=np.frombuffer(bytearray.fromhex(lst["value"]), dtype=dtype))
-        arr.value = arr.value.reshape(lst["shape"])
-        return arr
-
-    if isinstance(lst, list | np.ndarray):
-        # catches wrong types to allow e.g. FloatNDArray | ComplexNDArray
-        try:
-            return PydArray(value=np.asarray(lst, dtype=ty))
-        except TypeError:
-            return lst
-    return lst
+    value = payload["value"]
+    shape = payload["shape"]
+    arr = PydArray(value=value)
+    arr.value = arr.value.reshape(shape)
+    return arr
 
 
-def get_annotated_array(ty: type):
+def annotate_pyd_array(ty: type):
     """Creates an annotated type for numeric lists with Pydantic serializers and validators
     for efficient serialization."""
     return Annotated[
-        PydArray,
-        BeforeValidator(lambda x: _list_validator(x, ty)),
-        PlainSerializer(_list_serializer),
+        PydArray,  # TODO - Encode custom data type COMPILER-769
+        PlainValidator(lambda x: _validator(x, ty)),
+        PlainSerializer(lambda x: _serializer(x, ty)),
     ]
 
 
@@ -617,9 +670,9 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
         )
         super().__init__(**kwargs)
 
-    def __array__(self, dtype=None):
-        arr = self.value
-        return arr.astype(dtype, copy=False) if dtype is not None else arr
+    def __array__(self, dtype=None, copy=None) -> np.ndarray:
+        dtype = dtype or self.dtype
+        return self.value.astype(dtype=dtype, copy=copy)
 
     # One might also consider adding the built-in list type to this
     # list, to support operations like np.add(array_like, list)
@@ -725,6 +778,6 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
         return "%s(%r, dtype=%r)" % (type(self).__name__, self.value, self.dtype)
 
 
-IntNDArray = get_annotated_array(int)
-FloatNDArray = get_annotated_array(float)
-ComplexNDArray = get_annotated_array(complex)
+IntNDArray = annotate_pyd_array(int)
+FloatNDArray = annotate_pyd_array(float)
+ComplexNDArray = annotate_pyd_array(complex)

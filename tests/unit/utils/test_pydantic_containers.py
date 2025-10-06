@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import random
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -269,6 +270,16 @@ class TestPydArray:
         assert np.allclose(arr_deserialised.value, arr.value)
         assert arr_deserialised == arr
 
+    # TODO Model-level validator COMPILER-769
+    @pytest.mark.skip(reason="Needs model-level validator COMPILER-769")
+    @pytest.mark.parametrize("pyd_array", ["pyd_array_1.json", "pyd_array_2.json"])
+    def test_serialisation_json(self, testpath, pyd_array):
+        file_path = Path(testpath, "files", "payload", pyd_array)
+        with open(file_path, "r") as f:
+            arr = IntNDArray.model_validate_json(f.read())
+
+        assert arr.shape == (1000,)
+
     def test_list_input(self):
         arr = PydArray([1.0, 2.0, 3.0])
         assert isinstance(arr.value, np.ndarray)
@@ -312,3 +323,38 @@ class TestPydArray:
         m = MockContainer(a=[1.0, 2.0, 3.0])
         assert m.a.value.dtype == np.dtype(complex)
         assert m.a.dtype == np.dtype(complex)
+
+    def test_append(self):
+        arr1 = PydArray(np.random.rand(5))
+        arr2 = PydArray(np.random.rand(5))
+        arr = np.append(arr1, arr2)
+        assert arr.shape == (10,)
+        assert np.all(arr[:5] == arr1)
+        assert np.all(arr[5:] == arr2)
+
+    # TODO - `PydArray` <> `np.ndarray` interoperability COMPILER-769
+    @pytest.mark.skip(reason="`PydArray` <> `np.ndarray` interoperability COMPILER-769")
+    def test_all(self):
+        shape = (10, 2)
+
+        arr0 = PydArray(np.zeros(shape))
+        arr1 = PydArray(np.ones(shape))
+        assert np.all(arr0 == 0)
+        assert np.all(arr1 == 1)
+        assert np.all(arr1 + arr0 == arr1)
+
+    # TODO - `PydArray` <> `np.ndarray` interoperability COMPILER-769
+    @pytest.mark.skip(reason="`PydArray` <> `np.ndarray` interoperability COMPILER-769")
+    def test_any(self):
+        shape = (5, 10)
+
+        arr0 = PydArray(np.zeros(shape))
+        arr1 = PydArray(np.ones(shape))
+        i = np.random.choice(shape[0])
+        j = np.random.choice(shape[1])
+        random_value = np.random.random_sample()
+        arr0[i, j] = random_value
+        arr1[i, j] = random_value
+
+        assert np.any(arr0 == random_value)
+        assert np.any(arr1 == random_value)

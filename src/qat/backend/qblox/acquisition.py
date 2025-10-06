@@ -17,7 +17,7 @@ class PathData(BaseModel):
 
     avg_cnt: int = None
     oor: bool = Field(alias="out-of-range", default=False)
-    data: FloatNDArray = np.empty(0, dtype=float)
+    data: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -36,8 +36,8 @@ class IntegData(BaseModel):
     Path 0 refers to I while Path 1 refers to Q
     """
 
-    path0: FloatNDArray = np.empty(0, dtype=float)
-    path1: FloatNDArray = np.empty(0, dtype=float)
+    path0: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
+    path1: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -66,9 +66,9 @@ class BinnedAcqData(BaseModel):
     which are executed by the hardware.
     """
 
-    avg_cnt: IntNDArray = np.empty(0, dtype=int)
+    avg_cnt: IntNDArray = Field(default_factory=lambda: IntNDArray([]))
     integration: IntegData = IntegData()
-    threshold: FloatNDArray = np.empty(0, dtype=float)
+    threshold: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -106,31 +106,39 @@ class Acquisition(BaseModel):
     index: int = None
     acquisition: BinnedAndScopeAcqData = BinnedAndScopeAcqData()
 
-    @staticmethod
-    def accumulate(acq1: "Acquisition", acq2: "Acquisition"):
-        if acq1 == Acquisition():
-            return acq2.model_copy(deep=True)
+    def __add__(self, other: "Acquisition") -> "Acquisition":
+        """
+        Acquisition addition follows concatenation semantics such as the case for strings.
+        A few important details that might be adjusted in the future:
+            + Resulting scope_data.path0.avg_cnt is taken as the minimum of the two
+                Reason for the underestimation is to remain conservative and on the safe side
+                (Can raise if strictness is required)
+            + Resulting scope_data.path0.oor follows "AND" semantics
+        """
 
-        if acq2 == Acquisition():
-            return acq1.model_copy(deep=True)
+        if not isinstance(other, Acquisition):
+            raise TypeError(f"Can only add acquisitions, got {type(other)}")
 
-        if acq1 == acq2:
-            return acq1.model_copy(deep=True)
+        if self == Acquisition():
+            return other.model_copy(deep=True)
+
+        if other == Acquisition():
+            return self.model_copy(deep=True)
 
         result = Acquisition()
 
-        if acq1.index != acq2.index:
+        if self.index != other.index:
             raise ValueError(
-                f"Expected the same index but got {acq1.index} != {acq2.index}"
+                f"Expected the same index but got {self.index} != {other.index}"
             )
-        result.index = acq1.index
+        result.index = self.index
 
-        if acq1.name != acq2.name:
-            raise ValueError(f"Expected the same name but got {acq1.name} != {acq2.name}")
-        result.name = acq1.name
+        if self.name != other.name:
+            raise ValueError(f"Expected the same name but got {self.name} != {other.name}")
+        result.name = self.name
 
-        scope_data1 = acq1.acquisition.scope
-        scope_data2 = acq2.acquisition.scope
+        scope_data1 = self.acquisition.scope
+        scope_data2 = other.acquisition.scope
         scope_data = result.acquisition.scope
 
         scope_data.path0.avg_cnt = min(
@@ -144,8 +152,8 @@ class Acquisition(BaseModel):
         scope_data.path1.oor = scope_data1.path1.oor and scope_data2.path1.oor
         scope_data.path1.data = np.append(scope_data1.path1.data, scope_data2.path1.data)
 
-        bin_data1 = acq1.acquisition.bins
-        bin_data2 = acq2.acquisition.bins
+        bin_data1 = self.acquisition.bins
+        bin_data2 = other.acquisition.bins
         bin_data = result.acquisition.bins
 
         bin_data.avg_cnt = np.append(bin_data1.avg_cnt, bin_data2.avg_cnt)

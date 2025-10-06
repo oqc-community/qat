@@ -133,7 +133,7 @@ class QbloxEngine(NativeEngine):
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
             playback[target] = {
                 name: reduce(
-                    lambda acq1, acq2: Acquisition.accumulate(acq1, acq2),
+                    lambda acq1, acq2: acq1 + acq2,
                     acqs,
                     Acquisition(),
                 )
