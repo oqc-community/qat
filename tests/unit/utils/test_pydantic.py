@@ -313,7 +313,6 @@ class TestPydArray:
             a: IntNDArray
 
         m = MockContainer(a=[1.0, 2.0, 3.0])
-        assert m.a.value.dtype == np.dtype(int)
         assert m.a.dtype == np.dtype(int)
 
         # Upconversion too!
@@ -321,8 +320,25 @@ class TestPydArray:
             a: ComplexNDArray
 
         m = MockContainer(a=[1.0, 2.0, 3.0])
-        assert m.a.value.dtype == np.dtype(complex)
         assert m.a.dtype == np.dtype(complex)
+
+
+class TestPydArrayNumpyInteroperability:
+    """
+    Tests interoperability between PydArray and Numpy arrays. If an operator isn't tested
+    or the test is skipped, it's safe to assume that support for that operator is missing.
+    """
+
+    def test_equality(self):
+        """
+        Equality tested according to how it's been defined, which not exactly the same
+        as NumPy array equality.
+        """
+
+        arr0 = PydArray(np.zeros(5))
+        arr1 = PydArray(np.ones(5))
+        assert arr0 == arr0
+        assert arr0 != arr1
 
     def test_append(self):
         arr1 = PydArray(np.random.rand(5))

@@ -99,23 +99,31 @@ class TestAcquisition:
             scope1 = double_acq0.acquisition.scope
             assert scope1.path0.avg_cnt == scope0.path0.avg_cnt
             assert scope1.path0.oor == scope0.path0.oor
-            assert scope1.path0.data == np.append(scope0.path0.data, scope0.path0.data)
+            assert np.all(
+                scope1.path0.data == np.append(scope0.path0.data, scope0.path0.data)
+            )
 
             assert scope1.path1.avg_cnt == scope0.path1.avg_cnt
             assert scope1.path1.oor == scope0.path1.oor
-            assert scope1.path1.data == np.append(scope0.path1.data, scope0.path1.data)
+            assert np.all(
+                scope1.path1.data == np.append(scope0.path1.data, scope0.path1.data)
+            )
 
             bin_data0 = acq0.acquisition.bins
             bin_data1 = double_acq0.acquisition.bins
-            assert bin_data1.avg_cnt == np.append(bin_data0.avg_cnt, bin_data0.avg_cnt)
-            assert bin_data1.integration.path0 == np.append(
-                bin_data0.integration.path0, bin_data0.integration.path0
+            assert np.all(
+                bin_data1.avg_cnt == np.append(bin_data0.avg_cnt, bin_data0.avg_cnt)
             )
-            assert bin_data1.integration.path1 == np.append(
-                bin_data0.integration.path1, bin_data0.integration.path1
+            assert np.all(
+                bin_data1.integration.path0
+                == np.append(bin_data0.integration.path0, bin_data0.integration.path0)
             )
-            assert bin_data1.threshold == np.append(
-                bin_data0.threshold, bin_data0.threshold
+            assert np.all(
+                bin_data1.integration.path1
+                == np.append(bin_data0.integration.path1, bin_data0.integration.path1)
+            )
+            assert np.all(
+                bin_data1.threshold == np.append(bin_data0.threshold, bin_data0.threshold)
             )
 
     @pytest.mark.parametrize(

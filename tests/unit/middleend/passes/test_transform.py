@@ -2066,7 +2066,7 @@ class TestEvaluateWaveforms:
         samples = np.random.rand(100)
         wf = SampledWaveform(samples=samples)
         new_wf = pass_.evaluate_waveform(wf, scale=1.0)
-        assert new_wf.samples == samples
+        assert np.all(new_wf.samples == samples)
 
     def test_evaluate_sampled_waveform_with_scale(self, pass_):
         samples = np.random.rand(100)
@@ -2136,7 +2136,7 @@ class TestEvaluateWaveforms:
             target=target,
             waveform_lookup=waveform_lookup,
         )
-        assert cached_wf.samples is new_wf.samples
+        assert np.all(cached_wf.samples == new_wf.samples)
 
     @pytest.mark.parametrize(
         "instruction",
@@ -2213,7 +2213,7 @@ class TestEvaluateWaveforms:
         assert new_instruction.target == qubit.drive_pulse_channel.uuid
         assert new_instruction.ignore_channel_scale == True
         if ignore_channel_scale:
-            assert new_instruction.waveform.samples == samples
+            assert np.all(new_instruction.waveform.samples == samples)
         else:
             assert np.allclose(new_instruction.waveform.samples, samples * 2.0)
 

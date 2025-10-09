@@ -626,9 +626,7 @@ def _validator(payload, ty: type):
 
     value = payload["value"]
     shape = payload["shape"]
-    arr = PydArray(value=value)
-    arr.value = arr.value.reshape(shape)
-    return arr
+    return value.reshape(shape)
 
 
 def annotate_pyd_array(ty: type):
@@ -643,9 +641,22 @@ def annotate_pyd_array(ty: type):
 
 class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
     """
-    Subclass a NumPy mixin that auto-adds Python operator methods
-    (like +, -, *, etc.) in terms of NumPy ufuncs. This class
-    still controls behavior via `__array_ufunc__` below.
+    A data class wrapper to handle the information needed to completely describe a numpy array:
+        + Value is the numpy array itself
+        + Shape is the shape of the numpy array
+        + dtype is the data (implied) type of the numpy array
+
+    Through annotations, this allows creation of metadata classes on top of PydArray that describe
+    how to (de)serialise a (blob) PydArray object according to some (required) type. See _validator()
+    and _serializer().
+
+    Enlisting the array data as (nested) list(s) is not optimal, and this class renders (de)serialisation
+    fast.
+
+    This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic operators in terms of
+    NumPy ufuncs. This does NOT guarantee full interoperability with NumPy but allows the option to extend
+    this support in the future. For now, the sole purpose of this class is ONLY to be a data class wrapper
+    and mediator for (de)serialisation purposes.
     """
 
     value: NDArray[Shape["*, ..."], int | float | complex | bool]  # noqa: F722
