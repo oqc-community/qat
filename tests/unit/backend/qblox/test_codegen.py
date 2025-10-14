@@ -41,12 +41,14 @@ from qat.purr.compiler.instructions import (
     Pulse,
     Sweep,
     Variable,
+    calculate_duration,
 )
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
+    discrimination,
     empty,
     measure_acquire,
     multi_readout,
@@ -448,6 +450,40 @@ class TestQbloxBackend1:
                         remainder = effective_width % Constants.MAX_WAIT_TIME
                         if quotient > 1:
                             assert f"wait {remainder}" in program
+
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_discrimination(self, qblox_model, qubit_indices):
+        qubits = [qblox_model.get_qubit(index) for index in qubit_indices]
+
+        builder = discrimination(qblox_model, qubit_indices)
+        acquire = next(inst for inst in builder.instructions if isinstance(inst, Acquire))
+        acq_width = int(calculate_duration(acquire))
+
+        ordered_executables = self._do_emit(builder, qblox_model)
+        for executable in ordered_executables.values():
+            assert len(executable.packages) == len(qubits)
+            qub_pkg_zip = [
+                (qub, pkg)
+                for (qub, (channel_id, pkg)) in zip(qubits, executable.packages.items())
+                if qub.get_measure_channel()
+                == qblox_model.get_pulse_channel_from_id(channel_id)
+            ]
+
+            for qubit, measure_pkg in qub_pkg_zip:
+                A, B = qubit.mean_z_map_args[0], qubit.mean_z_map_args[1]
+                mean_g = (1 - B) / A
+                mean_e = (-1 - B) / A
+
+                rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+                threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+
+                assert measure_pkg.sequencer_config.thresholded_acq.rotation == np.rad2deg(
+                    rotation
+                )
+                assert (
+                    measure_pkg.sequencer_config.thresholded_acq.threshold
+                    == acq_width * threshold
+                )
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

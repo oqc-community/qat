@@ -6,7 +6,6 @@ from functools import reduce
 from itertools import groupby
 from typing import Dict, List
 
-import numpy as np
 from compiler_config.config import InlineResultsProcessing
 from more_itertools import partition
 
@@ -30,7 +29,6 @@ from qat.purr.backends.qblox.transform_passes import (
     ScopeSanitisation,
 )
 from qat.purr.backends.utilities import (
-    software_post_process_discriminate,
     software_post_process_linear_map_complex_to_real,
 )
 from qat.purr.compiler.devices import PulseChannel
@@ -237,15 +235,9 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                             pp.args, response, axes
                         )
                     elif pp.process == PostProcessType.DISCRIMINATE:
-                        log.info(
-                            f"thrld_data counts: {np.unique(thrld_data, return_counts=True)}"
-                        )
-                        response, _ = software_post_process_discriminate(
-                            pp.args, response, axes
-                        )
-                        log.info(
-                            f"response counts: {np.unique(response, return_counts=True)}"
-                        )
+                        # f : {0, 1} ----> {-1, 1}
+                        #       x    |---> 1 - 2x
+                        response = 1 - 2 * thrld_data
 
                 loop_nest_shape = tuple((sweep_counts or [1]) + (repeat_counts or [-1]))
                 response = response.reshape(loop_nest_shape)

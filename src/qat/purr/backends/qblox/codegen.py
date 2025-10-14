@@ -755,6 +755,15 @@ class QbloxContext(AbstractContext):
         post_procs: List[PostProcessing],
         target: PulseChannel,
     ):
+        """
+        Regarding HW thresholding, `acquire.rotation` is in radians and `acquire.threshold` is uncorrected.
+        (Exactly as they've been computed during measure block construction)
+
+        Here at configuration time, we "legalise" these parameters to what Qblox requires:
+            + `rotation` as degrees
+            + `threshold` to be corrected by the integration length
+        """
+
         pulse = self._evaluate_waveform(measure, target)
         pulse_width = pulse.size
         delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
@@ -789,7 +798,7 @@ class QbloxContext(AbstractContext):
         acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         self.sequencer_config.square_weight_acq.integration_length = acq_width
         self.sequencer_config.thresholded_acq.rotation = np.rad2deg(acquire.rotation)
-        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
+        self.sequencer_config.thresholded_acq.threshold = acq_width * acquire.threshold
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
@@ -860,6 +869,15 @@ class NewQbloxContext(AbstractContext):
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
     ):
+        """
+        Regarding HW thresholding, `acquire.rotation` is in radians and `acquire.threshold` is uncorrected.
+        (Exactly as they've been computed during measure block construction)
+
+        Here at configuration time, we "legalise" these parameters to what Qblox requires:
+            + `rotation` as degrees
+            + `threshold` to be corrected by the integration length
+        """
+
         pulse = self._evaluate_waveform(measure, target)
         pulse_width = pulse.size
         delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
@@ -888,8 +906,8 @@ class NewQbloxContext(AbstractContext):
         acq_width = int(calculate_duration(acquire))
         acq_index = self._register_acquisition(acquire.output_variable, num_bins)
         self.sequencer_config.square_weight_acq.integration_length = acq_width
-        self.sequencer_config.thresholded_acq.rotation = acquire.rotation
-        self.sequencer_config.thresholded_acq.threshold = acquire.threshold
+        self.sequencer_config.thresholded_acq.rotation = np.rad2deg(acquire.rotation)
+        self.sequencer_config.thresholded_acq.threshold = acq_width * acquire.threshold
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None

@@ -573,3 +573,15 @@ def hidden_mode(model, qubit_indices=None, mode_indices=None, num_points=None):
         builder.measure_mean_z(qubit, output_variable=f"Q{index}")
 
     return builder
+
+
+def discrimination(model, qubit_indices=None):
+    qubit_indices = qubit_indices or [0]
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        builder.measure_single_shot_binned(qubit)
+    return builder
