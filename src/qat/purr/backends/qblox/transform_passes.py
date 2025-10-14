@@ -6,8 +6,6 @@ import itertools
 import numpy as np
 from more_itertools import partition
 
-from qat.purr.backends.qblox.pass_base import QatIR, TransformPass
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
@@ -18,10 +16,12 @@ from qat.purr.compiler.instructions import (
     Return,
     Sweep,
 )
+from qat.purr.core.pass_base import TransformPass
+from qat.purr.core.result_base import ResultManager
 
 
 class ScopeSanitisation(TransformPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         Bubbles up all sweeps and repeats to the beginning of the list.
         Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.
@@ -30,12 +30,8 @@ class ScopeSanitisation(TransformPass):
         compatibility.
         """
 
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         tail, head = partition(
-            lambda inst: isinstance(inst, (Sweep, Repeat)), builder.instructions
+            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
         )
         tail, head = list(tail), list(head)
 
@@ -43,54 +39,44 @@ class ScopeSanitisation(TransformPass):
             EndSweep() if isinstance(inst, Sweep) else EndRepeat() for inst in head
         ]
 
-        builder.instructions = head + tail + delimiters[::-1]
+        ir.instructions = head + tail + delimiters[::-1]
 
 
 class RepeatSanitisation(TransformPass):
     def __init__(self, model: QuantumHardwareModel = None):
         self.model = model
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         Fixes repeat instructions if any with default values from the HW model
         Adds a repeat instructions if none is found
         """
 
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
-        model = self.model
-
-        repeats = [inst for inst in builder.instructions if isinstance(inst, Repeat)]
+        repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         if repeats:
             for rep in repeats:
                 if rep.repeat_count is None:
-                    rep.repeat_count = model.default_repeat_count
+                    rep.repeat_count = self.model.default_repeat_count
                 if rep.repetition_period is None:
-                    rep.repetition_period = model.default_repetition_period
+                    rep.repetition_period = self.model.default_repetition_period
         else:
-            builder.repeat(model.default_repeat_count, model.default_repetition_period)
+            ir.repeat(self.model.default_repeat_count, self.model.default_repetition_period)
 
 
 class ReturnSanitisation(TransformPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
-        returns = [inst for inst in builder.instructions if isinstance(inst, Return)]
-        acquires = [inst for inst in builder.instructions if isinstance(inst, Acquire)]
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        returns = [inst for inst in ir.instructions if isinstance(inst, Return)]
+        acquires = [inst for inst in ir.instructions if isinstance(inst, Acquire)]
 
         if returns:
             unique_variables = set(itertools.chain(*[ret.variables for ret in returns]))
             for ret in returns:
-                builder.instructions.remove(ret)
+                ir.instructions.remove(ret)
         else:
             # If we don't have an explicit return, imply all results.
             unique_variables = set(acq.output_variable for acq in acquires)
 
-        builder.returns(list(unique_variables))
+        ir.returns(list(unique_variables))
 
 
 class DesugaringPass(TransformPass):
@@ -103,12 +89,8 @@ class DesugaringPass(TransformPass):
     is iteration constructs such as Sweep and Repeat.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
-        for inst in builder.instructions:
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        for inst in ir.instructions:
             if isinstance(inst, Sweep):
                 count = len(next(iter(inst.variables.values())))
                 iter_name = f"sweep_{hash(inst)}"

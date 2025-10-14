@@ -1,12 +1,11 @@
 import pytest
 
 from qat.purr.backends.echo import get_default_echo_hardware
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.instructions import Variable
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.compiler.transform_passes import DeviceUpdateSanitisation
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.result_base import ResultManager
 
 
 class TestDeviceUpdateSanitisation:
@@ -20,23 +19,19 @@ class TestDeviceUpdateSanitisation:
         # Valid DeviceUpdate
         builder = get_builder(model)
         builder.device_assign(drive_channel, "frequency", Variable(freq_var))
-        DeviceUpdateSanitisation().run(QatIR(builder), ResultManager(), MetricsManager())
+        DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
 
         # Non valid DeviceUpdate
         builder = get_builder(model)
         builder.device_assign(drive_channel, "freakuency", Variable(freq_var))
         with pytest.raises(ValueError):
-            DeviceUpdateSanitisation().run(
-                QatIR(builder), ResultManager(), MetricsManager()
-            )
+            DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
 
         builder = get_builder(model)
         builder.device_assign(drive_channel, "bias", Variable("b1"))
         builder.device_assign(drive_channel, "bias", Variable("b2"))
         with pytest.raises(ValueError):
-            DeviceUpdateSanitisation().run(
-                QatIR(builder), ResultManager(), MetricsManager()
-            )
+            DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
 
     def test_device_update_sanitisation(self):
         model = get_default_echo_hardware()
@@ -54,7 +49,7 @@ class TestDeviceUpdateSanitisation:
         builder.device_assign(acquire_channel, "scale", Variable(scale_var))
 
         length_before = len(builder.instructions)
-        DeviceUpdateSanitisation().run(QatIR(builder), ResultManager(), MetricsManager())
+        DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
         assert len(builder.instructions) == length_before
 
         builder.device_assign(drive_channel, "frequency", Variable(freq_var))
@@ -62,7 +57,7 @@ class TestDeviceUpdateSanitisation:
         builder.device_assign(acquire_channel, "frequency", Variable(freq_var))
 
         length_before = len(builder.instructions)
-        DeviceUpdateSanitisation().run(QatIR(builder), ResultManager(), MetricsManager())
+        DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
         assert len(builder.instructions) == length_before
 
         builder.device_assign(drive_channel, "scale", Variable(scale_var))
@@ -70,5 +65,5 @@ class TestDeviceUpdateSanitisation:
         builder.device_assign(acquire_channel, "scale", Variable(scale_var))
 
         length_before = len(builder.instructions)
-        DeviceUpdateSanitisation().run(QatIR(builder), ResultManager(), MetricsManager())
+        DeviceUpdateSanitisation().run(builder, ResultManager(), MetricsManager())
         assert len(builder.instructions) == length_before - 3

@@ -13,8 +13,6 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.graph import ControlFlowGraph
-from qat.purr.backends.qblox.pass_base import AnalysisPass, QatIR
-from qat.purr.backends.qblox.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
@@ -35,6 +33,8 @@ from qat.purr.compiler.instructions import (
     Variable,
     calculate_duration,
 )
+from qat.purr.core.pass_base import AnalysisPass
+from qat.purr.core.result_base import ResultInfoMixin, ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -71,18 +71,14 @@ class TriagePass(AnalysisPass):
     in the legacy code.
     """
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
 
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         targets = set()
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, QuantumInstruction):
                 if isinstance(inst, PostProcessing):
                     for qt in inst.quantum_targets:
@@ -94,7 +90,7 @@ class TriagePass(AnalysisPass):
                     targets.update(inst.quantum_targets)
 
         result = TriageResult()
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             # Dissect by target
             if isinstance(inst, QuantumInstruction):
                 result.quantum_instructions.append(inst)
@@ -250,15 +246,11 @@ class BindingPass(AnalysisPass):
 
         return IterBound(start, step, end, count)
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
@@ -519,15 +511,11 @@ class TILegalisationPass(AnalysisPass):
 
         return legal_bound
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
@@ -699,7 +687,7 @@ class QbloxLegalisationPass(AnalysisPass):
         # Qblox registers are unsigned 32bit integers.
         return legal_bound.astype(np.uint32)
 
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         Performs target-dependent legalisation for QBlox.
 
@@ -736,10 +724,6 @@ class QbloxLegalisationPass(AnalysisPass):
         will follow in future iterations.
         """
 
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 
@@ -773,18 +757,14 @@ class CFGResult(ResultInfoMixin):
 
 
 class CFGPass(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
 
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         result = CFGResult()
-        self._build_cfg(builder, result.cfg)
+        self._build_cfg(ir, result.cfg)
         res_mgr.add(result)
 
     def _build_cfg(self, builder: InstructionBuilder, cfg: ControlFlowGraph):

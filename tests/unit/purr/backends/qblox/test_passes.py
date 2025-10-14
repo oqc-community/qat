@@ -15,11 +15,11 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen import PreCodegenPass, PreCodegenResult
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.qblox.transform_passes import RepeatSanitisation, ScopeSanitisation
 from qat.purr.compiler.instructions import DeviceUpdate
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import PassManager
+from qat.purr.core.result_base import ResultManager
 
 from tests.unit.utils.builder_nuggets import resonator_spect
 
@@ -42,7 +42,7 @@ class TestAnalysisPasses:
             | PreCodegenPass()
         )
 
-        pipeline.run(QatIR(builder), res_mgr, met_mgr)
+        pipeline.run(builder, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         target_map = triage_result.target_map
@@ -65,12 +65,12 @@ class TestAnalysisPasses:
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
-        ).run(QatIR(builder), res_mgr, met_mgr)
+        ).run(builder, res_mgr, met_mgr)
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
-        QbloxLegalisationPass().run(QatIR(builder), res_mgr)
+        QbloxLegalisationPass().run(builder, res_mgr)
 
         legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
 

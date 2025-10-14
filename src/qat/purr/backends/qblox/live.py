@@ -20,9 +20,6 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter, QbloxPackage
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.qblox.transform_passes import (
     RepeatSanitisation,
     ReturnSanitisation,
@@ -48,6 +45,9 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.runtime import NewQuantumRuntime
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import InvokerMixin, PassManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 from qat.purr.utils.logging_utils import log_duration
 
@@ -285,8 +285,7 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
             | TriagePass()
         )
 
-    def invoke_backend(self, builder, res_mgr: ResultManager, met_mgr: MetricsManager):
-        ir = QatIR(builder)
+    def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
         return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
 
@@ -326,24 +325,23 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
             | QbloxLegalisationPass()
         )
 
-    def invoke_backend(self, builder, res_mgr: ResultManager, met_mgr: MetricsManager):
+    def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
         remaining, static_dus = partition(
             lambda inst: isinstance(inst, DeviceUpdate)
             and not isinstance(inst.value, Variable),
-            builder.instructions,
+            ir.instructions,
         )
         remaining, static_dus = list(remaining), list(static_dus)
 
-        builder.instructions = remaining
+        ir.instructions = remaining
         injectors = DeviceInjectors(static_dus)
 
         try:
             injectors.inject()
             res_mgr = res_mgr or ResultManager()
             met_mgr = met_mgr or MetricsManager()
-            ir = QatIR(builder)
             self.run_pass_pipeline(ir, res_mgr, met_mgr)
             return NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
         finally:

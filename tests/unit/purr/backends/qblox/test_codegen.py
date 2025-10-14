@@ -18,9 +18,6 @@ from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.qblox.transform_passes import (
     DesugaringPass,
     RepeatSanitisation,
@@ -39,6 +36,9 @@ from qat.purr.compiler.instructions import (
     calculate_duration,
 )
 from qat.purr.compiler.runtime import get_builder
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import InvokerMixin, PassManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
@@ -72,17 +72,16 @@ class TestQbloxEmitter(InvokerMixin):
         old_value = qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
         try:
             qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = False
-            ir = QatIR(builder)
             res_mgr = ResultManager()
             met_mgr = MetricsManager()
 
             if not skip_runtime:
                 runtime = model.create_runtime()
-                runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+                runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
             self.model = model
-            self.run_pass_pipeline(ir, res_mgr, met_mgr)
-            return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+            self.run_pass_pipeline(builder, res_mgr, met_mgr)
+            return QbloxEmitter().emit_packages(builder, res_mgr, met_mgr)
         finally:
             qatconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS = old_value
 
@@ -547,15 +546,16 @@ class TestNewQbloxEmitter(InvokerMixin):
 
     def test_prologue_epilogue(self, model):
         builder = empty(model)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
         assert len(builder.instructions) == 6
 
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr, ignore_empty=False)
+        packages = NewQbloxEmitter().emit_packages(
+            builder, res_mgr, met_mgr, ignore_empty=False
+        )
         assert len(packages) == 2
 
         for pkg in packages:
@@ -572,17 +572,16 @@ class TestNewQbloxEmitter(InvokerMixin):
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_resonator_spect(self, model, num_points, qubit_indices):
         builder = resonator_spect(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
 
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, met_mgr)
         assert len(packages) == len(qubit_indices)
 
         for index in qubit_indices:
@@ -619,13 +618,12 @@ class TestNewQbloxEmitter(InvokerMixin):
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_qubit_spect(self, model, num_points, qubit_indices):
         builder = qubit_spect(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         self.model = model
         model.create_engine()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
@@ -641,9 +639,9 @@ class TestNewQbloxEmitter(InvokerMixin):
         injectors = DeviceInjectors(static_dus)
         try:
             injectors.inject()
-            self.run_pass_pipeline(ir, res_mgr, met_mgr)
+            self.run_pass_pipeline(builder, res_mgr, met_mgr)
 
-            packages = NewQbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+            packages = NewQbloxEmitter().emit_packages(builder, res_mgr, met_mgr)
             assert len(packages) == 2 * len(qubit_indices)
 
             for index in qubit_indices:
@@ -710,58 +708,54 @@ class TestNewQbloxEmitter(InvokerMixin):
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_delay_iteration(self, model, num_points, qubit_indices):
         builder = delay_iteration(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_width_iteration(self, model, num_points, qubit_indices):
         builder = pulse_width_iteration(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_amplitude_iteration(self, model, num_points, qubit_indices):
         builder = pulse_amplitude_iteration(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_time_and_phase_iteration(self, model, num_points, qubit_indices):
         builder = time_and_phase_iteration(model, qubit_indices, num_points)
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         runtime = model.create_runtime()
-        runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
         self.model = model
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        packages = NewQbloxEmitter().emit_packages(ir, res_mgr, model)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)

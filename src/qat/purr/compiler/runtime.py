@@ -14,9 +14,6 @@ from compiler_config.config import (
 )
 
 from qat.core.config.configure import get_config
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.builders import (
     FluidBuilderWrapper,
     InstructionBuilder,
@@ -41,6 +38,9 @@ from qat.purr.compiler.transform_passes import (
     PostProcessingSanitisation,
 )
 from qat.purr.compiler.validation_passes import InstructionValidation, ReadoutValidation
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import InvokerMixin, PassManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -307,14 +307,9 @@ class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
         if self.engine is None:
             raise ValueError("No execution engine available.")
 
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(
-                f"Expected InstructionBuilder, but got {type(builder)} instead"
-            )
-
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        self.run_pass_pipeline(QatIR(builder), res_mgr, met_mgr)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
         results = fexecute(builder)
         results = self._transform_results(results, results_format, repeats)
         return self._apply_error_mitigation(results, builder, error_mitigation)

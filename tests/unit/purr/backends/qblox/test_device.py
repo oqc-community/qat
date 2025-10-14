@@ -5,13 +5,13 @@ import pytest
 
 from qat.purr.backends.qblox.analysis_passes import TriagePass
 from qat.purr.backends.qblox.codegen import QbloxEmitter
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import InvokerMixin, PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.qblox.transform_passes import RepeatSanitisation, ReturnSanitisation
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import InvokerMixin, PassManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -28,16 +28,15 @@ class TestQbloxControlHardware(InvokerMixin):
         )
 
     def _do_emit(self, builder, skip_runtime=False):
-        ir = QatIR(builder)
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
 
         if not skip_runtime:
             runtime = self.model.create_runtime()
-            runtime.run_pass_pipeline(ir, res_mgr, met_mgr)
+            runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
 
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-        return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        return QbloxEmitter().emit_packages(builder, res_mgr, met_mgr)
 
     def test_instruction_execution(self, model):
         amp = 1

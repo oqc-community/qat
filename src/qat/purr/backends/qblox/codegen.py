@@ -27,9 +27,6 @@ from qat.purr.backends.qblox.codegen_base import DfsTraversal
 from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.ir import Opcode, Sequence, SequenceBuilder
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import AnalysisPass, InvokerMixin, PassManager, QatIR
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -57,6 +54,9 @@ from qat.purr.compiler.instructions import (
     Waveform,
     calculate_duration,
 )
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import AnalysisPass, InvokerMixin, PassManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -1005,7 +1005,7 @@ class QbloxEmitter(InvokerMixin):
 
     def emit_packages(
         self,
-        ir: QatIR,
+        ir: InstructionBuilder,
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty=True,
@@ -1101,16 +1101,12 @@ class PreCodegenResult:
 
 
 class PreCodegenPass(AnalysisPass):
-    def run(self, ir: QatIR, res_mgr: ResultManager, *args, **kwargs):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """
         Precedes assembly codegen.
         Performs a naive register allocation through a manager object.
         Computes useful information in the form of attributes.
         """
-
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
 
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
@@ -1137,7 +1133,7 @@ class NewQbloxEmitter(InvokerMixin):
 
     def emit_packages(
         self,
-        ir: QatIR,
+        ir: InstructionBuilder,
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty=True,

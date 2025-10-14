@@ -7,9 +7,6 @@ from typing import Dict, List
 
 from compiler_config.config import MetricsType
 
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import QatIR, TransformPass
-from qat.purr.backends.qblox.result_base import ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.instructions import (
@@ -25,6 +22,9 @@ from qat.purr.compiler.instructions import (
     Pulse,
     Variable,
 )
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import TransformPass
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -36,15 +36,16 @@ class PhaseOptimisation(TransformPass):
     """
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
         accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
         optimized_instructions: List[Instruction] = []
-        for instruction in builder.instructions:
+        for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
             ):
@@ -69,7 +70,7 @@ class PhaseOptimisation(TransformPass):
             else:
                 optimized_instructions.append(instruction)
 
-        builder.instructions = optimized_instructions
+        ir.instructions = optimized_instructions
         met_mgr.record_metric(
             MetricsType.OptimizedInstructionCount, len(optimized_instructions)
         )
@@ -82,13 +83,14 @@ class PostProcessingSanitisation(TransformPass):
     """
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
-        if not isinstance(builder, InstructionBuilder):
-            raise ValueError(f"Expected InstructionBuilder, got {type(builder)}")
-
-        pp_insts = [val for val in builder.instructions if isinstance(val, PostProcessing)]
+        pp_insts = [val for val in ir.instructions if isinstance(val, PostProcessing)]
         discarded = []
         for pp in pp_insts:
             if pp.acquire.mode == AcquireMode.SCOPE:
@@ -112,10 +114,8 @@ class PostProcessingSanitisation(TransformPass):
                     and len(pp.axes) <= 1
                 ):
                     discarded.append(pp)
-        builder.instructions = [val for val in builder.instructions if val not in discarded]
-        met_mgr.record_metric(
-            MetricsType.OptimizedInstructionCount, len(builder.instructions)
-        )
+        ir.instructions = [val for val in ir.instructions if val not in discarded]
+        met_mgr.record_metric(MetricsType.OptimizedInstructionCount, len(ir.instructions))
 
 
 class DeviceUpdateSanitisation(TransformPass):
@@ -135,11 +135,15 @@ class DeviceUpdateSanitisation(TransformPass):
     """
 
     def run(
-        self, ir: QatIR, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
     ):
-        builder = ir.value
         target_attr2value = defaultdict(list)
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, DeviceUpdate):
                 # target already validated to be a QuantumComponent during initialisation
                 if not hasattr(inst.target, inst.attribute):
@@ -163,7 +167,7 @@ class DeviceUpdateSanitisation(TransformPass):
                 )
 
         new_instructions = []
-        for inst in builder.instructions:
+        for inst in ir.instructions:
             if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable):
                 if next(iter(target_attr2value[(inst.target, inst.attribute)]), None):
                     target_attr2value[(inst.target, inst.attribute)].clear()
@@ -171,4 +175,4 @@ class DeviceUpdateSanitisation(TransformPass):
             else:
                 new_instructions.append(inst)
 
-        builder.instructions = new_instructions
+        ir.instructions = new_instructions

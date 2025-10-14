@@ -2,15 +2,14 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from qat.model.loaders.purr import EchoModelLoader
-from qat.purr.backends.qblox.metrics_base import MetricsManager
-from qat.purr.backends.qblox.pass_base import (
+from qat.purr.compiler.runtime import NewQuantumRuntime
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import (
     AnalysisPass,
-    QatIR,
     TransformPass,
     ValidationPass,
 )
-from qat.purr.backends.qblox.result_base import ResultManager
-from qat.purr.compiler.runtime import NewQuantumRuntime
+from qat.purr.core.result_base import ResultManager
 
 from tests.unit.utils.builder_nuggets import resonator_spect
 
@@ -29,4 +28,4 @@ def test_new_quantum_runtime():
     assert not any([m for m in pipeline.passes if isinstance(m._pass, AnalysisPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, TransformPass)])
     assert any([m for m in pipeline.passes if isinstance(m._pass, ValidationPass)])
-    runtime.run_pass_pipeline(QatIR(builder), res_mgr, met_mgr, model, engine)
+    runtime.run_pass_pipeline(builder, res_mgr, met_mgr, model, engine)
