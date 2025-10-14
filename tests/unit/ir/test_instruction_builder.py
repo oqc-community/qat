@@ -15,6 +15,7 @@ from qat.ir.measure import (
     ProcessAxis,
     acq_mode_process_axis,
 )
+from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import (
     CrossResonanceCancellationPulseChannel,
@@ -122,34 +123,63 @@ class TestInstructionBuilder:
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit = hw_model.qubit_with_index(0)
         pulse_channel = builder.get_pulse_channel(qubit.drive_pulse_channel.uuid)
-        assert pulse_channel is qubit.drive_pulse_channel
+        assert pulse_channel is not qubit.drive_pulse_channel
+        assert pulse_channel.uuid == qubit.drive_pulse_channel.uuid
 
-    def test_create_pulse_channel_from_physical_channel(self):
+    @pytest.mark.parametrize("string", [True, False])
+    def test_create_pulse_channel(self, string: bool):
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
-        frequency = 5.254e9
-        scale = 0.954
-        physical_channel = hw_model.qubit_with_index(0).physical_channel
-        pulse_channel = builder.create_pulse_channel(
-            frequency=frequency, channel=physical_channel, scale=scale
-        )
-        assert pulse_channel.frequency == frequency
-        assert pulse_channel.scale == scale
-        assert pulse_channel.physical_channel_id == physical_channel.uuid
-        assert pulse_channel is builder.get_pulse_channel(pulse_channel.uuid)
-
-    def test_create_pulse_channel_from_pulse_channel(self):
-        builder = QuantumInstructionBuilder(hardware_model=hw_model)
-        frequency = 5.254e9
-        scale = 0.954
         qubit = hw_model.qubit_with_index(0)
-        drive_channel = qubit.drive_pulse_channel
+        if string:
+            physical_channel = qubit.physical_channel.uuid
+        else:
+            physical_channel = qubit.physical_channel
+
         pulse_channel = builder.create_pulse_channel(
-            channel=drive_channel, frequency=frequency, scale=scale
+            frequency=5.0e9,
+            physical_channel=physical_channel,
+            imbalance=0.9,
+            phase_iq_offset=0.1,
+            scale=0.8 + 0.1j,
+            uuid="test-uuid",
         )
-        assert pulse_channel.frequency == frequency
-        assert pulse_channel.scale == scale
+        assert isinstance(pulse_channel, PulseChannel)
+        assert pulse_channel.uuid == "test-uuid"
+        assert pulse_channel.frequency == 5.0e9
+        assert pulse_channel.imbalance == 0.9
+        assert pulse_channel.phase_iq_offset == 0.1
+        assert pulse_channel.scale == 0.8 + 0.1j
         assert pulse_channel.physical_channel_id == qubit.physical_channel.uuid
-        assert pulse_channel is builder.get_pulse_channel(pulse_channel.uuid)
+
+    def test_create_pulse_channel_with_unknown_pulse_channel_raises(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+
+        with pytest.raises(
+            ValueError, match="Physical channel with id 'unknown' not found."
+        ):
+            builder.create_pulse_channel(
+                frequency=5.0e9,
+                physical_channel="unknown",
+                imbalance=0.9,
+                phase_iq_offset=0.1,
+                scale=0.8 + 0.1j,
+                uuid="test-uuid",
+            )
+
+    def test_pulse_channel_map_on_instantiation(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        assert len(builder._pulse_channels) == len(hw_model._ids_to_pulse_channels)
+        assert builder._pulse_channels.keys() == hw_model._ids_to_pulse_channels.keys()
+        for key, channel in builder._pulse_channels.items():
+            hw_channel = hw_model._ids_to_pulse_channels[key]
+            assert channel.scale == hw_channel.scale
+            assert channel.phase_iq_offset == hw_channel.phase_iq_offset
+            assert channel.imbalance == hw_channel.imbalance
+            assert channel.fixed_if == hw_channel.fixed_if
+            assert (
+                channel.physical_channel_id
+                == hw_model.physical_channel_for_pulse_channel_id(channel.uuid).uuid
+            )
 
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))

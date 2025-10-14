@@ -407,7 +407,7 @@ class TestPydPhaseOptimisation:
     def test_single_phase(self, phase, pulse_enabled):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         for qubit in self.hw.qubits.values():
-            builder.phase_shift(target=qubit, theta=phase)
+            builder.Z(target=qubit, theta=phase)
             if pulse_enabled:
                 builder.pulse(
                     targets=qubit.drive_pulse_channel.uuid,
@@ -435,11 +435,11 @@ class TestPydPhaseOptimisation:
         qubits = list(self.hw.qubits.values())
 
         for qubit in qubits:
-            builder.phase_shift(target=qubit, theta=phase)
+            builder.Z(target=qubit, theta=phase)
 
         random.shuffle(qubits)
         for qubit in qubits:
-            builder.phase_shift(target=qubit, theta=phase + 0.3)
+            builder.Z(target=qubit, theta=phase + 0.3)
             if pulse_enabled:
                 builder.pulse(
                     targets=qubit.drive_pulse_channel.uuid,

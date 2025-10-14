@@ -95,6 +95,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._qubits_to_qubit_ids = {}
         self._resonators_to_qubits = {}
         self._physical_channel_map = {}
+        self._physical_channel_ids_to_device = {}
 
         for qubit_id, qubit in self.qubits.items():
             self._qubits_to_qubit_ids[qubit] = qubit_id
@@ -103,6 +104,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
             for device in [qubit, qubit.resonator]:
                 phys_channel = device.physical_channel
                 self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
+                self._physical_channel_ids_to_device[phys_channel.uuid] = device
 
                 if phys_channel.name_index is None:
                     raise ValueError(
@@ -277,6 +279,9 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     def device_for_pulse_channel_id(self, id_: str):
         return self._pulse_channel_ids_to_device.get(id_, None)
+
+    def device_for_physical_channel_id(self, id_: str):
+        return self._physical_channel_ids_to_device.get(id_, None)
 
     def qubit_for_resonator(self, resonator: Resonator) -> Qubit:
         """Returns the qubit associated with the given resonator."""

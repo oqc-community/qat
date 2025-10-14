@@ -20,7 +20,7 @@ from qat.ir.instructions import (
     Synchronize,
 )
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, PostProcessType
-from qat.ir.pulse_channel import CustomPulseChannel
+from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     DragGaussianWaveform,
     GaussianSquareWaveform,
@@ -305,7 +305,7 @@ class TestQasm3Parser:
             uuids.add(pulse.target)
             channel = builder.get_pulse_channel(pulse.target)
             channels.append(channel)
-            assert isinstance(channel, CustomPulseChannel)
+            assert isinstance(channel, IRPulseChannel)
 
         assert len(uuids) == 3
         assert channels[0].physical_channel_id == channel_1.uuid
@@ -618,7 +618,7 @@ class TestQASM3Features:
         assert pulses[1].target != channel.uuid
 
         pulse_channel_1 = builder.get_pulse_channel(pulses[1].target)
-        assert isinstance(pulse_channel_1, CustomPulseChannel)
+        assert isinstance(pulse_channel_1, IRPulseChannel)
         assert pulse_channel_1.physical_channel_id == qubit.physical_channel.uuid
         assert np.isclose(pulse_channel_1.frequency, channel.frequency * 1.05)
 

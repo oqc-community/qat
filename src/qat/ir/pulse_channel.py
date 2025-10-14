@@ -1,18 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from qat.model.device import PulseChannel
+from uuid import uuid4
+
+from pydantic import BaseModel, Field
 
 
-class CustomPulseChannel(PulseChannel):
-    """Represents a pulse channel defined at the level of the IR, allowing users to play
-    pulses at custom frequencies which might coexist with the standard logical channels.
+class PulseChannel(BaseModel):
+    """An IR-level representation of a pulse channel.
 
-    In addition to the standard PulseChannel properties seen in the hardware model, a
-    physical channel id is stored to link it to a physical channel on hardware.
+    This holds the properties of a pulse channel that are relevant at compile-time, and
+    decouples it from the hardware model, allowing dynamic representation and creation of
+    hardware models.
 
-    TODO: this is a half-step towards treating pulse channels as an IR construct. This
-    should eventually be done in full to also treat pulse channels derived from the
-    hardware model as IR instructions. (COMPILER-761)
+    Eventually, this might be replaced with a more formal IR operation the declares pulse
+    channels a symbols, with lookups defer to symbol tables.
     """
 
+    uuid: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
+    frequency: float
+    imbalance: float = 1.0
+    phase_iq_offset: float = 0.0
+    scale: float | complex = 1.0 + 0.0j
+    fixed_if: bool = False
     physical_channel_id: str
+
+    def __hash__(self):
+        return hash(self.uuid)

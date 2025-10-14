@@ -6,6 +6,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Optional, Union
+from uuid import uuid4
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -36,15 +37,9 @@ from qat.ir.measure import (
     ProcessAxis,
     acq_mode_process_axis,
 )
-from qat.ir.pulse_channel import CustomPulseChannel
+from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import Pulse, SampledWaveform
-from qat.model.device import (
-    Component,
-    DrivePulseChannel,
-    PhysicalChannel,
-    PulseChannel,
-    Qubit,
-)
+from qat.model.device import Component, PhysicalChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import QubitId, ValidatedList
@@ -267,7 +262,9 @@ class InstructionBuilder(ABC):
 class QuantumInstructionBuilder(InstructionBuilder):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._pulse_channels: dict[str, CustomPulseChannel] = {}
+        self._pulse_channels: dict[str, PulseChannel] = self._build_pulse_channel_mapping(
+            self.hw
+        )
 
     def pretty_print(self):
         output_str = ""
@@ -419,34 +416,41 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
 
     def _hw_X_pi_2(
-        self, target: Qubit, pulse_channel: DrivePulseChannel = None, amp_scale: float = 1.0
+        self, target: Qubit, pulse_channel: PulseChannel = None, amp_scale: float = 1.0
     ):
-        pulse_channel = pulse_channel or target.drive_pulse_channel
+        """Op definition for a X(pi/2) gate.
 
-        try:
-            pulse_waveform = pulse_channel.pulse.waveform_type(
-                **pulse_channel.pulse.model_dump()
-            )
-            pulse_waveform.amp *= amp_scale
-        except AttributeError as e:
-            raise ValueError(
-                f"Pulse channel {pulse_channel} does not have a valid pulse calibration."
-            ) from e
+        Optionally allows a pulse channel to be provided to apply the X(pi/2) pulse down.
+        """
 
+        pulse_channel = pulse_channel or self.get_pulse_channel(
+            target.drive_pulse_channel.uuid
+        )
+        pulse_waveform = target.drive_pulse_channel.pulse
+        pulse_waveform = pulse_waveform.waveform_type(**pulse_waveform.model_dump())
+        pulse_waveform.amp *= amp_scale
         return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 
     def _hw_Z(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
     ):
+        """Op definition for a Z(theta) gate.
+
+        If a channel is provided, the phase shift is applied to that channel. If none is
+        provided, or the channel is the drive channel for the target qubit, the phase shift
+        is applied to all pulse channels associated with the qubit.
+        """
+
         if theta == 0:
             return []
 
         # Rotate drive pulse channel of the qubit.
-        pulse_channel = pulse_channel or target.drive_pulse_channel
+        qubit_drive_id = target.drive_pulse_channel.uuid
+        pulse_channel = pulse_channel or self.get_pulse_channel(qubit_drive_id)
         instr_collection = [PhaseShift(targets=pulse_channel.uuid, phase=theta)]
         # Rotate all cross resonance (cancellation) pulse channels pertaining to the qubit.
         qubit_id = self._qubit_index_by_uuid[target.uuid]
-        if isinstance(pulse_channel, DrivePulseChannel):
+        if pulse_channel.uuid == qubit_drive_id:
             for (
                 coupled_qubit_id,
                 crc_pulse_channel,
@@ -464,6 +468,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return instr_collection
 
     def _hw_ZX_pi_4(self, target1: Qubit, target2: Qubit):
+        """Native op definition for a ZX(pi/4) gate."""
+
         target1_id = self._qubit_index_by_uuid[target1.uuid]
         target2_id = self._qubit_index_by_uuid[target2.uuid]
 
@@ -885,27 +891,19 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_channel = target.drive_pulse_channel if isinstance(target, Qubit) else target
         return self.add(Delay(targets=pulse_channel.uuid, duration=duration))
 
-    def synchronize(self, targets: Qubit | PulseChannel | list[Qubit | PulseChannel]):
+    def synchronize(self, targets: Qubit | list[Qubit | PulseChannel]):
         targets = targets if isinstance(targets, list) else [targets]
 
         pulse_channel_ids = set()
         for target in targets:
-            if isinstance(target, PulseChannel):
-                pulse_channel_ids.add(target.uuid)
-            elif isinstance(target, Qubit):
-                # TODO: At some point, we might want to implement (pulse channel)
-                # getters at the qubit level just for the sake of conveniency. #326
-                pulse_channel_ids.add(target.acquire_pulse_channel.uuid)
-                pulse_channel_ids.add(target.measure_pulse_channel.uuid)
+            if isinstance(target, Qubit):
                 qubit_pulse_channel_ids = [
                     pulse_channel.uuid
                     for pulse_channel in target.all_qubit_and_resonator_pulse_channels
                 ]
                 pulse_channel_ids.update(qubit_pulse_channel_ids)
             else:
-                raise TypeError(
-                    "Please provide :class:`Qubit`s or :class:`PulseChannel`s as targets."
-                )
+                pulse_channel_ids.add(target.uuid)
         if len(pulse_channel_ids) > 1:
             return self.add(Synchronize(targets=pulse_channel_ids))
         else:
@@ -923,67 +921,72 @@ class QuantumInstructionBuilder(InstructionBuilder):
         raise NotImplementedError("Not available on this hardware model.")
 
     @InstructionBuilder._check_identity_operation
-    def phase_shift(self, target: Qubit | PulseChannel, theta: float):
-        if isinstance(target, Qubit):
-            return self.add(
-                PhaseShift(targets=target.drive_pulse_channel.uuid, phase=theta)
-            )
-        elif isinstance(target, PulseChannel):
-            return self.add(PhaseShift(targets=target.uuid, phase=theta))
-        else:
-            raise TypeError(
-                "Please provide a target that is either a `Qubit` or a `PulseChannel`."
-            )
+    def phase_shift(self, target: PulseChannel, theta: float):
+        return self.add(PhaseShift(targets=target.uuid, phase=theta))
 
-    def frequency_shift(self, target: Qubit, frequency):
-        if isinstance(target, Qubit):
-            return self.add(
-                FrequencyShift(targets=target.drive_pulse_channel.uuid, frequency=frequency)
-            )
-        elif isinstance(target, PulseChannel):
-            return self.add(FrequencyShift(targets=target.uuid, frequency=frequency))
-        else:
-            raise TypeError(
-                "Please provide a target that is either a `Qubit` or a `PulseChannel`."
-            )
+    def frequency_shift(self, target: PulseChannel, frequency: float):
+        if np.isclose(frequency, 0.0):
+            return self
+        return self.add(FrequencyShift(targets=target.uuid, frequency=frequency))
 
     def get_pulse_channel(
         self,
         id: str,
-    ) -> CustomPulseChannel:
-        """Given an id, return the corresponding pulse channel."""
+    ) -> PulseChannel:
+        """Given an id, return the corresponding pulse channel.
 
-        pulse_channel = self.hw.pulse_channel_with_id(id)
+        Checks internally stored pulse channels, but can pull pulse channels from the
+        hardware model if not found.
+        """
+
+        pulse_channel = self._pulse_channels.get(id, None)
         if pulse_channel is not None:
             return pulse_channel
 
-        pulse_channel = self._pulse_channels.get(id, None)
+        pulse_channel = self.hw.pulse_channel_with_id(id)
         if pulse_channel is None:
             raise ValueError(f"Pulse channel with id '{id}' not found.")
 
+        pulse_channel = self.create_pulse_channel(
+            frequency=pulse_channel.frequency,
+            physical_channel=self.hw.physical_channel_for_pulse_channel_id(
+                pulse_channel.uuid
+            ).uuid,
+            imbalance=pulse_channel.imbalance,
+            phase_iq_offset=pulse_channel.phase_iq_offset,
+            scale=pulse_channel.scale,
+            fixed_if=pulse_channel.fixed_if,
+            uuid=pulse_channel.uuid,
+        )
         return pulse_channel
 
     def create_pulse_channel(
         self,
         frequency: float,
-        channel: CustomPulseChannel | PhysicalChannel | PulseChannel,
+        physical_channel: PhysicalChannel | str,
         imbalance: float = 1.0,
         phase_iq_offset: float = 0.0,
         scale: float | complex = 1.0 + 0.0j,
         fixed_if: bool = False,
-    ) -> CustomPulseChannel:
+        uuid: str | None = None,
+    ) -> PulseChannel:
         """Creates a pulse channel and adds stores it within the builder.
 
         The channel can be provided as a physical channel which the logical channel is
         linked too, or use the physical channel of a provided pulse channel.
         """
 
-        if isinstance(channel, PulseChannel):
-            physical_channel = self._get_physical_channel_id_from_pulse_channel(channel)
+        if isinstance(physical_channel, PhysicalChannel):
+            physical_channel = physical_channel.uuid
         else:
-            physical_channel = channel.uuid
+            if self.hw.physical_channel_with_id(physical_channel) is None:
+                raise ValueError(
+                    f"Physical channel with id '{physical_channel}' not found."
+                )
 
-        pulse_channel = CustomPulseChannel(
+        uuid = uuid if uuid is not None else str(uuid4())
+        pulse_channel = PulseChannel(
+            uuid=uuid,
             physical_channel_id=physical_channel,
             frequency=frequency,
             imbalance=imbalance,
@@ -992,13 +995,26 @@ class QuantumInstructionBuilder(InstructionBuilder):
             fixed_if=fixed_if,
         )
 
-        self._pulse_channels[pulse_channel.uuid] = pulse_channel
+        self._pulse_channels[uuid] = pulse_channel
         return pulse_channel
 
-    def _get_physical_channel_id_from_pulse_channel(self, pulse_channel: PulseChannel):
-        if isinstance(pulse_channel, CustomPulseChannel):
-            return pulse_channel.physical_channel_id
-        return self.hw.physical_channel_for_pulse_channel_id(pulse_channel.uuid).uuid
+    @staticmethod
+    def _build_pulse_channel_mapping(hw: PhysicalHardwareModel) -> dict[str, PulseChannel]:
+        pulse_channels = {}
+        for qubit in hw.qubits.values():
+            for device in [qubit, qubit.resonator]:
+                physical_channel_id = device.physical_channel.uuid
+                for pc in device.all_pulse_channels:
+                    pulse_channels[pc.uuid] = PulseChannel(
+                        physical_channel_id=physical_channel_id,
+                        frequency=pc.frequency,
+                        imbalance=pc.imbalance,
+                        phase_iq_offset=pc.phase_iq_offset,
+                        scale=pc.scale,
+                        fixed_if=pc.fixed_if,
+                        uuid=pc.uuid,
+                    )
+        return pulse_channels
 
 
 PydQuantumInstructionBuilder = QuantumInstructionBuilder

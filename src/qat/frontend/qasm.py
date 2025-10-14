@@ -176,6 +176,7 @@ class BaseQasmFrontend(BaseFrontend, ABC):
             builder = self.model.create_builder()
         elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
             builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+            builder.repeat(compiler_config.repeats)
         else:
             raise TypeError("Invalid hardware model type set.")
 
@@ -192,13 +193,7 @@ class BaseQasmFrontend(BaseFrontend, ABC):
                 )
                 .add(builder)
             )
-        elif isinstance(self.model, PydHardwareModel):
-            return (
-                PydQuantumInstructionBuilder(self.model)
-                .repeat(compiler_config.repeats)
-                .__add__(builder)
-            )
-        return None
+        return builder
 
     def emit(
         self,

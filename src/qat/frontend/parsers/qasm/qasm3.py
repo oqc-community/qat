@@ -30,6 +30,7 @@ from qat.ir.instructions import (
     Variable,
 )
 from qat.ir.measure import Acquire, AcquireMode, PostProcessType, ProcessAxis
+from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     AbstractWaveform,
     DragGaussianWaveform,
@@ -824,17 +825,23 @@ class Qasm3Parser(Interpreter, AbstractParser):
         )
         phase = 0.0 if len(args) <= 2 else args[2]
 
-        if not isinstance(port, (PulseChannel, PhysicalChannel)):
+        if isinstance(port, IRPulseChannel):
+            physical_channel_id = port.physical_channel_id
+        elif isinstance(port, PhysicalChannel):
+            physical_channel_id = port.uuid
+        else:
             raise TypeError(
                 f"Cannot create new frame from variable '{name}'. "
                 "Must be either type Port or Frame."
             )
 
-        pulse_channel = self.builder.create_pulse_channel(frequency=frequency, channel=port)
+        pulse_channel = self.builder.create_pulse_channel(
+            frequency=frequency, physical_channel=physical_channel_id
+        )
         self.builder.phase_shift(target=pulse_channel, theta=phase)
 
         self._attempt_declaration(
-            Variable(name=name, var_type=PulseChannel, value=pulse_channel)
+            Variable(name=name, var_type=IRPulseChannel, value=pulse_channel)
         )
 
     def waveform_definition(self, tree: Tree):
@@ -1395,7 +1402,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             body,
         )
 
-    def _get_phase(self, pulse_channel: PulseChannel):
+    def _get_phase(self, pulse_channel: IRPulseChannel):
         phase = 0
         for inst in self.builder.instructions:
             inst: QuantumInstruction
@@ -1405,7 +1412,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 phase = 0
         return phase
 
-    def _get_frequency(self, pulse_channel: PulseChannel):
+    def _get_frequency(self, pulse_channel: IRPulseChannel):
         frequency = pulse_channel.frequency
         for inst in self.builder.instructions:
             if isinstance(inst, FrequencyShift) and pulse_channel.uuid in inst.targets:
@@ -1414,7 +1421,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
     def _capture_iq_value(
         self,
-        pulse_channel: PulseChannel,
+        pulse_channel: IRPulseChannel,
         duration: float,
         output_variable: str,
         filter: Pulse = None,
@@ -1426,20 +1433,27 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # these post processing operations are removed for executions on live hardware.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
-
-        device = self.builder.hw.device_for_pulse_channel_id(pulse_channel.uuid)
+        device = self.builder.hw.device_for_physical_channel_id(
+            pulse_channel.physical_channel_id
+        )
         if device is None:
-            # TODO: add robustness to custom pulse channels (COMPILER-756)
-            raise TypeError(f"Pulse channel {pulse_channel} is not assigned to any device.")
+            raise TypeError(
+                f"Pulse channel {pulse_channel} is not assigned to any known device."
+            )
+
         if isinstance(device, Resonator):
             qubit = self.builder.hw.qubit_for_resonator(device)
 
-        if isinstance(pulse_channel, AcquirePulseChannel):
-            delay = pulse_channel.acquire.delay
+        # This kind of logic to add delays is really part of a measure definition, and
+        # not within the semantics of a capture command, which is essentially an acqurire.
+        # I don't think this is necessary to do, but I won't change it for now...
+        hw_pulse_channel = self.builder.hw.pulse_channel_with_id(pulse_channel.uuid)
+        if isinstance(hw_pulse_channel, AcquirePulseChannel):
+            delay = hw_pulse_channel.acquire.delay
         else:
             log.warning(
-                f"The acquire channel {pulse_channel.uuid} is not assigned to a single "
-                "resonator: setting the delay to 0.0."
+                f"The acquire channel {pulse_channel.uuid} is not an acquire channel: "
+                "setting the delay to 0.0."
             )
             delay = 0.0
 
@@ -1468,9 +1482,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         return acquire
 
     def _validate_channel_args(
-        self, pulse_channel: PulseChannel, val_type: str, value=None
+        self, pulse_channel: IRPulseChannel, val_type: str, value=None
     ):
-        if not isinstance(pulse_channel, PulseChannel):
+        if not isinstance(pulse_channel, IRPulseChannel):
             raise ValueError(f"{str(pulse_channel)} is not a valid pulse channel.")
 
         if value is not None and not isinstance(value, (int, float)):
@@ -1478,10 +1492,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         return pulse_channel, value
 
-    def _validate_phase_args(self, pulse_channel: PulseChannel, phase=None):
+    def _validate_phase_args(self, pulse_channel: IRPulseChannel, phase=None):
         return self._validate_channel_args(pulse_channel, "phase", phase)
 
-    def _validate_freq_args(self, pulse_channel: PulseChannel, frequency=None):
+    def _validate_freq_args(self, pulse_channel: IRPulseChannel, frequency=None):
         return self._validate_channel_args(pulse_channel, "frequency", frequency)
 
     def extern_or_subroutine_call(self, tree: Tree):
@@ -1502,7 +1516,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
 
             pulse_target = args[0]
-            if not isinstance(pulse_target, PulseChannel):
+            if not isinstance(pulse_target, IRPulseChannel):
                 variable_name = self.transform_to_value(tree.children[1].children[0])
                 raise ValueError(
                     f"Play waveform argument {variable_name} does not point to a waveform."
@@ -1661,12 +1675,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
     def extern_frame(self, tree: Tree):
         name = self.transform_to_value(tree, walk_variable=False)
-        pulse_channel = self._frame_mappings.get(name, None)
-        if pulse_channel is None:
+        hwm_pulse_channel = self._frame_mappings.get(name, None)
+        if hwm_pulse_channel is None:
             raise ValueError(f"Could not find extern Frame with name '{name}'.")
+        pulse_channel = self.builder.get_pulse_channel(hwm_pulse_channel.uuid)
 
         self._attempt_declaration(
-            Variable(name=name, var_type=PulseChannel, value=pulse_channel)
+            Variable(name=name, var_type=IRPulseChannel, value=pulse_channel)
         )
 
     def extern_port(self, tree: Tree):
@@ -1682,7 +1697,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
     def frame_attribute_assignment(self, tree: Tree):
         args = self.transform_to_value(tree)
         pulse_channel = args[0][0]
-        if not isinstance(pulse_channel, PulseChannel):
+        if not isinstance(pulse_channel, IRPulseChannel):
             raise ValueError("Tried to assign to a frame that doesn't exist.")
 
         field = args[0][1]
