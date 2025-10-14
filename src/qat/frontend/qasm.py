@@ -12,6 +12,7 @@ from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
 from qat.frontend.parsers.qasm import CloudQasmParser as PydCloudQasmParser
 from qat.frontend.parsers.qasm import Qasm3Parser as PydQasm3Parser
+from qat.frontend.parsers.qasm.base import AbstractParser as PydAbstractParser
 from qat.frontend.passes.analysis import InputAnalysis
 from qat.frontend.passes.purr.transform import InputOptimisation
 from qat.frontend.passes.transform import PydInputOptimisation
@@ -21,7 +22,7 @@ from qat.ir.instruction_builder import (
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
+from qat.purr.integrations.qasm import AbstractParser, CloudQasmParser, Qasm3Parser
 
 path_regex = re.compile(r"^.+\.(qasm)$")
 string_regex = re.compile(r"OPENQASM (?P<version>[0-9]+)(?:.[0-9])?;")
@@ -84,8 +85,6 @@ class BaseQasmFrontend(BaseFrontend, ABC):
     frontends are identical up to the language and its respective parser. This class
     implements the base functionality."""
 
-    parser: None | CloudQasmParser | Qasm3Parser | PydCloudQasmParser | PydQasm3Parser
-
     def __init__(
         self,
         model: QuantumHardwareModel | PydHardwareModel = None,
@@ -105,6 +104,11 @@ class BaseQasmFrontend(BaseFrontend, ABC):
     @property
     @abstractmethod
     def version(self) -> int: ...
+
+    @abstractmethod
+    def create_parser(
+        self, config: CompilerConfig
+    ) -> AbstractParser | PydAbstractParser: ...
 
     @staticmethod
     def build_pass_pipeline(model: QuantumHardwareModel) -> PassManager | None:
@@ -174,7 +178,9 @@ class BaseQasmFrontend(BaseFrontend, ABC):
             builder = PydQuantumInstructionBuilder(hardware_model=self.model)
         else:
             raise TypeError("Invalid hardware model type set.")
-        builder = self.parser.parse(builder, src)
+
+        parser = self.create_parser(compiler_config)
+        builder = parser.parse(builder, src)
 
         if isinstance(self.model, QuantumHardwareModel):
             return (
@@ -193,17 +199,6 @@ class BaseQasmFrontend(BaseFrontend, ABC):
                 .__add__(builder)
             )
         return None
-
-    def _init_parser_results_format(self, compiler_config: CompilerConfig) -> None:
-        """Initializes the parser with the compiler config.
-
-        :param compiler_config: The compiler config is used in both the pipeline and for
-            parsing.
-        """
-        if compiler_config.results_format.format is not None:
-            self.parser.results_format = compiler_config.results_format.format
-        else:
-            self.parser.results_format = InlineResultsProcessing.Program
 
     def emit(
         self,
@@ -231,9 +226,6 @@ class BaseQasmFrontend(BaseFrontend, ABC):
 
         src = self._check_source(src)
         src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
-
-        self._init_parser_results_format(compiler_config)
-
         return self._generate_builder(src, compiler_config)
 
 
@@ -255,10 +247,21 @@ class Qasm2Frontend(BaseQasmFrontend):
         """
 
         super().__init__(model, pipeline)
+
+    def create_parser(self, config: CompilerConfig) -> CloudQasmParser | PydCloudQasmParser:
         if isinstance(self.model, QuantumHardwareModel):
-            self.parser = CloudQasmParser()
+            parser = CloudQasmParser()
         elif isinstance(self.model, PydHardwareModel):
-            self.parser = PydCloudQasmParser()
+            parser = PydCloudQasmParser()
+        else:
+            raise TypeError("Invalid hardware model type set.")
+
+        parser.results_format = (
+            config.results_format.format
+            if config.results_format.format is not None
+            else InlineResultsProcessing.Program
+        )
+        return parser
 
 
 class Qasm3Frontend(BaseQasmFrontend):
@@ -279,7 +282,18 @@ class Qasm3Frontend(BaseQasmFrontend):
         """
 
         super().__init__(model, pipeline)
+
+    def create_parser(self, config: CompilerConfig) -> Qasm3Parser | PydQasm3Parser:
         if isinstance(self.model, QuantumHardwareModel):
-            self.parser = Qasm3Parser()
+            parser = Qasm3Parser()
         elif isinstance(self.model, PydHardwareModel):
-            self.parser = PydQasm3Parser()
+            parser = PydQasm3Parser()
+        else:
+            raise TypeError("Invalid hardware model type set.")
+
+        parser.results_format = (
+            config.results_format.format
+            if config.results_format.format is not None
+            else InlineResultsProcessing.Program
+        )
+        return parser

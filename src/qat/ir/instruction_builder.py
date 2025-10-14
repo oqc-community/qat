@@ -66,6 +66,18 @@ class InstructionBuilder(ABC):
         self.compiled_shots: int | None = None
         self.shots: int | None = None
 
+    def get_qubit(self, index: int) -> Qubit:
+        """Returns the qubit with the given index.
+
+        Note: maybe this is the wrong level of abstraction to have details about the model.
+        Maybe operations should deal with qubit indices, and the subclass handles the
+        translation layer. Nevertheless, this is to be resolved with structured IR.
+
+        :param index: The index of the qubit to return.
+        :return: The qubit with the given index.
+        """
+        return self.hw.qubit_with_index(index)
+
     @abstractmethod
     def X(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None

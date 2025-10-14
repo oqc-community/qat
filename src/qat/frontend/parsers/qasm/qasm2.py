@@ -270,7 +270,7 @@ class Qasm2Parser(AbstractParser):
                 case CXGate():
                     self.process_cnot(node, context, builder, **kwargs)
                 case IfElseOp():
-                    raise ValueError("IfElseOp is not currently supported.")
+                    raise NotImplementedError("IfElseOp is not currently supported.")
                 case Gate():
                     self.process_gate(node, context, builder, **kwargs)
                 case _:

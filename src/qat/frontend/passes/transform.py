@@ -154,10 +154,9 @@ class PydParse(TransformPass):
                 fp.write(qir_string)
             fp.close()
             try:
-                parser = QIRParser(self.hw_model)
-                if compiler_config.results_format.format is not None:
-                    parser.results_format = compiler_config.results_format.format
-                builder = parser.parse(fp.name)
+                parser = QIRParser(results_format=compiler_config.results_format.format)
+                builder = QuantumInstructionBuilder(self.hw_model)
+                builder = parser.parse(builder, fp.name)
             finally:
                 os.remove(fp.name)
         return builder

@@ -5,20 +5,17 @@ from pathlib import Path
 import pytest
 from compiler_config.config import (
     CompilerConfig,
-    InlineResultsProcessing,
-    QuantumResultsFormat,
     Tket,
 )
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
-from qat.ir.instructions import Assign as PydAssign
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder as LegInstructionBuilder
 from qat.purr.compiler.devices import QubitCoupling
-from qat.purr.compiler.instructions import Assign, Pulse, ResultsProcessing
+from qat.purr.compiler.instructions import Pulse
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
 
 from tests.unit.utils.models import get_jagged_echo_hardware
@@ -93,7 +90,7 @@ class TestQIRFrontend:
     def test_parser_matching_model(self, request, model_type, parser_type):
         model = request.getfixturevalue(model_type)
         frontend = QIRFrontend(model)
-        assert isinstance(frontend.parser, parser_type)
+        assert isinstance(frontend._init_parser(), parser_type)
 
     def test_invalid_paths(self, legacy_model):
         frontend = QIRFrontend(legacy_model)
@@ -158,35 +155,6 @@ class TestQIRFrontend:
         assert isinstance(builder, builder_type)
         assert len(builder.instructions) == instruction_count
 
-    def test_resets_results_format(self, legacy_model):
-        frontend = QIRFrontend(legacy_model)
-        assert frontend.parser.results_format is QuantumResultsFormat().binary().format
-        config = CompilerConfig(results_format=QuantumResultsFormat().raw())
-        builder_raw = frontend.emit(
-            _get_qir_path("generator-bell.ll"), compiler_config=config
-        )
-        result_processing = filter(
-            lambda inst: isinstance(inst, ResultsProcessing), builder_raw.instructions
-        )
-        assert all(
-            [
-                inst.results_processing is InlineResultsProcessing.Raw
-                for inst in result_processing
-            ]
-        )
-        assert frontend.parser.results_format is QuantumResultsFormat().binary().format
-        builder_bin = frontend.emit(_get_qir_path("generator-bell.ll"))
-        result_processing = filter(
-            lambda inst: isinstance(inst, ResultsProcessing), builder_bin.instructions
-        )
-        assert all(
-            [
-                inst.results_processing is InlineResultsProcessing.Binary
-                for inst in result_processing
-            ]
-        )
-        assert builder_bin is not builder_raw
-
     @pytest.mark.parametrize("qir_path", get_all_qir_paths(), ids=filename_ids)
     def test_check_and_return_source_with_qasm_2_files(self, qir_path, legacy_model):
         qir_path = str(qir_path)
@@ -212,51 +180,3 @@ class TestQIRFrontend:
         # TODO: Update frontends to work with `Path`s, COMPILER-404
         res = QIRFrontend(legacy_model).check_and_return_source(qasm_path)
         assert not res
-
-    def test_return_variables_are_reset_legacy(self, legacy_model):
-        frontend = QIRFrontend(legacy_model)
-        qir_str = _get_qir_path("bell_psi_plus.ll")
-        builder = frontend.emit(qir_str)
-        assert isinstance(builder, LegInstructionBuilder)
-        assert frontend.parser.result_variables == []
-        assign_insts = [inst for inst in builder.instructions if isinstance(inst, Assign)]
-        assert len(assign_insts) == 1
-        assign_vars = assign_insts[0].value
-        assert isinstance(assign_vars, list)
-        assert len(assign_vars) > 0
-
-        new_builder = frontend.emit(qir_str)
-        assert isinstance(new_builder, LegInstructionBuilder)
-        new_assign_insts = [
-            inst for inst in new_builder.instructions if isinstance(inst, Assign)
-        ]
-        assert len(new_assign_insts) == 1
-        new_assign_vars = new_assign_insts[0].value
-        assert isinstance(new_assign_vars, list)
-        assert len(new_assign_vars) > 0
-        assert len(new_assign_vars) == len(assign_vars)
-
-    def test_return_variables_are_reset(self, pyd_model):
-        frontend = QIRFrontend(pyd_model)
-        qir_str = _get_qir_path("bell_psi_plus.ll")
-        builder = frontend.emit(qir_str)
-        assert isinstance(builder, PydInstructionBuilder)
-        assert frontend.parser.result_variables == []
-        assign_insts = [
-            inst for inst in builder.instructions if isinstance(inst, PydAssign)
-        ]
-        assert len(assign_insts) == 1
-        assign_vars = assign_insts[0].value
-        assert isinstance(assign_vars, list)
-        assert len(assign_vars) > 0
-
-        new_builder = frontend.emit(qir_str)
-        assert isinstance(new_builder, PydInstructionBuilder)
-        new_assign_insts = [
-            inst for inst in new_builder.instructions if isinstance(inst, PydAssign)
-        ]
-        assert len(new_assign_insts) == 1
-        new_assign_vars = new_assign_insts[0].value
-        assert isinstance(new_assign_vars, list)
-        assert len(new_assign_vars) > 0
-        assert len(new_assign_vars) == len(assign_vars)

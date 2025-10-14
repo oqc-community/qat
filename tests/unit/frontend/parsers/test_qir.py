@@ -4,7 +4,6 @@ import pytest
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.instructions import Return
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.purr.backends.echo import apply_setup_to_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -43,12 +42,12 @@ class TestQIRParser:
         ],
     )
     def test_qir_legacy_vs_pyd_parse(self, qir_file):
-        pyd_parser = PydQIRParser(pyd_hw_model)
+        pyd_parser = PydQIRParser()
         leg_parser = LegQIRParser(leg_hw_model)
 
         qir_string = _get_qir_path(qir_file)
 
-        pyd_builder = pyd_parser.parse(qir_string)
+        pyd_builder = pyd_parser.parse(QuantumInstructionBuilder(pyd_hw_model), qir_string)
         leg_builder = leg_parser.parse(qir_string)
 
         assert (
@@ -59,16 +58,3 @@ class TestQIRParser:
                 leg_builder.instructions
             )
         )
-
-    def test_results_variables_are_cleaned(self):
-        parser = PydQIRParser(pyd_hw_model)
-        qir_string = _get_qir_path("bell_psi_plus.ll")
-        builder = parser.parse(qir_string)
-        assert isinstance(builder, QuantumInstructionBuilder)
-        assert parser.result_variables == []
-        return_insts = [inst for inst in builder.instructions if isinstance(inst, Return)]
-        assert len(return_insts) > 0
-        vars = []
-        for inst in return_insts:
-            vars.extend(inst.variables)
-        assert len(vars) > 0

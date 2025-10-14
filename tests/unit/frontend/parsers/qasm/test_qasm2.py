@@ -78,7 +78,9 @@ class TestQasm2Parser:
 
     def test_example_if(self, n_qubits, seed):
         hw = generate_hw_model(n_qubits, seed=seed)
-        with pytest.raises(ValueError, match="IfElseOp is not currently supported."):
+        with pytest.raises(
+            NotImplementedError, match="IfElseOp is not currently supported."
+        ):
             parse_qasm2_and_apply_optimisations("example_if.qasm", hw)
 
     def test_random_n5_d5(self, n_qubits, seed):

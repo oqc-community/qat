@@ -72,7 +72,6 @@ class QIRFrontend(BaseFrontend):
         """
         super().__init__(model)
         self.pipeline = pipeline if pipeline is not None else self.build_pass_pipeline()
-        self.parser = self._init_parser()
 
     @staticmethod
     def build_pass_pipeline() -> PassManager:
@@ -83,11 +82,19 @@ class QIRFrontend(BaseFrontend):
 
         return PassManager()
 
-    def _init_parser(self) -> QIRParser | None:
+    def _init_parser(
+        self, config: CompilerConfig | None = None
+    ) -> QIRParser | PydQIRParser:
+        results_format = (
+            config.results_format.format if config and config.results_format else None
+        )
         if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
-            return QIRParser(self.model)
+            parser = QIRParser(self.model)
+            if results_format is not None:
+                parser.results_format = results_format
+            return parser
         elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
-            return PydQIRParser(self.model)
+            return PydQIRParser(results_format)
 
     def check_and_return_source(self, src: str | bytes) -> bool | str | bytes:
         """Checks that the source program (or file path) can be interpreted as a QIR file
@@ -127,6 +134,7 @@ class QIRFrontend(BaseFrontend):
         self, compiler_config: CompilerConfig, src: str
     ) -> InstructionBuilder | None:
         builder = None
+        parser = self._init_parser(compiler_config)
         if isinstance(self.model, QuantumHardwareModel):
             optimizations = compiler_config.optimizations
             if (
@@ -140,7 +148,7 @@ class QIRFrontend(BaseFrontend):
                     compiler_config.results_format.format,
                 )
             else:
-                builder = self.parser.parse(src)
+                builder = parser.parse(src)
 
             builder = (
                 self.model.create_builder()
@@ -152,7 +160,7 @@ class QIRFrontend(BaseFrontend):
                 .add(builder)
             )
         elif isinstance(self.model, PydHardwareModel):
-            builder = self.parser.parse(src)
+            builder = parser.parse(PydQuantumInstructionBuilder(self.model), src)
             builder = (
                 PydQuantumInstructionBuilder(self.model)
                 .repeat(compiler_config.repeats)
@@ -185,21 +193,7 @@ class QIRFrontend(BaseFrontend):
         )
 
         src = self._check_source(src)
-
         src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
-
-        reset_parser_format: bool = False
-        old_parser_results_format = None
-
-        if compiler_config.results_format.format is not None:
-            # TODO: Fix the need to reset parser attributes after parsing COMPILER-531
-            reset_parser_format = True
-            old_parser_results_format = self.parser.results_format
-            self.parser.results_format = compiler_config.results_format.format
-
         builder = self._get_builder(compiler_config, src)
-
-        if reset_parser_format:
-            self.parser.results_format = old_parser_results_format
 
         return builder
